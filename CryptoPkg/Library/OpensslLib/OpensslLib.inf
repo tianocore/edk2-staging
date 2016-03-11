@@ -470,6 +470,7 @@
   $(OPENSSL_PATH)/crypto/ocsp/ocsp_vfy.c
   $(OPENSSL_PATH)/crypto/ocsp/ocsp_err.c
   $(OPENSSL_PATH)/crypto/krb5/krb5_asn.c
+  $(OPENSSL_PATH)/crypto/pqueue/pqueue.c
   $(OPENSSL_PATH)/crypto/cmac/cmac.c
   $(OPENSSL_PATH)/crypto/cmac/cm_ameth.c
   $(OPENSSL_PATH)/crypto/cmac/cm_pmeth.c

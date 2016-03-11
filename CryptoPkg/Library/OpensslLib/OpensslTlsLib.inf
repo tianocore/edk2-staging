@@ -1,0 +1,110 @@
+## @file
+#  This module provides OpenSSL SSL/TLS Library implementation.
+#
+#  Copyright (c) 2016, Intel Corporation. All rights reserved.<BR>
+#  This program and the accompanying materials
+#  are licensed and made available under the terms and conditions of the BSD License
+#  which accompanies this distribution.  The full text of the license may be found at
+#  http://opensource.org/licenses/bsd-license.php
+#
+#  THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = OpensslTlsLib
+  MODULE_UNI_FILE                = OpensslTlsLib.uni
+  FILE_GUID                      = 8F636E6A-394C-428A-A3A5-CE2AAAA7D55B
+  MODULE_TYPE                    = BASE
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = OpensslTlsLib
+  DEFINE OPENSSL_PATH            = openssl-1.0.2g
+  DEFINE OPENSSL_FLAGS           = -DL_ENDIAN -DOPENSSL_SMALL_FOOTPRINT -D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE
+
+#
+#  VALID_ARCHITECTURES           = IA32 X64 IPF ARM AARCH64
+#
+
+[Sources]
+  $(OPENSSL_PATH)/e_os.h
+  $(OPENSSL_PATH)/ssl/s2_meth.c
+  $(OPENSSL_PATH)/ssl/s2_srvr.c
+  $(OPENSSL_PATH)/ssl/s2_clnt.c
+  $(OPENSSL_PATH)/ssl/s2_lib.c
+  $(OPENSSL_PATH)/ssl/s2_enc.c
+  $(OPENSSL_PATH)/ssl/s2_pkt.c
+  $(OPENSSL_PATH)/ssl/s3_meth.c
+  $(OPENSSL_PATH)/ssl/s3_srvr.c
+  $(OPENSSL_PATH)/ssl/s3_clnt.c
+  $(OPENSSL_PATH)/ssl/s3_lib.c
+  $(OPENSSL_PATH)/ssl/s3_enc.c
+  $(OPENSSL_PATH)/ssl/s3_pkt.c
+  $(OPENSSL_PATH)/ssl/s3_both.c
+  $(OPENSSL_PATH)/ssl/s3_cbc.c
+  $(OPENSSL_PATH)/ssl/s23_meth.c
+  $(OPENSSL_PATH)/ssl/s23_srvr.c
+  $(OPENSSL_PATH)/ssl/s23_clnt.c
+  $(OPENSSL_PATH)/ssl/s23_lib.c
+  $(OPENSSL_PATH)/ssl/s23_pkt.c
+  $(OPENSSL_PATH)/ssl/t1_meth.c
+  $(OPENSSL_PATH)/ssl/t1_srvr.c
+  $(OPENSSL_PATH)/ssl/t1_clnt.c
+  $(OPENSSL_PATH)/ssl/t1_lib.c
+  $(OPENSSL_PATH)/ssl/t1_enc.c
+  $(OPENSSL_PATH)/ssl/t1_ext.c
+  $(OPENSSL_PATH)/ssl/d1_meth.c
+  $(OPENSSL_PATH)/ssl/d1_srvr.c
+  $(OPENSSL_PATH)/ssl/d1_clnt.c
+  $(OPENSSL_PATH)/ssl/d1_lib.c
+  $(OPENSSL_PATH)/ssl/d1_pkt.c
+  $(OPENSSL_PATH)/ssl/d1_both.c
+  $(OPENSSL_PATH)/ssl/d1_srtp.c
+  $(OPENSSL_PATH)/ssl/ssl_lib.c
+  $(OPENSSL_PATH)/ssl/ssl_err2.c
+  $(OPENSSL_PATH)/ssl/ssl_cert.c
+  $(OPENSSL_PATH)/ssl/ssl_sess.c
+  $(OPENSSL_PATH)/ssl/ssl_ciph.c
+  $(OPENSSL_PATH)/ssl/ssl_stat.c
+  $(OPENSSL_PATH)/ssl/ssl_rsa.c
+  $(OPENSSL_PATH)/ssl/ssl_asn1.c
+  $(OPENSSL_PATH)/ssl/ssl_txt.c
+  $(OPENSSL_PATH)/ssl/ssl_algs.c
+  #
+  # Disable SSL command configuration interfaces.
+  #
+  # $(OPENSSL_PATH)/ssl/ssl_conf.c
+  $(OPENSSL_PATH)/ssl/bio_ssl.c
+  $(OPENSSL_PATH)/ssl/ssl_err.c
+  $(OPENSSL_PATH)/ssl/kssl.c
+  $(OPENSSL_PATH)/ssl/t1_reneg.c
+  $(OPENSSL_PATH)/ssl/tls_srp.c
+  $(OPENSSL_PATH)/ssl/t1_trce.c
+  $(OPENSSL_PATH)/ssl/ssl_utst.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  CryptoPkg/CryptoPkg.dec
+
+[LibraryClasses]
+  DebugLib
+  OpensslLib
+
+[BuildOptions]
+  #
+  # Disables the following Visual Studio compiler warnings brought by openssl source, so we do not break the build with /WX option:
+  # C4244: conversion from type1 to type2, possible loss of data
+  # C4702: unreachable code
+  # C4706: assignment within conditional expression
+  # C4133: incompatible types - from type1 to type2
+  # C4245: conversion from type1 to type2, signed/unsigned mismatch
+  # C4267: conversion from size_t to type, possible loss of data
+  # C4305: truncation from type1 to type2 of smaller size
+  # C4306: conversion from type1 to type2 of greater size
+  # C4702: Potentially uninitialized local variable name used
+  #
+  MSFT:*_*_IA32_CC_FLAGS = -U_WIN32 -U_WIN64 -U_MSC_VER $(OPENSSL_FLAGS) /wd4244 /wd4245 /wd4701 /wd4702 /wd4706
+  MSFT:*_*_X64_CC_FLAGS  = -U_WIN32 -U_WIN64 -U_MSC_VER $(OPENSSL_FLAGS) /wd4133 /wd4244 /wd4245 /wd4267 /wd4701 /wd4305 /wd4306 /wd4702 /wd4706  /wd4311
+  MSFT:*_*_IPF_CC_FLAGS  = -U_WIN32 -U_WIN64 -U_MSC_VER $(OPENSSL_FLAGS) /wd4133 /wd4244 /wd4245 /wd4267 /wd4701 /wd4305 /wd4306 /wd4702 /wd4706
+
