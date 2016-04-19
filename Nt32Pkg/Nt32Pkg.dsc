@@ -452,6 +452,7 @@
    
 !if $(HTTPS_BOOT_ENABLE) == TRUE
   NetworkPkg/TlsDxe/TlsDxe.inf
+  NetworkPkg/TlsAuthConfigDxe/TlsAuthConfigDxe.inf
 !endif
 
   MdeModulePkg/Universal/BdsDxe/BdsDxe.inf {
