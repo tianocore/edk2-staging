@@ -2,6 +2,7 @@
   SSL/TLS Library Wrapper Implementation over OpenSSL.
 
 Copyright (c) 2016, Intel Corporation. All rights reserved.<BR>
+(C) Copyright 2016 Hewlett Packard Enterprise Development LP<BR>
 This program and the accompanying materials
 are licensed and made available under the terms and conditions of the BSD License
 which accompanies this distribution.  The full text of the license may be found at
@@ -16,6 +17,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include <openssl/ssl.h>
 #include <openssl/bio.h>
+#include <openssl/err.h>
 
 #define MAX_BUFFER_SIZE   32768
 
@@ -1429,6 +1431,7 @@ TlsSetCaCertificate (
   EFI_STATUS      Status;
   TLS_CONNECTION  *TlsConn;
   INTN            Ret;
+  unsigned long   ErrorCode;
 
   BioCert   = NULL;
   Cert      = NULL;
@@ -1481,8 +1484,16 @@ TlsSetCaCertificate (
 
   Ret = X509_STORE_add_cert (X509Store, Cert);
   if (Ret != 1) {
-    Status = EFI_ABORTED;
-    goto ON_EXIT;
+    ErrorCode = ERR_peek_last_error ();
+    //
+    // Ignore "already in table" errors
+    //
+    if (!(ERR_GET_FUNC (ErrorCode) == X509_F_X509_STORE_ADD_CERT &&
+        ERR_GET_REASON (ErrorCode) == X509_R_CERT_ALREADY_IN_HASH_TABLE)) {
+      Status = EFI_ABORTED;
+      goto ON_EXIT;
+    }
+
   }
   
   X509_STORE_set_flags (
