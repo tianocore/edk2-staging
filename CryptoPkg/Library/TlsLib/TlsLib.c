@@ -130,7 +130,7 @@ TlsInitialize (
   // Loads error strings from both crypto and ssl library.
   //
   SSL_load_error_strings ();
-  
+
   /// OpenSSL_add_all_algorithms();
 
   //
@@ -274,6 +274,7 @@ TlsNew (
   )
 {
   TLS_CONNECTION  *TlsConn;
+  X509_STORE      *X509Store;
 
   TlsConn = NULL;
 
@@ -342,6 +343,28 @@ TlsNew (
   //
   SSL_set_bio (TlsConn->Ssl, TlsConn->InBio, TlsConn->OutBio);
 
+
+  //
+  // Create new X509 store if needed
+  //
+  X509Store = SSL_CTX_get_cert_store (TlsConn->Ssl->ctx);
+  if (X509Store == NULL) {
+    X509Store = X509_STORE_new ();
+    if (X509Store == NULL) {
+      TlsFree ((VOID *) TlsConn);
+      return NULL;
+    }
+    SSL_CTX_set1_verify_cert_store (TlsConn->Ssl->ctx, X509Store);
+    X509_STORE_free (X509Store);
+  }
+
+  //
+  // Set X509_STORE flags used in certificate validation
+  //
+  X509_STORE_set_flags (
+    X509Store,
+    X509_V_FLAG_PARTIAL_CHAIN | X509_V_FLAG_NO_CHECK_TIME
+    );
   return (VOID *) TlsConn;
 }
 
@@ -1473,15 +1496,13 @@ TlsSetCaCertificate (
 
   X509Store = SSL_CTX_get_cert_store(TlsConn->Ssl->ctx);
   if (X509Store == NULL) {
-    X509Store = X509_STORE_new();
-    if (X509Store == NULL) {
       Status = EFI_ABORTED;
       goto ON_EXIT;
-    }
-    
-    SSL_CTX_set_cert_store(TlsConn->Ssl->ctx, X509Store);
   }
 
+  //
+  // Add certificate to X509 store
+  //
   Ret = X509_STORE_add_cert (X509Store, Cert);
   if (Ret != 1) {
     ErrorCode = ERR_peek_last_error ();
@@ -1493,14 +1514,8 @@ TlsSetCaCertificate (
       Status = EFI_ABORTED;
       goto ON_EXIT;
     }
-
   }
-  
-  X509_STORE_set_flags (
-    X509Store, 
-    X509_V_FLAG_PARTIAL_CHAIN | X509_V_FLAG_NO_CHECK_TIME
-    );
-  
+
 ON_EXIT:
   if (BioCert != NULL) {
     BIO_free (BioCert);
