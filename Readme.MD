@@ -30,6 +30,7 @@ CryptoPkg/Library/OpensslLib/OpensslTlsLib.inf
 CryptoPkg/Library/BaseCryptLib/BaseCryptLib.inf
 CryptoPkg/Library/TlsLib/TlsLib.inf
 NetworkPkg/TlsDxe/TlsDxe.inf
+NetworkPkg/TlsAuthConfigDxe/TlsAuthConfigDxe.inf
 ```
 
 #### HTTPS Authentication
@@ -42,3 +43,4 @@ Currently, HTTPS boot feature only support server authentication with an unauthe
 
 #define EFI_TLS_CA_CERTIFICATE_VARIABLE          L"TlsCaCertificate"
 ```
+**TlsAuthConfigDxe** is a temporary driver to provide an UI to support the required certificate configuration.
