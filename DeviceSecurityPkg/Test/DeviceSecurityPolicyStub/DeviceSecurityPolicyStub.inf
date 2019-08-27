@@ -1,0 +1,40 @@
+## @file
+#  EDKII Device Security Policy Stub
+#
+# Copyright (c) 2020, Intel Corporation. All rights reserved.<BR>
+# SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = DeviceSecurityPolicyStub
+  FILE_GUID                      = E3152C9F-8549-46C2-8B09-40EA0AE116F3
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = MainEntryPoint
+
+[Sources]
+  DeviceSecurityPolicyStub.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  DeviceSecurityPkg/DeviceSecurityPkg.dec
+
+[LibraryClasses]
+  UefiRuntimeServicesTableLib
+  UefiBootServicesTableLib
+  UefiDriverEntryPoint
+  MemoryAllocationLib
+  DevicePathLib
+  BaseMemoryLib
+  PrintLib
+  DebugLib
+
+[Protocols]
+  gEdkiiDeviceSecurityPolicyProtocolGuid  ## PRODUCES
+  gEdkiiDeviceIdentifierTypePciGuid       ## COMSUMES
+
+[Depex]
+  TRUE

@@ -1,0 +1,112 @@
+{
+  "corim": { // #6.501 (unsigned-corim-map)
+    "corim.id": "d0c996b044a6a4ce43e5541800123f0a", // 0
+    "corim.tags": { // 1: #6.506 (concise-mid-tag)
+      "comid.tag-identity": { // 1
+        "comid.tag-id": "3f06af63a93c11e4979700505690773f" // 0
+      },
+      "comid.entity": { // 2
+        "comid.entity-name": "device_entity_name_AAA", // 0
+        "comid.reg-id": "http://www.device_vendor.com", // 1
+        "comid.role": [ // 2
+          "comid.tag-creator", // 0
+          "comid.creator" // 1
+        ]
+      },
+      "comid.triples": { // 4
+        "comid.reference-triples": [ // 0
+          {
+            "comid.class": { // 0
+                "comid.class-id": "67b28b6c34cc40a19117ab5b05911e37", // 0
+                "comid.vendor": "device_vendor", // 1
+                "comid.model": "device_model_AAA", // 2
+                "comid.layer": 1, // 3
+                "comid.index": 0 // 4
+            },
+            "comid.mval": { // 1
+                "comid.ver": { // 0
+                  "comid.version": "1.0.0" // 0
+                },
+                "comid.svn" : 123, // 1 : #6.552 (tagged-svn)
+                "comid.digests": [ // 2
+                  "SHA_256", // 1
+                  "7EB24A18990EE4C958C89773DA6CC9FBC5C278357762D02EC6AB947EB28726FF"
+                ],
+                "comid.flags": [ // 3
+                  "not-secure", // bit 1
+                  "debug" // bit 3
+                ]
+            }
+          },
+          {
+            "comid.class": { // 0
+                "comid.class-id": "67b28b6c34cc40a19117ab5b05911e37", // 0
+                "comid.vendor": "device_vendor", // 1
+                "comid.model": "device_model_AAA", // 2
+                "comid.layer": 1, // 3
+                "comid.index": 1 // 4
+            },
+            "comid.mval": { // 1
+                "comid.ver": { // 0
+                  "comid.version": "1.0.0" // 0
+                },
+                "comid.svn" : 456, // 1 : #6.552 (tagged-svn)
+                "comid.digests": [ // 2
+                  "SHA_256", // 1
+                  "9E50F90FD035924A202C1F5C5246ACC40AB0C3211366E89F0C5D9CF42A6A8D78"
+                ],
+                "comid.flags": [ // 3
+                  "not-secure", // bit 1
+                  "debug" // bit 3
+                ]
+            }
+          },
+          {
+            "comid.class": { // 0
+                "comid.class-id": "67b28b6c34cc40a19117ab5b05911e37", // 0
+                "comid.vendor": "device_vendor", // 1
+                "comid.model": "device_model_AAA", // 2
+                "comid.layer": 1, // 3
+                "comid.index": 2 // 4
+            },
+            "comid.mval": { // 1
+                "comid.ver": { // 0
+                  "comid.version": "1.0.0" // 0
+                },
+                "comid.digests": [ // 2
+                  "SHA_256", // 1
+                  "262CAFD9AEC68ED56EA179EC74E067D73711E60DE530D50AA0F3D6087BAD0677"
+                ],
+                "comid.flags": [ // 3
+                  "not-secure", // bit 1
+                  "debug" // bit 3
+                ]
+            }
+          },
+          {
+            "comid.class": { // 0
+                "comid.class-id": "67b28b6c34cc40a19117ab5b05911e37", // 0
+                "comid.vendor": "device_vendor", // 1
+                "comid.model": "device_model_AAA", // 2
+                "comid.layer": 1, // 3
+                "comid.index": 3 // 4
+            },
+            "comid.mval": { // 1
+                "comid.ver": { // 0
+                  "comid.version": "1.0.0" // 0
+                },
+                "comid.digests": [ // 2
+                  "SHA_256", // 1
+                  "3C902E18125F2DA0E87B76F334A19335925453713E04E52A6606244BFF74F4CA"
+                ],
+                "comid.flags": [ // 3
+                  "not-secure", // bit 1
+                  "debug" // bit 3
+                ]
+            }
+          }
+        ]
+      }
+    }
+  }
+}
