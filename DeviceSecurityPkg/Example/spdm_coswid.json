@@ -1,0 +1,97 @@
+{
+      "concise-swid-tag": {
+        "tag-id": "C43C3BDB-74E6-4336-8676-79B3D405FAEA",   // 0
+        "tag-version": 0,   // 12
+        "software-name": "device_software_name_AAA",   // 1
+        "software-version": "device_firmware_version_01",   // 13
+        "corpus": false,   // 8
+        "patch": false,   // 9
+        "supplemental": false,   // 11
+        "software-meta": [   // 5
+          {
+            "colloquial-version": "device_colloquial_version_1.0",   // 45
+            "edition": "device_edition_1.0",   // 47
+            "product": "device_product_AAA",   // 52
+            "revision": "device_revision_3.7.6"   // 54
+          }
+        ],
+        "entity": [   // 2
+          {
+            "entity-name": "device_entity_name_AAA",   // 31
+            "role": [ // 33
+              "softwareCreator", // 2
+              "tagCreator"  // 1
+            ],
+            "thumbprint": [   // 34 
+              "SHA_256", // 1
+              "1234567812345678123456781234567812345678123456781234567812345678"
+            ],
+            "reg-id": "http://www.device_vendor.com"   // 32
+          }
+        ],
+        "link": [   // 4
+          {
+            "href": "https://github.com/device_vendor/device_AAA",   // 38
+            "rel": 4   // 40
+          }
+        ],
+        "payload": {   // 6
+          "directory": {   // 16
+            "fs-name": "Device_FS",   // 24
+            "location": "DeviceBin",   // 23
+            "path-elements": {   // 26
+              "file": [   // 17
+                {
+                  "fs-name": "Rom.bin",   // 24
+                  "size": 65536,   // 20
+                  "hash": [   // 7
+                    "SHA_256", // 1
+                    "7EB24A18990EE4C958C89773DA6CC9FBC5C278357762D02EC6AB947EB28726FF"
+                  ]
+                },
+                {
+                  "fs-name": "Firmware.bin",   // 24
+                  "size": 65536,   // 20
+                  "hash": [   // 7
+                    "SHA_256", // 1
+                    "9E50F90FD035924A202C1F5C5246ACC40AB0C3211366E89F0C5D9CF42A6A8D78"
+                  ]
+                },
+                {
+                  "fs-name": "HwConfig.bin",   // 24
+                  "size": 4096,   // 20
+                  "hash": [   // 7
+                    "SHA_256", // 1
+                    "262CAFD9AEC68ED56EA179EC74E067D73711E60DE530D50AA0F3D6087BAD0677"
+                  ]
+                },
+                {
+                  "fs-name": "FwConfig.bin",   // 24
+                  "size": 4096,   // 20
+                  "hash": [   // 7
+                    "SHA_256", // 1
+                    "3C902E18125F2DA0E87B76F334A19335925453713E04E52A6606244BFF74F4CA"
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "reference-measurement": {   // 58
+          "payload-type": "direct",   // 59 : 0
+          "binding-spec-name": "RIMIM",   // 63
+          "binding-spec-version": "01",   // 64
+          "platform-manufacturer-id": 343,   // 65
+          "platform-manufacturer-name": "device_vendor",   // 66
+          "platform-model-name": "device_model_AAA",   // 67
+          "platform-version": "device_platform_version_3.7.6",   // 68
+          "firmware-manufacturer-id": 343,   // 69
+          "firmware-manufacturer-name": "device_vendor",   // 70
+          "firmware-version": "device_firmware_version_3.7.6",   // 72
+          "rim-link-hash": [   // 73
+            "SHA_256", // 1
+            "1234567812345678123456781234567812345678123456781234567812345678"
+          ]
+        }
+      }
+}
