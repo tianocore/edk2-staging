@@ -1,0 +1,31 @@
+## @file  RiscVPkg.dec
+# This Package provides UEFI RISC-V modules and libraries.
+#
+# Copyright (c) 2016 - 2019, Hewlett Packard Enterprise Development LP. All rights reserved.<BR>
+#
+# SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+##
+
+[Defines]
+  DEC_SPECIFICATION              = 0x0001001b
+  PACKAGE_NAME                   = RiscVPkg
+  PACKAGE_UNI_FILE               = RiscVPkg.uni
+  PACKAGE_GUID                   = 993C7CAC-C87C-4F08-A2CF-AD3AABA859D1
+  PACKAGE_VERSION                = 1.0
+
+[Includes]
+  Include
+  Include/Library
+  Library/RiscVOpensbiLib/opensbi         # OpenSBI header file reference ("include/sbi/...")
+  Library/RiscVOpensbiLib/opensbi/include # Header file reference from opensbi files, ("sbi/...")
+
+[LibraryClasses]
+  RiscVPlatformDxeIplLib|Include/Library/RiscVPlatformDxeIpl.h
+  RiscVCpuLib|Include/Library/RiscVCpuLib.h
+
+[Guids]
+  gUefiRiscVPkgTokenSpaceGuid  = { 0x4261e9c8, 0x52c0, 0x4b34, { 0x85, 0x3d, 0x48, 0x46, 0xea, 0xd3, 0xb7, 0x2c}}
+
+[UserExtensions.TianoCore."ExtraFiles"]
+  RiscVPkgExtra.uni
