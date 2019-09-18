@@ -34,7 +34,7 @@
 !include NetworkPkg/NetworkComponents.dsc.inc
 
 !else
-[Components.IA32, Components.X64, Components.ARM, Components.AARCH64]
+[Components.IA32, Components.X64, Components.ARM, Components.AARCH64, Components.RISCV64]
 !include NetworkPkg/NetworkComponents.dsc.inc
 
 !endif
