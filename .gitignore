@@ -1,3 +1,8 @@
 Build/
 tags/
 .DS_Store
+*.pyc
+__pycache__/
+*_extdep/
+
+.vscode/
