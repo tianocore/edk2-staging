@@ -27,5 +27,14 @@
 [Guids]
   gUefiRiscVPkgTokenSpaceGuid  = { 0x4261e9c8, 0x52c0, 0x4b34, { 0x85, 0x3d, 0x48, 0x46, 0xea, 0xd3, 0xb7, 0x2c}}
 
+[PcdsFixedAtBuild]
+  #
+  #                                                   1000000000
+  # PcdRiscVMachineTimerTickInNanoSecond = ---------------------------------------
+  #                                          PcdRiscVMachineTimerFrequencyInHerz
+  #
+  gUefiRiscVPkgTokenSpaceGuid.PcdRiscVMachineTimerTickInNanoSecond|100|UINT64|0x00001010
+  gUefiRiscVPkgTokenSpaceGuid.PcdRiscVMachineTimerFrequencyInHerz|10000000|UINT64|0x00001011
+
 [UserExtensions.TianoCore."ExtraFiles"]
   RiscVPkgExtra.uni
