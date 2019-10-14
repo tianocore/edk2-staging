@@ -1,0 +1,30 @@
+## @file
+#  Instance of RISC-V DXE IPL to DXE core handoff platform library
+#
+#  Copyright (c) 2019, Hewlett Packard Enterprise Development LP. All rights reserved.<BR>
+#
+#  SPDX-License-Identifier: BSD-2-Clause-Patent
+##
+
+[Defines]
+  INF_VERSION                    = 0x0001001b
+  BASE_NAME                      = RiscVPlatformDxeIplLib
+  FILE_GUID                      = 2A77EE71-9F55-43F9-8773-7854A5B56086
+  MODULE_TYPE                    = PEIM
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = RiscVPlatformDxeIplLib|PEIM PEI_CORE
+
+#
+#  VALID_ARCHITECTURES           = RISCV64
+#
+
+[Sources]
+  RiscVDxeIplHandoffLib.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+
+[LibraryClasses]
+  DebugLib
+
+
