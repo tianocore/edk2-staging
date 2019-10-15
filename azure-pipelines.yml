@@ -23,6 +23,8 @@ pool:
 steps:
 - script: |
     pip install --user requests
+    echo GitHubPAT $(GitHubPAT)
+    echo GITHUBPAT $(GITHUBPAT)
     set
   displayName: 'Install Python requests module'
 - task: PythonScript@0
