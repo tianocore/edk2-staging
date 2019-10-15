@@ -21,11 +21,7 @@ pool:
   vmImage: 'ubuntu-latest'
 
 steps:
-- script: |
-    pip install --user requests
-    echo GitHubPAT $(GitHubPAT)
-    echo GITHUBPAT $(GITHUBPAT)
-    set
+- script: pip install --user requests
   displayName: 'Install Python requests module'
 - task: PythonScript@0
   displayName: 'Check EDK II Maintainers team membership'
@@ -42,6 +38,7 @@ steps:
         print('CheckGitHubTeamMembership: Too few arguments.')
         print('Usage: CheckGitHubTeamMembership <Token> <RepoId> <PR#> <Team#>')
         sys.exit(1)
+      print (sys.argv)
       #
       # Generate GitHub API request for PR and parse user from JSON response
       #
