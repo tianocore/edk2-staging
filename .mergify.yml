@@ -28,7 +28,7 @@ pull_request_rules:
   - name: automatically close a PR that fails the EDK II Maintainers membership check
     conditions:
       - base=edk2-ci
-      - status-failure=edk2-staging edk2-ci-CI
+      - status-failure=tianocore.edk2-staging
     actions:
       close:
         message: PR submitter is not a member of the Tianocore EDK II Maintainers team

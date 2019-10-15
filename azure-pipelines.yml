@@ -40,6 +40,12 @@ steps:
         sys.exit(1)
       print (sys.argv)
       #
+      # Fill in Authorization token using Personal Access Token (PAT)
+      #
+      Headers = {
+        'Authorization': 'token ' + sys.argv[1],
+      }
+      #
       # Generate GitHub API request for PR and parse user from JSON response
       #
       Url = 'https://api.github.com/repos/{RepoId}/pulls/{PrNumber}'.format(
@@ -48,7 +54,6 @@ steps:
               )
       print(Url)
       PullRequest = requests.get(Url).json()
-      print(PullRequest)
       if 'user' in PullRequest and 'login' in PullRequest['user']:
         User = PullRequest['user']['login']
       else:
@@ -64,8 +69,7 @@ steps:
               User=User
               )
       print(Url)
-      Membership = requests.get(Url, auth=('mdkinney', sys.argv[1])).json()
-      print(Membership)
+      Membership = requests.get(Url, headers=Headers).json()
       #
       # If JSON response does not contain a 'state' or 'role' field, then exit with
       # an error.
