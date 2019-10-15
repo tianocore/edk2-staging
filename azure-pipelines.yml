@@ -21,6 +21,9 @@ pool:
   vmImage: 'ubuntu-latest'
 
 steps:
+- checkout: self
+  fetchDepth: 1
+  clean: true
 - script: pip install --user requests
   displayName: 'Install Python requests module'
 - task: PythonScript@0
