@@ -38,7 +38,6 @@ steps:
         print('CheckGitHubTeamMembership: Too few arguments.')
         print('Usage: CheckGitHubTeamMembership <Token> <RepoId> <PR#> <Team#>')
         sys.exit(1)
-      print (sys.argv)
       #
       # Fill in Authorization token using Personal Access Token (PAT)
       #
