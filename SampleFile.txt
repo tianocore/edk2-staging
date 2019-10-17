@@ -10,4 +10,5 @@ Add line for edk2-ci-Example_PR_16 Patch #1.
 Add line for edk2-ci-Example_PR_17 Patch #1.
 Add line for edk2-ci-Example_PR_18 Patch #1.
 Add line for edk2-ci-Example_PR_19 Patch #1.
-Add line for edk2-ci-Example_PR_20 Patch #1 with trailing spaces.     
+Add line for edk2-ci-Example_PR_20 Patch #1
+Add line for edk2-ci-Example_PR_21 Patch #1 without trailing spaces.
