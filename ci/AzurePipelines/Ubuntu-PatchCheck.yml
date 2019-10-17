@@ -21,9 +21,6 @@ pool:
   vmImage: 'ubuntu-latest'
 
 steps:
-- checkout: self
-  clean: true
-
 - task: UsePythonVersion@0
   inputs:
     versionSpec: '3.7.x'
