@@ -25,13 +25,28 @@
 ##
 
 pull_request_rules:
-  - name: automatic merge when GitHub branch protection passes
+  - name: automatic merge when GitHub branch protection passes and 'push' label is present
     conditions:
       - base=edk2-ci
+      - label=push
+      - status-success=tianocore.EdkiiMaintainersCheck
+      - status-success=tianocore.PatchCheck
+      - status-success=Ubuntu GCC5 PR
+      - status-success=Windows VS2019 PR
     actions:
       merge:
         strict: true
         method: rebase
+  - name: automatic close when GitHub branch protection passes and 'push' label is not present
+    conditions:
+      - base=edk2-ci
+      - label!=push
+      - status-success=tianocore.PatchCheck
+      - status-success=Ubuntu GCC5 PR
+      - status-success=Windows VS2019 PR
+    actions:
+      close:
+        message: All checks passed.  Auto close personal build.
   - name: post a comment on a PR that can not be merged due to a merge conflict
     conditions:
       - base=edk2-ci
@@ -39,9 +54,10 @@ pull_request_rules:
     actions:
       comment:
         message: PR can not be merged due to conflict.  Please rebase and resubmit
-  - name: automatically close a PR that fails the EDK II Maintainers membership check
+  - name: automatically close a PR that fails the EDK II Maintainers membership check and 'push' label is present
     conditions:
       - base=edk2-ci
+      - label=push
       - status-failure=tianocore.EdkiiMaintainersCheck
     actions:
       close:
