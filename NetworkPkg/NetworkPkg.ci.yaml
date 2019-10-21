@@ -17,7 +17,7 @@
             "MdeModulePkg/MdeModulePkg.dec",
             "NetworkPkg/NetworkPkg.dec",
             "CryptoPkg/CryptoPkg.dec"
-        ], 
+        ],
         # For host based unit tests
         "AcceptableDependencies-HOST_APPLICATION":[],
         # For UEFI shell based apps
@@ -38,7 +38,7 @@
     "LibraryClassCheck": {
         "IgnoreHeaderFile": []
     },
-    
+
     ## options defined ci/Plugin/SpellCheck
     "SpellCheck": {
         "skip": True,
