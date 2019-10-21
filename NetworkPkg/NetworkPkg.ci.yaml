@@ -50,6 +50,8 @@
 
     "Defines": {
         "BLD_*_NETWORK_ENABLE": "TRUE",
+        "BLD_*_NETWORK_SNP_ENABLE": "TRUE",
+        "BLD_*_NETWORK_VLAN_ENABLE": "TRUE",
         "BLD_*_NETWORK_IP4_ENABLE": "TRUE",
         "BLD_*_NETWORK_IP6_ENABLE": "TRUE",
         "BLD_*_NETWORK_TLS_ENABLE": "TRUE",
