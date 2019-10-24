@@ -160,8 +160,8 @@ class Settings(CiBuildSettingsManager, UpdateSettingsManager, SetupSettingsManag
         for f in changedFilesList:
             nodes=f.split("/")  # split each part of path for comparison later
 
-            # python file change in ci folder causes building all
-            if f.endswith(".py") and "ci" in nodes:
+            # python file change in .pytool folder causes building all
+            if f.endswith(".py") and ".pytool" in nodes:
                 for a in possible_packages[:]:
                     build_these_packages.append(a)
                     possible_packages.remove(a)
