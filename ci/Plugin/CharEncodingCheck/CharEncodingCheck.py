@@ -44,12 +44,12 @@ class CharEncodingCheck(ICiBuildPlugin):
         """ Provide the testcase name and classname for use in reporting
             testclassname: a descriptive string for the testcase can include whitespace
             classname: should be patterned <packagename>.<plugin>.<optionally any unique condition>
-            
+
             Args:
               packagename: string containing name of package to build
               environment: The VarDict for the test to run in
             Returns:
-                a tuple containing the testcase name and the classname 
+                a tuple containing the testcase name and the classname
                 (testcasename, classname)
         """
         return ("Check for valid file encoding for " + packagename, packagename + ".CharEncodingCheck")

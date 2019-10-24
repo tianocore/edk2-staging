@@ -17,7 +17,7 @@ from edk2toolext.environment.var_dict import VarDict
 class CompilerPlugin(ICiBuildPlugin):
     """
     A CiBuildPlugin that compiles the package dsc
-    from the package being tested.  
+    from the package being tested.
 
     Configuration options:
     "CompilerPlugin": {
@@ -32,7 +32,7 @@ class CompilerPlugin(ICiBuildPlugin):
               packagename: string containing name of package to build
               environment: The VarDict for the test to run in
             Returns:
-                a tuple containing the testcase name and the classname 
+                a tuple containing the testcase name and the classname
                 (testcasename, classname)
         """
         target = environment.GetValue("TARGET")
@@ -60,9 +60,9 @@ class CompilerPlugin(ICiBuildPlugin):
             tc.SetSkipped()
             tc.LogStdError("DscPath not found in config file.  Nothing to compile.")
             return -1
-        
+
         AP = Edk2pathObj.GetAbsolutePathOnThisSytemFromEdk2RelativePath(packagename)
-        
+
         APDSC = os.path.join(AP, pkgconfig["DscPath"].strip())
         AP_Path = Edk2pathObj.GetEdk2RelativePathFromAbsolutePath(APDSC)
         if AP is None or AP_Path is None or not os.path.isfile(APDSC):

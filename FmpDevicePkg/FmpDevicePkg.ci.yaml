@@ -17,7 +17,7 @@
             "MdeModulePkg/MdeModulePkg.dec",
             "FmpDevicePkg/FmpDevicePkg.dec",
             "CryptoPkg/CryptoPkg.dec"
-        ], 
+        ],
         "IgnoreInf": []
     },
     "DscCompleteCheck": {

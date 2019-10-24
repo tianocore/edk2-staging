@@ -39,13 +39,13 @@ Thie plugin by default will check the below standard paths.  If the package woul
 ```python
 [
 # C source
-"*.c", 
+"*.c",
 "*.h",
 
 # Assembly files
-"*.nasm", 
-"*.asm", 
-"*.masm", 
+"*.nasm",
+"*.asm",
+"*.masm",
 "*.s",
 
 # ACPI source language
@@ -86,7 +86,7 @@ CSpell supports numerous methods to annotate your files to ignore words, section
 ``` c
 // spell-checker:ignore unenroll, word2, word3
 ```
-or 
+or
 
 ```ini
 # spell-checker:ignore unenroll, word2, word3

@@ -1,5 +1,5 @@
 ## @file
-# Azure Pipielines YML file that evalues the patch series in a PR using the 
+# Azure Pipielines YML file that evalues the patch series in a PR using the
 # python script BaseTools/Scripts/PatchCheck.py.
 #
 # NOTE: This example monitors pull requests against the edk2-ci branch.  Most

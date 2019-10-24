@@ -4,7 +4,7 @@
 # Copyright (c) 2019, Microsoft Corporation
 # SPDX-License-Identifier: BSD-2-Clause-Patent
 ##
-trigger: 
+trigger:
 - edk2-ci
 
 pr:
