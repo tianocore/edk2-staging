@@ -24,7 +24,7 @@
     },
     "DscCompleteCheck": {
         "IgnoreInf": [],
-        "DscPath": "FatPkg.dsc"   
+        "DscPath": "FatPkg.dsc"
     },
     "GuidCheck": {
         "IgnoreGuidName": [],

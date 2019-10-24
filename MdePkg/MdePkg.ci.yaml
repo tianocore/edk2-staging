@@ -19,7 +19,7 @@
     "DependencyCheck": {
         "AcceptableDependencies": [
             "MdePkg/MdePkg.dec"
-        ], 
+        ],
         # For host based unit tests
         "AcceptableDependencies-HOST_APPLICATION":[],
         # For UEFI shell based apps
@@ -30,7 +30,7 @@
     ## options defined ci/Plugin/DscCompleteCheck
     "DscCompleteCheck": {
         "IgnoreInf": [],
-        "DscPath": "MdePkg.dsc"   
+        "DscPath": "MdePkg.dsc"
     },
 
     ## options defined ci/Plugin/GuidCheck
@@ -39,7 +39,7 @@
             "gEfiFirmwareVolumeTopFileGuid" # sec modules must be set to this guid
         ],
         "IgnoreGuidValue": ["00000000-0000-0000-0000-000000000000"],
-        "IgnoreFoldersAndFiles": [], 
+        "IgnoreFoldersAndFiles": [],
         "IgnoreDuplicates": [
             "gEfiFirmwareVolumeBlockProtocolGuid=gEfiFirmwareVolumeBlock2ProtocolGuid",
             "gEfiMmAccessProtocolGuid=gEfiSmmAccess2ProtocolGuid",
@@ -78,7 +78,7 @@
     "LibraryClassCheck": {
         "IgnoreHeaderFile": []
     },
-    
+
     ## options defined ci/Plugin/SpellCheck
     "SpellCheck": {
         "skip": True,

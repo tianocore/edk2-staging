@@ -108,7 +108,7 @@ class LibraryClassCheck(ICiBuildPlugin):
 
         if "IgnoreLibraryClass" in pkgconfig:
             LibraryClassIgnore = pkgconfig["IgnoreLibraryClass"]
-                
+
 
         ## Attempt to find library classes
         for lcd in dec.LibraryClasses:

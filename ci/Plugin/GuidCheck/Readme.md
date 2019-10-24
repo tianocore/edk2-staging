@@ -29,7 +29,7 @@ The plugin has numerous configuration options to support the UEFI codebase.
 This list allows strings in two formats.
 
 * _GuidName_
-  * This will remove any entry with this GuidName from the list of GUIDs therefore ignoring any error associated with this name.  
+  * This will remove any entry with this GuidName from the list of GUIDs therefore ignoring any error associated with this name.
 * _GuidName=GuidValue_
   * This will also ignore the GUID by name but only if the value equals the GuidValue.
   * GuidValue should be in registry format.
@@ -46,7 +46,7 @@ This list allows strings in guid registry format _GuidValue_.
 
 This supports .gitignore file and folder matching strings including wildcards
 
-* Any folder or file ignored will not be parsed and therefore any GUID defined will be ignored.  
+* Any folder or file ignored will not be parsed and therefore any GUID defined will be ignored.
 * The plugin will always ignores the following ["/Build", "/Conf"]
 
 ### IgnoreDuplicates

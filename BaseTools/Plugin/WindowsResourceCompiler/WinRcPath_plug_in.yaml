@@ -1,5 +1,5 @@
 ##
-# Build Plugin used to set the path to rc.exe on windows. 
+# Build Plugin used to set the path to rc.exe on windows.
 # The plugin is able to use python to locate the tool as to avoid
 # hard-coding the path
 #

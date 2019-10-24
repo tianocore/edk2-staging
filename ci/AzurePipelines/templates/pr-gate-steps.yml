@@ -16,7 +16,7 @@ steps:
 - checkout: self
   clean: true
   fetchDepth: 1
-  
+
 - task: UsePythonVersion@0
   inputs:
     versionSpec: '3.7.x'
@@ -25,7 +25,7 @@ steps:
 - script: pip install -r requirements.txt --upgrade
   displayName: 'Install/Upgrade pip modules'
 
-# Set default 
+# Set default
 - bash: |
     echo "##vso[task.setvariable variable=pkgs_to_build]${{ parameters.build_pkgs }}"
     echo "##vso[task.setvariable variable=pkg_count]${{ 1 }}"
@@ -37,7 +37,7 @@ steps:
     filename: stuart_pr_eval
     arguments: -c ci/CISettings.py -p ${{ parameters.build_pkgs }} --pr-target origin/$(System.PullRequest.targetBranch) --output-csv-format-string "##vso[task.setvariable variable=pkgs_to_build;isOutpout=true]{pkgcsv}" --output-count-format-string "##vso[task.setvariable variable=pkg_count;isOutpout=true]{pkgcount}"
   condition: eq(variables['Build.Reason'], 'PullRequest')
-  
+
 
 # install spell check prereqs
 - template: spell-check-prereq-steps.yml

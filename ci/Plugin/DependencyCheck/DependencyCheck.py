@@ -14,7 +14,7 @@ from edk2toolext.environment.var_dict import VarDict
 class DependencyCheck(ICiBuildPlugin):
     """
     A CiBuildPlugin that finds all modules (inf files) in a package and reviews the packages used
-    to confirm they are acceptable.  This is to help enforce layering and identify improper 
+    to confirm they are acceptable.  This is to help enforce layering and identify improper
     dependencies between packages.
 
     Configuration options:
@@ -33,13 +33,13 @@ class DependencyCheck(ICiBuildPlugin):
               packagename: string containing name of package to build
               environment: The VarDict for the test to run in
             Returns:
-                a tuple containing the testcase name and the classname 
+                a tuple containing the testcase name and the classname
                 (testcasename, classname)
                 testclassname: a descriptive string for the testcase can include whitespace
                 classname: should be patterned <packagename>.<plugin>.<optionally any unique condition>
         """
         return ("Test Package Dependencies for modules in " + packagename, packagename + ".DependencyCheck")
-    
+
     ##
     # External function of plugin.  This function is used to perform the task of the MuBuild Plugin
     #
@@ -71,21 +71,21 @@ class DependencyCheck(ICiBuildPlugin):
                 except:
                     logging.info("DependencyConfig.IgnoreInf -> {0} not found in filesystem.  Invalid ignore file".format(a))
                     tc.LogStdError("DependencyConfig.IgnoreInf -> {0} not found in filesystem.  Invalid ignore file".format(a))
-        
-        
+
+
         # Get the AccpetableDependencies list
         if "AcceptableDependencies" not in pkgconfig:
             logging.info("DependencyCheck Skipped.  No Acceptable Dependencies defined.")
             tc.LogStdOut("DependencyCheck Skipped.  No Acceptable Dependencies defined.")
             tc.SetSkipped()
             return -1
-            
+
         # Log dependencies
         for k in pkgconfig.keys():
             if k.startswith("AcceptableDependencies"):
                 pkgstring = "\n".join(pkgconfig[k])
                 if ("-" in k):
-                    _, _, mod_type = k.partition("-") 
+                    _, _, mod_type = k.partition("-")
                     tc.LogStdOut(f"Additional dependencies for MODULE_TYPE {mod_type}:\n {pkgstring}")
                 else:
                     tc.LogStdOut(f"Acceptable Dependencies:\n {pkgstring}")
@@ -110,7 +110,7 @@ class DependencyCheck(ICiBuildPlugin):
 
                     logging.error("Dependency Check: Invalid Dependency INF: {0} depends on pkg {1}".format(file, p))
                     tc.LogStdError("Dependency Check: Invalid Dependency INF: {0} depends on pkg {1}".format(file, p))
-                    overall_status += 1       
+                    overall_status += 1
 
         # If XML object exists, add results
         if overall_status is not 0:

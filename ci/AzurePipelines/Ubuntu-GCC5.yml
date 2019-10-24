@@ -6,7 +6,7 @@
 ##
 trigger:
 - edk2-ci
-pr: 
+pr:
 - edk2-ci
 
 jobs:
