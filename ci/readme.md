@@ -86,7 +86,7 @@ This test scans all files in a package to make sure that there are no invalid Un
 
 ### Spell Checking - cspell
 
-This test runs a spell checker on all files within the package.  This is done using the NodeJs cspell tool.  For details check `ci/Plugin/SpellCheck`.  For this plugin to run during ci you must install nodejs and cspell and have both available to the command line when running your CI.  
+This test runs a spell checker on all files within the package.  This is done using the NodeJs cspell tool.  For details check `ci/Plugin/SpellCheck`.  For this plugin to run during ci you must install nodejs and cspell and have both available to the command line when running your CI.
 
 Install
 
@@ -99,7 +99,7 @@ Install
 
 ## Current Azure Pipeline Tests
 
-When adding a test it can be added as either a *PyTool* test or just added to the CI build process.  This should be a deliberate choice.  Any change added as a pipeline test is not as easily run on a private/local workspace.  But there are times where this is still the preferred method.  
+When adding a test it can be added as either a *PyTool* test or just added to the CI build process.  This should be a deliberate choice.  Any change added as a pipeline test is not as easily run on a private/local workspace.  But there are times where this is still the preferred method.
 
 ## Future investments
 

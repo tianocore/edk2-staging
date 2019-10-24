@@ -3,7 +3,7 @@
 # - package contains different binaries based on host
 # Add the folder with the tool to the path
 #
-# This is only downloaded for scope cibuild thus 
+# This is only downloaded for scope cibuild thus
 # should have no impact on the asl compiler used by any
 # given platform to build.
 #

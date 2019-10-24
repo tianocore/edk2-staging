@@ -20,9 +20,9 @@ from edk2toolext.environment import version_aggregator
 class SpellCheck(ICiBuildPlugin):
     """
     A CiBuildPlugin that uses the cspell node module to scan the files
-    from the package being tested for spelling errors.  The plugin contains 
+    from the package being tested for spelling errors.  The plugin contains
     the base cspell.json file then thru the configuration options other settings
-    can be changed or extended.   
+    can be changed or extended.
 
     Configuration options:
     "SpellCheck": {
@@ -50,7 +50,7 @@ class SpellCheck(ICiBuildPlugin):
               packagename: string containing name of package to build
               environment: The VarDict for the test to run in
             Returns:
-                a tuple containing the testcase name and the classname 
+                a tuple containing the testcase name and the classname
                 (testcasename, classname)
                 testclassname: a descriptive string for the testcase can include whitespace
                 classname: should be patterned <packagename>.<plugin>.<optionally any unique condition>
@@ -107,7 +107,7 @@ class SpellCheck(ICiBuildPlugin):
             "CSpell", cspell_version, version_aggregator.VersionTypes.INFO)
 
         package_relative_paths_to_spell_check = SpellCheck.STANDARD_PLUGIN_DEFINED_PATHS
-        
+
         #
         # Allow the ci.yaml to remove any of the above standard paths
         #
@@ -119,7 +119,7 @@ class SpellCheck(ICiBuildPlugin):
                     package_relative_paths_to_spell_check.remove(a)
                 else:
                     tc.LogStdOut(f"Invalid IgnoreStandardPaths value: {a}")
-        
+
         #
         # check for any additional include paths defined by package config
         #

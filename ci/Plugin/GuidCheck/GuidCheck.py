@@ -12,7 +12,7 @@ from edk2toolext.environment.var_dict import VarDict
 class GuidCheck(ICiBuildPlugin):
     """
     A CiBuildPlugin that scans the code tree and looks for duplicate guids
-    from the package being tested.  
+    from the package being tested.
 
     Configuration options:
     "GuidCheck": {
@@ -30,7 +30,7 @@ class GuidCheck(ICiBuildPlugin):
               packagename: string containing name of package to build
               environment: The VarDict for the test to run in
             Returns:
-                a tuple containing the testcase name and the classname 
+                a tuple containing the testcase name and the classname
                 (testcasename, classname)
                 testclassname: a descriptive string for the testcase can include whitespace
                 classname: should be patterned <packagename>.<plugin>.<optionally any unique condition>
@@ -65,11 +65,11 @@ class GuidCheck(ICiBuildPlugin):
 
     def _FindConflictingGuidNames(self, guidlist: list) -> list:
         """ Find all duplicate guids by name and if they are not all
-        from inf files report them as errors.  It is ok to have 
-        BASE_NAME duplication.  
+        from inf files report them as errors.  It is ok to have
+        BASE_NAME duplication.
 
         Is this useful?  It would catch two same named guids in dec file
-        that resolve to different values. 
+        that resolve to different values.
         """
         # Sort the list by guid
         namesorted = sorted(guidlist, key=lambda x: x.name.upper())
@@ -93,8 +93,8 @@ class GuidCheck(ICiBuildPlugin):
                     error = None
             previous = i
 
-            # Loop thru and remove any errors where all files are infs as it is ok if 
-            # they have the same inf base name.  
+            # Loop thru and remove any errors where all files are infs as it is ok if
+            # they have the same inf base name.
             for e in errors[:]:
                 if len( [en for en in e.entries if not en.absfilepath.lower().endswith(".inf")]) == 0:
                     errors.remove(e)
@@ -179,12 +179,12 @@ class GuidCheck(ICiBuildPlugin):
                     tc.LogStdError("GuidCheck.IgnoreDuplicates -> {0} invalid format".format(a))
                     logging.info("GuidCheck.IgnoreDuplicates -> {0} invalid format".format(a))
                     continue
-                
+
                 for b in Errors[:]:
                     if b.type != "guid":
                         continue
-                    ## Make a list of the names that are not in the names list.  If there 
-                    ## are any in the list then this error should not be ignored.  
+                    ## Make a list of the names that are not in the names list.  If there
+                    ## are any in the list then this error should not be ignored.
                     t = [x for x in b.entries if x.name not in names]
                     if(len(t) == len(b.entries)):
                         ## did not apply to any entry
@@ -200,7 +200,7 @@ class GuidCheck(ICiBuildPlugin):
                     else:
                         tc.LogStdOut("GuidCheck.IgnoreDuplicates -> {0} unknown error.".format(a))
                         logging.info("GuidCheck.IgnoreDuplicates -> {0} unknown error".format(a))
-                    
+
 
 
         # Find conflicting Guid Names

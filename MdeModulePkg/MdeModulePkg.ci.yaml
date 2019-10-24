@@ -16,7 +16,7 @@
     },
 
     ## options defined ci/Plugin/DependencyCheck
-    "DependencyCheck": { 
+    "DependencyCheck": {
         "AcceptableDependencies": [
             "MdePkg/MdePkg.dec",
             "MdeModulePkg/MdeModulePkg.dec",
@@ -32,12 +32,12 @@
 
     ## options defined ci/Plugin/DscCompleteCheck
     "DscCompleteCheck": {
-        "IgnoreInf": [], 
-        "DscPath": "MdeModulePkg.dsc"   
+        "IgnoreInf": [],
+        "DscPath": "MdeModulePkg.dsc"
     },
 
     ## options defined ci/Plugin/GuidCheck
-    "GuidCheck": { 
+    "GuidCheck": {
         "IgnoreGuidName": [],
         "IgnoreGuidValue": ["00000000-0000-0000-0000-000000000000"],
         "IgnoreFoldersAndFiles": [],
@@ -50,7 +50,7 @@
     },
 
     ## options defined ci/Plugin/LibraryClassCheck
-    "LibraryClassCheck": { 
+    "LibraryClassCheck": {
         "IgnoreHeaderFile": []
     },
 
@@ -62,7 +62,7 @@
         "IgnoreFiles": [             # use gitignore syntax to ignore errors in matching files
             "Library/LzmaCustomDecompressLib/Sdk/DOC/*"
         ],
-        "ExtendWords": [           # words to extend to the dictionary for this package 
+        "ExtendWords": [           # words to extend to the dictionary for this package
             "LIGHTGRAY",
             "DARKGRAY",
             "LIGHTBLUE",
