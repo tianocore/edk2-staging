@@ -82,6 +82,13 @@ typedef enum {
 // If all memory has the same reliability, then this bit is not used.
 //
 #define EFI_MEMORY_MORE_RELIABLE    0x0000000000010000ULL
+
+//
+// Note: UEFI spec 2.8 and following:
+//
+#define EFI_MEMORY_SP               0x0000000000040000ULL
+#define EFI_MEMORY_CPU_CRYPTO       0x0000000000080000ULL
+
 //
 // Runtime memory attribute
 //
