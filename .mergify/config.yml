@@ -29,7 +29,7 @@ pull_request_rules:
     conditions:
       - base=edk2-ci
       - label=push
-      - status-success=tianocore.EdkiiMaintainers
+      - author=@tianocore/edk-ii-maintainers
       - status-success=tianocore.PatchCheck
       - status-success=Ubuntu GCC5 PR
       - status-success=Windows VS2019 PR
@@ -58,7 +58,7 @@ pull_request_rules:
     conditions:
       - base=edk2-ci
       - label=push
-      - status-failure=tianocore.EdkiiMaintainers
+      - author!=@tianocore/edk-ii-maintainers
     actions:
       close:
         message: PR submitter is not a member of the Tianocore EDK II Maintainers team
