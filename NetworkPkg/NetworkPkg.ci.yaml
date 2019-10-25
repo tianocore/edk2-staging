@@ -49,6 +49,7 @@
     },
 
     "Defines": {
+        "BLD_*_PYTOOL_CONTINUOUS_INTEGRATION": "TRUE",
         "BLD_*_NETWORK_ENABLE": "TRUE",
         "BLD_*_NETWORK_SNP_ENABLE": "TRUE",
         "BLD_*_NETWORK_VLAN_ENABLE": "TRUE",
