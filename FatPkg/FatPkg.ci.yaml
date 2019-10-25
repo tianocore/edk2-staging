@@ -41,7 +41,10 @@
             "IFILE",
             "OFILE",
             "FDISKed",
-            "Lfnbuffer"
+            "Lfnbuffer",
+            "FFFFFFFFL",
+            "CDVOL",
+            "DMDEPKG"
         ]
     }
 }

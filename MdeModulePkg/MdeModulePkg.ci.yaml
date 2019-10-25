@@ -56,6 +56,7 @@
 
     ## options defined ci/Plugin/SpellCheck
     "SpellCheck": {
+        "skip": True,
         "IgnoreStandardPaths": [     # Standard Plugin defined paths that should be ignore
             "*.c", "*.asm", "*.h", "*.nasm", "*.s", "*.asl", "*.inf"
         ],
