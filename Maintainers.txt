@@ -460,3 +460,26 @@ F: StandaloneMmPkg/
 M: Achin Gupta <achin.gupta@arm.com>
 M: Jiewen Yao <jiewen.yao@intel.com>
 R: Supreeth Venkatesh <supreeth.venkatesh@arm.com>
+
+EDK II Continuous Integration:
+------------------------------
+.azurepipelines/
+F: .azurepipelines/
+M: Sean Brogan <sean.brogan@microsoft.com>
+M: Bret Barkelew <Bret.Barkelew@microsoft.com>
+R: Michael D Kinney <michael.d.kinney@intel.com>
+R: Liming Gao <liming.gao@intel.com>
+
+.mergify/
+F: .mergify/
+M: Michael D Kinney <michael.d.kinney@intel.com>
+M: Liming Gao <liming.gao@intel.com>
+R: Sean Brogan <sean.brogan@microsoft.com>
+R: Bret Barkelew <Bret.Barkelew@microsoft.com>
+
+.pytool/
+F: .pytool/
+M: Sean Brogan <sean.brogan@microsoft.com>
+M: Bret Barkelew <Bret.Barkelew@microsoft.com>
+R: Michael D Kinney <michael.d.kinney@intel.com>
+R: Liming Gao <liming.gao@intel.com>
