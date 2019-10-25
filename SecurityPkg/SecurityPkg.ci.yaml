@@ -73,5 +73,9 @@
         ],
         "IgnoreStandardPaths": [],   # Standard Plugin defined paths that should be ignore
         "AdditionalIncludePaths": [] # Additional paths to spell check (wildcards supported)
+    },
+
+    "Defines": {
+        "BLD_*_PYTOOL_CONTINUOUS_INTEGRATION": "TRUE",
     }
 }
