@@ -26,6 +26,7 @@ class SpellCheck(ICiBuildPlugin):
 
     Configuration options:
     "SpellCheck": {
+        "AuditOnly": False,          # Don't fail the build if there are errors.  Just log them
         "IgnoreFiles": [],           # use gitignore syntax to ignore errors in matching files
         "ExtendWords": [],           # words to extend to the dictionary for this package
         "IgnoreStandardPaths": [],   # Standard Plugin defined paths that should be ignore
@@ -194,8 +195,13 @@ class SpellCheck(ICiBuildPlugin):
         # add result to test case
         overall_status = len(Errors)
         if overall_status != 0:
-            tc.SetFailed("SpellCheck {0} Failed.  Errors {1}".format(
-                packagename, overall_status), "CHECK_FAILED")
+            if "AuditOnly" in pkgconfig and pkgconfig["AuditOnly"]:
+                # set as skipped if AuditOnly
+                tc.SetSkipped()
+                return -1
+            else:
+                tc.SetFailed("SpellCheck {0} Failed.  Errors {1}".format(
+                    packagename, overall_status), "CHECK_FAILED")
         else:
             tc.SetSuccess()
         return overall_status

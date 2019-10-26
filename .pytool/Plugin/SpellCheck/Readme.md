@@ -14,12 +14,18 @@ The plugin has a few configuration options to support the UEFI codebase.
 
 ``` yaml
   "SpellCheck": {
+      "AuditOnly": False,          # If True, log all errors and then mark as skipped
       "IgnoreFiles": [],           # use gitignore syntax to ignore errors in matching files
       "ExtendWords": [],           # words to extend to the dictionary for this package
       "IgnoreStandardPaths": [],   # Standard Plugin defined paths that should be ignore
       "AdditionalIncludePaths": [] # Additional paths to spell check (wildcards supported)
   }
 ```
+
+### AuditOnly
+
+Boolean - Default is False.
+If True run the test in an Audit only mode which will log all errors but instead of failing the build it will set the test as skipped.  This allows visibility into the failures without breaking the build.
 
 ### IgnoreFiles
 
@@ -34,7 +40,7 @@ This list allows words to be added to the dictionary for the spell checker when 
 
 ### IgnoreStandardPaths
 
-Thie plugin by default will check the below standard paths.  If the package would like to ignore any of them list that here.
+This plugin by default will check the below standard paths.  If the package would like to ignore any of them list that here.
 
 ```python
 [
@@ -59,7 +65,7 @@ Thie plugin by default will check the below standard paths.  If the package woul
 ]
 ```
 
-### AdditionalIncludePaths:
+### AdditionalIncludePaths
 
 If the package would to add additional path patterns to be included in spellchecking they can be defined here.
 
@@ -86,6 +92,7 @@ CSpell supports numerous methods to annotate your files to ignore words, section
 ``` c
 // spell-checker:ignore unenroll, word2, word3
 ```
+
 or
 
 ```ini
