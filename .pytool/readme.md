@@ -101,6 +101,18 @@ Install
 
 When adding a test it can be added as either a *PyTool* test or just added to the CI build process.  This should be a deliberate choice.  Any change added as a pipeline test is not as easily run on a private/local workspace.  But there are times where this is still the preferred method.
 
+## PyTool Scopes
+
+Scopes are how the PyTool ext_dep, path_env, and plugins are activated.  Meaning that if an invocable process has a scope active then those ext_dep and path_env will be active. To allow easy integration of PyTools capabilities there are a few standard scopes.
+
+| Scope   | Invocable | Description    |
+| :----   | :-----    | :----          |
+| global  | edk2_invocable++ - should be base_abstract_invocable       | Running an invocables |
+| global-win | edk2_invocable++ | Running on Microsoft Windows |
+| global-nix | edk2_invocable++ | Running on Linux based OS    |
+| edk2-build |  | This indicates that an invocable is building EDK2 based UEFI code |
+| cibuild | set in .pytool/CISettings.py | Suggested target for edk2 continuous integration builds.  Tools used for CiBuilds can use this scope.  Example: asl compiler |
+
 ## Future investments
 
 * PatchCheck tests as plugins
