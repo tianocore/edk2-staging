@@ -42,7 +42,7 @@
 
     ## options defined ci/Plugin/SpellCheck
     "SpellCheck": {
-        "skip": True,
+        "AuditOnly": True,           # Fails test but run in AuditOnly mode to collect log
         "IgnoreFiles": [],           # use gitignore syntax to ignore errors in matching files
         "ExtendWords": [],           # words to extend to the dictionary for this package
         "IgnoreStandardPaths": [],   # Standard Plugin defined paths that should be ignore

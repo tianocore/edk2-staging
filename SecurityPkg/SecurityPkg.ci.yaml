@@ -42,6 +42,7 @@
 
     ## options defined ci/Plugin/SpellCheck
     "SpellCheck": {
+        "AuditOnly": True,           # Fails test but run in AuditOnly mode to collect log
         "ExtendWords": [             # words to extend to the dictionary for this package
             "shortformed", # tpm acpi
             "autodetect",
