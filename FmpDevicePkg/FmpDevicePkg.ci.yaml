@@ -35,10 +35,9 @@
     "SpellCheck": {
         "ExtendWords": [
             "FMPSTATE",
-            "PYTOOL",
         ]
     },
     "Defines": {
-        "BLD_*_PYTOOL_CONTINUOUS_INTEGRATION": "TRUE",
+        "BLD_*_CONTINUOUS_INTEGRATION": "TRUE",
     }
 }

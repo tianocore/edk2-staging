@@ -48,7 +48,7 @@
   DebugLib|MdePkg/Library/UefiDebugLibStdErr/UefiDebugLibStdErr.inf
   DebugPrintErrorLevelLib|MdePkg/Library/BaseDebugPrintErrorLevelLib/BaseDebugPrintErrorLevelLib.inf
   PcdLib|MdePkg/Library/BasePcdLibNull/BasePcdLibNull.inf
-!ifdef PYTOOL_CONTINUOUS_INTEGRATION
+!ifdef CONTINUOUS_INTEGRATION
   BaseCryptLib|CryptoPkg/Library/BaseCryptLibNull/BaseCryptLibNull.inf
 !else
   IntrinsicLib|CryptoPkg/Library/IntrinsicLib/IntrinsicLib.inf
