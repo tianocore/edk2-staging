@@ -41,7 +41,7 @@
   DxeServicesTableLib|MdePkg/Library/DxeServicesTableLib/DxeServicesTableLib.inf
   SafeIntLib|MdePkg/Library/BaseSafeIntLib/BaseSafeIntLib.inf
 
-!ifdef PYTOOL_CONTINUOUS_INTEGRATION
+!ifdef CONTINUOUS_INTEGRATION
   BaseCryptLib|CryptoPkg/Library/BaseCryptLibNull/BaseCryptLibNull.inf
   TlsLib|CryptoPkg/Library/TlsLibNull/TlsLibNull.inf
 !else
