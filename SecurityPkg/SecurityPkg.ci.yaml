@@ -42,8 +42,6 @@
 
     ## options defined ci/Plugin/SpellCheck
     "SpellCheck": {
-        "skip": True,
-        "IgnoreFiles": [],           # use gitignore syntax to ignore errors in matching files
         "ExtendWords": [             # words to extend to the dictionary for this package
             "shortformed", # tpm acpi
             "autodetect",
@@ -76,6 +74,6 @@
     },
 
     "Defines": {
-        "BLD_*_PYTOOL_CONTINUOUS_INTEGRATION": "TRUE",
+        "BLD_*_CONTINUOUS_INTEGRATION": "TRUE",
     }
 }
