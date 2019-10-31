@@ -2,3 +2,4 @@ Test_PR_1
 
 Test_PR_3
 Add line for EDK_II_CI_Unit_Test_0003_Maintainer_Single_Patch_Push.
+Add line for EDK_II_CI_Unit_Test_0003_Maintainer_Multi_Patch_Personal patch #1.
