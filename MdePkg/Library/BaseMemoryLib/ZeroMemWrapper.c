@@ -48,3 +48,4 @@ ZeroMem (
   ASSERT (Length <= (MAX_ADDRESS - (UINTN)Buffer + 1));
   return InternalMemZeroMem (Buffer, Length);
 }
+// Add line for EDK_II_CI_Unit_Test_0003_Maintainer_Single_Patch_MdePkgLibInst_Personal.
