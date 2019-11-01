@@ -5,12 +5,12 @@ for the UEFI and PI specifications from www.uefi.org.
 
 ## Build Status
 
-| Host Type | Toolchain | Branch | Build Status | Test Status | Code Coverage |
-| :-------- | :-------- | :---- | :----- | :---- | :--- |
-| Windows | VS2019 | edk2-ci | [![Build Status](https://dev.azure.com/tianocore/edk2-ci-play/_apis/build/status/Edk2%20Windows%20VS2019%20CI?branchName=edk2-ci)](https://dev.azure.com/tianocore/edk2-ci-play/_build/latest?definitionId=14&branchName=edk2-ci) | [![Azure DevOps tests](https://img.shields.io/azure-devops/tests/tianocore/edk2-ci-play/14.svg)](https://dev.azure.com/tianocore/edk2-ci-play/_build/latest?definitionId=14&branchName=edk2-ci) | [![Code Coverage](https://img.shields.io/badge/coverage-coming_soon-blue)](https://dev.azure.com/tianocore/edk2-ci-play/_build/latest?definitionId=14&branchName=edk2-ci)|
-| Ubuntu | GCC5 | edk2-ci | [![Build Status](https://dev.azure.com/tianocore/edk2-ci-play/_apis/build/status/Edk2%20Ubuntu%20GCC5%20CI?branchName=edk2-ci)](https://dev.azure.com/tianocore/edk2-ci-play/_build/latest?definitionId=15&branchName=edk2-ci) | [![Azure DevOps tests](https://img.shields.io/azure-devops/tests/tianocore/edk2-ci-play/15.svg)](https://dev.azure.com/tianocore/edk2-ci-play/_build/latest?definitionId=15&branchName=edk2-ci)  | [![Code Coverage](https://img.shields.io/badge/coverage-coming_soon-blue)](https://dev.azure.com/tianocore/edk2-ci-play/_build/latest?definitionId=15&branchName=edk2-ci) |
+| Host Type | Toolchain | Branch  | Build Status | Test Status | Code Coverage |
+| :-------- | :-------- | :------ | :----------- | :---------- | :------------ |
+| Windows   | VS2019    | edk2-ci | [![Build Status](https://dev.azure.com/tianocore/edk2-ci-play/_apis/build/status/edk2-staging/Windows%20VS2019%20CI?branchName=edk2-ci)](https://dev.azure.com/tianocore/edk2-ci-play/_build/latest?definitionId=27&branchName=edk2-ci) | [![Azure DevOps tests](https://img.shields.io/azure-devops/tests/tianocore/edk2-ci-play/14.svg)](https://dev.azure.com/tianocore/edk2-ci-play/_build/latest?definitionId=27&branchName=edk2-ci) | [![Code Coverage](https://img.shields.io/badge/coverage-coming_soon-blue)](https://dev.azure.com/tianocore/edk2-ci-play/_build/latest?definitionId=27&branchName=edk2-ci) |
+| Ubuntu    | GCC5      | edk2-ci | [![Build Status](https://dev.azure.com/tianocore/edk2-ci-play/_apis/build/status/edk2-staging/Ubuntu%20GCC5%20CI?branchName=edk2-ci)](https://dev.azure.com/tianocore/edk2-ci-play/_build/latest?definitionId=26&branchName=edk2-ci)    | [![Azure DevOps tests](https://img.shields.io/azure-devops/tests/tianocore/edk2-ci-play/15.svg)](https://dev.azure.com/tianocore/edk2-ci-play/_build/latest?definitionId=26&branchName=edk2-ci) | [![Code Coverage](https://img.shields.io/badge/coverage-coming_soon-blue)](https://dev.azure.com/tianocore/edk2-ci-play/_build/latest?definitionId=26&branchName=edk2-ci) |
 
-[More CI Build information](ci/readme.md)
+[More CI Build information](.pytools/Readme.md)
 
 ## License Details
 
