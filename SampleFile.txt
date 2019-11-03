@@ -9,3 +9,4 @@ Add line for EDK_II_CI_Unit_Test_0004h_Maintainer_Single_Patch_Personal.
 
 Hello world
 Add line for EDK_II_CI_Unit_Test_0004l_Maintainer_Single_Patch_Push.
+Add line for EDK_II_CI_Unit_Test_0004l_Maintainer_Multi_Patch_Personal patch #1.
