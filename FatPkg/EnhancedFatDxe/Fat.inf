@@ -86,3 +86,5 @@
   gEfiMdePkgTokenSpaceGuid.PcdUefiVariableDefaultPlatformLang   ## SOMETIMES_CONSUMES
 [UserExtensions.TianoCore."ExtraFiles"]
   FatExtra.uni
+[Packages]
+  FatPkg/FatPkg.dec
