@@ -61,5 +61,8 @@ jobs:
 - job: FINISHED
   dependsOn: Build_${{ parameters.tool_chain_tag }}
   steps:
-  - script: echo FINISHED
+  - checkout: none
+  - script: |
+      echo FINISHED
+      sleep 10
     displayName: FINISHED
