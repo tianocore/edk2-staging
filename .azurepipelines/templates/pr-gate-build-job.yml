@@ -60,6 +60,8 @@ jobs:
 
 - job: FINISHED
   dependsOn: Build_${{ parameters.tool_chain_tag }}
+  condition: succeeded()
   steps:
+  - checkout: none
   - script: echo FINISHED
     displayName: FINISHED
