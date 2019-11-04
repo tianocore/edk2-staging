@@ -7924,3 +7924,4 @@ PatchInstructionX86 (
 
 #endif // defined (MDE_CPU_IA32) || defined (MDE_CPU_X64)
 #endif // !defined (__BASE_LIB__)
+// Add line for EDK_II_CI_Unit_Test_0005_NonMaintainer_Single_Patch_MdePkgLibClass_Personal.
