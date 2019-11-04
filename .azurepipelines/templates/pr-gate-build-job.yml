@@ -63,5 +63,7 @@ jobs:
   condition: succeeded()
   steps:
   - checkout: none
-  - script: echo FINISHED
+  - script: |
+      echo FINISHED
+      sleep 10
     displayName: FINISHED
