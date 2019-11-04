@@ -991,3 +991,4 @@ TimerDriverInitialize (
 
   return Status;
 }
+}  // Add extra close bracket to generate build error
