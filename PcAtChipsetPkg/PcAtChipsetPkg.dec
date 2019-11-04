@@ -144,3 +144,5 @@
 
 [UserExtensions.TianoCore."ExtraFiles"]
   PcAtChipsetPkgExtra.uni
+[LibraryClasses]
+  LibClassWithBadPathLib|Include/Library/IncludeFileNotPresent.h
