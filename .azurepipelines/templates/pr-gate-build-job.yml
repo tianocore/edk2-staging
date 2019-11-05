@@ -67,3 +67,13 @@ jobs:
       echo FINISHED
       sleep 10
     displayName: FINISHED
+
+- job: FAILED
+  dependsOn: Build_${{ parameters.tool_chain_tag }}
+  condition: failed()
+  steps:
+  - checkout: none
+  - script: |
+      echo FAILED
+      sleep 10
+    displayName: FAILED
