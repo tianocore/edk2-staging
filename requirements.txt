@@ -3,7 +3,7 @@
 #
 # This file provides the list of python components to install using PIP.
 #
-# Copyright (c) 2019, Microsoft Corporation. All rights reserved.<BR>
+# Copyright (c) Microsoft Corporation. All rights reserved.<BR>
 #
 # SPDX-License-Identifier: BSD-2-Clause-Patent
 #
