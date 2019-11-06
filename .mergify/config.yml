@@ -25,7 +25,8 @@
 ##
 
 pull_request_rules:
-  - name: automatic merge when GitHub branch protection passes and 'push' label is present
+
+  - name: Automatically merge a PR when all required checks pass and 'push' label is present
     conditions:
       - base=edk2-ci
       - label=push
@@ -37,24 +38,30 @@ pull_request_rules:
       merge:
         strict: true
         method: rebase
-  - name: automatic close when GitHub branch protection passes and 'push' label is not present
+
+  - name: Automatically close a PR when all required checks pass and 'push' label is not present
     conditions:
       - base=edk2-ci
-      - label!=push
+      - -label=push
+      - -closed
       - status-success=tianocore.PatchCheck
       - status-success=Ubuntu GCC5 PR
       - status-success=Windows VS2019 PR
+      - status-success=Ubuntu GCC5 PR (FINISHED)
+      - status-success=Windows VS2019 PR (FINISHED)
     actions:
       close:
-        message: All checks passed.  Auto close personal build.
-  - name: post a comment on a PR that can not be merged due to a merge conflict
+        message: All checks passed. Auto close personal build.
+
+  - name: Post a comment on a PR that can not be merged due to a merge conflict
     conditions:
       - base=edk2-ci
       - conflict
     actions:
       comment:
         message: PR can not be merged due to conflict.  Please rebase and resubmit
-  - name: automatically close a PR that fails the EDK II Maintainers membership check and 'push' label is present
+
+  - name: Automatically close a PR that fails the EDK II Maintainers membership check and 'push' label is present
     conditions:
       - base=edk2-ci
       - label=push
@@ -62,10 +69,29 @@ pull_request_rules:
     actions:
       close:
         message: PR submitter is not a member of the Tianocore EDK II Maintainers team
-  - name: post a comment on a PR that does not pass PatchCheck.py checks
+
+  - name: Post a comment on a PR if PatchCheck fails
     conditions:
       - base=edk2-ci
       - status-failure=tianocore.PatchCheck
     actions:
       comment:
-        message: PR can not be merged due to PatchCheck errors.  Please resolve and resubmit
+        message: PR can not be merged due to a PatchCheck failure.  Please resolve and resubmit
+
+  - name: Post a comment on a PR if Ubuntu GCC5 fails
+    conditions:
+      - base=edk2-ci
+      - status-failure=Ubuntu GCC5 PR
+      - status-success=Ubuntu GCC5 PR (FAILED)
+    actions:
+      comment:
+        message: PR can not be merged due to an Ubuntu GCC5 failure.  Please resolve and resubmit
+
+  - name: Post a comment on a PR if Windows VS2019 fails
+    conditions:
+      - base=edk2-ci
+      - status-failure=Windows VS2019 PR
+      - status-success=Windows VS2019 PR (FAILED)
+    actions:
+      comment:
+        message: PR can not be merged due to a Windows VS2019 failure.  Please resolve and resubmit
