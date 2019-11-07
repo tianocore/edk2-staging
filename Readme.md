@@ -3,7 +3,7 @@
 A modern, feature-rich, cross-platform firmware development environment
 for the UEFI and PI specifications from www.uefi.org.
 
-## Build Status
+# Build Status
 
 | Host Type | Toolchain | Branch  | Build Status | Test Status | Code Coverage |
 | :-------- | :-------- | :------ | :----------- | :---------- | :------------ |
@@ -12,7 +12,7 @@ for the UEFI and PI specifications from www.uefi.org.
 
 [More CI Build information](.pytool/Readme.md)
 
-## License Details
+# License Details
 
 The majority of the content in the EDK II open source project uses a
 [BSD-2-Clause Plus Patent License](License.txt).  The EDK II open source project
@@ -31,8 +31,7 @@ contains the following components that are covered by additional licenses:
 The EDK II Project is composed of packages.  The maintainers for each package
 are listed in [Maintainers.txt](Maintainers.txt).
 
-## Resources
-
+# Resources
 * [TianoCore](http://www.tianocore.org)
 * [EDK II](https://github.com/tianocore/tianocore.github.io/wiki/EDK-II)
 * [Getting Started with EDK II](https://github.com/tianocore/tianocore.github.io/wiki/Getting-Started-with-EDK-II)
@@ -41,8 +40,7 @@ are listed in [Maintainers.txt](Maintainers.txt).
 * [How To Contribute](https://github.com/tianocore/tianocore.github.io/wiki/How-To-Contribute)
 * [Release Planning](https://github.com/tianocore/tianocore.github.io/wiki/EDK-II-Release-Planning)
 
-## Code Contributions
-
+# Code Contributions
 To make a contribution to a TianoCore project, follow these steps.
 1. Create a change description in the format specified below to
    use in the source control commit log.
@@ -70,7 +68,7 @@ To make a contribution to a TianoCore project, follow these steps.
    Contributions using other licenses might be accepted, but further
    review will be required.
 
-## Developer Certificate of Origin
+# Developer Certificate of Origin
 
 Your change description should use the standard format for a
 commit message, and must include your `Signed-off-by` signature.
@@ -117,7 +115,7 @@ By making a contribution to this project, I certify that:
     this project or the open source license(s) involved.
 ```
 
-## Sample Change Description / Commit Message
+# Sample Change Description / Commit Message
 
 ```
 From: Contributor Name <contributor@example.com>
@@ -128,14 +126,14 @@ Full-commit-message
 Signed-off-by: Contributor Name <contributor@example.com>
 ```
 
-### Notes for sample patch email
+## Notes for sample patch email
 
 * The first line of commit message is taken from the email's subject
   line following `[Repository/Branch PATCH]`. The remaining portion of the
   commit message is the email's content.
 * `git format-patch` is one way to create this format
 
-### Definitions for sample patch email
+## Definitions for sample patch email
 
 * `Repository` is the identifier of the repository the patch applies.
   This identifier should only be provided for repositories other than
@@ -154,7 +152,7 @@ Signed-off-by: Contributor Name <contributor@example.com>
 * `Signed-off-by` is the contributor's signature identifying them
   by their real/legal name and their email address.
 
-## Submodules
+# Submodules
 
 Submodule in EDK II is allowed but submodule chain should be avoided
 as possible as we can. Currently EDK II contains two submodules
