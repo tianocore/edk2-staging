@@ -45,7 +45,6 @@
             "gEdkiiFormBrowserExProtocolGuid=gEfiFormBrowserExProtocolGuid",
             "gEfiPeiMmAccessPpiGuid=gPeiSmmAccessPpiGuid",
             "gPeiSmmControlPpiGuid=gEfiPeiMmControlPpiGuid",
-            "gEdkiiSerialPortLibVendorGuid=SerialDxe"  # Is this a bug????
         ]
     },
 
