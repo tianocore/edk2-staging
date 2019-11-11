@@ -1,4 +1,4 @@
-##
+## @file
 # CiBuildPlugin used to confirm all INFs are listed in
 # the components section of package dsc
 #

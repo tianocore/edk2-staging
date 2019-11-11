@@ -1,4 +1,4 @@
-##
+## @file
 # Download GCC AARCH64 compiler from Linaro's release site
 # Set shell variable GCC5_AARCH64_INSTALL to this folder
 #

@@ -1,4 +1,4 @@
-##
+## @file
 # CiBuildPlugin used to check that all library classes are declared correctly in dec file
 #
 # Copyright (c) 2019, Microsoft Corporation

@@ -1,4 +1,4 @@
-##
+## @file
 # Download nasm x86 assembler executable tool from a nuget.org package
 # - package contains different binaries based on host
 # Put on the tool on the path

@@ -1,4 +1,4 @@
-##
+## @file
 # Download GCC ARM compiler from Linaro's release site
 # Set shell variable GCC5_ARM_INSTALL to this folder
 #

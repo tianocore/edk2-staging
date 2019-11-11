@@ -1,4 +1,4 @@
-##
+## @file
 # Azure Pipeline build file for a build using Windows and VS2019
 #
 # Copyright (c) 2019, Microsoft Corporation

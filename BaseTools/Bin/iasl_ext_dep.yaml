@@ -1,4 +1,4 @@
-##
+## @file
 # Download iasl executable tool from a nuget.org package
 # - package contains different binaries based on host
 # Add the folder with the tool to the path

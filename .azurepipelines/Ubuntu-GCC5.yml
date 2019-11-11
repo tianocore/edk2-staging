@@ -1,4 +1,4 @@
-##
+## @file
 # Azure Pipeline build file for a build using ubuntu and GCC5
 #
 # Copyright (c) 2019, Microsoft Corporation

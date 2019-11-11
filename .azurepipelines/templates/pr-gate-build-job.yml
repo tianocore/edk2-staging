@@ -1,3 +1,4 @@
+## @file
 # File templates/pr-gate-build-job.yml
 #
 # template file used to build supported packages.
