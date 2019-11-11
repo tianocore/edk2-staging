@@ -144,7 +144,13 @@ class Settings(CiBuildSettingsManager, UpdateSettingsManager, SetupSettingsManag
         return "Edk2"
 
     def GetDependencies(self):
-        return []
+        return [
+            {
+                "Path": "EDK2_TEST",
+                "Url": "https://github.com/corthon/edk2-test-1.git",
+                "Branch": "edk2-host-test_v2"
+            }
+        ]
 
     def GetPackagesPath(self):
         return ()
