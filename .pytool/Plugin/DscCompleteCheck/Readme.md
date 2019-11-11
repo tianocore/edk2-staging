@@ -1,6 +1,11 @@
 # Dsc Complete Check Plugin
 
-This CiBuildPlugin scans all INF files from a package and confirms they are listed in the package level DSC file. The test considers it an error if any INF does not appear in the `Components` section of the package-level DSC (indicating that it would not be built if the package were built). This is critical because much of the CI infrastructure assumes that all modules will be listed in the DSC and compiled.
+This CiBuildPlugin scans all INF files from a package and confirms they are
+listed in the package level DSC file. The test considers it an error if any INF
+does not appear in the `Components` section of the package-level DSC (indicating
+that it would not be built if the package were built). This is critical because
+much of the CI infrastructure assumes that all modules will be listed in the DSC
+and compiled.
 
 ## Configuration
 
