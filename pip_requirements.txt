@@ -1,0 +1,17 @@
+## @file
+# EDK II Python PIP requirements file
+#
+# This file provides the list of python components to install using PIP.
+#
+# Copyright (c) Microsoft Corporation. All rights reserved.<BR>
+#
+# SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+# https://pypi.org/project/pip/
+# https://pip.pypa.io/en/stable/user_guide/#requirements-files
+# https://pip.pypa.io/en/stable/reference/pip_install/#requirements-file-format
+#
+##
+
+edk2-pytool-library==0.10.*
+edk2-pytool-extensions==0.12.*
