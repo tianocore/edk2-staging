@@ -11,7 +11,7 @@
     },
 
     ## options defined ci/Plugin/CharEncodingCheck
-"CharEncodingCheck": {
+    "CharEncodingCheck": {
         "IgnoreFiles": []
     },
 
@@ -31,6 +31,12 @@
     "DscCompleteCheck": {
         "IgnoreInf": [],
         "DscPath": "MdePkg.dsc"
+    },
+
+    ## options defined ci/Plugin/HostUnitTestDscCompleteCheck
+    "HostUnitTestDscCompleteCheck": {
+        "IgnoreInf": [],
+        "DscPath": "MdePkgTest.dsc"
     },
 
     ## options defined ci/Plugin/GuidCheck
