@@ -119,7 +119,7 @@ class Settings(CiSetupSettingsManager, CiBuildSettingsManager, UpdateSettingsMan
     def GetActiveScopes(self):
         ''' return tuple containing scopes that should be active for this process '''
         # scopes = ("cibuild","edk2-build","host-based-test")
-        scopes = ("host-based-test",)
+        scopes = ("host-based-test", "host-test-win", "edk2-build")
 
         self.ActualToolChainTag = shell_environment.GetBuildVars().GetValue("TOOL_CHAIN_TAG", "")
 
@@ -135,7 +135,7 @@ class Settings(CiSetupSettingsManager, CiBuildSettingsManager, UpdateSettingsMan
         ''' return iterable containing RequiredSubmodule objects.
         If no RequiredSubmodules return an empty iterable
         '''
-        rs=[]
+        rs = []
         rs.append(RequiredSubmodule(
             "ArmPkg/Library/ArmSoftFloatLib/berkeley-softfloat-3", False))
         rs.append(RequiredSubmodule(
@@ -163,10 +163,11 @@ class Settings(CiSetupSettingsManager, CiBuildSettingsManager, UpdateSettingsMan
 
     def FilterPackagesToTest(self, changedFilesList: list, potentialPackagesList: list) -> list:
         ''' Filter potential packages to test based on changed files. '''
-        build_these_packages=[]
-        possible_packages=potentialPackagesList.copy()
+        build_these_packages = []
+        possible_packages = potentialPackagesList.copy()
         for f in changedFilesList:
-            nodes=f.split("/")  # split each part of path for comparison later
+            # split each part of path for comparison later
+            nodes = f.split("/")
 
             # python file change in .pytool folder causes building all
             if f.endswith(".py") and ".pytool" in nodes:
