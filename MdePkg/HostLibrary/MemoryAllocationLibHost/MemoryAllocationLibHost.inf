@@ -1,0 +1,24 @@
+## @file
+#
+# Copyright (c) 2018, Intel Corporation. All rights reserved.<BR>
+# SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = MemoryAllocationLibHost
+  FILE_GUID                      = A1672454-A3D3-4AAC-A86B-8D63132BBB91
+  MODULE_TYPE                    = HOST_APPLICATION
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = MemoryAllocationLib | HOST_APPLICATION
+
+[Sources]
+  MemoryAllocationLibHost.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+
+[LibraryClasses]
+  BaseLib
+

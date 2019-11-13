@@ -1,0 +1,30 @@
+## @file
+#
+# Copyright (c) 2018, Intel Corporation. All rights reserved.<BR>
+# SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = DebugLibHost
+  FILE_GUID                      = 6A77CE89-C1B6-4A6B-9561-07D7127514A7
+  MODULE_TYPE                    = HOST_APPLICATION
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = DebugLib | HOST_APPLICATION
+
+[Sources]
+  DebugLibHost.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+
+[LibraryClasses]
+  BaseLib
+  PrintLib
+
+[BuildOptions]
+  MSFT:*_*_*_CC_FLAGS = /D _CRT_SECURE_NO_WARNINGS
+  GCC:*_KLEE_*_CC_FLAGS = "-DTEST_WITH_KLEE=TRUE"
+
+

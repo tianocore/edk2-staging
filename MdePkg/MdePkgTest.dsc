@@ -1,5 +1,5 @@
 ## @file MdePkgTest.dsc
-# 
+#
 # Copyright (c) 2019, Intel Corporation. All rights reserved.<BR>
 # SPDX-License-Identifier: BSD-2-Clause-Patent
 #
@@ -12,20 +12,17 @@
   DSC_SPECIFICATION              = 0x00010005
   OUTPUT_DIRECTORY               = Build/MdePkg
   SUPPORTED_ARCHITECTURES        = IA32|X64
-  BUILD_TARGETS                  = DEBUG|RELEASE|NOOPT
+  BUILD_TARGETS                  = NOOPT
   SKUID_IDENTIFIER               = DEFAULT
-  FLASH_DEFINITION               = MdePkg/MdePkgTest.fdf
-
-  DEFINE UNIT_TEST_FRAMEWORK_MODE = CMOCKA
-  DEFINE UNIT_TEST_XML_MODE = FALSE
-
-[PcdsFixedAtBuild]
-  !if $(UNIT_TEST_XML_MODE) == TRUE
-    gUefiHostUnitTestPkgTokenSpaceGuid.HostUnitTestMode|0x1
-  !endif
 
 [LibraryClasses]
   CmockaLib|CmockaHostUnitTestPkg/Library/CmockaLib/CmockaLib.inf
+
+  BaseLib|MdePkg/HostLibrary/BaseLibHost/BaseLibHost.inf
+  BaseMemoryLib|MdePkg/HostLibrary/BaseMemoryLibHost/BaseMemoryLibHost.inf
+  DebugLib|MdePkg/HostLibrary/DebugLibHost/DebugLibHost.inf
+  MemoryAllocationLib|MdePkg/HostLibrary/MemoryAllocationLibHost/MemoryAllocationLibHost.inf
+  OsServiceLib|UnitTestPkg/Library/OsServiceLibHost/OsServiceLibHost.inf
 
   PcdLib|MdePkg/Library/BasePcdLibNull/BasePcdLibNull.inf
   PeiServicesLib|MdePkg/Library/PeiServicesLib/PeiServicesLib.inf
@@ -33,18 +30,6 @@
   PrintLib|MdePkg/Library/BasePrintLib/BasePrintLib.inf
   SafeIntLib|MdePkg/Library/BaseSafeIntLib/BaseSafeIntLib.inf
 
-  BaseLib|MdePkg/HostLibrary/BaseLibHost/BaseLibHost.inf
-  BaseMemoryLib|MdePkg/HostLibrary/BaseMemoryLibHost/BaseMemoryLibHost.inf
-  DebugLib|MdePkg/HostLibrary/DebugLibHost/DebugLibHost.inf
-  DevicePathLib|MdePkg/HostLibrary/UefiDevicePathLibHost/UefiDevicePathLibHost.inf
-  DxeServicesTableLib|MdePkg/HostLibrary/DxeServicesTableLibHost/DxeServicesTableLibHost.inf
-  MemoryAllocationLib|MdePkg/HostLibrary/MemoryAllocationLibHost/MemoryAllocationLibHost.inf
-  PeiServicesTablePointerLib|MdePkg/HostLibrary/PeiServicesTablePointerLibHost/PeiServicesTablePointerLibHost.inf
-  SmmServicesTableLib|MdePkg/HostLibrary/SmmServicesTableLibHost/SmmServicesTableLibHost.inf
-  UefiBootServicesTableLib|MdePkg/HostLibrary/UefiBootServicesTableLibHost/UefiBootServicesTableLibHost.inf
-  UefiRuntimeServicesTableLib|MdePkg/HostLibrary/UefiRuntimeServicesTableLibHost/UefiRuntimeServicesTableLibHost.inf
-
-  OsServiceLib|UefiHostTestPkg/Library/OsServiceLibHost/OsServiceLibHost.inf
   UnitTestAssertLib|CmockaHostUnitTestPkg/Library/UnitTestAssertLibcmocka/UnitTestAssertLibcmocka.inf
   UnitTestLib|CmockaHostUnitTestPkg/Library/UnitTestLibcmocka/UnitTestLibcmocka.inf
 
@@ -59,43 +44,25 @@
   }
 
   MdePkg/Test/UnitTest/Library/BaseSafeIntLib/TestBaseSafeIntLib.inf
-  MdePkg/Test/UnitTest/Library/PeiServicesLib/TestPeiServicesLib.inf
-  MdePkg/Test/UnitTest/Library/DxeServicesTableLib/TestDxeServicesTableLib.inf
-  MdePkg/Test/UnitTest/Library/SmmServicesTableLib/TestSmmServicesTableLib.inf
-  MdePkg/Test/UnitTest/Library/UefiBootServicesTableLib/TestUefiBootServicesTableLib.inf
-  MdePkg/Test/UnitTest/Library/MemoryAllocationLib/TestMemoryAllocationLib.inf
-  MdePkg/Test/UnitTest/Library/UefiRuntimeServicesTableLib/TestUefiRuntimeServicesTableLib.inf
 
-  MdePkg/Test/UnitTest/Library/BasePcdLib/TestPcdLibStatic.inf {
-  <LibraryClasses>
-    PcdLib|MdePkg/Library/BasePcdLibNull/BasePcdLibNull.inf
-  <PcdsPatchableInModule>
-    gTestCasePkgTokenSpaceGuid.PcdTestPatchableInModuleVoidStrAsc|"StrAsc"|VOID*|12
-    gTestCasePkgTokenSpaceGuid.PcdTestPatchableInModuleVoidStrUni|L"StrUni"|VOID*|28
-    gTestCasePkgTokenSpaceGuid.PcdTestPatchableInModuleVoidBufAll0|{0x0, 0x0, 0x0}|VOID*|5
-    gTestCasePkgTokenSpaceGuid.PcdTestPatchableInModuleVoidBufAll1|{0xFF, 0xFF, 0xFF}|VOID*|5
-  }
-  MdePkg/Test/UnitTest/Library/BasePcdLib/TestPcdLibDynamic.inf {
-  <LibraryClasses>
-    PcdLib|MdePkg/HostLibrary/BasePcdLibHost/BasePcdLibHost.inf
-  }
 
-  MdePkg/HostLibrary/BaseCacheMaintenanceLibHost/BaseCacheMaintenanceLibHost.inf
-  MdePkg/HostLibrary/BaseCpuLibHost/BaseCpuLibHost.inf
+  #compile all host application components
   MdePkg/HostLibrary/BaseLibHost/BaseLibHost.inf
   MdePkg/HostLibrary/BaseLibHost/BaseLibHostNoAsm.inf
   MdePkg/HostLibrary/BaseMemoryLibHost/BaseMemoryLibHost.inf
-  MdePkg/HostLibrary/BaseTimerLibHost/BaseTimerLibHost.inf
   MdePkg/HostLibrary/DebugLibHost/DebugLibHost.inf
-  MdePkg/HostLibrary/DxeServicesTableLibHost/DxeServicesTableLibHost.inf
-  MdePkg/HostLibrary/HobLibHost/HobLibHost.inf
   MdePkg/HostLibrary/MemoryAllocationLibHost/MemoryAllocationLibHost.inf
-  MdePkg/HostLibrary/PeimEntryPointHost/PeimEntryPointHost.inf
-  MdePkg/HostLibrary/PeiServicesTablePointerLibHost/PeiServicesTablePointerLibHost.inf
-  MdePkg/HostLibrary/SmmMemLibHost/SmmMemLibHost.inf
-  MdePkg/HostLibrary/SmmServicesTableLibHost/SmmServicesTableLibHost.inf
-  MdePkg/HostLibrary/UefiBootServicesTableLibHost/UefiBootServicesTableLibHost.inf
-  MdePkg/HostLibrary/UefiLibHost/UefiLibHost.inf
-  MdePkg/HostLibrary/UefiRuntimeServicesTableLibHost/UefiRuntimeServicesTableLibHost.inf
 
-!include UefiHostUnitTestPkg/UefiHostUnitTestBuildOption.dsc
+
+[BuildOptions]
+  MSFT:*_*_IA32_CC_FLAGS == /nologo /W4 /WX /Gy /c /D UNICODE /Od /FIAutoGen.h /EHs-c- /GF /Gs8192 /Zi /Gm /D _CRT_SECURE_NO_WARNINGS /D _CRT_SECURE_NO_DEPRECATE /DHOST_DEBUG_MESSAGE=1
+  MSFT:*_*_X64_CC_FLAGS == /nologo /W4 /WX /Gy /c /D UNICODE /Od /FIAutoGen.h /EHs-c- /GF /Gs8192 /Zi /Gm /D _CRT_SECURE_NO_WARNINGS /D _CRT_SECURE_NO_DEPRECATE /DHOST_DEBUG_MESSAGE=1
+
+[BuildOptions.common.EDKII.HOST_APPLICATION]
+  MSFT:*_*_IA32_DLINK_FLAGS    == /out:"$(BIN_DIR)\$(BASE_NAME).exe" /base:0x10000000 /pdb:"$(BIN_DIR)\$(BASE_NAME).pdb" /LIBPATH:"%VCToolsInstallDir%lib\x86" /LIBPATH:"%UniversalCRTSdkDir%lib\%UCRTVersion%\ucrt\x86" /LIBPATH:"%WindowsSdkDir%lib\%WindowsSDKLibVersion%\um\x86" /NOLOGO /SUBSYSTEM:CONSOLE /NODEFAULTLIB /IGNORE:4086 /MAP /OPT:REF /DEBUG /MACHINE:I386 /LTCG Kernel32.lib MSVCRTD.lib vcruntimed.lib ucrtd.lib Gdi32.lib User32.lib Winmm.lib Advapi32.lib
+  MSFT:*_*_IA32_DLINK_FLAGS    == /out:"$(BIN_DIR)\$(BASE_NAME).exe" /pdb:"$(BIN_DIR)\$(BASE_NAME).pdb" /LIBPATH:"%VCToolsInstallDir%lib\x86" /LIBPATH:"%UniversalCRTSdkDir%lib\%UCRTVersion%\ucrt\x86" /LIBPATH:"%WindowsSdkDir%lib\%WindowsSDKLibVersion%\um\x86" /NOLOGO /SUBSYSTEM:CONSOLE /NODEFAULTLIB:libcmt.lib /IGNORE:4001 /MAP /OPT:REF /DEBUG /MACHINE:x86 Kernel32.lib MSVCRTD.lib Gdi32.lib User32.lib Winmm.lib Advapi32.lib
+
+  MSFT:*_*_IA32_CC_FLAGS == /nologo /W4 /WX /Gy /c /D UNICODE /Od /FIAutoGen.h /EHs-c- /GF /Gs8192 /Zi /D _CRT_SECURE_NO_WARNINGS /D _CRT_SECURE_NO_DEPRECATE /wd4305
+
+  MSFT:*_*_X64_DLINK_FLAGS    == /out:"$(BIN_DIR)\$(BASE_NAME).exe" /pdb:"$(BIN_DIR)\$(BASE_NAME).pdb" /LIBPATH:"%VCToolsInstallDir%lib\x64" /LIBPATH:"%UniversalCRTSdkDir%lib\%UCRTVersion%\ucrt\x64" /LIBPATH:"%WindowsSdkDir%lib\%WindowsSDKLibVersion%\um\x64" /NOLOGO /SUBSYSTEM:CONSOLE /NODEFAULTLIB:libcmt.lib /IGNORE:4001 /MAP /OPT:REF /DEBUG /MACHINE:X64 MSVCRTD.lib Kernel32.lib Gdi32.lib User32.lib Winmm.lib Advapi32.lib
+  MSFT:*_*_X64_CC_FLAGS == /nologo /W4 /WX /Gy /c /D UNICODE /Od /FIAutoGen.h /EHs-c- /GF /Gs8192 /Zi /D _CRT_SECURE_NO_WARNINGS /D _CRT_SECURE_NO_DEPRECATE
