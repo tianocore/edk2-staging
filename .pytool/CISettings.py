@@ -154,7 +154,7 @@ class Settings(CiSetupSettingsManager, CiBuildSettingsManager, UpdateSettingsMan
         ]
 
     def GetPackagesPath(self):
-        return ()
+        return ('EDK2_TEST',)
 
     def GetWorkspaceRoot(self):
         ''' get WorkspacePath '''

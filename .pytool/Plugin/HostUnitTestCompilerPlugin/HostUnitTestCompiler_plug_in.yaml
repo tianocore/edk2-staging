@@ -6,7 +6,7 @@
 # SPDX-License-Identifier: BSD-2-Clause-Patent
 ##
 {
-  "scope": "unittest",
+  "scope": "host-based-test",
   "name": "Host Unit Test Compiler Plugin",
   "module": "HostUnitTestCompilerPlugin"
 }

@@ -12,15 +12,15 @@
   DSC_SPECIFICATION              = 0x00010005
   OUTPUT_DIRECTORY               = Build/MdePkg
   SUPPORTED_ARCHITECTURES        = IA32|X64
-  BUILD_TARGETS                  = DEBUG|RELEASE
+  BUILD_TARGETS                  = DEBUG|RELEASE|NOOPT
   SKUID_IDENTIFIER               = DEFAULT
   FLASH_DEFINITION               = MdePkg/MdePkgTest.fdf
 
-  DEFINE UNIT_TEST_FRAMEWORK_MODE = HOST
+  DEFINE UNIT_TEST_FRAMEWORK_MODE = CMOCKA
   DEFINE UNIT_TEST_XML_MODE = FALSE
 
 [PcdsFixedAtBuild]
-  !if $(UNIT_TEST_XML_MODE) == FALSE
+  !if $(UNIT_TEST_XML_MODE) == TRUE
     gUefiHostUnitTestPkgTokenSpaceGuid.HostUnitTestMode|0x1
   !endif
 
@@ -79,5 +79,23 @@
   <LibraryClasses>
     PcdLib|MdePkg/HostLibrary/BasePcdLibHost/BasePcdLibHost.inf
   }
+
+  MdePkg/HostLibrary/BaseCacheMaintenanceLibHost/BaseCacheMaintenanceLibHost.inf
+  MdePkg/HostLibrary/BaseCpuLibHost/BaseCpuLibHost.inf
+  MdePkg/HostLibrary/BaseLibHost/BaseLibHost.inf
+  MdePkg/HostLibrary/BaseLibHost/BaseLibHostNoAsm.inf
+  MdePkg/HostLibrary/BaseMemoryLibHost/BaseMemoryLibHost.inf
+  MdePkg/HostLibrary/BaseTimerLibHost/BaseTimerLibHost.inf
+  MdePkg/HostLibrary/DebugLibHost/DebugLibHost.inf
+  MdePkg/HostLibrary/DxeServicesTableLibHost/DxeServicesTableLibHost.inf
+  MdePkg/HostLibrary/HobLibHost/HobLibHost.inf
+  MdePkg/HostLibrary/MemoryAllocationLibHost/MemoryAllocationLibHost.inf
+  MdePkg/HostLibrary/PeimEntryPointHost/PeimEntryPointHost.inf
+  MdePkg/HostLibrary/PeiServicesTablePointerLibHost/PeiServicesTablePointerLibHost.inf
+  MdePkg/HostLibrary/SmmMemLibHost/SmmMemLibHost.inf
+  MdePkg/HostLibrary/SmmServicesTableLibHost/SmmServicesTableLibHost.inf
+  MdePkg/HostLibrary/UefiBootServicesTableLibHost/UefiBootServicesTableLibHost.inf
+  MdePkg/HostLibrary/UefiLibHost/UefiLibHost.inf
+  MdePkg/HostLibrary/UefiRuntimeServicesTableLibHost/UefiRuntimeServicesTableLibHost.inf
 
 !include UefiHostUnitTestPkg/UefiHostUnitTestBuildOption.dsc

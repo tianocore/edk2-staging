@@ -10,6 +10,11 @@
         "DscPath": "MdePkg.dsc"
     },
 
+    ## options defined ci/Plugin/HostUnitTestCompilerPlugin
+    "HostUnitTestCompilerPlugin": {
+        "DscPath": "MdePkgTest.dsc"
+    },
+
     ## options defined ci/Plugin/CharEncodingCheck
     "CharEncodingCheck": {
         "IgnoreFiles": []
@@ -29,13 +34,13 @@
 
     ## options defined ci/Plugin/DscCompleteCheck
     "DscCompleteCheck": {
-        "IgnoreInf": [],
+        "IgnoreInf": [""],
         "DscPath": "MdePkg.dsc"
     },
 
     ## options defined ci/Plugin/HostUnitTestDscCompleteCheck
     "HostUnitTestDscCompleteCheck": {
-        "IgnoreInf": [],
+        "IgnoreInf": ["MdePkg/Test/UnitTest/Library/BasePcdLib/TestPcdLibDynamic.inf"],
         "DscPath": "MdePkgTest.dsc"
     },
 
