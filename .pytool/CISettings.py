@@ -118,10 +118,12 @@ class Settings(CiSetupSettingsManager, CiBuildSettingsManager, UpdateSettingsMan
 
     def GetActiveScopes(self):
         ''' return tuple containing scopes that should be active for this process '''
-        # scopes = ("cibuild","edk2-build","host-based-test")
-        scopes = ("host-based-test", "host-test-win", "edk2-build")
+        scopes = ("cibuild","edk2-build","host-based-test")
 
         self.ActualToolChainTag = shell_environment.GetBuildVars().GetValue("TOOL_CHAIN_TAG", "")
+
+        if GetHostInfo().os.upper() == "WINDOWS":
+            scopes += ('host-test-win',)
 
         if GetHostInfo().os.upper() == "LINUX" and self.ActualToolChainTag.upper().startswith("GCC"):
             if "AARCH64" in self.ActualArchitectures:
