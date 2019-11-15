@@ -22,7 +22,7 @@ jobs:
     matrix:
       TARGET_MDE_CPU:
         Build.Pkgs: 'MdePkg,UefiCpuPkg'
-        Build.Targets: 'DEBUG,RELEASE,NO-TARGET'
+        Build.Targets: 'DEBUG,RELEASE,NO-TARGET,NOOPT'
       TARGET_MDEMODULE_DEBUG:
         Build.Pkgs: 'MdeModulePkg'
         Build.Targets: 'DEBUG'
