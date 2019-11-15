@@ -40,7 +40,7 @@
 
     ## options defined ci/Plugin/HostUnitTestDscCompleteCheck
     "HostUnitTestDscCompleteCheck": {
-        "IgnoreInf": ["MdePkg/Test/UnitTest/Library/BasePcdLib/TestPcdLibDynamic.inf"],
+        "IgnoreInf": [""],
         "DscPath": "MdePkgTest.dsc"
     },
 
