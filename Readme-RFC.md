@@ -43,25 +43,31 @@ Stubs are a little more complicated than mocks. Rather than blindly returning va
 
 ### Test cases for a library/protocol/ppi/guid interface
 
-If what's being tested is an interface (e.g. a library with a public header file), the test should be localized to the parent package.
+If what's being tested is an interface (e.g. a library with a public header file, like DebugLib), the test should be scoped to the parent package.
 
 ```
-Pkg/Test/UnitTest/[Library|Protocol|Ppi|Guid]/
+MdePkg/Test/UnitTest/[Library|Protocol|Ppi|Guid]/
 ```
 
-### Test cases for the feature under one package
+### Test cases for a library/driver (PEI/DXE/SMM) implementation
 
-Pkg/Test/HostFuncTest
-Pkg/Test/[Shell|Dxe|Smm|Pei]
+If what's being tested is a specific implementation (e.g. BaseDebugLibSerialPort for DebugLib), the test should be scoped to the implementation directory itself.
 
-### Test cases for a library/driver(PEI/DXE/SMM) implementation
+```
+MdePkg/Library/BaseDebugLibSerialPort/UnitTest/
+```
 
-Pkg/Universal/EsrtFmpDxe/UnitTest/
+### Test cases for a feature under one package
 
-### Test cases for the feature that spans multiple packages.
+```
+Pkg/Test/HostFuncTest/
+```
 
-UefiTestPkg/HostFuncTest   
-UefiTestPkg/[Shell|Dxe|Smm|Pei]  
+### Test cases for a feature that spans multiple packages.
+
+```
+UefiTestPkg/HostFuncTest/
+```
 
 Code/Test                                   | Location
 ---------                                   | --------
