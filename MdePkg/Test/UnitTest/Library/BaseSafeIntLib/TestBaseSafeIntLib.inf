@@ -40,6 +40,7 @@
 
 [Sources]
   TestBaseSafeIntLib.c
+  TestBaseSafeIntLib.h
 
 [Sources.Ia32]
   IA32/SafeIntLibUintnIntnUnitTests.c
