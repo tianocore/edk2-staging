@@ -1,0 +1,43 @@
+## @file
+## Copyright (c) 2016, Microsoft Corporation. All rights reserved.<BR>
+##
+
+
+[Defines]
+  INF_VERSION                    = 0x00010006
+  BASE_NAME                      = SampleUnitTestSmm
+  FILE_GUID                      = 389B16DB-F622-424C-9000-9E43C69CBF71
+  MODULE_TYPE                    = DXE_SMM_DRIVER
+  VERSION_STRING                 = 1.0
+  PI_SPECIFICATION_VERSION       = 0x0001000A
+  ENTRY_POINT                    = SampleUnitTestSmm
+
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = IA32 X64 IPF EBC
+#
+
+[Sources]
+  SampleUnitTestSmm.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  UnitTestPkg/UnitTestPkg.dec
+
+[Protocols]
+
+
+[LibraryClasses]
+  BaseLib
+  UefiDriverEntryPoint
+  DebugLib
+  UnitTestLib
+  UnitTestAssertLib
+  PrintLib
+
+[Guids]
+
+[Depex]
+  gEfiSmmCpuProtocolGuid
+
