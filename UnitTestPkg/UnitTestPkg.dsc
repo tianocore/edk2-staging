@@ -168,18 +168,14 @@
   UnitTestPersistenceLib|UnitTestPkg/Library/UnitTestPersistenceLibFileSystem/UnitTestPersistenceLibFileSystem.inf
 
 [Components]
+  UnitTestPkg/Library/UnitTestAssertLib/UnitTestAssertLib.inf
   UnitTestPkg/Library/UnitTestLib/UnitTestLibDxe.inf
   UnitTestPkg/Library/UnitTestLib/UnitTestLibPei.inf
   UnitTestPkg/Library/UnitTestLib/UnitTestLibSmm.inf
-  UnitTestPkg/Library/UnitTestAssertLib/UnitTestAssertLib.inf
   UnitTestPkg/Library/UnitTestLogLib/UnitTestLogLib.inf
-  UnitTestPkg/Library/UnitTestResultReportLibPlainTextOutput/UnitTestResultReportLibPlainTextOutput.inf
-  UnitTestPkg/Library/UnitTestResultReportLibDebug/UnitTestResultReportLibDebug.inf
-  UnitTestPkg/Library/UnitTestBootLibUsbClass/UnitTestBootLibUsbClass.inf
-  UnitTestPkg/Library/UnitTestBootLibNull/UnitTestBootLibNull.inf
-  UnitTestPkg/Library/UnitTestBootLibMicrosoftUsb/UnitTestBootLibMicrosoftUsb.inf
-  UnitTestPkg/Library/UnitTestPersistenceLibFileSystem/UnitTestPersistenceLibFileSystem.inf
   UnitTestPkg/Library/UnitTestPersistenceLibNull/UnitTestPersistenceLibNull.inf
+  UnitTestPkg/Library/UnitTestResultReportLibDebug/UnitTestResultReportLibDebug.inf
+  UnitTestPkg/Library/UnitTestResultReportLibPlainTextOutput/UnitTestResultReportLibPlainTextOutput.inf
   UnitTestPkg/Sample/SampleUnitTestApp/SampleUnitTestApp.inf
   UnitTestPkg/Sample/SampleUnitTestPeim/SampleUnitTestPeim.inf
   UnitTestPkg/Sample/SampleUnitTestSmm/SampleUnitTestSmm.inf
