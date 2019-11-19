@@ -22,7 +22,7 @@
   BaseMemoryLib|MdePkg/HostLibrary/BaseMemoryLibHost/BaseMemoryLibHost.inf
   DebugLib|MdePkg/HostLibrary/DebugLibHost/DebugLibHost.inf
   MemoryAllocationLib|MdePkg/HostLibrary/MemoryAllocationLibHost/MemoryAllocationLibHost.inf
-  OsServiceLib|UnitTestPkg/Library/OsServiceLibHost/OsServiceLibHost.inf
+  OsServiceLib|HostBasedUnitTestPkg/Library/OsServiceLibHost/OsServiceLibHost.inf
 
   PcdLib|MdePkg/Library/BasePcdLibNull/BasePcdLibNull.inf
   PeiServicesLib|MdePkg/Library/PeiServicesLib/PeiServicesLib.inf
