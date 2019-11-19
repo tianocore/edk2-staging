@@ -151,7 +151,7 @@ class Settings(CiSetupSettingsManager, CiBuildSettingsManager, UpdateSettingsMan
         return [
             {
                 "Path": "EDK2_TEST",
-                "Url": "https://github.com/corthon/edk2-test-1.git",
+                "Url": "https://github.com/corthon/edk2-test.git",
                 "Branch": "edk2-host-test_v2"
             }
         ]
