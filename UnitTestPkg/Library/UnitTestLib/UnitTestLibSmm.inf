@@ -27,8 +27,8 @@ LIBRARY_CLASS   = UnitTestLib|DXE_SMM_DRIVER
   BaseLib
   UnitTestLogLib
   UnitTestPersistenceLib
-  UnitTestBootLib
   UnitTestResultReportLib
+  UnitTestTerminationLib
 
 
 [Packages]
@@ -41,5 +41,4 @@ LIBRARY_CLASS   = UnitTestLib|DXE_SMM_DRIVER
 
 [Sources]
   UnitTestLib.c
-  UnitTestLibSmmStub.c
   Md5.c

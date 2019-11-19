@@ -26,8 +26,8 @@ LIBRARY_CLASS   = UnitTestLib|PEIM
   BaseLib
   UnitTestLogLib
   UnitTestPersistenceLib
-  UnitTestBootLib
   UnitTestResultReportLib
+  UnitTestTerminationLib
 
 
 [Packages]
@@ -40,5 +40,4 @@ LIBRARY_CLASS   = UnitTestLib|PEIM
 
 [Sources]
   UnitTestLib.c
-  UnitTestLibPeiStub.c
   Md5.c

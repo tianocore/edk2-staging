@@ -162,14 +162,17 @@
 [LibraryClasses.common.PEIM]
   UnitTestLib|UnitTestPkg/Library/UnitTestLib/UnitTestLibPei.inf
   UnitTestResultReportLib|UnitTestPkg/Library/UnitTestResultReportLibDebug/UnitTestResultReportLibDebug.inf
+  UnitTestTerminationLib|UnitTestPkg/Library/UnitTestTerminationLibTbd/UnitTestTerminationLibTbd.inf
   
 [LibraryClasses.common.DXE_SMM_DRIVER]
   UnitTestLib|UnitTestPkg/Library/UnitTestLib/UnitTestLibSmm.inf
   UnitTestResultReportLib|UnitTestPkg/Library/UnitTestResultReportLibDebug/UnitTestResultReportLibDebug.inf
+  UnitTestTerminationLib|UnitTestPkg/Library/UnitTestTerminationLibTbd/UnitTestTerminationLibTbd.inf
 
 [LibraryClasses.common.DXE_DRIVER, LibraryClasses.common.UEFI_APPLICATION]
   UnitTestLib|UnitTestPkg/Library/UnitTestLib/UnitTestLibDxe.inf
   UnitTestResultReportLib|UnitTestPkg/Library/UnitTestResultReportLibPlainTextOutput/UnitTestResultReportLibPlainTextOutput.inf
+  UnitTestTerminationLib|UnitTestPkg/Library/UnitTestTerminationLibDxe/UnitTestTerminationLibDxe.inf
 
 [Components]
   UnitTestPkg/Library/UnitTestAssertLib/UnitTestAssertLib.inf

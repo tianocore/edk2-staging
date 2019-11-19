@@ -1,8 +1,9 @@
 /**
-
 Implement UnitTestLib 
 
-Copyright (c) Microsoft
+Copyright (c) Microsoft Corporation.
+SPDX-License-Identifier: BSD-2-Clause-Patent
+
 **/
 
 #include <Uefi.h>
@@ -11,25 +12,15 @@ Copyright (c) Microsoft
 #include <Library/BaseMemoryLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/DebugLib.h>
-#include <Library/UnitTestBootLib.h>
 #include <Library/UnitTestLib.h>
 #include <Library/UnitTestLogLib.h>
 #include <Library/UnitTestPersistenceLib.h>
 #include <Library/UnitTestResultReportLib.h>
+#include <Library/UnitTestTerminationLib.h>
 
 #include "Md5.h"
 
 MD5_CTX     mFingerprintCtx;
-
-VOID
-FrameworkExit (
-  VOID
-  );
-
-VOID
-FrameworkResetSystem (
-  IN EFI_RESET_TYPE             ResetType
-  );
 
 // Prototyped here so that it can be included near the functions that
 // it logically goes with.
@@ -942,12 +933,6 @@ SaveFrameworkStateAndReboot (
   if (!EFI_ERROR( Status ))
   {
     //
-    // Next, we want to update the BootNext variable to the device
-    // so that we have a fighting chance of coming back here.
-    //
-    SetBootNextDevice();
-
-    //
     // Free data that was used.
     FreeUnitTestFramework( (UNIT_TEST_FRAMEWORK*)FrameworkHandle );
 
@@ -962,18 +947,4 @@ SaveFrameworkStateAndReboot (
   }
 
   return Status;
-} // SaveFrameworkStateAndReboot()
-
-/**
-  Set the boot manager to boot from a specific device on the next boot. 
-  This should be set only for the next boot and shouldn't
-  require any manual clean up
-**/
-EFI_STATUS
-EFIAPI
-SetFrameworkBootNextDevice (
-  IN UNIT_TEST_FRAMEWORK_HANDLE FrameworkHandle
-  )
-{
-  return SetBootNextDevice();
 } // SaveFrameworkStateAndReboot()

@@ -41,6 +41,11 @@
   #
   UnitTestResultReportLib|Include/Library/UnitTestResultReportLib.h
 
+  ## @libraryclass Abstracts the methods that a test could exit prematurely.
+  # Allows tests written for different contexts to handle Quit()/Reboot() differently.
+  #
+  UnitTestTerminationLib|Include/Library/UnitTestTerminationLib.h
+
 [Guids]
 
   gUnitTestPkgTokenSpaceGuid = { 0x833d3aba, 0x39b4, 0x43a2, { 0xb9, 0x30, 0x7a, 0x34, 0x53, 0x39, 0x31, 0xb3 } }
