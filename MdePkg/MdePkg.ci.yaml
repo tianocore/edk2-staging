@@ -23,7 +23,8 @@
     ## options defined ci/Plugin/DependencyCheck
     "DependencyCheck": {
         "AcceptableDependencies": [
-            "MdePkg/MdePkg.dec"
+            "MdePkg/MdePkg.dec",
+            "UnitTestPkg/UnitTestPkg.dec"
         ],
         # For host based unit tests
         "AcceptableDependencies-HOST_APPLICATION":[],
