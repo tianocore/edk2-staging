@@ -49,7 +49,8 @@ class Settings(CiSetupSettingsManager, CiBuildSettingsManager, UpdateSettingsMan
                 "FmpDevicePkg",
                 "ShellPkg",
                 "FatPkg",
-                "CryptoPkg"
+                "CryptoPkg",
+                "UnitTestPkg"
                 )
 
     def GetArchitecturesSupported(self):

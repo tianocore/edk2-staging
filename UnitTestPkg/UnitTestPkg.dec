@@ -23,23 +23,23 @@
 
   ## @libraryclass Provide unit test assert helpers
   #
-  UnitTestAssertLib|Include\Library\UnitTestAssertLib.h
+  UnitTestAssertLib|Include/Library/UnitTestAssertLib.h
 
   ## @libraryclass Provides a unit test framework
   #
-  UnitTestLib|Include\Library\UnitTestLib.h
+  UnitTestLib|Include/Library/UnitTestLib.h
 
   ## @libraryclass Provide unit test logging
   #
-  UnitTestLogLib|Include\Library\UnitTestLogLib.h
+  UnitTestLogLib|Include/Library/UnitTestLogLib.h
 
   ## @libraryclass Allows save and restore unit test internal state
   #
-  UnitTestPersistenceLib|Include\Library\UnitTestPersistenceLib.h
+  UnitTestPersistenceLib|Include/Library/UnitTestPersistenceLib.h
 
   ## @libraryclass Provides a unit test result report
   #
-  UnitTestResultReportLib|Include\Library\UnitTestResultReportLib.h
+  UnitTestResultReportLib|Include/Library/UnitTestResultReportLib.h
 
 [Guids]
 
