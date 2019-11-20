@@ -35,8 +35,8 @@ jobs:
       TARGET_OTHER:
         Build.Pkgs: 'PcAtChipsetPkg,ShellPkg'
         Build.Targets: 'DEBUG,RELEASE,NO-TARGET'
-      TARGET_FMP:
-        Build.Pkgs: 'FmpDevicePkg,FatPkg'
+      TARGET_FMP_FAT_TEST:
+        Build.Pkgs: 'FmpDevicePkg,FatPkg,UnitTestPkg'
         Build.Targets: 'DEBUG,RELEASE,NO-TARGET'
       TARGET_CRYPTO:
         Build.Pkgs: 'CryptoPkg'

@@ -183,6 +183,8 @@
   UnitTestPkg/Library/UnitTestPersistenceLibNull/UnitTestPersistenceLibNull.inf
   UnitTestPkg/Library/UnitTestResultReportLibDebug/UnitTestResultReportLibDebug.inf
   UnitTestPkg/Library/UnitTestResultReportLibPlainTextOutput/UnitTestResultReportLibPlainTextOutput.inf
+  UnitTestPkg/Library/UnitTestTerminationLibDxe/UnitTestTerminationLibDxe.inf
+  UnitTestPkg/Library/UnitTestTerminationLibTbd/UnitTestTerminationLibTbd.inf
   UnitTestPkg/Sample/SampleUnitTestApp/SampleUnitTestApp.inf
   UnitTestPkg/Sample/SampleUnitTestPeim/SampleUnitTestPeim.inf
   UnitTestPkg/Sample/SampleUnitTestSmm/SampleUnitTestSmm.inf
