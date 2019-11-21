@@ -1,7 +1,8 @@
 # @file HostBasedUnitTestRunner.py
 # Plugin to located any host-based unit tests in the output directory and execute them.
 ##
-# Copyright (c) Microsoft Corporation
+# Copyright (c) Microsoft Corporation.
+# SPDX-License-Identifier: BSD-2-Clause-Patent
 #
 ##
 import os
