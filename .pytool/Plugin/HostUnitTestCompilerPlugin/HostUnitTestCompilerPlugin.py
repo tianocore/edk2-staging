@@ -1,6 +1,6 @@
 # @file HostUnitTestCompilerPlugin.py  
-#
-# Copyright (c) Microsoft Corporation. All rights reserved.
+##
+# Copyright (c) Microsoft Corporation.
 # SPDX-License-Identifier: BSD-2-Clause-Patent
 ##
 
@@ -8,17 +8,18 @@ import logging
 import os
 import re
 from edk2toollib.uefi.edk2.parsers.dsc_parser import DscParser
-from edk2toolext.environment.var_dict import VarDict
 from edk2toolext.environment.plugintypes.ci_build_plugin import ICiBuildPlugin
 from edk2toolext.environment.uefi_build import UefiBuilder
 from edk2toolext import edk2_logging
+from edk2toolext.environment.var_dict import VarDict
 from edk2toollib.utility_functions import GetHostInfo
 
 
 class HostUnitTestCompilerPlugin(ICiBuildPlugin):
     """
-    A CiBuildPlugin that compiles the dsc for host based unit
-    test apps, runs them, and collects their results.   
+    A CiBuildPlugin that compiles the dsc for host based unit test apps.
+    An IUefiBuildPlugin may be attached to this plugin that will run the
+    unit tests and collect the results after successful compilation.
 
     Configuration options:
     "HostUnitTestCompilerPlugin": {
@@ -35,7 +36,7 @@ class HostUnitTestCompilerPlugin(ICiBuildPlugin):
               packagename: string containing name of package to build
               environment: The VarDict for the test to run in
             Returns:
-                a tuple containing the testcase name and the classname 
+                a tuple containing the testcase name and the classname
                 (testcasename, classname)
         """
         num,types = self.__GetHostUnitTestArch(environment)
@@ -85,14 +86,15 @@ class HostUnitTestCompilerPlugin(ICiBuildPlugin):
     def RunBuildPlugin(self, packagename, Edk2pathObj, pkgconfig, environment, PLM, PLMHelper, tc, output_stream=None):
         self._env = environment
         environment.SetValue("CI_BUILD_TYPE", "host_unit_test", "Set in HostUnitTestCompilerPlugin")
-        AP = Edk2pathObj.GetAbsolutePathOnThisSytemFromEdk2RelativePath(packagename)
 
         # Parse the config for required DscPath element
         if "DscPath" not in pkgconfig:
             tc.SetSkipped()
             tc.LogStdError("DscPath not found in config file.  Nothing to compile for HostBasedUnitTests.")
             return -1
-        
+
+        AP = Edk2pathObj.GetAbsolutePathOnThisSytemFromEdk2RelativePath(packagename)
+
         APDSC = os.path.join(AP, pkgconfig["DscPath"].strip())
         AP_Path = Edk2pathObj.GetEdk2RelativePathFromAbsolutePath(APDSC)
         if AP is None or AP_Path is None or not os.path.isfile(APDSC):

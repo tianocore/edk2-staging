@@ -1,4 +1,4 @@
-# @file HostUnitTestCompiler_plugin.py
+# @file CompilerPlugin.py
 ##
 # Copyright (c) Microsoft Corporation.
 # SPDX-License-Identifier: BSD-2-Clause-Patent
@@ -42,7 +42,7 @@ class CompilerPlugin(ICiBuildPlugin):
         return ["DEBUG", "RELEASE"]
 
     ##
-    # External function of plugin.  This function is used to perform the task of the MuBuild Plugin
+    # External function of plugin.  This function is used to perform the task of the ICiBuildPlugin Plugin
     #
     #   - package is the edk2 path to package.  This means workspace/packagepath relative.
     #   - edk2path object configured with workspace and packages path
