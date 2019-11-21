@@ -19,6 +19,18 @@ from edk2toollib.utility_functions import RunCmd
 class HostBasedUnitTestRunner(IUefiBuildPlugin):
 
     def do_pre_build(self, thebuilder):
+        '''
+        Works with the compiler (either the HostBasedCompilerPlugin or an other Builder) to set
+        up the environment that will be needed to build host-based unit tests.
+
+        EXPECTS:
+        - Build Var 'CI_BUILD_TYPE' - If not set to 'host_unit_test', will not do anything.
+
+        UPDATES:
+        - Shell Var (Several) - Updates the shell with all vars listed in interesting_keys.
+        - Shell Path - Updated from QueryVcVariables()
+        - Shell Var 'CMOCKA_MESSAGE_OUTPUT'
+        '''
         ci_type = thebuilder.env.GetValue('CI_BUILD_TYPE')
         if ci_type != 'host_unit_test':
             return 0
@@ -40,6 +52,16 @@ class HostBasedUnitTestRunner(IUefiBuildPlugin):
         return 0
 
     def do_post_build(self, thebuilder):
+        '''
+        After a build, will automatically locate and run all host-based unit tests. Logs any
+        failures with Warning severity and will return a count of the failures as the return code.
+
+        EXPECTS:
+        - Build Var 'CI_BUILD_TYPE' - If not set to 'host_unit_test', will not do anything.
+
+        UPDATES:
+        - Shell Var 'CMOCKA_XML_FILE'
+        '''
         ci_type = thebuilder.env.GetValue('CI_BUILD_TYPE')
         if ci_type != 'host_unit_test':
             return 0
