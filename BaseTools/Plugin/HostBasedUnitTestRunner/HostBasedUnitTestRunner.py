@@ -17,6 +17,27 @@ from edk2toollib.utility_functions import RunCmd
 
 class HostBasedUnitTestRunner(IUefiBuildPlugin):
 
+    def do_pre_build(self, thebuilder):
+        ci_type = thebuilder.env.GetValue('CI_BUILD_TYPE')
+        if ci_type != 'host_unit_test':
+            return 0
+
+        shell_env = shell_environment.GetEnvironment()
+        # Use the tools lib to determine the correct values for the vars that interest us.
+        interesting_keys = ["ExtensionSdkDir", "INCLUDE", "LIB", "LIBPATH", "UniversalCRTSdkDir",
+                            "UCRTVersion", "WindowsLibPath", "WindowsSdkBinPath", "WindowsSdkDir", "WindowsSdkVerBinPath",
+                            "WindowsSDKVersion", "VCToolsInstallDir"]
+        vs_vars = locate_tools.QueryVcVariables(interesting_keys, "amd64")
+        for (k, v) in vs_vars.items():
+            if k.upper() == "PATH":
+                shell_env.append_path(v)
+            else:
+                shell_env.set_shell_var(k, v)
+
+        # Set up the reporting type for Cmocka.
+        shell_env.set_shell_var('CMOCKA_MESSAGE_OUTPUT', 'xml')
+        return 0
+
     def do_post_build(self, thebuilder):
         ci_type = thebuilder.env.GetValue('CI_BUILD_TYPE')
         if ci_type != 'host_unit_test':
@@ -26,6 +47,9 @@ class HostBasedUnitTestRunner(IUefiBuildPlugin):
         logging.log(edk2_logging.get_section_level(),
                     "Run Host based Unit Tests")
         path = thebuilder.env.GetValue("BUILD_OUTPUT_BASE")
+
+        failure_count = 0
+
         for arch in thebuilder.env.GetValue("TARGET_ARCH").split():
             logging.log(edk2_logging.get_subsection_level(),
                         "Testing for architecture: " + arch)
@@ -63,26 +87,6 @@ class HostBasedUnitTestRunner(IUefiBuildPlugin):
                                             "%s Test Failed" % os.path.basename(test))
                                         logging.warning(
                                             "  %s - %s" % (case.attrib['name'], result.text))
+                                        failure_count += 1
 
-        return 0
-
-    def do_pre_build(self, thebuilder):
-        ci_type = thebuilder.env.GetValue('CI_BUILD_TYPE')
-        if ci_type != 'host_unit_test':
-            return 0
-
-        shell_env = shell_environment.GetEnvironment()
-        # Use the tools lib to determine the correct values for the vars that interest us.
-        interesting_keys = ["ExtensionSdkDir", "INCLUDE", "LIB", "LIBPATH", "UniversalCRTSdkDir",
-                            "UCRTVersion", "WindowsLibPath", "WindowsSdkBinPath", "WindowsSdkDir", "WindowsSdkVerBinPath",
-                            "WindowsSDKVersion", "VCToolsInstallDir"]
-        vs_vars = locate_tools.QueryVcVariables(interesting_keys, "amd64")
-        for (k, v) in vs_vars.items():
-            if k.upper() == "PATH":
-                shell_env.append_path(v)
-            else:
-                shell_env.set_shell_var(k, v)
-
-        # Set up the reporting type for Cmocka.
-        shell_env.set_shell_var('CMOCKA_MESSAGE_OUTPUT', 'xml')
-        return 0
+        return failure_count
