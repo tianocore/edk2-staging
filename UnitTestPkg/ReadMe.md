@@ -158,7 +158,73 @@ function pointers for prerequisite check and cleanup routines; and and optional 
 Okay, that's a lot. Let's take it one piece at a time. The description and class name strings are very similar in
 usage to the suite title and package name strings in the test suites. The former is for user presentation and the
 latter is for xUnit parsing. The test case function pointer is what is actually executed as the "test" and the
-prototype should be `UNIT_TEST_FUNCTION`.
+prototype should be `UNIT_TEST_FUNCTION`. The last three parameters require a little bit more explaining.
+
+The prerequisite check function has a prototype of `UNIT_TEST_PREREQ` and -- if provided -- will be called
+immediately before the test case. If this function returns any error, the test case will not be run and will be
+recorded as `UNIT_TEST_ERROR_PREREQ_NOT_MET`. The cleanup function (prototype `UNIT_TEST_CLEANUP`) will be called
+immediately after the test case to provide an opportunity to reset any global state that may have been changed in the
+test case. In the event of a prerequisite failure, the cleanup function will also be skipped. If either of these
+functions is not needed, pass `NULL`.
+
+The context pointer is entirely case-specific. It will be passed to the test case upon execution. One of the purposes
+of the context pointer is to allow test case reuse with different input data. (Another use is for testing that wraps
+around a system reboot, but that's beyond the scope of this guide.) The test case must know how to interpret the context
+pointer, so it could be a simple value, or it could be a complex structure. If unneeded, pass `NULL`.
+
+In 'SampleUnitTestApp', the first test case is added using the code below...
+
+```c
+AddTestCase( SimpleMathTests, L"Adding 1 to 1 should produce 2", L"Sample.Math.Addition", OnePlusOneShouldEqualTwo, NULL, NULL, NULL );
+```
+
+This test case calls the function `OnePlusOneShouldEqualTwo` and has no prerequisite, cleanup, or context.
+
+Once all the suites and cases are added, it's time to run the Framework.
+
+```c
+//
+// Execute the tests.
+//
+Status = RunAllTestSuites( Fw );
+```
+
+### A Simple Test Case
+
+We'll take a look at the below test case from 'SampleUnitTestApp'...
+
+```c
+UNIT_TEST_STATUS
+EFIAPI
+OnePlusOneShouldEqualTwo (
+  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
+  IN UNIT_TEST_CONTEXT           Context
+  )
+{
+  UINTN     A, B, C;
+
+  A = 1;
+  B = 1;
+  C = A + B;
+
+  UT_ASSERT_EQUAL(C, 2);
+  return UNIT_TEST_PASSED;
+} // OnePlusOneShouldEqualTwo()
+```
+
+The prototype for this function matches the `UNIT_TEST_FUNCTION` prototype. It takes in a handle to the Framework
+itself and the context pointer. The context pointer could be cast and interpreted as anything within this test case,
+which is why it's important to configure contexts carefully. The test case returns a value of `UNIT_TEST_STATUS`, which
+will be recorded in the Framework and reported at the end of all suites.
+
+In this test case, the `UT_ASSERT_EQUAL` assertion is being used to establish that the business logic has functioned
+correctly. There are several assertion macros, and you are encouraged to use one that matches as closely to your
+intended test criterium as possible, because the logging is specific to the macro and more specific macros have more
+detailed logs. When in doubt, there are always `UT_ASSERT_TRUE` and `UT_ASSERT_FALSE`. Assertion macros that fail their
+test criterium will immediately return from the test case with `UNIT_TEST_ERROR_TEST_FAILED` and log an error string.
+_Note_ that this early return can have implications for memory leakage.
+
+At the end, if all test criteria pass, you should return `UNIT_TEST_PASSED`.
 
 ## Copyright
 
