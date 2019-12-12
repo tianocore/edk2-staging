@@ -71,7 +71,7 @@ STATIC
 EFI_STATUS
 AddStringToUnitTestLog (
   IN OUT UNIT_TEST    *UnitTest,
-  IN CONST CHAR16     *String
+  IN CONST CHAR8      *String
   )
 {
   EFI_STATUS  Status;
@@ -97,7 +97,7 @@ AddStringToUnitTestLog (
     return EFI_OUT_OF_RESOURCES;
   }
 
-  Status = StrnCatS(UnitTest->Log, UNIT_TEST_MAX_LOG_BUFFER/ sizeof(CHAR16), String, UNIT_TEST_MAX_SINGLE_LOG_STRING_LENGTH);
+  Status = AsciiStrnCatS(UnitTest->Log, UNIT_TEST_MAX_LOG_BUFFER / sizeof(CHAR8), String, UNIT_TEST_MAX_SINGLE_LOG_STRING_LENGTH);
   if(EFI_ERROR(Status)) 
   {
     DEBUG((DEBUG_ERROR, "Failed to add unit test log string.  Status = %r\n", Status));
@@ -111,8 +111,8 @@ STATIC
 EFI_STATUS
 AddUnitTestFailure(
   IN OUT UNIT_TEST    *UnitTest,
-  IN CONST CHAR16 *FailureMessage,
-  FAILURE_TYPE FailureType
+  IN CONST CHAR8      *FailureMessage,
+  IN FAILURE_TYPE     FailureType
 )
 {
   //
@@ -124,7 +124,7 @@ AddUnitTestFailure(
   }
 
   UnitTest->FailureType = FailureType;
-  StrCpyS(&UnitTest->FailureMessage[0], UNIT_TEST_TESTFAILUREMSG_LENGTH, FailureMessage);
+  AsciiStrCpyS(&UnitTest->FailureMessage[0], UNIT_TEST_TESTFAILUREMSG_LENGTH, FailureMessage);
 
   return EFI_SUCCESS;
 }
@@ -139,8 +139,8 @@ VOID
 EFIAPI
 UnitTestLogInit (
 IN OUT UNIT_TEST  *Test,
-IN UINT8      *Buffer,
-IN UINTN      BufferSize
+IN UINT8          *Buffer,
+IN UINTN          BufferSize
 )
 {
   //
@@ -181,7 +181,7 @@ UnitTestLog (
   )
 {
   CHAR8         NewFormatString[UNIT_TEST_MAX_SINGLE_LOG_STRING_LENGTH];
-  CHAR16        LogString[UNIT_TEST_MAX_SINGLE_LOG_STRING_LENGTH];
+  CHAR8         LogString[UNIT_TEST_MAX_SINGLE_LOG_STRING_LENGTH];
   CONST CHAR8   *LogTypePrefix = NULL;
   VA_LIST       Marker;
   UINTN LogLevel = (UINTN) PcdGet32(UnitTestLogLevel);
@@ -210,7 +210,7 @@ UnitTestLog (
   // Convert the message to an ASCII String
   //
   VA_START (Marker, Format);
-  UnicodeVSPrintAsciiFormat( LogString, sizeof( LogString ), NewFormatString, Marker );
+  AsciiVSPrint( LogString, sizeof( LogString ), NewFormatString, Marker );
   VA_END (Marker);
 
   //
@@ -225,12 +225,12 @@ VOID
 EFIAPI
 UnitTestLogFailure(
   IN  UNIT_TEST_FRAMEWORK_HANDLE  Framework,
-  FAILURE_TYPE FailureType,
+  IN  FAILURE_TYPE                FailureType,
   IN  CONST CHAR8                 *Format,
   ...
 )
 {
-  CHAR16        LogString[UNIT_TEST_TESTFAILUREMSG_LENGTH];
+  CHAR8         LogString[UNIT_TEST_TESTFAILUREMSG_LENGTH];
   VA_LIST       Marker;
 
 
@@ -238,7 +238,7 @@ UnitTestLogFailure(
   // Convert the message to an ASCII String
   //
   VA_START(Marker, Format);
-  UnicodeVSPrintAsciiFormat(LogString, sizeof(LogString), Format, Marker);
+  AsciiVSPrint(LogString, sizeof(LogString), Format, Marker);
   VA_END(Marker);
 
   //

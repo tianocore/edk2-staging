@@ -146,8 +146,8 @@ OutputUnitTestFrameworkReport(
     INTN SNotRun = 0;
 
     DEBUG((DEBUG_INFO, "/////////////////////////////////////////////////////////\n"));
-    DEBUG((DEBUG_INFO, "  SUITE: %s\n", Suite->UTS.Title));
-    DEBUG((DEBUG_INFO, "   PACKAGE: %s\n", Suite->UTS.Package));
+    DEBUG((DEBUG_INFO, "  SUITE: %a\n", Suite->UTS.Title));
+    DEBUG((DEBUG_INFO, "   PACKAGE: %a\n", Suite->UTS.Package));
     DEBUG((DEBUG_INFO, "/////////////////////////////////////////////////////////\n"));
 
     //
@@ -159,8 +159,8 @@ OutputUnitTestFrameworkReport(
     {
 
       DEBUG((DEBUG_INFO, "*********************************************************\n"));
-      DEBUG((DEBUG_INFO, "  CLASS NAME: %s\n", Test->UT.ClassName));
-      DEBUG((DEBUG_INFO, "  TEST:    %s\n", Test->UT.Description));
+      DEBUG((DEBUG_INFO, "  CLASS NAME: %a\n", Test->UT.ClassName));
+      DEBUG((DEBUG_INFO, "  TEST:    %a\n", Test->UT.Description));
       DEBUG((DEBUG_INFO, "  STATUS:  %a\n", GetStringForUnitTestStatus( Test->UT.Result )));
       DEBUG((DEBUG_INFO, "  FAILURE: %a\n", GetStringForFailureType(Test->UT.FailureType)));
       DEBUG((DEBUG_INFO, "  FAILURE MESSAGE:\n%a\n", Test->UT.FailureMessage));
@@ -170,7 +170,7 @@ OutputUnitTestFrameworkReport(
         DEBUG((DEBUG_INFO, "  LOG:\n"));
         // NOTE: This has to be done directly because all of the other
         //       "formatted" print statements have caps on the string size.
-        DEBUG((DEBUG_INFO, "%s", Test->UT.Log));
+        DEBUG((DEBUG_INFO, "%a", Test->UT.Log));
       }
 
       switch (Test->UT.Result)

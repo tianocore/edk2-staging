@@ -26,8 +26,8 @@ Copyright (C) 2016 Microsoft Corporation. All Rights Reserved.
 #include <Library/UnitTestAssertLib.h>
 
 
-#define UNIT_TEST_SMM_NAME        L"Sample Unit Test Library SMM"
-#define UNIT_TEST_SMM_VERSION     L"0.1"
+#define UNIT_TEST_SMM_NAME        "Sample Unit Test Library SMM"
+#define UNIT_TEST_SMM_VERSION     "0.1"
 
 
 BOOLEAN       mSampleGlobalTestBoolean = FALSE;
@@ -157,16 +157,13 @@ SampleUnitTestSmm (
   EFI_STATUS                Status;
   UNIT_TEST_FRAMEWORK       *Fw = NULL;
   UNIT_TEST_SUITE           *SimpleMathTests, *GlobalVarTests;
-  CHAR16  ShortName[100];
-  ShortName[0] = L'\0';
 
-  UnicodeSPrint(&ShortName[0], sizeof(ShortName), L"%a", gEfiCallerBaseName); 
-  DEBUG(( DEBUG_INFO, "%s v%s\n", UNIT_TEST_SMM_NAME, UNIT_TEST_SMM_VERSION ));
+  DEBUG(( DEBUG_INFO, "%a v%a\n", UNIT_TEST_SMM_NAME, UNIT_TEST_SMM_VERSION ));
 
   //
   // Start setting up the test framework for running the tests.
   //
-  Status = InitUnitTestFramework( &Fw, UNIT_TEST_SMM_NAME, ShortName, UNIT_TEST_SMM_VERSION );
+  Status = InitUnitTestFramework( &Fw, UNIT_TEST_SMM_NAME, gEfiCallerBaseName, UNIT_TEST_SMM_VERSION );
   if (EFI_ERROR( Status ))
   {
     DEBUG((DEBUG_ERROR, "Failed in InitUnitTestFramework. Status = %r\n", Status));
@@ -176,27 +173,27 @@ SampleUnitTestSmm (
   //
   // Populate the SimpleMathTests Unit Test Suite.
   //
-  Status = CreateUnitTestSuite( &SimpleMathTests, Fw, L"Simple Math Tests", L"Sample.Math", NULL, NULL );
+  Status = CreateUnitTestSuite( &SimpleMathTests, Fw, "Simple Math Tests", "Sample.Math", NULL, NULL );
   if (EFI_ERROR( Status ))
   {
     DEBUG((DEBUG_ERROR, "Failed in CreateUnitTestSuite for SimpleMathTests\n"));
     Status = EFI_OUT_OF_RESOURCES;
     goto EXIT;
   }
-  AddTestCase( SimpleMathTests, L"Adding 1 to 1 should produce 2", L"Sample.Math.Addition", OnePlusOneShouldEqualTwo, NULL, NULL, NULL );
+  AddTestCase( SimpleMathTests, "Adding 1 to 1 should produce 2", "Sample.Math.Addition", OnePlusOneShouldEqualTwo, NULL, NULL, NULL );
 
   //
   // Populate the GlobalVarTests Unit Test Suite.
   //
-  Status = CreateUnitTestSuite( &GlobalVarTests, Fw, L"Global Variable Tests", L"Sample.Globals", NULL, NULL );
+  Status = CreateUnitTestSuite( &GlobalVarTests, Fw, "Global Variable Tests", "Sample.Globals", NULL, NULL );
   if (EFI_ERROR( Status ))
   {
     DEBUG((DEBUG_ERROR, "Failed in CreateUnitTestSuite for GlobalVarTests\n"));
     Status = EFI_OUT_OF_RESOURCES;
     goto EXIT;
   }
-  AddTestCase( GlobalVarTests, L"You should be able to change a global BOOLEAN", L"Sample.Globals.Boolean", GlobalBooleanShouldBeChangeable, NULL, NULL, NULL );
-  AddTestCase( GlobalVarTests, L"You should be able to change a global pointer", L"Sample.Globals.Pointer", GlobalPointerShouldBeChangeable, MakeSureThatPointerIsNull, ClearThePointer, NULL );
+  AddTestCase( GlobalVarTests, "You should be able to change a global BOOLEAN", "Sample.Globals.Boolean", GlobalBooleanShouldBeChangeable, NULL, NULL, NULL );
+  AddTestCase( GlobalVarTests, "You should be able to change a global pointer", "Sample.Globals.Pointer", GlobalPointerShouldBeChangeable, MakeSureThatPointerIsNull, ClearThePointer, NULL );
 
   //
   // Execute the tests.

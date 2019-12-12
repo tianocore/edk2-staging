@@ -54,7 +54,7 @@ UpdateTestFromSave (
 STATIC
 BOOLEAN
 IsFrameworkShortNameValid (
-  IN  CHAR16    *ShortTitleString
+  IN  CHAR8     *ShortTitleString
   )
 {
   // TODO: Finish this function.
@@ -63,19 +63,19 @@ IsFrameworkShortNameValid (
 
 
 STATIC
-CHAR16*
+CHAR8*
 AllocateAndCopyString (
-  IN  CHAR16    *StringToCopy
+  IN  CHAR8     *StringToCopy
   )
 {
-  CHAR16    *NewString = NULL;
+  CHAR8     *NewString = NULL;
   UINTN     NewStringLength;
 
-  NewStringLength = StrnLenS( StringToCopy, UNIT_TEST_MAX_STRING_LENGTH ) + 1;
-  NewString = AllocatePool( NewStringLength * sizeof( CHAR16 ) );
+  NewStringLength = AsciiStrnLenS( StringToCopy, UNIT_TEST_MAX_STRING_LENGTH ) + 1;
+  NewString = AllocatePool( NewStringLength * sizeof( CHAR8 ) );
   if (NewString != NULL)
   {
-    StrCpyS( NewString, NewStringLength, StringToCopy );
+    AsciiStrCpyS( NewString, NewStringLength, StringToCopy );
   }
 
   return NewString;
@@ -92,8 +92,8 @@ SetFrameworkFingerprint (
   MD5Init( &mFingerprintCtx );
 
   // For this one we'll just use the title and version as the unique fingerprint.
-  MD5Update( &mFingerprintCtx, Framework->Title, (StrLen( Framework->Title ) * sizeof( CHAR16 )) );
-  MD5Update( &mFingerprintCtx, Framework->VersionString, (StrLen( Framework->VersionString ) * sizeof( CHAR16 )) );
+  MD5Update( &mFingerprintCtx, Framework->Title, (AsciiStrLen( Framework->Title ) * sizeof( CHAR8 )) );
+  MD5Update( &mFingerprintCtx, Framework->VersionString, (AsciiStrLen( Framework->VersionString ) * sizeof( CHAR8 )) );
 
   MD5Final( &mFingerprintCtx, &Framework->Fingerprint[0] );
   return;
@@ -112,8 +112,8 @@ SetSuiteFingerprint (
 
   // For this one, we'll use the fingerprint from the framework, and the title of the suite.
   MD5Update( &mFingerprintCtx, &Framework->Fingerprint[0], UNIT_TEST_FINGERPRINT_SIZE );
-  MD5Update( &mFingerprintCtx, Suite->Title, (StrLen( Suite->Title ) * sizeof( CHAR16 )) );
-  MD5Update(&mFingerprintCtx, Suite->Package, (StrLen(Suite->Package) * sizeof(CHAR16)));
+  MD5Update( &mFingerprintCtx, Suite->Title, (AsciiStrLen( Suite->Title ) * sizeof( CHAR8 )) );
+  MD5Update(&mFingerprintCtx, Suite->Package, (AsciiStrLen(Suite->Package) * sizeof(CHAR8)));
 
   MD5Final( &mFingerprintCtx, &Suite->Fingerprint[0] );
   return;
@@ -132,8 +132,8 @@ SetTestFingerprint (
 
   // For this one, we'll use the fingerprint from the suite, and the description and classname of the test.
   MD5Update( &mFingerprintCtx, &Suite->Fingerprint[0], UNIT_TEST_FINGERPRINT_SIZE );
-  MD5Update( &mFingerprintCtx, Test->Description, (StrLen( Test->Description ) * sizeof( CHAR16 )) );
-  MD5Update(&mFingerprintCtx, Test->ClassName, (StrLen(Test->ClassName) * sizeof(CHAR16)));
+  MD5Update( &mFingerprintCtx, Test->Description, (AsciiStrLen( Test->Description ) * sizeof( CHAR8 )) );
+  MD5Update(&mFingerprintCtx, Test->ClassName, (AsciiStrLen(Test->ClassName) * sizeof(CHAR8)));
 
   MD5Final( &mFingerprintCtx, &Test->Fingerprint[0] );
   return;
@@ -201,9 +201,9 @@ EFI_STATUS
 EFIAPI
 InitUnitTestFramework (
   OUT UNIT_TEST_FRAMEWORK   **Framework,
-  IN  CHAR16                *Title,
-  IN  CHAR16                *ShortTitle,
-  IN  CHAR16                *VersionString
+  IN  CHAR8                 *Title,
+  IN  CHAR8                 *ShortTitle,
+  IN  CHAR8                 *VersionString
   )
 {
   EFI_STATUS                Status = EFI_SUCCESS;
@@ -288,8 +288,8 @@ EFIAPI
 CreateUnitTestSuite (
   OUT UNIT_TEST_SUITE           **Suite,
   IN UNIT_TEST_FRAMEWORK        *Framework,
-  IN CHAR16                     *Title,
-  IN CHAR16                     *Package,
+  IN CHAR8                      *Title,
+  IN CHAR8                      *Package,
   IN UNIT_TEST_SUITE_SETUP      Sup    OPTIONAL,
   IN UNIT_TEST_SUITE_TEARDOWN   Tdn    OPTIONAL
   )
@@ -359,8 +359,8 @@ EFI_STATUS
 EFIAPI
 AddTestCase (
   IN UNIT_TEST_SUITE      *Suite,
-  IN CHAR16               *Description,
-  IN CHAR16               *ClassName,
+  IN CHAR8                *Description,
+  IN CHAR8                *ClassName,
   IN UNIT_TEST_FUNCTION   Func,
   IN UNIT_TEST_PREREQ     PreReq    OPTIONAL,
   IN UNIT_TEST_CLEANUP    CleanUp   OPTIONAL,
@@ -458,7 +458,7 @@ RunTestSuite (
   }
 
   DEBUG((DEBUG_VERBOSE, "---------------------------------------------------------\n"));
-  DEBUG((DEBUG_VERBOSE, "RUNNING TEST SUITE: %s\n", Suite->Title));
+  DEBUG((DEBUG_VERBOSE, "RUNNING TEST SUITE: %a\n", Suite->Title));
   DEBUG((DEBUG_VERBOSE, "---------------------------------------------------------\n"));
 
   if (Suite->Setup != NULL)
@@ -477,7 +477,7 @@ RunTestSuite (
     ParentFramework->CurrentTest  = Test;
 
     DEBUG((DEBUG_VERBOSE, "*********************************************************\n"));
-    DEBUG((DEBUG_VERBOSE, " RUNNING TEST: %s:\n", Test->Description));
+    DEBUG((DEBUG_VERBOSE, " RUNNING TEST: %a:\n", Test->Description));
     DEBUG((DEBUG_VERBOSE, "**********************************************************\n"));
 
     //
@@ -633,7 +633,7 @@ UpdateTestFromSave (
     Test->Result = MatchingTest->Result;
 
     Test->FailureType = MatchingTest->FailureType;
-    StrnCpyS(&Test->FailureMessage[0], UNIT_TEST_TESTFAILUREMSG_LENGTH, &MatchingTest->FailureMessage[0], UNIT_TEST_TESTFAILUREMSG_LENGTH);
+    AsciiStrnCpyS(&Test->FailureMessage[0], UNIT_TEST_TESTFAILUREMSG_LENGTH, &MatchingTest->FailureMessage[0], UNIT_TEST_TESTFAILUREMSG_LENGTH);
 
     // If there is a log string associated, grab that.
     // We can tell that there's a log string because the "size" will be larger than
@@ -717,7 +717,7 @@ SerializeState (
       if (UnitTest->Log != NULL)
       {
         // The +1 is for the NULL character. Can't forget the NULL character.
-        LogSize = (StrLen( UnitTest->Log ) + 1) * sizeof( CHAR16 );
+        LogSize = (AsciiStrLen( UnitTest->Log ) + 1) * sizeof( CHAR8 );
         ASSERT( LogSize < MAX_UINT32 );
         TotalSize += (UINT32)LogSize;
       }
@@ -774,7 +774,7 @@ SerializeState (
       // Save the result.
       TestSaveData->Result = UnitTest->Result;
       TestSaveData->FailureType = UnitTest->FailureType;
-      StrnCpyS(&TestSaveData->FailureMessage[0], UNIT_TEST_TESTFAILUREMSG_LENGTH, &UnitTest->FailureMessage[0], UNIT_TEST_TESTFAILUREMSG_LENGTH);
+      AsciiStrnCpyS(&TestSaveData->FailureMessage[0], UNIT_TEST_TESTFAILUREMSG_LENGTH, &UnitTest->FailureMessage[0], UNIT_TEST_TESTFAILUREMSG_LENGTH);
 
       
       // If there is a log, save the log.
@@ -782,7 +782,7 @@ SerializeState (
       if (UnitTest->Log != NULL)
       {
         // The +1 is for the NULL character. Can't forget the NULL character.
-        LogSize = (StrLen( UnitTest->Log ) + 1) * sizeof( CHAR16 );
+        LogSize = (AsciiStrLen( UnitTest->Log ) + 1) * sizeof( CHAR8 );
         CopyMem( FloatingPointer, UnitTest->Log, LogSize );
         FloatingPointer += LogSize;
       }

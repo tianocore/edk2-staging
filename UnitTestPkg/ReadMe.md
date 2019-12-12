@@ -110,16 +110,12 @@ These strings are copied internally to the Framework, so using stack-allocated o
 In the 'SampleUnitTestApp', the module name is used as the short name, so the init looks like this.
 
 ```c
-CHAR16  ShortName[100];
-ShortName[0] = L'\0';
-
-UnicodeSPrint(&ShortName[0], sizeof(ShortName), L"%a", gEfiCallerBaseName);
-DEBUG(( DEBUG_INFO, "%s v%s\n", UNIT_TEST_APP_NAME, UNIT_TEST_APP_VERSION ));
+DEBUG(( DEBUG_INFO, "%a v%a\n", UNIT_TEST_APP_NAME, UNIT_TEST_APP_VERSION ));
 
 //
 // Start setting up the test framework for running the tests.
 //
-Status = InitUnitTestFramework( &Fw, UNIT_TEST_APP_NAME, ShortName, UNIT_TEST_APP_VERSION );
+Status = InitUnitTestFramework( &Fw, UNIT_TEST_APP_NAME, gEfiCallerBaseName, UNIT_TEST_APP_VERSION );
 ```
 
 The `&Fw` returned here is the handle to the Framework. If it's successfully returned, we can start adding

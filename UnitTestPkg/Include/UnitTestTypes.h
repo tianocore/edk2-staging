@@ -115,11 +115,11 @@ VOID
 
 
 typedef struct {
-  CHAR16                    *Description;
-  CHAR16                    *ClassName;  //can't have spaces and should be short
-  CHAR16                    *Log;
+  CHAR8                     *Description;
+  CHAR8                     *ClassName;  //can't have spaces and should be short
+  CHAR8                     *Log;
   FAILURE_TYPE              FailureType;
-  CHAR16                    FailureMessage[UNIT_TEST_TESTFAILUREMSG_LENGTH];
+  CHAR8                     FailureMessage[UNIT_TEST_TESTFAILUREMSG_LENGTH];
   UINT8                     Fingerprint[UNIT_TEST_FINGERPRINT_SIZE];
   UNIT_TEST_STATUS          Result;
   UNIT_TEST_FUNCTION        RunTest;
@@ -135,8 +135,8 @@ typedef struct {
 } UNIT_TEST_LIST_ENTRY;
 
 typedef struct {
-  CHAR16                      *Title;
-  CHAR16                      *Package;
+  CHAR8                       *Title;
+  CHAR8                       *Package;
   UINT8                       Fingerprint[UNIT_TEST_FINGERPRINT_SIZE];
   UNIT_TEST_SUITE_SETUP       Setup;
   UNIT_TEST_SUITE_TEARDOWN    Teardown;
@@ -150,10 +150,10 @@ typedef struct {
 } UNIT_TEST_SUITE_LIST_ENTRY;
 
 typedef struct {
-  CHAR16                    *Title;
-  CHAR16                    *ShortTitle;      // This title should contain NO spaces or non-filename charatecters. Is used in reporting and serialization.
-  CHAR16                    *VersionString;
-  CHAR16                    *Log;
+  CHAR8                     *Title;
+  CHAR8                     *ShortTitle;      // This title should contain NO spaces or non-filename charatecters. Is used in reporting and serialization.
+  CHAR8                     *VersionString;
+  CHAR8                     *Log;
   UINT8                     Fingerprint[UNIT_TEST_FINGERPRINT_SIZE];
   LIST_ENTRY                TestSuiteList;    // UNIT_TEST_SUITE_LIST_ENTRY
   EFI_TIME                  StartTime;
@@ -172,10 +172,10 @@ typedef struct
 {
   UINT32            Size;
   UINT8             Fingerprint[UNIT_TEST_FINGERPRINT_SIZE];      // Fingerprint of the test itself.
-  CHAR16            FailureMessage[UNIT_TEST_TESTFAILUREMSG_LENGTH];
+  CHAR8             FailureMessage[UNIT_TEST_TESTFAILUREMSG_LENGTH];
   FAILURE_TYPE      FailureType;
   UNIT_TEST_STATUS  Result;
-  // CHAR16            Log[];
+  // CHAR8             Log[];
 } UNIT_TEST_SAVE_TEST;
 
 typedef struct
@@ -195,7 +195,7 @@ typedef struct
   BOOLEAN           HasSavedContext;
   // UNIT_TEST_SAVE_TEST    Tests[];                              // Array of structures starts here.
   // UNIT_TEST_SAVE_CONTEXT SavedContext[];                       // Saved context for the currently running test.
-  // CHAR16                 Log[];                                // NOTE: Not yet implemented!!
+  // CHAR8                  Log[];                                // NOTE: Not yet implemented!!
 } UNIT_TEST_SAVE_HEADER;
 
 #pragma pack ()

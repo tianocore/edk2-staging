@@ -9,6 +9,7 @@ Copyright (c) Microsoft
 #include <UnitTestTypes.h>
 #include <Library/UefiLib.h>
 #include <Library/DebugLib.h>
+#include <Library/MemoryAllocationLib.h>
 #include <Library/UnitTestResultReportLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
@@ -121,6 +122,8 @@ OutputUnitTestFrameworkReport(
   INTN Failed = 0;
   INTN NotRun = 0;
   UNIT_TEST_SUITE_LIST_ENTRY *Suite = NULL;
+  UINT16  *LogString = NULL;
+  UINTN   LogStringLength = 0;
 
   if (Framework == NULL)
   {
@@ -146,8 +149,8 @@ OutputUnitTestFrameworkReport(
     INTN SNotRun = 0;
 
     Print( L"/////////////////////////////////////////////////////////\n" );
-    Print( L"  SUITE: %s\n", Suite->UTS.Title );
-    Print( L"   PACKAGE: %s\n", Suite->UTS.Package);
+    Print( L"  SUITE: %a\n", Suite->UTS.Title );
+    Print( L"   PACKAGE: %a\n", Suite->UTS.Package);
     Print( L"/////////////////////////////////////////////////////////\n" );
 
     //
@@ -159,18 +162,28 @@ OutputUnitTestFrameworkReport(
     {
 
       Print (L"*********************************************************\n" );
-      Print (L"  CLASS NAME: %s\n", Test->UT.ClassName);
-      Print( L"  TEST:    %s\n", Test->UT.Description );
+      Print (L"  CLASS NAME: %a\n", Test->UT.ClassName);
+      Print( L"  TEST:    %a\n", Test->UT.Description );
       Print( L"  STATUS:  %a\n", GetStringForUnitTestStatus( Test->UT.Result ) );
       Print( L"  FAILURE: %a\n", GetStringForFailureType(Test->UT.FailureType));
       Print( L"  FAILURE MESSAGE:\n%a\n", Test->UT.FailureMessage);
 
       if (Test->UT.Log != NULL)
       {
+        // Make sure that we can expand the string into the unicode buffer.
+        if (LogStringLength <= AsciiStrnLenS( Test->UT.Log, MAX_UINT32 )) {
+          LogStringLength = AsciiStrnLenS( Test->UT.Log, MAX_UINT32 ) + 1;
+          if (LogString) {
+            FreePool( LogString );
+          }
+          LogString = AllocatePool( LogStringLength * sizeof(CHAR16) );
+        }
+        AsciiStrToUnicodeStrS( Test->UT.Log, LogString, LogStringLength );
+
         Print( L"  LOG:\n" );
         // NOTE: This has to be done directly because all of the other
         //       "formatted" print statements have caps on the string size.
-        gST->ConOut->OutputString( gST->ConOut, Test->UT.Log );
+        gST->ConOut->OutputString( gST->ConOut, LogString );
       }
 
       switch (Test->UT.Result)
@@ -203,6 +216,10 @@ OutputUnitTestFrameworkReport(
   Print( L" Failed:  %d  (%d%%)\n", Failed, (Failed * 100) / (Passed + Failed + NotRun) );
   Print( L" Not Run: %d  (%d%%)\n", NotRun, (NotRun * 100) / (Passed + Failed + NotRun) );
   Print( L"=========================================================\n" );
+
+  if (LogString) {
+    FreePool( LogString );
+  }
 
   return EFI_SUCCESS;
 }

@@ -26,9 +26,9 @@ EFI_STATUS
 EFIAPI
 InitUnitTestFramework (
   OUT UNIT_TEST_FRAMEWORK   **Framework,
-  IN  CHAR16                *Title,
-  IN  CHAR16                *ShortTitle,
-  IN  CHAR16                *VersionString
+  IN  CHAR8                 *Title,
+  IN  CHAR8                 *ShortTitle,
+  IN  CHAR8                 *VersionString
   );
 
 /*
@@ -49,8 +49,8 @@ EFIAPI
 CreateUnitTestSuite (
   OUT UNIT_TEST_SUITE           **Suite,
   IN UNIT_TEST_FRAMEWORK        *Framework,
-  IN CHAR16                     *Title,
-  IN CHAR16                     *Package,
+  IN CHAR8                      *Title,
+  IN CHAR8                      *Package,
   IN UNIT_TEST_SUITE_SETUP      Sup    OPTIONAL,
   IN UNIT_TEST_SUITE_TEARDOWN   Tdn    OPTIONAL
   );
@@ -73,8 +73,8 @@ EFI_STATUS
 EFIAPI
 AddTestCase (
   IN UNIT_TEST_SUITE      *Suite,
-  IN CHAR16               *Description,
-  IN CHAR16               *ClassName,
+  IN CHAR8                *Description,
+  IN CHAR8                *ClassName,
   IN UNIT_TEST_FUNCTION   Func,
   IN UNIT_TEST_PREREQ     PreReq    OPTIONAL,
   IN UNIT_TEST_CLEANUP    CleanUp   OPTIONAL,
