@@ -12,7 +12,7 @@
 
     ## options defined ci/Plugin/HostUnitTestCompilerPlugin
     "HostUnitTestCompilerPlugin": {
-        "DscPath": "MdePkgTest.dsc"
+        "DscPath": "Test/MdePkgTest.dsc"
     },
 
     ## options defined ci/Plugin/CharEncodingCheck
