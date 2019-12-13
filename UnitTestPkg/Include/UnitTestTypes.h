@@ -166,7 +166,6 @@ typedef struct {
 //
 //Structures for the framework to serializing unit test status
 //
-#pragma pack (1)
 
 typedef struct
 {
@@ -197,7 +196,5 @@ typedef struct
   // UNIT_TEST_SAVE_CONTEXT SavedContext[];                       // Saved context for the currently running test.
   // CHAR8                  Log[];                                // NOTE: Not yet implemented!!
 } UNIT_TEST_SAVE_HEADER;
-
-#pragma pack ()
 
 #endif
