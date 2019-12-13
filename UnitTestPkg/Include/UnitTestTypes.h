@@ -19,7 +19,7 @@
 ///================================================================================================
 #define UNIT_TEST_MAX_STRING_LENGTH     (120)
 
-#define UNIT_TEST_FINGERPRINT_SIZE      (16)    // Hardcoded to MD5_HASHSIZE.
+#define UNIT_TEST_FINGERPRINT_SIZE      (sizeof(UINT32))    // Hardcoded to CRC32.
 #define UNIT_TEST_TESTFAILUREMSG_LENGTH (120)
 
 typedef UINT32 UNIT_TEST_STATUS;

@@ -41,4 +41,3 @@ LIBRARY_CLASS   = UnitTestLib|DXE_SMM_DRIVER
 
 [Sources]
   UnitTestLib.c
-  Md5.c

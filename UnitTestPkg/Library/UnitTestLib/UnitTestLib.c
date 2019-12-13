@@ -18,9 +18,6 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Library/UnitTestResultReportLib.h>
 #include <Library/UnitTestTerminationLib.h>
 
-#include "Md5.h"
-
-MD5_CTX     mFingerprintCtx;
 
 // Prototyped here so that it can be included near the functions that
 // it logically goes with.
@@ -89,13 +86,13 @@ SetFrameworkFingerprint (
   IN  UNIT_TEST_FRAMEWORK   *Framework
   )
 {
-  MD5Init( &mFingerprintCtx );
+  UINT32  NewFingerprint;
 
   // For this one we'll just use the title and version as the unique fingerprint.
-  MD5Update( &mFingerprintCtx, Framework->Title, (AsciiStrLen( Framework->Title ) * sizeof( CHAR8 )) );
-  MD5Update( &mFingerprintCtx, Framework->VersionString, (AsciiStrLen( Framework->VersionString ) * sizeof( CHAR8 )) );
+  NewFingerprint = CalculateCrc32( Framework->Title, (AsciiStrLen( Framework->Title ) * sizeof( CHAR8 )) );
+  NewFingerprint = (NewFingerprint >> 8) ^ CalculateCrc32( Framework->VersionString, (AsciiStrLen( Framework->VersionString ) * sizeof( CHAR8 )) );
 
-  MD5Final( &mFingerprintCtx, &Framework->Fingerprint[0] );
+  CopyMem( Fingerprint, &NewFingerprint, UNIT_TEST_FINGERPRINT_SIZE );
   return;
 } // SetFrameworkFingerprint()
 
@@ -108,14 +105,14 @@ SetSuiteFingerprint (
   IN  UNIT_TEST_SUITE       *Suite
   )
 {
-  MD5Init( &mFingerprintCtx );
+  UINT32  NewFingerprint;
 
   // For this one, we'll use the fingerprint from the framework, and the title of the suite.
-  MD5Update( &mFingerprintCtx, &Framework->Fingerprint[0], UNIT_TEST_FINGERPRINT_SIZE );
-  MD5Update( &mFingerprintCtx, Suite->Title, (AsciiStrLen( Suite->Title ) * sizeof( CHAR8 )) );
-  MD5Update(&mFingerprintCtx, Suite->Package, (AsciiStrLen(Suite->Package) * sizeof(CHAR8)));
+  NewFingerprint = CalculateCrc32( &Framework->Fingerprint[0], UNIT_TEST_FINGERPRINT_SIZE );
+  NewFingerprint = (NewFingerprint >> 8) ^ CalculateCrc32( Suite->Title, (AsciiStrLen( Suite->Title ) * sizeof( CHAR8 )) );
+  NewFingerprint = (NewFingerprint >> 8) ^ CalculateCrc32( Suite->Package, (AsciiStrLen(Suite->Package) * sizeof(CHAR8)) );
 
-  MD5Final( &mFingerprintCtx, &Suite->Fingerprint[0] );
+  CopyMem( Fingerprint, &NewFingerprint, UNIT_TEST_FINGERPRINT_SIZE );
   return;
 } // SetSuiteFingerprint()
 
@@ -128,14 +125,14 @@ SetTestFingerprint (
   IN  UNIT_TEST             *Test
   )
 {
-  MD5Init( &mFingerprintCtx );
+  UINT32  NewFingerprint;
 
   // For this one, we'll use the fingerprint from the suite, and the description and classname of the test.
-  MD5Update( &mFingerprintCtx, &Suite->Fingerprint[0], UNIT_TEST_FINGERPRINT_SIZE );
-  MD5Update( &mFingerprintCtx, Test->Description, (AsciiStrLen( Test->Description ) * sizeof( CHAR8 )) );
-  MD5Update(&mFingerprintCtx, Test->ClassName, (AsciiStrLen(Test->ClassName) * sizeof(CHAR8)));
+  NewFingerprint = CalculateCrc32( &Suite->Fingerprint[0], UNIT_TEST_FINGERPRINT_SIZE );
+  NewFingerprint = (NewFingerprint >> 8) ^ CalculateCrc32( Test->Description, (AsciiStrLen( Test->Description ) * sizeof( CHAR8 )) );
+  NewFingerprint = (NewFingerprint >> 8) ^ CalculateCrc32( Test->ClassName, (AsciiStrLen(Test->ClassName) * sizeof(CHAR8)) );
 
-  MD5Final( &mFingerprintCtx, &Test->Fingerprint[0] );
+  CopyMem( Fingerprint, &NewFingerprint, UNIT_TEST_FINGERPRINT_SIZE );
   return;
 } // SetTestFingerprint()
 

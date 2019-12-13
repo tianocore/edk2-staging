@@ -42,4 +42,3 @@ LIBRARY_CLASS   = UnitTestLib|DXE_DRIVER UEFI_APPLICATION
 
 [Sources]
   UnitTestLib.c
-  Md5.c

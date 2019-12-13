@@ -40,4 +40,3 @@ LIBRARY_CLASS   = UnitTestLib|PEIM
 
 [Sources]
   UnitTestLib.c
-  Md5.c
