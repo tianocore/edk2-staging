@@ -18,10 +18,10 @@
 [LibraryClasses]
   CmockaLib|CmockaHostUnitTestPkg/Library/CmockaLib/CmockaLib.inf
 
-  BaseLib|MdePkg/HostLibrary/BaseLibHost/BaseLibHost.inf
-  BaseMemoryLib|MdePkg/HostLibrary/BaseMemoryLibHost/BaseMemoryLibHost.inf
-  DebugLib|MdePkg/HostLibrary/DebugLibHost/DebugLibHost.inf
-  MemoryAllocationLib|MdePkg/HostLibrary/MemoryAllocationLibHost/MemoryAllocationLibHost.inf
+  BaseLib|MdePkg/Test/HostLibrary/BaseLibHost/BaseLibHost.inf
+  BaseMemoryLib|MdePkg/Test/HostLibrary/BaseMemoryLibHost/BaseMemoryLibHost.inf
+  DebugLib|MdePkg/Test/HostLibrary/DebugLibHost/DebugLibHost.inf
+  MemoryAllocationLib|MdePkg/Test/HostLibrary/MemoryAllocationLibHost/MemoryAllocationLibHost.inf
   OsServiceLib|HostBasedUnitTestPkg/Library/OsServiceLibHost/OsServiceLibHost.inf
 
   PcdLib|MdePkg/Library/BasePcdLibNull/BasePcdLibNull.inf
@@ -47,11 +47,11 @@
 
 
   #compile all host application components
-  MdePkg/HostLibrary/BaseLibHost/BaseLibHost.inf
-  MdePkg/HostLibrary/BaseLibHost/BaseLibHostNoAsm.inf
-  MdePkg/HostLibrary/BaseMemoryLibHost/BaseMemoryLibHost.inf
-  MdePkg/HostLibrary/DebugLibHost/DebugLibHost.inf
-  MdePkg/HostLibrary/MemoryAllocationLibHost/MemoryAllocationLibHost.inf
+  MdePkg/Test/HostLibrary/BaseLibHost/BaseLibHost.inf
+  MdePkg/Test/HostLibrary/BaseLibHost/BaseLibHostNoAsm.inf
+  MdePkg/Test/HostLibrary/BaseMemoryLibHost/BaseMemoryLibHost.inf
+  MdePkg/Test/HostLibrary/DebugLibHost/DebugLibHost.inf
+  MdePkg/Test/HostLibrary/MemoryAllocationLibHost/MemoryAllocationLibHost.inf
 
 
 [BuildOptions]
