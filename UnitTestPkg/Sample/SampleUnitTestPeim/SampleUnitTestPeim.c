@@ -182,7 +182,7 @@ SampleUnitTestPeim (
     Status = EFI_OUT_OF_RESOURCES;
     goto EXIT;
   }
-  AddTestCase( SimpleMathTests, "Adding 1 to 1 should produce 2", "Sample.Math.Addition", OnePlusOneShouldEqualTwo, NULL, NULL, NULL );
+  AddTestCase( SimpleMathTests, "Adding 1 to 1 should produce 2", "Addition", OnePlusOneShouldEqualTwo, NULL, NULL, NULL );
 
   //
   // Populate the GlobalVarTests Unit Test Suite.
@@ -194,8 +194,8 @@ SampleUnitTestPeim (
     Status = EFI_OUT_OF_RESOURCES;
     goto EXIT;
   }
-  AddTestCase( GlobalVarTests, "You should be able to change a global BOOLEAN", "Sample.Globals.Boolean", GlobalBooleanShouldBeChangeable, NULL, NULL, NULL );
-  AddTestCase( GlobalVarTests, "You should be able to change a global pointer", "Sample.Globals.Pointer", GlobalPointerShouldBeChangeable, MakeSureThatPointerIsNull, ClearThePointer, NULL );
+  AddTestCase( GlobalVarTests, "You should be able to change a global BOOLEAN", "Boolean", GlobalBooleanShouldBeChangeable, NULL, NULL, NULL );
+  AddTestCase( GlobalVarTests, "You should be able to change a global pointer", "Pointer", GlobalPointerShouldBeChangeable, MakeSureThatPointerIsNull, ClearThePointer, NULL );
 
   //
   // Execute the tests.
