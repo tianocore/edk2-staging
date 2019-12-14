@@ -160,7 +160,7 @@ SampleUnitTestApp (
   )
 {
   EFI_STATUS                Status;
-  UNIT_TEST_FRAMEWORK       *Fw = NULL;
+  UNIT_TEST_FRAMEWORK       *Framework = NULL;
   UNIT_TEST_SUITE           *SimpleMathTests, *GlobalVarTests;
 
   DEBUG(( DEBUG_INFO, "%a v%a\n", UNIT_TEST_APP_NAME, UNIT_TEST_APP_VERSION ));
@@ -168,7 +168,7 @@ SampleUnitTestApp (
   //
   // Start setting up the test framework for running the tests.
   //
-  Status = InitUnitTestFramework( &Fw, UNIT_TEST_APP_NAME, gEfiCallerBaseName, UNIT_TEST_APP_VERSION );
+  Status = InitUnitTestFramework( &Framework, UNIT_TEST_APP_NAME, gEfiCallerBaseName, UNIT_TEST_APP_VERSION );
   if (EFI_ERROR( Status ))
   {
     DEBUG((DEBUG_ERROR, "Failed in InitUnitTestFramework. Status = %r\n", Status));
@@ -178,7 +178,7 @@ SampleUnitTestApp (
   //
   // Populate the SimpleMathTests Unit Test Suite.
   //
-  Status = CreateUnitTestSuite( &SimpleMathTests, Fw, "Simple Math Tests", "Sample.Math", NULL, NULL );
+  Status = CreateUnitTestSuite( &SimpleMathTests, Framework, "Simple Math Tests", "Sample.Math", NULL, NULL );
   if (EFI_ERROR( Status ))
   {
     DEBUG((DEBUG_ERROR, "Failed in CreateUnitTestSuite for SimpleMathTests\n"));
@@ -190,7 +190,7 @@ SampleUnitTestApp (
   //
   // Populate the GlobalVarTests Unit Test Suite.
   //
-  Status = CreateUnitTestSuite( &GlobalVarTests, Fw, "Global Variable Tests", "Sample.Globals", NULL, NULL );
+  Status = CreateUnitTestSuite( &GlobalVarTests, Framework, "Global Variable Tests", "Sample.Globals", NULL, NULL );
   if (EFI_ERROR( Status ))
   {
     DEBUG((DEBUG_ERROR, "Failed in CreateUnitTestSuite for GlobalVarTests\n"));
@@ -203,12 +203,12 @@ SampleUnitTestApp (
   //
   // Execute the tests.
   //
-  Status = RunAllTestSuites( Fw );
+  Status = RunAllTestSuites( Framework );
 
 EXIT:
-  if (Fw)
+  if (Framework)
   {
-    FreeUnitTestFramework( Fw );
+    FreeUnitTestFramework( Framework );
   }
 
   return Status;
