@@ -96,9 +96,6 @@ OnePlusOneShouldEqualTwo (
 
   UT_ASSERT_EQUAL(C, 2);
 
-  UT_LOG_WARNING("This should not be. %a", "This also should not be.\n");
-  UT_LOG_WARNING("This is also crap.\n");
-
   return UNIT_TEST_PASSED;
 } // OnePlusOneShouldEqualTwo()
 
