@@ -21,7 +21,7 @@
 #
 
 [Sources]
-  cmocka_extdep/cmocka/src/cmocka.c
+  cmocka/src/cmocka.c
   
 [Packages]
   CmockaHostUnitTestPkg/CmockaHostUnitTestPkg.dec
