@@ -143,6 +143,8 @@ class Settings(CiSetupSettingsManager, CiBuildSettingsManager, UpdateSettingsMan
             "ArmPkg/Library/ArmSoftFloatLib/berkeley-softfloat-3", False))
         rs.append(RequiredSubmodule(
             "CryptoPkg/Library/OpensslLib/openssl", False))
+        rs.append(RequiredSubmodule(
+            "UnitTestFrameworkPkg/FrameworkLibrary/CmockaLib/cmocka", False))
         return rs
 
     def GetName(self):
@@ -153,7 +155,7 @@ class Settings(CiSetupSettingsManager, CiBuildSettingsManager, UpdateSettingsMan
         ]
 
     def GetPackagesPath(self):
-        return ('EDK2_TEST',)
+        return ()
 
     def GetWorkspaceRoot(self):
         ''' get WorkspacePath '''
