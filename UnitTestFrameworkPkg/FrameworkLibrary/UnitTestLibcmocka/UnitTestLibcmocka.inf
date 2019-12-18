@@ -1,0 +1,39 @@
+## @file
+#
+# Copyright (c) 2019, Intel Corporation. All rights reserved.<BR>
+# SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+##
+
+[Defines]
+  INF_VERSION     = 0x00010017
+  BASE_NAME       = UnitTestLibcmocka
+  FILE_GUID       = C800595F-45A3-45A1-8B50-28F01C2A5A4F
+  VERSION_STRING  = 1.0
+  MODULE_TYPE     = BASE
+  LIBRARY_CLASS   = UnitTestLib
+
+[LibraryClasses]
+  BaseLib
+  MemoryAllocationLib
+  OsServiceLib
+  CmockaLib
+
+[Packages]
+  MdePkg/MdePkg.dec
+  UnitTestPkg/UnitTestPkg.dec
+  HostBasedUnitTestPkg/HostBasedUnitTestPkg.dec
+  CmockaHostUnitTestPkg/CmockaHostUnitTestPkg.dec
+
+[Sources]
+  UnitTestLib.c
+
+[Sources.Ia32]
+  IA32/cmockaFuncTemplateMsvc.nasm | MSFT
+  IA32/cmockaFuncTemplateGcc.nasm  | GCC
+
+[Sources.X64]
+  X64/cmockaFuncTemplateMsvc.nasm  | MSFT
+  X64/cmockaFuncTemplateGcc.nasm   | GCC
+
+[Pcd]

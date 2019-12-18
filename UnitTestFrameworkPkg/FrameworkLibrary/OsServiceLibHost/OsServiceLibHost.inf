@@ -1,0 +1,26 @@
+## @file
+#
+# Copyright (c) 2017, Intel Corporation. All rights reserved.<BR>
+# SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = OsServiceLibHost
+  FILE_GUID                      = 56DCD496-CD73-42D0-B145-B7C100CE5877
+  MODULE_TYPE                    = BASE
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = OsServiceLib
+
+[Sources]
+  OsServiceLibMsvc.c          | MSFT
+  OsServiceLibGcc.c           | GCC
+
+[Packages]
+  MdePkg/MdePkg.dec
+
+[LibraryClasses]
+
+[BuildOptions]
+

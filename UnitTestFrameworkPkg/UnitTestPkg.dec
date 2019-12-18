@@ -19,8 +19,10 @@
 [Includes]
   Include
 
-[LibraryClasses]
+[Includes.Common.Private]
+  FrameworkInclude
 
+[LibraryClasses]
   ## @libraryclass Provide unit test assert helpers
   #
   UnitTestAssertLib|Include/Library/UnitTestAssertLib.h
@@ -33,6 +35,7 @@
   #
   UnitTestLogLib|Include/Library/UnitTestLogLib.h
 
+[LibraryClasses.Common.Private]
   ## @libraryclass Allows save and restore unit test internal state
   #
   UnitTestPersistenceLib|Include/Library/UnitTestPersistenceLib.h
@@ -47,7 +50,6 @@
   UnitTestTerminationLib|Include/Library/UnitTestTerminationLib.h
 
 [Guids]
-
   gUnitTestPkgTokenSpaceGuid = { 0x833d3aba, 0x39b4, 0x43a2, { 0xb9, 0x30, 0x7a, 0x34, 0x53, 0x39, 0x31, 0xb3 } }
 
 [Ppis]
