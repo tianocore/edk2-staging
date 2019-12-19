@@ -1,5 +1,5 @@
 ## @file
-# UnitTestPkg
+# UnitTestFrameworkPkg
 #
 # Copyright (c) 2007 - 2018, Intel Corporation. All rights reserved.<BR>
 #
@@ -8,11 +8,11 @@
 ##
 
 [Defines]
-  PLATFORM_NAME                  = UnitTestPkg
+  PLATFORM_NAME                  = UnitTestFrameworkPkg
   PLATFORM_GUID                  = 7420CC7E-334E-4EFF-B974-A39613455168
   PLATFORM_VERSION               = 1.00
   DSC_SPECIFICATION              = 0x00010005
-  OUTPUT_DIRECTORY               = Build/UnitTestPkg
+  OUTPUT_DIRECTORY               = Build/UnitTestFrameworkPkg
   SUPPORTED_ARCHITECTURES        = IA32|IPF|X64|EBC|ARM|AARCH64
   BUILD_TARGETS                  = DEBUG|RELEASE|NOOPT
   SKUID_IDENTIFIER               = DEFAULT
@@ -152,42 +152,47 @@
   NULL|MdePkg/Library/BaseStackCheckLib/BaseStackCheckLib.inf
   
   #
-  # UnitTestPkg
+  # UnitTestFrameworkPkg
   #
 [LibraryClasses]
-  UnitTestAssertLib|UnitTestPkg/Library/UnitTestAssertLib/UnitTestAssertLib.inf
-  UnitTestLogLib|UnitTestPkg/Library/UnitTestLogLib/UnitTestLogLib.inf
-  UnitTestPersistenceLib|UnitTestPkg/Library/UnitTestPersistenceLibNull/UnitTestPersistenceLibNull.inf
+  UnitTestAssertLib|UnitTestFrameworkPkg/Library/UnitTestAssertLib/UnitTestAssertLib.inf
+  UnitTestLogLib|UnitTestFrameworkPkg/Library/UnitTestLogLib/UnitTestLogLib.inf
+  UnitTestPersistenceLib|UnitTestFrameworkPkg/FrameworkLibrary/UnitTestPersistenceLibNull/UnitTestPersistenceLibNull.inf
   
 [LibraryClasses.common.PEIM]
-  UnitTestLib|UnitTestPkg/Library/UnitTestLib/UnitTestLibPei.inf
-  UnitTestResultReportLib|UnitTestPkg/Library/UnitTestResultReportLibDebug/UnitTestResultReportLibDebug.inf
-  UnitTestTerminationLib|UnitTestPkg/Library/UnitTestTerminationLibTbd/UnitTestTerminationLibTbd.inf
+  UnitTestLib|UnitTestFrameworkPkg/Library/UnitTestLib/UnitTestLibPei.inf
+  UnitTestResultReportLib|UnitTestFrameworkPkg/FrameworkLibrary/UnitTestResultReportLibDebug/UnitTestResultReportLibDebug.inf
   
 [LibraryClasses.common.DXE_SMM_DRIVER]
-  UnitTestLib|UnitTestPkg/Library/UnitTestLib/UnitTestLibSmm.inf
-  UnitTestResultReportLib|UnitTestPkg/Library/UnitTestResultReportLibDebug/UnitTestResultReportLibDebug.inf
-  UnitTestTerminationLib|UnitTestPkg/Library/UnitTestTerminationLibTbd/UnitTestTerminationLibTbd.inf
+  UnitTestLib|UnitTestFrameworkPkg/Library/UnitTestLib/UnitTestLibSmm.inf
+  UnitTestResultReportLib|UnitTestFrameworkPkg/FrameworkLibrary/UnitTestResultReportLibDebug/UnitTestResultReportLibDebug.inf
 
 [LibraryClasses.common.DXE_DRIVER, LibraryClasses.common.UEFI_APPLICATION]
-  UnitTestLib|UnitTestPkg/Library/UnitTestLib/UnitTestLibDxe.inf
-  UnitTestResultReportLib|UnitTestPkg/Library/UnitTestResultReportLibPlainTextOutput/UnitTestResultReportLibPlainTextOutput.inf
-  UnitTestTerminationLib|UnitTestPkg/Library/UnitTestTerminationLibDxe/UnitTestTerminationLibDxe.inf
+  UnitTestLib|UnitTestFrameworkPkg/Library/UnitTestLib/UnitTestLibDxe.inf
+  UnitTestResultReportLib|UnitTestFrameworkPkg/FrameworkLibrary/UnitTestResultReportLibPlainTextOutput/UnitTestResultReportLibPlainTextOutput.inf
+  UnitTestTerminationLib|UnitTestFrameworkPkg/Library/UnitTestTerminationLibDxe/UnitTestTerminationLibDxe.inf
 
 [Components]
-  UnitTestPkg/Library/UnitTestAssertLib/UnitTestAssertLib.inf
-  UnitTestPkg/Library/UnitTestLib/UnitTestLibDxe.inf
-  UnitTestPkg/Library/UnitTestLib/UnitTestLibPei.inf
-  UnitTestPkg/Library/UnitTestLib/UnitTestLibSmm.inf
-  UnitTestPkg/Library/UnitTestLogLib/UnitTestLogLib.inf
-  UnitTestPkg/Library/UnitTestPersistenceLibNull/UnitTestPersistenceLibNull.inf
-  UnitTestPkg/Library/UnitTestResultReportLibDebug/UnitTestResultReportLibDebug.inf
-  UnitTestPkg/Library/UnitTestResultReportLibPlainTextOutput/UnitTestResultReportLibPlainTextOutput.inf
-  UnitTestPkg/Library/UnitTestTerminationLibDxe/UnitTestTerminationLibDxe.inf
-  UnitTestPkg/Library/UnitTestTerminationLibTbd/UnitTestTerminationLibTbd.inf
-  UnitTestPkg/Sample/SampleUnitTestApp/SampleUnitTestApp.inf
-  UnitTestPkg/Sample/SampleUnitTestPeim/SampleUnitTestPeim.inf
-  UnitTestPkg/Sample/SampleUnitTestSmm/SampleUnitTestSmm.inf
+  UnitTestFrameworkPkg/Library/UnitTestAssertLib/UnitTestAssertLib.inf
+  UnitTestFrameworkPkg/Library/UnitTestLib/UnitTestLibDxe.inf
+  UnitTestFrameworkPkg/Library/UnitTestLib/UnitTestLibPei.inf
+  UnitTestFrameworkPkg/Library/UnitTestLib/UnitTestLibSmm.inf
+  UnitTestFrameworkPkg/Library/UnitTestLogLib/UnitTestLogLib.inf
+  UnitTestFrameworkPkg/FrameworkLibrary/UnitTestPersistenceLibNull/UnitTestPersistenceLibNull.inf
+  UnitTestFrameworkPkg/FrameworkLibrary/UnitTestResultReportLibDebug/UnitTestResultReportLibDebug.inf
+  UnitTestFrameworkPkg/FrameworkLibrary/UnitTestResultReportLibPlainTextOutput/UnitTestResultReportLibPlainTextOutput.inf
+  UnitTestFrameworkPkg/Library/UnitTestTerminationLibDxe/UnitTestTerminationLibDxe.inf
+  UnitTestFrameworkPkg/FrameworkLibrary/CmockaLib/CmockaLib.inf
+  UnitTestFrameworkPkg/FrameworkLibrary/OsServiceLibHost/OsServiceLibHost.inf
+  UnitTestFrameworkPkg/FrameworkLibrary/UnitTestAssertLibcmocka/UnitTestAssertLibcmocka.inf
+  UnitTestFrameworkPkg/FrameworkLibrary/UnitTestBootLibNull/UnitTestBootLibNull.inf
+  UnitTestFrameworkPkg/FrameworkLibrary/UnitTestBootLibUsbClass/UnitTestBootLibUsbClass.inf
+  UnitTestFrameworkPkg/FrameworkLibrary/UnitTestLibcmocka/UnitTestLibcmocka.inf
+  UnitTestFrameworkPkg/FrameworkLibrary/UnitTestPersistenceLibFileSystem/UnitTestPersistenceLibFileSystem.inf
+  UnitTestFrameworkPkg/FrameworkLibrary/UnitTestTerminationLibShell/UnitTestTerminationLibShell.inf
+  UnitTestFrameworkPkg/Sample/SampleUnitTestApp/SampleUnitTestApp.inf
+  UnitTestFrameworkPkg/Sample/SampleUnitTestPeim/SampleUnitTestPeim.inf
+  UnitTestFrameworkPkg/Sample/SampleUnitTestSmm/SampleUnitTestSmm.inf
 
 [BuildOptions]
   *_*_*_CC_FLAGS = -D DISABLE_NEW_DEPRECATED_INTERFACES

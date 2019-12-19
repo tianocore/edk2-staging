@@ -37,19 +37,27 @@
   #
   UnitTestLogLib|Include/Library/UnitTestLogLib.h
 
-[LibraryClasses.Common.Private]
-  ## @libraryclass Allows save and restore unit test internal state
-  #
-  UnitTestPersistenceLib|Include/Library/UnitTestPersistenceLib.h
-
-  ## @libraryclass Provides a unit test result report
-  #
-  UnitTestResultReportLib|Include/Library/UnitTestResultReportLib.h
-
   ## @libraryclass Abstracts the methods that a test could exit prematurely.
   # Allows tests written for different contexts to handle Quit()/Reboot() differently.
   #
   UnitTestTerminationLib|Include/Library/UnitTestTerminationLib.h
+
+[LibraryClasses.Common.Private]
+  ## @libraryclass Allows save and restore unit test internal state
+  #
+  UnitTestPersistenceLib|FrameworkInclude/Library/UnitTestPersistenceLib.h
+
+  ## @libraryclass Provides a unit test result report
+  #
+  UnitTestResultReportLib|FrameworkInclude/Library/UnitTestResultReportLib.h
+
+  ## @libraryclass Provides memory allocation routines specific to host-based tests.
+  #
+  OsServiceLib|FrameworkInclude/Library/OsServiceLib.h
+
+  ## @libraryclass Provides boot-option routines useful in shell-based tests.
+  #
+  UnitTestBootLib|FrameworkInclude/Library/UnitTestBootLib.h
 
 [Guids]
   gUnitTestPkgTokenSpaceGuid = { 0x833d3aba, 0x39b4, 0x43a2, { 0xb9, 0x30, 0x7a, 0x34, 0x53, 0x39, 0x31, 0xb3 } }
