@@ -24,7 +24,7 @@ LIBRARY_CLASS   = UnitTestResultReportLib
 
 [Packages]
   MdePkg/MdePkg.dec
-  UnitTestPkg/UnitTestPkg.dec
+  UnitTestFrameworkPkg/UnitTestFrameworkPkg.dec
 
 
 [Guids]

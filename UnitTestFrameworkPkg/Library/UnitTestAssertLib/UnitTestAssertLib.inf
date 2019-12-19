@@ -28,7 +28,7 @@ LIBRARY_CLASS   = UnitTestAssertLib
 
 [Packages]
   MdePkg/MdePkg.dec
-  UnitTestPkg/UnitTestPkg.dec
+  UnitTestFrameworkPkg/UnitTestFrameworkPkg.dec
 
 
 [Guids]

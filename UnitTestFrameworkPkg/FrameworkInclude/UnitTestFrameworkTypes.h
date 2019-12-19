@@ -22,14 +22,6 @@
 #define UNIT_TEST_FINGERPRINT_SIZE      (sizeof(UINT32))    // Hardcoded to CRC32.
 #define UNIT_TEST_TESTFAILUREMSG_LENGTH (120)
 
-typedef UINT32 UNIT_TEST_STATUS;
-#define UNIT_TEST_PASSED                      (0)
-#define UNIT_TEST_ERROR_PREREQ_NOT_MET        (1)
-#define UNIT_TEST_ERROR_TEST_FAILED           (2)
-#define UNIT_TEST_SKIPPED                     (0xFFFFFFFD)
-#define UNIT_TEST_RUNNING                     (0xFFFFFFFE)
-#define UNIT_TEST_PENDING                     (0xFFFFFFFF)
-
 typedef UINT32 FAILURE_TYPE;
 #define FAILURETYPE_NOFAILURE     (0)
 #define FAILURETYPE_OTHER         (1)
@@ -41,69 +33,6 @@ typedef UINT32 FAILURE_TYPE;
 #define FAILURETYPE_ASSERTSTATUSEQUAL (7)
 #define FAILURETYPE_ASSERTNOTNULL (8)
 
-typedef VOID*   UNIT_TEST_FRAMEWORK_HANDLE; // Same as a UNIT_TEST_FRAMEWORK*, but with fewer build errors.
-typedef VOID*   UNIT_TEST_SUITE_HANDLE;     // Same as a UNIT_TEST_SUITE*, but with fewer build errors.
-typedef VOID*   UNIT_TEST_CONTEXT;
-
-
-///================================================================================================
-///================================================================================================
-///
-/// UNIT TEST FUNCTION TYPE DEFINITIONS
-///
-///================================================================================================
-///================================================================================================
-
-
-//
-// Unit-Test Function pointer type.
-//
-typedef
-UNIT_TEST_STATUS
-(EFIAPI *UNIT_TEST_FUNCTION) (
-  UNIT_TEST_FRAMEWORK_HANDLE  Framework,
-  UNIT_TEST_CONTEXT           Context
-  );
-
-//
-// Unit-Test Prerequisite Function pointer type.
-// NOTE: Should be the same as UnitTest.
-//
-typedef
-UNIT_TEST_STATUS
-(EFIAPI *UNIT_TEST_PREREQ) (
-  UNIT_TEST_FRAMEWORK_HANDLE  Framework,
-  UNIT_TEST_CONTEXT           Context
-  );
-
-//
-// Unit-Test Test Cleanup (after) function pointer type.
-//
-typedef
-VOID
-(EFIAPI *UNIT_TEST_CLEANUP) (
-  UNIT_TEST_FRAMEWORK_HANDLE  Framework,
-  UNIT_TEST_CONTEXT           Context
-  );
-
-//
-// Unit-Test Test Suite Setup (before) function pointer type.
-//
-typedef
-VOID
-(EFIAPI *UNIT_TEST_SUITE_SETUP) (
-  UNIT_TEST_FRAMEWORK_HANDLE  Framework
-  );
-
-//
-// Unit-Test Test Suite Teardown (after) function pointer type.
-//
-typedef
-VOID
-(EFIAPI *UNIT_TEST_SUITE_TEARDOWN) (
-  UNIT_TEST_FRAMEWORK_HANDLE  Framework
-  );
-
 
 ///================================================================================================
 ///================================================================================================
@@ -112,7 +41,6 @@ VOID
 ///
 ///================================================================================================
 ///================================================================================================
-
 
 typedef struct {
   CHAR8                     *Description;
@@ -162,7 +90,6 @@ typedef struct {
   VOID                      *SavedState;      // This is an instance of UNIT_TEST_SAVE_HEADER*, if present.
 } UNIT_TEST_FRAMEWORK;
 
-
 //
 //Structures for the framework to serializing unit test status
 //
@@ -174,14 +101,14 @@ typedef struct
   CHAR8             FailureMessage[UNIT_TEST_TESTFAILUREMSG_LENGTH];
   FAILURE_TYPE      FailureType;
   UNIT_TEST_STATUS  Result;
-  // CHAR8             Log[];
+  CHAR8             Log[];
 } UNIT_TEST_SAVE_TEST;
 
 typedef struct
 {
   UINT32            Size;
   UINT8             Fingerprint[UNIT_TEST_FINGERPRINT_SIZE];      // Fingerprint of the corresponding test.
-  // UINT8          Data[];                                       // Actual data of the context.
+  UINT8             Data[];                                       // Actual data of the context.
 } UNIT_TEST_SAVE_CONTEXT;
 
 typedef struct

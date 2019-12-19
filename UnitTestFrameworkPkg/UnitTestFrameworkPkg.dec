@@ -21,6 +21,8 @@
 
 [Includes.Common.Private]
   FrameworkInclude
+  FrameworkLibrary/CmockaLib/cmocka/include
+  FrameworkLibrary/CmockaLib/cmocka/include/cmockery
 
 [LibraryClasses]
   ## @libraryclass Provide unit test assert helpers

@@ -6,7 +6,7 @@ Copyright (c) Microsoft
 **/
 
 #include <Uefi.h>
-#include <UnitTestTypes.h>
+#include <UnitTestFrameworkTypes.h>
 #include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
 #include <Library/UnitTestResultReportLib.h>

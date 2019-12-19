@@ -16,13 +16,13 @@
   SKUID_IDENTIFIER               = DEFAULT
 
 [LibraryClasses]
-  CmockaLib|CmockaHostUnitTestPkg/Library/CmockaLib/CmockaLib.inf
+  CmockaLib|UnitTestFrameworkPkg/FrameworkLibrary/CmockaLib/CmockaLib.inf
 
   BaseLib|MdePkg/Test/HostLibrary/BaseLibHost/BaseLibHost.inf
   BaseMemoryLib|MdePkg/Test/HostLibrary/BaseMemoryLibHost/BaseMemoryLibHost.inf
   DebugLib|MdePkg/Test/HostLibrary/DebugLibHost/DebugLibHost.inf
   MemoryAllocationLib|MdePkg/Test/HostLibrary/MemoryAllocationLibHost/MemoryAllocationLibHost.inf
-  OsServiceLib|HostBasedUnitTestPkg/Library/OsServiceLibHost/OsServiceLibHost.inf
+  OsServiceLib|UnitTestFrameworkPkg/FrameworkLibrary/OsServiceLibHost/OsServiceLibHost.inf
 
   PcdLib|MdePkg/Library/BasePcdLibNull/BasePcdLibNull.inf
   PeiServicesLib|MdePkg/Library/PeiServicesLib/PeiServicesLib.inf
@@ -30,12 +30,12 @@
   PrintLib|MdePkg/Library/BasePrintLib/BasePrintLib.inf
   SafeIntLib|MdePkg/Library/BaseSafeIntLib/BaseSafeIntLib.inf
 
-  UnitTestAssertLib|CmockaHostUnitTestPkg/Library/UnitTestAssertLibcmocka/UnitTestAssertLibcmocka.inf
-  UnitTestLib|CmockaHostUnitTestPkg/Library/UnitTestLibcmocka/UnitTestLibcmocka.inf
+  UnitTestAssertLib|UnitTestFrameworkPkg/FrameworkLibrary/UnitTestAssertLibcmocka/UnitTestAssertLibcmocka.inf
+  UnitTestLib|UnitTestFrameworkPkg/FrameworkLibrary/UnitTestLibcmocka/UnitTestLibcmocka.inf
 
 [Components]
 
-  CmockaHostUnitTestPkg/Library/CmockaLib/CmockaLib.inf {
+  UnitTestFrameworkPkg/FrameworkLibrary/CmockaLib/CmockaLib.inf {
   <BuildOptions>
     MSFT:*_*_*_CC_FLAGS      ==  /c /D _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1 /D _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1 /D _CRT_NONSTDC_NO_WARNINGS=1 /D _CRT_SECURE_NO_WARNINGS=1 -DHAVE_VSNPRINTF -DHAVE_SNPRINTF
 

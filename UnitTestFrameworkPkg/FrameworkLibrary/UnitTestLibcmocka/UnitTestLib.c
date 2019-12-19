@@ -13,12 +13,14 @@
 #include <cmocka.h>
 
 #include <Uefi.h>
-#include <UnitTestTypes.h>
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/DebugLib.h>
 #include <Library/OsServiceLib.h>
+
+#include <Library/UnitTestLib.h>
+#include <UnitTestFrameworkTypes.h>
 
 #define MAX_STRING_SIZE  1025
 

@@ -6,7 +6,7 @@ Copyright (c) Microsoft
 **/
 
 #include <PiDxe.h>
-#include <UnitTestTypes.h>
+#include <UnitTestFrameworkTypes.h>
 #include <Library/UefiLib.h>
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>

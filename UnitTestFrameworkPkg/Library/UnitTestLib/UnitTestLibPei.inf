@@ -32,7 +32,7 @@ LIBRARY_CLASS   = UnitTestLib|PEIM
 
 [Packages]
   MdePkg/MdePkg.dec
-  UnitTestPkg/UnitTestPkg.dec
+  UnitTestFrameworkPkg/UnitTestFrameworkPkg.dec
 
 
 [Guids]

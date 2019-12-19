@@ -21,9 +21,7 @@ Copyright (C) 2016 Microsoft Corporation. All Rights Reserved.
 
 **/
 #include <PiDxe.h>
-#include <UnitTestTypes.h>
 #include <Library/UnitTestPersistenceLib.h>
-//#include <Library/UnitTestLib.h>
 #include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
@@ -32,6 +30,9 @@ Copyright (C) 2016 Microsoft Corporation. All Rights Reserved.
 #include <Library/ShellLib.h>
 
 #include <Protocol/LoadedImage.h>
+
+#include <Library/UnitTestLib.h>
+#include <UnitTestFrameworkTypes.h>
 
 /**
   TODO: STUFF!!

@@ -34,7 +34,7 @@ LIBRARY_CLASS   = UnitTestLib|DXE_DRIVER UEFI_APPLICATION
 
 [Packages]
   MdePkg/MdePkg.dec
-  UnitTestPkg/UnitTestPkg.dec
+  UnitTestFrameworkPkg/UnitTestFrameworkPkg.dec
 
 
 [Guids]

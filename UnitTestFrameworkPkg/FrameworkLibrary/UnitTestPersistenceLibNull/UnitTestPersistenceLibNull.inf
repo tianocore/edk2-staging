@@ -41,4 +41,4 @@
 
 [Packages]
   MdePkg/MdePkg.dec
-  UnitTestPkg/UnitTestPkg.dec
+  UnitTestFrameworkPkg/UnitTestFrameworkPkg.dec

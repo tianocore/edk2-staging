@@ -33,7 +33,7 @@ LIBRARY_CLASS   = UnitTestLib|DXE_SMM_DRIVER
 
 [Packages]
   MdePkg/MdePkg.dec
-  UnitTestPkg/UnitTestPkg.dec
+  UnitTestFrameworkPkg/UnitTestFrameworkPkg.dec
 
 
 [Guids]

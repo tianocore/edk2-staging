@@ -21,9 +21,7 @@
 
 [Packages]
   MdePkg/MdePkg.dec
-  UnitTestPkg/UnitTestPkg.dec
-  HostBasedUnitTestPkg/HostBasedUnitTestPkg.dec
-  CmockaHostUnitTestPkg/CmockaHostUnitTestPkg.dec
+  UnitTestFrameworkPkg/UnitTestFrameworkPkg.dec
 
 [Sources]
   UnitTestLib.c

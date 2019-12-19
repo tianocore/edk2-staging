@@ -2736,13 +2736,13 @@ UefiTestMain (
   VOID
   )
 {
-  EFI_STATUS                Status;
-  UNIT_TEST_FRAMEWORK       *Fw;
-  UNIT_TEST_SUITE           *ConversionTestSuite;
-  UNIT_TEST_SUITE           *AdditionSubtractionTestSuite;
-  UNIT_TEST_SUITE           *MultiplicationTestSuite;
+  EFI_STATUS                  Status;
+  UNIT_TEST_FRAMEWORK_HANDLE  Framework;
+  UNIT_TEST_SUITE_HANDLE      ConversionTestSuite;
+  UNIT_TEST_SUITE_HANDLE      AdditionSubtractionTestSuite;
+  UNIT_TEST_SUITE_HANDLE      MultiplicationTestSuite;
 
-  Fw = NULL;
+  Framework = NULL;
   ConversionTestSuite = NULL;
   AdditionSubtractionTestSuite = NULL;
   MultiplicationTestSuite = NULL; 
@@ -2752,7 +2752,7 @@ UefiTestMain (
   //
   // Start setting up the test framework for running the tests.
   //
-  Status = InitUnitTestFramework (&Fw, UNIT_TEST_NAME, gEfiCallerBaseName, UNIT_TEST_VERSION);
+  Status = InitUnitTestFramework (&Framework, UNIT_TEST_NAME, gEfiCallerBaseName, UNIT_TEST_VERSION);
   if (EFI_ERROR(Status)) {
     DEBUG((DEBUG_ERROR, "Failed in InitUnitTestFramework. Status = %r\n", Status));
     goto EXIT;
@@ -2761,142 +2761,142 @@ UefiTestMain (
   ///
   // Test the conversion functions
   //
-  Status = CreateUnitTestSuite (&ConversionTestSuite, Fw, "Int Safe Conversions Test Suite", "Common.SafeInt.Convert", NULL, NULL);
+  Status = CreateUnitTestSuite (&ConversionTestSuite, Framework, "Int Safe Conversions Test Suite", "Common.SafeInt.Convert", NULL, NULL);
   if (EFI_ERROR(Status)) {
     DEBUG((DEBUG_ERROR, "Failed in CreateUnitTestSuite for Conversions Test Suite\n"));
     Status = EFI_OUT_OF_RESOURCES;
     goto EXIT;
   }
-  AddTestCase(ConversionTestSuite, "Test SafeInt8ToUint8",    "Common.SafeInt.Convert.TestSafeInt8ToUint8",    TestSafeInt8ToUint8,    NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeInt8ToUint16",   "Common.SafeInt.Convert.TestSafeInt8ToUint16",   TestSafeInt8ToUint16,   NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeInt8ToUint32",   "Common.SafeInt.Convert.TestSafeInt8ToUint32",   TestSafeInt8ToUint32,   NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeInt8ToUintn",    "Common.SafeInt.Convert.TestSafeInt8ToUintn",    TestSafeInt8ToUintn,    NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeInt8ToUint64",   "Common.SafeInt.Convert.TestSafeInt8ToUint64",   TestSafeInt8ToUint64,   NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeUint8ToInt8",    "Common.SafeInt.Convert.TestSafeUint8ToInt8",    TestSafeUint8ToInt8,    NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeUint8ToChar8",   "Common.SafeInt.Convert.TestSafeUint8ToChar8",   TestSafeUint8ToChar8,   NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeInt16ToInt8",    "Common.SafeInt.Convert.TestSafeInt16ToInt8",    TestSafeInt16ToInt8,    NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeInt16ToChar8",   "Common.SafeInt.Convert.TestSafeInt16ToChar8",   TestSafeInt16ToChar8,   NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeInt16ToUint8",   "Common.SafeInt.Convert.TestSafeInt16ToUint8",   TestSafeInt16ToUint8,   NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeInt16ToUint16",  "Common.SafeInt.Convert.TestSafeInt16ToUint16",  TestSafeInt16ToUint16,  NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeInt16ToUint32",  "Common.SafeInt.Convert.TestSafeInt16ToUint32",  TestSafeInt16ToUint32,  NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeInt16ToUintn",   "Common.SafeInt.Convert.TestSafeInt16ToUintn",   TestSafeInt16ToUintn,   NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeInt16ToUint64",  "Common.SafeInt.Convert.TestSafeInt16ToUint64",  TestSafeInt16ToUint64,  NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeUint16ToInt8",   "Common.SafeInt.Convert.TestSafeUint16ToInt8",   TestSafeUint16ToInt8,   NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeUint16ToChar8",  "Common.SafeInt.Convert.TestSafeUint16ToChar8",  TestSafeUint16ToChar8,  NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeUint16ToUint8",  "Common.SafeInt.Convert.TestSafeUint16ToUint8",  TestSafeUint16ToUint8,  NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeUint16ToInt16",  "Common.SafeInt.Convert.TestSafeUint16ToInt16",  TestSafeUint16ToInt16,  NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeInt32ToInt8",    "Common.SafeInt.Convert.TestSafeInt32ToInt8",    TestSafeInt32ToInt8,    NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeInt32ToChar8",   "Common.SafeInt.Convert.TestSafeInt32ToChar8",   TestSafeInt32ToChar8,   NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeInt32ToUint8",   "Common.SafeInt.Convert.TestSafeInt32ToUint8",   TestSafeInt32ToUint8,   NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeInt32ToInt16",   "Common.SafeInt.Convert.TestSafeInt32ToInt16",   TestSafeInt32ToInt16,   NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeInt32ToUint16",  "Common.SafeInt.Convert.TestSafeInt32ToUint16",  TestSafeInt32ToUint16,  NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeInt32ToUint32",  "Common.SafeInt.Convert.TestSafeInt32ToUint32",  TestSafeInt32ToUint32,  NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeInt32ToUintn",   "Common.SafeInt.Convert.TestSafeInt32ToUintn",   TestSafeInt32ToUintn,   NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeInt32ToUint64",  "Common.SafeInt.Convert.TestSafeInt32ToUint64",  TestSafeInt32ToUint64,  NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeUint32ToInt8",   "Common.SafeInt.Convert.TestSafeUint32ToInt8",   TestSafeUint32ToInt8,   NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeUint32ToChar8",  "Common.SafeInt.Convert.TestSafeUint32ToChar8",  TestSafeUint32ToChar8,  NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeUint32ToUint8",  "Common.SafeInt.Convert.TestSafeUint32ToUint8",  TestSafeUint32ToUint8,  NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeUint32ToInt16",  "Common.SafeInt.Convert.TestSafeUint32ToInt16",  TestSafeUint32ToInt16,  NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeUint32ToUint16", "Common.SafeInt.Convert.TestSafeUint32ToUint16", TestSafeUint32ToUint16, NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeUint32ToInt32",  "Common.SafeInt.Convert.TestSafeUint32ToInt32",  TestSafeUint32ToInt32,  NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeUint32ToIntn",   "Common.SafeInt.Convert.TestSafeUint32ToIntn",   TestSafeUint32ToIntn,   NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeIntnToInt8",     "Common.SafeInt.Convert.TestSafeIntnToInt8",     TestSafeIntnToInt8,     NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeIntnToChar8",    "Common.SafeInt.Convert.TestSafeIntnToChar8",    TestSafeIntnToChar8,    NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeIntnToUint8",    "Common.SafeInt.Convert.TestSafeIntnToUint8",    TestSafeIntnToUint8,    NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeIntnToInt16",    "Common.SafeInt.Convert.TestSafeIntnToInt16",    TestSafeIntnToInt16,    NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeIntnToUint16",   "Common.SafeInt.Convert.TestSafeIntnToUint16",   TestSafeIntnToUint16,   NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeIntnToInt32",    "Common.SafeInt.Convert.TestSafeIntnToInt32",    TestSafeIntnToInt32,    NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeIntnToUint32",   "Common.SafeInt.Convert.TestSafeIntnToUint32",   TestSafeIntnToUint32,   NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeIntnToUintn",    "Common.SafeInt.Convert.TestSafeIntnToUintn",    TestSafeIntnToUintn,    NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeIntnToUint64",   "Common.SafeInt.Convert.TestSafeIntnToUint64",   TestSafeIntnToUint64,   NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeUintnToInt8",    "Common.SafeInt.Convert.TestSafeUintnToInt8",    TestSafeUintnToInt8,    NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeUintnToChar8",   "Common.SafeInt.Convert.TestSafeUintnToChar8",   TestSafeUintnToChar8,   NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeUintnToUint8",   "Common.SafeInt.Convert.TestSafeUintnToUint8",   TestSafeUintnToUint8,   NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeUintnToInt16",   "Common.SafeInt.Convert.TestSafeUintnToInt16",   TestSafeUintnToInt16,   NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeUintnToUint16",  "Common.SafeInt.Convert.TestSafeUintnToUint16",  TestSafeUintnToUint16,  NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeUintnToInt32",   "Common.SafeInt.Convert.TestSafeUintnToInt32",   TestSafeUintnToInt32,   NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeUintnToUint32",  "Common.SafeInt.Convert.TestSafeUintnToUint32",  TestSafeUintnToUint32,  NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeUintnToIntn",    "Common.SafeInt.Convert.TestSafeUintnToIntn",    TestSafeUintnToIntn,    NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeUintnToInt64",   "Common.SafeInt.Convert.TestSafeUintnToInt64",   TestSafeUintnToInt64,   NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeInt64ToInt8",    "Common.SafeInt.Convert.TestSafeInt64ToInt8",    TestSafeInt64ToInt8,    NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeInt64ToChar8",   "Common.SafeInt.Convert.TestSafeInt64ToChar8",   TestSafeInt64ToChar8,   NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeInt64ToUint8",   "Common.SafeInt.Convert.TestSafeInt64ToUint8",   TestSafeInt64ToUint8,   NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeInt64ToInt16",   "Common.SafeInt.Convert.TestSafeInt64ToInt16",   TestSafeInt64ToInt16,   NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeInt64ToUint16",  "Common.SafeInt.Convert.TestSafeInt64ToUint16",  TestSafeInt64ToUint16,  NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeInt64ToInt32",   "Common.SafeInt.Convert.TestSafeInt64ToInt32",   TestSafeInt64ToInt32,   NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeInt64ToUint32",  "Common.SafeInt.Convert.TestSafeInt64ToUint32",  TestSafeInt64ToUint32,  NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeInt64ToIntn",    "Common.SafeInt.Convert.TestSafeInt64ToIntn",    TestSafeInt64ToIntn,    NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeInt64ToUintn",   "Common.SafeInt.Convert.TestSafeInt64ToUintn",   TestSafeInt64ToUintn,   NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeInt64ToUint64",  "Common.SafeInt.Convert.TestSafeInt64ToUint64",  TestSafeInt64ToUint64,  NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeUint64ToInt8",   "Common.SafeInt.Convert.TestSafeUint64ToInt8",   TestSafeUint64ToInt8,   NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeUint64ToChar8",  "Common.SafeInt.Convert.TestSafeUint64ToChar8",  TestSafeUint64ToChar8,  NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeUint64ToUint8",  "Common.SafeInt.Convert.TestSafeUint64ToUint8",  TestSafeUint64ToUint8,  NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeUint64ToInt16",  "Common.SafeInt.Convert.TestSafeUint64ToInt16",  TestSafeUint64ToInt16,  NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeUint64ToUint16", "Common.SafeInt.Convert.TestSafeUint64ToUint16", TestSafeUint64ToUint16, NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeUint64ToInt32",  "Common.SafeInt.Convert.TestSafeUint64ToInt32",  TestSafeUint64ToInt32,  NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeUint64ToUint32", "Common.SafeInt.Convert.TestSafeUint64ToUint32", TestSafeUint64ToUint32, NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeUint64ToIntn",   "Common.SafeInt.Convert.TestSafeUint64ToIntn",   TestSafeUint64ToIntn,   NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeUint64ToUintn",  "Common.SafeInt.Convert.TestSafeUint64ToUintn",  TestSafeUint64ToUintn,  NULL, NULL, NULL);
-  AddTestCase(ConversionTestSuite, "Test SafeUint64ToInt64",  "Common.SafeInt.Convert.TestSafeUint64ToInt64",  TestSafeUint64ToInt64,  NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeInt8ToUint8",    "TestSafeInt8ToUint8",    TestSafeInt8ToUint8,    NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeInt8ToUint16",   "TestSafeInt8ToUint16",   TestSafeInt8ToUint16,   NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeInt8ToUint32",   "TestSafeInt8ToUint32",   TestSafeInt8ToUint32,   NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeInt8ToUintn",    "TestSafeInt8ToUintn",    TestSafeInt8ToUintn,    NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeInt8ToUint64",   "TestSafeInt8ToUint64",   TestSafeInt8ToUint64,   NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeUint8ToInt8",    "TestSafeUint8ToInt8",    TestSafeUint8ToInt8,    NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeUint8ToChar8",   "TestSafeUint8ToChar8",   TestSafeUint8ToChar8,   NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeInt16ToInt8",    "TestSafeInt16ToInt8",    TestSafeInt16ToInt8,    NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeInt16ToChar8",   "TestSafeInt16ToChar8",   TestSafeInt16ToChar8,   NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeInt16ToUint8",   "TestSafeInt16ToUint8",   TestSafeInt16ToUint8,   NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeInt16ToUint16",  "TestSafeInt16ToUint16",  TestSafeInt16ToUint16,  NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeInt16ToUint32",  "TestSafeInt16ToUint32",  TestSafeInt16ToUint32,  NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeInt16ToUintn",   "TestSafeInt16ToUintn",   TestSafeInt16ToUintn,   NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeInt16ToUint64",  "TestSafeInt16ToUint64",  TestSafeInt16ToUint64,  NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeUint16ToInt8",   "TestSafeUint16ToInt8",   TestSafeUint16ToInt8,   NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeUint16ToChar8",  "TestSafeUint16ToChar8",  TestSafeUint16ToChar8,  NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeUint16ToUint8",  "TestSafeUint16ToUint8",  TestSafeUint16ToUint8,  NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeUint16ToInt16",  "TestSafeUint16ToInt16",  TestSafeUint16ToInt16,  NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeInt32ToInt8",    "TestSafeInt32ToInt8",    TestSafeInt32ToInt8,    NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeInt32ToChar8",   "TestSafeInt32ToChar8",   TestSafeInt32ToChar8,   NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeInt32ToUint8",   "TestSafeInt32ToUint8",   TestSafeInt32ToUint8,   NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeInt32ToInt16",   "TestSafeInt32ToInt16",   TestSafeInt32ToInt16,   NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeInt32ToUint16",  "TestSafeInt32ToUint16",  TestSafeInt32ToUint16,  NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeInt32ToUint32",  "TestSafeInt32ToUint32",  TestSafeInt32ToUint32,  NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeInt32ToUintn",   "TestSafeInt32ToUintn",   TestSafeInt32ToUintn,   NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeInt32ToUint64",  "TestSafeInt32ToUint64",  TestSafeInt32ToUint64,  NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeUint32ToInt8",   "TestSafeUint32ToInt8",   TestSafeUint32ToInt8,   NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeUint32ToChar8",  "TestSafeUint32ToChar8",  TestSafeUint32ToChar8,  NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeUint32ToUint8",  "TestSafeUint32ToUint8",  TestSafeUint32ToUint8,  NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeUint32ToInt16",  "TestSafeUint32ToInt16",  TestSafeUint32ToInt16,  NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeUint32ToUint16", "TestSafeUint32ToUint16", TestSafeUint32ToUint16, NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeUint32ToInt32",  "TestSafeUint32ToInt32",  TestSafeUint32ToInt32,  NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeUint32ToIntn",   "TestSafeUint32ToIntn",   TestSafeUint32ToIntn,   NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeIntnToInt8",     "TestSafeIntnToInt8",     TestSafeIntnToInt8,     NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeIntnToChar8",    "TestSafeIntnToChar8",    TestSafeIntnToChar8,    NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeIntnToUint8",    "TestSafeIntnToUint8",    TestSafeIntnToUint8,    NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeIntnToInt16",    "TestSafeIntnToInt16",    TestSafeIntnToInt16,    NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeIntnToUint16",   "TestSafeIntnToUint16",   TestSafeIntnToUint16,   NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeIntnToInt32",    "TestSafeIntnToInt32",    TestSafeIntnToInt32,    NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeIntnToUint32",   "TestSafeIntnToUint32",   TestSafeIntnToUint32,   NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeIntnToUintn",    "TestSafeIntnToUintn",    TestSafeIntnToUintn,    NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeIntnToUint64",   "TestSafeIntnToUint64",   TestSafeIntnToUint64,   NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeUintnToInt8",    "TestSafeUintnToInt8",    TestSafeUintnToInt8,    NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeUintnToChar8",   "TestSafeUintnToChar8",   TestSafeUintnToChar8,   NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeUintnToUint8",   "TestSafeUintnToUint8",   TestSafeUintnToUint8,   NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeUintnToInt16",   "TestSafeUintnToInt16",   TestSafeUintnToInt16,   NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeUintnToUint16",  "TestSafeUintnToUint16",  TestSafeUintnToUint16,  NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeUintnToInt32",   "TestSafeUintnToInt32",   TestSafeUintnToInt32,   NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeUintnToUint32",  "TestSafeUintnToUint32",  TestSafeUintnToUint32,  NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeUintnToIntn",    "TestSafeUintnToIntn",    TestSafeUintnToIntn,    NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeUintnToInt64",   "TestSafeUintnToInt64",   TestSafeUintnToInt64,   NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeInt64ToInt8",    "TestSafeInt64ToInt8",    TestSafeInt64ToInt8,    NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeInt64ToChar8",   "TestSafeInt64ToChar8",   TestSafeInt64ToChar8,   NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeInt64ToUint8",   "TestSafeInt64ToUint8",   TestSafeInt64ToUint8,   NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeInt64ToInt16",   "TestSafeInt64ToInt16",   TestSafeInt64ToInt16,   NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeInt64ToUint16",  "TestSafeInt64ToUint16",  TestSafeInt64ToUint16,  NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeInt64ToInt32",   "TestSafeInt64ToInt32",   TestSafeInt64ToInt32,   NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeInt64ToUint32",  "TestSafeInt64ToUint32",  TestSafeInt64ToUint32,  NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeInt64ToIntn",    "TestSafeInt64ToIntn",    TestSafeInt64ToIntn,    NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeInt64ToUintn",   "TestSafeInt64ToUintn",   TestSafeInt64ToUintn,   NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeInt64ToUint64",  "TestSafeInt64ToUint64",  TestSafeInt64ToUint64,  NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeUint64ToInt8",   "TestSafeUint64ToInt8",   TestSafeUint64ToInt8,   NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeUint64ToChar8",  "TestSafeUint64ToChar8",  TestSafeUint64ToChar8,  NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeUint64ToUint8",  "TestSafeUint64ToUint8",  TestSafeUint64ToUint8,  NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeUint64ToInt16",  "TestSafeUint64ToInt16",  TestSafeUint64ToInt16,  NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeUint64ToUint16", "TestSafeUint64ToUint16", TestSafeUint64ToUint16, NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeUint64ToInt32",  "TestSafeUint64ToInt32",  TestSafeUint64ToInt32,  NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeUint64ToUint32", "TestSafeUint64ToUint32", TestSafeUint64ToUint32, NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeUint64ToIntn",   "TestSafeUint64ToIntn",   TestSafeUint64ToIntn,   NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeUint64ToUintn",  "TestSafeUint64ToUintn",  TestSafeUint64ToUintn,  NULL, NULL, NULL);
+  AddTestCase(ConversionTestSuite, "Test SafeUint64ToInt64",  "TestSafeUint64ToInt64",  TestSafeUint64ToInt64,  NULL, NULL, NULL);
 
   //
   // Test the addition and subtraction functions
   //
-  Status = CreateUnitTestSuite(&AdditionSubtractionTestSuite, Fw, "Int Safe Add/Subtract Test Suite", "Common.SafeInt.AddSubtract", NULL, NULL);
+  Status = CreateUnitTestSuite(&AdditionSubtractionTestSuite, Framework, "Int Safe Add/Subtract Test Suite", "Common.SafeInt.AddSubtract", NULL, NULL);
   if (EFI_ERROR(Status)) {
     DEBUG((DEBUG_ERROR, "Failed in CreateUnitTestSuite for Int Safe Add/Subtract Test Suite\n"));
     Status = EFI_OUT_OF_RESOURCES;
     goto EXIT;
   }
-  AddTestCase(AdditionSubtractionTestSuite, "Test SafeUint8Add",  "Common.SafeInt.AddSubtract.TestSafeUint8Add",  TestSafeUint8Add,  NULL, NULL, NULL);
-  AddTestCase(AdditionSubtractionTestSuite, "Test SafeUint16Add", "Common.SafeInt.AddSubtract.TestSafeUint16Add", TestSafeUint16Add, NULL, NULL, NULL);
-  AddTestCase(AdditionSubtractionTestSuite, "Test SafeUint32Add", "Common.SafeInt.AddSubtract.TestSafeUint32Add", TestSafeUint32Add, NULL, NULL, NULL);
-  AddTestCase(AdditionSubtractionTestSuite, "Test SafeUintnAdd",  "Common.SafeInt.AddSubtract.TestSafeUintnAdd",  TestSafeUintnAdd,  NULL, NULL, NULL);
-  AddTestCase(AdditionSubtractionTestSuite, "Test SafeUint64Add", "Common.SafeInt.AddSubtract.TestSafeUint64Add", TestSafeUint64Add, NULL, NULL, NULL);
-  AddTestCase(AdditionSubtractionTestSuite, "Test SafeInt8Add",   "Common.SafeInt.AddSubtract.TestSafeInt8Add",   TestSafeInt8Add,   NULL, NULL, NULL);
-  AddTestCase(AdditionSubtractionTestSuite, "Test SafeInt16Add",  "Common.SafeInt.AddSubtract.TestSafeInt16Add",  TestSafeInt16Add,  NULL, NULL, NULL);
-  AddTestCase(AdditionSubtractionTestSuite, "Test SafeInt32Add",  "Common.SafeInt.AddSubtract.TestSafeInt32Add",  TestSafeInt32Add,  NULL, NULL, NULL);
-  AddTestCase(AdditionSubtractionTestSuite, "Test SafeIntnAdd",   "Common.SafeInt.AddSubtract.TestSafeIntnAdd",   TestSafeIntnAdd,   NULL, NULL, NULL);
-  AddTestCase(AdditionSubtractionTestSuite, "Test SafeInt64Add",  "Common.SafeInt.AddSubtract.TestSafeInt64Add",  TestSafeInt64Add,  NULL, NULL, NULL);
-  AddTestCase(AdditionSubtractionTestSuite, "Test SafeUint8Sub",  "Common.SafeInt.AddSubtract.TestSafeUint8Sub",  TestSafeUint8Sub,  NULL, NULL, NULL);
-  AddTestCase(AdditionSubtractionTestSuite, "Test SafeUint16Sub", "Common.SafeInt.AddSubtract.TestSafeUint16Sub", TestSafeUint16Sub, NULL, NULL, NULL);
-  AddTestCase(AdditionSubtractionTestSuite, "Test SafeUint32Sub", "Common.SafeInt.AddSubtract.TestSafeUint32Sub", TestSafeUint32Sub, NULL, NULL, NULL);
-  AddTestCase(AdditionSubtractionTestSuite, "Test SafeUintnSub",  "Common.SafeInt.AddSubtract.TestSafeUintnSub",  TestSafeUintnSub,  NULL, NULL, NULL);
-  AddTestCase(AdditionSubtractionTestSuite, "Test SafeUint64Sub", "Common.SafeInt.AddSubtract.TestSafeUint64Sub", TestSafeUint64Sub, NULL, NULL, NULL);
-  AddTestCase(AdditionSubtractionTestSuite, "Test SafeInt8Sub",   "Common.SafeInt.AddSubtract.TestSafeInt8Sub",   TestSafeInt8Sub,   NULL, NULL, NULL);
-  AddTestCase(AdditionSubtractionTestSuite, "Test SafeInt16Sub",  "Common.SafeInt.AddSubtract.TestSafeInt16Sub",  TestSafeInt16Sub,  NULL, NULL, NULL);
-  AddTestCase(AdditionSubtractionTestSuite, "Test SafeInt32Sub",  "Common.SafeInt.AddSubtract.TestSafeInt32Sub",  TestSafeInt32Sub,  NULL, NULL, NULL);
-  AddTestCase(AdditionSubtractionTestSuite, "Test SafeIntnSub",   "Common.SafeInt.AddSubtract.TestSafeIntnSub",   TestSafeIntnSub,   NULL, NULL, NULL);
-  AddTestCase(AdditionSubtractionTestSuite, "Test SafeInt64Sub",  "Common.SafeInt.AddSubtract.TestSafeInt64Sub",  TestSafeInt64Sub,  NULL, NULL, NULL);
+  AddTestCase(AdditionSubtractionTestSuite, "Test SafeUint8Add",  "TestSafeUint8Add",  TestSafeUint8Add,  NULL, NULL, NULL);
+  AddTestCase(AdditionSubtractionTestSuite, "Test SafeUint16Add", "TestSafeUint16Add", TestSafeUint16Add, NULL, NULL, NULL);
+  AddTestCase(AdditionSubtractionTestSuite, "Test SafeUint32Add", "TestSafeUint32Add", TestSafeUint32Add, NULL, NULL, NULL);
+  AddTestCase(AdditionSubtractionTestSuite, "Test SafeUintnAdd",  "TestSafeUintnAdd",  TestSafeUintnAdd,  NULL, NULL, NULL);
+  AddTestCase(AdditionSubtractionTestSuite, "Test SafeUint64Add", "TestSafeUint64Add", TestSafeUint64Add, NULL, NULL, NULL);
+  AddTestCase(AdditionSubtractionTestSuite, "Test SafeInt8Add",   "TestSafeInt8Add",   TestSafeInt8Add,   NULL, NULL, NULL);
+  AddTestCase(AdditionSubtractionTestSuite, "Test SafeInt16Add",  "TestSafeInt16Add",  TestSafeInt16Add,  NULL, NULL, NULL);
+  AddTestCase(AdditionSubtractionTestSuite, "Test SafeInt32Add",  "TestSafeInt32Add",  TestSafeInt32Add,  NULL, NULL, NULL);
+  AddTestCase(AdditionSubtractionTestSuite, "Test SafeIntnAdd",   "TestSafeIntnAdd",   TestSafeIntnAdd,   NULL, NULL, NULL);
+  AddTestCase(AdditionSubtractionTestSuite, "Test SafeInt64Add",  "TestSafeInt64Add",  TestSafeInt64Add,  NULL, NULL, NULL);
+  AddTestCase(AdditionSubtractionTestSuite, "Test SafeUint8Sub",  "TestSafeUint8Sub",  TestSafeUint8Sub,  NULL, NULL, NULL);
+  AddTestCase(AdditionSubtractionTestSuite, "Test SafeUint16Sub", "TestSafeUint16Sub", TestSafeUint16Sub, NULL, NULL, NULL);
+  AddTestCase(AdditionSubtractionTestSuite, "Test SafeUint32Sub", "TestSafeUint32Sub", TestSafeUint32Sub, NULL, NULL, NULL);
+  AddTestCase(AdditionSubtractionTestSuite, "Test SafeUintnSub",  "TestSafeUintnSub",  TestSafeUintnSub,  NULL, NULL, NULL);
+  AddTestCase(AdditionSubtractionTestSuite, "Test SafeUint64Sub", "TestSafeUint64Sub", TestSafeUint64Sub, NULL, NULL, NULL);
+  AddTestCase(AdditionSubtractionTestSuite, "Test SafeInt8Sub",   "TestSafeInt8Sub",   TestSafeInt8Sub,   NULL, NULL, NULL);
+  AddTestCase(AdditionSubtractionTestSuite, "Test SafeInt16Sub",  "TestSafeInt16Sub",  TestSafeInt16Sub,  NULL, NULL, NULL);
+  AddTestCase(AdditionSubtractionTestSuite, "Test SafeInt32Sub",  "TestSafeInt32Sub",  TestSafeInt32Sub,  NULL, NULL, NULL);
+  AddTestCase(AdditionSubtractionTestSuite, "Test SafeIntnSub",   "TestSafeIntnSub",   TestSafeIntnSub,   NULL, NULL, NULL);
+  AddTestCase(AdditionSubtractionTestSuite, "Test SafeInt64Sub",  "TestSafeInt64Sub",  TestSafeInt64Sub,  NULL, NULL, NULL);
 
   //
   // Test the multiplication functions
   //
-  Status = CreateUnitTestSuite(&MultiplicationTestSuite, Fw, "Int Safe Multiply Test Suite", "Common.SafeInt.Multiply", NULL, NULL);
+  Status = CreateUnitTestSuite(&MultiplicationTestSuite, Framework, "Int Safe Multiply Test Suite", "Common.SafeInt.Multiply", NULL, NULL);
   if (EFI_ERROR(Status)) {
     DEBUG((DEBUG_ERROR, "Failed in CreateUnitTestSuite for Int Safe Multiply Test Suite\n"));
     Status = EFI_OUT_OF_RESOURCES;
     goto EXIT;
   }
-  AddTestCase(MultiplicationTestSuite, "Test SafeUint8Mult",  "Common.SafeInt.Multiply.TestSafeUint8Mult",  TestSafeUint8Mult,  NULL, NULL, NULL);
-  AddTestCase(MultiplicationTestSuite, "Test SafeUint16Mult", "Common.SafeInt.Multiply.TestSafeUint16Mult", TestSafeUint16Mult, NULL, NULL, NULL);
-  AddTestCase(MultiplicationTestSuite, "Test SafeUint32Mult", "Common.SafeInt.Multiply.TestSafeUint32Mult", TestSafeUint32Mult, NULL, NULL, NULL);
-  AddTestCase(MultiplicationTestSuite, "Test SafeUintnMult",  "Common.SafeInt.Multiply.TestSafeUintnMult",  TestSafeUintnMult,  NULL, NULL, NULL);
-  AddTestCase(MultiplicationTestSuite, "Test SafeUint64Mult", "Common.SafeInt.Multiply.TestSafeUint64Mult", TestSafeUint64Mult, NULL, NULL, NULL);
-  AddTestCase(MultiplicationTestSuite, "Test SafeInt8Mult",   "Common.SafeInt.Multiply.TestSafeInt8Mult",   TestSafeInt8Mult,   NULL, NULL, NULL);
-  AddTestCase(MultiplicationTestSuite, "Test SafeInt16Mult",  "Common.SafeInt.Multiply.TestSafeInt16Mult",  TestSafeInt16Mult,  NULL, NULL, NULL);
-  AddTestCase(MultiplicationTestSuite, "Test SafeInt32Mult",  "Common.SafeInt.Multiply.TestSafeInt32Mult",  TestSafeInt32Mult,  NULL, NULL, NULL);
-  AddTestCase(MultiplicationTestSuite, "Test SafeIntnMult",   "Common.SafeInt.Multiply.TestSafeIntnMult",   TestSafeIntnMult,   NULL, NULL, NULL);
-  AddTestCase(MultiplicationTestSuite, "Test SafeInt64Mult",  "Common.SafeInt.Multiply.TestSafeInt64Mult",  TestSafeInt64Mult,  NULL, NULL, NULL);
+  AddTestCase(MultiplicationTestSuite, "Test SafeUint8Mult",  "TestSafeUint8Mult",  TestSafeUint8Mult,  NULL, NULL, NULL);
+  AddTestCase(MultiplicationTestSuite, "Test SafeUint16Mult", "TestSafeUint16Mult", TestSafeUint16Mult, NULL, NULL, NULL);
+  AddTestCase(MultiplicationTestSuite, "Test SafeUint32Mult", "TestSafeUint32Mult", TestSafeUint32Mult, NULL, NULL, NULL);
+  AddTestCase(MultiplicationTestSuite, "Test SafeUintnMult",  "TestSafeUintnMult",  TestSafeUintnMult,  NULL, NULL, NULL);
+  AddTestCase(MultiplicationTestSuite, "Test SafeUint64Mult", "TestSafeUint64Mult", TestSafeUint64Mult, NULL, NULL, NULL);
+  AddTestCase(MultiplicationTestSuite, "Test SafeInt8Mult",   "TestSafeInt8Mult",   TestSafeInt8Mult,   NULL, NULL, NULL);
+  AddTestCase(MultiplicationTestSuite, "Test SafeInt16Mult",  "TestSafeInt16Mult",  TestSafeInt16Mult,  NULL, NULL, NULL);
+  AddTestCase(MultiplicationTestSuite, "Test SafeInt32Mult",  "TestSafeInt32Mult",  TestSafeInt32Mult,  NULL, NULL, NULL);
+  AddTestCase(MultiplicationTestSuite, "Test SafeIntnMult",   "TestSafeIntnMult",   TestSafeIntnMult,   NULL, NULL, NULL);
+  AddTestCase(MultiplicationTestSuite, "Test SafeInt64Mult",  "TestSafeInt64Mult",  TestSafeInt64Mult,  NULL, NULL, NULL);
 
   //
   // Execute the tests.
   //
-  Status = RunAllTestSuites(Fw);
+  Status = RunAllTestSuites(Framework);
 
 EXIT:
-  if (Fw != NULL) {
-    FreeUnitTestFramework(Fw);
+  if (Framework != NULL) {
+    FreeUnitTestFramework(Framework);
   }
 
   return Status;

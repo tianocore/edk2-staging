@@ -31,7 +31,7 @@ LIBRARY_CLASS   = UnitTestBootLib|UEFI_APPLICATION
 [Packages]
   MdePkg/MdePkg.dec
   MdeModulePkg/MdeModulePkg.dec
-  UnitTestPkg/UnitTestPkg.dec
+  UnitTestFrameworkPkg/UnitTestFrameworkPkg.dec
 
 
 [Guids]

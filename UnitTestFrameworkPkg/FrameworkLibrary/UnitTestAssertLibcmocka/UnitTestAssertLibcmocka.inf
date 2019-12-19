@@ -19,8 +19,7 @@
 
 [Packages]
   MdePkg/MdePkg.dec
-  UnitTestPkg/UnitTestPkg.dec
-  CmockaHostUnitTestPkg/CmockaHostUnitTestPkg.dec
+  UnitTestFrameworkPkg/UnitTestFrameworkPkg.dec
 
 [Sources]
   UnitTestAssertLib.c

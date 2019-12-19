@@ -35,7 +35,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <Library/UefiLib.h>
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
-#include <UnitTestTypes.h>
 #include <Library/UnitTestLib.h>
 #include <Library/UnitTestAssertLib.h>
 #include <Library/SafeIntLib.h>
