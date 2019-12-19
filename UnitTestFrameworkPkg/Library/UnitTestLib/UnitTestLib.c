@@ -197,10 +197,10 @@ Method to Initialize the Unit Test framework
 EFI_STATUS
 EFIAPI
 InitUnitTestFramework (
-  OUT UNIT_TEST_FRAMEWORK   **Framework,
-  IN  CHAR8                 *Title,
-  IN  CHAR8                 *ShortTitle,
-  IN  CHAR8                 *VersionString
+  OUT UNIT_TEST_FRAMEWORK_HANDLE  *Framework,
+  IN  CHAR8                       *Title,
+  IN  CHAR8                       *ShortTitle,
+  IN  CHAR8                       *VersionString
   )
 {
   EFI_STATUS                Status = EFI_SUCCESS;
@@ -283,8 +283,8 @@ Exit:
 EFI_STATUS
 EFIAPI
 CreateUnitTestSuite (
-  OUT UNIT_TEST_SUITE           **Suite,
-  IN UNIT_TEST_FRAMEWORK        *Framework,
+  OUT UNIT_TEST_SUITE_HANDLE    *Suite,
+  IN UNIT_TEST_FRAMEWORK_HANDLE Framework,
   IN CHAR8                      *Title,
   IN CHAR8                      *Package,
   IN UNIT_TEST_SUITE_SETUP      Sup    OPTIONAL,
@@ -355,13 +355,13 @@ Exit:
 EFI_STATUS
 EFIAPI
 AddTestCase (
-  IN UNIT_TEST_SUITE      *Suite,
-  IN CHAR8                *Description,
-  IN CHAR8                *ClassName,
-  IN UNIT_TEST_FUNCTION   Func,
-  IN UNIT_TEST_PREREQ     PreReq    OPTIONAL,
-  IN UNIT_TEST_CLEANUP    CleanUp   OPTIONAL,
-  IN UNIT_TEST_CONTEXT    Context   OPTIONAL
+  IN UNIT_TEST_SUITE_HANDLE   Suite,
+  IN CHAR8                    *Description,
+  IN CHAR8                    *ClassName,
+  IN UNIT_TEST_FUNCTION       Func,
+  IN UNIT_TEST_PREREQ         PreReq    OPTIONAL,
+  IN UNIT_TEST_CLEANUP        CleanUp   OPTIONAL,
+  IN UNIT_TEST_CONTEXT        Context   OPTIONAL
   )
 {
   EFI_STATUS            Status = EFI_SUCCESS;
@@ -534,7 +534,7 @@ RunTestSuite (
 EFI_STATUS
 EFIAPI
 RunAllTestSuites(
-  IN UNIT_TEST_FRAMEWORK  *Framework
+  IN UNIT_TEST_FRAMEWORK_HANDLE   Framework
   )
 {
   UNIT_TEST_SUITE_LIST_ENTRY *Suite = NULL;
@@ -850,98 +850,3 @@ SaveFrameworkState (
 
   return Status;
 } // SaveFrameworkState()
-
-
-EFI_STATUS
-EFIAPI
-SaveFrameworkStateAndQuit (
-  IN UNIT_TEST_FRAMEWORK_HANDLE FrameworkHandle,
-  IN UNIT_TEST_CONTEXT          ContextToSave     OPTIONAL,
-  IN UINTN                      ContextToSaveSize
-  )
-{
-  EFI_STATUS                  Status;
-
-  //
-  // First, let's not make assumptions about the parameters.
-  if (FrameworkHandle == NULL)
-  {
-    return EFI_INVALID_PARAMETER;
-  }
-
-  //
-  // Now, save all the data associated with this framework.
-  Status = SaveFrameworkState( FrameworkHandle, ContextToSave, ContextToSaveSize );
-
-  //
-  // If we're all good, let's book...
-  if (!EFI_ERROR( Status ))
-  {
-    //
-    // Free data that was used.
-    FreeUnitTestFramework( (UNIT_TEST_FRAMEWORK*)FrameworkHandle );
-
-    //
-    // Quit
-    FrameworkExit ();
-    DEBUG(( DEBUG_ERROR, "%a - Unit test failed to quit! Framework can no longer be used!\n", __FUNCTION__ ));
-
-    //
-    // We REALLY shouldn't be here.
-    Status = EFI_ABORTED;
-  }
-
-  return Status;
-} // SaveFrameworkStateAndQuit()
-
-
-/**
-  NOTE: Takes in a ResetType, but currently only supports EfiResetCold
-        and EfiResetWarm. All other types will return EFI_INVALID_PARAMETER.
-        If a more specific reset is required, use SaveFrameworkState() and
-        call gRT->ResetSystem() directly.
-
-**/
-EFI_STATUS
-EFIAPI
-SaveFrameworkStateAndReboot (
-  IN UNIT_TEST_FRAMEWORK_HANDLE FrameworkHandle,
-  IN UNIT_TEST_CONTEXT          ContextToSave     OPTIONAL,
-  IN UINTN                      ContextToSaveSize,
-  IN EFI_RESET_TYPE             ResetType
-  )
-{
-  EFI_STATUS                  Status;
-
-  //
-  // First, let's not make assumptions about the parameters.
-  if (FrameworkHandle == NULL ||
-      (ResetType != EfiResetCold && ResetType != EfiResetWarm))
-  {
-    return EFI_INVALID_PARAMETER;
-  }
-
-  //
-  // Now, save all the data associated with this framework.
-  Status = SaveFrameworkState( FrameworkHandle, ContextToSave, ContextToSaveSize );
-
-  //
-  // If we're all good, let's book...
-  if (!EFI_ERROR( Status ))
-  {
-    //
-    // Free data that was used.
-    FreeUnitTestFramework( (UNIT_TEST_FRAMEWORK*)FrameworkHandle );
-
-    //
-    // Reset 
-    FrameworkResetSystem (ResetType);
-    DEBUG(( DEBUG_ERROR, "%a - Unit test failed to quit! Framework can no longer be used!\n", __FUNCTION__ ));
-
-    //
-    // We REALLY shouldn't be here.
-    Status = EFI_ABORTED;
-  }
-
-  return Status;
-} // SaveFrameworkStateAndReboot()

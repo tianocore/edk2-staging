@@ -180,10 +180,10 @@ Method to Initialize the Unit Test framework
 EFI_STATUS
 EFIAPI
 InitUnitTestFramework (
-  OUT UNIT_TEST_FRAMEWORK   **Framework,
-  IN  CHAR8                 *Title,
-  IN  CHAR8                 *ShortTitle,
-  IN  CHAR8                 *VersionString
+  OUT UNIT_TEST_FRAMEWORK_HANDLE    *Framework,
+  IN  CHAR8                         *Title,
+  IN  CHAR8                         *ShortTitle,
+  IN  CHAR8                         *VersionString
   )
 {
   EFI_STATUS                Status;
@@ -247,8 +247,8 @@ Exit:
 EFI_STATUS
 EFIAPI
 CreateUnitTestSuite (
-  OUT UNIT_TEST_SUITE           **Suite,
-  IN UNIT_TEST_FRAMEWORK        *Framework,
+  OUT UNIT_TEST_SUITE_HANDLE    *Suite,
+  IN UNIT_TEST_FRAMEWORK_HANDLE Framework,
   IN CHAR8                      *Title,
   IN CHAR8                      *Package,
   IN UNIT_TEST_SUITE_SETUP      Sup    OPTIONAL,
@@ -330,13 +330,13 @@ Exit:
 EFI_STATUS
 EFIAPI
 AddTestCase (
-  IN UNIT_TEST_SUITE      *Suite,
-  IN CHAR8                *Description,
-  IN CHAR8                *ClassName,
-  IN UNIT_TEST_FUNCTION   Func,
-  IN UNIT_TEST_PREREQ     PreReq    OPTIONAL,
-  IN UNIT_TEST_CLEANUP    CleanUp   OPTIONAL,
-  IN UNIT_TEST_CONTEXT    Context   OPTIONAL
+  IN UNIT_TEST_SUITE_HANDLE   Suite,
+  IN CHAR8                    *Description,
+  IN CHAR8                    *ClassName,
+  IN UNIT_TEST_FUNCTION       Func,
+  IN UNIT_TEST_PREREQ         PreReq    OPTIONAL,
+  IN UNIT_TEST_CLEANUP        CleanUp   OPTIONAL,
+  IN UNIT_TEST_CONTEXT        Context   OPTIONAL
   )
 {
   EFI_STATUS               Status;
@@ -431,7 +431,7 @@ Exit:
 EFI_STATUS
 EFIAPI
 RunAllTestSuites(
-  IN UNIT_TEST_FRAMEWORK  *Framework
+  IN UNIT_TEST_FRAMEWORK_HANDLE Framework
   )
 {
   EFI_STATUS                    Status;
@@ -516,35 +516,3 @@ SaveFrameworkState (
 {
   return EFI_UNSUPPORTED;
 } // SaveFrameworkState()
-
-
-EFI_STATUS
-EFIAPI
-SaveFrameworkStateAndQuit (
-  IN UNIT_TEST_FRAMEWORK_HANDLE FrameworkHandle,
-  IN UNIT_TEST_CONTEXT          ContextToSave     OPTIONAL,
-  IN UINTN                      ContextToSaveSize
-  )
-{
-  return EFI_UNSUPPORTED;
-} // SaveFrameworkStateAndQuit()
-
-
-/**
-  NOTE: Takes in a ResetType, but currently only supports EfiResetCold
-        and EfiResetWarm. All other types will return EFI_INVALID_PARAMETER.
-        If a more specific reset is required, use SaveFrameworkState() and
-        call gRT->ResetSystem() directly.
-
-**/
-EFI_STATUS
-EFIAPI
-SaveFrameworkStateAndReboot (
-  IN UNIT_TEST_FRAMEWORK_HANDLE FrameworkHandle,
-  IN UNIT_TEST_CONTEXT          ContextToSave     OPTIONAL,
-  IN UINTN                      ContextToSaveSize,
-  IN EFI_RESET_TYPE             ResetType
-  )
-{
-  return EFI_UNSUPPORTED;
-} // SaveFrameworkStateAndReboot()
