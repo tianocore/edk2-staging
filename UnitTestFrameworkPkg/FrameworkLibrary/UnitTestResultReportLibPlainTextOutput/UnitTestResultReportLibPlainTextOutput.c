@@ -6,12 +6,14 @@ Copyright (c) Microsoft
 **/
 
 #include <PiDxe.h>
-#include <UnitTestFrameworkTypes.h>
 #include <Library/UefiLib.h>
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
-#include <Library/UnitTestResultReportLib.h>
 #include <Library/UefiBootServicesTableLib.h>
+
+#include <Library/UnitTestLib.h>
+#include <UnitTestFrameworkTypes.h>
+#include <Library/UnitTestResultReportLib.h>
 
 
 

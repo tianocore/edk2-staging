@@ -7,16 +7,16 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 **/
 
 #include <Uefi.h>
-#include <UnitTestFrameworkTypes.h>
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/DebugLib.h>
+
 #include <Library/UnitTestLib.h>
+#include <UnitTestFrameworkTypes.h>
 #include <Library/UnitTestLogLib.h>
 #include <Library/UnitTestPersistenceLib.h>
 #include <Library/UnitTestResultReportLib.h>
-#include <Library/UnitTestTerminationLib.h>
 
 
 // Prototyped here so that it can be included near the functions that
@@ -284,7 +284,7 @@ EFI_STATUS
 EFIAPI
 CreateUnitTestSuite (
   OUT UNIT_TEST_SUITE_HANDLE    *Suite,
-  IN UNIT_TEST_FRAMEWORK_HANDLE Framework,
+  IN UNIT_TEST_FRAMEWORK_HANDLE FrameworkHandle,
   IN CHAR8                      *Title,
   IN CHAR8                      *Package,
   IN UNIT_TEST_SUITE_SETUP      Sup    OPTIONAL,
@@ -293,6 +293,9 @@ CreateUnitTestSuite (
 {
   EFI_STATUS                    Status = EFI_SUCCESS;
   UNIT_TEST_SUITE_LIST_ENTRY    *NewSuiteEntry;
+  UNIT_TEST_FRAMEWORK           *Framework;
+
+  Framework = (UNIT_TEST_FRAMEWORK*)FrameworkHandle;
 
   //
   // First, let's check to make sure that our parameters look good.
@@ -355,7 +358,7 @@ Exit:
 EFI_STATUS
 EFIAPI
 AddTestCase (
-  IN UNIT_TEST_SUITE_HANDLE   Suite,
+  IN UNIT_TEST_SUITE_HANDLE   SuiteHandle,
   IN CHAR8                    *Description,
   IN CHAR8                    *ClassName,
   IN UNIT_TEST_FUNCTION       Func,
@@ -366,7 +369,11 @@ AddTestCase (
 {
   EFI_STATUS            Status = EFI_SUCCESS;
   UNIT_TEST_LIST_ENTRY  *NewTestEntry;
-  UNIT_TEST_FRAMEWORK   *ParentFramework = (UNIT_TEST_FRAMEWORK*)Suite->ParentFramework;
+  UNIT_TEST_FRAMEWORK   *ParentFramework;
+  UNIT_TEST_SUITE       *Suite;
+
+  Suite = (UNIT_TEST_SUITE*)SuiteHandle;
+  ParentFramework = (UNIT_TEST_FRAMEWORK*)Suite->ParentFramework;
 
   //
   // First, let's check to make sure that our parameters look good.
@@ -533,12 +540,15 @@ RunTestSuite (
 
 EFI_STATUS
 EFIAPI
-RunAllTestSuites(
-  IN UNIT_TEST_FRAMEWORK_HANDLE   Framework
+RunAllTestSuites (
+  IN UNIT_TEST_FRAMEWORK_HANDLE   FrameworkHandle
   )
 {
-  UNIT_TEST_SUITE_LIST_ENTRY *Suite = NULL;
-  EFI_STATUS Status; 
+  UNIT_TEST_FRAMEWORK         *Framework;
+  UNIT_TEST_SUITE_LIST_ENTRY  *Suite = NULL;
+  EFI_STATUS                  Status;
+
+  Framework = (UNIT_TEST_FRAMEWORK*)FrameworkHandle;
 
   if (Framework == NULL)
   {

@@ -12,7 +12,7 @@
   BASE_NAME           = UnitTestTerminationLibShell
   FILE_GUID           = E5C189CF-CA58-45C0-9EA9-C30D04FB705D
   VERSION_STRING      = 1.0
-  MODULE_TYPE         = DXE_DRIVER
+  MODULE_TYPE         = UEFI_APPLICATION
   LIBRARY_CLASS       = UnitTestTerminationLib|UEFI_APPLICATION
 
 #
@@ -28,8 +28,10 @@
 
 [Packages]
   MdePkg/MdePkg.dec
+  UnitTestFrameworkPkg/UnitTestFrameworkPkg.dec
 
 
 [LibraryClasses]
   UefiBootServicesTableLib
+  UefiRuntimeServicesTableLib
   UnitTestBootLib

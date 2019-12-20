@@ -6,8 +6,6 @@ Copyright (c) Microsoft
 **/
 
 #include <Uefi.h>
-#include <UnitTestFrameworkTypes.h>
-#include <Library/UnitTestLogLib.h>
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/MemoryAllocationLib.h>
@@ -15,9 +13,12 @@ Copyright (c) Microsoft
 #include <Library/PrintLib.h>
 #include <Library/PcdLib.h>
 
+#include <Library/UnitTestLib.h>
+#include <UnitTestFrameworkTypes.h>
+#include <Library/UnitTestLogLib.h>
+
 #define UNIT_TEST_MAX_SINGLE_LOG_STRING_LENGTH    (512)
 #define UNIT_TEST_MAX_LOG_BUFFER (16 * 1024)
-
 
 
 struct _UNIT_TEST_LOG_PREFIX_STRING
@@ -138,11 +139,15 @@ AddUnitTestFailure(
 VOID
 EFIAPI
 UnitTestLogInit (
-IN OUT UNIT_TEST  *Test,
-IN UINT8          *Buffer,
-IN UINTN          BufferSize
-)
+  IN OUT UNIT_TEST_HANDLE   TestHandle,
+  IN UINT8                  *Buffer,
+  IN UINTN                  BufferSize
+  )
 {
+  UNIT_TEST   *Test;
+
+  Test = (UNIT_TEST*)TestHandle;
+
   //
   // Make sure that you're cooking with gas.
   //
@@ -221,6 +226,7 @@ UnitTestLog (
   return;
 }
 
+// TODO: Move this function and all referenced functions to the Assert Lib that uses it.
 VOID
 EFIAPI
 UnitTestLogFailure(

@@ -6,11 +6,13 @@ Copyright (c) Microsoft
 **/
 
 #include <Uefi.h>
-#include <UnitTestFrameworkTypes.h>
-#include <Library/UnitTestLogLib.h>
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
+
+#include <Library/UnitTestLib.h>
+#include <UnitTestFrameworkTypes.h>
+#include <Library/UnitTestLogLib.h>
 
 
 BOOLEAN

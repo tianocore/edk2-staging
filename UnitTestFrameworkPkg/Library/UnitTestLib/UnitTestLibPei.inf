@@ -27,7 +27,6 @@ LIBRARY_CLASS   = UnitTestLib|PEIM
   UnitTestLogLib
   UnitTestPersistenceLib
   UnitTestResultReportLib
-  UnitTestTerminationLib
 
 
 [Packages]

@@ -21,8 +21,9 @@ Copyright (C) 2016 Microsoft Corporation. All Rights Reserved.
 #include <PiSmm.h>
 #include <Library/PrintLib.h>
 #include <Library/DebugLib.h>
-#include <UnitTestFrameworkTypes.h>
+
 #include <Library/UnitTestLib.h>
+#include <UnitTestFrameworkTypes.h>
 #include <Library/UnitTestAssertLib.h>
 
 

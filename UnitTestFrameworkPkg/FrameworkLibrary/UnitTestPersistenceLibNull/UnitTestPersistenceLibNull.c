@@ -19,8 +19,9 @@ Copyright (C) 2016 Microsoft Corporation. All Rights Reserved.
 **/
 
 #include <Uefi.h>
-#include <UnitTestFrameworkTypes.h>
+
 #include <Library/UnitTestLib.h>
+#include <UnitTestFrameworkTypes.h>
 #include <Library/UnitTestPersistenceLib.h>
 
 

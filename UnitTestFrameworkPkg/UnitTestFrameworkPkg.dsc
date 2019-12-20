@@ -101,8 +101,6 @@
   DebugAgentLib|MdeModulePkg/Library/DebugAgentLibNull/DebugAgentLibNull.inf
   PlatformHookLib|MdeModulePkg/Library/BasePlatformHookLibNull/BasePlatformHookLibNull.inf
   ResetSystemLib|MdeModulePkg/Library/BaseResetSystemLibNull/BaseResetSystemLibNull.inf
-  ResetUtilityLib|MdeModulePkg/Library/ResetUtilityLib/ResetUtilityLib.inf                    ## MS_CHANGE
-  HwResetSystemLib|MdeModulePkg/Library/BaseResetSystemLibNull/BaseResetSystemLibNull.inf     ## MS_CHANGE
   SmbusLib|MdePkg/Library/DxeSmbusLib/DxeSmbusLib.inf
   S3BootScriptLib|MdeModulePkg/Library/PiDxeS3BootScriptLib/DxeS3BootScriptLib.inf
   CpuExceptionHandlerLib|MdeModulePkg/Library/CpuExceptionHandlerLibNull/CpuExceptionHandlerLibNull.inf
@@ -158,6 +156,7 @@
   UnitTestAssertLib|UnitTestFrameworkPkg/Library/UnitTestAssertLib/UnitTestAssertLib.inf
   UnitTestLogLib|UnitTestFrameworkPkg/Library/UnitTestLogLib/UnitTestLogLib.inf
   UnitTestPersistenceLib|UnitTestFrameworkPkg/FrameworkLibrary/UnitTestPersistenceLibNull/UnitTestPersistenceLibNull.inf
+  #UnitTestBootLib|UnitTestFrameworkPkg/FrameworkLibrary/UnitTestBootLibNull/UnitTestBootLibNull.inf
   
 [LibraryClasses.common.PEIM]
   UnitTestLib|UnitTestFrameworkPkg/Library/UnitTestLib/UnitTestLibPei.inf
@@ -182,12 +181,8 @@
   UnitTestFrameworkPkg/FrameworkLibrary/UnitTestResultReportLibDebug/UnitTestResultReportLibDebug.inf
   UnitTestFrameworkPkg/FrameworkLibrary/UnitTestResultReportLibPlainTextOutput/UnitTestResultReportLibPlainTextOutput.inf
   UnitTestFrameworkPkg/Library/UnitTestTerminationLibDxe/UnitTestTerminationLibDxe.inf
-  UnitTestFrameworkPkg/FrameworkLibrary/CmockaLib/CmockaLib.inf
-  UnitTestFrameworkPkg/FrameworkLibrary/OsServiceLibHost/OsServiceLibHost.inf
-  UnitTestFrameworkPkg/FrameworkLibrary/UnitTestAssertLibcmocka/UnitTestAssertLibcmocka.inf
   UnitTestFrameworkPkg/FrameworkLibrary/UnitTestBootLibNull/UnitTestBootLibNull.inf
   UnitTestFrameworkPkg/FrameworkLibrary/UnitTestBootLibUsbClass/UnitTestBootLibUsbClass.inf
-  UnitTestFrameworkPkg/FrameworkLibrary/UnitTestLibcmocka/UnitTestLibcmocka.inf
   UnitTestFrameworkPkg/FrameworkLibrary/UnitTestPersistenceLibFileSystem/UnitTestPersistenceLibFileSystem.inf
   UnitTestFrameworkPkg/FrameworkLibrary/UnitTestTerminationLibShell/UnitTestTerminationLibShell.inf
   UnitTestFrameworkPkg/Sample/SampleUnitTestApp/SampleUnitTestApp.inf

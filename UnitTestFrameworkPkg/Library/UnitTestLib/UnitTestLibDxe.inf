@@ -29,7 +29,6 @@ LIBRARY_CLASS   = UnitTestLib|DXE_DRIVER UEFI_APPLICATION
   UnitTestLogLib
   UnitTestPersistenceLib
   UnitTestResultReportLib
-  UnitTestTerminationLib
 
 
 [Packages]

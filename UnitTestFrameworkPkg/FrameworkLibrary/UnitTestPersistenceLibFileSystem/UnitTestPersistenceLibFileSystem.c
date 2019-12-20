@@ -21,7 +21,6 @@ Copyright (C) 2016 Microsoft Corporation. All Rights Reserved.
 
 **/
 #include <PiDxe.h>
-#include <Library/UnitTestPersistenceLib.h>
 #include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
@@ -33,6 +32,7 @@ Copyright (C) 2016 Microsoft Corporation. All Rights Reserved.
 
 #include <Library/UnitTestLib.h>
 #include <UnitTestFrameworkTypes.h>
+#include <Library/UnitTestPersistenceLib.h>
 
 /**
   TODO: STUFF!!
@@ -51,6 +51,7 @@ GetCacheFileDevicePath (
   UNIT_TEST_FRAMEWORK             *Framework = (UNIT_TEST_FRAMEWORK*)FrameworkHandle;
   EFI_LOADED_IMAGE_PROTOCOL       *LoadedImage;
   CHAR16                          *AppPath = NULL, *CacheFilePath = NULL;
+  CHAR16                          *TestName = NULL;
   CHAR16                          *FileSuffix = L"_Cache.dat";
   UINTN                           DirectorySlashOffset, CacheFilePathLength;
   EFI_DEVICE_PATH_PROTOCOL        *CacheFileDevicePath = NULL;
@@ -67,6 +68,14 @@ GetCacheFileDevicePath (
     DEBUG(( DEBUG_WARN, "%a - Failed to locate DevicePath for loaded image. %r\n", __FUNCTION__, Status ));
     return NULL;
   }
+
+  // Before we can start, we should change our test name from ASCII to Unicode.
+  CacheFilePathLength = AsciiStrLen( Framework->ShortTitle ) + 1;
+  TestName = AllocatePool( CacheFilePathLength );
+  if (!TestName) {
+    goto Exit;
+  }
+  AsciiStrToUnicodeStrS( Framework->ShortTitle, TestName, CacheFilePathLength );
 
   //
   // Now we should have the device path of the root device and a file path for the rest.
@@ -109,17 +118,20 @@ GetCacheFileDevicePath (
   // Now we know some things, we're ready to produce our output string, I think.
   //
   CacheFilePathLength = DirectorySlashOffset + 1;
-  CacheFilePathLength += StrLen( Framework->ShortTitle );
+  CacheFilePathLength += StrLen( TestName );
   CacheFilePathLength += StrLen( FileSuffix );
   CacheFilePathLength += 1;   // Don't forget the NULL terminator.
   CacheFilePath       = AllocateZeroPool( CacheFilePathLength * sizeof( CHAR16 ) );
+  if (!CacheFilePath) {
+    goto Exit;
+  }
 
   //
   // Let's produce our final path string, shall we?
   //
-  StrnCpyS( CacheFilePath, CacheFilePathLength, AppPath, DirectorySlashOffset + 1 ); // Copy the path for the parent directory.
-  StrCatS( CacheFilePath, CacheFilePathLength, Framework->ShortTitle );              // Copy the base name for the test cache.
-  StrCatS( CacheFilePath, CacheFilePathLength, FileSuffix );                         // Copy the file suffix.
+  StrnCpyS( CacheFilePath, CacheFilePathLength, AppPath, DirectorySlashOffset + 1 );  // Copy the path for the parent directory.
+  StrCatS( CacheFilePath, CacheFilePathLength, TestName );                            // Copy the base name for the test cache.
+  StrCatS( CacheFilePath, CacheFilePathLength, FileSuffix );                          // Copy the file suffix.
 
   //
   // Finally, try to create the device path for the thing thing.
@@ -135,6 +147,10 @@ Exit:
   if (CacheFilePath != NULL)
   {
     FreePool( CacheFilePath);
+  }
+  if (TestName != NULL)
+  {
+    FreePool( TestName);
   }
 
   return CacheFileDevicePath;

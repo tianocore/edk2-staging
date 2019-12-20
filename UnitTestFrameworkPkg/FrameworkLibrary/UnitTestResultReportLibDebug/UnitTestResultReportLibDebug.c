@@ -6,11 +6,13 @@ Copyright (c) Microsoft
 **/
 
 #include <Uefi.h>
-#include <UnitTestFrameworkTypes.h>
 #include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
-#include <Library/UnitTestResultReportLib.h>
 #include <Library/UefiBootServicesTableLib.h>
+
+#include <Library/UnitTestLib.h>
+#include <UnitTestFrameworkTypes.h>
+#include <Library/UnitTestResultReportLib.h>
 
 
 

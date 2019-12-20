@@ -21,6 +21,7 @@ typedef UINT32 UNIT_TEST_STATUS;
 
 typedef VOID*   UNIT_TEST_FRAMEWORK_HANDLE; // Same as a UNIT_TEST_FRAMEWORK*, but with fewer build errors.
 typedef VOID*   UNIT_TEST_SUITE_HANDLE;     // Same as a UNIT_TEST_SUITE*, but with fewer build errors.
+typedef VOID*   UNIT_TEST_HANDLE;           // Same as a UNIT_TEST*, but with fewer build errors.
 typedef VOID*   UNIT_TEST_CONTEXT;
 
 

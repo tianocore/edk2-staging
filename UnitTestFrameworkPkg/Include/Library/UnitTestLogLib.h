@@ -43,14 +43,17 @@ UnitTestLog (
   ...
   );
 
+// TODO: This header should not require the framework types.
+
 VOID
 EFIAPI
 UnitTestLogInit (
-IN OUT UNIT_TEST  *Test,
-IN UINT8      *Buffer OPTIONAL,
-IN UINTN      BufferSize
-);
+  IN OUT UNIT_TEST_HANDLE   Test,
+  IN UINT8                  *Buffer OPTIONAL,
+  IN UINTN                  BufferSize
+  );
 
+// TODO: Drop this from the lib interface.
 VOID
 EFIAPI
 UnitTestLogFailure(

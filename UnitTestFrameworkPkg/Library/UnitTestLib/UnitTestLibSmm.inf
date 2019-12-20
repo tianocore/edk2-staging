@@ -28,7 +28,6 @@ LIBRARY_CLASS   = UnitTestLib|DXE_SMM_DRIVER
   UnitTestLogLib
   UnitTestPersistenceLib
   UnitTestResultReportLib
-  UnitTestTerminationLib
 
 
 [Packages]
