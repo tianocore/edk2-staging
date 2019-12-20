@@ -650,7 +650,7 @@ UpdateTestFromSave (
     //                 fast and loose with data buffers.
     if (MatchingTest->Size > sizeof( UNIT_TEST_SAVE_TEST ))
     {
-      UnitTestLogInit(Test, ((UINT8*)MatchingTest + sizeof( UNIT_TEST_SAVE_TEST )), MatchingTest->Size - sizeof( UNIT_TEST_SAVE_TEST ) );
+      UnitTestLogInit(Test, (UINT8*)MatchingTest->Log, MatchingTest->Size - sizeof( UNIT_TEST_SAVE_TEST ) );
     }
   }
 
@@ -668,7 +668,7 @@ UpdateTestFromSave (
         CompareFingerprints( &Test->Fingerprint[0], &SavedContext->Fingerprint[0] ))
     {
       // Override the test context with the saved context.
-      Test->Context = (VOID*)((UINT8*)SavedContext + sizeof( *SavedContext ));
+      Test->Context = (VOID*)SavedContext->Data;
     }
   }
 
@@ -754,7 +754,7 @@ SerializeState (
   //
   // Alright, let's start setting up some data.
   Header->Version         = UNIT_TEST_PERSISTENCE_LIB_VERSION;
-  Header->BlobSize        = TotalSize;
+  Header->SaveStateSize   = TotalSize;
   CopyMem( &Header->Fingerprint[0], &Framework->Fingerprint[0], UNIT_TEST_FINGERPRINT_SIZE );
   CopyMem( &Header->StartTime, &Framework->StartTime, sizeof( EFI_TIME ) );
   Header->TestCount       = TestCount;

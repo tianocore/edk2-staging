@@ -96,7 +96,7 @@ typedef struct {
 
 typedef struct
 {
-  UINT32            Size;
+  UINT32            Size;                                         // Size of the UNIT_TEST_SAVE_TEST including Log[]
   UINT8             Fingerprint[UNIT_TEST_FINGERPRINT_SIZE];      // Fingerprint of the test itself.
   CHAR8             FailureMessage[UNIT_TEST_TESTFAILUREMSG_LENGTH];
   FAILURE_TYPE      FailureType;
@@ -106,7 +106,7 @@ typedef struct
 
 typedef struct
 {
-  UINT32            Size;
+  UINT32            Size;                                         // Size of the UNIT_TEST_SAVE_CONTEXT including Data[]
   UINT8             Fingerprint[UNIT_TEST_FINGERPRINT_SIZE];      // Fingerprint of the corresponding test.
   UINT8             Data[];                                       // Actual data of the context.
 } UNIT_TEST_SAVE_CONTEXT;
@@ -114,7 +114,7 @@ typedef struct
 typedef struct
 {
   UINT8             Version;
-  UINT32            BlobSize;
+  UINT32            SaveStateSize;                                // Size of the entire serialized buffer.
   UINT8             Fingerprint[UNIT_TEST_FINGERPRINT_SIZE];      // Fingerprint of the framework that has been saved.
   EFI_TIME          StartTime;
   UINT32            TestCount;

@@ -274,13 +274,13 @@ SaveUnitTestCache (
   //
   // Write the data to the file.
   //
-  WriteCount = SaveData->BlobSize;
+  WriteCount = SaveData->SaveStateSize;
   DEBUG(( DEBUG_INFO, "%a - Writing %d bytes to file...\n", __FUNCTION__, WriteCount ));
   Status = ShellWriteFile( FileHandle,
                            &WriteCount,
                            SaveData );
 
-  if (EFI_ERROR( Status ) || WriteCount != SaveData->BlobSize)
+  if (EFI_ERROR( Status ) || WriteCount != SaveData->SaveStateSize)
   {
     DEBUG(( DEBUG_ERROR, "%a - Writing to file failed! %r\n", __FUNCTION__, Status ));
   }
