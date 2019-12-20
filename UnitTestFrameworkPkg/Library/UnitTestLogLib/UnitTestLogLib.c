@@ -108,28 +108,6 @@ AddStringToUnitTestLog (
   return EFI_SUCCESS;
 }
 
-STATIC
-EFI_STATUS
-AddUnitTestFailure(
-  IN OUT UNIT_TEST    *UnitTest,
-  IN CONST CHAR8      *FailureMessage,
-  IN FAILURE_TYPE     FailureType
-)
-{
-  //
-  // Make sure that you're cooking with gas.
-  //
-  if (UnitTest == NULL || FailureMessage == NULL)
-  {
-    return EFI_INVALID_PARAMETER;
-  }
-
-  UnitTest->FailureType = FailureType;
-  AsciiStrCpyS(&UnitTest->FailureMessage[0], UNIT_TEST_TESTFAILUREMSG_LENGTH, FailureMessage);
-
-  return EFI_SUCCESS;
-}
-
 
 //=============================================================================
 //
@@ -225,33 +203,3 @@ UnitTestLog (
 
   return;
 }
-
-// TODO: Move this function and all referenced functions to the Assert Lib that uses it.
-VOID
-EFIAPI
-UnitTestLogFailure(
-  IN  UNIT_TEST_FRAMEWORK_HANDLE  Framework,
-  IN  FAILURE_TYPE                FailureType,
-  IN  CONST CHAR8                 *Format,
-  ...
-)
-{
-  CHAR8         LogString[UNIT_TEST_TESTFAILUREMSG_LENGTH];
-  VA_LIST       Marker;
-
-
-  //
-  // Convert the message to an ASCII String
-  //
-  VA_START(Marker, Format);
-  AsciiVSPrint(LogString, sizeof(LogString), Format, Marker);
-  VA_END(Marker);
-
-  //
-  // Finally, add the string to the log.
-  //
-  AddUnitTestFailure(((UNIT_TEST_FRAMEWORK*)Framework)->CurrentTest, LogString, FailureType);
-
-  return;
-}
-

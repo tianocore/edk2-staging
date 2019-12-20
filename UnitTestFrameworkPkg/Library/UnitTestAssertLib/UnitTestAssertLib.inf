@@ -24,6 +24,7 @@ LIBRARY_CLASS   = UnitTestAssertLib
   BaseLib
   BaseMemoryLib
   UnitTestLogLib
+  PrintLib
 
 
 [Packages]

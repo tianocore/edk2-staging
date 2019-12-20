@@ -53,14 +53,4 @@ UnitTestLogInit (
   IN UINTN                  BufferSize
   );
 
-// TODO: Drop this from the lib interface.
-VOID
-EFIAPI
-UnitTestLogFailure(
-  IN  UNIT_TEST_FRAMEWORK_HANDLE  Framework,
-  FAILURE_TYPE FailureType,
-  IN  CONST CHAR8                 *Format,
-  ...
-);
-
 #endif
