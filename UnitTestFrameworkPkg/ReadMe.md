@@ -222,6 +222,16 @@ _Note_ that this early return can have implications for memory leakage.
 
 At the end, if all test criteria pass, you should return `UNIT_TEST_PASSED`.
 
+## Development
+
+When using the EDK2 Pytools for CI testing, the host-based unit tests will be built and run on any build that includes the `NOOPT` build target.
+
+If you are trying to iterate on a single test, a convenient pattern is to build only that test module. For example, the following command will build only the SafeIntLib host-based test from the MdePkg...
+
+```bash
+stuart_ci_build -c .\.pytool\CISettings.py TOOL_CHAIN_TAG=VS2017 -p MdePkg -t NOOPT BUILDMODULE=MdePkg/Test/UnitTest/Library/BaseSafeIntLib/TestBaseSafeIntLib.inf
+```
+
 ## Copyright
 
 Copyright (c) Microsoft Corporation.  
