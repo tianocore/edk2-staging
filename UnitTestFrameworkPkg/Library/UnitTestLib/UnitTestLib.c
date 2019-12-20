@@ -658,13 +658,10 @@ UpdateTestFromSave (
   // If the saved context exists and matches this test, grab it, too.
   if (SavedState->HasSavedContext)
   {
-    // TODO: Reconcile the difference between the way "size" works for Test Saves
-    //        and the way it works for Context Saves. Too confusing to use it different ways.
-
     // If there was a saved context, the "matching test" loop will have placed the FloatingPointer
     // at the beginning of the context structure.
     SavedContext = (UNIT_TEST_SAVE_CONTEXT*)FloatingPointer;
-    if (SavedContext->Size > 0 &&
+    if ((SavedContext->Size - sizeof(UNIT_TEST_SAVE_CONTEXT)) > 0 &&
         CompareFingerprints( &Test->Fingerprint[0], &SavedContext->Fingerprint[0] ))
     {
       // Override the test context with the saved context.
@@ -808,7 +805,7 @@ SerializeState (
   if (ContextToSave != NULL && Framework->CurrentTest != NULL)
   {
     TestSaveContext         = (UNIT_TEST_SAVE_CONTEXT*)FloatingPointer;
-    TestSaveContext->Size   = (UINT32)ContextToSaveSize;
+    TestSaveContext->Size   = (UINT32)ContextToSaveSize + sizeof(UNIT_TEST_SAVE_CONTEXT);
     CopyMem( &TestSaveContext->Fingerprint[0], &Framework->CurrentTest->Fingerprint[0], UNIT_TEST_FINGERPRINT_SIZE );
     CopyMem( ((UINT8*)TestSaveContext + sizeof( UNIT_TEST_SAVE_CONTEXT )), ContextToSave, ContextToSaveSize );
     Header->HasSavedContext = TRUE;
