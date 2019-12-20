@@ -1,4 +1,4 @@
-[submodule "CryptoPkg/Library/OpensslLib/openssl"]
+﻿[submodule "CryptoPkg/Library/OpensslLib/openssl"]
 	path = CryptoPkg/Library/OpensslLib/openssl
 	url = https://github.com/openssl/openssl
 [submodule "SoftFloat"]
@@ -7,3 +7,6 @@
 [submodule "UnitTestFrameworkPkg/Library/CmockaLib/cmocka"]
 	path = UnitTestFrameworkPkg/Library/CmockaLib/cmocka
 	url = https://git.cryptomilk.org/projects/cmocka.git
+[submodule "RiscVPkg/Library/RiscVOpensbiLib/opensbi"]
+	path = RiscVPkg/Library/RiscVOpensbiLib/opensbi
+	url = https://github.com/riscv/opensbi.git
