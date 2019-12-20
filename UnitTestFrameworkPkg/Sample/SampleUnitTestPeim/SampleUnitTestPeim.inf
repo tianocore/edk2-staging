@@ -22,7 +22,6 @@
 
 [Packages]
   MdePkg/MdePkg.dec
-  UnitTestFrameworkPkg/UnitTestFrameworkPkg.dec
 
 [Protocols]
 

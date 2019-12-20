@@ -16,31 +16,10 @@
   PACKAGE_VERSION                = 1.00
 
 
-[Includes]
-  Include
-
 [Includes.Common.Private]
   FrameworkInclude
   FrameworkLibrary/CmockaLib/cmocka/include
   FrameworkLibrary/CmockaLib/cmocka/include/cmockery
-
-[LibraryClasses]
-  ## @libraryclass Provide unit test assert helpers
-  #
-  UnitTestAssertLib|Include/Library/UnitTestAssertLib.h
-
-  ## @libraryclass Provides a unit test framework
-  #
-  UnitTestLib|Include/Library/UnitTestLib.h
-
-  ## @libraryclass Provide unit test logging
-  #
-  UnitTestLogLib|Include/Library/UnitTestLogLib.h
-
-  ## @libraryclass Abstracts the methods that a test could exit prematurely.
-  # Allows tests written for different contexts to handle Quit()/Reboot() differently.
-  #
-  UnitTestTerminationLib|Include/Library/UnitTestTerminationLib.h
 
 [LibraryClasses.Common.Private]
   ## @libraryclass Allows save and restore unit test internal state
