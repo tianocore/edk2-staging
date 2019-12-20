@@ -23,7 +23,6 @@ Copyright (C) 2016 Microsoft Corporation. All Rights Reserved.
 #include <Library/DebugLib.h>
 
 #include <Library/UnitTestLib.h>
-#include <UnitTestFrameworkTypes.h>
 #include <Library/UnitTestAssertLib.h>
 
 
@@ -157,9 +156,9 @@ SampleUnitTestPeim (
   IN CONST EFI_PEI_SERVICES    **PeiServices
   )
 {
-  EFI_STATUS                Status;
-  UNIT_TEST_FRAMEWORK       *Framework = NULL;
-  UNIT_TEST_SUITE           *SimpleMathTests, *GlobalVarTests;
+  EFI_STATUS                  Status;
+  UNIT_TEST_FRAMEWORK_HANDLE  Framework = NULL;
+  UNIT_TEST_SUITE_HANDLE      SimpleMathTests, GlobalVarTests;
 
   DEBUG(( DEBUG_INFO, "%a v%a\n", UNIT_TEST_PEIM_NAME, UNIT_TEST_PEIM_VERSION ));
 
