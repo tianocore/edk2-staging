@@ -30,8 +30,8 @@
   PrintLib|MdePkg/Library/BasePrintLib/BasePrintLib.inf
   SafeIntLib|MdePkg/Library/BaseSafeIntLib/BaseSafeIntLib.inf
 
-  UnitTestAssertLib|UnitTestFrameworkPkg/FrameworkLibrary/UnitTestAssertLibcmocka/UnitTestAssertLibcmocka.inf
-  UnitTestLib|UnitTestFrameworkPkg/FrameworkLibrary/UnitTestLibcmocka/UnitTestLibcmocka.inf
+  UnitTestAssertLib|UnitTestFrameworkPkg/Library/UnitTestAssertLibcmocka/UnitTestAssertLibcmocka.inf
+  UnitTestLib|UnitTestFrameworkPkg/Library/UnitTestLibcmocka/UnitTestLibcmocka.inf
 
 [Components]
 
