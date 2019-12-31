@@ -244,6 +244,23 @@
   ##  @libraryclass  Module entry point library for standalone MM drivers.
   StandaloneMmDriverEntryPoint|Include/Library/StandaloneMmDriverEntryPoint.h
 
+  ## @libraryclass Provide unit test assert helpers
+  #
+  UnitTestAssertLib|Include/Library/UnitTestAssertLib.h
+
+  ## @libraryclass Provides a unit test framework
+  #
+  UnitTestLib|Include/Library/UnitTestLib.h
+
+  ## @libraryclass Provide unit test logging
+  #
+  UnitTestLogLib|Include/Library/UnitTestLogLib.h
+
+  ## @libraryclass Abstracts the methods that a test could exit prematurely.
+  # Allows tests written for different contexts to handle Quit()/Reboot() differently.
+  #
+  UnitTestTerminationLib|Include/Library/UnitTestTerminationLib.h
+
 [LibraryClasses.IA32, LibraryClasses.X64]
   ##  @libraryclass  Abstracts both S/W SMI generation and detection.
   ##

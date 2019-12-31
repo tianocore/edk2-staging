@@ -27,7 +27,7 @@
         ],
         # For host based unit tests
         "AcceptableDependencies-HOST_APPLICATION":[
-            "UnitTestPkg/UnitTestPkg.dec"
+            "UnitTestFrameworkPkg/UnitTestFrameworkPkg.dec"
         ],
         # For UEFI shell based apps
         "AcceptableDependencies-UEFI_APPLICATION":[],
