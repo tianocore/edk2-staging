@@ -133,7 +133,7 @@ AllocateAndCopyString (
 EFI_STATUS
 EFIAPI
 FreeUnitTestFramework (
-  IN UNIT_TEST_FRAMEWORK  *Framework
+  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework
   )
 {
   // TODO: Finish this function.
@@ -238,7 +238,7 @@ Exit:
   // Otherwise, we need to undo this horrible thing that we've done.
   else
   {
-    FreeUnitTestFramework ((UNIT_TEST_FRAMEWORK *)NewFramework);
+    FreeUnitTestFramework ((UNIT_TEST_FRAMEWORK_HANDLE)NewFramework);
   }
 
   return Status;
@@ -309,6 +309,9 @@ CreateUnitTestSuite (
   CopyMem ((VOID *)(UINTN)NewSuiteEntry->UTS.GroupTeardown, (VOID *)(UINTN)GroupTeardownTemplate, mGroupTeardownTemplateSize);
   *(UINTN *)((UINTN)NewSuiteEntry->UTS.GroupTeardown + sizeof(UINTN)/sizeof(UINT32)) = (UINTN)&NewSuiteEntry->UTS;
 
+  NewSuiteEntry->UTS.GroupSetup = (CMFixtureFunction)Sup;
+  NewSuiteEntry->UTS.GroupTeardown = (CMFixtureFunction)Tdn;
+
 Exit:
   //
   // If everything is going well, add the new suite to the tail list for the framework.
@@ -342,12 +345,10 @@ AddTestCase (
   EFI_STATUS               Status;
   MY_UNIT_TEST_SUITE       *MySuite;
   MY_UNIT_TEST_LIST_ENTRY  *NewTestEntry;
-  MY_UNIT_TEST_FRAMEWORK   *ParentFramework;
   UINTN                    TestNameSize;
 
   Status = EFI_SUCCESS;
   MySuite = (MY_UNIT_TEST_SUITE *)Suite;
-  ParentFramework = (MY_UNIT_TEST_FRAMEWORK*)MySuite->ParentFramework;
 
   //
   // First, let's check to make sure that our parameters look good.
@@ -395,6 +396,10 @@ AddTestCase (
   ASSERT(NewTestEntry->UT.TeardownFunc != NULL);
   CopyMem ((VOID *)(UINTN)NewTestEntry->UT.TeardownFunc, (VOID *)(UINTN)TeardownFuncTemplate, mTeardownFuncTemplateSize);
   *(UINTN *)((UINTN)NewTestEntry->UT.TeardownFunc + sizeof(UINTN)/sizeof(UINT32)) = (UINTN)&NewTestEntry->UT;
+
+  NewTestEntry->UT.TestFunc = (CMUnitTestFunction)Func;
+  NewTestEntry->UT.SetupFunc = (CMFixtureFunction)PreReq;
+  NewTestEntry->UT.TeardownFunc = (CMFixtureFunction)CleanUp;
 
   TestNameSize = AsciiStrLen (Description) + 1;
   NewTestEntry->UT.TestName  = AllocatePool (TestNameSize);
