@@ -150,7 +150,7 @@ CompareFingerprints (
 EFI_STATUS
 EFIAPI
 FreeUnitTestFramework (
-  IN UNIT_TEST_FRAMEWORK  *Framework
+  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework
   )
 {
   // TODO: Finish this function.
@@ -272,7 +272,7 @@ Exit:
   // Otherwise, we need to undo this horrible thing that we've done.
   else
   {
-    FreeUnitTestFramework( NewFramework );
+    FreeUnitTestFramework ((UNIT_TEST_FRAMEWORK_HANDLE)NewFramework);
   }
 
   return Status;
