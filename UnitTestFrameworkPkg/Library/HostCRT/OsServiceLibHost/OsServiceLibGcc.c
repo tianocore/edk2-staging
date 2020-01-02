@@ -6,6 +6,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 **/
 
 #include <sys/mman.h>
+#include <unistd.h>
 
 VOID *
 AllocateExecutableMemory (
