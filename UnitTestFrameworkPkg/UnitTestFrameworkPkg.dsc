@@ -153,34 +153,34 @@
   # UnitTestFrameworkPkg
   #
 [LibraryClasses]
-  UnitTestAssertLib|UnitTestFrameworkPkg/Library/UnitTestAssertLib/UnitTestAssertLib.inf
-  UnitTestLogLib|UnitTestFrameworkPkg/Library/UnitTestLogLib/UnitTestLogLib.inf
-  UnitTestPersistenceLib|UnitTestFrameworkPkg/FrameworkLibrary/UnitTestPersistenceLibNull/UnitTestPersistenceLibNull.inf
+  UnitTestAssertLib|UnitTestFrameworkPkg/Library/UEFI/UnitTestAssertLib/UnitTestAssertLib.inf
+  UnitTestLogLib|UnitTestFrameworkPkg/Library/UEFI/UnitTestLogLib/UnitTestLogLib.inf
+  UnitTestPersistenceLib|UnitTestFrameworkPkg/Library/UEFI/UnitTestPersistenceLibNull/UnitTestPersistenceLibNull.inf
   
 [LibraryClasses.common.PEIM]
-  UnitTestLib|UnitTestFrameworkPkg/Library/UnitTestLib/UnitTestLibPei.inf
-  UnitTestResultReportLib|UnitTestFrameworkPkg/FrameworkLibrary/UnitTestResultReportLibDebug/UnitTestResultReportLibDebug.inf
+  UnitTestLib|UnitTestFrameworkPkg/Library/UEFI/UnitTestLib/UnitTestLibPei.inf
+  UnitTestResultReportLib|UnitTestFrameworkPkg/Library/UEFI/UnitTestResultReportLibDebug/UnitTestResultReportLibDebug.inf
   
 [LibraryClasses.common.DXE_SMM_DRIVER]
-  UnitTestLib|UnitTestFrameworkPkg/Library/UnitTestLib/UnitTestLibSmm.inf
-  UnitTestResultReportLib|UnitTestFrameworkPkg/FrameworkLibrary/UnitTestResultReportLibDebug/UnitTestResultReportLibDebug.inf
+  UnitTestLib|UnitTestFrameworkPkg/Library/UEFI/UnitTestLib/UnitTestLibSmm.inf
+  UnitTestResultReportLib|UnitTestFrameworkPkg/Library/UEFI/UnitTestResultReportLibDebug/UnitTestResultReportLibDebug.inf
 
 [LibraryClasses.common.DXE_DRIVER, LibraryClasses.common.UEFI_APPLICATION]
-  UnitTestLib|UnitTestFrameworkPkg/Library/UnitTestLib/UnitTestLibDxe.inf
-  UnitTestResultReportLib|UnitTestFrameworkPkg/FrameworkLibrary/UnitTestResultReportLibPlainTextOutput/UnitTestResultReportLibPlainTextOutput.inf
+  UnitTestLib|UnitTestFrameworkPkg/Library/UEFI/UnitTestLib/UnitTestLibDxe.inf
+  UnitTestResultReportLib|UnitTestFrameworkPkg/Library/UefiShell/UnitTestResultReportLibPlainTextOutput/UnitTestResultReportLibPlainTextOutput.inf
 
 [Components]
-  UnitTestFrameworkPkg/Library/UnitTestAssertLib/UnitTestAssertLib.inf
-  UnitTestFrameworkPkg/Library/UnitTestLib/UnitTestLibDxe.inf
-  UnitTestFrameworkPkg/Library/UnitTestLib/UnitTestLibPei.inf
-  UnitTestFrameworkPkg/Library/UnitTestLib/UnitTestLibSmm.inf
-  UnitTestFrameworkPkg/Library/UnitTestLogLib/UnitTestLogLib.inf
-  UnitTestFrameworkPkg/FrameworkLibrary/UnitTestPersistenceLibNull/UnitTestPersistenceLibNull.inf
-  UnitTestFrameworkPkg/FrameworkLibrary/UnitTestResultReportLibDebug/UnitTestResultReportLibDebug.inf
-  UnitTestFrameworkPkg/FrameworkLibrary/UnitTestResultReportLibPlainTextOutput/UnitTestResultReportLibPlainTextOutput.inf
-  UnitTestFrameworkPkg/FrameworkLibrary/UnitTestBootLibNull/UnitTestBootLibNull.inf
-  UnitTestFrameworkPkg/FrameworkLibrary/UnitTestBootLibUsbClass/UnitTestBootLibUsbClass.inf
-  UnitTestFrameworkPkg/FrameworkLibrary/UnitTestPersistenceLibFileSystem/UnitTestPersistenceLibFileSystem.inf
+  UnitTestFrameworkPkg/Library/UEFI/UnitTestAssertLib/UnitTestAssertLib.inf
+  UnitTestFrameworkPkg/Library/UEFI/UnitTestLib/UnitTestLibDxe.inf
+  UnitTestFrameworkPkg/Library/UEFI/UnitTestLib/UnitTestLibPei.inf
+  UnitTestFrameworkPkg/Library/UEFI/UnitTestLib/UnitTestLibSmm.inf
+  UnitTestFrameworkPkg/Library/UEFI/UnitTestLogLib/UnitTestLogLib.inf
+  UnitTestFrameworkPkg/Library/UEFI/UnitTestPersistenceLibNull/UnitTestPersistenceLibNull.inf
+  UnitTestFrameworkPkg/Library/UEFI/UnitTestResultReportLibDebug/UnitTestResultReportLibDebug.inf
+  UnitTestFrameworkPkg/Library/UEFI/UnitTestBootLibNull/UnitTestBootLibNull.inf
+  UnitTestFrameworkPkg/Library/UefiShell/UnitTestResultReportLibPlainTextOutput/UnitTestResultReportLibPlainTextOutput.inf
+  UnitTestFrameworkPkg/Library/UefiShell/UnitTestBootLibUsbClass/UnitTestBootLibUsbClass.inf
+  UnitTestFrameworkPkg/Library/UefiShell/UnitTestPersistenceLibFileSystem/UnitTestPersistenceLibFileSystem.inf
   UnitTestFrameworkPkg/Sample/SampleUnitTestApp/SampleUnitTestApp.inf
   UnitTestFrameworkPkg/Sample/SampleUnitTestPeim/SampleUnitTestPeim.inf
   UnitTestFrameworkPkg/Sample/SampleUnitTestSmm/SampleUnitTestSmm.inf

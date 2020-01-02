@@ -18,8 +18,8 @@
 
 [Includes.Common.Private]
   FrameworkInclude
-  FrameworkLibrary/CmockaLib/cmocka/include
-  FrameworkLibrary/CmockaLib/cmocka/include/cmockery
+  Library/HostCMocka/CmockaLib/cmocka/include
+  Library/HostCMocka/CmockaLib/cmocka/include/cmockery
 
 [LibraryClasses.Common.Private]
   ## @libraryclass Allows save and restore unit test internal state
