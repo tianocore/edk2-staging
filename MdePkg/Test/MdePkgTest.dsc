@@ -16,53 +16,83 @@
   SKUID_IDENTIFIER               = DEFAULT
 
 [LibraryClasses]
-  CmockaLib|UnitTestFrameworkPkg/Library/HostCMocka/CmockaLib/CmockaLib.inf
-
-  BaseLib|MdePkg/Test/HostLibrary/BaseLibHost/BaseLibHost.inf
-  BaseMemoryLib|MdePkg/Test/HostLibrary/BaseMemoryLibHost/BaseMemoryLibHost.inf
-  DebugLib|MdePkg/Test/HostLibrary/DebugLibHost/DebugLibHost.inf
-  MemoryAllocationLib|MdePkg/Test/HostLibrary/MemoryAllocationLibHost/MemoryAllocationLibHost.inf
-  OsServiceLib|UnitTestFrameworkPkg/Library/HostCRT/OsServiceLibHost/OsServiceLibHost.inf
-
+  BaseLib|MdePkg/Library/BaseLib/BaseLib.inf
+  BaseMemoryLib|MdePkg/Library/BaseMemoryLib/BaseMemoryLib.inf
+  DebugLib|MdePkg/Library/BaseDebugLibNull/BaseDebugLibNull.inf
+  MemoryAllocationLib|MdePkg/Library/UefiMemoryAllocationLib/UefiMemoryAllocationLib.inf
   PcdLib|MdePkg/Library/BasePcdLibNull/BasePcdLibNull.inf
   PeiServicesLib|MdePkg/Library/PeiServicesLib/PeiServicesLib.inf
   PerformanceLib|MdePkg/Library/BasePerformanceLibNull/BasePerformanceLibNull.inf
   PrintLib|MdePkg/Library/BasePrintLib/BasePrintLib.inf
   SafeIntLib|MdePkg/Library/BaseSafeIntLib/BaseSafeIntLib.inf
 
+[LibraryClasses.common.HOST_APPLICATION]
+  OsServiceLib|UnitTestFrameworkPkg/Library/HostCRT/OsServiceLibHost/OsServiceLibHost.inf
+  CmockaLib|UnitTestFrameworkPkg/Library/HostCMocka/CmockaLib/CmockaLib.inf
   UnitTestAssertLib|UnitTestFrameworkPkg/Library/HostCMocka/UnitTestAssertLibcmocka/UnitTestAssertLibcmocka.inf
   UnitTestLib|UnitTestFrameworkPkg/Library/HostCMocka/UnitTestLibcmocka/UnitTestLibcmocka.inf
 
+  DebugLib|MdePkg/Test/HostLibrary/DebugLibHost/DebugLibHost.inf
+  MemoryAllocationLib|MdePkg/Test/HostLibrary/MemoryAllocationLibHost/MemoryAllocationLibHost.inf
+
 [Components]
-
-  UnitTestFrameworkPkg/Library/HostCMocka/CmockaLib/CmockaLib.inf {
-  <BuildOptions>
-    MSFT:*_*_*_CC_FLAGS      ==  /c /D _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1 /D _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1 /D _CRT_NONSTDC_NO_WARNINGS=1 /D _CRT_SECURE_NO_WARNINGS=1 -DHAVE_VSNPRINTF -DHAVE_SNPRINTF
-
-    GCC:*_*_IA32_CC_FLAGS    == -m32 -O0 -g -fprofile-arcs -ftest-coverage -std=gnu99 -Wpedantic -Wall -Wshadow -Wmissing-prototypes -Wcast-align -Werror=address -Wstrict-prototypes -Werror=strict-prototypes -Wwrite-strings -Werror=write-strings -Werror-implicit-function-declaration -Wpointer-arith -Werror=pointer-arith -Wdeclaration-after-statement -Werror=declaration-after-statement -Wreturn-type -Werror=return-type -Wuninitialized -Werror=uninitialized -Werror=strict-overflow -Wstrict-overflow=2 -Wno-format-zero-length -Wmissing-field-initializers -Wformat-security -Werror=format-security -fno-common -Wformat -fno-common -fstack-protector-strong -DHAVE_SIGNAL_H
-    GCC:*_*_X64_CC_FLAGS     == -m64 -O0 -g -fprofile-arcs -ftest-coverage -std=gnu99 -Wpedantic -Wall -Wshadow -Wmissing-prototypes -Wcast-align -Werror=address -Wstrict-prototypes -Werror=strict-prototypes -Wwrite-strings -Werror=write-strings -Werror-implicit-function-declaration -Wpointer-arith -Werror=pointer-arith -Wdeclaration-after-statement -Werror=declaration-after-statement -Wreturn-type -Werror=return-type -Wuninitialized -Werror=uninitialized -Werror=strict-overflow -Wstrict-overflow=2 -Wno-format-zero-length -Wmissing-field-initializers -Wformat-security -Werror=format-security -fno-common -Wformat -fno-common -fstack-protector-strong -DHAVE_SIGNAL_H
-  }
-
-  MdePkg/Test/UnitTest/Library/BaseSafeIntLib/TestBaseSafeIntLib.inf
-
-
-  #compile all host application components
-  MdePkg/Test/HostLibrary/BaseLibHost/BaseLibHost.inf
-  MdePkg/Test/HostLibrary/BaseLibHost/BaseLibHostNoAsm.inf
-  MdePkg/Test/HostLibrary/BaseMemoryLibHost/BaseMemoryLibHost.inf
+  #
+  # Build HostLibrary componments
+  #
   MdePkg/Test/HostLibrary/DebugLibHost/DebugLibHost.inf
   MdePkg/Test/HostLibrary/MemoryAllocationLibHost/MemoryAllocationLibHost.inf
 
+  #
+  # Build HOST_APPLICATION that tests the SafeIntLib
+  #
+  MdePkg/Test/UnitTest/Library/BaseSafeIntLib/TestBaseSafeIntLib.inf
 
 [BuildOptions]
-  MSFT:*_*_IA32_CC_FLAGS == /nologo /W4 /WX /Gy /c /D UNICODE /Od /FIAutoGen.h /EHs-c- /GF /Gs8192 /Zi /Gm /D _CRT_SECURE_NO_WARNINGS /D _CRT_SECURE_NO_DEPRECATE /DHOST_DEBUG_MESSAGE=1
-  MSFT:*_*_X64_CC_FLAGS == /nologo /W4 /WX /Gy /c /D UNICODE /Od /FIAutoGen.h /EHs-c- /GF /Gs8192 /Zi /Gm /D _CRT_SECURE_NO_WARNINGS /D _CRT_SECURE_NO_DEPRECATE /DHOST_DEBUG_MESSAGE=1
+  GCC:*_*_*_CC_FLAGS = -fno-pie
 
 [BuildOptions.common.EDKII.HOST_APPLICATION]
-  MSFT:*_*_IA32_DLINK_FLAGS    == /out:"$(BIN_DIR)\$(BASE_NAME).exe" /base:0x10000000 /pdb:"$(BIN_DIR)\$(BASE_NAME).pdb" /LIBPATH:"%VCToolsInstallDir%lib\x86" /LIBPATH:"%UniversalCRTSdkDir%lib\%UCRTVersion%\ucrt\x86" /LIBPATH:"%WindowsSdkDir%lib\%WindowsSDKLibVersion%\um\x86" /NOLOGO /SUBSYSTEM:CONSOLE /NODEFAULTLIB /IGNORE:4086 /MAP /OPT:REF /DEBUG /MACHINE:I386 /LTCG Kernel32.lib MSVCRTD.lib vcruntimed.lib ucrtd.lib Gdi32.lib User32.lib Winmm.lib Advapi32.lib
-  MSFT:*_*_IA32_DLINK_FLAGS    == /out:"$(BIN_DIR)\$(BASE_NAME).exe" /pdb:"$(BIN_DIR)\$(BASE_NAME).pdb" /LIBPATH:"%VCToolsInstallDir%lib\x86" /LIBPATH:"%UniversalCRTSdkDir%lib\%UCRTVersion%\ucrt\x86" /LIBPATH:"%WindowsSdkDir%lib\%WindowsSDKLibVersion%\um\x86" /NOLOGO /SUBSYSTEM:CONSOLE /NODEFAULTLIB:libcmt.lib /IGNORE:4001 /MAP /OPT:REF /DEBUG /MACHINE:x86 Kernel32.lib MSVCRTD.lib Gdi32.lib User32.lib Winmm.lib Advapi32.lib
+  #
+  # MSFT
+  #
+  MSFT:*_*_*_DLINK_FLAGS            == /out:"$(BIN_DIR)\$(BASE_NAME).exe" /pdb:"$(BIN_DIR)\$(BASE_NAME).pdb" /IGNORE:4001 /NOLOGO /SUBSYSTEM:CONSOLE /DEBUG /NODEFAULTLIB:libcmt.lib libcmtd.lib
+  MSFT:*_*_IA32_DLINK_FLAGS         = /MACHINE:I386
+  MSFT:*_*_X64_DLINK_FLAGS          = /MACHINE:AMD64
 
-  MSFT:*_*_IA32_CC_FLAGS == /nologo /W4 /WX /Gy /c /D UNICODE /Od /FIAutoGen.h /EHs-c- /GF /Gs8192 /Zi /D _CRT_SECURE_NO_WARNINGS /D _CRT_SECURE_NO_DEPRECATE /wd4305
+  MSFT:*_VS2015_IA32_DLINK_FLAGS    = /LIBPATH:"%VS2015_PREFIX%Lib" /LIBPATH:"%VS2015_PREFIX%VC\Lib" /LIBPATH:"%UniversalCRTSdkDir%lib\%UCRTVersion%\ucrt\x86" /LIBPATH:"%WindowsSdkDir%lib\%WindowsSDKLibVersion%\um\x86"
+  MSFT:*_VS2015x86_IA32_DLINK_FLAGS = /LIBPATH:"%VS2015_PREFIX%Lib" /LIBPATH:"%VS2015_PREFIX%VC\Lib" /LIBPATH:"%UniversalCRTSdkDir%lib\%UCRTVersion%\ucrt\x86" /LIBPATH:"%WindowsSdkDir%lib\%WindowsSDKLibVersion%\um\x86"
+  MSFT:*_VS2017_IA32_DLINK_FLAGS    = /LIBPATH:"%VCToolsInstallDir%lib\x86" /LIBPATH:"%UniversalCRTSdkDir%lib\%UCRTVersion%\ucrt\x86" /LIBPATH:"%WindowsSdkDir%lib\%WindowsSDKLibVersion%\um\x86"
+  MSFT:*_VS2019_IA32_DLINK_FLAGS    = /LIBPATH:"%VCToolsInstallDir%lib\x86" /LIBPATH:"%UniversalCRTSdkDir%lib\%UCRTVersion%\ucrt\x86" /LIBPATH:"%WindowsSdkDir%lib\%WindowsSDKLibVersion%\um\x86"
 
-  MSFT:*_*_X64_DLINK_FLAGS    == /out:"$(BIN_DIR)\$(BASE_NAME).exe" /pdb:"$(BIN_DIR)\$(BASE_NAME).pdb" /LIBPATH:"%VCToolsInstallDir%lib\x64" /LIBPATH:"%UniversalCRTSdkDir%lib\%UCRTVersion%\ucrt\x64" /LIBPATH:"%WindowsSdkDir%lib\%WindowsSDKLibVersion%\um\x64" /NOLOGO /SUBSYSTEM:CONSOLE /NODEFAULTLIB:libcmt.lib /IGNORE:4001 /MAP /OPT:REF /DEBUG /MACHINE:X64 MSVCRTD.lib Kernel32.lib Gdi32.lib User32.lib Winmm.lib Advapi32.lib
-  MSFT:*_*_X64_CC_FLAGS == /nologo /W4 /WX /Gy /c /D UNICODE /Od /FIAutoGen.h /EHs-c- /GF /Gs8192 /Zi /D _CRT_SECURE_NO_WARNINGS /D _CRT_SECURE_NO_DEPRECATE
+  MSFT:*_VS2015_X64_DLINK_FLAGS     = /LIBPATH:"%VS2015_PREFIX%VC\Lib\AMD64" /LIBPATH:"%UniversalCRTSdkDir%lib\%UCRTVersion%\ucrt\x64" /LIBPATH:"%WindowsSdkDir%lib\%WindowsSDKLibVersion%\um\x64"
+  MSFT:*_VS2015x86_X64_DLINK_FLAGS  = /LIBPATH:"%VS2015_PREFIX%VC\Lib\AMD64" /LIBPATH:"%UniversalCRTSdkDir%lib\%UCRTVersion%\ucrt\x64" /LIBPATH:"%WindowsSdkDir%lib\%WindowsSDKLibVersion%\um\x64"
+  MSFT:*_VS2017_X64_DLINK_FLAGS     = /LIBPATH:"%VCToolsInstallDir%lib\x64" /LIBPATH:"%UniversalCRTSdkDir%lib\%UCRTVersion%\ucrt\x64" /LIBPATH:"%WindowsSdkDir%lib\%WindowsSDKLibVersion%\um\x64"
+  MSFT:*_VS2019_X64_DLINK_FLAGS     = /LIBPATH:"%VCToolsInstallDir%lib\x64" /LIBPATH:"%UniversalCRTSdkDir%lib\%UCRTVersion%\ucrt\x64" /LIBPATH:"%WindowsSdkDir%lib\%WindowsSDKLibVersion%\um\x64"
+
+  #
+  # GCC
+  #
+  GCC:*_*_IA32_DLINK_FLAGS == -o $(BIN_DIR)/$(BASE_NAME) -m32
+  GCC:*_*_X64_DLINK_FLAGS  == -o $(BIN_DIR)/$(BASE_NAME) -m64
+  GCC:*_*_*_DLINK2_FLAGS == -lgcov
+
+  #
+  # GCC CLANG9
+  #
+  GCC:*_CLANG9_X64_DLINK_FLAGS == /out:"$(BIN_DIR)\$(BASE_NAME).exe" /base:0x10000000 /pdb:"$(BIN_DIR)\$(BASE_NAME).pdb"  /LIBPATH:"%UniversalCRTSdkDir%lib\%UCRTVersion%\ucrt\x64" /LIBPATH:"%WindowsSdkDir%lib\%WindowsSDKLibVersion%\um\x64" /LIBPATH:"%VCToolsInstallDir%lib\x64"   /NOLOGO /SUBSYSTEM:CONSOLE /NODEFAULTLIB /IGNORE:4086  /OPT:REF /DEBUG /MACHINE:AMD64 Kernel32.lib MSVCRTD.lib vcruntimed.lib ucrtd.lib Gdi32.lib User32.lib Winmm.lib Advapi32.lib /lldmap  /EXPORT:InitializeDriver=_ModuleEntryPoint
+  GCC:*_CLANG9_X64_CC_FLAGS == -m64 -g -fshort-wchar -fno-strict-aliasing -Wall -c -include AutoGen.h -D _CRT_SECURE_NO_WARNINGS -Wnonportable-include-path  -D UNICODE -D _CRT_SECURE_NO_DEPRECATE
+
+  GCC:*_CLANG9_IA32_DLINK_FLAGS == /out:"$(BIN_DIR)\$(BASE_NAME).exe" /base:0x10000000 /pdb:"$(BIN_DIR)\$(BASE_NAME).pdb" /LIBPATH:"%UniversalCRTSdkDir%lib\%UCRTVersion%\ucrt\x86" /LIBPATH:"%WindowsSdkDir%lib\%WindowsSDKLibVersion%\um\x86" /LIBPATH:"%VCToolsInstallDir%ib\x86"   /NOLOGO /SUBSYSTEM:CONSOLE /NODEFAULTLIB /IGNORE:4086  /OPT:REF /DEBUG /MACHINE:I386 Kernel32.lib MSVCRTD.lib vcruntimed.lib ucrtd.lib Gdi32.lib User32.lib Winmm.lib Advapi32.lib /lldmap  /EXPORT:InitializeDriver=_ModuleEntryPoint
+  GCC:*_CLANG9_IA32_CC_FLAGS == -m32 -g -fshort-wchar -fno-strict-aliasing -Wall -c -include AutoGen.h -D _CRT_SECURE_NO_WARNINGS -Wnonportable-include-path  -D UNICODE -D _CRT_SECURE_NO_DEPRECATE
+
+  #
+  # Need to do this link via gcc and not ld as the pathing to libraries changes from OS version to OS version
+  #
+  XCODE:*_*_IA32_DLINK_PATH == gcc
+  XCODE:*_*_IA32_CC_FLAGS = -I$(WORKSPACE)/EmulatorPkg/Unix/Host/X11IncludeHack
+  XCODE:*_*_IA32_DLINK_FLAGS == -arch i386 -o $(BIN_DIR)/Host -L/usr/X11R6/lib -lXext -lX11 -framework Carbon
+  XCODE:*_*_IA32_ASM_FLAGS == -arch i386 -g
+
+  XCODE:*_*_X64_DLINK_PATH == gcc
+  XCODE:*_*_X64_DLINK_FLAGS == -o $(BIN_DIR)/Host -L/usr/X11R6/lib -lXext -lX11 -framework Carbon -Wl,-no_pie
+  XCODE:*_*_X64_ASM_FLAGS == -g
+  XCODE:*_*_X64_CC_FLAGS = -O0 -target x86_64-apple-darwin -I$(WORKSPACE)/EmulatorPkg/Unix/Host/X11IncludeHack "-DEFIAPI=__attribute__((ms_abi))"
