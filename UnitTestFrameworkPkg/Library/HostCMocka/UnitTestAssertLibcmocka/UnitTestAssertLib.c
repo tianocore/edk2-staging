@@ -35,7 +35,7 @@ UnitTestAssertTrue (
 {
   CHAR8  TempStr[MAX_STRING_SIZE];
 
-  sprintf (TempStr, "UT_ASSERT_TRUE(%s:%x)", Description, Expression);
+  snprintf (TempStr, sizeof(TempStr), "UT_ASSERT_TRUE(%s:%x)", Description, Expression);
   _assert_true (Expression, Description, FileName, (INT32)LineNumber);
 
   return Expression;
@@ -55,7 +55,7 @@ UnitTestAssertFalse (
 {
   CHAR8  TempStr[MAX_STRING_SIZE];
 
-  sprintf (TempStr, "UT_ASSERT_FALSE(%s:%x)", Description, Expression);
+  snprintf (TempStr, sizeof(TempStr), "UT_ASSERT_FALSE(%s:%x)", Description, Expression);
   _assert_true (!Expression, Description, FileName, (INT32)LineNumber);
 
   return !Expression;
@@ -75,7 +75,7 @@ UnitTestAssertNotEfiError (
 {
   CHAR8  TempStr[MAX_STRING_SIZE];
 
-  sprintf (TempStr, "UT_ASSERT_NOT_EFI_ERROR(%s:%p)", Description, (void *)Status);
+  snprintf (TempStr, sizeof(TempStr), "UT_ASSERT_NOT_EFI_ERROR(%s:%p)", Description, (void *)Status);
   _assert_true (!EFI_ERROR (Status), Description, FileName, (INT32)LineNumber);
 
   return !EFI_ERROR (Status);
@@ -97,7 +97,7 @@ UnitTestAssertEqual (
 {
   CHAR8  TempStr[MAX_STRING_SIZE];
 
-  sprintf (TempStr, "UT_ASSERT_EQUAL(%s:%llx, %s:%llx)", DescriptionA, ValueA, DescriptionB, ValueB);
+  snprintf (TempStr, sizeof(TempStr), "UT_ASSERT_EQUAL(%s:%llx, %s:%llx)", DescriptionA, ValueA, DescriptionB, ValueB);
   _assert_int_equal (ValueA, ValueB, FileName, (INT32)LineNumber);
 
   return (ValueA == ValueB);
@@ -122,7 +122,7 @@ UnitTestAssertMemEqual(
 
   Result = (CompareMem((VOID*)ValueA, (VOID*)ValueB, Length) == 0);
 
-  sprintf (TempStr, "UT_ASSERT_MEM_EQUAL(%s:%p, %s:%p)", DescriptionA, (VOID *)ValueA, DescriptionB, (VOID *)ValueB);
+  snprintf (TempStr, sizeof(TempStr), "UT_ASSERT_MEM_EQUAL(%s:%p, %s:%p)", DescriptionA, (VOID *)ValueA, DescriptionB, (VOID *)ValueB);
   _assert_true (Result, TempStr, FileName, (INT32)LineNumber);
 
   return Result;
@@ -144,7 +144,7 @@ UnitTestAssertNotEqual (
 {
   CHAR8  TempStr[MAX_STRING_SIZE];
 
-  sprintf (TempStr, "UT_ASSERT_NOT_EQUAL(%s:%llx, %s:%llx)", DescriptionA, ValueA, DescriptionB, ValueB);
+  snprintf (TempStr, sizeof(TempStr), "UT_ASSERT_NOT_EQUAL(%s:%llx, %s:%llx)", DescriptionA, ValueA, DescriptionB, ValueB);
   _assert_int_not_equal (ValueA, ValueB, FileName, (INT32)LineNumber);
 
   return (ValueA != ValueB);
@@ -165,7 +165,7 @@ UnitTestAssertStatusEqual (
 {
   CHAR8  TempStr[MAX_STRING_SIZE];
 
-  sprintf (TempStr, "UT_ASSERT_STATUS_EQUAL(%s:%p)", Description, (VOID *)Status);
+  snprintf (TempStr, sizeof(TempStr), "UT_ASSERT_STATUS_EQUAL(%s:%p)", Description, (VOID *)Status);
   _assert_int_equal (Status, Status, FileName, (INT32)LineNumber);
 
   return (Status == Expected);
@@ -184,7 +184,7 @@ UnitTestAssertNotNull(
 {
   CHAR8  TempStr[MAX_STRING_SIZE];
 
-  sprintf (TempStr, "UT_ASSERT_NOT_NULL(%s:%p)", PointerName, Pointer);
+  snprintf (TempStr, sizeof(TempStr), "UT_ASSERT_NOT_NULL(%s:%p)", PointerName, Pointer);
   _assert_true (Pointer != NULL, TempStr, FileName, (INT32)LineNumber);
 
   return (Pointer != NULL);
