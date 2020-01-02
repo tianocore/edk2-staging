@@ -90,7 +90,6 @@ Not to state the obvious, but let's make sure we have the following includes bef
 
 ```c
 #include <Library/UnitTestLib.h>
-#include <Library/UnitTestAssertLib.h>
 ```
 
 Now that we've got that squared away, let's look at our 'Main()'' routine (or DriverEntryPoint() or whatever).

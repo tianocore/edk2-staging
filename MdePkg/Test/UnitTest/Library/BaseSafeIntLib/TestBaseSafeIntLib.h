@@ -36,7 +36,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/UnitTestLib.h>
-#include <Library/UnitTestAssertLib.h>
 #include <Library/SafeIntLib.h>
 
 UNIT_TEST_STATUS

@@ -124,4 +124,23 @@ typedef struct
   // CHAR8                  Log[];                                // NOTE: Not yet implemented!!
 } UNIT_TEST_SAVE_HEADER;
 
+/**
+  This function is responsible for initializing the log buffer for a single test. It can
+  be used internally, but may also be consumed by the test framework to add pre-existing
+  data to a log before it's used.
+
+  @param[in,out]  TestHandle    A handle to the test being initialized.
+  @param[in]      Buffer        [Optional] A pointer to pre-existing log data that should
+                                be used to initialize the log. Should include a NULL terminator.
+  @param[in]      BufferSize    [Optional] The size of the pre-existing log data.
+
+**/
+VOID
+EFIAPI
+UnitTestLogInit (
+  IN OUT UNIT_TEST_HANDLE   TestHandle,
+  IN UINT8                  *Buffer     OPTIONAL,
+  IN UINTN                  BufferSize  OPTIONAL
+  );
+
 #endif

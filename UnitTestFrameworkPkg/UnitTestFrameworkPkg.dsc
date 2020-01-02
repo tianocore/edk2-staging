@@ -156,7 +156,6 @@
   UnitTestAssertLib|UnitTestFrameworkPkg/Library/UnitTestAssertLib/UnitTestAssertLib.inf
   UnitTestLogLib|UnitTestFrameworkPkg/Library/UnitTestLogLib/UnitTestLogLib.inf
   UnitTestPersistenceLib|UnitTestFrameworkPkg/FrameworkLibrary/UnitTestPersistenceLibNull/UnitTestPersistenceLibNull.inf
-  #UnitTestBootLib|UnitTestFrameworkPkg/FrameworkLibrary/UnitTestBootLibNull/UnitTestBootLibNull.inf
   
 [LibraryClasses.common.PEIM]
   UnitTestLib|UnitTestFrameworkPkg/Library/UnitTestLib/UnitTestLibPei.inf
@@ -169,7 +168,6 @@
 [LibraryClasses.common.DXE_DRIVER, LibraryClasses.common.UEFI_APPLICATION]
   UnitTestLib|UnitTestFrameworkPkg/Library/UnitTestLib/UnitTestLibDxe.inf
   UnitTestResultReportLib|UnitTestFrameworkPkg/FrameworkLibrary/UnitTestResultReportLibPlainTextOutput/UnitTestResultReportLibPlainTextOutput.inf
-  UnitTestTerminationLib|UnitTestFrameworkPkg/Library/UnitTestTerminationLibDxe/UnitTestTerminationLibDxe.inf
 
 [Components]
   UnitTestFrameworkPkg/Library/UnitTestAssertLib/UnitTestAssertLib.inf
@@ -180,11 +178,9 @@
   UnitTestFrameworkPkg/FrameworkLibrary/UnitTestPersistenceLibNull/UnitTestPersistenceLibNull.inf
   UnitTestFrameworkPkg/FrameworkLibrary/UnitTestResultReportLibDebug/UnitTestResultReportLibDebug.inf
   UnitTestFrameworkPkg/FrameworkLibrary/UnitTestResultReportLibPlainTextOutput/UnitTestResultReportLibPlainTextOutput.inf
-  UnitTestFrameworkPkg/Library/UnitTestTerminationLibDxe/UnitTestTerminationLibDxe.inf
   UnitTestFrameworkPkg/FrameworkLibrary/UnitTestBootLibNull/UnitTestBootLibNull.inf
   UnitTestFrameworkPkg/FrameworkLibrary/UnitTestBootLibUsbClass/UnitTestBootLibUsbClass.inf
   UnitTestFrameworkPkg/FrameworkLibrary/UnitTestPersistenceLibFileSystem/UnitTestPersistenceLibFileSystem.inf
-  UnitTestFrameworkPkg/FrameworkLibrary/UnitTestTerminationLibShell/UnitTestTerminationLibShell.inf
   UnitTestFrameworkPkg/Sample/SampleUnitTestApp/SampleUnitTestApp.inf
   UnitTestFrameworkPkg/Sample/SampleUnitTestPeim/SampleUnitTestPeim.inf
   UnitTestFrameworkPkg/Sample/SampleUnitTestSmm/SampleUnitTestSmm.inf

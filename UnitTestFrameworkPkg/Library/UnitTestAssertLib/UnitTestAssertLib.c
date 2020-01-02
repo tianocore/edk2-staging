@@ -13,7 +13,6 @@ Copyright (c) Microsoft
 
 #include <Library/UnitTestLib.h>
 #include <UnitTestFrameworkTypes.h>
-#include <Library/UnitTestLogLib.h>
 
 
 STATIC

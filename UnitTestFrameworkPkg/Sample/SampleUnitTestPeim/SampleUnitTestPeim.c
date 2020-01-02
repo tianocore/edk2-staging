@@ -23,7 +23,6 @@ Copyright (C) 2016 Microsoft Corporation. All Rights Reserved.
 #include <Library/DebugLib.h>
 
 #include <Library/UnitTestLib.h>
-#include <Library/UnitTestAssertLib.h>
 
 
 #define UNIT_TEST_PEIM_NAME        "Sample Unit Test Library PEIM"

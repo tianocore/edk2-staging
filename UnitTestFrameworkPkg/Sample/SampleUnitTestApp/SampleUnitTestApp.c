@@ -23,8 +23,6 @@ Copyright (C) 2016 Microsoft Corporation. All Rights Reserved.
 #include <Library/DebugLib.h>
 
 #include <Library/UnitTestLib.h>
-#include <Library/UnitTestAssertLib.h>
-#include <Library/UnitTestLogLib.h>
 
 
 #define UNIT_TEST_APP_NAME        "Sample Unit Test Library Application"
