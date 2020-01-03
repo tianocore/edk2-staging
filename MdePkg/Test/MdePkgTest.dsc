@@ -31,16 +31,10 @@
   UnitTestAssertLib|UnitTestFrameworkPkg/Library/HostCMocka/UnitTestAssertLibcmocka/UnitTestAssertLibcmocka.inf
   UnitTestLib|UnitTestFrameworkPkg/Library/HostCMocka/UnitTestLibcmocka/UnitTestLibcmocka.inf
 
-  DebugLib|MdePkg/Test/HostLibrary/DebugLibHost/DebugLibHost.inf
-  MemoryAllocationLib|MdePkg/Test/HostLibrary/MemoryAllocationLibHost/MemoryAllocationLibHost.inf
+  DebugLib|UnitTestFrameworkPkg/Library/Posix/DebugLibPosix/DebugLibPosix.inf
+  MemoryAllocationLib|UnitTestFrameworkPkg/Library/Posix/MemoryAllocationLibPosix/MemoryAllocationLibPosix.inf
 
 [Components]
-  #
-  # Build HostLibrary componments
-  #
-  MdePkg/Test/HostLibrary/DebugLibHost/DebugLibHost.inf
-  MdePkg/Test/HostLibrary/MemoryAllocationLibHost/MemoryAllocationLibHost.inf
-
   #
   # Build HOST_APPLICATION that tests the SafeIntLib
   #

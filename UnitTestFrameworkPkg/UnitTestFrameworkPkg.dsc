@@ -170,6 +170,8 @@
   UnitTestResultReportLib|UnitTestFrameworkPkg/Library/UefiShell/UnitTestResultReportLibPlainTextOutput/UnitTestResultReportLibPlainTextOutput.inf
 
 [Components]
+  UnitTestFrameworkPkg/Library/Posix/DebugLibPosix/DebugLibPosix.inf
+  UnitTestFrameworkPkg/Library/Posix/MemoryAllocationLibPosix/MemoryAllocationLibPosix.inf
   UnitTestFrameworkPkg/Library/UEFI/UnitTestAssertLib/UnitTestAssertLib.inf
   UnitTestFrameworkPkg/Library/UEFI/UnitTestLib/UnitTestLibDxe.inf
   UnitTestFrameworkPkg/Library/UEFI/UnitTestLib/UnitTestLibPei.inf
