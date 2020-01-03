@@ -144,7 +144,7 @@ class Settings(CiSetupSettingsManager, CiBuildSettingsManager, UpdateSettingsMan
         rs.append(RequiredSubmodule(
             "CryptoPkg/Library/OpensslLib/openssl", False))
         rs.append(RequiredSubmodule(
-            "UnitTestFrameworkPkg/Library/HostCMocka/CmockaLib/cmocka", False))
+            "UnitTestFrameworkPkg/Library/HostCmocka/CmockaLib/cmocka", False))
         return rs
 
     def GetName(self):
