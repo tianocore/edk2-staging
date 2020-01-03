@@ -14,7 +14,6 @@
   MODULE_TYPE                    = BASE
   VERSION_STRING                 = 0.1
   LIBRARY_CLASS                  = CmockaLib
-  DEFINE CMOCKA_PATH             = cmocka
 
 #
 #  VALID_ARCHITECTURES           = IA32 X64 ARM AARCH64

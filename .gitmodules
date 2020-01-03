@@ -4,6 +4,6 @@
 [submodule "SoftFloat"]
 	path = ArmPkg/Library/ArmSoftFloatLib/berkeley-softfloat-3
 	url = https://github.com/ucb-bar/berkeley-softfloat-3.git
-[submodule "UnitTestFrameworkPkg/Library/HostCMocka/CmockaLib/cmocka"]
-	path = UnitTestFrameworkPkg/Library/HostCMocka/CmockaLib/cmocka
+[submodule "UnitTestFrameworkPkg/Library/HostCmocka/CmockaLib/cmocka"]
+	path = UnitTestFrameworkPkg/Library/HostCmocka/CmockaLib/cmocka
 	url = https://git.cryptomilk.org/projects/cmocka.git

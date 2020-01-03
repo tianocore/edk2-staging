@@ -30,9 +30,9 @@
         "IgnoreInf": [
             # Don't need to build these.
             # These are host-based only.
-            "UnitTestFrameworkPkg/Library/HostCMocka/UnitTestLibcmocka/UnitTestLibcmocka.inf",
-            "UnitTestFrameworkPkg/Library/HostCMocka/UnitTestAssertLibcmocka/UnitTestAssertLibcmocka.inf",
-            "UnitTestFrameworkPkg/Library/HostCMocka/CmockaLib/CmockaLib.inf"
+            "UnitTestFrameworkPkg/Library/HostCmocka/UnitTestLibCmocka/UnitTestLibCmocka.inf",
+            "UnitTestFrameworkPkg/Library/HostCmocka/UnitTestAssertLibCmocka/UnitTestAssertLibCmocka.inf",
+            "UnitTestFrameworkPkg/Library/HostCmocka/CmockaLib/CmockaLib.inf"
         ]
     },
     "GuidCheck": {

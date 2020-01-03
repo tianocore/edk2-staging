@@ -7,7 +7,7 @@
 
 [Defines]
   INF_VERSION     = 0x00010017
-  BASE_NAME       = UnitTestAssertLibcmocka
+  BASE_NAME       = UnitTestAssertLibCmocka
   FILE_GUID       = 8841561C-ABF2-4989-9039-4C6485D61C23
   VERSION_STRING  = 1.0
   MODULE_TYPE     = BASE

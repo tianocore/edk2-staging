@@ -27,9 +27,9 @@
   SafeIntLib|MdePkg/Library/BaseSafeIntLib/BaseSafeIntLib.inf
 
 [LibraryClasses.common.HOST_APPLICATION]
-  CmockaLib|UnitTestFrameworkPkg/Library/HostCMocka/CmockaLib/CmockaLib.inf
-  UnitTestAssertLib|UnitTestFrameworkPkg/Library/HostCMocka/UnitTestAssertLibcmocka/UnitTestAssertLibcmocka.inf
-  UnitTestLib|UnitTestFrameworkPkg/Library/HostCMocka/UnitTestLibcmocka/UnitTestLibcmocka.inf
+  CmockaLib|UnitTestFrameworkPkg/Library/HostCmocka/CmockaLib/CmockaLib.inf
+  UnitTestAssertLib|UnitTestFrameworkPkg/Library/HostCmocka/UnitTestAssertLibCmocka/UnitTestAssertLibCmocka.inf
+  UnitTestLib|UnitTestFrameworkPkg/Library/HostCmocka/UnitTestLibCmocka/UnitTestLibCmocka.inf
 
   DebugLib|UnitTestFrameworkPkg/Library/Posix/DebugLibPosix/DebugLibPosix.inf
   MemoryAllocationLib|UnitTestFrameworkPkg/Library/Posix/MemoryAllocationLibPosix/MemoryAllocationLibPosix.inf
