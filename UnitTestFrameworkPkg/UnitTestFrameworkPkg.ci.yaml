@@ -30,7 +30,6 @@
         "IgnoreInf": [
             # Don't need to build these.
             # These are host-based only.
-            "UnitTestFrameworkPkg/Library/HostCRT/OsServiceLibHost/OsServiceLibHost.inf",
             "UnitTestFrameworkPkg/Library/HostCMocka/UnitTestLibcmocka/UnitTestLibcmocka.inf",
             "UnitTestFrameworkPkg/Library/HostCMocka/UnitTestAssertLibcmocka/UnitTestAssertLibcmocka.inf",
             "UnitTestFrameworkPkg/Library/HostCMocka/CmockaLib/CmockaLib.inf"

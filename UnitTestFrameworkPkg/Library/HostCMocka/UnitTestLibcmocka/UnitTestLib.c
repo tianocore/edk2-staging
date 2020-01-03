@@ -17,7 +17,6 @@
 #include <Library/BaseMemoryLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/DebugLib.h>
-#include <Library/OsServiceLib.h>
 
 #include <Library/UnitTestLib.h>
 #include <UnitTestFrameworkTypes.h>
@@ -299,16 +298,6 @@ CreateUnitTestSuite (
     goto Exit;
   }
 
-  NewSuiteEntry->UTS.GroupSetup = (CMFixtureFunction)(UINTN)AllocateExecutableMemory (mGroupSetupTemplateSize);
-  ASSERT(NewSuiteEntry->UTS.GroupSetup != NULL);
-  CopyMem ((VOID *)(UINTN)NewSuiteEntry->UTS.GroupSetup, (VOID *)(UINTN)GroupSetupTemplate, mGroupSetupTemplateSize);
-  *(UINTN *)((UINTN)NewSuiteEntry->UTS.GroupSetup + sizeof(UINTN)/sizeof(UINT32)) = (UINTN)&NewSuiteEntry->UTS;
-  
-  NewSuiteEntry->UTS.GroupTeardown = (CMFixtureFunction)(UINTN)AllocateExecutableMemory (mGroupTeardownTemplateSize);
-  ASSERT(NewSuiteEntry->UTS.GroupTeardown != NULL);
-  CopyMem ((VOID *)(UINTN)NewSuiteEntry->UTS.GroupTeardown, (VOID *)(UINTN)GroupTeardownTemplate, mGroupTeardownTemplateSize);
-  *(UINTN *)((UINTN)NewSuiteEntry->UTS.GroupTeardown + sizeof(UINTN)/sizeof(UINT32)) = (UINTN)&NewSuiteEntry->UTS;
-
   NewSuiteEntry->UTS.GroupSetup = (CMFixtureFunction)Sup;
   NewSuiteEntry->UTS.GroupTeardown = (CMFixtureFunction)Tdn;
 
@@ -382,21 +371,6 @@ AddTestCase (
     goto Exit;
   }
   
-  NewTestEntry->UT.TestFunc = (CMUnitTestFunction)(UINTN)AllocateExecutableMemory (mTestFuncTemplateSize);
-  ASSERT(NewTestEntry->UT.TestFunc != NULL);
-  CopyMem ((VOID *)(UINTN)NewTestEntry->UT.TestFunc, (VOID *)(UINTN)TestFuncTemplate, mTestFuncTemplateSize);
-  *(UINTN *)((UINTN)NewTestEntry->UT.TestFunc + sizeof(UINTN)/sizeof(UINT32)) = (UINTN)&NewTestEntry->UT;
-  
-  NewTestEntry->UT.SetupFunc = (CMFixtureFunction)(UINTN)AllocateExecutableMemory (mSetupFuncTemplateSize);
-  ASSERT(NewTestEntry->UT.SetupFunc != NULL);
-  CopyMem ((VOID *)(UINTN)NewTestEntry->UT.SetupFunc, (VOID *)(UINTN)SetupFuncTemplate, mSetupFuncTemplateSize);
-  *(UINTN *)((UINTN)NewTestEntry->UT.SetupFunc + sizeof(UINTN)/sizeof(UINT32)) = (UINTN)&NewTestEntry->UT;
-  
-  NewTestEntry->UT.TeardownFunc = (CMFixtureFunction)(UINTN)AllocateExecutableMemory (mTeardownFuncTemplateSize);
-  ASSERT(NewTestEntry->UT.TeardownFunc != NULL);
-  CopyMem ((VOID *)(UINTN)NewTestEntry->UT.TeardownFunc, (VOID *)(UINTN)TeardownFuncTemplate, mTeardownFuncTemplateSize);
-  *(UINTN *)((UINTN)NewTestEntry->UT.TeardownFunc + sizeof(UINTN)/sizeof(UINT32)) = (UINTN)&NewTestEntry->UT;
-
   NewTestEntry->UT.TestFunc = (CMUnitTestFunction)Func;
   NewTestEntry->UT.SetupFunc = (CMFixtureFunction)PreReq;
   NewTestEntry->UT.TeardownFunc = (CMFixtureFunction)CleanUp;

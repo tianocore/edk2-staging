@@ -16,7 +16,6 @@
 [LibraryClasses]
   BaseLib
   MemoryAllocationLib
-  OsServiceLib
   CmockaLib
 
 [Packages]
@@ -25,13 +24,3 @@
 
 [Sources]
   UnitTestLib.c
-
-[Sources.Ia32]
-  IA32/cmockaFuncTemplateMsvc.nasm | MSFT
-  IA32/cmockaFuncTemplateGcc.nasm  | GCC
-
-[Sources.X64]
-  X64/cmockaFuncTemplateMsvc.nasm  | MSFT
-  X64/cmockaFuncTemplateGcc.nasm   | GCC
-
-[Pcd]

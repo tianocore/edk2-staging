@@ -30,10 +30,6 @@
   #
   UnitTestResultReportLib|FrameworkInclude/Library/UnitTestResultReportLib.h
 
-  ## @libraryclass Provides memory allocation routines specific to host-based tests.
-  #
-  OsServiceLib|FrameworkInclude/Library/OsServiceLib.h
-
   ## @libraryclass Provides boot-option routines useful in shell-based tests.
   #
   UnitTestBootLib|FrameworkInclude/Library/UnitTestBootLib.h

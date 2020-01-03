@@ -27,7 +27,6 @@
   SafeIntLib|MdePkg/Library/BaseSafeIntLib/BaseSafeIntLib.inf
 
 [LibraryClasses.common.HOST_APPLICATION]
-  OsServiceLib|UnitTestFrameworkPkg/Library/HostCRT/OsServiceLibHost/OsServiceLibHost.inf
   CmockaLib|UnitTestFrameworkPkg/Library/HostCMocka/CmockaLib/CmockaLib.inf
   UnitTestAssertLib|UnitTestFrameworkPkg/Library/HostCMocka/UnitTestAssertLibcmocka/UnitTestAssertLibcmocka.inf
   UnitTestLib|UnitTestFrameworkPkg/Library/HostCMocka/UnitTestLibcmocka/UnitTestLibcmocka.inf
