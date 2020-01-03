@@ -624,7 +624,7 @@ TestSafeInt32ToChar8(
   CHAR8 Result = 0;
 
   // CHAR8 is typedefed as char, which by default is signed, thus
-	// CHAR8 is same as INT8, so same tests as above:
+  // CHAR8 is same as INT8, so same tests as above:
 
   //
   // If Operand is between MIN_INT8 and MAX_INT8 inclusive, then it's a cast
@@ -857,7 +857,7 @@ TestSafeUint32ToChar8(
   CHAR8 Result = 0;
 
   // CHAR8 is typedefed as char, which by default is signed, thus
-	// CHAR8 is same as INT8, so same tests as above:
+  // CHAR8 is same as INT8, so same tests as above:
 
   //
   // If Operand is <= MAX_INT8, then it's a cast
@@ -1037,7 +1037,7 @@ TestSafeIntnToChar8(
   CHAR8 Result = 0;
 
   // CHAR8 is typedefed as char, which by default is signed, thus
-	// CHAR8 is same as INT8, so same tests as above:
+  // CHAR8 is same as INT8, so same tests as above:
 
   //
   // If Operand is between MIN_INT8 and MAX_INT8 inclusive, then it's a cast
@@ -1262,7 +1262,7 @@ TestSafeUintnToChar8(
   CHAR8 Result = 0;
 
   // CHAR8 is typedefed as char, which by default is signed, thus
-	// CHAR8 is same as INT8, so same tests as above:
+  // CHAR8 is same as INT8, so same tests as above:
 
   //
   // If Operand is <= MAX_INT8, then it's a cast
@@ -2745,8 +2745,8 @@ UefiTestMain (
   Framework = NULL;
   ConversionTestSuite = NULL;
   AdditionSubtractionTestSuite = NULL;
-  MultiplicationTestSuite = NULL; 
-  
+  MultiplicationTestSuite = NULL;
+
   DEBUG((DEBUG_INFO, "%a v%a\n", UNIT_TEST_NAME, UNIT_TEST_VERSION));
 
   //
