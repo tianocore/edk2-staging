@@ -153,33 +153,33 @@
   # UnitTestFrameworkPkg
   #
 [LibraryClasses]
-  UnitTestAssertLib|UnitTestFrameworkPkg/Library/UEFI/UnitTestAssertLib/UnitTestAssertLib.inf
-  UnitTestLogLib|UnitTestFrameworkPkg/Library/UEFI/UnitTestLogLib/UnitTestLogLib.inf
-  UnitTestPersistenceLib|UnitTestFrameworkPkg/Library/UEFI/UnitTestPersistenceLibNull/UnitTestPersistenceLibNull.inf
+  UnitTestAssertLib|UnitTestFrameworkPkg/Library/Uefi/UnitTestAssertLib/UnitTestAssertLib.inf
+  UnitTestLogLib|UnitTestFrameworkPkg/Library/Uefi/UnitTestLogLib/UnitTestLogLib.inf
+  UnitTestPersistenceLib|UnitTestFrameworkPkg/Library/Uefi/UnitTestPersistenceLibNull/UnitTestPersistenceLibNull.inf
   
 [LibraryClasses.common.PEIM]
-  UnitTestLib|UnitTestFrameworkPkg/Library/UEFI/UnitTestLib/UnitTestLibPei.inf
-  UnitTestResultReportLib|UnitTestFrameworkPkg/Library/UEFI/UnitTestResultReportLibDebug/UnitTestResultReportLibDebug.inf
+  UnitTestLib|UnitTestFrameworkPkg/Library/Uefi/UnitTestLib/UnitTestLibPei.inf
+  UnitTestResultReportLib|UnitTestFrameworkPkg/Library/Uefi/UnitTestResultReportLibDebug/UnitTestResultReportLibDebug.inf
   
 [LibraryClasses.common.DXE_SMM_DRIVER]
-  UnitTestLib|UnitTestFrameworkPkg/Library/UEFI/UnitTestLib/UnitTestLibSmm.inf
-  UnitTestResultReportLib|UnitTestFrameworkPkg/Library/UEFI/UnitTestResultReportLibDebug/UnitTestResultReportLibDebug.inf
+  UnitTestLib|UnitTestFrameworkPkg/Library/Uefi/UnitTestLib/UnitTestLibSmm.inf
+  UnitTestResultReportLib|UnitTestFrameworkPkg/Library/Uefi/UnitTestResultReportLibDebug/UnitTestResultReportLibDebug.inf
 
 [LibraryClasses.common.DXE_DRIVER, LibraryClasses.common.UEFI_APPLICATION]
-  UnitTestLib|UnitTestFrameworkPkg/Library/UEFI/UnitTestLib/UnitTestLibDxe.inf
+  UnitTestLib|UnitTestFrameworkPkg/Library/Uefi/UnitTestLib/UnitTestLibDxe.inf
   UnitTestResultReportLib|UnitTestFrameworkPkg/Library/UefiShell/UnitTestResultReportLibPlainTextOutput/UnitTestResultReportLibPlainTextOutput.inf
 
 [Components]
   UnitTestFrameworkPkg/Library/Posix/DebugLibPosix/DebugLibPosix.inf
   UnitTestFrameworkPkg/Library/Posix/MemoryAllocationLibPosix/MemoryAllocationLibPosix.inf
-  UnitTestFrameworkPkg/Library/UEFI/UnitTestAssertLib/UnitTestAssertLib.inf
-  UnitTestFrameworkPkg/Library/UEFI/UnitTestLib/UnitTestLibDxe.inf
-  UnitTestFrameworkPkg/Library/UEFI/UnitTestLib/UnitTestLibPei.inf
-  UnitTestFrameworkPkg/Library/UEFI/UnitTestLib/UnitTestLibSmm.inf
-  UnitTestFrameworkPkg/Library/UEFI/UnitTestLogLib/UnitTestLogLib.inf
-  UnitTestFrameworkPkg/Library/UEFI/UnitTestPersistenceLibNull/UnitTestPersistenceLibNull.inf
-  UnitTestFrameworkPkg/Library/UEFI/UnitTestResultReportLibDebug/UnitTestResultReportLibDebug.inf
-  UnitTestFrameworkPkg/Library/UEFI/UnitTestBootLibNull/UnitTestBootLibNull.inf
+  UnitTestFrameworkPkg/Library/Uefi/UnitTestAssertLib/UnitTestAssertLib.inf
+  UnitTestFrameworkPkg/Library/Uefi/UnitTestLib/UnitTestLibDxe.inf
+  UnitTestFrameworkPkg/Library/Uefi/UnitTestLib/UnitTestLibPei.inf
+  UnitTestFrameworkPkg/Library/Uefi/UnitTestLib/UnitTestLibSmm.inf
+  UnitTestFrameworkPkg/Library/Uefi/UnitTestLogLib/UnitTestLogLib.inf
+  UnitTestFrameworkPkg/Library/Uefi/UnitTestPersistenceLibNull/UnitTestPersistenceLibNull.inf
+  UnitTestFrameworkPkg/Library/Uefi/UnitTestResultReportLibDebug/UnitTestResultReportLibDebug.inf
+  UnitTestFrameworkPkg/Library/Uefi/UnitTestBootLibNull/UnitTestBootLibNull.inf
   UnitTestFrameworkPkg/Library/UefiShell/UnitTestResultReportLibPlainTextOutput/UnitTestResultReportLibPlainTextOutput.inf
   UnitTestFrameworkPkg/Library/UefiShell/UnitTestBootLibUsbClass/UnitTestBootLibUsbClass.inf
   UnitTestFrameworkPkg/Library/UefiShell/UnitTestPersistenceLibFileSystem/UnitTestPersistenceLibFileSystem.inf
