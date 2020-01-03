@@ -1,6 +1,6 @@
 /**
 
-Implement UnitTestResultReportLib doing plain txt out to console 
+Implement UnitTestResultReportLib doing plain txt out to console
 
 Copyright (c) Microsoft
 **/
@@ -139,7 +139,7 @@ OutputUnitTestFrameworkReport(
   // Iterate all suites
   //
   for (Suite = (UNIT_TEST_SUITE_LIST_ENTRY*)GetFirstNode(&Framework->TestSuiteList);
-    (LIST_ENTRY*)Suite != &Framework->TestSuiteList; 
+    (LIST_ENTRY*)Suite != &Framework->TestSuiteList;
     Suite = (UNIT_TEST_SUITE_LIST_ENTRY*)GetNextNode(&Framework->TestSuiteList, (LIST_ENTRY*)Suite))
   {
     UNIT_TEST_LIST_ENTRY *Test = NULL;

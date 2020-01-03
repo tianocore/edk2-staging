@@ -21,10 +21,10 @@
 
 [Sources]
   cmocka/src/cmocka.c
-  
+
 [Packages]
   UnitTestFrameworkPkg/UnitTestFrameworkPkg.dec
-  
+
 [BuildOptions]
   MSFT:*_*_*_CC_FLAGS      ==  /c /D _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1 /D _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1 /D _CRT_NONSTDC_NO_WARNINGS=1 /D _CRT_SECURE_NO_WARNINGS=1 -DHAVE_VSNPRINTF -DHAVE_SNPRINTF
 

@@ -225,7 +225,7 @@ AllocateCopyPool (
   IN CONST VOID  *Buffer
   )
 {
-  VOID  *Memory;  
+  VOID  *Memory;
   Memory = malloc (AllocationSize);
   if (Memory == NULL) {
     return NULL;

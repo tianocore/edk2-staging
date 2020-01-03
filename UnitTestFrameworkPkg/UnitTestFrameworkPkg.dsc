@@ -93,7 +93,7 @@
   # Misc
   #
   DebugLib|MdeModulePkg/Library/PeiDxeDebugLibReportStatusCode/PeiDxeDebugLibReportStatusCode.inf
-  DebugPrintErrorLevelLib|MdePkg/Library/BaseDebugPrintErrorLevelLib/BaseDebugPrintErrorLevelLib.inf  
+  DebugPrintErrorLevelLib|MdePkg/Library/BaseDebugPrintErrorLevelLib/BaseDebugPrintErrorLevelLib.inf
   ReportStatusCodeLib|MdePkg/Library/BaseReportStatusCodeLibNull/BaseReportStatusCodeLibNull.inf
   OemHookStatusCodeLib|MdeModulePkg/Library/OemHookStatusCodeLibNull/OemHookStatusCodeLibNull.inf
   PeCoffExtraActionLib|MdePkg/Library/BasePeCoffExtraActionLibNull/BasePeCoffExtraActionLibNull.inf
@@ -148,7 +148,7 @@
   # include BaseStackCheckLib unconditionally.
   #
   NULL|MdePkg/Library/BaseStackCheckLib/BaseStackCheckLib.inf
-  
+
   #
   # UnitTestFrameworkPkg
   #
@@ -156,11 +156,11 @@
   UnitTestAssertLib|UnitTestFrameworkPkg/Library/Uefi/UnitTestAssertLib/UnitTestAssertLib.inf
   UnitTestLogLib|UnitTestFrameworkPkg/Library/Uefi/UnitTestLogLib/UnitTestLogLib.inf
   UnitTestPersistenceLib|UnitTestFrameworkPkg/Library/Uefi/UnitTestPersistenceLibNull/UnitTestPersistenceLibNull.inf
-  
+
 [LibraryClasses.common.PEIM]
   UnitTestLib|UnitTestFrameworkPkg/Library/Uefi/UnitTestLib/UnitTestLibPei.inf
   UnitTestResultReportLib|UnitTestFrameworkPkg/Library/Uefi/UnitTestResultReportLibDebug/UnitTestResultReportLibDebug.inf
-  
+
 [LibraryClasses.common.DXE_SMM_DRIVER]
   UnitTestLib|UnitTestFrameworkPkg/Library/Uefi/UnitTestLib/UnitTestLibSmm.inf
   UnitTestResultReportLib|UnitTestFrameworkPkg/Library/Uefi/UnitTestResultReportLibDebug/UnitTestResultReportLibDebug.inf

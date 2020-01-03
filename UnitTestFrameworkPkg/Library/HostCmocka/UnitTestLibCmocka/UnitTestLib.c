@@ -190,7 +190,7 @@ InitUnitTestFramework (
 
   Status = EFI_SUCCESS;
   NewFramework = NULL;
-  
+
   //
   // First, check all pointers and make sure nothing's broked.
   if (Framework == NULL || Title == NULL ||
@@ -314,7 +314,7 @@ Exit:
   {
     FreeUnitTestSuiteEntry( (UNIT_TEST_SUITE_LIST_ENTRY *)NewSuiteEntry );
   }
-  
+
   return Status;
 }
 
@@ -370,7 +370,7 @@ AddTestCase (
     Status = EFI_OUT_OF_RESOURCES;
     goto Exit;
   }
-  
+
   NewTestEntry->UT.TestFunc = (CMUnitTestFunction)Func;
   NewTestEntry->UT.SetupFunc = (CMFixtureFunction)PreReq;
   NewTestEntry->UT.TeardownFunc = (CMFixtureFunction)CleanUp;

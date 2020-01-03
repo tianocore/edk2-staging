@@ -106,7 +106,7 @@ GlobalBooleanShouldBeChangeable (
 {
   mSampleGlobalTestBoolean = TRUE;
   UT_ASSERT_TRUE(mSampleGlobalTestBoolean);
-  
+
   mSampleGlobalTestBoolean = FALSE;
   UT_ASSERT_FALSE(mSampleGlobalTestBoolean);
 
@@ -136,9 +136,9 @@ GlobalPointerShouldBeChangeable (
 ///================================================================================================
 
 
-/** 
+/**
   SampleUnitTestPeim
-  
+
   @param  FileHandle              Handle of the file being invoked. Type
                                   EFI_PEI_FILE_HANDLE is defined in
                                   FfsFindNextFile().

@@ -61,7 +61,7 @@ SetBootNextDevice(
 
   Status = EfiBootManagerInitializeLoadOption(
     &NewOption,
-    (UINTN) BootNextValue, 
+    (UINTN) BootNextValue,
     LoadOptionTypeBoot,
     Attributes,
     L"Generic USB Class Device",
@@ -74,8 +74,8 @@ SetBootNextDevice(
     DEBUG((DEBUG_ERROR, "%a: Error creating load option.  Status = %r\n", __FUNCTION__, Status));
     goto CLEANUP;
   }
-  
-  NewOptionValid = TRUE;  
+
+  NewOptionValid = TRUE;
   DEBUG((DEBUG_VERBOSE, "%a: Generic USB Class Device boot option created.\n", __FUNCTION__));
   Status = EfiBootManagerLoadOptionToVariable(&NewOption);
   if (EFI_ERROR(Status)) {

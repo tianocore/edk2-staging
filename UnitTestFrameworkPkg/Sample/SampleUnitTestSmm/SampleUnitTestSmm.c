@@ -106,7 +106,7 @@ GlobalBooleanShouldBeChangeable (
 {
   mSampleGlobalTestBoolean = TRUE;
   UT_ASSERT_TRUE(mSampleGlobalTestBoolean);
-  
+
   mSampleGlobalTestBoolean = FALSE;
   UT_ASSERT_FALSE(mSampleGlobalTestBoolean);
 
@@ -136,9 +136,9 @@ GlobalPointerShouldBeChangeable (
 ///================================================================================================
 
 
-/** 
+/**
   SampleUnitTestSmm
-  
+
   @param[in] ImageHandle  The firmware allocated handle for the EFI image.
   @param[in] SystemTable  A pointer to the EFI System Table.
 

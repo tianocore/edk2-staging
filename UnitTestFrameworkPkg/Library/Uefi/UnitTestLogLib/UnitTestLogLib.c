@@ -85,12 +85,12 @@ AddStringToUnitTestLog (
   }
 
   // If this is the first log for the test allocate log space
-  if (UnitTest->Log == NULL) 
+  if (UnitTest->Log == NULL)
   {
     UnitTestLogInit(UnitTest, NULL, 0);
   }
 
-  if (UnitTest->Log == NULL) 
+  if (UnitTest->Log == NULL)
   {
     DEBUG((DEBUG_ERROR, "Failed to allocate space for unit test log\n"));
     ASSERT(UnitTest->Log != NULL);
@@ -98,7 +98,7 @@ AddStringToUnitTestLog (
   }
 
   Status = AsciiStrnCatS(UnitTest->Log, UNIT_TEST_MAX_LOG_BUFFER / sizeof(CHAR8), String, UNIT_TEST_MAX_SINGLE_LOG_STRING_LENGTH);
-  if(EFI_ERROR(Status)) 
+  if(EFI_ERROR(Status))
   {
     DEBUG((DEBUG_ERROR, "Failed to add unit test log string.  Status = %r\n", Status));
     return Status;
@@ -147,7 +147,7 @@ UnitTestLogInit (
   }
 
   // If this is the first log for the test allocate log space
-  if (Test->Log == NULL) 
+  if (Test->Log == NULL)
   {
     Test->Log = AllocateZeroPool(UNIT_TEST_MAX_LOG_BUFFER);
   }
@@ -158,7 +158,7 @@ UnitTestLogInit (
     DEBUG((DEBUG_ERROR, "Failed to allocate memory for the log\n"));
     return;
   }
-  
+
   if((Buffer != NULL) && (BufferSize > 0) && ((BufferSize <= UNIT_TEST_MAX_LOG_BUFFER)))
   {
     CopyMem(Test->Log, Buffer, BufferSize);

@@ -1,5 +1,5 @@
 /** @file
-  Provides the basic types and common elements of the unit test framework 
+  Provides the basic types and common elements of the unit test framework
 
   Copyright (c) 2016, Microsoft Corporation. All rights reserved.<BR>
   Copyright (c) 2019, Intel Corporation. All rights reserved.<BR>

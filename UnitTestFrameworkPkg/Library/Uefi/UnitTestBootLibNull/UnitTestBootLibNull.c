@@ -1,6 +1,6 @@
 /**
 
-NULL implementation for UnitTestBootLib to allow simple compliation  
+NULL implementation for UnitTestBootLib to allow simple compliation
 
 
 Copyright (c) Microsoft

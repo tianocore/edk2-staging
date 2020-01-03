@@ -1,5 +1,5 @@
 /**
-Implement UnitTestLib 
+Implement UnitTestLib
 
 Copyright (c) Microsoft Corporation.
 SPDX-License-Identifier: BSD-2-Clause-Patent
@@ -770,16 +770,16 @@ SerializeState (
     {
       TestSaveData  = (UNIT_TEST_SAVE_TEST*)FloatingPointer;
       UnitTest      = &((UNIT_TEST_LIST_ENTRY*)Test)->UT;
-      
+
       // Save the fingerprint.
       CopyMem( &TestSaveData->Fingerprint[0], &UnitTest->Fingerprint[0], UNIT_TEST_FINGERPRINT_SIZE );
-      
+
       // Save the result.
       TestSaveData->Result = UnitTest->Result;
       TestSaveData->FailureType = UnitTest->FailureType;
       AsciiStrnCpyS(&TestSaveData->FailureMessage[0], UNIT_TEST_TESTFAILUREMSG_LENGTH, &UnitTest->FailureMessage[0], UNIT_TEST_TESTFAILUREMSG_LENGTH);
 
-      
+
       // If there is a log, save the log.
       FloatingPointer += sizeof( UNIT_TEST_SAVE_TEST );
       if (UnitTest->Log != NULL)

@@ -1,7 +1,7 @@
 ## @file
 # Library to support booting to USB on the next boot
-# This instance uses the industry standard usb class boot option. 
-# 
+# This instance uses the industry standard usb class boot option.
+#
 #
 # @copyright
 # Copyright (c) 2016 Microsoft Corporation. All rights reserved
