@@ -1,13 +1,12 @@
-## @file  UnitTestPkg.dec
+## @file
 #
-# This Package provides all definitions(including functions, MACROs, structures and library classes)
-# and libraries instances, which are used to support Unit Testing and Interface testing
+# This Package provides all definitions(including functions, MACROs, structures
+# and library classes) and libraries instances, which are used to support Unit
+# Testing and Interface testing
 #
 # Copyright (c) 2017, Microsoft Corporation. All rights reserved.
 #
-#
 ##
-
 
 [Defines]
   DEC_SPECIFICATION              = 0x00010005
@@ -15,36 +14,26 @@
   PACKAGE_GUID                   = 4A70C4A0-D72C-4D3F-9943-BE7C41C50BA3
   PACKAGE_VERSION                = 1.00
 
-
 [Includes.Common.Private]
-  FrameworkInclude
+  PrivateInclude
   Library/HostCMocka/CmockaLib/cmocka/include
   Library/HostCMocka/CmockaLib/cmocka/include/cmockery
 
 [LibraryClasses.Common.Private]
   ## @libraryclass Allows save and restore unit test internal state
   #
-  UnitTestPersistenceLib|FrameworkInclude/Library/UnitTestPersistenceLib.h
+  UnitTestPersistenceLib|PrivateInclude/Library/UnitTestPersistenceLib.h
 
   ## @libraryclass Provides a unit test result report
   #
-  UnitTestResultReportLib|FrameworkInclude/Library/UnitTestResultReportLib.h
+  UnitTestResultReportLib|PrivateInclude/Library/UnitTestResultReportLib.h
 
   ## @libraryclass Provides boot-option routines useful in shell-based tests.
   #
-  UnitTestBootLib|FrameworkInclude/Library/UnitTestBootLib.h
+  UnitTestBootLib|PrivateInclude/Library/UnitTestBootLib.h
 
 [Guids]
   gUnitTestPkgTokenSpaceGuid = { 0x833d3aba, 0x39b4, 0x43a2, { 0xb9, 0x30, 0x7a, 0x34, 0x53, 0x39, 0x31, 0xb3 } }
 
-[Ppis]
-
-[Protocols]
-
-[PcdsFeatureFlag]
-
-[PcdsDynamic, PcdsDynamicEx]
-
 [PcdsFixedAtBuild]
   gUnitTestPkgTokenSpaceGuid.UnitTestLogLevel|0xFFFFFFFF|UINT32|0x00000001
-  
