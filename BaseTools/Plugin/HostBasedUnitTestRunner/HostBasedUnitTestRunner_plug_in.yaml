@@ -1,6 +1,6 @@
 ##
-# CiBuildPlugin used to run any unittests that
-# were built on this CI pass.
+# IUefiBuildPlugin used to run any unittests that
+# were built on this build.
 #
 # Copyright (c) Microsoft Corporation.
 # SPDX-License-Identifier: BSD-2-Clause-Patent
