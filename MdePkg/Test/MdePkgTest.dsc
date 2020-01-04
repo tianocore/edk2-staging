@@ -1,4 +1,4 @@
-## @file MdePkgTest.dsc
+## @file
 #
 # Copyright (c) 2019, Intel Corporation. All rights reserved.<BR>
 # SPDX-License-Identifier: BSD-2-Clause-Patent
@@ -6,14 +6,14 @@
 ##
 
 [Defines]
-  PLATFORM_NAME                  = MdePkg
-  PLATFORM_GUID                  = 50652B4C-88CB-4481-96E8-37F2D0034440
-  PLATFORM_VERSION               = 0.1
-  DSC_SPECIFICATION              = 0x00010005
-  OUTPUT_DIRECTORY               = Build/MdePkg
-  SUPPORTED_ARCHITECTURES        = IA32|X64
-  BUILD_TARGETS                  = NOOPT
-  SKUID_IDENTIFIER               = DEFAULT
+  PLATFORM_NAME           = MdePkgTest
+  PLATFORM_GUID           = 50652B4C-88CB-4481-96E8-37F2D0034440
+  PLATFORM_VERSION        = 0.1
+  DSC_SPECIFICATION       = 0x00010005
+  OUTPUT_DIRECTORY        = Build/MdePkg/Test
+  SUPPORTED_ARCHITECTURES = IA32|X64
+  BUILD_TARGETS           = NOOPT
+  SKUID_IDENTIFIER        = DEFAULT
 
 [LibraryClasses]
   BaseLib|MdePkg/Library/BaseLib/BaseLib.inf

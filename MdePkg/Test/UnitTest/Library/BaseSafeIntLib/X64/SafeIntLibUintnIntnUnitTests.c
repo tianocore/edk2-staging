@@ -1,31 +1,29 @@
-/**
-@file
-x64-specific functions for unit-testing INTN and UINTN functions in
-SafeIntLib.
+/** @file
+  x64-specific functions for unit-testing INTN and UINTN functions in
+  SafeIntLib.
 
+  Copyright (c) 2017, Microsoft Corporation
+  Copyright (c) 2019, Intel Corporation. All rights reserved.<BR>
 
-Copyright (c) 2017, Microsoft Corporation
-Copyright (c) 2019, Intel Corporation. All rights reserved.<BR>
+  All rights reserved.
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
+  1. Redistributions of source code must retain the above copyright notice,
+  this list of conditions and the following disclaimer.
+  2. Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
 
-All rights reserved.
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-1. Redistributions of source code must retain the above copyright notice,
-this list of conditions and the following disclaimer.
-2. Redistributions in binary form must reproduce the above copyright notice,
-this list of conditions and the following disclaimer in the documentation
-and/or other materials provided with the distribution.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
-IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
-INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
-OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
-ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+  IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+  INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+  OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 **/
 
@@ -33,18 +31,20 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 UNIT_TEST_STATUS
 EFIAPI
-TestSafeInt32ToUintn(
+TestSafeInt32ToUintn (
   IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
-  EFI_STATUS Status;
-  INT32 Operand = 0x5bababab;
-  UINTN Result = 0;
+  EFI_STATUS  Status;
+  INT32       Operand;
+  UINTN       Result;
 
   //
   // If Operand is non-negative, then it's a cast
   //
+  Operand = 0x5bababab;
+  Result = 0;
   Status = SafeInt32ToUintn(Operand, &Result);
   UT_ASSERT_NOT_EFI_ERROR(Status);
   UT_ASSERT_EQUAL(0x5bababab, Result);
@@ -61,14 +61,14 @@ TestSafeInt32ToUintn(
 
 UNIT_TEST_STATUS
 EFIAPI
-TestSafeUint32ToIntn(
+TestSafeUint32ToIntn (
   IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
-  EFI_STATUS Status;
-  UINT32 Operand = 0xabababab;
-  INTN Result = 0;
+  EFI_STATUS  Status;
+  UINT32      Operand;
+  INTN        Result;
 
   //
   // For x64, INTN is same as INT64 which is a superset of INT32
@@ -78,6 +78,8 @@ TestSafeUint32ToIntn(
   //
   // If Operand is non-negative, then it's a cast
   //
+  Operand = 0xabababab;
+  Result = 0;
   Status = SafeUint32ToIntn(Operand, &Result);
   UT_ASSERT_NOT_EFI_ERROR(Status);
   UT_ASSERT_EQUAL(0xabababab, Result);
@@ -87,18 +89,20 @@ TestSafeUint32ToIntn(
 
 UNIT_TEST_STATUS
 EFIAPI
-TestSafeIntnToInt32(
+TestSafeIntnToInt32 (
   IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
-  EFI_STATUS Status;
-  INTN Operand = 0x5bababab;
-  INT32 Result = 0;
+  EFI_STATUS  Status;
+  INTN        Operand;
+  INT32       Result;
 
   //
   // If Operand is between MIN_INT32 and  MAX_INT32 inclusive, then it's a cast
   //
+  Operand = 0x5bababab;
+  Result = 0;
   Status = SafeIntnToInt32(Operand, &Result);
   UT_ASSERT_NOT_EFI_ERROR(Status);
   UT_ASSERT_EQUAL(0x5bababab, Result);
@@ -124,18 +128,20 @@ TestSafeIntnToInt32(
 
 UNIT_TEST_STATUS
 EFIAPI
-TestSafeIntnToUint32(
+TestSafeIntnToUint32 (
   IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
-  EFI_STATUS Status;
-  INTN Operand = 0xabababab;
-  UINT32 Result = 0;
+  EFI_STATUS  Status;
+  INTN        Operand;
+  UINT32      Result;
 
   //
   // If Operand is between 0 and  MAX_UINT32 inclusive, then it's a cast
   //
+  Operand = 0xabababab;
+  Result = 0;
   Status = SafeIntnToUint32(Operand, &Result);
   UT_ASSERT_NOT_EFI_ERROR(Status);
   UT_ASSERT_EQUAL(0xabababab, Result);
@@ -156,18 +162,20 @@ TestSafeIntnToUint32(
 
 UNIT_TEST_STATUS
 EFIAPI
-TestSafeUintnToUint32(
+TestSafeUintnToUint32 (
   IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
-  EFI_STATUS Status;
-  UINTN Operand = 0xabababab;
-  UINT32 Result = 0;
+  EFI_STATUS  Status;
+  UINTN       Operand;
+  UINT32      Result;
 
   //
   // If Operand is <= MAX_UINT32, then it's a cast
   //
+  Operand = 0xabababab;
+  Result = 0;
   Status = SafeUintnToUint32(Operand, &Result);
   UT_ASSERT_NOT_EFI_ERROR(Status);
   UT_ASSERT_EQUAL(0xabababab, Result);
@@ -184,18 +192,20 @@ TestSafeUintnToUint32(
 
 UNIT_TEST_STATUS
 EFIAPI
-TestSafeUintnToIntn(
+TestSafeUintnToIntn (
   IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
-  EFI_STATUS Status;
-  UINTN Operand = 0x5babababefefefef;
-  INTN Result = 0;
+  EFI_STATUS  Status;
+  UINTN       Operand;
+  INTN        Result;
 
   //
   // If Operand is <= MAX_INTN (0x7fff_ffff_ffff_ffff), then it's a cast
   //
+  Operand = 0x5babababefefefef;
+  Result = 0;
   Status = SafeUintnToIntn(Operand, &Result);
   UT_ASSERT_NOT_EFI_ERROR(Status);
   UT_ASSERT_EQUAL(0x5babababefefefef, Result);
@@ -212,18 +222,20 @@ TestSafeUintnToIntn(
 
 UNIT_TEST_STATUS
 EFIAPI
-TestSafeUintnToInt64(
+TestSafeUintnToInt64 (
   IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
-  EFI_STATUS Status;
-  UINTN Operand = 0x5babababefefefef;
-  INT64 Result = 0;
+  EFI_STATUS  Status;
+  UINTN       Operand;
+  INT64       Result;
 
   //
   // If Operand is <= MAX_INT64, then it's a cast
   //
+  Operand = 0x5babababefefefef;
+  Result = 0;
   Status = SafeUintnToInt64(Operand, &Result);
   UT_ASSERT_NOT_EFI_ERROR(Status);
   UT_ASSERT_EQUAL(0x5babababefefefef, Result);
@@ -240,18 +252,20 @@ TestSafeUintnToInt64(
 
 UNIT_TEST_STATUS
 EFIAPI
-TestSafeInt64ToIntn(
+TestSafeInt64ToIntn (
   IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
-  EFI_STATUS Status;
-  INT64 Operand = 0x5babababefefefef;
-  INTN Result = 0;
+  EFI_STATUS  Status;
+  INT64       Operand;
+  INTN        Result;
 
   //
   // INTN is same as INT64 in x64, so this is just a cast
   //
+  Operand = 0x5babababefefefef;
+  Result = 0;
   Status = SafeInt64ToIntn(Operand, &Result);
   UT_ASSERT_NOT_EFI_ERROR(Status);
   UT_ASSERT_EQUAL(0x5babababefefefef, Result);
@@ -261,18 +275,20 @@ TestSafeInt64ToIntn(
 
 UNIT_TEST_STATUS
 EFIAPI
-TestSafeInt64ToUintn(
+TestSafeInt64ToUintn (
   IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
-  EFI_STATUS Status;
-  INT64 Operand = 0x5babababefefefef;
-  UINTN Result = 0;
+  EFI_STATUS  Status;
+  INT64       Operand;
+  UINTN       Result;
 
   //
   // If Operand is non-negative, then it's a cast
   //
+  Operand = 0x5babababefefefef;
+  Result = 0;
   Status = SafeInt64ToUintn(Operand, &Result);
   UT_ASSERT_NOT_EFI_ERROR(Status);
   UT_ASSERT_EQUAL(0x5babababefefefef, Result);
@@ -289,18 +305,20 @@ TestSafeInt64ToUintn(
 
 UNIT_TEST_STATUS
 EFIAPI
-TestSafeUint64ToIntn(
+TestSafeUint64ToIntn (
   IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
-  EFI_STATUS Status;
-  UINT64 Operand = 0x5babababefefefef;
-  INTN Result = 0;
+  EFI_STATUS  Status;
+  UINT64      Operand;
+  INTN        Result;
 
   //
   // If Operand is <= MAX_INTN (0x7fff_ffff_ffff_ffff), then it's a cast
   //
+  Operand = 0x5babababefefefef;
+  Result = 0;
   Status = SafeUint64ToIntn(Operand, &Result);
   UT_ASSERT_NOT_EFI_ERROR(Status);
   UT_ASSERT_EQUAL(0x5babababefefefef, Result);
@@ -317,18 +335,20 @@ TestSafeUint64ToIntn(
 
 UNIT_TEST_STATUS
 EFIAPI
-TestSafeUint64ToUintn(
+TestSafeUint64ToUintn (
   IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
-  EFI_STATUS Status;
-  UINT64 Operand = 0xababababefefefef;
-  UINTN Result = 0;
+  EFI_STATUS  Status;
+  UINT64      Operand;
+  UINTN       Result;
 
   //
   // UINTN is same as UINT64 in x64, so this is just a cast
   //
+  Operand = 0xababababefefefef;
+  Result = 0;
   Status = SafeUint64ToUintn(Operand, &Result);
   UT_ASSERT_NOT_EFI_ERROR(Status);
   UT_ASSERT_EQUAL(0xababababefefefef, Result);
@@ -338,19 +358,22 @@ TestSafeUint64ToUintn(
 
 UNIT_TEST_STATUS
 EFIAPI
-TestSafeUintnAdd(
+TestSafeUintnAdd (
   IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
-  EFI_STATUS Status;
-  UINTN Augend = 0x3a3a3a3a12121212;
-  UINTN Addend = 0x3a3a3a3a12121212;
-  UINTN Result = 0;
+  EFI_STATUS  Status;
+  UINTN       Augend;
+  UINTN       Addend;
+  UINTN       Result;
 
   //
   // If the result of addition doesn't overflow MAX_UINTN, then it's addition
   //
+  Augend = 0x3a3a3a3a12121212;
+  Addend = 0x3a3a3a3a12121212;
+  Result = 0;
   Status = SafeUintnAdd(Augend, Addend, &Result);
   UT_ASSERT_NOT_EFI_ERROR(Status);
   UT_ASSERT_EQUAL(0x7474747424242424, Result);
@@ -368,20 +391,23 @@ TestSafeUintnAdd(
 
 UNIT_TEST_STATUS
 EFIAPI
-TestSafeIntnAdd(
+TestSafeIntnAdd (
   IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
-  EFI_STATUS Status;
-  INTN Augend = 0x3a3a3a3a3a3a3a3a;
-  INTN Addend = 0x3a3a3a3a3a3a3a3a;
-  INTN Result = 0;
+  EFI_STATUS  Status;
+  INTN        Augend;
+  INTN        Addend;
+  INTN        Result;
 
   //
   // If the result of addition doesn't overflow MAX_INTN
   // and doesn't underflow MIN_INTN, then it's addition
   //
+  Augend = 0x3a3a3a3a3a3a3a3a;
+  Addend = 0x3a3a3a3a3a3a3a3a;
+  Result = 0;
   Status = SafeIntnAdd(Augend, Addend, &Result);
   UT_ASSERT_NOT_EFI_ERROR(Status);
   UT_ASSERT_EQUAL(0x7474747474747474, Result);
@@ -410,19 +436,22 @@ TestSafeIntnAdd(
 
 UNIT_TEST_STATUS
 EFIAPI
-TestSafeUintnSub(
+TestSafeUintnSub (
   IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
-  EFI_STATUS Status;
-  UINTN Minuend = 0x5a5a5a5a5a5a5a5a;
-  UINTN Subtrahend = 0x3b3b3b3b3b3b3b3b;
-  UINTN Result = 0;
+  EFI_STATUS  Status;
+  UINTN       Minuend;
+  UINTN       Subtrahend;
+  UINTN       Result;
 
   //
   // If Minuend >= Subtrahend, then it's subtraction
   //
+  Minuend = 0x5a5a5a5a5a5a5a5a;
+  Subtrahend = 0x3b3b3b3b3b3b3b3b;
+  Result = 0;
   Status = SafeUintnSub(Minuend, Subtrahend, &Result);
   UT_ASSERT_NOT_EFI_ERROR(Status);
   UT_ASSERT_EQUAL(0x1f1f1f1f1f1f1f1f, Result);
@@ -440,20 +469,23 @@ TestSafeUintnSub(
 
 UNIT_TEST_STATUS
 EFIAPI
-TestSafeIntnSub(
+TestSafeIntnSub (
   IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
-  EFI_STATUS Status;
-  INTN Minuend = 0x5a5a5a5a5a5a5a5a;
-  INTN Subtrahend = 0x3a3a3a3a3a3a3a3a;
-  INTN Result = 0;
+  EFI_STATUS  Status;
+  INTN        Minuend;
+  INTN        Subtrahend;
+  INTN        Result;
 
   //
   // If the result of subtractions doesn't overflow MAX_INTN or
   // underflow MIN_INTN, then it's subtraction
   //
+  Minuend = 0x5a5a5a5a5a5a5a5a;
+  Subtrahend = 0x3a3a3a3a3a3a3a3a;
+  Result = 0;
   Status = SafeIntnSub(Minuend, Subtrahend, &Result);
   UT_ASSERT_NOT_EFI_ERROR(Status);
   UT_ASSERT_EQUAL(0x2020202020202020, Result);
@@ -482,19 +514,22 @@ TestSafeIntnSub(
 
 UNIT_TEST_STATUS
 EFIAPI
-TestSafeUintnMult(
+TestSafeUintnMult (
   IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
-  EFI_STATUS Status;
-  UINTN Multiplicand = 0x123456789a;
-  UINTN Multiplier = 0x1234567;
-  UINTN Result = 0;
+  EFI_STATUS  Status;
+  UINTN       Multiplicand;
+  UINTN       Multiplier;
+  UINTN       Result;
 
   //
   // If the result of multiplication doesn't overflow MAX_UINTN, it will succeed
   //
+  Multiplicand = 0x123456789a;
+  Multiplier = 0x1234567;
+  Result = 0;
   Status = SafeUintnMult(Multiplicand, Multiplier, &Result);
   UT_ASSERT_NOT_EFI_ERROR(Status);
   UT_ASSERT_EQUAL(0x14b66db9745a07f6, Result);
@@ -512,20 +547,23 @@ TestSafeUintnMult(
 
 UNIT_TEST_STATUS
 EFIAPI
-TestSafeIntnMult(
+TestSafeIntnMult (
   IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
-  EFI_STATUS Status;
-  INTN Multiplicand = 0x123456789;
-  INTN Multiplier = 0x6789abcd;
-  INTN Result = 0;
+  EFI_STATUS  Status;
+  INTN        Multiplicand;
+  INTN        Multiplier;
+  INTN        Result;
 
   //
   // If the result of multiplication doesn't overflow MAX_INTN and doesn't
   // underflow MIN_UINTN, it will succeed
   //
+  Multiplicand = 0x123456789;
+  Multiplier = 0x6789abcd;
+  Result = 0;
   Status = SafeIntnMult(Multiplicand, Multiplier, &Result);
   UT_ASSERT_NOT_EFI_ERROR(Status);
   UT_ASSERT_EQUAL(0x75cd9045220d6bb5, Result);
