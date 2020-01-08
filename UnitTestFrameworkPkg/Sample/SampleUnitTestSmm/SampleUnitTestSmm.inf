@@ -24,18 +24,12 @@
 [Packages]
   MdePkg/MdePkg.dec
 
-[Protocols]
-
-
 [LibraryClasses]
   BaseLib
   UefiDriverEntryPoint
   DebugLib
   UnitTestLib
-  UnitTestAssertLib
   PrintLib
-
-[Guids]
 
 [Depex]
   gEfiSmmCpuProtocolGuid

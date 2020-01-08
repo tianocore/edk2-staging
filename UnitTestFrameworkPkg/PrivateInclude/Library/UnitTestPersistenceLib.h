@@ -1,4 +1,4 @@
-/** @file -- UnitTestPersistenceLib.h
+/** @file
   This header file describes a library that contains functions to save and
   restore unit test internal state, in case the test needs to pause and resume
   (eg. a reboot-based test).
@@ -12,8 +12,9 @@
 #ifndef _UNIT_TEST_PERSISTENCE_LIB_H_
 #define _UNIT_TEST_PERSISTENCE_LIB_H_
 
-#define UNIT_TEST_PERSISTENCE_LIB_VERSION   1
+#include <UnitTestFrameworkTypes.h>
 
+#define UNIT_TEST_PERSISTENCE_LIB_VERSION   1
 
 /**
   Determines whether a persistence cache already exists for
@@ -28,9 +29,8 @@
 BOOLEAN
 EFIAPI
 DoesCacheExist (
-  IN  UNIT_TEST_FRAMEWORK_HANDLE  FrameworkHandle
+  IN UNIT_TEST_FRAMEWORK_HANDLE  FrameworkHandle
   );
-
 
 /**
   Will save the data associated with an internal Unit Test Framework
@@ -48,10 +48,9 @@ DoesCacheExist (
 EFI_STATUS
 EFIAPI
 SaveUnitTestCache (
-  IN  UNIT_TEST_FRAMEWORK_HANDLE  FrameworkHandle,
-  IN  UNIT_TEST_SAVE_HEADER       *SaveData
+  IN UNIT_TEST_FRAMEWORK_HANDLE  FrameworkHandle,
+  IN UNIT_TEST_SAVE_HEADER       *SaveData
   );
-
 
 /**
   Will retrieve any cached state associated with the given framework.
@@ -74,4 +73,4 @@ LoadUnitTestCache (
   OUT UNIT_TEST_SAVE_HEADER       **SaveData
   );
 
-#endif // _UNIT_TEST_PERSISTENCE_LIB_H_
+#endif

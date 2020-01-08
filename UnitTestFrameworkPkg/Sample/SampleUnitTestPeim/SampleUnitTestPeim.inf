@@ -23,18 +23,12 @@
 [Packages]
   MdePkg/MdePkg.dec
 
-[Protocols]
-
-
 [LibraryClasses]
   BaseLib
   PeimEntryPoint
   DebugLib
   UnitTestLib
-  UnitTestAssertLib
   PrintLib
-
-[Guids]
 
 [Depex]
   gEfiPeiMemoryDiscoveredPpiGuid

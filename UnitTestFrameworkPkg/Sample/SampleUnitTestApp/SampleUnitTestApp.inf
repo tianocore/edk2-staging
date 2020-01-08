@@ -23,19 +23,12 @@
 [Packages]
   MdePkg/MdePkg.dec
 
-[Protocols]
-
-
 [LibraryClasses]
   BaseLib
   UefiApplicationEntryPoint
   DebugLib
   UnitTestLib
-  UnitTestAssertLib
   PrintLib
-
-[Guids]
-
 
 
 

@@ -29,6 +29,7 @@
 #ifndef _TEST_BASE_SAFE_INT_LIB_H_
 #define _TEST_BASE_SAFE_INT_LIB_H_
 
+#include <PiPei.h>
 #include <Uefi.h>
 #include <Library/UefiLib.h>
 #include <Library/DebugLib.h>

@@ -9,15 +9,15 @@
 ##
 
 [Defines]
-  DEC_SPECIFICATION              = 0x00010005
-  PACKAGE_NAME                   = UnitTestPkg
-  PACKAGE_GUID                   = 4A70C4A0-D72C-4D3F-9943-BE7C41C50BA3
-  PACKAGE_VERSION                = 1.00
+  DEC_SPECIFICATION = 0x00010005
+  PACKAGE_NAME      = UnitTestPkg
+  PACKAGE_GUID      = 4A70C4A0-D72C-4D3F-9943-BE7C41C50BA3
+  PACKAGE_VERSION   = 1.00
 
 [Includes.Common.Private]
   PrivateInclude
-  Library/HostCmocka/CmockaLib/cmocka/include
-  Library/HostCmocka/CmockaLib/cmocka/include/cmockery
+  Library/CmockaLib/cmocka/include
+  Library/CmockaLib/cmocka/include/cmockery
 
 [LibraryClasses.Common.Private]
   ## @libraryclass Allows save and restore unit test internal state

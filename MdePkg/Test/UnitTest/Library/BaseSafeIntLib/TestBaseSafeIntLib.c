@@ -2918,7 +2918,7 @@ TestSafeInt64Mult (
 EFI_STATUS
 EFIAPI
 UefiTestMain (
-   VOID
+  VOID
   )
 {
   EFI_STATUS                  Status;
@@ -3085,6 +3085,26 @@ EXIT:
   }
 
   return Status;
+}
+
+EFI_STATUS
+EFIAPI
+PeiEntryPoint (
+  IN EFI_PEI_FILE_HANDLE       FileHandle,
+  IN CONST EFI_PEI_SERVICES    **PeiServices
+  )
+{
+  return UefiTestMain ();
+}
+
+EFI_STATUS
+EFIAPI
+DxeEntryPoint (
+  IN EFI_HANDLE        ImageHandle,
+  IN EFI_SYSTEM_TABLE  *SystemTable
+  )
+{
+  return UefiTestMain ();
 }
 
 int 

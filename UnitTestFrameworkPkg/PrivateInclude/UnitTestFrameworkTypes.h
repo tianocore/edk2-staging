@@ -10,6 +10,8 @@
 #ifndef __UNIT_TEST_TYPES_H__
 #define __UNIT_TEST_TYPES_H__
 
+#include <Library/UnitTestLib.h>
+
 ///================================================================================================
 ///================================================================================================
 ///
@@ -17,21 +19,21 @@
 ///
 ///================================================================================================
 ///================================================================================================
-#define UNIT_TEST_MAX_STRING_LENGTH     (120)
+#define UNIT_TEST_MAX_STRING_LENGTH  (120)
 
-#define UNIT_TEST_FINGERPRINT_SIZE      (sizeof(UINT32))    // Hardcoded to CRC32.
-#define UNIT_TEST_TESTFAILUREMSG_LENGTH (120)
+#define UNIT_TEST_FINGERPRINT_SIZE       (sizeof(UINT32))    // Hardcoded to CRC32.
+#define UNIT_TEST_TESTFAILUREMSG_LENGTH  (120)
 
 typedef UINT32 FAILURE_TYPE;
-#define FAILURETYPE_NOFAILURE     (0)
-#define FAILURETYPE_OTHER         (1)
-#define FAILURETYPE_ASSERTTRUE    (2)
-#define FAILURETYPE_ASSERTFALSE   (3)
-#define FAILURETYPE_ASSERTEQUAL   (4)
-#define FAILURETYPE_ASSERTNOTEQUAL (5)
-#define FAILURETYPE_ASSERTNOTEFIERROR (6)
-#define FAILURETYPE_ASSERTSTATUSEQUAL (7)
-#define FAILURETYPE_ASSERTNOTNULL (8)
+#define FAILURETYPE_NOFAILURE          (0)
+#define FAILURETYPE_OTHER              (1)
+#define FAILURETYPE_ASSERTTRUE         (2)
+#define FAILURETYPE_ASSERTFALSE        (3)
+#define FAILURETYPE_ASSERTEQUAL        (4)
+#define FAILURETYPE_ASSERTNOTEQUAL     (5)
+#define FAILURETYPE_ASSERTNOTEFIERROR  (6)
+#define FAILURETYPE_ASSERTSTATUSEQUAL  (7)
+#define FAILURETYPE_ASSERTNOTNULL      (8)
 
 
 ///================================================================================================
@@ -63,6 +65,7 @@ typedef struct {
 } UNIT_TEST_LIST_ENTRY;
 
 typedef struct {
+  UINTN                       NumTests;
   CHAR8                       *Title;
   CHAR8                       *Package;
   UINT8                       Fingerprint[UNIT_TEST_FINGERPRINT_SIZE];
