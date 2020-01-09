@@ -1,7 +1,7 @@
 /** @file
   Common header file for MP Initialize Library.
 
-  Copyright (c) 2016 - 2019, Intel Corporation. All rights reserved.<BR>
+  Copyright (c) 2016 - 2020, Intel Corporation. All rights reserved.<BR>
   SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
@@ -42,6 +42,19 @@
 #define CPU_SWITCH_STATE_IDLE   0
 #define CPU_SWITCH_STATE_STORED 1
 #define CPU_SWITCH_STATE_LOADED 2
+
+//
+// Default maximum number of entries to store the microcode patches information
+//
+#define DEFAULT_MAX_MICROCODE_PATCH_NUM 8
+
+//
+// Data structure for microcode patch information
+//
+typedef struct {
+  UINTN    Address;
+  UINTN    Size;
+} MICROCODE_PATCH_INFO;
 
 //
 // CPU exchange information for switch BSP
@@ -122,6 +135,9 @@ typedef struct {
   UINT64                         CurrentTime;
   UINT64                         TotalTime;
   EFI_EVENT                      WaitEvent;
+  UINT32                         ProcessorSignature;
+  UINT8                          PlatformId;
+  UINT64                         MicrocodeEntryAddr;
 } CPU_AP_DATA;
 
 //
@@ -200,6 +216,8 @@ struct _CPU_MP_DATA {
   UINT64                         CpuInfoInHob;
   UINT32                         CpuCount;
   UINT32                         BspNumber;
+  UINT64                         MicrocodePatchAddress;
+  UINT64                         MicrocodePatchRegionSize;
   //
   // The above fields data will be passed from PEI to DXE
   // Please make sure the fields offset same in the different
@@ -243,13 +261,6 @@ struct _CPU_MP_DATA {
   UINT8                          Vector;
   BOOLEAN                        PeriodicMode;
   BOOLEAN                        TimerInterruptState;
-  UINT64                         MicrocodePatchAddress;
-  UINT64                         MicrocodePatchRegionSize;
-
-  UINT32                         ProcessorSignature;
-  UINT32                         ProcessorFlags;
-  UINT64                         MicrocodeDataAddress;
-  UINT32                         MicrocodeRevision;
 
   //
   // Whether need to use Init-Sipi-Sipi to wake up the APs.
@@ -564,13 +575,25 @@ CheckAndUpdateApsStatus (
 /**
   Detect whether specified processor can find matching microcode patch and load it.
 
-  @param[in]  CpuMpData    The pointer to CPU MP Data structure.
-  @param[in]  IsBspCallIn  Indicate whether the caller is BSP or not.
+  @param[in]  CpuMpData        The pointer to CPU MP Data structure.
+  @param[in]  ProcessorNumber  The handle number of the processor. The range is
+                               from 0 to the total number of logical processors
+                               minus 1.
 **/
 VOID
 MicrocodeDetect (
   IN CPU_MP_DATA             *CpuMpData,
-  IN BOOLEAN                 IsBspCallIn
+  IN UINTN                   ProcessorNumber
+  );
+
+/**
+  Load the required microcode patches data into memory.
+
+  @param[in, out]  CpuMpData    The pointer to CPU MP Data structure.
+**/
+VOID
+LoadMicrocodePatch (
+  IN OUT CPU_MP_DATA             *CpuMpData
   );
 
 /**
@@ -591,6 +614,21 @@ IsMwaitSupport (
 VOID
 EnableDebugAgent (
   VOID
+  );
+
+/**
+  Find the current Processor number by APIC ID.
+
+  @param[in]  CpuMpData         Pointer to PEI CPU MP Data
+  @param[out] ProcessorNumber   Return the pocessor number found
+
+  @retval EFI_SUCCESS          ProcessorNumber is found and returned.
+  @retval EFI_NOT_FOUND        ProcessorNumber is not found.
+**/
+EFI_STATUS
+GetProcessorNumber (
+  IN CPU_MP_DATA               *CpuMpData,
+  OUT UINTN                    *ProcessorNumber
   );
 
 #endif

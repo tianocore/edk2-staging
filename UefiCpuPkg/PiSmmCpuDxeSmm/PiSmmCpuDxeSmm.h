@@ -212,10 +212,23 @@ typedef struct {
   UINTN                   Signature;
   LIST_ENTRY              Link;
 
-  SPIN_LOCK               *ProcedureToken;
+  SPIN_LOCK               *SpinLock;
+  volatile UINT32         RunningApCount;
+  BOOLEAN                 Used;
 } PROCEDURE_TOKEN;
 
 #define PROCEDURE_TOKEN_FROM_LINK(a)  CR (a, PROCEDURE_TOKEN, Link, PROCEDURE_TOKEN_SIGNATURE)
+
+#define TOKEN_BUFFER_SIGNATURE  SIGNATURE_32 ('T', 'K', 'B', 'S')
+
+typedef struct {
+  UINTN                   Signature;
+  LIST_ENTRY              Link;
+
+  UINT8                   *Buffer;
+} TOKEN_BUFFER;
+
+#define TOKEN_BUFFER_FROM_LINK(a)  CR (a, TOKEN_BUFFER, Link, TOKEN_BUFFER_SIGNATURE)
 
 //
 // Private structure for the SMM CPU module that is stored in DXE Runtime memory
@@ -242,7 +255,6 @@ typedef struct {
 
   PROCEDURE_WRAPPER               *ApWrapperFunc;
   LIST_ENTRY                      TokenList;
-
 } SMM_CPU_PRIVATE_DATA;
 
 extern SMM_CPU_PRIVATE_DATA  *gSmmCpuPrivate;
@@ -392,7 +404,7 @@ typedef struct {
   volatile VOID                     *Parameter;
   volatile UINT32                   *Run;
   volatile BOOLEAN                  *Present;
-  SPIN_LOCK                         *Token;
+  PROCEDURE_TOKEN                   *Token;
   EFI_STATUS                        *Status;
 } SMM_CPU_DATA_BLOCK;
 
@@ -1455,7 +1467,7 @@ InitializeDataForMmMp (
 
   @retval TRUE  Access to non-SMRAM is restricted.
   @retval FALSE Access to non-SMRAM is not restricted.
-*/
+**/
 BOOLEAN
 IsRestrictedMemoryAccess (
   VOID

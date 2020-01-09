@@ -148,7 +148,7 @@ class PlatformAutoGen(AutoGen):
     #
     @cached_class_function
     def __hash__(self):
-        return hash((self.MetaFile, self.Arch))
+        return hash((self.MetaFile, self.Arch,self.ToolChain,self.BuildTarget))
     @cached_class_function
     def __repr__(self):
         return "%s [%s]" % (self.MetaFile, self.Arch)
@@ -975,6 +975,7 @@ class PlatformAutoGen(AutoGen):
                 continue
             ModuleData = self.BuildDatabase[ModuleFile, self.Arch, self.BuildTarget, self.ToolChain]
             RetVal.update(ModuleData.Packages)
+        RetVal.update(self.Platform.Packages)
         return list(RetVal)
 
     @cached_property
