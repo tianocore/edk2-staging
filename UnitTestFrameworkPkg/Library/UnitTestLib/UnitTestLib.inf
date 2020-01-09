@@ -1,7 +1,8 @@
 ## @file
 # Library to support Unit Testing from PEI, DXE, SMM, and UEFI Applications.
 #
-# Copyright (c) 2016 Microsoft Corporation. All rights reserved
+# Copyright (c) Microsoft Corporation.<BR>
+# SPDX-License-Identifier: BSD-2-Clause-Patent
 #
 ##
 

@@ -1,7 +1,8 @@
 ## @file
 # NULL library for UnitTestBootUsb
 #
-# Copyright (c) 2018 Microsoft Corporation. All rights reserved
+# Copyright (c) Microsoft Corporation.<BR>
+# SPDX-License-Identifier: BSD-2-Clause-Patent
 #
 ##
 

@@ -16,3 +16,9 @@ The package relative path of the DSC file to build.
 ### DscPath
 
 Package relative path to the DSC file to build.
+
+## Copyright
+
+Copyright (c) Microsoft Corporation.
+SPDX-License-Identifier: BSD-2-Clause-Patent
+

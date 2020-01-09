@@ -1,7 +1,8 @@
 /**
   NULL implementation for UnitTestBootLib to allow simple compliation
 
-  Copyright (c) Microsoft
+  Copyright (c) Microsoft Corporation.<BR>
+  SPDX-License-Identifier: BSD-2-Clause-Patent
 **/
 
 #include <PiDxe.h>

@@ -79,3 +79,9 @@ Code/Test                                   | Location
 `6)` Non-Host-Based (PEI/DXE/SMM/Shell) Tests for a functionality or feature | If the feature is in one package, should be located in the <code>*Pkg/Test/[Shell&#124;Dxe&#124;Smm&#124;Pei]Test</code> directory.   <br /> <br /> (Or) <br />  <br /> if the feature spans multiple packages, should be located in <code>UefiTestPkg/Feature/Functional/[Shell&#124;Dxe&#124;Smm&#124;Pei]Test</code>  <br /><br /> ============= <br /> * PEI Example: MP_SERVICE_PPI. Or check MTRR configuration in a notification function. <br /> * SMM Example: a test in a protocol callback function. (It is different with the solution that SmmAgent+ShellApp) <br /> * DXE Example: a test in a UEFI event call back to check SPI/SMRAM status. <br /> * Shell Example: the SMM handler audit test has a shell-based app that interacts with an SMM handler to get information. The SMM paging audit test gathers information about both DXE and SMM. And the SMM paging functional test actually forces errors into SMM via a DXE driver. <br /> ============= <br /> <br />
 `7)` Host-Based Library Implementations                 | Host-Based Implementations of common libraries (eg. MemoryAllocationLibHost) should live in the same package that declares the library interface in its .DEC file in the `*Pkg/HostLibrary` directory. Should have 'Host' in the name.
 `8)` Host-Based Mocks and Stubs  | Mock and Stub libraries should live in the `UefiHostTestPkg/Helpers` with either 'Mock' or 'Stub' in the library name.
+
+## Copyright
+
+Copyright (c) Microsoft Corporation.
+SPDX-License-Identifier: BSD-2-Clause-Patent
+

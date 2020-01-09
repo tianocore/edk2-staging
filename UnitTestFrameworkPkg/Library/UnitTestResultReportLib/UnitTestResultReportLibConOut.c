@@ -2,7 +2,8 @@
 
   Implement UnitTestResultReportLib doing plain txt out to console
 
-  Copyright (c) Microsoft
+  Copyright (c) Microsoft Corporation.<BR>
+  SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 

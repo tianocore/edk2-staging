@@ -2,7 +2,8 @@
 # Library to support booting to USB on the next boot
 # This instance uses the industry standard usb class boot option.
 #
-# Copyright (c) 2016 Microsoft Corporation. All rights reserved
+# Copyright (c) Microsoft Corporation.<BR>
+# SPDX-License-Identifier: BSD-2-Clause-Patent
 #
 ##
 

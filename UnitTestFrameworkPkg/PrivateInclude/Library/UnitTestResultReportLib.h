@@ -2,7 +2,7 @@
   Provides a unit test result report.  This allows new result output formats to
   be easily customized.
 
-  Copyright (c) 2016, Microsoft Corporation. All rights reserved.<BR>
+  Copyright (c) Microsoft Corporation.<BR>
   Copyright (c) 2019, Intel Corporation. All rights reserved.<BR>
   SPDX-License-Identifier: BSD-2-Clause-Patent
 

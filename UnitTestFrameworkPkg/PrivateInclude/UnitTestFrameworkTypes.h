@@ -1,7 +1,7 @@
 /** @file
   Provides the basic types and common elements of the unit test framework
 
-  Copyright (c) 2016, Microsoft Corporation. All rights reserved.<BR>
+  Copyright (c) Microsoft Corporation.<BR>
   Copyright (c) 2019, Intel Corporation. All rights reserved.<BR>
   SPDX-License-Identifier: BSD-2-Clause-Patent
 

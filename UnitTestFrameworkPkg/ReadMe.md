@@ -235,3 +235,4 @@ stuart_ci_build -c .\.pytool\CISettings.py TOOL_CHAIN_TAG=VS2017 -p MdePkg -t NO
 
 Copyright (c) Microsoft Corporation.
 SPDX-License-Identifier: BSD-2-Clause-Patent
+

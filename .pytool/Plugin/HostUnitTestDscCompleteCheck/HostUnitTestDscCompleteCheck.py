@@ -3,7 +3,7 @@
 # This is a copy of DscCompleteCheck with different filtering logic.
 # It should be discussed if this should be one plugin
 #
-# Copyright (c) Microsoft Corporation. All rights reserved.
+# Copyright (c) Microsoft Corporation.
 # SPDX-License-Identifier: BSD-2-Clause-Patent
 ##
 import logging

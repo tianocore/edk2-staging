@@ -3,7 +3,7 @@
   restore unit test internal state, in case the test needs to pause and resume
   (eg. a reboot-based test).
 
-  Copyright (C) 2016 Microsoft Corporation. All Rights Reserved.
+  Copyright (c) Microsoft Corporation.<BR>
   Copyright (c) 2019, Intel Corporation. All rights reserved.<BR>
   SPDX-License-Identifier: BSD-2-Clause-Patent
 

@@ -4,7 +4,7 @@
   USB.  Since boot managers are not all the same creating a lib to support
   platform customization will make porting to new code base/platform easier.
 
-  Copyright (c) 2016, Microsoft Corporation. All rights reserved.<BR>
+  Copyright (c) Microsoft Corporation.<BR>
   Copyright (c) 2019, Intel Corporation. All rights reserved.<BR>
   SPDX-License-Identifier: BSD-2-Clause-Patent
 

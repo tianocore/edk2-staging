@@ -2,7 +2,7 @@
   Provides a unit test framework.  This allows tests to focus on testing logic
   and the framework to focus on runnings, reporting, statistics, etc.
 
-  Copyright (c) 2016, Microsoft Corporation. All rights reserved.<BR>
+  Copyright (c) Microsoft Corporation.<BR>
   Copyright (c) 2019, Intel Corporation. All rights reserved.<BR>
   SPDX-License-Identifier: BSD-2-Clause-Patent
 

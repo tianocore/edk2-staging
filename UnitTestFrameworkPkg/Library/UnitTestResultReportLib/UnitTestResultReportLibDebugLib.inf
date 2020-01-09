@@ -1,7 +1,8 @@
 ## @file
 # Library to support printing out the unit test report using DEBUG() macros.
 #
-# Copyright (c) 2016 Microsoft Corporation. All rights reserved
+# Copyright (c) Microsoft Corporation.<BR>
+# SPDX-License-Identifier: BSD-2-Clause-Patent
 #
 ##
 
