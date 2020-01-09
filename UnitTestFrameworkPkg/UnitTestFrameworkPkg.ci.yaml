@@ -30,7 +30,10 @@
         "IgnoreInf": [
             # Don't need to build these.
             # These are host-based only.
-            "UnitTestFrameworkPkg/Library/CmockaLib/CmockaLib.inf"
+            "UnitTestFrameworkPkg/Library/CmockaLib/CmockaLib.inf",
+            "UnitTestFrameworkPkg/Library/UnitTestLib/UnitTestLibCmocka.inf",
+            "UnitTestFrameworkPkg/Library/Posix/DebugLibPosix/DebugLibPosix.inf",
+            "UnitTestFrameworkPkg/Library/Posix/MemoryAllocationLibPosix/MemoryAllocationLibPosix.inf",
         ]
     },
     "GuidCheck": {

@@ -12,7 +12,7 @@
 
     ## options defined ci/Plugin/HostUnitTestCompilerPlugin
     "HostUnitTestCompilerPlugin": {
-        "DscPath": "Test/MdePkgTest.dsc"
+        "DscPath": "Test/MdePkgHostTest.dsc"
     },
 
     ## options defined ci/Plugin/CharEncodingCheck
@@ -36,7 +36,14 @@
 
     ## options defined ci/Plugin/DscCompleteCheck
     "DscCompleteCheck": {
-        "IgnoreInf": [""],
+        "IgnoreInf": [
+            # TODO: Figure out what to do about these...
+            #       Should they just move to the standard DSC?
+            "MdePkg/Test/UnitTest/Library/BaseSafeIntLib/TestBaseSafeIntLibDxe.inf",
+            "MdePkg/Test/UnitTest/Library/BaseSafeIntLib/TestBaseSafeIntLibPei.inf",
+            "MdePkg/Test/UnitTest/Library/BaseSafeIntLib/TestBaseSafeIntLibSmm.inf",
+            "MdePkg/Test/UnitTest/Library/BaseSafeIntLib/TestBaseSafeIntLibUefiShell.inf",
+        ],
         "DscPath": "MdePkg.dsc"
     },
 
