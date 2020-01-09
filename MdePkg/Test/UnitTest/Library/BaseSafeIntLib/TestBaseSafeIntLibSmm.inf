@@ -33,7 +33,6 @@
 
 [Packages]
   MdePkg/MdePkg.dec
-  UnitTestFrameworkPkg/UnitTestFrameworkPkg.dec
 
 [LibraryClasses]
   UefiDriverEntryPoint

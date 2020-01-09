@@ -32,7 +32,6 @@
 
 [Packages]
   MdePkg/MdePkg.dec
-  UnitTestFrameworkPkg/UnitTestFrameworkPkg.dec
 
 [LibraryClasses]
   BaseLib
