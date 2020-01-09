@@ -1,20 +1,20 @@
-/** @file -- SampleUnitTestSmm.c
+/** @file -- SampleUnitTestApp.c
 This is a sample EFI Shell application to demostrate the usage of the Unit Test Library.
 
   Copyright (c) Microsoft Corporation.<BR>
   SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
-
-#include <PiSmm.h>
-#include <Library/PrintLib.h>
+#include <PiPei.h>
+#include <Uefi.h>
+#include <Library/UefiLib.h>
 #include <Library/DebugLib.h>
-
 #include <Library/UnitTestLib.h>
+#include <Library/PrintLib.h>
 
 
-#define UNIT_TEST_SMM_NAME        "Sample Unit Test Library SMM"
-#define UNIT_TEST_SMM_VERSION     "0.1"
+#define UNIT_TEST_NAME        "Sample Unit Test"
+#define UNIT_TEST_VERSION     "0.1"
 
 
 BOOLEAN       mSampleGlobalTestBoolean = FALSE;
@@ -81,6 +81,7 @@ OnePlusOneShouldEqualTwo (
   C = A + B;
 
   UT_ASSERT_EQUAL(C, 2);
+
   return UNIT_TEST_PASSED;
 } // OnePlusOneShouldEqualTwo()
 
@@ -110,7 +111,7 @@ GlobalPointerShouldBeChangeable (
   )
 {
   mSampleGlobalTestPointer = (VOID*)-1;
-  UT_ASSERT_EQUAL((UINTN)mSampleGlobalTestPointer, (UINTN)((VOID *)-1));
+  UT_ASSERT_EQUAL((UINTN)mSampleGlobalTestPointer, (UINTN)((VOID*)-1));
   return UNIT_TEST_PASSED;
 } // GlobalPointerShouldBeChangeable()
 
@@ -125,32 +126,25 @@ GlobalPointerShouldBeChangeable (
 
 
 /**
-  SampleUnitTestSmm
-
-  @param[in] ImageHandle  The firmware allocated handle for the EFI image.
-  @param[in] SystemTable  A pointer to the EFI System Table.
-
-  @retval EFI_SUCCESS     The entry point executed successfully.
-  @retval other           Some error occured when executing this entry point.
+  UefiTestMain
 
 **/
 EFI_STATUS
 EFIAPI
-SampleUnitTestSmm (
-  IN EFI_HANDLE        ImageHandle,
-  IN EFI_SYSTEM_TABLE  *SystemTable
+UefiTestMain (
+  VOID
   )
 {
   EFI_STATUS                  Status;
   UNIT_TEST_FRAMEWORK_HANDLE  Framework = NULL;
   UNIT_TEST_SUITE_HANDLE      SimpleMathTests, GlobalVarTests;
 
-  DEBUG(( DEBUG_INFO, "%a v%a\n", UNIT_TEST_SMM_NAME, UNIT_TEST_SMM_VERSION ));
+  DEBUG(( DEBUG_INFO, "%a v%a\n", UNIT_TEST_NAME, UNIT_TEST_VERSION ));
 
   //
   // Start setting up the test framework for running the tests.
   //
-  Status = InitUnitTestFramework( &Framework, UNIT_TEST_SMM_NAME, gEfiCallerBaseName, UNIT_TEST_SMM_VERSION );
+  Status = InitUnitTestFramework( &Framework, UNIT_TEST_NAME, gEfiCallerBaseName, UNIT_TEST_VERSION );
   if (EFI_ERROR( Status ))
   {
     DEBUG((DEBUG_ERROR, "Failed in InitUnitTestFramework. Status = %r\n", Status));
@@ -194,4 +188,33 @@ EXIT:
   }
 
   return Status;
+} // UefiTestMain()
+
+EFI_STATUS
+EFIAPI
+PeiEntryPoint (
+  IN EFI_PEI_FILE_HANDLE       FileHandle,
+  IN CONST EFI_PEI_SERVICES    **PeiServices
+  )
+{
+  return UefiTestMain ();
+}
+
+EFI_STATUS
+EFIAPI
+DxeEntryPoint (
+  IN EFI_HANDLE        ImageHandle,
+  IN EFI_SYSTEM_TABLE  *SystemTable
+  )
+{
+  return UefiTestMain ();
+}
+
+int
+main (
+  int argc,
+  char *argv[]
+  )
+{
+  return UefiTestMain ();
 }

@@ -1,4 +1,6 @@
 ## @file
+# Sample UnitTest built for execution in UEFI Shell.
+#
 # Copyright (c) Microsoft Corporation.<BR>
 # SPDX-License-Identifier: BSD-2-Clause-Patent
 ##
@@ -6,31 +8,30 @@
 
 [Defines]
   INF_VERSION                    = 0x00010006
-  BASE_NAME                      = SampleUnitTestPeim
-  FILE_GUID                      = B9BD9451-3DC8-48EA-A6F0-55753BF186F1
-  MODULE_TYPE                    = PEIM
+  BASE_NAME                      = SampleUnitTestUefiShell
+  FILE_GUID                      = 9E8F461A-17E1-4312-B49C-E66F0A88EA8B
+  MODULE_TYPE                    = UEFI_APPLICATION
   VERSION_STRING                 = 1.0
-  ENTRY_POINT                    = SampleUnitTestPeim
+  ENTRY_POINT                    = DxeEntryPoint
 
 #
 # The following information is for reference only and not required by the build tools.
 #
-#  VALID_ARCHITECTURES           = IA32 X64 IPF EBC
+#  VALID_ARCHITECTURES           = IA32 X64
 #
 
 [Sources]
-  SampleUnitTestPeim.c
+  SampleUnitTest.c
 
 [Packages]
   MdePkg/MdePkg.dec
 
 [LibraryClasses]
+  UefiApplicationEntryPoint
   BaseLib
-  PeimEntryPoint
   DebugLib
   UnitTestLib
   PrintLib
 
-[Depex]
-  gEfiPeiMemoryDiscoveredPpiGuid
+
 

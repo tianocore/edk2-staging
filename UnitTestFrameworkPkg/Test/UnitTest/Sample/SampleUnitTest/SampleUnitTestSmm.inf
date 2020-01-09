@@ -1,4 +1,6 @@
 ## @file
+# Sample UnitTest built for execution in SMM.
+#
 # Copyright (c) Microsoft Corporation.<BR>
 # SPDX-License-Identifier: BSD-2-Clause-Patent
 ##
@@ -11,27 +13,26 @@
   MODULE_TYPE                    = DXE_SMM_DRIVER
   VERSION_STRING                 = 1.0
   PI_SPECIFICATION_VERSION       = 0x0001000A
-  ENTRY_POINT                    = SampleUnitTestSmm
+  ENTRY_POINT                    = DxeEntryPoint
 
 #
 # The following information is for reference only and not required by the build tools.
 #
-#  VALID_ARCHITECTURES           = IA32 X64 IPF EBC
+#  VALID_ARCHITECTURES           = IA32 X64
 #
 
 [Sources]
-  SampleUnitTestSmm.c
+  SampleUnitTest.c
 
 [Packages]
   MdePkg/MdePkg.dec
 
 [LibraryClasses]
-  BaseLib
   UefiDriverEntryPoint
+  BaseLib
   DebugLib
   UnitTestLib
   PrintLib
 
 [Depex]
   gEfiSmmCpuProtocolGuid
-

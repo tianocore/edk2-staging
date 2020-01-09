@@ -28,9 +28,9 @@
   UnitTestFrameworkPkg/Library/UnitTestBootLibUsbClass/UnitTestBootLibUsbClass.inf
   UnitTestFrameworkPkg/Library/UnitTestPersistenceLibSimpleFileSystem/UnitTestPersistenceLibSimpleFileSystem.inf
 
-  UnitTestFrameworkPkg/Test/UnitTest/Sample/SampleUnitTestApp/SampleUnitTestApp.inf
-  UnitTestFrameworkPkg/Test/UnitTest/Sample/SampleUnitTestPeim/SampleUnitTestPeim.inf
-  UnitTestFrameworkPkg/Test/UnitTest/Sample/SampleUnitTestSmm/SampleUnitTestSmm.inf
+  UnitTestFrameworkPkg/Test/UnitTest/Sample/SampleUnitTest/SampleUnitTestPei.inf
+  UnitTestFrameworkPkg/Test/UnitTest/Sample/SampleUnitTest/SampleUnitTestSmm.inf
+  UnitTestFrameworkPkg/Test/UnitTest/Sample/SampleUnitTest/SampleUnitTestUefiShell.inf
 
 [BuildOptions]
   *_*_*_CC_FLAGS = -D DISABLE_NEW_DEPRECATED_INTERFACES
