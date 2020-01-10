@@ -15,6 +15,7 @@ typedef UINT32  UNIT_TEST_STATUS;
 #define UNIT_TEST_PASSED                (0)
 #define UNIT_TEST_ERROR_PREREQ_NOT_MET  (1)
 #define UNIT_TEST_ERROR_TEST_FAILED     (2)
+#define UNIT_TEST_ERROR_CLEANUP_FAILED  (3)
 #define UNIT_TEST_SKIPPED               (0xFFFFFFFD)
 #define UNIT_TEST_RUNNING               (0xFFFFFFFE)
 #define UNIT_TEST_PENDING               (0xFFFFFFFF)
@@ -81,9 +82,12 @@ UNIT_TEST_STATUS
   @param[in]  Framework   Identical to UNIT_TEST_FUNCTION.
   @param[in]  Context     Identical to UNIT_TEST_FUNCTION.
 
+  @retval     UNIT_TEST_PASSED                Test case cleanup succeeded.
+  @retval     UNIT_TEST_ERROR_CLEANUP_FAILED  Test case cleanup failed.
+
 **/
 typedef
-VOID
+UNIT_TEST_STATUS
 (EFIAPI *UNIT_TEST_CLEANUP)(
   UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   UNIT_TEST_CONTEXT           Context
