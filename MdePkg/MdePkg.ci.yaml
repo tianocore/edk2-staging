@@ -43,7 +43,7 @@
     ## options defined ci/Plugin/HostUnitTestDscCompleteCheck
     "HostUnitTestDscCompleteCheck": {
         "IgnoreInf": [""],
-        "DscPath": "MdePkgTest.dsc"
+        "DscPath": "Test/MdePkgHostTest.dsc"
     },
 
     ## options defined ci/Plugin/GuidCheck

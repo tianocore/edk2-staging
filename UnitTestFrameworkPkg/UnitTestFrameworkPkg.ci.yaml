@@ -8,6 +8,11 @@
     "CompilerPlugin": {
         "DscPath": "UnitTestFrameworkPkg.dsc"
     },
+    ## options defined ci/Plugin/HostUnitTestCompilerPlugin
+    "HostUnitTestCompilerPlugin": {
+        "DscPath": "Test/UnitTestFrameworkPkgHostTest.dsc"
+    },
+
     "CharEncodingCheck": {
         "IgnoreFiles": []
     },
@@ -36,6 +41,12 @@
             "UnitTestFrameworkPkg/Library/Posix/MemoryAllocationLibPosix/MemoryAllocationLibPosix.inf",
         ]
     },
+    ## options defined ci/Plugin/HostUnitTestDscCompleteCheck
+    "HostUnitTestDscCompleteCheck": {
+        "IgnoreInf": [""],
+        "DscPath": "Test/UnitTestFrameworkPkgHostTest.dsc"
+    },
+
     "GuidCheck": {
         "IgnoreGuidName": [],
         "IgnoreGuidValue": [],
