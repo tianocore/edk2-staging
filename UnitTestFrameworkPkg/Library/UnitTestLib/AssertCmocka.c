@@ -33,7 +33,7 @@ UnitTestAssertTrue (
   CHAR8  TempStr[MAX_STRING_SIZE];
 
   snprintf (TempStr, sizeof(TempStr), "UT_ASSERT_TRUE(%s:%x)", Description, Expression);
-  _assert_true (Expression, Description, FileName, (INT32)LineNumber);
+  _assert_true (Expression, TempStr, FileName, (INT32)LineNumber);
 
   return Expression;
 }
@@ -52,7 +52,7 @@ UnitTestAssertFalse (
   CHAR8  TempStr[MAX_STRING_SIZE];
 
   snprintf (TempStr, sizeof(TempStr), "UT_ASSERT_FALSE(%s:%x)", Description, Expression);
-  _assert_true (!Expression, Description, FileName, (INT32)LineNumber);
+  _assert_true (!Expression, TempStr, FileName, (INT32)LineNumber);
 
   return !Expression;
 }
@@ -71,7 +71,7 @@ UnitTestAssertNotEfiError (
   CHAR8  TempStr[MAX_STRING_SIZE];
 
   snprintf (TempStr, sizeof(TempStr), "UT_ASSERT_NOT_EFI_ERROR(%s:%p)", Description, (void *)Status);
-  _assert_true (!EFI_ERROR (Status), Description, FileName, (INT32)LineNumber);
+  _assert_true (!EFI_ERROR (Status), TempStr, FileName, (INT32)LineNumber);
 
   return !EFI_ERROR (Status);
 }
@@ -92,7 +92,7 @@ UnitTestAssertEqual (
   CHAR8  TempStr[MAX_STRING_SIZE];
 
   snprintf (TempStr, sizeof(TempStr), "UT_ASSERT_EQUAL(%s:%llx, %s:%llx)", DescriptionA, ValueA, DescriptionB, ValueB);
-  _assert_int_equal (ValueA, ValueB, FileName, (INT32)LineNumber);
+  _assert_true ((ValueA == ValueB), TempStr, FileName, (INT32)LineNumber);
 
   return (ValueA == ValueB);
 }
@@ -138,7 +138,7 @@ UnitTestAssertNotEqual (
   CHAR8  TempStr[MAX_STRING_SIZE];
 
   snprintf (TempStr, sizeof(TempStr), "UT_ASSERT_NOT_EQUAL(%s:%llx, %s:%llx)", DescriptionA, ValueA, DescriptionB, ValueB);
-  _assert_int_not_equal (ValueA, ValueB, FileName, (INT32)LineNumber);
+  _assert_true ((ValueA != ValueB), TempStr, FileName, (INT32)LineNumber);
 
   return (ValueA != ValueB);
 }
@@ -158,7 +158,7 @@ UnitTestAssertStatusEqual (
   CHAR8  TempStr[MAX_STRING_SIZE];
 
   snprintf (TempStr, sizeof(TempStr), "UT_ASSERT_STATUS_EQUAL(%s:%p)", Description, (VOID *)Status);
-  _assert_int_equal (Status, Status, FileName, (INT32)LineNumber);
+  _assert_true ((Status == Expected), TempStr, FileName, (INT32)LineNumber);
 
   return (Status == Expected);
 }
@@ -177,7 +177,7 @@ UnitTestAssertNotNull (
   CHAR8  TempStr[MAX_STRING_SIZE];
 
   snprintf (TempStr, sizeof(TempStr), "UT_ASSERT_NOT_NULL(%s:%p)", PointerName, Pointer);
-  _assert_true (Pointer != NULL, TempStr, FileName, (INT32)LineNumber);
+  _assert_true ((Pointer != NULL), TempStr, FileName, (INT32)LineNumber);
 
   return (Pointer != NULL);
 }
