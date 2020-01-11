@@ -21,6 +21,123 @@
 #include <Library/MemoryAllocationLib.h>
 #include <Library/DebugLib.h>
 
+//
+// The currently active test suite
+//
+UNIT_TEST_SUITE  *mActiveUnitTestSuite = NULL;
+
+void
+CmockaUnitTestFunctionRunner (
+  void **state
+  )
+{
+  UNIT_TEST            *UnitTest;
+  UNIT_TEST_SUITE      *Suite;
+  UNIT_TEST_FRAMEWORK  *Framework;
+
+  UnitTest  = (UNIT_TEST *)(*state);
+  Suite     = (UNIT_TEST_SUITE *)(UnitTest->ParentSuite);
+  Framework = (UNIT_TEST_FRAMEWORK *)(Suite->ParentFramework);
+
+  if (UnitTest->RunTest == NULL) {
+    UnitTest->Result = UNIT_TEST_SKIPPED;
+  } else {
+    UnitTest->Result = UNIT_TEST_RUNNING;
+    UnitTest->Result = UnitTest->RunTest (Framework, UnitTest->Context);
+  }
+}
+
+int
+CmockaUnitTestSetupFunctionRunner (
+  void **state
+  )
+{
+  UNIT_TEST            *UnitTest;
+  UNIT_TEST_SUITE      *Suite;
+  UNIT_TEST_FRAMEWORK  *Framework;
+  UNIT_TEST_STATUS     Result;
+
+  UnitTest  = (UNIT_TEST *)(*state);
+  Suite     = (UNIT_TEST_SUITE *)(UnitTest->ParentSuite);
+  Framework = (UNIT_TEST_FRAMEWORK *)(Suite->ParentFramework);
+
+  if (UnitTest->PreReq == NULL) {
+    return 0;
+  }
+  Result = UnitTest->PreReq (Framework, UnitTest->Context);
+  //
+  // Return 0 for success.  Non-zero for error.
+  //
+  return (int)Result;
+}
+
+int
+CmockaUnitTestTeardownFunctionRunner (
+  void **state
+  )
+{
+  UNIT_TEST            *UnitTest;
+  UNIT_TEST_SUITE      *Suite;
+  UNIT_TEST_FRAMEWORK  *Framework;
+
+  UnitTest  = (UNIT_TEST *)(*state);
+  Suite     = (UNIT_TEST_SUITE *)(UnitTest->ParentSuite);
+  Framework = (UNIT_TEST_FRAMEWORK *)(Suite->ParentFramework);
+
+  if (UnitTest->CleanUp == NULL) {
+    return 0;
+  }
+  UnitTest->CleanUp (Framework, UnitTest->Context);
+  //
+  // Return 0 for success.  Non-zero for error.
+  //
+  return 0;
+}
+
+int
+CmockaUnitTestSuiteSetupFunctionRunner (
+  void **state
+  )
+{
+  UNIT_TEST_FRAMEWORK  *Framework;
+
+  if (mActiveUnitTestSuite == NULL) {
+    return -1;
+  }
+  if (mActiveUnitTestSuite->Setup == NULL) {
+    return 0;
+  }
+
+  Framework = (UNIT_TEST_FRAMEWORK *)(mActiveUnitTestSuite->ParentFramework);
+  mActiveUnitTestSuite->Setup (Framework);
+  //
+  // Always succeed
+  //
+  return 0;
+}
+
+int
+CmockaUnitTestSuiteTeardownFunctionRunner (
+  void **state
+  )
+{
+  UNIT_TEST_FRAMEWORK  *Framework;
+
+  if (mActiveUnitTestSuite == NULL) {
+    return -1;
+  }
+  if (mActiveUnitTestSuite->Teardown == NULL) {
+    return 0;
+  }
+
+  Framework = (UNIT_TEST_FRAMEWORK *)(mActiveUnitTestSuite->ParentFramework);
+  mActiveUnitTestSuite->Teardown (Framework);
+  //
+  // Always succeed
+  //
+  return 0;
+}
+
 STATIC
 EFI_STATUS
 RunTestSuite (
@@ -42,10 +159,6 @@ RunTestSuite (
   DEBUG ((DEBUG_VERBOSE, "RUNNING TEST SUITE: %a\n", Suite->Title));
   DEBUG ((DEBUG_VERBOSE, "---------------------------------------------------------\n"));
 
-  if (Suite->Setup != NULL) {
-    Suite->Setup (Suite->ParentFramework);
-  }
-
   //
   // Alocate buffer of CMUnitTest entries
   //
@@ -61,10 +174,10 @@ RunTestSuite (
        TestEntry = (UNIT_TEST_LIST_ENTRY *)GetNextNode (&(Suite->TestCaseList), (LIST_ENTRY *)TestEntry)) {
     UnitTest                   = &TestEntry->UT;
     Tests[Index].name          = UnitTest->Description;
-    Tests[Index].test_func     = (CMUnitTestFunction)(UnitTest->RunTest);
-    Tests[Index].setup_func    = (CMFixtureFunction)(UnitTest->PreReq);
-    Tests[Index].teardown_func = (CMFixtureFunction)(UnitTest->CleanUp);
-    Tests[Index].initial_state = NULL;
+    Tests[Index].test_func     = CmockaUnitTestFunctionRunner;
+    Tests[Index].setup_func    = CmockaUnitTestSetupFunctionRunner;
+    Tests[Index].teardown_func = CmockaUnitTestTeardownFunctionRunner;
+    Tests[Index].initial_state = UnitTest;
     Index++;
   }
   ASSERT (Index == Suite->NumTests);
@@ -72,13 +185,15 @@ RunTestSuite (
   //
   // Run all unit tests in a test suite
   //
+  mActiveUnitTestSuite = Suite;
   _cmocka_run_group_tests (
     Suite->Title,
     Tests,
     Suite->NumTests,
-    (CMFixtureFunction)(Suite->Setup),
-    (CMFixtureFunction)(Suite->Teardown)
+    CmockaUnitTestSuiteSetupFunctionRunner,
+    CmockaUnitTestSuiteTeardownFunctionRunner
     );
+  mActiveUnitTestSuite = NULL;
   FreePool (Tests);
 
   return EFI_SUCCESS;
