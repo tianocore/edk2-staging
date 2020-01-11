@@ -46,7 +46,7 @@ MakeSureThatPointerIsNull (
 } // ListsShouldHaveTheSameDescriptorSize()
 
 
-UNIT_TEST_STATUS
+VOID
 EFIAPI
 ClearThePointer (
   IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
@@ -54,7 +54,6 @@ ClearThePointer (
   )
 {
   mSampleGlobalTestPointer = NULL;
-  return (mSampleGlobalTestPointer == NULL) ? UNIT_TEST_PASSED : UNIT_TEST_ERROR_CLEANUP_FAILED;
 } // ClearThePointer()
 
 
