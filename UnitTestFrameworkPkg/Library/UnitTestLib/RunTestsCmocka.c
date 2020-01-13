@@ -39,11 +39,15 @@ CmockaUnitTestFunctionRunner (
   Suite     = (UNIT_TEST_SUITE *)(UnitTest->ParentSuite);
   Framework = (UNIT_TEST_FRAMEWORK *)(Suite->ParentFramework);
 
+
   if (UnitTest->RunTest == NULL) {
     UnitTest->Result = UNIT_TEST_SKIPPED;
   } else {
     UnitTest->Result = UNIT_TEST_RUNNING;
+
+    Framework->CurrentTest = UnitTest;
     UnitTest->Result = UnitTest->RunTest (Framework, UnitTest->Context);
+    Framework->CurrentTest = NULL;
   }
 }
 
@@ -64,7 +68,11 @@ CmockaUnitTestSetupFunctionRunner (
   if (UnitTest->PreReq == NULL) {
     return 0;
   }
+
+  Framework->CurrentTest = UnitTest;
   Result = UnitTest->PreReq (Framework, UnitTest->Context);
+  Framework->CurrentTest = NULL;
+
   //
   // Return 0 for success.  Non-zero for error.
   //
@@ -84,10 +92,14 @@ CmockaUnitTestTeardownFunctionRunner (
   Suite     = (UNIT_TEST_SUITE *)(UnitTest->ParentSuite);
   Framework = (UNIT_TEST_FRAMEWORK *)(Suite->ParentFramework);
 
+
   if (UnitTest->CleanUp == NULL) {
     return 0;
   }
+
+  Framework->CurrentTest = UnitTest;
   UnitTest->CleanUp (Framework, UnitTest->Context);
+  Framework->CurrentTest = NULL;
   //
   // Return 0 for success.  Non-zero for error.
   //
