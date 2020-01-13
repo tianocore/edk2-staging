@@ -64,7 +64,7 @@ class HostUnitTestDscCompleteCheck(ICiBuildPlugin):
         abs_dsc_path = os.path.join(abs_pkg_path, pkgconfig["DscPath"].strip())
         wsr_dsc_path = Edk2pathObj.GetEdk2RelativePathFromAbsolutePath(abs_dsc_path)
 
-        if abs_dsc_path is None or wsr_dsc_path is "" or not os.path.isfile(abs_dsc_path):
+        if abs_dsc_path is None or wsr_dsc_path == "" or not os.path.isfile(abs_dsc_path):
             tc.SetSkipped()
             tc.LogStdError("Package Host Unit Test Dsc not found")
             return 0
@@ -115,7 +115,7 @@ class HostUnitTestDscCompleteCheck(ICiBuildPlugin):
                 overall_status = overall_status + 1
 
         # If XML object exists, add result
-        if overall_status is not 0:
+        if overall_status != 0:
             tc.SetFailed("HostUnitTestDscCompleteCheck {0} Failed.  Errors {1}".format(wsr_dsc_path, overall_status), "CHECK_FAILED")
         else:
             tc.SetSuccess()
