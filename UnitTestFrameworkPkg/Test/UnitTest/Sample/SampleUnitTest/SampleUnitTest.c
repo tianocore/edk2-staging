@@ -109,6 +109,9 @@ GlobalPointerShouldBeChangeable (
   IN UNIT_TEST_CONTEXT           Context
   )
 {
+  // Example of logging.
+  UT_LOG_WARNING("About to change a global pointer! Current value is 0x%X\n", mSampleGlobalTestPointer);
+
   mSampleGlobalTestPointer = (VOID*)-1;
   UT_ASSERT_EQUAL((UINTN)mSampleGlobalTestPointer, (UINTN)((VOID*)-1));
   return UNIT_TEST_PASSED;
