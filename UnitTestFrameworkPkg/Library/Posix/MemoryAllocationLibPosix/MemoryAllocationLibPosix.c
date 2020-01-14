@@ -24,7 +24,7 @@
 ///
 /// Structure placed immediately before an aligned allocation to store the
 /// information required to free the entire buffer allocated to support then
-/// aligned alocation.
+/// aligned allocation.
 ///
 typedef struct {
   UINT32  Signature;

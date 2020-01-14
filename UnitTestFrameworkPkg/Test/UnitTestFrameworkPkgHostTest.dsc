@@ -22,3 +22,11 @@
   # Build HOST_APPLICATION that tests the SampleUnitTest
   #
   UnitTestFrameworkPkg/Test/UnitTest/Sample/SampleUnitTest/SampleUnitTestHost.inf
+
+  #
+  # Build Libraries
+  #
+  UnitTestFrameworkPkg/Library/CmockaLib/CmockaLib.inf
+  UnitTestFrameworkPkg/Library/Posix/DebugLibPosix/DebugLibPosix.inf
+  UnitTestFrameworkPkg/Library/Posix/MemoryAllocationLibPosix/MemoryAllocationLibPosix.inf
+  UnitTestFrameworkPkg/Library/UnitTestLib/UnitTestLibCmocka.inf

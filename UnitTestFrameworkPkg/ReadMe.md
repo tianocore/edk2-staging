@@ -145,7 +145,7 @@ Status = CreateUnitTestSuite( &SimpleMathTests, Fw, L"Simple Math Tests", L"Samp
 This test suite has no setup or teardown functions. The `&SimpleMathTests` returned here is a handle to the suite and
 will be used when adding test cases.
 
-Alrighty! Now we've finished some of the cruft, red tape, and busy work. We're ready to add some tests. Adding a test
+Great! Now we've finished some of the cruft, red tape, and busy work. We're ready to add some tests. Adding a test
 to a test suite is accomplished with the -- you guessed it -- `AddTestCase` function. It takes in the suite handle;
 a `CHAR16` string for the description and class name; a function pointer for the test case itself; additional, optional
 function pointers for prerequisite check and cleanup routines; and and optional pointer to a context structure.

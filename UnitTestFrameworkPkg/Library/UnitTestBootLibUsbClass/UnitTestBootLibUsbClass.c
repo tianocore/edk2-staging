@@ -21,7 +21,7 @@
   @retval EFI_SUCCESS      Boot device for next boot was set.
   @retval EFI_UNSUPPORTED  Setting the boot device for the next boot is not
                            supportted.
-  @retval Other            Boot devide for next boot can not be set.
+  @retval Other            Boot device for next boot can not be set.
 **/
 EFI_STATUS
 EFIAPI
@@ -66,9 +66,9 @@ SetBootNextDevice (
     goto CLEANUP;
   }
 
-  //@MRT --- Is this memory leak becasue we lose the old Dp memory
+  //@MRT --- Is this memory leak because we lose the old Dp memory
   Dp = AppendDevicePathNode (
-         DpEnd, 
+         DpEnd,
          (EFI_DEVICE_PATH_PROTOCOL *)&UsbDp
          );
   if (Dp == NULL) {

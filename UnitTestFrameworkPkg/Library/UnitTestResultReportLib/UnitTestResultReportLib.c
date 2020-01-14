@@ -179,7 +179,7 @@ OutputUnitTestFrameworkReport (
 
       switch (Test->UT.Result) {
       case UNIT_TEST_PASSED:
-        SPassed++; 
+        SPassed++;
         break;
       case UNIT_TEST_ERROR_TEST_FAILED:
         SFailed++;
@@ -204,7 +204,7 @@ OutputUnitTestFrameworkReport (
 
     Passed += SPassed;  //add to global counters
     Failed += SFailed;  //add to global counters
-    NotRun += SNotRun;  //add to global coutners
+    NotRun += SNotRun;  //add to global counters
   }//End Suite iteration
 
   ReportPrint ("=========================================================\n");

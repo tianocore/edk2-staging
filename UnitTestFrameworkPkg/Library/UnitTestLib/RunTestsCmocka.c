@@ -172,7 +172,7 @@ RunTestSuite (
   DEBUG ((DEBUG_VERBOSE, "---------------------------------------------------------\n"));
 
   //
-  // Alocate buffer of CMUnitTest entries
+  // Allocate buffer of CMUnitTest entries
   //
   Tests = AllocateZeroPool (Suite->NumTests * sizeof (struct CMUnitTest));
   ASSERT (Tests != NULL);

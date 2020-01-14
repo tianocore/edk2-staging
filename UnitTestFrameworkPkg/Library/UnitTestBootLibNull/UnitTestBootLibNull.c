@@ -1,5 +1,5 @@
 /**
-  NULL implementation for UnitTestBootLib to allow simple compliation
+  NULL implementation for UnitTestBootLib to allow simple compilation
 
   Copyright (c) Microsoft Corporation.<BR>
   SPDX-License-Identifier: BSD-2-Clause-Patent
@@ -14,7 +14,7 @@
   @retval EFI_SUCCESS      Boot device for next boot was set.
   @retval EFI_UNSUPPORTED  Setting the boot device for the next boot is not
                            supportted.
-  @retval Other            Boot devide for next boot can not be set.
+  @retval Other            Boot device for next boot can not be set.
 **/
 EFI_STATUS
 EFIAPI

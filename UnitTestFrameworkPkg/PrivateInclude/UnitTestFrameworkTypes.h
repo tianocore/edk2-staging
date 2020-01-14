@@ -82,7 +82,7 @@ typedef struct {
 
 typedef struct {
   CHAR8                     *Title;
-  CHAR8                     *ShortTitle;      // This title should contain NO spaces or non-filename charatecters. Is used in reporting and serialization.
+  CHAR8                     *ShortTitle;      // This title should contain NO spaces or non-filename characters. Is used in reporting and serialization.
   CHAR8                     *VersionString;
   CHAR8                     *Log;
   UINT8                     Fingerprint[UNIT_TEST_FINGERPRINT_SIZE];

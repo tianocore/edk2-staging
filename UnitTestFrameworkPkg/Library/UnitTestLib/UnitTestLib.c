@@ -668,7 +668,7 @@ SerializeState (
 
       //
       // Update the size once the structure is complete.
-      // NOTE: Should thise be a straight cast without validation?
+      // NOTE: Should this be a straight cast without validation?
       //
       TestSaveData->Size = (UINT32)(FloatingPointer - (UINT8 *)TestSaveData);
     }
