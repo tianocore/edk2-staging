@@ -21,8 +21,8 @@ class HostUnitTestDscCompleteCheck(ICiBuildPlugin):
 
     Configuration options:
     "HostUnitTestDscCompleteCheck": {
-        "DscPath": "<path to host unit test dsc from root of pkg>"
-        "IgnoreInf": []  # Ignore INF if found in filesystem by not dsc
+        "DscPath": "", # Path to Host based unit test DSC file
+        "IgnoreInf": []  # Ignore INF if found in filesystem but not dsc
     }
     """
 
@@ -33,7 +33,7 @@ class HostUnitTestDscCompleteCheck(ICiBuildPlugin):
               packagename: string containing name of package to build
               environment: The VarDict for the test to run in
             Returns:
-                a tuple containing the testcase name and the classname 
+                a tuple containing the testcase name and the classname
                 (testcasename, classname)
                 testclassname: a descriptive string for the testcase can include whitespace
                 classname: should be patterned <packagename>.<plugin>.<optionally any unique condition>
@@ -57,12 +57,15 @@ class HostUnitTestDscCompleteCheck(ICiBuildPlugin):
         # Parse the config for required DscPath element
         if "DscPath" not in pkgconfig:
             tc.SetSkipped()
-            tc.LogStdError("DscPath not found in config file.  Nothing to check.")
+            tc.LogStdError(
+                "DscPath not found in config file.  Nothing to check.")
             return -1
 
-        abs_pkg_path = Edk2pathObj.GetAbsolutePathOnThisSytemFromEdk2RelativePath(packagename)
+        abs_pkg_path = Edk2pathObj.GetAbsolutePathOnThisSytemFromEdk2RelativePath(
+            packagename)
         abs_dsc_path = os.path.join(abs_pkg_path, pkgconfig["DscPath"].strip())
-        wsr_dsc_path = Edk2pathObj.GetEdk2RelativePathFromAbsolutePath(abs_dsc_path)
+        wsr_dsc_path = Edk2pathObj.GetEdk2RelativePathFromAbsolutePath(
+            abs_dsc_path)
 
         if abs_dsc_path is None or wsr_dsc_path == "" or not os.path.isfile(abs_dsc_path):
             tc.SetSkipped()
@@ -71,7 +74,8 @@ class HostUnitTestDscCompleteCheck(ICiBuildPlugin):
 
         # Get INF Files
         INFFiles = self.WalkDirectoryForExtension([".inf"], abs_pkg_path)
-        INFFiles = [Edk2pathObj.GetEdk2RelativePathFromAbsolutePath(x) for x in INFFiles]  # make edk2relative path so can compare with DSC
+        INFFiles = [Edk2pathObj.GetEdk2RelativePathFromAbsolutePath(
+            x) for x in INFFiles]  # make edk2relative path so can compare with DSC
 
         # remove ignores
 
@@ -82,8 +86,10 @@ class HostUnitTestDscCompleteCheck(ICiBuildPlugin):
                     tc.LogStdOut("Ignoring INF {0}".format(a))
                     INFFiles.remove(a)
                 except:
-                    tc.LogStdError("HostUnitTestDscCompleteCheck.IgnoreInf -> {0} not found in filesystem.  Invalid ignore file".format(a))
-                    logging.info("HostUnitTestDscCompleteCheck.IgnoreInf -> {0} not found in filesystem.  Invalid ignore file".format(a))
+                    tc.LogStdError(
+                        "HostUnitTestDscCompleteCheck.IgnoreInf -> {0} not found in filesystem.  Invalid ignore file".format(a))
+                    logging.info(
+                        "HostUnitTestDscCompleteCheck.IgnoreInf -> {0} not found in filesystem.  Invalid ignore file".format(a))
 
         # DSC Parser
         dp = DscParser()
@@ -102,13 +108,24 @@ class HostUnitTestDscCompleteCheck(ICiBuildPlugin):
                 infp.SetPackagePaths(Edk2pathObj.PackagePathList)
                 infp.ParseFile(INF)
                 if("MODULE_TYPE" not in infp.Dict):
-                    tc.LogStdOut("Ignoring INF. Missing key for MODULE_TYPE {0}".format(INF))
+                    tc.LogStdOut(
+                        "Ignoring INF. Missing key for MODULE_TYPE {0}".format(INF))
                     continue
 
-                if(infp.Dict["MODULE_TYPE"] != "HOST_APPLICATION"):
-                    tc.LogStdOut("Ignoring INF.  MODULE_TYPE is not HOST_APPLICATION {0}".format(INF))
-                    continue
+                if(infp.Dict["MODULE_TYPE"] == "HOST_APPLICATION"):
+                    # should compile test a library that is declared type HOST_APPLICATION
+                    pass
 
+                elif len(infp.SupportedPhases) > 0 and \
+                        "HOST_APPLICATION" in infp.SupportedPhases:
+                    # should compile test a library that supports HOST_APPLICATION but
+                    # require it to be an explicit opt-in
+                    pass
+
+                else:
+                    tc.LogStdOut(
+                        "Ignoring INF. MODULE_TYPE or suppored phases not HOST_APPLICATION {0}".format(INF))
+                    continue
 
                 logging.critical(INF + " not in " + wsr_dsc_path)
                 tc.LogStdError("{0} not in {1}".format(INF, wsr_dsc_path))
@@ -116,7 +133,8 @@ class HostUnitTestDscCompleteCheck(ICiBuildPlugin):
 
         # If XML object exists, add result
         if overall_status != 0:
-            tc.SetFailed("HostUnitTestDscCompleteCheck {0} Failed.  Errors {1}".format(wsr_dsc_path, overall_status), "CHECK_FAILED")
+            tc.SetFailed("HostUnitTestDscCompleteCheck {0} Failed.  Errors {1}".format(
+                wsr_dsc_path, overall_status), "CHECK_FAILED")
         else:
             tc.SetSuccess()
         return overall_status

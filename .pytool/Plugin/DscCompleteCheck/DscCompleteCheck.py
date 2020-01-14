@@ -54,12 +54,15 @@ class DscCompleteCheck(ICiBuildPlugin):
         # Parse the config for required DscPath element
         if "DscPath" not in pkgconfig:
             tc.SetSkipped()
-            tc.LogStdError("DscPath not found in config file.  Nothing to check.")
+            tc.LogStdError(
+                "DscPath not found in config file.  Nothing to check.")
             return -1
 
-        abs_pkg_path = Edk2pathObj.GetAbsolutePathOnThisSytemFromEdk2RelativePath(packagename)
+        abs_pkg_path = Edk2pathObj.GetAbsolutePathOnThisSytemFromEdk2RelativePath(
+            packagename)
         abs_dsc_path = os.path.join(abs_pkg_path, pkgconfig["DscPath"].strip())
-        wsr_dsc_path = Edk2pathObj.GetEdk2RelativePathFromAbsolutePath(abs_dsc_path)
+        wsr_dsc_path = Edk2pathObj.GetEdk2RelativePathFromAbsolutePath(
+            abs_dsc_path)
 
         if abs_dsc_path is None or wsr_dsc_path == "" or not os.path.isfile(abs_dsc_path):
             tc.SetSkipped()
@@ -68,7 +71,8 @@ class DscCompleteCheck(ICiBuildPlugin):
 
         # Get INF Files
         INFFiles = self.WalkDirectoryForExtension([".inf"], abs_pkg_path)
-        INFFiles = [Edk2pathObj.GetEdk2RelativePathFromAbsolutePath(x) for x in INFFiles]  # make edk2relative path so can compare with DSC
+        INFFiles = [Edk2pathObj.GetEdk2RelativePathFromAbsolutePath(
+            x) for x in INFFiles]  # make edk2relative path so can compare with DSC
 
         # remove ignores
 
@@ -79,8 +83,10 @@ class DscCompleteCheck(ICiBuildPlugin):
                     tc.LogStdOut("Ignoring INF {0}".format(a))
                     INFFiles.remove(a)
                 except:
-                    tc.LogStdError("DscCompleteCheck.IgnoreInf -> {0} not found in filesystem.  Invalid ignore file".format(a))
-                    logging.info("DscCompleteCheck.IgnoreInf -> {0} not found in filesystem.  Invalid ignore file".format(a))
+                    tc.LogStdError(
+                        "DscCompleteCheck.IgnoreInf -> {0} not found in filesystem.  Invalid ignore file".format(a))
+                    logging.info(
+                        "DscCompleteCheck.IgnoreInf -> {0} not found in filesystem.  Invalid ignore file".format(a))
 
         # DSC Parser
         dp = DscParser()
@@ -99,11 +105,19 @@ class DscCompleteCheck(ICiBuildPlugin):
                 infp.SetPackagePaths(Edk2pathObj.PackagePathList)
                 infp.ParseFile(INF)
                 if("MODULE_TYPE" not in infp.Dict):
-                    tc.LogStdOut("Ignoring INF. Missing key for MODULE_TYPE {0}".format(INF))
+                    tc.LogStdOut(
+                        "Ignoring INF. Missing key for MODULE_TYPE {0}".format(INF))
                     continue
 
                 if(infp.Dict["MODULE_TYPE"] == "HOST_APPLICATION"):
-                    tc.LogStdOut("Ignoring INF.  Module type is HOST_APPLICATION {0}".format(INF))
+                    tc.LogStdOut(
+                        "Ignoring INF.  Module type is HOST_APPLICATION {0}".format(INF))
+                    continue
+
+                if len(infp.SupportedPhases) == 1 and \
+                   "HOST_APPLICATION" in infp.SupportedPhases:
+                    tc.LogStdOut(
+                        "Ignoring Library INF due to only supporting type HOST_APPLICATION {0}".format(INF))
                     continue
 
                 logging.critical(INF + " not in " + wsr_dsc_path)
@@ -112,7 +126,8 @@ class DscCompleteCheck(ICiBuildPlugin):
 
         # If XML object exists, add result
         if overall_status != 0:
-            tc.SetFailed("DscCompleteCheck {0} Failed.  Errors {1}".format(wsr_dsc_path, overall_status), "CHECK_FAILED")
+            tc.SetFailed("DscCompleteCheck {0} Failed.  Errors {1}".format(
+                wsr_dsc_path, overall_status), "CHECK_FAILED")
         else:
             tc.SetSuccess()
         return overall_status
