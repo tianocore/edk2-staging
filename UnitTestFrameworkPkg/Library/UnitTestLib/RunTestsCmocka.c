@@ -48,6 +48,14 @@ CmockaUnitTestFunctionRunner (
     Framework->CurrentTest = UnitTest;
     UnitTest->Result = UnitTest->RunTest (Framework, UnitTest->Context);
     Framework->CurrentTest = NULL;
+
+    // Print out the log messages - This is a partial solution as it
+    // does not get the log into the XML.  Need cmocka changes to support
+    // stdout and stderr in their xml format
+    //
+    if (UnitTest->Log != NULL) {
+      print_message("%s", UnitTest->Log);
+    }
   }
 }
 
