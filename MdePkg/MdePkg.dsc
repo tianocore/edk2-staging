@@ -121,6 +121,11 @@
   MdePkg/Library/StandaloneMmServicesTableLib/StandaloneMmServicesTableLib.inf
 
   #
+  # Add UEFI Target Based Unit Tests
+  #
+  MdePkg/Test/UnitTest/Library/BaseLib/BaseLibUnitTestsUefi.inf
+
+  #
   # Build PEIM, DXE_DRIVER, SMM_DRIVER, UEFI Shell components that test SafeIntLib
   #
   MdePkg/Test/UnitTest/Library/BaseSafeIntLib/TestBaseSafeIntLibPei.inf
