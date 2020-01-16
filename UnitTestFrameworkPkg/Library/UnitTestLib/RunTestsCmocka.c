@@ -54,7 +54,10 @@ CmockaUnitTestFunctionRunner (
     // stdout and stderr in their xml format
     //
     if (UnitTest->Log != NULL) {
+      print_message("UnitTest: %s - %s\n", UnitTest->ClassName, UnitTest->Description);
+      print_message("Log Output Start\n");
       print_message("%s", UnitTest->Log);
+      print_message("Log Output End\n");
     }
   }
 }
