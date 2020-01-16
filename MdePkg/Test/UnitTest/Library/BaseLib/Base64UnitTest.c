@@ -62,9 +62,8 @@ typedef struct {
 #define B64_TEST_7     "Zm9vYmFy"
 #define BIN_TEST_7     "foobar"
 
-// Adds white space - also ends the last quantum with only spaces afterwards
-#define B64_TEST_8_IN   "   Zm9\r\nvYmFy   "
-#define B64_TEST_8_OUT  "Zm9vYmFy"
+// Adds all white space - also ends the last quantum with only spaces afterwards
+#define B64_TEST_8_IN   " \t\v  Zm9\r\nvYmFy \f  "
 #define BIN_TEST_8      "foobar"
 
 // Not a quantum multiple of 4
@@ -88,7 +87,7 @@ static BASIC_TEST_CONTEXT    mBasicEncodeTest4  = {BIN_TEST_4,     B64_TEST_4,  
 static BASIC_TEST_CONTEXT    mBasicEncodeTest5  = {BIN_TEST_5,     B64_TEST_5,      EFI_SUCCESS, NULL, sizeof(B64_TEST_5)};
 static BASIC_TEST_CONTEXT    mBasicEncodeTest6  = {BIN_TEST_6,     B64_TEST_6,      EFI_SUCCESS, NULL, sizeof(B64_TEST_6)};
 static BASIC_TEST_CONTEXT    mBasicEncodeTest7  = {BIN_TEST_7,     B64_TEST_7,      EFI_SUCCESS, NULL, sizeof(B64_TEST_7)};
-static BASIC_TEST_CONTEXT    mBasicEncodeTest8  = {BIN_TEST_8,     B64_TEST_8_OUT,  EFI_SUCCESS, NULL, sizeof(B64_TEST_8_OUT)};
+static BASIC_TEST_CONTEXT    mBasicEncodeError1 = {BIN_TEST_7,     B64_TEST_1,      EFI_BUFFER_TOO_SMALL, NULL, sizeof(B64_TEST_7)};
 
 static BASIC_TEST_CONTEXT    mBasicDecodeTest1  = {B64_TEST_1,     BIN_TEST_1,      EFI_SUCCESS, NULL, sizeof(BIN_TEST_1)-1};
 static BASIC_TEST_CONTEXT    mBasicDecodeTest2  = {B64_TEST_2,     BIN_TEST_2,      EFI_SUCCESS, NULL, sizeof(BIN_TEST_2)-1};
@@ -178,9 +177,7 @@ RfcEncodeTest(
     BinSize = AsciiStrnLenS(binString, MAX_TEST_STRING_SIZE);
     BinData = (UINT8 *)  binString;
 
-    // Only allocate the expected buffer, and count on memory
-    // protections to catch buffer overruns
-    b64WorkString = (CHAR8 *) AllocatePool(Btc->ExpectedSize);
+    b64WorkString = (CHAR8 *) AllocatePool(b64StringSize);
     UT_ASSERT_NOT_NULL(b64WorkString);
 
     Btc->BufferToFree = b64WorkString;
@@ -192,20 +189,22 @@ RfcEncodeTest(
 
     UT_ASSERT_EQUAL(ReturnSize, Btc->ExpectedSize);
 
-    if (ReturnSize != 0) {
-        CompareStatus = AsciiStrnCmp(b64String, b64WorkString, ReturnSize);
-        if (CompareStatus != 0) {
-            UT_LOG_ERROR("b64 string compare error - size=%d\n",ReturnSize);
-            for (indx = 0; indx < ReturnSize; indx++) {
-                UT_LOG_ERROR(" %2.2x", 0xff & b64String[indx]);
+    if (! EFI_ERROR(Btc->ExpectedStatus)) {
+        if (ReturnSize != 0) {
+            CompareStatus = AsciiStrnCmp(b64String, b64WorkString, ReturnSize);
+            if (CompareStatus != 0) {
+                UT_LOG_ERROR("b64 string compare error - size=%d\n",ReturnSize);
+                for (indx = 0; indx < ReturnSize; indx++) {
+                    UT_LOG_ERROR(" %2.2x", 0xff & b64String[indx]);
+                }
+                UT_LOG_ERROR("\n b64 work string:\n");
+                for (indx = 0; indx < ReturnSize; indx++) {
+                    UT_LOG_ERROR(" %2.2x", 0xff & b64WorkString[indx]);
+                }
+                UT_LOG_ERROR("\n");
             }
-            UT_LOG_ERROR("\n b64 work string:\n");
-            for (indx = 0; indx < ReturnSize; indx++) {
-                UT_LOG_ERROR(" %2.2x", 0xff & b64WorkString[indx]);
-            }
-            UT_LOG_ERROR("\n");
+            UT_ASSERT_EQUAL(CompareStatus, 0);
         }
-        UT_ASSERT_EQUAL(CompareStatus, 0);
     }
 
     Btc->BufferToFree = NULL;
@@ -244,9 +243,7 @@ RfcDecodeTest(
     b64StringLen = AsciiStrnLenS(b64String, MAX_TEST_STRING_SIZE);
     BinSize = AsciiStrnLenS(binString, MAX_TEST_STRING_SIZE);
 
-    // Only allocate the expected buffer, and count on memory
-    // protections to catch buffer overruns
-    BinData = AllocatePool (Btc->ExpectedSize);
+    BinData = AllocatePool (BinSize);
     Btc->BufferToFree = BinData;
 
     ReturnSize = BinSize;
@@ -324,15 +321,14 @@ UnitTestingEntry ()
     }
 
 // --------------Suite-----------Description--------------Class Name----------Function--------Pre---Post-------------------Context-----------
-    AddTestCase( b64EncodeTests, "RFC 4686 Test Vector", "Test1", RfcEncodeTest, NULL, CleanUpB64TestContext, &mBasicEncodeTest1);
-    AddTestCase( b64EncodeTests, "RFC 4686 Test Vector", "Test2", RfcEncodeTest, NULL, CleanUpB64TestContext, &mBasicEncodeTest2);
-    AddTestCase( b64EncodeTests, "RFC 4686 Test Vector", "Test3", RfcEncodeTest, NULL, CleanUpB64TestContext, &mBasicEncodeTest3);
-    AddTestCase( b64EncodeTests, "RFC 4686 Test Vector", "Test4", RfcEncodeTest, NULL, CleanUpB64TestContext, &mBasicEncodeTest4);
-    AddTestCase( b64EncodeTests, "RFC 4686 Test Vector", "Test5", RfcEncodeTest, NULL, CleanUpB64TestContext, &mBasicEncodeTest5);
-    AddTestCase( b64EncodeTests, "RFC 4686 Test Vector", "Test6", RfcEncodeTest, NULL, CleanUpB64TestContext, &mBasicEncodeTest6);
-    AddTestCase( b64EncodeTests, "RFC 4686 Test Vector", "Test7", RfcEncodeTest, NULL, CleanUpB64TestContext, &mBasicEncodeTest7);
-    AddTestCase( b64EncodeTests, "RFC 4686 Test Vector", "Test8", RfcEncodeTest, NULL, CleanUpB64TestContext, &mBasicEncodeTest8);
-
+    AddTestCase( b64EncodeTests, "RFC 4686 Test Vector - Empty", "Test1", RfcEncodeTest, NULL, CleanUpB64TestContext, &mBasicEncodeTest1);
+    AddTestCase( b64EncodeTests, "RFC 4686 Test Vector - f", "Test2", RfcEncodeTest, NULL, CleanUpB64TestContext, &mBasicEncodeTest2);
+    AddTestCase( b64EncodeTests, "RFC 4686 Test Vector - fo", "Test3", RfcEncodeTest, NULL, CleanUpB64TestContext, &mBasicEncodeTest3);
+    AddTestCase( b64EncodeTests, "RFC 4686 Test Vector - foo", "Test4", RfcEncodeTest, NULL, CleanUpB64TestContext, &mBasicEncodeTest4);
+    AddTestCase( b64EncodeTests, "RFC 4686 Test Vector - foob", "Test5", RfcEncodeTest, NULL, CleanUpB64TestContext, &mBasicEncodeTest5);
+    AddTestCase( b64EncodeTests, "RFC 4686 Test Vector - fooba", "Test6", RfcEncodeTest, NULL, CleanUpB64TestContext, &mBasicEncodeTest6);
+    AddTestCase( b64EncodeTests, "RFC 4686 Test Vector - foobar", "Test7", RfcEncodeTest, NULL, CleanUpB64TestContext, &mBasicEncodeTest7);
+    AddTestCase( b64EncodeTests, "Too small of output buffer", "Error1", RfcEncodeTest, NULL, CleanUpB64TestContext, &mBasicEncodeError1);
     //
     // Populate the B64 Decode Unit Test Suite.
     //
@@ -343,20 +339,20 @@ UnitTestingEntry ()
         goto EXIT;
     }
 
-    AddTestCase(b64DecodeTests, "RFC 4686 Test Vector", "Test1",  RfcDecodeTest, NULL, CleanUpB64TestContext, &mBasicDecodeTest1 );
-    AddTestCase(b64DecodeTests, "RFC 4686 Test Vector", "Test2",  RfcDecodeTest, NULL, CleanUpB64TestContext, &mBasicDecodeTest2 );
-    AddTestCase(b64DecodeTests, "RFC 4686 Test Vector", "Test3",  RfcDecodeTest, NULL, CleanUpB64TestContext, &mBasicDecodeTest3 );
-    AddTestCase(b64DecodeTests, "RFC 4686 Test Vector", "Test4",  RfcDecodeTest, NULL, CleanUpB64TestContext, &mBasicDecodeTest4 );
-    AddTestCase(b64DecodeTests, "RFC 4686 Test Vector", "Test5",  RfcDecodeTest, NULL, CleanUpB64TestContext, &mBasicDecodeTest5 );
-    AddTestCase(b64DecodeTests, "RFC 4686 Test Vector", "Test6",  RfcDecodeTest, NULL, CleanUpB64TestContext, &mBasicDecodeTest6 );
-    AddTestCase(b64DecodeTests, "RFC 4686 Test Vector", "Test7",  RfcDecodeTest, NULL, CleanUpB64TestContext, &mBasicDecodeTest7 );
-    AddTestCase(b64DecodeTests, "RFC 4686 Test Vector", "Test8",  RfcDecodeTest, NULL, CleanUpB64TestContext, &mBasicDecodeTest8 );
+    AddTestCase(b64DecodeTests, "RFC 4686 Test Vector - Empty", "Test1",  RfcDecodeTest, NULL, CleanUpB64TestContext, &mBasicDecodeTest1 );
+    AddTestCase(b64DecodeTests, "RFC 4686 Test Vector - f", "Test2",  RfcDecodeTest, NULL, CleanUpB64TestContext, &mBasicDecodeTest2 );
+    AddTestCase(b64DecodeTests, "RFC 4686 Test Vector - fo", "Test3",  RfcDecodeTest, NULL, CleanUpB64TestContext, &mBasicDecodeTest3 );
+    AddTestCase(b64DecodeTests, "RFC 4686 Test Vector - foo", "Test4",  RfcDecodeTest, NULL, CleanUpB64TestContext, &mBasicDecodeTest4 );
+    AddTestCase(b64DecodeTests, "RFC 4686 Test Vector - foob", "Test5",  RfcDecodeTest, NULL, CleanUpB64TestContext, &mBasicDecodeTest5 );
+    AddTestCase(b64DecodeTests, "RFC 4686 Test Vector - fooba", "Test6",  RfcDecodeTest, NULL, CleanUpB64TestContext, &mBasicDecodeTest6 );
+    AddTestCase(b64DecodeTests, "RFC 4686 Test Vector - foobar", "Test7",  RfcDecodeTest, NULL, CleanUpB64TestContext, &mBasicDecodeTest7 );
+    AddTestCase(b64DecodeTests, "Ignore Whitespace test", "Test8",  RfcDecodeTest, NULL, CleanUpB64TestContext, &mBasicDecodeTest8 );
 
-    AddTestCase(b64DecodeTests, "RFC 4686 Test Vector", "Error1", RfcDecodeTest, NULL, CleanUpB64TestContext, &mBasicDecodeError1 );
-    AddTestCase(b64DecodeTests, "RFC 4686 Test Vector", "Error2", RfcDecodeTest, NULL, CleanUpB64TestContext, &mBasicDecodeError2 );
-    AddTestCase(b64DecodeTests, "RFC 4686 Test Vector", "Error3", RfcDecodeTest, NULL, CleanUpB64TestContext, &mBasicDecodeError3 );
-    AddTestCase(b64DecodeTests, "RFC 4686 Test Vector", "Error4", RfcDecodeTest, NULL, CleanUpB64TestContext, &mBasicDecodeError4 );
-    AddTestCase(b64DecodeTests, "RFC 4686 Test Vector", "Error5", RfcDecodeTest, NULL, CleanUpB64TestContext, &mBasicDecodeError5 );
+    AddTestCase(b64DecodeTests, "Not a quantum multiple of 4", "Error1", RfcDecodeTest, NULL, CleanUpB64TestContext, &mBasicDecodeError1 );
+    AddTestCase(b64DecodeTests, "Invalid characters in the string", "Error2", RfcDecodeTest, NULL, CleanUpB64TestContext, &mBasicDecodeError2 );
+    AddTestCase(b64DecodeTests, "Too many padding characters", "Error3", RfcDecodeTest, NULL, CleanUpB64TestContext, &mBasicDecodeError3 );
+    AddTestCase(b64DecodeTests, "Incorrectly placed padding character", "Error4", RfcDecodeTest, NULL, CleanUpB64TestContext, &mBasicDecodeError4 );
+    AddTestCase(b64DecodeTests, "Too small of output buffer", "Error5", RfcDecodeTest, NULL, CleanUpB64TestContext, &mBasicDecodeError5 );
 
     //
     // Execute the tests.
