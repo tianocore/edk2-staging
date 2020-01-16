@@ -538,6 +538,9 @@ ReallocatePool (
   if (NewBuffer != NULL && OldBuffer != NULL) {
     memcpy (NewBuffer, OldBuffer, MIN (OldSize, NewSize));
   }
+  if (OldBuffer != NULL) {
+    FreePool(OldBuffer);
+  }
   return NewBuffer;
 }
 
