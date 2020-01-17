@@ -1,7 +1,8 @@
 ## @file
 #  Check a patch for various format issues
 #
-#  Copyright (c) 2015 - 2019, Intel Corporation. All rights reserved.<BR>
+#  Copyright (c) 2015 - 2020, Intel Corporation. All rights reserved.<BR>
+#  Copyright (C) 2020, Red Hat, Inc.<BR>
 #
 #  SPDX-License-Identifier: BSD-2-Clause-Patent
 #
@@ -22,6 +23,62 @@ class Verbose:
     SILENT, ONELINE, NORMAL = range(3)
     level = NORMAL
 
+class EmailAddressCheck:
+    """Checks an email address."""
+
+    def __init__(self, email, description):
+        self.ok = True
+
+        if email is None:
+            self.error('Email address is missing!')
+            return
+        if description is None:
+            self.error('Email description is missing!')
+            return
+
+        self.description = "'" + description + "'"
+        self.check_email_address(email)
+
+    def error(self, *err):
+        if self.ok and Verbose.level > Verbose.ONELINE:
+            print('The ' + self.description + ' email address is not valid:')
+        self.ok = False
+        if Verbose.level < Verbose.NORMAL:
+            return
+        count = 0
+        for line in err:
+            prefix = (' *', '  ')[count > 0]
+            print(prefix, line)
+            count += 1
+
+    email_re1 = re.compile(r'(?:\s*)(.*?)(\s*)<(.+)>\s*$',
+                           re.MULTILINE|re.IGNORECASE)
+
+    def check_email_address(self, email):
+        email = email.strip()
+        mo = self.email_re1.match(email)
+        if mo is None:
+            self.error("Email format is invalid: " + email.strip())
+            return
+
+        name = mo.group(1).strip()
+        if name == '':
+            self.error("Name is not provided with email address: " +
+                       email)
+        else:
+            quoted = len(name) > 2 and name[0] == '"' and name[-1] == '"'
+            if name.find(',') >= 0 and not quoted:
+                self.error('Add quotes (") around name with a comma: ' +
+                           name)
+
+        if mo.group(2) == '':
+            self.error("There should be a space between the name and " +
+                       "email address: " + email)
+
+        if mo.group(3).find(' ') >= 0:
+            self.error("The email address cannot contain a space: " +
+                       mo.group(3))
+
 class CommitMessageCheck:
     """Checks the contents of a git commit message."""
 
@@ -34,6 +91,8 @@ class CommitMessageCheck:
 
         self.subject = subject
         self.msg = message
+
+        print (subject)
 
         self.check_contributed_under()
         self.check_signed_off_by()
@@ -121,37 +180,9 @@ class CommitMessageCheck:
             if s[2] != ' ':
                 self.error("There should be a space after '" + sig + ":'")
 
-            self.check_email_address(s[3])
+            EmailAddressCheck(s[3], sig)
 
         return sigs
-
-    email_re1 = re.compile(r'(?:\s*)(.*?)(\s*)<(.+)>\s*$',
-                           re.MULTILINE|re.IGNORECASE)
-
-    def check_email_address(self, email):
-        email = email.strip()
-        mo = self.email_re1.match(email)
-        if mo is None:
-            self.error("Email format is invalid: " + email.strip())
-            return
-
-        name = mo.group(1).strip()
-        if name == '':
-            self.error("Name is not provided with email address: " +
-                       email)
-        else:
-            quoted = len(name) > 2 and name[0] == '"' and name[-1] == '"'
-            if name.find(',') >= 0 and not quoted:
-                self.error('Add quotes (") around name with a comma: ' +
-                           name)
-
-        if mo.group(2) == '':
-            self.error("There should be a space between the name and " +
-                       "email address: " + email)
-
-        if mo.group(3).find(' ') >= 0:
-            self.error("The email address cannot contain a space: " +
-                       mo.group(3))
 
     def check_signed_off_by(self):
         sob='Signed-off-by'
@@ -179,6 +210,8 @@ class CommitMessageCheck:
         for sig in self.sig_types:
             self.find_signatures(sig)
 
+    cve_re = re.compile('CVE-[0-9]{4}-[0-9]{5}[^0-9]')
+
     def check_overall_format(self):
         lines = self.msg.splitlines()
 
@@ -196,9 +229,26 @@ class CommitMessageCheck:
             self.error('Empty commit message!')
             return
 
-        if count >= 1 and len(lines[0].rstrip()) >= 72:
-            self.error('First line of commit message (subject line) ' +
-                       'is too long.')
+        if count >= 1 and re.search(self.cve_re, lines[0]):
+            #
+            # If CVE-xxxx-xxxxx is present in subject line, then limit length of
+            # subject line to 92 characters
+            #
+            if len(lines[0].rstrip()) >= 93:
+                self.error(
+                    'First line of commit message (subject line) is too long (%d >= 93).' %
+                    (len(lines[0].rstrip()))
+                    )
+        else:
+            #
+            # If CVE-xxxx-xxxxx is not present in subject line, then limit
+            # length of subject line to 75 characters
+            #
+            if len(lines[0].rstrip()) >= 76:
+                self.error(
+                    'First line of commit message (subject line) is too long (%d >= 76).' %
+                    (len(lines[0].rstrip()))
+                    )
 
         if count >= 1 and len(lines[0].strip()) == 0:
             self.error('First line of commit message (subject line) ' +
@@ -212,7 +262,14 @@ class CommitMessageCheck:
             if (len(lines[i]) >= 76 and
                 len(lines[i].split()) > 1 and
                 not lines[i].startswith('git-svn-id:')):
-                self.error('Line %d of commit message is too long.' % (i + 1))
+                #
+                # Print a warning if body line is longer than 75 characters
+                #
+                print(
+                    'WARNING - Line %d of commit message is too long (%d >= 76).' %
+                    (i + 1, len(lines[i]))
+                    )
+                print(lines[i])
 
         last_sig_line = None
         for i in range(count - 1, 0, -1):
@@ -422,6 +479,9 @@ class CheckOnePatch:
         self.patch = patch
         self.find_patch_pieces()
 
+        email_check = EmailAddressCheck(self.author_email, 'Author')
+        email_ok = email_check.ok
+
         msg_check = CommitMessageCheck(self.commit_subject, self.commit_msg)
         msg_ok = msg_check.ok
 
@@ -430,7 +490,7 @@ class CheckOnePatch:
             diff_check = GitDiffCheck(self.diff)
             diff_ok = diff_check.ok
 
-        self.ok = msg_ok and diff_ok
+        self.ok = email_ok and msg_ok and diff_ok
 
         if Verbose.level == Verbose.ONELINE:
             if self.ok:
@@ -503,10 +563,29 @@ class CheckOnePatch:
         else:
             self.stat = mo.group('stat')
             self.commit_msg = mo.group('commit_message')
+        #
+        # Parse subject line from email header.  The subject line may be
+        # composed of multiple parts with different encodings.  Decode and
+        # combine all the parts to produce a single string with the contents of
+        # the decoded subject line.
+        #
+        parts = email.header.decode_header(pmail.get('subject'))
+        subject = ''
+        for (part, encoding) in parts:
+            if encoding:
+                part = part.decode(encoding)
+            else:
+                try:
+                    part = part.decode()
+                except:
+                    pass
+            subject = subject + part
 
-        self.commit_subject = pmail['subject'].replace('\r\n', '')
+        self.commit_subject = subject.replace('\r\n', '')
         self.commit_subject = self.commit_subject.replace('\n', '')
         self.commit_subject = self.subject_prefix_re.sub('', self.commit_subject, 1)
+
+        self.author_email = pmail['from']
 
 class CheckGitCommits:
     """Reads patches from git based on the specified git revision range.
@@ -527,6 +606,8 @@ class CheckGitCommits:
                 else:
                     blank_line = True
                 print('Checking git commit:', commit)
+            email = self.read_committer_email_address_from_git(commit)
+            self.ok &= EmailAddressCheck(email, 'Committer').ok
             patch = self.read_patch_from_git(commit)
             self.ok &= CheckOnePatch(commit, patch).ok
         if not commits:
@@ -544,6 +625,10 @@ class CheckGitCommits:
     def read_patch_from_git(self, commit):
         # Run git to get the commit patch
         return self.run_git('show', '--pretty=email', '--no-textconv', commit)
+
+    def read_committer_email_address_from_git(self, commit):
+        # Run git to get the committer email
+        return self.run_git('show', '--pretty=%cn <%ce>', '--no-patch', commit)
 
     def run_git(self, *args):
         cmd = [ 'git' ]
