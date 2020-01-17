@@ -22,7 +22,6 @@
 BOOLEAN
 EFIAPI
 UnitTestAssertTrue (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN BOOLEAN                     Expression,
   IN CONST CHAR8                 *FunctionName,
   IN UINTN                       LineNumber,
@@ -41,7 +40,6 @@ UnitTestAssertTrue (
 BOOLEAN
 EFIAPI
 UnitTestAssertFalse (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN BOOLEAN                     Expression,
   IN CONST CHAR8                 *FunctionName,
   IN UINTN                       LineNumber,
@@ -60,7 +58,6 @@ UnitTestAssertFalse (
 BOOLEAN
 EFIAPI
 UnitTestAssertNotEfiError (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN EFI_STATUS                  Status,
   IN CONST CHAR8                 *FunctionName,
   IN UINTN                       LineNumber,
@@ -79,7 +76,6 @@ UnitTestAssertNotEfiError (
 BOOLEAN
 EFIAPI
 UnitTestAssertEqual (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UINT64                      ValueA,
   IN UINT64                      ValueB,
   IN CONST CHAR8                 *FunctionName,
@@ -100,7 +96,6 @@ UnitTestAssertEqual (
 BOOLEAN
 EFIAPI
 UnitTestAssertMemEqual (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UINTN                       ValueA,
   IN UINTN                       ValueB,
   IN UINTN                       Length,
@@ -125,7 +120,6 @@ UnitTestAssertMemEqual (
 BOOLEAN
 EFIAPI
 UnitTestAssertNotEqual (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UINT64                      ValueA,
   IN UINT64                      ValueB,
   IN CONST CHAR8                 *FunctionName,
@@ -146,7 +140,6 @@ UnitTestAssertNotEqual (
 BOOLEAN
 EFIAPI
 UnitTestAssertStatusEqual (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN EFI_STATUS                  Status,
   IN EFI_STATUS                  Expected,
   IN CONST CHAR8                 *FunctionName,
@@ -166,7 +159,6 @@ UnitTestAssertStatusEqual (
 BOOLEAN
 EFIAPI
 UnitTestAssertNotNull (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN VOID*                       Pointer,
   IN CONST CHAR8                 *FunctionName,
   IN UINTN                       LineNumber,

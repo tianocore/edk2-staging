@@ -65,7 +65,6 @@ UnitTestLogFailure (
 BOOLEAN
 EFIAPI
 UnitTestAssertTrue (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN BOOLEAN                     Expression,
   IN CONST CHAR8                 *FunctionName,
   IN UINTN                       LineNumber,
@@ -73,9 +72,12 @@ UnitTestAssertTrue (
   IN CONST CHAR8                 *Description
   )
 {
+  UNIT_TEST_FRAMEWORK_HANDLE  Framework;
+
+  Framework = GetActiveFrameworkHandle();
   if (!Expression) {
     UnitTestLogFailure (Framework, FAILURETYPE_ASSERTTRUE, "%a::%d Expression (%a) is not TRUE!\n", FunctionName, LineNumber, Description);
-    UnitTestLog (Framework, DEBUG_ERROR, "[ASSERT FAIL] %a::%d Expression (%a) is not TRUE!\n", FunctionName, LineNumber, Description );
+    UnitTestLog (DEBUG_ERROR, "[ASSERT FAIL] %a::%d Expression (%a) is not TRUE!\n", FunctionName, LineNumber, Description );
   }
   return Expression;
 }
@@ -83,7 +85,6 @@ UnitTestAssertTrue (
 BOOLEAN
 EFIAPI
 UnitTestAssertFalse (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN BOOLEAN                     Expression,
   IN CONST CHAR8                 *FunctionName,
   IN UINTN                       LineNumber,
@@ -91,9 +92,12 @@ UnitTestAssertFalse (
   IN CONST CHAR8                 *Description
   )
 {
+  UNIT_TEST_FRAMEWORK_HANDLE  Framework;
+
+  Framework = GetActiveFrameworkHandle();
   if (Expression) {
     UnitTestLogFailure (Framework, FAILURETYPE_ASSERTFALSE, "%a::%d Expression(%a) is not FALSE!\n", FunctionName, LineNumber, Description );
-    UnitTestLog (Framework, DEBUG_ERROR,"[ASSERT FAIL] %a::%d Expression (%a) is not FALSE!\n", FunctionName, LineNumber, Description );
+    UnitTestLog (DEBUG_ERROR,"[ASSERT FAIL] %a::%d Expression (%a) is not FALSE!\n", FunctionName, LineNumber, Description );
   }
   return !Expression;
 }
@@ -101,7 +105,6 @@ UnitTestAssertFalse (
 BOOLEAN
 EFIAPI
 UnitTestAssertNotEfiError (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN EFI_STATUS                  Status,
   IN CONST CHAR8                 *FunctionName,
   IN UINTN                       LineNumber,
@@ -109,9 +112,12 @@ UnitTestAssertNotEfiError (
   IN CONST CHAR8                 *Description
   )
 {
+  UNIT_TEST_FRAMEWORK_HANDLE  Framework;
+
+  Framework = GetActiveFrameworkHandle();
   if (EFI_ERROR (Status)) {
     UnitTestLogFailure (Framework, FAILURETYPE_ASSERTNOTEFIERROR, "%a::%d Status '%a' is EFI_ERROR (%r)!\n", FunctionName, LineNumber, Description, Status);
-    UnitTestLog (Framework, DEBUG_ERROR,"[ASSERT FAIL] %a::%d Status '%a' is EFI_ERROR (%r)!\n", FunctionName, LineNumber, Description, Status );
+    UnitTestLog (DEBUG_ERROR,"[ASSERT FAIL] %a::%d Status '%a' is EFI_ERROR (%r)!\n", FunctionName, LineNumber, Description, Status );
   }
   return !EFI_ERROR( Status );
 }
@@ -119,7 +125,6 @@ UnitTestAssertNotEfiError (
 BOOLEAN
 EFIAPI
 UnitTestAssertEqual (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UINT64                      ValueA,
   IN UINT64                      ValueB,
   IN CONST CHAR8                 *FunctionName,
@@ -129,9 +134,12 @@ UnitTestAssertEqual (
   IN CONST CHAR8                 *DescriptionB
   )
 {
+  UNIT_TEST_FRAMEWORK_HANDLE  Framework;
+
+  Framework = GetActiveFrameworkHandle();
   if ((ValueA != ValueB)) {
     UnitTestLogFailure (Framework, FAILURETYPE_ASSERTEQUAL, "%a::%d Value %a != %a (%d != %d)!\n", FunctionName, LineNumber, DescriptionA, DescriptionB, ValueA, ValueB);
-    UnitTestLog (Framework, DEBUG_ERROR,"[ASSERT FAIL] %a::%d Value %a != %a (%d != %d)!\n", FunctionName, LineNumber, DescriptionA, DescriptionB, ValueA, ValueB );
+    UnitTestLog (DEBUG_ERROR,"[ASSERT FAIL] %a::%d Value %a != %a (%d != %d)!\n", FunctionName, LineNumber, DescriptionA, DescriptionB, ValueA, ValueB );
   }
   return (ValueA == ValueB);
 }
@@ -139,7 +147,6 @@ UnitTestAssertEqual (
 BOOLEAN
 EFIAPI
 UnitTestAssertMemEqual (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UINTN                       ValueA,
   IN UINTN                       ValueB,
   IN UINTN                       Length,
@@ -150,9 +157,12 @@ UnitTestAssertMemEqual (
   IN CONST CHAR8                 *DescriptionB
   )
 {
+  UNIT_TEST_FRAMEWORK_HANDLE  Framework;
+
+  Framework = GetActiveFrameworkHandle();
   if (CompareMem((VOID*)ValueA, (VOID*)ValueB, Length) != 0) {
     UnitTestLogFailure (Framework, FAILURETYPE_ASSERTEQUAL, __FUNCTION__, "%a::%d Memory at %a != %a for length %d bytes!\n", FunctionName, LineNumber, DescriptionA, DescriptionB, Length);
-    UnitTestLog (Framework, DEBUG_ERROR, "[ASSERT FAIL] %a::%d Value %a != %a for length %d bytes!\n", FunctionName, LineNumber, DescriptionA, DescriptionB, Length);
+    UnitTestLog (DEBUG_ERROR, "[ASSERT FAIL] %a::%d Value %a != %a for length %d bytes!\n", FunctionName, LineNumber, DescriptionA, DescriptionB, Length);
     return FALSE;
   }
   return TRUE;
@@ -161,7 +171,6 @@ UnitTestAssertMemEqual (
 BOOLEAN
 EFIAPI
 UnitTestAssertNotEqual (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UINT64                      ValueA,
   IN UINT64                      ValueB,
   IN CONST CHAR8                 *FunctionName,
@@ -171,9 +180,12 @@ UnitTestAssertNotEqual (
   IN CONST CHAR8                 *DescriptionB
   )
 {
+  UNIT_TEST_FRAMEWORK_HANDLE  Framework;
+
+  Framework = GetActiveFrameworkHandle();
   if ((ValueA == ValueB)) {
     UnitTestLogFailure (Framework, FAILURETYPE_ASSERTNOTEQUAL,"%a::%d Value %a == %a (%d == %d)!\n", FunctionName, LineNumber, DescriptionA, DescriptionB, ValueA, ValueB);
-    UnitTestLog (Framework, DEBUG_ERROR,"[ASSERT FAIL] %a::%d Value %a == %a (%d == %d)!\n", FunctionName, LineNumber,DescriptionA, DescriptionB, ValueA, ValueB );
+    UnitTestLog (DEBUG_ERROR,"[ASSERT FAIL] %a::%d Value %a == %a (%d == %d)!\n", FunctionName, LineNumber,DescriptionA, DescriptionB, ValueA, ValueB );
   }
   return (ValueA != ValueB);
 }
@@ -181,7 +193,6 @@ UnitTestAssertNotEqual (
 BOOLEAN
 EFIAPI
 UnitTestAssertStatusEqual (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN EFI_STATUS                  Status,
   IN EFI_STATUS                  Expected,
   IN CONST CHAR8                 *FunctionName,
@@ -190,9 +201,12 @@ UnitTestAssertStatusEqual (
   IN CONST CHAR8                 *Description
   )
 {
+  UNIT_TEST_FRAMEWORK_HANDLE  Framework;
+
+  Framework = GetActiveFrameworkHandle();
   if ((Status != Expected)) {
     UnitTestLogFailure (Framework, FAILURETYPE_ASSERTSTATUSEQUAL, "%a::%d Status '%a' is %r, should be %r!\n", FunctionName, LineNumber, Description, Status, Expected);
-    UnitTestLog (Framework, DEBUG_ERROR,"[ASSERT FAIL] %a::%d Status '%a' is %r, should be %r!\n", FunctionName, LineNumber, Description, Status, Expected );
+    UnitTestLog (DEBUG_ERROR,"[ASSERT FAIL] %a::%d Status '%a' is %r, should be %r!\n", FunctionName, LineNumber, Description, Status, Expected );
   }
   return (Status == Expected);
 }
@@ -200,7 +214,6 @@ UnitTestAssertStatusEqual (
 BOOLEAN
 EFIAPI
 UnitTestAssertNotNull (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN VOID*                       Pointer,
   IN CONST CHAR8                 *FunctionName,
   IN UINTN                       LineNumber,
@@ -208,9 +221,12 @@ UnitTestAssertNotNull (
   IN CONST CHAR8                 *PointerName
   )
 {
+  UNIT_TEST_FRAMEWORK_HANDLE  Framework;
+
+  Framework = GetActiveFrameworkHandle();
   if (Pointer == NULL) {
     UnitTestLogFailure (Framework, FAILURETYPE_ASSERTNOTNULL, "%a::%d Pointer (%a) is NULL!\n", FunctionName, LineNumber, PointerName);
-    UnitTestLog (Framework, DEBUG_ERROR, "[ASSERT FAIL] %a::%d Pointer (%a) is NULL!\n", FunctionName, LineNumber, PointerName);
+    UnitTestLog (DEBUG_ERROR, "[ASSERT FAIL] %a::%d Pointer (%a) is NULL!\n", FunctionName, LineNumber, PointerName);
   }
   return (Pointer != NULL);
 }

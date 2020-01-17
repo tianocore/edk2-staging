@@ -271,21 +271,6 @@ SaveFrameworkState (
   IN UINTN                       ContextToSaveSize
   );
 
-/**
-  Internal helper function to return a handle to the currently executing framework.
-  This function is generally used for communication within the UnitTest framework, but is
-  defined here so that it can be consumed by the Assertion and Logging macros.
-
-  There should be no need to consume as a test writer, but it's there if you need it.
-
-  @retval     Handle to the currently executing test framework.
-
-**/
-UNIT_TEST_FRAMEWORK_HANDLE
-GetActiveFrameworkHandle (
-  VOID
-  );
-
 ///
 /// Unit-Test Assertion Macros and Functions
 ///
@@ -300,7 +285,7 @@ GetActiveFrameworkHandle (
 
 **/
 #define UT_ASSERT_TRUE(Expression)                                                                   \
-  if(!UnitTestAssertTrue (GetActiveFrameworkHandle(), (Expression), __FUNCTION__, __LINE__, __FILE__, #Expression)) { \
+  if(!UnitTestAssertTrue ((Expression), __FUNCTION__, __LINE__, __FILE__, #Expression)) { \
     return UNIT_TEST_ERROR_TEST_FAILED;                                                              \
   }
 
@@ -315,7 +300,7 @@ GetActiveFrameworkHandle (
 
 **/
 #define UT_ASSERT_FALSE(Expression)                                                                   \
-  if(!UnitTestAssertFalse (GetActiveFrameworkHandle(), (Expression), __FUNCTION__, __LINE__, __FILE__, #Expression)) { \
+  if(!UnitTestAssertFalse ((Expression), __FUNCTION__, __LINE__, __FILE__, #Expression)) { \
     return UNIT_TEST_ERROR_TEST_FAILED;                                                               \
   }
 
@@ -330,7 +315,7 @@ GetActiveFrameworkHandle (
 
 **/
 #define UT_ASSERT_EQUAL(ValueA, ValueB)                                                                                      \
-  if(!UnitTestAssertEqual (GetActiveFrameworkHandle(), (UINT64)ValueA, (UINT64)ValueB, __FUNCTION__, __LINE__, __FILE__, #ValueA, #ValueB)) { \
+  if(!UnitTestAssertEqual ((UINT64)ValueA, (UINT64)ValueB, __FUNCTION__, __LINE__, __FILE__, #ValueA, #ValueB)) { \
     return UNIT_TEST_ERROR_TEST_FAILED;                                                                                      \
   }
 
@@ -346,7 +331,7 @@ GetActiveFrameworkHandle (
 
 **/
 #define UT_ASSERT_MEM_EQUAL(ValueA, ValueB, Length)                                                                                          \
-  if(!UnitTestAssertMemEqual (GetActiveFrameworkHandle(), (UINTN)ValueA, (UINTN)ValueB, (UINTN)Length, __FUNCTION__, __LINE__, __FILE__, #ValueA, #ValueB)) { \
+  if(!UnitTestAssertMemEqual ((UINTN)ValueA, (UINTN)ValueB, (UINTN)Length, __FUNCTION__, __LINE__, __FILE__, #ValueA, #ValueB)) { \
     return UNIT_TEST_ERROR_TEST_FAILED;                                                                                                      \
   }
 
@@ -361,7 +346,7 @@ GetActiveFrameworkHandle (
 
 **/
 #define UT_ASSERT_NOT_EQUAL(ValueA, ValueB)                                                                                     \
-  if(!UnitTestAssertNotEqual (GetActiveFrameworkHandle(), (UINT64)ValueA, (UINT64)ValueB, __FUNCTION__, __LINE__, __FILE__, #ValueA, #ValueB)) { \
+  if(!UnitTestAssertNotEqual ((UINT64)ValueA, (UINT64)ValueB, __FUNCTION__, __LINE__, __FILE__, #ValueA, #ValueB)) { \
     return UNIT_TEST_ERROR_TEST_FAILED;                                                                                         \
   }
 
@@ -376,7 +361,7 @@ GetActiveFrameworkHandle (
 
 **/
 #define UT_ASSERT_NOT_EFI_ERROR(Status)                                                           \
-  if(!UnitTestAssertNotEfiError (GetActiveFrameworkHandle(), Status, __FUNCTION__, __LINE__, __FILE__, #Status)) { \
+  if(!UnitTestAssertNotEfiError (Status, __FUNCTION__, __LINE__, __FILE__, #Status)) { \
     return UNIT_TEST_ERROR_TEST_FAILED;                                                           \
   }
 
@@ -391,7 +376,7 @@ GetActiveFrameworkHandle (
 
 **/
 #define UT_ASSERT_STATUS_EQUAL(Status, Expected)                                                            \
-  if(!UnitTestAssertStatusEqual (GetActiveFrameworkHandle(), Status, Expected, __FUNCTION__, __LINE__, __FILE__, #Status)) { \
+  if(!UnitTestAssertStatusEqual (Status, Expected, __FUNCTION__, __LINE__, __FILE__, #Status)) { \
     return UNIT_TEST_ERROR_TEST_FAILED;                                                                     \
   }
 
@@ -406,7 +391,7 @@ GetActiveFrameworkHandle (
 
 **/
 #define UT_ASSERT_NOT_NULL(Pointer)                                                             \
-  if(!UnitTestAssertNotNull (GetActiveFrameworkHandle(), Pointer, __FUNCTION__, __LINE__, __FILE__, #Pointer)) { \
+  if(!UnitTestAssertNotNull (Pointer, __FUNCTION__, __LINE__, __FILE__, #Pointer)) { \
     return UNIT_TEST_ERROR_TEST_FAILED;                                                         \
   }
 
@@ -419,7 +404,6 @@ GetActiveFrameworkHandle (
 BOOLEAN
 EFIAPI
 UnitTestAssertTrue (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN BOOLEAN                     Expression,
   IN CONST CHAR8                 *FunctionName,
   IN UINTN                       LineNumber,
@@ -436,7 +420,6 @@ UnitTestAssertTrue (
 BOOLEAN
 EFIAPI
 UnitTestAssertFalse (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN BOOLEAN                     Expression,
   IN CONST CHAR8                 *FunctionName,
   IN UINTN                       LineNumber,
@@ -453,7 +436,6 @@ UnitTestAssertFalse (
 BOOLEAN
 EFIAPI
 UnitTestAssertNotEfiError (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN EFI_STATUS                  Status,
   IN CONST CHAR8                 *FunctionName,
   IN UINTN                       LineNumber,
@@ -470,7 +452,6 @@ UnitTestAssertNotEfiError (
 BOOLEAN
 EFIAPI
 UnitTestAssertEqual (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UINT64                      ValueA,
   IN UINT64                      ValueB,
   IN CONST CHAR8                 *FunctionName,
@@ -489,7 +470,6 @@ UnitTestAssertEqual (
 BOOLEAN
 EFIAPI
 UnitTestAssertMemEqual (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UINTN                       ValueA,
   IN UINTN                       ValueB,
   IN UINTN                       Length,
@@ -509,7 +489,6 @@ UnitTestAssertMemEqual (
 BOOLEAN
 EFIAPI
 UnitTestAssertNotEqual (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UINT64                      ValueA,
   IN UINT64                      ValueB,
   IN CONST CHAR8                 *FunctionName,
@@ -528,7 +507,6 @@ UnitTestAssertNotEqual (
 BOOLEAN
 EFIAPI
 UnitTestAssertStatusEqual (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN EFI_STATUS                  Status,
   IN EFI_STATUS                  Expected,
   IN CONST CHAR8                 *FunctionName,
@@ -546,7 +524,6 @@ UnitTestAssertStatusEqual (
 BOOLEAN
 EFIAPI
 UnitTestAssertNotNull (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN VOID*                       Pointer,
   IN CONST CHAR8                 *FunctionName,
   IN UINTN                       LineNumber,
@@ -566,7 +543,7 @@ UnitTestAssertNotNull (
 
 **/
 #define UT_LOG_ERROR(Format, ...)    \
-  UnitTestLog (GetActiveFrameworkHandle(), DEBUG_ERROR, Format, ##__VA_ARGS__ );
+  UnitTestLog (DEBUG_ERROR, Format, ##__VA_ARGS__ );
 
 /**
   Test logging macro that records a WARNING message in the test framework log.
@@ -577,7 +554,7 @@ UnitTestAssertNotNull (
 
 **/
 #define UT_LOG_WARNING(Format, ...)  \
-  UnitTestLog (GetActiveFrameworkHandle(), DEBUG_WARN, Format, ##__VA_ARGS__ );
+  UnitTestLog (DEBUG_WARN, Format, ##__VA_ARGS__ );
 
 /**
   Test logging macro that records an INFO message in the test framework log.
@@ -588,7 +565,7 @@ UnitTestAssertNotNull (
 
 **/
 #define UT_LOG_INFO(Format, ...)     \
-  UnitTestLog (GetActiveFrameworkHandle(), DEBUG_INFO, Format, ##__VA_ARGS__ );
+  UnitTestLog (DEBUG_INFO, Format, ##__VA_ARGS__ );
 
 /**
   Test logging macro that records a VERBOSE message in the test framework log.
@@ -599,7 +576,7 @@ UnitTestAssertNotNull (
 
 **/
 #define UT_LOG_VERBOSE(Format, ...)  \
-  UnitTestLog (GetActiveFrameworkHandle(), DEBUG_VERBOSE, Format, ##__VA_ARGS__ );
+  UnitTestLog (DEBUG_VERBOSE, Format, ##__VA_ARGS__ );
 
 /**
   Helper function for the test logging macros.
@@ -610,7 +587,6 @@ UnitTestAssertNotNull (
 VOID
 EFIAPI
 UnitTestLog (
-  IN  UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN  UINTN                       ErrorLevel,
   IN  CONST CHAR8                 *Format,
   ...

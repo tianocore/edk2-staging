@@ -149,7 +149,6 @@ UnitTestLogInit (
 VOID
 EFIAPI
 UnitTestLog (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UINTN                       ErrorLevel,
   IN CONST CHAR8                 *Format,
   ...
@@ -160,6 +159,9 @@ UnitTestLog (
   CONST CHAR8  *LogTypePrefix;
   VA_LIST      Marker;
   UINTN        LogLevel;
+  UNIT_TEST_FRAMEWORK_HANDLE  Framework;
+
+  Framework = GetActiveFrameworkHandle();
 
   LogTypePrefix = NULL;
   LogLevel      = (UINTN)PcdGet32 (UnitTestLogLevel);

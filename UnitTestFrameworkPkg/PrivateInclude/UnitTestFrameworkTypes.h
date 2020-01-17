@@ -146,4 +146,19 @@ UnitTestLogInit (
   IN UINTN                  BufferSize  OPTIONAL
   );
 
+/**
+  Internal helper function to return a handle to the currently executing framework.
+  This function is generally used for communication within the UnitTest framework, but is
+  defined here so that it can be consumed by the Assertion and Logging macros.
+
+  There should be no need to consume as a test writer, but it's there if you need it.
+
+  @retval     Handle to the currently executing test framework.
+
+**/
+UNIT_TEST_FRAMEWORK_HANDLE
+GetActiveFrameworkHandle (
+  VOID
+  );
+
 #endif
