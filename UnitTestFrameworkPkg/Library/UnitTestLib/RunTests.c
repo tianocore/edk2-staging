@@ -13,6 +13,17 @@
 #include <Library/DebugLib.h>
 #include <Library/UnitTestResultReportLib.h>
 
+
+STATIC UNIT_TEST_FRAMEWORK_HANDLE    mFramework = NULL;
+
+UNIT_TEST_FRAMEWORK_HANDLE
+GetActiveFrameworkHandle(
+  VOID
+  )
+{
+  return mFramework;
+}
+
 STATIC
 EFI_STATUS
 RunTestSuite (
@@ -121,6 +132,7 @@ RunAllTestSuites (
   DEBUG ((DEBUG_VERBOSE, "---------------------------------------------------------\n"));
   DEBUG ((DEBUG_VERBOSE, "------------     RUNNING ALL TEST SUITES   --------------\n"));
   DEBUG ((DEBUG_VERBOSE, "---------------------------------------------------------\n"));
+  mFramework = FrameworkHandle;
 
   //
   // Iterate all suites
@@ -139,6 +151,8 @@ RunAllTestSuites (
   //
   SaveFrameworkState (FrameworkHandle, NULL, 0);
   OutputUnitTestFrameworkReport (FrameworkHandle);
+
+  mFramework = NULL;
 
   return EFI_SUCCESS;
 }

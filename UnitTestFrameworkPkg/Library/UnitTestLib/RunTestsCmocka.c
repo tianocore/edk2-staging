@@ -21,6 +21,17 @@
 #include <Library/MemoryAllocationLib.h>
 #include <Library/DebugLib.h>
 
+
+STATIC UNIT_TEST_FRAMEWORK_HANDLE    mFramework = NULL;
+
+UNIT_TEST_FRAMEWORK_HANDLE
+GetActiveFrameworkHandle(
+  VOID
+  )
+{
+  return mFramework;
+}
+
 //
 // The currently active test suite
 //
@@ -242,6 +253,7 @@ RunAllTestSuites (
   DEBUG((DEBUG_VERBOSE, "---------------------------------------------------------\n"));
   DEBUG((DEBUG_VERBOSE, "------------     RUNNING ALL TEST SUITES   --------------\n"));
   DEBUG((DEBUG_VERBOSE, "---------------------------------------------------------\n"));
+  mFramework = FrameworkHandle;
 
   //
   // Iterate all suites
@@ -254,6 +266,8 @@ RunAllTestSuites (
       DEBUG ((DEBUG_ERROR, "Test Suite Failed with Error.  %r\n", Status));
     }
   }
+
+  mFramework = NULL;
 
   return EFI_SUCCESS;
 }

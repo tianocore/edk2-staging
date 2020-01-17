@@ -271,6 +271,21 @@ SaveFrameworkState (
   IN UINTN                       ContextToSaveSize
   );
 
+/**
+  Internal helper function to return a handle to the currently executing framework.
+  This function is generally used for communication within the UnitTest framework, but is
+  defined here so that it can be consumed by the Assertion and Logging macros.
+
+  There should be no need to consume as a test writer, but it's there if you need it.
+
+  @retval     Handle to the currently executing test framework.
+
+**/
+UNIT_TEST_FRAMEWORK_HANDLE
+GetActiveFrameworkHandle (
+  VOID
+  );
+
 ///
 /// Unit-Test Assertion Macros and Functions
 ///
@@ -285,7 +300,7 @@ SaveFrameworkState (
 
 **/
 #define UT_ASSERT_TRUE(Expression)                                                                   \
-  if(!UnitTestAssertTrue (Framework, (Expression), __FUNCTION__, __LINE__, __FILE__, #Expression)) { \
+  if(!UnitTestAssertTrue (GetActiveFrameworkHandle(), (Expression), __FUNCTION__, __LINE__, __FILE__, #Expression)) { \
     return UNIT_TEST_ERROR_TEST_FAILED;                                                              \
   }
 
@@ -300,7 +315,7 @@ SaveFrameworkState (
 
 **/
 #define UT_ASSERT_FALSE(Expression)                                                                   \
-  if(!UnitTestAssertFalse (Framework, (Expression), __FUNCTION__, __LINE__, __FILE__, #Expression)) { \
+  if(!UnitTestAssertFalse (GetActiveFrameworkHandle(), (Expression), __FUNCTION__, __LINE__, __FILE__, #Expression)) { \
     return UNIT_TEST_ERROR_TEST_FAILED;                                                               \
   }
 
@@ -315,7 +330,7 @@ SaveFrameworkState (
 
 **/
 #define UT_ASSERT_EQUAL(ValueA, ValueB)                                                                                      \
-  if(!UnitTestAssertEqual (Framework, (UINT64)ValueA, (UINT64)ValueB, __FUNCTION__, __LINE__, __FILE__, #ValueA, #ValueB)) { \
+  if(!UnitTestAssertEqual (GetActiveFrameworkHandle(), (UINT64)ValueA, (UINT64)ValueB, __FUNCTION__, __LINE__, __FILE__, #ValueA, #ValueB)) { \
     return UNIT_TEST_ERROR_TEST_FAILED;                                                                                      \
   }
 
@@ -331,7 +346,7 @@ SaveFrameworkState (
 
 **/
 #define UT_ASSERT_MEM_EQUAL(ValueA, ValueB, Length)                                                                                          \
-  if(!UnitTestAssertMemEqual (Framework, (UINTN)ValueA, (UINTN)ValueB, (UINTN)Length, __FUNCTION__, __LINE__, __FILE__, #ValueA, #ValueB)) { \
+  if(!UnitTestAssertMemEqual (GetActiveFrameworkHandle(), (UINTN)ValueA, (UINTN)ValueB, (UINTN)Length, __FUNCTION__, __LINE__, __FILE__, #ValueA, #ValueB)) { \
     return UNIT_TEST_ERROR_TEST_FAILED;                                                                                                      \
   }
 
@@ -346,7 +361,7 @@ SaveFrameworkState (
 
 **/
 #define UT_ASSERT_NOT_EQUAL(ValueA, ValueB)                                                                                     \
-  if(!UnitTestAssertNotEqual (Framework, (UINT64)ValueA, (UINT64)ValueB, __FUNCTION__, __LINE__, __FILE__, #ValueA, #ValueB)) { \
+  if(!UnitTestAssertNotEqual (GetActiveFrameworkHandle(), (UINT64)ValueA, (UINT64)ValueB, __FUNCTION__, __LINE__, __FILE__, #ValueA, #ValueB)) { \
     return UNIT_TEST_ERROR_TEST_FAILED;                                                                                         \
   }
 
@@ -361,7 +376,7 @@ SaveFrameworkState (
 
 **/
 #define UT_ASSERT_NOT_EFI_ERROR(Status)                                                           \
-  if(!UnitTestAssertNotEfiError (Framework, Status, __FUNCTION__, __LINE__, __FILE__, #Status)) { \
+  if(!UnitTestAssertNotEfiError (GetActiveFrameworkHandle(), Status, __FUNCTION__, __LINE__, __FILE__, #Status)) { \
     return UNIT_TEST_ERROR_TEST_FAILED;                                                           \
   }
 
@@ -376,7 +391,7 @@ SaveFrameworkState (
 
 **/
 #define UT_ASSERT_STATUS_EQUAL(Status, Expected)                                                            \
-  if(!UnitTestAssertStatusEqual (Framework, Status, Expected, __FUNCTION__, __LINE__, __FILE__, #Status)) { \
+  if(!UnitTestAssertStatusEqual (GetActiveFrameworkHandle(), Status, Expected, __FUNCTION__, __LINE__, __FILE__, #Status)) { \
     return UNIT_TEST_ERROR_TEST_FAILED;                                                                     \
   }
 
@@ -391,7 +406,7 @@ SaveFrameworkState (
 
 **/
 #define UT_ASSERT_NOT_NULL(Pointer)                                                             \
-  if(!UnitTestAssertNotNull (Framework, Pointer, __FUNCTION__, __LINE__, __FILE__, #Pointer)) { \
+  if(!UnitTestAssertNotNull (GetActiveFrameworkHandle(), Pointer, __FUNCTION__, __LINE__, __FILE__, #Pointer)) { \
     return UNIT_TEST_ERROR_TEST_FAILED;                                                         \
   }
 
@@ -551,7 +566,7 @@ UnitTestAssertNotNull (
 
 **/
 #define UT_LOG_ERROR(Format, ...)    \
-  UnitTestLog (Framework, DEBUG_ERROR, Format, ##__VA_ARGS__ );
+  UnitTestLog (GetActiveFrameworkHandle(), DEBUG_ERROR, Format, ##__VA_ARGS__ );
 
 /**
   Test logging macro that records a WARNING message in the test framework log.
@@ -562,7 +577,7 @@ UnitTestAssertNotNull (
 
 **/
 #define UT_LOG_WARNING(Format, ...)  \
-  UnitTestLog (Framework, DEBUG_WARN, Format, ##__VA_ARGS__ );
+  UnitTestLog (GetActiveFrameworkHandle(), DEBUG_WARN, Format, ##__VA_ARGS__ );
 
 /**
   Test logging macro that records an INFO message in the test framework log.
@@ -573,7 +588,7 @@ UnitTestAssertNotNull (
 
 **/
 #define UT_LOG_INFO(Format, ...)     \
-  UnitTestLog (Framework, DEBUG_INFO, Format, ##__VA_ARGS__ );
+  UnitTestLog (GetActiveFrameworkHandle(), DEBUG_INFO, Format, ##__VA_ARGS__ );
 
 /**
   Test logging macro that records a VERBOSE message in the test framework log.
@@ -584,7 +599,7 @@ UnitTestAssertNotNull (
 
 **/
 #define UT_LOG_VERBOSE(Format, ...)  \
-  UnitTestLog (Framework, DEBUG_VERBOSE, Format, ##__VA_ARGS__ );
+  UnitTestLog (GetActiveFrameworkHandle(), DEBUG_VERBOSE, Format, ##__VA_ARGS__ );
 
 /**
   Helper function for the test logging macros.
