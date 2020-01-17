@@ -15,9 +15,11 @@
   PACKAGE_GUID      = 4A70C4A0-D72C-4D3F-9943-BE7C41C50BA3
   PACKAGE_VERSION   = 1.00
 
+[Includes]
+  Library/CmockaLib/cmocka/include
+
 [Includes.Common.Private]
   PrivateInclude
-  Library/CmockaLib/cmocka/include
   Library/CmockaLib/cmocka/include/cmockery
 
 [LibraryClasses.Common.Private]

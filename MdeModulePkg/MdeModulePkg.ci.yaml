@@ -9,6 +9,10 @@
     "CompilerPlugin": {
         "DscPath": "MdeModulePkg.dsc"
     },
+    ## options defined ci/Plugin/HostUnitTestCompilerPlugin
+    "HostUnitTestCompilerPlugin": {
+        "DscPath": "Test/MdeModulePkgHostTest.dsc"
+    },
 
     ## options defined ci/Plugin/CharEncodingCheck
     "CharEncodingCheck": {
@@ -34,6 +38,11 @@
     "DscCompleteCheck": {
         "IgnoreInf": [],
         "DscPath": "MdeModulePkg.dsc"
+    },
+    ## options defined ci/Plugin/HostUnitTestDscCompleteCheck
+    "HostUnitTestDscCompleteCheck": {
+        "IgnoreInf": [""],
+        "DscPath": "Test/MdeModulePkgHostTest.dsc"
     },
 
     ## options defined ci/Plugin/GuidCheck
