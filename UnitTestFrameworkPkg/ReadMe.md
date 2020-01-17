@@ -209,6 +209,16 @@ _Note_ that this early return can have implications for memory leakage.
 
 At the end, if all test criteria pass, you should return `UNIT_TEST_PASSED`.
 
+### More Complex Cases
+
+To write more advanced tests, first take a look at all the Assertion and Logging macros provided in the framework.
+
+Beyond that, if you're writing host-based tests and want to take a dependency on the UnitTestFrameworkPkg, you can
+leverage the `cmocka.h` interface and write tests with all the features of the Cmocka framework.
+
+Documentation for Cmocka can be found here:
+https://api.cmocka.org/
+
 ## Development
 
 When using the EDK2 Pytools for CI testing, the host-based unit tests will be built and run on any build that includes the `NOOPT` build target.
@@ -218,6 +228,27 @@ If you are trying to iterate on a single test, a convenient pattern is to build 
 ```bash
 stuart_ci_build -c .pytool/CISettings.py TOOL_CHAIN_TAG=VS2017 -p MdePkg -t NOOPT BUILDMODULE=MdePkg/Test/UnitTest/Library/BaseSafeIntLib/TestBaseSafeIntLib.inf
 ```
+
+## Known Limitations
+
+### PEI, DXE, SMM
+
+While sample tests have been provided for these execution environments, only cursory build validation
+has been performed. Care has been taken while designing the frameworks to allow for execution during
+boot phases, but only UEFI Shell and host-based tests have been thoroughly evaluated. Full support for
+PEI, DXE, and SMM is forthcoming, but should be considered beta/staging for now.
+
+### Host-Based Support vs Other Tests
+
+The host-based test framework is powered internally by the Cmocka framework. As such, it has abilities
+that the target-based tests don't (yet). It would be awesome if this meant that it was a super set of
+the target-based tests, and it worked just like the target-based tests but with more features. Unfortunately,
+this is not the case. While care has been taken to keep them as close a possible, there are a few known
+inconsistencies that we're still ironing out. For example, the logging messages in the target-based tests
+are cached internally and associated with the running test case. They can be saved later as part of the
+reporting lib. This isn't currently possible with host-based. Only the assertion failures are logged.
+
+We will continue trying to make these as similar as possible.
 
 ## Copyright
 
