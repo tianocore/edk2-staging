@@ -20,9 +20,27 @@ typedef UINT32  UNIT_TEST_STATUS;
 #define UNIT_TEST_RUNNING               (0xFFFFFFFE)
 #define UNIT_TEST_PENDING               (0xFFFFFFFF)
 
-typedef VOID*  UNIT_TEST_FRAMEWORK_HANDLE; // Same as a UNIT_TEST_FRAMEWORK*
-typedef VOID*  UNIT_TEST_SUITE_HANDLE;     // Same as a UNIT_TEST_SUITE*
-typedef VOID*  UNIT_TEST_HANDLE;           // Same as a UNIT_TEST*
+///
+/// Unit Test Framwework Handle
+///
+struct UNIT_TEST_FRAMEWORK_OBJECT;
+typedef struct UNIT_TEST_FRAMEWORK_OBJECT  *UNIT_TEST_FRAMEWORK_HANDLE;
+
+///
+/// Unit Test Suite Handle
+///
+struct UNIT_TEST_SUITE_OBJECT;
+typedef struct UNIT_TEST_SUITE_OBJECT  *UNIT_TEST_SUITE_HANDLE;
+
+///
+/// Unit Test Handle
+///
+struct UNIT_TEST_OBJECT;
+typedef struct UNIT_TEST_OBJECT  *UNIT_TEST_HANDLE;
+
+///
+/// Unit Test Context
+///
 typedef VOID*  UNIT_TEST_CONTEXT;
 
 /**
@@ -30,17 +48,19 @@ typedef VOID*  UNIT_TEST_CONTEXT;
   Funtions with this prototype are registered to be dispatched by the
   UnitTest framework, and results are recorded as test Pass or Fail.
 
-  @param[in]  Framework   A handle to the current running framework that dispatched the test.
-                          Necessary for recording certain test events with the framework.
-  @param[in]  Context     [Optional] An optional paramter that enables: 1) test-case reuse with varied
-                          parameters and 2) test-case re-entry for Target tests that need a reboot.
-                          This parameter is a VOID* and it is the responsibility of the test
-                          author to ensure that the contents are well understood by all test
-                          cases that may consume it.
+  @param[in]  Framework  A handle to the current running framework that
+                         dispatched the test.  Necessary for recording certain
+                         test events with the framework.
+  @param[in]  Context    [Optional] An optional paramter that enables:
+                         1) test-case reuse with varied parameters and
+                         2) test-case re-entry for Target tests that need a
+                         reboot.  This parameter is a VOID* and it is the
+                         responsibility of the test author to ensure that the
+                         contents are well understood by all test cases that may
+                         consume it.
 
-
-  @retval     UNIT_TEST_PASSED              Test has completed and test case was successful.
-  @retval     UNIT_TEST_ERROR_TEST_FAILED   A test assertion has failed.
+  @retval  UNIT_TEST_PASSED             Test has completed and test case was successful.
+  @retval  UNIT_TEST_ERROR_TEST_FAILED  A test assertion has failed.
 
 **/
 typedef
@@ -57,11 +77,19 @@ UNIT_TEST_STATUS
   UnitTest framework prior to a given test case. If this prereq function returns
   UNIT_TEST_ERROR_PREREQ_NOT_MET, the test case will be skipped.
 
-  @param[in]  Framework   Identical to UNIT_TEST_FUNCTION.
-  @param[in]  Context     Identical to UNIT_TEST_FUNCTION.
+  @param[in]  Framework  A handle to the current running framework that
+                         dispatched the test.  Necessary for recording certain
+                         test events with the framework.
+  @param[in]  Context    [Optional] An optional paramter that enables:
+                         1) test-case reuse with varied parameters and
+                         2) test-case re-entry for Target tests that need a
+                         reboot.  This parameter is a VOID* and it is the
+                         responsibility of the test author to ensure that the
+                         contents are well understood by all test cases that may
+                         consume it.
 
-  @retval     UNIT_TEST_PASSED                Test case prerequisites are met.
-  @retval     UNIT_TEST_ERROR_PREREQ_NOT_MET  Test case should be skipped.
+  @retval  UNIT_TEST_PASSED                Test case prerequisites are met.
+  @retval  UNIT_TEST_ERROR_PREREQ_NOT_MET  Test case should be skipped.
 
 **/
 typedef
@@ -79,11 +107,19 @@ UNIT_TEST_STATUS
 
   The purpose of this function is to clean up any global state or test data.
 
-  @param[in]  Framework   Identical to UNIT_TEST_FUNCTION.
-  @param[in]  Context     Identical to UNIT_TEST_FUNCTION.
+  @param[in]  Framework  A handle to the current running framework that
+                         dispatched the test.  Necessary for recording certain
+                         test events with the framework.
+  @param[in]  Context    [Optional] An optional paramter that enables:
+                         1) test-case reuse with varied parameters and
+                         2) test-case re-entry for Target tests that need a
+                         reboot.  This parameter is a VOID* and it is the
+                         responsibility of the test author to ensure that the
+                         contents are well understood by all test cases that may
+                         consume it.
 
-  @retval     UNIT_TEST_PASSED                Test case cleanup succeeded.
-  @retval     UNIT_TEST_ERROR_CLEANUP_FAILED  Test case cleanup failed.
+  @retval  UNIT_TEST_PASSED                Test case cleanup succeeded.
+  @retval  UNIT_TEST_ERROR_CLEANUP_FAILED  Test case cleanup failed.
 
 **/
 typedef
@@ -101,7 +137,9 @@ VOID
 
   The purpose of this function is to set up any global state or test data.
 
-  @param[in]  Framework   Identical to UNIT_TEST_FUNCTION.
+  @param[in]  Framework  A handle to the current running framework that
+                         dispatched the test.  Necessary for recording certain
+                         test events with the framework.
 
 **/
 typedef
@@ -118,7 +156,9 @@ VOID
 
   The purpose of this function is to clean up any global state or test data.
 
-  @param[in]  Framework   Identical to UNIT_TEST_FUNCTION.
+  @param[in]  Framework  A handle to the current running framework that
+                         dispatched the test.  Necessary for recording certain
+                         test events with the framework.
 
 **/
 typedef
@@ -136,13 +176,13 @@ VOID
   This function registers the test name and also initializes the internal
   state of the test framework to receive any new suites and tests.
 
-  @param  Framework      - Unit test framework to be created.
-  @param  Title          - String name of the framework. String is copied.
-  @param  ShortTitle     - Short string name of the framework. String is copied.
-  @param  VersionString  - Version string for the framework. String is copied.
+  @param[out]  Framework      Unit test framework to be created.
+  @param[in]   Title          String name of the framework. String is copied.
+  @param[in]   ShortTitle     Short string name of the framework. String is copied.
+  @param[in]   VersionString  Version string for the framework. String is copied.
 
-  @retval  Success
-  @retval  EFI_ERROR()
+  @retval  EFI_SUCCESS  The unit test framework was initialized.
+  @retval  Other        The unit test framework could not be initialized.
 
 **/
 EFI_STATUS
@@ -159,15 +199,15 @@ InitUnitTestFramework (
   At least one test suite must be registered, because all test cases must be
   within a unit test suite.
 
-  @param  Suite      - Suite to create
-  @param  Framework  - Framework to add suite to
-  @param  Title      - String name of the suite. String is copied.
-  @param  Package    - String name of the package. String is copied.
-  @param  Sup        - Setup function, runs before suite.
-  @param  Tdn        - Teardown function, runs after suite.
+  @param[out]  Suite      Suite to create
+  @param[in]   Framework  Framework to add suite to
+  @param[in]   Title      String name of the suite. String is copied.
+  @param[in]   Package    String name of the package. String is copied.
+  @param[in]   Sup        Setup function, runs before suite.
+  @param[in]   Tdn        Teardown function, runs after suite.
 
-  @retval  Success
-  @retval  EFI_OUT_OF_RESOURCES
+  @retval  EFI_SUCCESS  The unit test suite was created.
+  @retval  Other        The unit test suite could not be created.
 
 **/
 EFI_STATUS
@@ -184,16 +224,17 @@ CreateUnitTestSuite (
 /**
   Adds test case to Suite
 
-  @param  Suite        - Suite to add test to.
-  @param  Description  - String describing test. String is copied.
-  @param  ClassName    - String name of the test. String is copied.
-  @param  Func         - Test function.
-  @param  PreReq       - Prep function, runs before test.
-  @param  CleanUp      - Clean up function, runs after test.
-  @param  Context      - Pointer to context.
+  @param[in]  Suite        Suite to add test to.
+  @param[in]  Description  String describing test. String is copied.
+  @param[in]  ClassName    String name of the test. String is copied.
+  @param[in]  Func         Test function.
+  @param[in]  PreReq       Prep function, runs before test.
+  @param[in]  CleanUp      Clean up function, runs after test.
+  @param[in]  Context      Pointer to context.
 
-  @retval  Success
-  @retval  EFI_OUT_OF_RESOURCES
+  @retval  EFI_SUCCESS           The unit test case was added to Suite.
+  @retval  EFI_OUT_OF_RESOURCES  There are not enough resources available to add
+                                 the unit test case to Suite.
 
 **/
 EFI_STATUS
@@ -215,16 +256,18 @@ AddTestCase (
   this function will cause the test framework to dispatch all test cases in sequence
   and record the results for reporting.
 
-  @param[in]  Framework
+  @param[in]  Framework  A handle to the current running framework that
+                         dispatched the test.  Necessary for recording certain
+                         test events with the framework.
 
-  @retval     Success
-  @retval     EFI_ERROR()
+  @retval  Success
+  @retval  EFI_ERROR()
 
 **/
 EFI_STATUS
 EFIAPI
-RunAllTestSuites(
-  IN UNIT_TEST_SUITE_HANDLE  Framework
+RunAllTestSuites (
+  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework
   );
 
 /**
@@ -233,16 +276,18 @@ RunAllTestSuites(
   After tests are run, this will teardown the entire framework and free all
   allocated data within.
 
-  @param[in]  Framework
+  @param[in]  Framework  A handle to the current running framework that
+                         dispatched the test.  Necessary for recording certain
+                         test events with the framework.
 
-  @retval     Success
-  @retval     EFI_ERROR()
+  @retval  Success
+  @retval  EFI_ERROR()
 
 **/
 EFI_STATUS
 EFIAPI
 FreeUnitTestFramework (
-  IN UNIT_TEST_SUITE_HANDLE  Framework
+  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework
   );
 
 /**
@@ -255,12 +300,12 @@ FreeUnitTestFramework (
   Generally called from within a test case prior to quitting or rebooting.
 
   @param[in]  Framework
-  @param[in]  ContextToSave   A buffer of test case-specific data to be saved along with framework
-                              state. Will be passed as "Context" to the test case upon resume.
-  @param[in]  ContextToSaveSize   Size of the ContextToSave buffer.
+  @param[in]  ContextToSave      A buffer of test case-specific data to be saved along with framework
+                                 state. Will be passed as "Context" to the test case upon resume.
+  @param[in]  ContextToSaveSize  Size of the ContextToSave buffer.
 
-  @retval     Success
-  @retval     EFI_ERROR()
+  @retval  Success
+  @retval  EFI_ERROR()
 
 **/
 EFI_STATUS
@@ -311,7 +356,7 @@ SaveFrameworkState (
   If the values are equal, execution will continue. Otherwise, the test case
   will immediately return UNIT_TEST_ERROR_TEST_FAILED.
 
-  @param  ValueA, ValueB    Values to be compared for equality. Will be compared as UINT64.
+  @param  ValueA,  ValueB    Values to be compared for equality. Will be compared as UINT64.
 
 **/
 #define UT_ASSERT_EQUAL(ValueA, ValueB)                                                                                      \
@@ -326,8 +371,8 @@ SaveFrameworkState (
   If the buffers are equal, execution will continue. Otherwise, the test case
   will immediately return UNIT_TEST_ERROR_TEST_FAILED.
 
-  @param  ValueA, ValueB    Pointers to the buffers for comparison.
-  @param  Length            Number of bytes to compare.
+  @param  ValueA,  ValueB    Pointers to the buffers for comparison.
+  @param  Length   Number of bytes to compare.
 
 **/
 #define UT_ASSERT_MEM_EQUAL(ValueA, ValueB, Length)                                                                                          \
@@ -342,7 +387,7 @@ SaveFrameworkState (
   If the values are non-equal, execution will continue. Otherwise, the test case
   will immediately return UNIT_TEST_ERROR_TEST_FAILED.
 
-  @param  ValueA, ValueB    Values to be compared for inequality. Will be compared as UINT64.
+  @param  ValueA,  ValueB    Values to be compared for inequality. Will be compared as UINT64.
 
 **/
 #define UT_ASSERT_NOT_EQUAL(ValueA, ValueB)                                                                                     \
@@ -357,7 +402,7 @@ SaveFrameworkState (
   If the status is !EFI_ERROR(), execution will continue. Otherwise, the test case
   will immediately return UNIT_TEST_ERROR_TEST_FAILED.
 
-  @param  Status    Status to be checked.
+  @param  Status  Status to be checked.
 
 **/
 #define UT_ASSERT_NOT_EFI_ERROR(Status)                                                           \
@@ -372,7 +417,7 @@ SaveFrameworkState (
   If the values are equal, execution will continue. Otherwise, the test case
   will immediately return UNIT_TEST_ERROR_TEST_FAILED.
 
-  @param  Status, Expected    Values to be compared for equality.
+  @param  Status,  Expected    Values to be compared for equality.
 
 **/
 #define UT_ASSERT_STATUS_EQUAL(Status, Expected)                                                            \
@@ -387,7 +432,7 @@ SaveFrameworkState (
   If the pointer is not NULL, execution will continue. Otherwise, the test case
   will immediately return UNIT_TEST_ERROR_TEST_FAILED.
 
-  @param  Pointer   Pointer to be checked.
+  @param  Pointer  Pointer to be checked.
 
 **/
 #define UT_ASSERT_NOT_NULL(Pointer)                                                             \
@@ -538,8 +583,8 @@ UnitTestAssertNotNull (
   Test logging macro that records an ERROR message in the test framework log.
   Record will be associated with this test case during reporting.
 
-  @param  Format    Standard C formatting string.
-  @param  ...       Print args.
+  @param  Format  Standard C formatting string.
+  @param  ...     Print args.
 
 **/
 #define UT_LOG_ERROR(Format, ...)    \
@@ -549,8 +594,8 @@ UnitTestAssertNotNull (
   Test logging macro that records a WARNING message in the test framework log.
   Record will be associated with this test case during reporting.
 
-  @param  Format    Standard C formatting string.
-  @param  ...       Print args.
+  @param  Format  Standard C formatting string.
+  @param  ...     Print args.
 
 **/
 #define UT_LOG_WARNING(Format, ...)  \
@@ -560,8 +605,8 @@ UnitTestAssertNotNull (
   Test logging macro that records an INFO message in the test framework log.
   Record will be associated with this test case during reporting.
 
-  @param  Format    Standard C formatting string.
-  @param  ...       Print args.
+  @param  Format  Standard C formatting string.
+  @param  ...     Print args.
 
 **/
 #define UT_LOG_INFO(Format, ...)     \
@@ -571,8 +616,8 @@ UnitTestAssertNotNull (
   Test logging macro that records a VERBOSE message in the test framework log.
   Record will be associated with this test case during reporting.
 
-  @param  Format    Standard C formatting string.
-  @param  ...       Print args.
+  @param  Format  Standard C formatting string.
+  @param  ...     Print args.
 
 **/
 #define UT_LOG_VERBOSE(Format, ...)  \
