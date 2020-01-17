@@ -148,19 +148,6 @@ ResetShutdownShouldIssueAShutdown (
 
 UNIT_TEST_STATUS
 EFIAPI
-EnterS3ShouldDoNothing (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
-  IN UNIT_TEST_CONTEXT           Context
-  )
-{
-    // The lack of expected values will cause an error if MockResetSystem is called.
-    EnterS3WithImmediateWake();
-
-    return UNIT_TEST_PASSED;
-} // EnterS3ShouldDoNothing()
-
-UNIT_TEST_STATUS
-EFIAPI
 ResetPlatformSpecificShouldIssueAPlatformSpecificReset (
   IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
@@ -237,7 +224,6 @@ UnitTestingEntry ()
     AddTestCase( ResetTests, "ResetCold should issue a cold reset", "Cold", ResetColdShouldIssueAColdReset, NULL, NULL, NULL);
     AddTestCase( ResetTests, "ResetWarm should issue a warm reset", "Warm", ResetWarmShouldIssueAWarmReset, NULL, NULL, NULL);
     AddTestCase( ResetTests, "ResetShutdown should issue a shutdown", "Shutdown", ResetShutdownShouldIssueAShutdown, NULL, NULL, NULL);
-    AddTestCase( ResetTests, "EnterS3WithImmediateWake should not reset", "S3", EnterS3ShouldDoNothing, NULL, NULL, NULL);
     AddTestCase( ResetTests, "ResetPlatformSpecific should issue a platform-specific reset", "Platform", ResetPlatformSpecificShouldIssueAPlatformSpecificReset, NULL, NULL, NULL);
     AddTestCase( ResetTests, "ResetSystem should pass all parameters through", "Parameters", ResetSystemShouldPassTheParametersThrough, NULL, NULL, NULL);
 
