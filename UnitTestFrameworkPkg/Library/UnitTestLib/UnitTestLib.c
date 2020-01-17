@@ -175,9 +175,10 @@ InitUnitTestFramework (
   IN  CHAR8                       *VersionString
   )
 {
-  EFI_STATUS             Status;
-  UNIT_TEST_FRAMEWORK    *NewFramework;
-  UNIT_TEST_SAVE_HEADER  *SavedState;
+  EFI_STATUS                  Status;
+  UNIT_TEST_FRAMEWORK_HANDLE  NewFrameworkHandle;
+  UNIT_TEST_FRAMEWORK         *NewFramework;
+  UNIT_TEST_SAVE_HEADER       *SavedState;
 
   Status       = EFI_SUCCESS;
   NewFramework = NULL;
@@ -208,6 +209,7 @@ InitUnitTestFramework (
   //
   // Next, set up all the test data.
   //
+  NewFrameworkHandle          = (UNIT_TEST_FRAMEWORK_HANDLE)NewFramework;
   NewFramework->Title         = AllocateAndCopyString (Title);
   NewFramework->ShortTitle    = AllocateAndCopyString (ShortTitle);
   NewFramework->VersionString = AllocateAndCopyString (VersionString);
@@ -230,9 +232,9 @@ InitUnitTestFramework (
   //
   // If there is a persisted context, load it now.
   //
-  if (DoesCacheExist (NewFramework)) {
+  if (DoesCacheExist (NewFrameworkHandle)) {
     SavedState = (UNIT_TEST_SAVE_HEADER *)NewFramework->SavedState;
-    Status = LoadUnitTestCache (NewFramework, &SavedState);
+    Status = LoadUnitTestCache (NewFrameworkHandle, &SavedState);
     if (EFI_ERROR (Status)) {
       //
       // Don't actually report it as an error, but emit a warning.
@@ -247,12 +249,12 @@ Exit:
   // If we're good, then let's copy the framework.
   //
   if (!EFI_ERROR (Status)) {
-    *Framework = NewFramework;
+    *Framework = NewFrameworkHandle;
   } else {
     //
     // Otherwise, we need to undo this horrible thing that we've done.
     //
-    FreeUnitTestFramework ((UNIT_TEST_FRAMEWORK_HANDLE)NewFramework);
+    FreeUnitTestFramework (NewFrameworkHandle);
   }
 
   return Status;
@@ -299,7 +301,7 @@ CreateUnitTestSuite (
   NewSuiteEntry->UTS.Package          = AllocateAndCopyString (Package);
   NewSuiteEntry->UTS.Setup            = Sup;
   NewSuiteEntry->UTS.Teardown         = Tdn;
-  NewSuiteEntry->UTS.ParentFramework  = Framework;
+  NewSuiteEntry->UTS.ParentFramework  = FrameworkHandle;
   InitializeListHead (&(NewSuiteEntry->Entry));             // List entry for sibling suites.
   InitializeListHead (&(NewSuiteEntry->UTS.TestCaseList));  // List entry for child tests.
   if (NewSuiteEntry->UTS.Title == NULL) {
@@ -323,7 +325,7 @@ Exit:
   //
   if (!EFI_ERROR( Status )) {
     InsertTailList (&(Framework->TestSuiteList), (LIST_ENTRY *)NewSuiteEntry);
-    *Suite = &NewSuiteEntry->UTS;
+    *Suite = (UNIT_TEST_SUITE_HANDLE)(&NewSuiteEntry->UTS);
   } else {
     //
     // Otherwise, make with the destruction.
@@ -381,7 +383,7 @@ AddTestCase (
   NewTestEntry->UT.RunTest           = Func;
   NewTestEntry->UT.Context           = Context;
   NewTestEntry->UT.Result            = UNIT_TEST_PENDING;
-  NewTestEntry->UT.ParentSuite       = Suite;
+  NewTestEntry->UT.ParentSuite       = SuiteHandle;
   InitializeListHead (&(NewTestEntry->Entry));  // List entry for sibling tests.
   if (NewTestEntry->UT.Description == NULL) {
     Status = EFI_OUT_OF_RESOURCES;

@@ -46,14 +46,14 @@ UnitTestLogFailure (
   ...
   )
 {
-  UNIT_TEST_FRAMEWORK_HANDLE  Framework;
+  UNIT_TEST_FRAMEWORK_HANDLE  FrameworkHandle;
   CHAR8                       LogString[UNIT_TEST_TESTFAILUREMSG_LENGTH];
   VA_LIST                     Marker;
 
   //
   // Get active Framework handle
   //
-  Framework = GetActiveFrameworkHandle();
+  FrameworkHandle = GetActiveFrameworkHandle ();
 
   //
   // Convert the message to an ASCII String
@@ -66,7 +66,7 @@ UnitTestLogFailure (
   // Finally, add the string to the log.
   //
   AddUnitTestFailure (
-    ((UNIT_TEST_FRAMEWORK *)Framework)->CurrentTest,
+    ((UNIT_TEST_FRAMEWORK *)FrameworkHandle)->CurrentTest,
     LogString,
     FailureType
     );

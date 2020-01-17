@@ -109,15 +109,11 @@ AddStringToUnitTestLog (
 VOID
 EFIAPI
 UnitTestLogInit (
-  IN OUT UNIT_TEST_HANDLE  TestHandle,
-  IN     UINT8             *Buffer,     OPTIONAL
-  IN     UINTN             BufferSize   OPTIONAL
+  IN OUT UNIT_TEST  *Test,
+  IN     UINT8      *Buffer,     OPTIONAL
+  IN     UINTN      BufferSize   OPTIONAL
   )
 {
-  UNIT_TEST  *Test;
-
-  Test = (UNIT_TEST *)TestHandle;
-
   //
   // Make sure that you're cooking with gas.
   //
@@ -154,14 +150,14 @@ UnitTestLog (
   ...
   )
 {
-  CHAR8        NewFormatString[UNIT_TEST_MAX_SINGLE_LOG_STRING_LENGTH];
-  CHAR8        LogString[UNIT_TEST_MAX_SINGLE_LOG_STRING_LENGTH];
-  CONST CHAR8  *LogTypePrefix;
-  VA_LIST      Marker;
-  UINTN        LogLevel;
-  UNIT_TEST_FRAMEWORK_HANDLE  Framework;
+  UNIT_TEST_FRAMEWORK_HANDLE  FrameworkHandle;
+  CHAR8                       NewFormatString[UNIT_TEST_MAX_SINGLE_LOG_STRING_LENGTH];
+  CHAR8                       LogString[UNIT_TEST_MAX_SINGLE_LOG_STRING_LENGTH];
+  CONST CHAR8                 *LogTypePrefix;
+  VA_LIST                     Marker;
+  UINTN                       LogLevel;
 
-  Framework = GetActiveFrameworkHandle();
+  FrameworkHandle = GetActiveFrameworkHandle ();
 
   LogTypePrefix = NULL;
   LogLevel      = (UINTN)PcdGet32 (UnitTestLogLevel);
@@ -194,5 +190,5 @@ UnitTestLog (
   //
   // Finally, add the string to the log.
   //
-  AddStringToUnitTestLog (((UNIT_TEST_FRAMEWORK *)Framework)->CurrentTest, LogString);
+  AddStringToUnitTestLog (((UNIT_TEST_FRAMEWORK *)FrameworkHandle)->CurrentTest, LogString);
 }

@@ -141,9 +141,9 @@ typedef struct
 VOID
 EFIAPI
 UnitTestLogInit (
-  IN OUT UNIT_TEST_HANDLE   TestHandle,
-  IN UINT8                  *Buffer     OPTIONAL,
-  IN UINTN                  BufferSize  OPTIONAL
+  IN OUT UNIT_TEST  *Test,
+  IN UINT8          *Buffer     OPTIONAL,
+  IN UINTN          BufferSize  OPTIONAL
   );
 
 /**

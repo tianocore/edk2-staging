@@ -22,14 +22,15 @@
 #include <Library/DebugLib.h>
 
 
-STATIC UNIT_TEST_FRAMEWORK_HANDLE    mFramework = NULL;
+STATIC UNIT_TEST_FRAMEWORK_HANDLE  mFrameworkHandle = NULL;
 
 UNIT_TEST_FRAMEWORK_HANDLE
-GetActiveFrameworkHandle(
+GetActiveFrameworkHandle (
   VOID
   )
 {
-  return mFramework;
+  ASSERT (mFrameworkHandle != NULL);
+  return mFrameworkHandle;
 }
 
 //
@@ -50,14 +51,13 @@ CmockaUnitTestFunctionRunner (
   Suite     = (UNIT_TEST_SUITE *)(UnitTest->ParentSuite);
   Framework = (UNIT_TEST_FRAMEWORK *)(Suite->ParentFramework);
 
-
   if (UnitTest->RunTest == NULL) {
     UnitTest->Result = UNIT_TEST_SKIPPED;
   } else {
     UnitTest->Result = UNIT_TEST_RUNNING;
 
     Framework->CurrentTest = UnitTest;
-    UnitTest->Result = UnitTest->RunTest (Framework, UnitTest->Context);
+    UnitTest->Result = UnitTest->RunTest ((UNIT_TEST_FRAMEWORK_HANDLE)Framework, UnitTest->Context);
     Framework->CurrentTest = NULL;
 
     // Print out the log messages - This is a partial solution as it
@@ -92,7 +92,7 @@ CmockaUnitTestSetupFunctionRunner (
   }
 
   Framework->CurrentTest = UnitTest;
-  Result = UnitTest->PreReq (Framework, UnitTest->Context);
+  Result = UnitTest->PreReq ((UNIT_TEST_FRAMEWORK_HANDLE)Framework, UnitTest->Context);
   Framework->CurrentTest = NULL;
 
   //
@@ -114,13 +114,12 @@ CmockaUnitTestTeardownFunctionRunner (
   Suite     = (UNIT_TEST_SUITE *)(UnitTest->ParentSuite);
   Framework = (UNIT_TEST_FRAMEWORK *)(Suite->ParentFramework);
 
-
   if (UnitTest->CleanUp == NULL) {
     return 0;
   }
 
   Framework->CurrentTest = UnitTest;
-  UnitTest->CleanUp (Framework, UnitTest->Context);
+  UnitTest->CleanUp ((UNIT_TEST_FRAMEWORK_HANDLE)Framework, UnitTest->Context);
   Framework->CurrentTest = NULL;
   //
   // Return 0 for success.  Non-zero for error.
@@ -143,7 +142,7 @@ CmockaUnitTestSuiteSetupFunctionRunner (
   }
 
   Framework = (UNIT_TEST_FRAMEWORK *)(mActiveUnitTestSuite->ParentFramework);
-  mActiveUnitTestSuite->Setup (Framework);
+  mActiveUnitTestSuite->Setup ((UNIT_TEST_FRAMEWORK_HANDLE)Framework);
   //
   // Always succeed
   //
@@ -165,7 +164,7 @@ CmockaUnitTestSuiteTeardownFunctionRunner (
   }
 
   Framework = (UNIT_TEST_FRAMEWORK *)(mActiveUnitTestSuite->ParentFramework);
-  mActiveUnitTestSuite->Teardown (Framework);
+  mActiveUnitTestSuite->Teardown ((UNIT_TEST_FRAMEWORK_HANDLE)Framework);
   //
   // Always succeed
   //
@@ -253,7 +252,7 @@ RunAllTestSuites (
   DEBUG((DEBUG_VERBOSE, "---------------------------------------------------------\n"));
   DEBUG((DEBUG_VERBOSE, "------------     RUNNING ALL TEST SUITES   --------------\n"));
   DEBUG((DEBUG_VERBOSE, "---------------------------------------------------------\n"));
-  mFramework = FrameworkHandle;
+  mFrameworkHandle = FrameworkHandle;
 
   //
   // Iterate all suites
@@ -267,7 +266,7 @@ RunAllTestSuites (
     }
   }
 
-  mFramework = NULL;
+  mFrameworkHandle = NULL;
 
   return EFI_SUCCESS;
 }
