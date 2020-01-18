@@ -8,6 +8,6 @@
 
 #include <Uefi.h>
 
-extern EFI_RUNTIME_SERVICES    MockRuntime;
+extern EFI_RUNTIME_SERVICES  MockRuntime;
 
-EFI_RUNTIME_SERVICES        *gRT = &MockRuntime;
+EFI_RUNTIME_SERVICES  *gRT = &MockRuntime;
