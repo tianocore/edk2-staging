@@ -18,7 +18,6 @@
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeInt8ToUint8 (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -48,7 +47,6 @@ TestSafeInt8ToUint8 (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeInt8ToUint16 (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -78,7 +76,6 @@ TestSafeInt8ToUint16 (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeInt8ToUint32 (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -108,7 +105,6 @@ TestSafeInt8ToUint32 (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeInt8ToUintn (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -138,7 +134,6 @@ TestSafeInt8ToUintn (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeInt8ToUint64 (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -168,7 +163,6 @@ TestSafeInt8ToUint64 (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeUint8ToInt8 (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -198,7 +192,6 @@ TestSafeUint8ToInt8 (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeUint8ToChar8 (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -233,7 +226,6 @@ TestSafeUint8ToChar8 (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeInt16ToInt8 (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -272,7 +264,6 @@ TestSafeInt16ToInt8 (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeInt16ToChar8 (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -316,7 +307,6 @@ TestSafeInt16ToChar8 (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeInt16ToUint8 (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -350,7 +340,6 @@ TestSafeInt16ToUint8 (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeInt16ToUint16 (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -378,7 +367,6 @@ TestSafeInt16ToUint16 (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeInt16ToUint32 (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -408,7 +396,6 @@ TestSafeInt16ToUint32 (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeInt16ToUintn (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -438,7 +425,6 @@ TestSafeInt16ToUintn (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeInt16ToUint64 (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -468,7 +454,6 @@ TestSafeInt16ToUint64 (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeUint16ToInt8 (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -498,7 +483,6 @@ TestSafeUint16ToInt8 (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeUint16ToChar8 (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -531,7 +515,6 @@ TestSafeUint16ToChar8 (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeUint16ToUint8 (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -561,7 +544,6 @@ TestSafeUint16ToUint8 (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeUint16ToInt16 (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -591,7 +573,6 @@ TestSafeUint16ToInt16 (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeInt32ToInt8 (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -630,7 +611,6 @@ TestSafeInt32ToInt8 (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeInt32ToChar8 (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -672,7 +652,6 @@ TestSafeInt32ToChar8 (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeInt32ToUint8 (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -710,7 +689,6 @@ TestSafeInt32ToUint8 (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeInt32ToInt16 (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -749,7 +727,6 @@ TestSafeInt32ToInt16 (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeInt32ToUint16 (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -787,7 +764,6 @@ TestSafeInt32ToUint16 (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeInt32ToUint32 (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -817,7 +793,6 @@ TestSafeInt32ToUint32 (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeInt32ToUint64 (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -847,7 +822,6 @@ TestSafeInt32ToUint64 (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeUint32ToInt8 (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -877,7 +851,6 @@ TestSafeUint32ToInt8 (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeUint32ToChar8 (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -910,7 +883,6 @@ TestSafeUint32ToChar8 (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeUint32ToUint8 (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -940,7 +912,6 @@ TestSafeUint32ToUint8 (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeUint32ToInt16 (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -970,7 +941,6 @@ TestSafeUint32ToInt16 (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeUint32ToUint16 (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -1000,7 +970,6 @@ TestSafeUint32ToUint16 (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeUint32ToInt32 (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -1030,7 +999,6 @@ TestSafeUint32ToInt32 (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeIntnToInt8 (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -1069,7 +1037,6 @@ TestSafeIntnToInt8 (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeIntnToChar8 (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -1111,7 +1078,6 @@ TestSafeIntnToChar8 (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeIntnToUint8 (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -1145,7 +1111,6 @@ TestSafeIntnToUint8 (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeIntnToInt16 (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -1184,7 +1149,6 @@ TestSafeIntnToInt16 (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeIntnToUint16 (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -1218,7 +1182,6 @@ TestSafeIntnToUint16 (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeIntnToUintn (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -1248,7 +1211,6 @@ TestSafeIntnToUintn (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeIntnToUint64 (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -1278,7 +1240,6 @@ TestSafeIntnToUint64 (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeUintnToInt8 (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -1308,7 +1269,6 @@ TestSafeUintnToInt8 (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeUintnToChar8 (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -1341,7 +1301,6 @@ TestSafeUintnToChar8 (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeUintnToUint8 (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -1371,7 +1330,6 @@ TestSafeUintnToUint8 (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeUintnToInt16 (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -1401,7 +1359,6 @@ TestSafeUintnToInt16 (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeUintnToUint16 (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -1431,7 +1388,6 @@ TestSafeUintnToUint16 (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeUintnToInt32 (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -1461,7 +1417,6 @@ TestSafeUintnToInt32 (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeInt64ToInt8 (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -1500,7 +1455,6 @@ TestSafeInt64ToInt8 (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeInt64ToChar8 (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -1542,7 +1496,6 @@ TestSafeInt64ToChar8 (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeInt64ToUint8 (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -1576,7 +1529,6 @@ TestSafeInt64ToUint8 (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeInt64ToInt16 (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -1615,7 +1567,6 @@ TestSafeInt64ToInt16 (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeInt64ToUint16 (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -1649,7 +1600,6 @@ TestSafeInt64ToUint16 (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeInt64ToInt32 (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -1688,7 +1638,6 @@ TestSafeInt64ToInt32 (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeInt64ToUint32 (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -1722,7 +1671,6 @@ TestSafeInt64ToUint32 (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeInt64ToUint64 (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -1752,7 +1700,6 @@ TestSafeInt64ToUint64 (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeUint64ToInt8 (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -1782,7 +1729,6 @@ TestSafeUint64ToInt8 (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeUint64ToChar8 (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -1815,7 +1761,6 @@ TestSafeUint64ToChar8 (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeUint64ToUint8 (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -1845,7 +1790,6 @@ TestSafeUint64ToUint8 (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeUint64ToInt16 (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -1875,7 +1819,6 @@ TestSafeUint64ToInt16 (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeUint64ToUint16 (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -1905,7 +1848,6 @@ TestSafeUint64ToUint16 (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeUint64ToInt32 (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -1935,7 +1877,6 @@ TestSafeUint64ToInt32 (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeUint64ToUint32 (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -1965,7 +1906,6 @@ TestSafeUint64ToUint32 (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeUint64ToInt64 (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -1998,7 +1938,6 @@ TestSafeUint64ToInt64 (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeUint8Add (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -2031,7 +1970,6 @@ TestSafeUint8Add (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeUint16Add (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -2061,7 +1999,6 @@ TestSafeUint16Add (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeUint32Add (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -2094,7 +2031,6 @@ TestSafeUint32Add (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeUint64Add (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -2127,7 +2063,6 @@ TestSafeUint64Add (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeInt8Add (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -2173,7 +2108,6 @@ TestSafeInt8Add (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeInt16Add (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -2218,7 +2152,6 @@ TestSafeInt16Add (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeInt32Add (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -2263,7 +2196,6 @@ TestSafeInt32Add (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeInt64Add (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -2311,7 +2243,6 @@ TestSafeInt64Add (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeUint8Sub (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -2344,7 +2275,6 @@ TestSafeUint8Sub (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeUint16Sub (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -2377,7 +2307,6 @@ TestSafeUint16Sub (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeUint32Sub (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -2410,7 +2339,6 @@ TestSafeUint32Sub (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeUint64Sub (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -2443,7 +2371,6 @@ TestSafeUint64Sub (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeInt8Sub (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -2488,7 +2415,6 @@ TestSafeInt8Sub (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeInt16Sub (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -2533,7 +2459,6 @@ TestSafeInt16Sub (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeInt32Sub (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -2578,7 +2503,6 @@ TestSafeInt32Sub (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeInt64Sub (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -2626,7 +2550,6 @@ TestSafeInt64Sub (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeUint8Mult (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -2659,7 +2582,6 @@ TestSafeUint8Mult (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeUint16Mult (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -2692,7 +2614,6 @@ TestSafeUint16Mult (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeUint32Mult (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -2725,7 +2646,6 @@ TestSafeUint32Mult (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeUint64Mult (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -2758,7 +2678,6 @@ TestSafeUint64Mult (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeInt8Mult (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -2792,7 +2711,6 @@ TestSafeInt8Mult (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeInt16Mult (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -2826,7 +2744,6 @@ TestSafeInt16Mult (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeInt32Mult (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -2860,7 +2777,6 @@ TestSafeInt32Mult (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeInt64Mult (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {

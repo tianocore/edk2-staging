@@ -37,7 +37,6 @@ VOID          *mSampleGlobalTestPointer = NULL;
 UNIT_TEST_STATUS
 EFIAPI
 MakeSureThatPointerIsNull (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -49,7 +48,6 @@ MakeSureThatPointerIsNull (
 VOID
 EFIAPI
 ClearThePointer (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -69,7 +67,6 @@ ClearThePointer (
 UNIT_TEST_STATUS
 EFIAPI
 OnePlusOneShouldEqualTwo (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -88,7 +85,6 @@ OnePlusOneShouldEqualTwo (
 UNIT_TEST_STATUS
 EFIAPI
 GlobalBooleanShouldBeChangeable (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -105,7 +101,6 @@ GlobalBooleanShouldBeChangeable (
 UNIT_TEST_STATUS
 EFIAPI
 GlobalPointerShouldBeChangeable (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {

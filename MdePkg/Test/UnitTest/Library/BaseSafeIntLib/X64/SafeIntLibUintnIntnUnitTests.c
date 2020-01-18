@@ -13,7 +13,6 @@
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeInt32ToUintn (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -43,7 +42,6 @@ TestSafeInt32ToUintn (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeUint32ToIntn (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -71,7 +69,6 @@ TestSafeUint32ToIntn (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeIntnToInt32 (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -110,7 +107,6 @@ TestSafeIntnToInt32 (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeIntnToUint32 (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -144,7 +140,6 @@ TestSafeIntnToUint32 (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeUintnToUint32 (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -174,7 +169,6 @@ TestSafeUintnToUint32 (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeUintnToIntn (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -204,7 +198,6 @@ TestSafeUintnToIntn (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeUintnToInt64 (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -234,7 +227,6 @@ TestSafeUintnToInt64 (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeInt64ToIntn (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -257,7 +249,6 @@ TestSafeInt64ToIntn (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeInt64ToUintn (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -287,7 +278,6 @@ TestSafeInt64ToUintn (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeUint64ToIntn (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -317,7 +307,6 @@ TestSafeUint64ToIntn (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeUint64ToUintn (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -340,7 +329,6 @@ TestSafeUint64ToUintn (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeUintnAdd (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -373,7 +361,6 @@ TestSafeUintnAdd (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeIntnAdd (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -418,7 +405,6 @@ TestSafeIntnAdd (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeUintnSub (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -451,7 +437,6 @@ TestSafeUintnSub (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeIntnSub (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -496,7 +481,6 @@ TestSafeIntnSub (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeUintnMult (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -529,7 +513,6 @@ TestSafeUintnMult (
 UNIT_TEST_STATUS
 EFIAPI
 TestSafeIntnMult (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {

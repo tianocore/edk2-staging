@@ -47,7 +47,7 @@ RunTestSuite (
   DEBUG ((DEBUG_VERBOSE, "---------------------------------------------------------\n"));
 
   if (Suite->Setup != NULL) {
-    Suite->Setup (Suite->ParentFramework);
+    Suite->Setup ();
   }
 
   //
@@ -77,7 +77,7 @@ RunTestSuite (
     // Next, if we're still running, make sure that our test prerequisites are in place.
     if (Test->Result == UNIT_TEST_PENDING && Test->PreReq != NULL) {
       DEBUG ((DEBUG_VERBOSE, "PREREQ\n"));
-      if (Test->PreReq (Suite->ParentFramework, Test->Context) != UNIT_TEST_PASSED) {
+      if (Test->PreReq (Test->Context) != UNIT_TEST_PASSED) {
         DEBUG ((DEBUG_ERROR, "PreReq Not Met\n"));
         Test->Result = UNIT_TEST_ERROR_PREREQ_NOT_MET;
         ParentFramework->CurrentTest  = NULL;
@@ -91,13 +91,13 @@ RunTestSuite (
     // or quit. The UNIT_TEST_RUNNING state will allow the test to resume
     // but will prevent the PreReq from being dispatched a second time.
     Test->Result = UNIT_TEST_RUNNING;
-    Test->Result = Test->RunTest (Suite->ParentFramework, Test->Context);
+    Test->Result = Test->RunTest (Test->Context);
 
     //
     // Finally, clean everything up, if need be.
     if (Test->CleanUp != NULL) {
       DEBUG (( DEBUG_VERBOSE, "CLEANUP\n"));
-      Test->CleanUp (Suite->ParentFramework, Test->Context);
+      Test->CleanUp (Test->Context);
     }
 
     //
@@ -107,7 +107,7 @@ RunTestSuite (
   }
 
   if (Suite->Teardown != NULL) {
-    Suite->Teardown( Suite->ParentFramework );
+    Suite->Teardown ();
   }
 
   return EFI_SUCCESS;

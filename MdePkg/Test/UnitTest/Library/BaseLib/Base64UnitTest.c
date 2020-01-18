@@ -119,7 +119,6 @@ STATIC
 VOID
 EFIAPI
 CleanUpB64TestContext (
-    IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
     IN UNIT_TEST_CONTEXT           Context
   ) {
 
@@ -148,7 +147,6 @@ static
 UNIT_TEST_STATUS
 EFIAPI
 RfcEncodeTest(
-    IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
     IN UNIT_TEST_CONTEXT           Context
     ) {
 
@@ -216,7 +214,6 @@ static
 UNIT_TEST_STATUS
 EFIAPI
 RfcDecodeTest(
-    IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
     IN UNIT_TEST_CONTEXT           Context
     ) {
 

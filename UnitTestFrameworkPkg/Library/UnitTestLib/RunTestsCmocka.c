@@ -57,7 +57,7 @@ CmockaUnitTestFunctionRunner (
     UnitTest->Result = UNIT_TEST_RUNNING;
 
     Framework->CurrentTest = UnitTest;
-    UnitTest->Result = UnitTest->RunTest ((UNIT_TEST_FRAMEWORK_HANDLE)Framework, UnitTest->Context);
+    UnitTest->Result = UnitTest->RunTest (UnitTest->Context);
     Framework->CurrentTest = NULL;
 
     // Print out the log messages - This is a partial solution as it
@@ -92,7 +92,7 @@ CmockaUnitTestSetupFunctionRunner (
   }
 
   Framework->CurrentTest = UnitTest;
-  Result = UnitTest->PreReq ((UNIT_TEST_FRAMEWORK_HANDLE)Framework, UnitTest->Context);
+  Result = UnitTest->PreReq (UnitTest->Context);
   Framework->CurrentTest = NULL;
 
   //
@@ -119,7 +119,7 @@ CmockaUnitTestTeardownFunctionRunner (
   }
 
   Framework->CurrentTest = UnitTest;
-  UnitTest->CleanUp ((UNIT_TEST_FRAMEWORK_HANDLE)Framework, UnitTest->Context);
+  UnitTest->CleanUp (UnitTest->Context);
   Framework->CurrentTest = NULL;
   //
   // Return 0 for success.  Non-zero for error.
@@ -142,7 +142,7 @@ CmockaUnitTestSuiteSetupFunctionRunner (
   }
 
   Framework = (UNIT_TEST_FRAMEWORK *)(mActiveUnitTestSuite->ParentFramework);
-  mActiveUnitTestSuite->Setup ((UNIT_TEST_FRAMEWORK_HANDLE)Framework);
+  mActiveUnitTestSuite->Setup ();
   //
   // Always succeed
   //
@@ -164,7 +164,7 @@ CmockaUnitTestSuiteTeardownFunctionRunner (
   }
 
   Framework = (UNIT_TEST_FRAMEWORK *)(mActiveUnitTestSuite->ParentFramework);
-  mActiveUnitTestSuite->Teardown ((UNIT_TEST_FRAMEWORK_HANDLE)Framework);
+  mActiveUnitTestSuite->Teardown ();
   //
   // Always succeed
   //

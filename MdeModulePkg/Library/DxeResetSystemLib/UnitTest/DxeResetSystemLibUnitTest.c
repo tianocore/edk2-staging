@@ -102,7 +102,6 @@ EFI_RUNTIME_SERVICES    MockRuntime = {
 UNIT_TEST_STATUS
 EFIAPI
 ResetColdShouldIssueAColdReset (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -117,7 +116,6 @@ ResetColdShouldIssueAColdReset (
 UNIT_TEST_STATUS
 EFIAPI
 ResetWarmShouldIssueAWarmReset (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -132,7 +130,6 @@ ResetWarmShouldIssueAWarmReset (
 UNIT_TEST_STATUS
 EFIAPI
 ResetShutdownShouldIssueAShutdown (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -147,7 +144,6 @@ ResetShutdownShouldIssueAShutdown (
 UNIT_TEST_STATUS
 EFIAPI
 ResetPlatformSpecificShouldIssueAPlatformSpecificReset (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
@@ -162,7 +158,6 @@ ResetPlatformSpecificShouldIssueAPlatformSpecificReset (
 UNIT_TEST_STATUS
 EFIAPI
 ResetSystemShouldPassTheParametersThrough (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
   IN UNIT_TEST_CONTEXT           Context
   )
 {
