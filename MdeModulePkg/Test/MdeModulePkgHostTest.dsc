@@ -25,5 +25,5 @@
   MdeModulePkg/Library/DxeResetSystemLib/UnitTest/DxeResetSystemLibUnitTestHost.inf {
     <LibraryClasses>
       ResetSystemLib|MdeModulePkg/Library/DxeResetSystemLib/DxeResetSystemLib.inf
-      UefiRuntimeServicesTableLib|UnitTestFrameworkPkg/Library/MockLibraryClassLibNull/MockLibraryClassLibNull.inf
+      UefiRuntimeServicesTableLib|MdeModulePkg/Library/DxeResetSystemLib/UnitTest/MochUefiRuntimeServicesTableLib.inf
   }

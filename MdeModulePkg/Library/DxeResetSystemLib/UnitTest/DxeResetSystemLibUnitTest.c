@@ -1,8 +1,8 @@
 /** @file
-DxeResetSystemLibUnitTestHost.c
+  Unit tests of the DxeResetSystemLib instance of the ResetSystemLib class
 
-Copyright (C) Microsoft Corporation.
-SPDX-License-Identifier: BSD-2-Clause-Patent
+  Copyright (C) Microsoft Corporation.
+  SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
@@ -90,8 +90,6 @@ EFI_RUNTIME_SERVICES    MockRuntime = {
       NULL,               // QueryCapsuleCapabilities
       NULL                // QueryVariableInfo
 };
-EFI_RUNTIME_SERVICES        *gRT = &MockRuntime;
-
 
 ///================================================================================================
 ///================================================================================================

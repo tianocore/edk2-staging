@@ -1,0 +1,25 @@
+## @file
+#  Moch implementation of the UEFI Runtime Services Table Library.
+#
+#  Copyright (c) 2020, Intel Corporation. All rights reserved.<BR>
+#  SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = MochUefiRuntimeServicesTableLib
+  FILE_GUID                      = 4EA215EE-85C1-4A0A-847F-D2A8DE20805F
+  MODULE_TYPE                    = UEFI_DRIVER
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = UefiRuntimeServicesTableLib|DXE_CORE DXE_DRIVER DXE_RUNTIME_DRIVER DXE_SMM_DRIVER UEFI_APPLICATION UEFI_DRIVER SMM_CORE
+
+#
+#  VALID_ARCHITECTURES           = IA32 X64 EBC
+#
+
+[Sources]
+  MochUefiRuntimeServicesTableLib.c
+
+[Packages]
+  MdePkg/MdePkg.dec

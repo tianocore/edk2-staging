@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: BSD-2-Clause-Patent
 ##
 
-
 [Defines]
   INF_VERSION                    = 0x00010006
   BASE_NAME                      = DxeResetSystemLibUnitTestHost
@@ -20,12 +19,10 @@
 [Sources]
   DxeResetSystemLibUnitTest.c
 
-
 [Packages]
   MdePkg/MdePkg.dec
   MdeModulePkg/MdeModulePkg.dec
   UnitTestFrameworkPkg/UnitTestFrameworkPkg.dec
-
 
 [LibraryClasses]
   ResetSystemLib
