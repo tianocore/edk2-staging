@@ -55,7 +55,7 @@ Most of these examples will refer to the SampleUnitTestUefiShell app found in th
 
 In our INF file, we'll need to bring in the `UnitTestLib` library. Conveniently, the interface
 header for the `UnitTestLib` is located in `MdePkg`, so you shouldn't need to depend on any other
-packages. As long as your DSC file knows where to find the lib implmentation that you want to use,
+packages. As long as your DSC file knows where to find the lib implementation that you want to use,
 you should be good to go.
 
 See this example in 'SampleUnitTestApp.inf'...
