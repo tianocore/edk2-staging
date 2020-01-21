@@ -272,12 +272,12 @@ TestSafeInt16ToChar8 (
   CHAR8       Result;
 
   //
-  // CHAR8 is typedefed as char, which by default is signed, thus
-  // CHAR8 is same as INT8, so same tests as above:
+  // CHAR8 is typedefed as char, which may be signed or unsigned based
+  // on the compiler. Thus, for compatibility CHAR8 should be between 0 and MAX_INT8.
   //
 
   //
-  // If Operand is between MIN_INT8 and MAX_INT8 inclusive, then it's a cast
+  // If Operand is between 0 and MAX_INT8 inclusive, then it's a cast
   //
   Operand = 0x5b;
   Result = 0;
@@ -285,14 +285,25 @@ TestSafeInt16ToChar8 (
   UT_ASSERT_NOT_EFI_ERROR(Status);
   UT_ASSERT_EQUAL(0x5b, Result);
 
-  Operand = (-35);
+  Operand = 0;
+  Result = 0;
   Status = SafeInt16ToChar8(Operand, &Result);
   UT_ASSERT_NOT_EFI_ERROR(Status);
-  UT_ASSERT_EQUAL((-35), Result);
+  UT_ASSERT_EQUAL(0, Result);
+
+  Operand = MAX_INT8;
+  Result = 0;
+  Status = SafeInt16ToChar8(Operand, &Result);
+  UT_ASSERT_NOT_EFI_ERROR(Status);
+  UT_ASSERT_EQUAL(MAX_INT8, Result);
 
   //
   // Otherwise should result in an error status
   //
+  Operand = (-35);
+  Status = SafeInt16ToChar8(Operand, &Result);
+  UT_ASSERT_EQUAL(RETURN_BUFFER_TOO_SMALL, Status);
+
   Operand = 0x1234;
   Status = SafeInt16ToChar8(Operand, &Result);
   UT_ASSERT_EQUAL(RETURN_BUFFER_TOO_SMALL, Status);
@@ -618,11 +629,13 @@ TestSafeInt32ToChar8 (
   INT32       Operand;
   CHAR8       Result;
 
-  // CHAR8 is typedefed as char, which by default is signed, thus
-  // CHAR8 is same as INT8, so same tests as above:
+  //
+  // CHAR8 is typedefed as char, which may be signed or unsigned based
+  // on the compiler. Thus, for compatibility CHAR8 should be between 0 and MAX_INT8.
+  //
 
   //
-  // If Operand is between MIN_INT8 and MAX_INT8 inclusive, then it's a cast
+  // If Operand is between 0 and MAX_INT8 inclusive, then it's a cast
   //
   Operand = 0x5b;
   Result = 0;
@@ -630,14 +643,25 @@ TestSafeInt32ToChar8 (
   UT_ASSERT_NOT_EFI_ERROR(Status);
   UT_ASSERT_EQUAL(0x5b, Result);
 
-  Operand = (-57);
+  Operand = 0;
+  Result = 0;
   Status = SafeInt32ToChar8(Operand, &Result);
   UT_ASSERT_NOT_EFI_ERROR(Status);
-  UT_ASSERT_EQUAL((-57), Result);
+  UT_ASSERT_EQUAL(0, Result);
+
+  Operand = MAX_INT8;
+  Result = 0;
+  Status = SafeInt32ToChar8(Operand, &Result);
+  UT_ASSERT_NOT_EFI_ERROR(Status);
+  UT_ASSERT_EQUAL(MAX_INT8, Result);
 
   //
   // Otherwise should result in an error status
   //
+  Operand = (-57);
+  Status = SafeInt32ToChar8(Operand, &Result);
+  UT_ASSERT_EQUAL(RETURN_BUFFER_TOO_SMALL, Status);
+
   Operand = (0x5bababab);
   Status = SafeInt32ToChar8(Operand, &Result);
   UT_ASSERT_EQUAL(RETURN_BUFFER_TOO_SMALL, Status);
@@ -1044,8 +1068,10 @@ TestSafeIntnToChar8 (
   INTN        Operand;
   CHAR8       Result;
 
-  // CHAR8 is typedefed as char, which by default is signed, thus
-  // CHAR8 is same as INT8, so same tests as above:
+  //
+  // CHAR8 is typedefed as char, which may be signed or unsigned based
+  // on the compiler. Thus, for compatibility CHAR8 should be between 0 and MAX_INT8.
+  //
 
   //
   // If Operand is between MIN_INT8 and MAX_INT8 inclusive, then it's a cast
@@ -1056,14 +1082,25 @@ TestSafeIntnToChar8 (
   UT_ASSERT_NOT_EFI_ERROR(Status);
   UT_ASSERT_EQUAL(0x5b, Result);
 
-  Operand = (-53);
+  Operand = 0;
+  Result = 0;
   Status = SafeIntnToChar8(Operand, &Result);
   UT_ASSERT_NOT_EFI_ERROR(Status);
-  UT_ASSERT_EQUAL((-53), Result);
+  UT_ASSERT_EQUAL(0, Result);
+
+  Operand = MAX_INT8;
+  Result = 0;
+  Status = SafeIntnToChar8(Operand, &Result);
+  UT_ASSERT_NOT_EFI_ERROR(Status);
+  UT_ASSERT_EQUAL(MAX_INT8, Result);
 
   //
   // Otherwise should result in an error status
   //
+  Operand = (-53);
+  Status = SafeIntnToChar8(Operand, &Result);
+  UT_ASSERT_EQUAL(RETURN_BUFFER_TOO_SMALL, Status);
+
   Operand = (0x5bababab);
   Status = SafeIntnToChar8(Operand, &Result);
   UT_ASSERT_EQUAL(RETURN_BUFFER_TOO_SMALL, Status);
@@ -1462,8 +1499,10 @@ TestSafeInt64ToChar8 (
   INT64       Operand;
   CHAR8       Result;
 
-  // CHAR8 is typedefed as char, which by default is signed, thus
-  // CHAR8 is same as INT8, so same tests as above:
+  //
+  // CHAR8 is typedefed as char, which may be signed or unsigned based
+  // on the compiler. Thus, for compatibility CHAR8 should be between 0 and MAX_INT8.
+  //
 
   //
   // If Operand is between MIN_INT8 and  MAX_INT8 inclusive, then it's a cast
@@ -1474,14 +1513,25 @@ TestSafeInt64ToChar8 (
   UT_ASSERT_NOT_EFI_ERROR(Status);
   UT_ASSERT_EQUAL(0x5b, Result);
 
-  Operand = (-37);
+  Operand = 0;
+  Result = 0;
   Status = SafeInt64ToChar8(Operand, &Result);
   UT_ASSERT_NOT_EFI_ERROR(Status);
-  UT_ASSERT_EQUAL((-37), Result);
+  UT_ASSERT_EQUAL(0, Result);
+
+  Operand = MAX_INT8;
+  Result = 0;
+  Status = SafeInt64ToChar8(Operand, &Result);
+  UT_ASSERT_NOT_EFI_ERROR(Status);
+  UT_ASSERT_EQUAL(MAX_INT8, Result);
 
   //
   // Otherwise should result in an error status
   //
+  Operand = (-37);
+  Status = SafeInt64ToChar8(Operand, &Result);
+  UT_ASSERT_EQUAL(RETURN_BUFFER_TOO_SMALL, Status);
+
   Operand = (0x5babababefefefef);
   Status = SafeInt64ToChar8(Operand, &Result);
   UT_ASSERT_EQUAL(RETURN_BUFFER_TOO_SMALL, Status);
