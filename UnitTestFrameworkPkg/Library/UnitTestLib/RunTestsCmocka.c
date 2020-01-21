@@ -65,7 +65,7 @@ CmockaUnitTestFunctionRunner (
     // stdout and stderr in their xml format
     //
     if (UnitTest->Log != NULL) {
-      print_message("UnitTest: %s - %s\n", UnitTest->ClassName, UnitTest->Description);
+      print_message("UnitTest: %s - %s\n", UnitTest->Name, UnitTest->Description);
       print_message("Log Output Start\n");
       print_message("%s", UnitTest->Log);
       print_message("Log Output End\n");
@@ -87,12 +87,12 @@ CmockaUnitTestSetupFunctionRunner (
   Suite     = (UNIT_TEST_SUITE *)(UnitTest->ParentSuite);
   Framework = (UNIT_TEST_FRAMEWORK *)(Suite->ParentFramework);
 
-  if (UnitTest->PreReq == NULL) {
+  if (UnitTest->Prerequisite == NULL) {
     return 0;
   }
 
   Framework->CurrentTest = UnitTest;
-  Result = UnitTest->PreReq (UnitTest->Context);
+  Result = UnitTest->Prerequisite (UnitTest->Context);
   Framework->CurrentTest = NULL;
 
   //
@@ -232,6 +232,20 @@ RunTestSuite (
   return EFI_SUCCESS;
 }
 
+/**
+  Execute all unit test cases in all unit test suites added to a Framework.
+
+  Once a unit test framework is initialized and all unit test suites and unit
+  test cases are registered, this function will cause the unit test framework to
+  dispatch all unit test cases in sequence and record the results for reporting.
+
+  @param[in]  FrameworkHandle  A handle to the current running framework that
+                               dispatched the test.  Necessary for recording
+                               certain test events with the framework.
+
+  @retval  EFI_SUCCESS            All test cases were dispached.
+  @retval  EFI_INVALID_PARAMETER  FrameworkHandle is NULL.
+**/
 EFI_STATUS
 EFIAPI
 RunAllTestSuites (

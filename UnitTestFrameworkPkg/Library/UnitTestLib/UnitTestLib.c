@@ -95,7 +95,7 @@ SetSuiteFingerprint (
   // For this one, we'll use the fingerprint from the framework, and the title of the suite.
   NewFingerprint = CalculateCrc32( &Framework->Fingerprint[0], UNIT_TEST_FINGERPRINT_SIZE );
   NewFingerprint = (NewFingerprint >> 8) ^ CalculateCrc32( Suite->Title, (AsciiStrLen( Suite->Title ) * sizeof( CHAR8 )) );
-  NewFingerprint = (NewFingerprint >> 8) ^ CalculateCrc32( Suite->Package, (AsciiStrLen(Suite->Package) * sizeof(CHAR8)) );
+  NewFingerprint = (NewFingerprint >> 8) ^ CalculateCrc32( Suite->Name, (AsciiStrLen(Suite->Name) * sizeof(CHAR8)) );
 
   CopyMem( Fingerprint, &NewFingerprint, UNIT_TEST_FINGERPRINT_SIZE );
   return;
@@ -114,7 +114,7 @@ SetTestFingerprint (
   // For this one, we'll use the fingerprint from the suite, and the description and classname of the test.
   NewFingerprint = CalculateCrc32( &Suite->Fingerprint[0], UNIT_TEST_FINGERPRINT_SIZE );
   NewFingerprint = (NewFingerprint >> 8) ^ CalculateCrc32( Test->Description, (AsciiStrLen( Test->Description ) * sizeof( CHAR8 )) );
-  NewFingerprint = (NewFingerprint >> 8) ^ CalculateCrc32( Test->ClassName, (AsciiStrLen(Test->ClassName) * sizeof(CHAR8)) );
+  NewFingerprint = (NewFingerprint >> 8) ^ CalculateCrc32( Test->Name, (AsciiStrLen(Test->Name) * sizeof(CHAR8)) );
 
   CopyMem( Fingerprint, &NewFingerprint, UNIT_TEST_FINGERPRINT_SIZE );
   return;
@@ -130,10 +130,24 @@ CompareFingerprints (
   return (CompareMem( FingerprintA, FingerprintB, UNIT_TEST_FINGERPRINT_SIZE ) == 0);
 }
 
+/**
+  Cleanup a test framework.
+
+  After tests are run, this will teardown the entire framework and free all
+  allocated data within.
+
+  @param[in]  FrameworkHandle  A handle to the current running framework that
+                               dispatched the test.  Necessary for recording
+                               certain test events with the framework.
+
+  @retval  EFI_SUCCESS            All resources associated with framework were
+                                  freed.
+  @retval  EFI_INVALID_PARAMETER  FrameworkHandle is NULL.
+**/
 EFI_STATUS
 EFIAPI
 FreeUnitTestFramework (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework
+  IN UNIT_TEST_FRAMEWORK_HANDLE  FrameworkHandle
   )
 {
   // TODO: Finish this function.
@@ -160,16 +174,34 @@ FreeUnitTestTestEntry (
   return EFI_SUCCESS;
 }
 
-/*
-  Method to Initialize the Unit Test framework
+/**
+  Method to Initialize the Unit Test framework.  This function registers the
+  test name and also initializes the internal state of the test framework to
+  receive any new suites and tests.
 
-  @retval  Success    - Unit Test init.
-  @retval  EFI_ERROR  - Unit Tests init failed.
-*/
+  @param[out]  FrameworkHandle  Unit test framework to be created.
+  @param[in]   Title            Null-terminated ASCII string that is the user
+                                friendly name of the framework. String is
+                                copied.
+  @param[in]   ShortTitle       Null-terminaled ASCII short string that is the
+                                short name of the framework with no spaces.
+                                String is copied.
+  @param[in]   VersionString    Null-terminaled ASCII version string for the
+                                framework. String is copied.
+
+  @retval  EFI_SUCCESS            The unit test framework was initialized.
+  @retval  EFI_INVALID_PARAMETER  FrameworkHandle is NULL.
+  @retval  EFI_INVALID_PARAMETER  Title is NULL.
+  @retval  EFI_INVALID_PARAMETER  ShortTitle is NULL.
+  @retval  EFI_INVALID_PARAMETER  VersionString is NULL.
+  @retval  EFI_INVALID_PARAMETER  ShortTitle is invalid.
+  @retval  EFI_OUT_OF_RESOURCES   There are not enough resources available to
+                                  initialize the unit test framework.
+**/
 EFI_STATUS
 EFIAPI
 InitUnitTestFramework (
-  OUT UNIT_TEST_FRAMEWORK_HANDLE  *Framework,
+  OUT UNIT_TEST_FRAMEWORK_HANDLE  *FrameworkHandle,
   IN  CHAR8                       *Title,
   IN  CHAR8                       *ShortTitle,
   IN  CHAR8                       *VersionString
@@ -186,7 +218,7 @@ InitUnitTestFramework (
   //
   // First, check all pointers and make sure nothing's broked.
   //
-  if (Framework == NULL || Title == NULL ||
+  if (FrameworkHandle == NULL || Title == NULL ||
       ShortTitle == NULL || VersionString == NULL) {
     return EFI_INVALID_PARAMETER;
   }
@@ -249,7 +281,7 @@ Exit:
   // If we're good, then let's copy the framework.
   //
   if (!EFI_ERROR (Status)) {
-    *Framework = NewFrameworkHandle;
+    *FrameworkHandle = NewFrameworkHandle;
   } else {
     //
     // Otherwise, we need to undo this horrible thing that we've done.
@@ -260,15 +292,41 @@ Exit:
   return Status;
 }
 
+/**
+  Registers a Unit Test Suite in the Unit Test Framework.
+  At least one test suite must be registered, because all test cases must be
+  within a unit test suite.
+
+  @param[out]  SuiteHandle      Unit test suite to create
+  @param[in]   FrameworkHandle  Unit test framework to add unit test suite to
+  @param[in]   Title            Null-terminated ASCII string that is the user
+                                friendly name of the test suite.  String is
+                                copied.
+  @param[in]   Name             Null-terminated ASCII string that is the short
+                                name of the test suite with no spaces.  String
+                                is copied.
+  @param[in]   Setup            Setup function, runs before suite.  This is an
+                                optional parameter that may be NULL.
+  @param[in]   Teardown         Teardown function, runs after suite.  This is an
+                                optional parameter that may be NULL.
+
+  @retval  EFI_SUCCESS            The unit test suite was created.
+  @retval  EFI_INVALID_PARAMETER  SuiteHandle is NULL.
+  @retval  EFI_INVALID_PARAMETER  FrameworkHandle is NULL.
+  @retval  EFI_INVALID_PARAMETER  Title is NULL.
+  @retval  EFI_INVALID_PARAMETER  Name is NULL.
+  @retval  EFI_OUT_OF_RESOURCES   There are not enough resources available to
+                                  initialize the unit test suite.
+**/
 EFI_STATUS
 EFIAPI
 CreateUnitTestSuite (
-  OUT UNIT_TEST_SUITE_HANDLE      *Suite,
+  OUT UNIT_TEST_SUITE_HANDLE      *SuiteHandle,
   IN  UNIT_TEST_FRAMEWORK_HANDLE  FrameworkHandle,
   IN  CHAR8                       *Title,
-  IN  CHAR8                       *Package,
-  IN  UNIT_TEST_SUITE_SETUP       Sup,              OPTIONAL
-  IN  UNIT_TEST_SUITE_TEARDOWN    Tdn               OPTIONAL
+  IN  CHAR8                       *Name,
+  IN  UNIT_TEST_SUITE_SETUP       Setup     OPTIONAL,
+  IN  UNIT_TEST_SUITE_TEARDOWN    Teardown  OPTIONAL
   )
 {
   EFI_STATUS                  Status;
@@ -281,7 +339,7 @@ CreateUnitTestSuite (
   //
   // First, let's check to make sure that our parameters look good.
   //
-  if ((Framework == NULL) || (Title == NULL) || (Package == NULL)) {
+  if ((SuiteHandle == NULL) || (Framework == NULL) || (Title == NULL) || (Name == NULL)) {
     return EFI_INVALID_PARAMETER;
   }
 
@@ -298,9 +356,9 @@ CreateUnitTestSuite (
   //
   NewSuiteEntry->UTS.NumTests         = 0;
   NewSuiteEntry->UTS.Title            = AllocateAndCopyString (Title);
-  NewSuiteEntry->UTS.Package          = AllocateAndCopyString (Package);
-  NewSuiteEntry->UTS.Setup            = Sup;
-  NewSuiteEntry->UTS.Teardown         = Tdn;
+  NewSuiteEntry->UTS.Name             = AllocateAndCopyString (Name);
+  NewSuiteEntry->UTS.Setup            = Setup;
+  NewSuiteEntry->UTS.Teardown         = Teardown;
   NewSuiteEntry->UTS.ParentFramework  = FrameworkHandle;
   InitializeListHead (&(NewSuiteEntry->Entry));             // List entry for sibling suites.
   InitializeListHead (&(NewSuiteEntry->UTS.TestCaseList));  // List entry for child tests.
@@ -309,7 +367,7 @@ CreateUnitTestSuite (
     goto Exit;
   }
 
-  if (NewSuiteEntry->UTS.Package == NULL) {
+  if (NewSuiteEntry->UTS.Name == NULL) {
     Status = EFI_OUT_OF_RESOURCES;
     goto Exit;
   }
@@ -325,7 +383,7 @@ Exit:
   //
   if (!EFI_ERROR( Status )) {
     InsertTailList (&(Framework->TestSuiteList), (LIST_ENTRY *)NewSuiteEntry);
-    *Suite = (UNIT_TEST_SUITE_HANDLE)(&NewSuiteEntry->UTS);
+    *SuiteHandle = (UNIT_TEST_SUITE_HANDLE)(&NewSuiteEntry->UTS);
   } else {
     //
     // Otherwise, make with the destruction.
@@ -336,15 +394,39 @@ Exit:
   return Status;
 }
 
+/**
+  Adds test case to Suite
+
+  @param[in]  SuiteHandle   Unit test suite to add test to.
+  @param[in]  Description   Null-terminated ASCII string that is the user
+                            friendly description of a test.  String is copied.
+  @param[in]  Name          Null-terminated ASCII string that is the short name
+                            of the test with no spaces.  String is copied.
+  @param[in]  Function      Unit test function.
+  @param[in]  Prerequisite  Prerequisite function, runs before test.  This is
+                            an optional parameter that may be NULL.
+  @param[in]  CleanUp       Clean up function, runs after test.  This is an
+                            optional parameter that may be NULL.
+  @param[in]  Context       Pointer to context.    This is an optional parameter
+                            that may be NULL.
+
+  @retval  EFI_SUCCESS            The unit test case was added to Suite.
+  @retval  EFI_INVALID_PARAMETER  SuiteHandle is NULL.
+  @retval  EFI_INVALID_PARAMETER  Description is NULL.
+  @retval  EFI_INVALID_PARAMETER  Name is NULL.
+  @retval  EFI_INVALID_PARAMETER  Function is NULL.
+  @retval  EFI_OUT_OF_RESOURCES   There are not enough resources available to
+                                  add the unit test case to Suite.
+**/
 EFI_STATUS
 EFIAPI
 AddTestCase (
   IN UNIT_TEST_SUITE_HANDLE  SuiteHandle,
   IN CHAR8                   *Description,
-  IN CHAR8                   *ClassName,
-  IN UNIT_TEST_FUNCTION      Func,
-  IN UNIT_TEST_PREREQ        PreReq,       OPTIONAL
-  IN UNIT_TEST_CLEANUP       CleanUp,      OPTIONAL
+  IN CHAR8                   *Name,
+  IN UNIT_TEST_FUNCTION      Function,
+  IN UNIT_TEST_PREREQUISITE  Prerequisite  OPTIONAL,
+  IN UNIT_TEST_CLEANUP       CleanUp       OPTIONAL,
   IN UNIT_TEST_CONTEXT       Context       OPTIONAL
   )
 {
@@ -360,7 +442,7 @@ AddTestCase (
   //
   // First, let's check to make sure that our parameters look good.
   //
-  if ((Suite == NULL) || (Description == NULL) || (ClassName == NULL)) {
+  if ((Suite == NULL) || (Description == NULL) || (Name == NULL) || (Function == NULL)) {
     return EFI_INVALID_PARAMETER;
   }
 
@@ -374,18 +456,22 @@ AddTestCase (
   //
   // Copy the fields we think we need.
   NewTestEntry->UT.Description       = AllocateAndCopyString (Description);
-  NewTestEntry->UT.ClassName         = AllocateAndCopyString (ClassName);
+  NewTestEntry->UT.Name              = AllocateAndCopyString (Name);
   NewTestEntry->UT.FailureType       = FAILURETYPE_NOFAILURE;
   NewTestEntry->UT.FailureMessage[0] = '\0';
   NewTestEntry->UT.Log               = NULL;
-  NewTestEntry->UT.PreReq            = PreReq;
+  NewTestEntry->UT.Prerequisite      = Prerequisite;
   NewTestEntry->UT.CleanUp           = CleanUp;
-  NewTestEntry->UT.RunTest           = Func;
+  NewTestEntry->UT.RunTest           = Function;
   NewTestEntry->UT.Context           = Context;
   NewTestEntry->UT.Result            = UNIT_TEST_PENDING;
   NewTestEntry->UT.ParentSuite       = SuiteHandle;
   InitializeListHead (&(NewTestEntry->Entry));  // List entry for sibling tests.
   if (NewTestEntry->UT.Description == NULL) {
+    Status = EFI_OUT_OF_RESOURCES;
+    goto Exit;
+  }
+  if (NewTestEntry->UT.Name == NULL) {
     Status = EFI_OUT_OF_RESOURCES;
     goto Exit;
   }
@@ -690,11 +776,41 @@ SerializeState (
   return Header;
 }
 
+/**
+  Leverages a framework-specific mechanism (see UnitTestPersistenceLib if you're
+  a framework author) to save the state of the executing framework along with
+  any allocated data so that the test may be resumed upon reentry. A test case
+  should pass any needed context (which, to prevent an infinite loop, should be
+  at least the current execution count) which will be saved by the framework and
+  passed to the test case upon resume.
+
+  Generally called from within a test case prior to quitting or rebooting.
+
+  @param[in]  FrameworkHandle    A handle to the current running framework that
+                                 dispatched the test.  Necessary for recording
+                                 certain test events with the framework.
+  @param[in]  ContextToSave      A buffer of test case-specific data to be saved
+                                 along with framework state.  Will be passed as
+                                 "Context" to the test case upon resume.  This
+                                 is an optional parameter that may be NULL.
+  @param[in]  ContextToSaveSize  Size of the ContextToSave buffer.
+
+  @retval  EFI_SUCCESS            The framework state and context were saved.
+  @retval  EFI_INVALID_PARAMETER  FrameworkHandle is NULL.
+  @retval  EFI_INVALID_PARAMETER  ContextToSave is not NULL and
+                                  ContextToSaveSize is 0.
+  @retval  EFI_INVALID_PARAMETER  ContextToSave is >= 4GB.
+  @retval  EFI_OUT_OF_RESOURCES   There are not enough resources available to
+                                  save the framework and context state.
+  @retval  EFI_DEVICE_ERROR       The framework and context state could not be
+                                  saved to a persistent storage devide due to a
+                                  device error.
+**/
 EFI_STATUS
 EFIAPI
 SaveFrameworkState (
   IN UNIT_TEST_FRAMEWORK_HANDLE  FrameworkHandle,
-  IN UNIT_TEST_CONTEXT           ContextToSave,      OPTIONAL
+  IN UNIT_TEST_CONTEXT           ContextToSave     OPTIONAL,
   IN UINTN                       ContextToSaveSize
   )
 {

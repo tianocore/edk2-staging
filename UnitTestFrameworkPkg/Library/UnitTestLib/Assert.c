@@ -74,6 +74,24 @@ UnitTestLogFailure (
   return;
 }
 
+/**
+  If Expression is TRUE, then TRUE is returned.
+  If Expression is FALSE, then an assert is triggered and the location of the
+  assert provided by FunctionName, LineNumber, FileName, and Description are
+  recorded and FALSE is returned.
+
+  @param[in]  Expression    The BOOLEAN result of the expression evaluation.
+  @param[in]  FunctionName  Null-terminated ASCII string of the function
+                            executing the assert macro.
+  @param[in]  LineNumber    The source file line number of the assert macro.
+  @param[in]  FileName      Null-terminated ASCII string of the filename
+                            executing the assert macro.
+  @param[in]  Description   Null-terminated ASCII string of the expression being
+                            evaluated.
+
+  @retval  TRUE   Expression is TRUE.
+  @retval  FALSE  Expression is FALSE.
+**/
 BOOLEAN
 EFIAPI
 UnitTestAssertTrue (
@@ -92,7 +110,7 @@ UnitTestAssertTrue (
       LineNumber,
       Description
       );
-    UnitTestLog (DEBUG_ERROR,
+    UT_LOG_ERROR (
       "[ASSERT FAIL] %a::%d Expression (%a) is not TRUE!\n",
       FunctionName,
       LineNumber,
@@ -102,6 +120,24 @@ UnitTestAssertTrue (
   return Expression;
 }
 
+/**
+  If Expression is FALSE, then TRUE is returned.
+  If Expression is TRUE, then an assert is triggered and the location of the
+  assert provided by FunctionName, LineNumber, FileName, and Description are
+  recorded and FALSE is returned.
+
+  @param[in]  Expression    The BOOLEAN result of the expression evaluation.
+  @param[in]  FunctionName  Null-terminated ASCII string of the function
+                            executing the assert macro.
+  @param[in]  LineNumber    The source file line number of the assert macro.
+  @param[in]  FileName      Null-terminated ASCII string of the filename
+                            executing the assert macro.
+  @param[in]  Description   Null-terminated ASCII string of the expression being
+                            evaluated.
+
+  @retval  TRUE   Expression is FALSE.
+  @retval  FALSE  Expression is TRUE.
+**/
 BOOLEAN
 EFIAPI
 UnitTestAssertFalse (
@@ -120,8 +156,7 @@ UnitTestAssertFalse (
       LineNumber,
       Description
       );
-    UnitTestLog (
-      DEBUG_ERROR,
+    UT_LOG_ERROR (
       "[ASSERT FAIL] %a::%d Expression (%a) is not FALSE!\n",
       FunctionName,
       LineNumber,
@@ -131,6 +166,24 @@ UnitTestAssertFalse (
   return !Expression;
 }
 
+/**
+  If Status is not an EFI_ERROR(), then TRUE is returned.
+  If Status is an EFI_ERROR(), then an assert is triggered and the location of
+  the assert provided by FunctionName, LineNumber, FileName, and Description are
+  recorded and FALSE is returned.
+
+  @param[in]  Status        The EFI_STATUS value to evaluate.
+  @param[in]  FunctionName  Null-terminated ASCII string of the function
+                            executing the assert macro.
+  @param[in]  LineNumber    The source file line number of the assert macro.
+  @param[in]  FileName      Null-terminated ASCII string of the filename
+                            executing the assert macro.
+  @param[in]  Description   Null-terminated ASCII string of the status
+                            expression being evaluated.
+
+  @retval  TRUE   Status is not an EFI_ERROR().
+  @retval  FALSE  Status is an EFI_ERROR().
+**/
 BOOLEAN
 EFIAPI
 UnitTestAssertNotEfiError (
@@ -150,8 +203,7 @@ UnitTestAssertNotEfiError (
       Description,
       Status
       );
-    UnitTestLog (
-      DEBUG_ERROR,
+    UT_LOG_ERROR (
       "[ASSERT FAIL] %a::%d Status '%a' is EFI_ERROR (%r)!\n",
       FunctionName,
       LineNumber,
@@ -162,6 +214,27 @@ UnitTestAssertNotEfiError (
   return !EFI_ERROR( Status );
 }
 
+/**
+  If ValueA is equal ValueB, then TRUE is returned.
+  If ValueA is not equal to ValueB, then an assert is triggered and the location
+  of the assert provided by FunctionName, LineNumber, FileName, DescriptionA,
+  and DescriptionB are recorded and FALSE is returned.
+
+  @param[in]  ValueA        64-bit value.
+  @param[in]  ValueB        64-bit value.
+  @param[in]  FunctionName  Null-terminated ASCII string of the function
+                            executing the assert macro.
+  @param[in]  LineNumber    The source file line number of the assert macro.
+  @param[in]  FileName      Null-terminated ASCII string of the filename
+                            executing the assert macro.
+  @param[in]  DescriptionA  Null-terminated ASCII string that is a description
+                            of ValueA.
+  @param[in]  DescriptionB  Null-terminated ASCII string that is a description
+                            of ValueB.
+
+  @retval  TRUE   ValueA is equal to ValueB.
+  @retval  FALSE  ValueA is not equal to ValueB.
+**/
 BOOLEAN
 EFIAPI
 UnitTestAssertEqual (
@@ -185,8 +258,7 @@ UnitTestAssertEqual (
       ValueA,
       ValueB
       );
-    UnitTestLog (
-      DEBUG_ERROR,
+    UT_LOG_ERROR (
       "[ASSERT FAIL] %a::%d Value %a != %a (%d != %d)!\n",
       FunctionName,
       LineNumber,
@@ -199,11 +271,36 @@ UnitTestAssertEqual (
   return (ValueA == ValueB);
 }
 
+/**
+  If the contents of BufferA are identical to the contents of BufferB, then TRUE
+  is returned.  If the contents of BufferA are not identical to the contents of
+  BufferB, then an assert is triggered and the location of the assert provided
+  by FunctionName, LineNumber, FileName, DescriptionA, and DescriptionB are
+  recorded and FALSE is returned.
+
+  @param[in]  BufferA       Pointer to a buffer for comparison.
+  @param[in]  BufferB       Pointer to a buffer for comparison.
+  @param[in]  Length        Number of bytes to compare in BufferA and BufferB.
+  @param[in]  FunctionName  Null-terminated ASCII string of the function
+                            executing the assert macro.
+  @param[in]  LineNumber    The source file line number of the assert macro.
+  @param[in]  FileName      Null-terminated ASCII string of the filename
+                            executing the assert macro.
+  @param[in]  DescriptionA  Null-terminated ASCII string that is a description
+                            of BufferA.
+  @param[in]  DescriptionB  Null-terminated ASCII string that is a description
+                            of BufferB.
+
+  @retval  TRUE   The contents of BufferA are identical to the contents of
+                  BufferB.
+  @retval  FALSE  The contents of BufferA are not identical to the contents of
+                  BufferB.
+**/
 BOOLEAN
 EFIAPI
 UnitTestAssertMemEqual (
-  IN UINTN        ValueA,
-  IN UINTN        ValueB,
+  IN VOID         *BufferA,
+  IN VOID         *BufferB,
   IN UINTN        Length,
   IN CONST CHAR8  *FunctionName,
   IN UINTN        LineNumber,
@@ -212,7 +309,7 @@ UnitTestAssertMemEqual (
   IN CONST CHAR8  *DescriptionB
   )
 {
-  if (CompareMem((VOID*)ValueA, (VOID*)ValueB, Length) != 0) {
+  if (CompareMem(BufferA, BufferB, Length) != 0) {
     UnitTestLogFailure (
       FAILURETYPE_ASSERTEQUAL,
       "%a::%d Memory at %a != %a for length %d bytes!\n",
@@ -222,8 +319,7 @@ UnitTestAssertMemEqual (
       DescriptionB,
       Length
       );
-    UnitTestLog (
-      DEBUG_ERROR,
+    UT_LOG_ERROR (
       "[ASSERT FAIL] %a::%d Value %a != %a for length %d bytes!\n",
       FunctionName,
       LineNumber,
@@ -236,6 +332,27 @@ UnitTestAssertMemEqual (
   return TRUE;
 }
 
+/**
+  If ValueA is not equal ValueB, then TRUE is returned.
+  If ValueA is equal to ValueB, then an assert is triggered and the location
+  of the assert provided by FunctionName, LineNumber, FileName, DescriptionA
+  and DescriptionB are recorded and FALSE is returned.
+
+  @param[in]  ValueA        64-bit value.
+  @param[in]  ValueB        64-bit value.
+  @param[in]  FunctionName  Null-terminated ASCII string of the function
+                            executing the assert macro.
+  @param[in]  LineNumber    The source file line number of the assert macro.
+  @param[in]  FileName      Null-terminated ASCII string of the filename
+                            executing the assert macro.
+  @param[in]  DescriptionA  Null-terminated ASCII string that is a description
+                            of ValueA.
+  @param[in]  DescriptionB  Null-terminated ASCII string that is a description
+                            of ValueB.
+
+  @retval  TRUE   ValueA is not equal to ValueB.
+  @retval  FALSE  ValueA is equal to ValueB.
+**/
 BOOLEAN
 EFIAPI
 UnitTestAssertNotEqual (
@@ -259,8 +376,7 @@ UnitTestAssertNotEqual (
       ValueA,
       ValueB
       );
-    UnitTestLog (
-      DEBUG_ERROR,
+    UT_LOG_ERROR (
       "[ASSERT FAIL] %a::%d Value %a == %a (%d == %d)!\n",
       FunctionName,
       LineNumber,
@@ -273,6 +389,26 @@ UnitTestAssertNotEqual (
   return (ValueA != ValueB);
 }
 
+/**
+  If Status is equal to Expected, then TRUE is returned.
+  If Status is not equal to Expected, then an assert is triggered and the
+  location of the assert provided by FunctionName, LineNumber, FileName, and
+  Description are recorded and FALSE is returned.
+
+  @param[in]  Status        EFI_STATUS value returned from an API under test.
+  @param[in]  Expected      The expected EFI_STATUS return value from an API
+                            under test.
+  @param[in]  FunctionName  Null-terminated ASCII string of the function
+                            executing the assert macro.
+  @param[in]  LineNumber    The source file line number of the assert macro.
+  @param[in]  FileName      Null-terminated ASCII string of the filename
+                            executing the assert macro.
+  @param[in]  Description   Null-terminated ASCII string that is a description
+                            of Status.
+
+  @retval  TRUE   Status is equal to Expected.
+  @retval  FALSE  Status is not equal to Expected.
+**/
 BOOLEAN
 EFIAPI
 UnitTestAssertStatusEqual (
@@ -294,8 +430,7 @@ UnitTestAssertStatusEqual (
       Status,
       Expected
       );
-    UnitTestLog (
-      DEBUG_ERROR,
+    UT_LOG_ERROR (
       "[ASSERT FAIL] %a::%d Status '%a' is %r, should be %r!\n",
       FunctionName,
       LineNumber,
@@ -307,10 +442,30 @@ UnitTestAssertStatusEqual (
   return (Status == Expected);
 }
 
+/**
+  If Pointer is not equal to NULL, then TRUE is returned.
+  If Pointer is equal to NULL, then an assert is triggered and the location of
+  the assert provided by FunctionName, LineNumber, FileName, and PointerName
+  are recorded and FALSE is returned.
+
+  @param[in]  Pointer       Pointer value to be checked against NULL.
+  @param[in]  Expected      The expected EFI_STATUS return value from a function
+                            under test.
+  @param[in]  FunctionName  Null-terminated ASCII string of the function
+                            executing the assert macro.
+  @param[in]  LineNumber    The source file line number of the assert macro.
+  @param[in]  FileName      Null-terminated ASCII string of the filename
+                            executing the assert macro.
+  @param[in]  PointerName   Null-terminated ASCII string that is a description
+                            of Pointer.
+
+  @retval  TRUE   Pointer is not equal to NULL.
+  @retval  FALSE  Pointer is equal to NULL.
+**/
 BOOLEAN
 EFIAPI
 UnitTestAssertNotNull (
-  IN VOID*        Pointer,
+  IN VOID         *Pointer,
   IN CONST CHAR8  *FunctionName,
   IN UINTN        LineNumber,
   IN CONST CHAR8  *FileName,
@@ -325,8 +480,7 @@ UnitTestAssertNotNull (
       LineNumber,
       PointerName
       );
-    UnitTestLog (
-      DEBUG_ERROR,
+    UT_LOG_ERROR (
       "[ASSERT FAIL] %a::%d Pointer (%a) is NULL!\n",
       FunctionName,
       LineNumber,

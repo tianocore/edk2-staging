@@ -143,9 +143,9 @@ usage to the suite title and package name strings in the test suites. The former
 latter is for xUnit parsing. The test case function pointer is what is actually executed as the "test" and the
 prototype should be `UNIT_TEST_FUNCTION`. The last three parameters require a little bit more explaining.
 
-The prerequisite check function has a prototype of `UNIT_TEST_PREREQ` and -- if provided -- will be called
+The prerequisite check function has a prototype of `UNIT_TEST_PREREQUISITE` and -- if provided -- will be called
 immediately before the test case. If this function returns any error, the test case will not be run and will be
-recorded as `UNIT_TEST_ERROR_PREREQ_NOT_MET`. The cleanup function (prototype `UNIT_TEST_CLEANUP`) will be called
+recorded as `UNIT_TEST_ERROR_PREREQUISITE_NOT_MET`. The cleanup function (prototype `UNIT_TEST_CLEANUP`) will be called
 immediately after the test case to provide an opportunity to reset any global state that may have been changed in the
 test case. In the event of a prerequisite failure, the cleanup function will also be skipped. If either of these
 functions is not needed, pass `NULL`.

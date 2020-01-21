@@ -46,14 +46,14 @@ typedef UINT32 FAILURE_TYPE;
 
 typedef struct {
   CHAR8                     *Description;
-  CHAR8                     *ClassName;  //can't have spaces and should be short
+  CHAR8                     *Name;  //can't have spaces and should be short
   CHAR8                     *Log;
   FAILURE_TYPE              FailureType;
   CHAR8                     FailureMessage[UNIT_TEST_TESTFAILUREMSG_LENGTH];
   UINT8                     Fingerprint[UNIT_TEST_FINGERPRINT_SIZE];
   UNIT_TEST_STATUS          Result;
   UNIT_TEST_FUNCTION        RunTest;
-  UNIT_TEST_PREREQ          PreReq;
+  UNIT_TEST_PREREQUISITE    Prerequisite;
   UNIT_TEST_CLEANUP         CleanUp;
   UNIT_TEST_CONTEXT         Context;
   UNIT_TEST_SUITE_HANDLE    ParentSuite;
@@ -67,7 +67,7 @@ typedef struct {
 typedef struct {
   UINTN                       NumTests;
   CHAR8                       *Title;
-  CHAR8                       *Package;
+  CHAR8                       *Name;
   UINT8                       Fingerprint[UNIT_TEST_FINGERPRINT_SIZE];
   UNIT_TEST_SUITE_SETUP       Setup;
   UNIT_TEST_SUITE_TEARDOWN    Teardown;

@@ -24,11 +24,11 @@ struct _UNIT_TEST_LOG_PREFIX_STRING {
   CHAR8             *String;
 };
 
-struct _UNIT_TEST_LOG_PREFIX_STRING   mLogPrefixStrings[] = {
-  { DEBUG_ERROR,    "[ERROR]       " },
-  { DEBUG_WARN,     "[WARNING]     " },
-  { DEBUG_INFO,     "[INFO]        " },
-  { DEBUG_VERBOSE,  "[VERBOSE]     " }
+struct _UNIT_TEST_LOG_PREFIX_STRING  mLogPrefixStrings[] = {
+  { UNIT_TEST_LOG_LEVEL_ERROR,   "[ERROR]       " },
+  { UNIT_TEST_LOG_LEVEL_WARN,    "[WARNING]     " },
+  { UNIT_TEST_LOG_LEVEL_INFO,    "[INFO]        " },
+  { UNIT_TEST_LOG_LEVEL_VERBOSE, "[VERBOSE]     " }
 };
 
 //
@@ -142,11 +142,20 @@ UnitTestLogInit (
   }
 }
 
+/**
+  Test logging function that records a messages in the test framework log.
+  Record is associated with the currently executing test case.
+
+  @param[in]  ErrorLevel  The error level of the unit test log message.
+  @param[in]  Format      Formatting string following the format defined in the
+                          MdePkg/Include/Library/PrintLib.h.
+  @param[in]  ...         Print args.
+**/
 VOID
 EFIAPI
 UnitTestLog (
-  IN UINTN                       ErrorLevel,
-  IN CONST CHAR8                 *Format,
+  IN  UINTN        ErrorLevel,
+  IN  CONST CHAR8  *Format,
   ...
   )
 {
@@ -155,17 +164,15 @@ UnitTestLog (
   CHAR8                       LogString[UNIT_TEST_MAX_SINGLE_LOG_STRING_LENGTH];
   CONST CHAR8                 *LogTypePrefix;
   VA_LIST                     Marker;
-  UINTN                       LogLevel;
 
   FrameworkHandle = GetActiveFrameworkHandle ();
 
   LogTypePrefix = NULL;
-  LogLevel      = (UINTN)PcdGet32 (UnitTestLogLevel);
 
   //
-  // Make sure that this debug mode is enabled.
+  // Make sure that this unit test log level is enabled.
   //
-  if ((ErrorLevel & LogLevel) == 0) {
+  if ((ErrorLevel & (UINTN)PcdGet32 (PcdUnitTestLogLevel)) == 0) {
     return;
   }
 

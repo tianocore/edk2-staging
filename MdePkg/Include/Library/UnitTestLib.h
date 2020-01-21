@@ -3,25 +3,35 @@
   and the framework to focus on runnings, reporting, statistics, etc.
 
   Copyright (c) Microsoft Corporation.<BR>
-  Copyright (c) 2019, Intel Corporation. All rights reserved.<BR>
+  Copyright (c) 2020, Intel Corporation. All rights reserved.<BR>
   SPDX-License-Identifier: BSD-2-Clause-Patent
-
 **/
 
 #ifndef __UNIT_TEST_LIB_H__
 #define __UNIT_TEST_LIB_H__
 
+///
+/// Unit Test Status
+///
 typedef UINT32  UNIT_TEST_STATUS;
-#define UNIT_TEST_PASSED                (0)
-#define UNIT_TEST_ERROR_PREREQ_NOT_MET  (1)
-#define UNIT_TEST_ERROR_TEST_FAILED     (2)
-#define UNIT_TEST_ERROR_CLEANUP_FAILED  (3)
-#define UNIT_TEST_SKIPPED               (0xFFFFFFFD)
-#define UNIT_TEST_RUNNING               (0xFFFFFFFE)
-#define UNIT_TEST_PENDING               (0xFFFFFFFF)
+#define UNIT_TEST_PASSED                      (0)
+#define UNIT_TEST_ERROR_PREREQUISITE_NOT_MET  (1)
+#define UNIT_TEST_ERROR_TEST_FAILED           (2)
+#define UNIT_TEST_ERROR_CLEANUP_FAILED        (3)
+#define UNIT_TEST_SKIPPED                     (0xFFFFFFFD)
+#define UNIT_TEST_RUNNING                     (0xFFFFFFFE)
+#define UNIT_TEST_PENDING                     (0xFFFFFFFF)
 
 ///
-/// Unit Test Framwework Handle
+/// Declare PcdUnitTestLogLevel bits and UnitTestLog() ErrorLevel parameter.
+///
+#define UNIT_TEST_LOG_LEVEL_ERROR    BIT0
+#define UNIT_TEST_LOG_LEVEL_WARN     BIT1
+#define UNIT_TEST_LOG_LEVEL_INFO     BIT2
+#define UNIT_TEST_LOG_LEVEL_VERBOSE  BIT3
+
+///
+/// Unit Test Framework Handle
 ///
 struct UNIT_TEST_FRAMEWORK_OBJECT;
 typedef struct UNIT_TEST_FRAMEWORK_OBJECT  *UNIT_TEST_FRAMEWORK_HANDLE;
@@ -45,12 +55,10 @@ typedef VOID*  UNIT_TEST_CONTEXT;
 
 /**
   The prototype for a single UnitTest case function.
+
   Funtions with this prototype are registered to be dispatched by the
   UnitTest framework, and results are recorded as test Pass or Fail.
 
-  @param[in]  Framework  A handle to the current running framework that
-                         dispatched the test.  Necessary for recording certain
-                         test events with the framework.
   @param[in]  Context    [Optional] An optional paramter that enables:
                          1) test-case reuse with varied parameters and
                          2) test-case re-entry for Target tests that need a
@@ -59,26 +67,24 @@ typedef VOID*  UNIT_TEST_CONTEXT;
                          contents are well understood by all test cases that may
                          consume it.
 
-  @retval  UNIT_TEST_PASSED             Test has completed and test case was successful.
-  @retval  UNIT_TEST_ERROR_TEST_FAILED  A test assertion has failed.
+  @retval  UNIT_TEST_PASSED             The Unit test has completed and the test
+                                        case was successful.
+  @retval  UNIT_TEST_ERROR_TEST_FAILED  A test case assertion has failed.
 
 **/
 typedef
 UNIT_TEST_STATUS
 (EFIAPI *UNIT_TEST_FUNCTION)(
-  UNIT_TEST_CONTEXT           Context
+  IN UNIT_TEST_CONTEXT  Context
   );
 
 /**
   Unit-Test Prerequisite Function pointer type.
-  NOTE: Should be the same as UnitTest.
-  Funtions with this prototype are registered to be dispatched by the
-  UnitTest framework prior to a given test case. If this prereq function returns
-  UNIT_TEST_ERROR_PREREQ_NOT_MET, the test case will be skipped.
 
-  @param[in]  Framework  A handle to the current running framework that
-                         dispatched the test.  Necessary for recording certain
-                         test events with the framework.
+  Funtions with this prototype are registered to be dispatched by the unit test
+  framework prior to a given test case. If this prereq function returns
+  UNIT_TEST_ERROR_PREREQUISITE_NOT_MET, the test case will be skipped.
+
   @param[in]  Context    [Optional] An optional paramter that enables:
                          1) test-case reuse with varied parameters and
                          2) test-case re-entry for Target tests that need a
@@ -87,27 +93,26 @@ UNIT_TEST_STATUS
                          contents are well understood by all test cases that may
                          consume it.
 
-  @retval  UNIT_TEST_PASSED                Test case prerequisites are met.
-  @retval  UNIT_TEST_ERROR_PREREQ_NOT_MET  Test case should be skipped.
+  @retval  UNIT_TEST_PASSED                      Unit test case prerequisites
+                                                 are met.
+  @retval  UNIT_TEST_ERROR_PREREQUISITE_NOT_MET  Test case should be skipped.
 
 **/
 typedef
 UNIT_TEST_STATUS
-(EFIAPI *UNIT_TEST_PREREQ)(
-  UNIT_TEST_CONTEXT           Context
+(EFIAPI *UNIT_TEST_PREREQUISITE)(
+  IN UNIT_TEST_CONTEXT  Context
   );
 
 /**
-  Unit-Test Test Cleanup (after) function pointer type.
+  Unit-Test Cleanup (after) function pointer type.
+
   Funtions with this prototype are registered to be dispatched by the
-  UnitTest framework after a given test case. This will be called even if the Test
-  Case returns an error, but not if the prerequisite fails and the test is skipped.
+  unit test framework after a given test case. This will be called even if the
+  test case returns an error, but not if the prerequisite fails and the test is
+  skipped.  The purpose of this function is to clean up any global state or
+  test data.
 
-  The purpose of this function is to clean up any global state or test data.
-
-  @param[in]  Framework  A handle to the current running framework that
-                         dispatched the test.  Necessary for recording certain
-                         test events with the framework.
   @param[in]  Context    [Optional] An optional paramter that enables:
                          1) test-case reuse with varied parameters and
                          2) test-case re-entry for Target tests that need a
@@ -123,21 +128,16 @@ UNIT_TEST_STATUS
 typedef
 VOID
 (EFIAPI *UNIT_TEST_CLEANUP)(
-  UNIT_TEST_CONTEXT           Context
+  IN UNIT_TEST_CONTEXT  Context
   );
 
 /**
-  Unit-Test Test Suite Setup (before) function pointer type.
-  Funtions with this prototype are registered to be dispatched by the
-  UnitTest framework prior to running any of the test cases in a test suite.
-  It will only be run once at the beginning of the suite (not prior to each case).
+  Unit-Test Test Suite Setup (before) function pointer type. Funtions with this
+  prototype are registered to be dispatched by the UnitTest framework prior to
+  running any of the test cases in a test suite.  It will only be run once at
+  the beginning of the suite (not prior to each case).
 
   The purpose of this function is to set up any global state or test data.
-
-  @param[in]  Framework  A handle to the current running framework that
-                         dispatched the test.  Necessary for recording certain
-                         test events with the framework.
-
 **/
 typedef
 VOID
@@ -146,17 +146,12 @@ VOID
   );
 
 /**
-  Unit-Test Test Suite Teardown (after) function pointer type.
-  Funtions with this prototype are registered to be dispatched by the
-  UnitTest framework after= running all of the test cases in a test suite.
-  It will only be run once at the end of the suite.
+  Unit-Test Test Suite Teardown (after) function pointer type.  Funtions with
+  this prototype are registered to be dispatched by the UnitTest framework after
+  running all of the test cases in a test suite.  It will only be run once at
+  the end of the suite.
 
   The purpose of this function is to clean up any global state or test data.
-
-  @param[in]  Framework  A handle to the current running framework that
-                         dispatched the test.  Necessary for recording certain
-                         test events with the framework.
-
 **/
 typedef
 VOID
@@ -164,107 +159,130 @@ VOID
   VOID
   );
 
-///
-/// Unit-Test Library Functions
-///
-
 /**
-  Method to Initialize the Unit Test framework.
-  This function registers the test name and also initializes the internal
-  state of the test framework to receive any new suites and tests.
+  Method to Initialize the Unit Test framework.  This function registers the
+  test name and also initializes the internal state of the test framework to
+  receive any new suites and tests.
 
-  @param[out]  Framework      Unit test framework to be created.
-  @param[in]   Title          String name of the framework. String is copied.
-  @param[in]   ShortTitle     Short string name of the framework. String is copied.
-  @param[in]   VersionString  Version string for the framework. String is copied.
+  @param[out]  FrameworkHandle  Unit test framework to be created.
+  @param[in]   Title            Null-terminated ASCII string that is the user
+                                friendly name of the framework. String is
+                                copied.
+  @param[in]   ShortTitle       Null-terminaled ASCII short string that is the
+                                short name of the framework with no spaces.
+                                String is copied.
+  @param[in]   VersionString    Null-terminaled ASCII version string for the
+                                framework. String is copied.
 
-  @retval  EFI_SUCCESS  The unit test framework was initialized.
-  @retval  Other        The unit test framework could not be initialized.
-
+  @retval  EFI_SUCCESS            The unit test framework was initialized.
+  @retval  EFI_INVALID_PARAMETER  FrameworkHandle is NULL.
+  @retval  EFI_INVALID_PARAMETER  Title is NULL.
+  @retval  EFI_INVALID_PARAMETER  ShortTitle is NULL.
+  @retval  EFI_INVALID_PARAMETER  VersionString is NULL.
+  @retval  EFI_INVALID_PARAMETER  ShortTitle is invalid.
+  @retval  EFI_OUT_OF_RESOURCES   There are not enough resources available to
+                                  initialize the unit test framework.
 **/
 EFI_STATUS
 EFIAPI
 InitUnitTestFramework (
-  OUT UNIT_TEST_FRAMEWORK_HANDLE  *Framework,
+  OUT UNIT_TEST_FRAMEWORK_HANDLE  *FrameworkHandle,
   IN  CHAR8                       *Title,
   IN  CHAR8                       *ShortTitle,
   IN  CHAR8                       *VersionString
   );
 
 /**
-  Registers a Unit Test Suite in the Unit Test Framework
+  Registers a Unit Test Suite in the Unit Test Framework.
   At least one test suite must be registered, because all test cases must be
   within a unit test suite.
 
-  @param[out]  Suite      Suite to create
-  @param[in]   Framework  Framework to add suite to
-  @param[in]   Title      String name of the suite. String is copied.
-  @param[in]   Package    String name of the package. String is copied.
-  @param[in]   Sup        Setup function, runs before suite.
-  @param[in]   Tdn        Teardown function, runs after suite.
+  @param[out]  SuiteHandle      Unit test suite to create
+  @param[in]   FrameworkHandle  Unit test framework to add unit test suite to
+  @param[in]   Title            Null-terminated ASCII string that is the user
+                                friendly name of the test suite.  String is
+                                copied.
+  @param[in]   Name             Null-terminated ASCII string that is the short
+                                name of the test suite with no spaces.  String
+                                is copied.
+  @param[in]   Setup            Setup function, runs before suite.  This is an
+                                optional parameter that may be NULL.
+  @param[in]   Teardown         Teardown function, runs after suite.  This is an
+                                optional parameter that may be NULL.
 
-  @retval  EFI_SUCCESS  The unit test suite was created.
-  @retval  Other        The unit test suite could not be created.
-
+  @retval  EFI_SUCCESS            The unit test suite was created.
+  @retval  EFI_INVALID_PARAMETER  SuiteHandle is NULL.
+  @retval  EFI_INVALID_PARAMETER  FrameworkHandle is NULL.
+  @retval  EFI_INVALID_PARAMETER  Title is NULL.
+  @retval  EFI_INVALID_PARAMETER  Name is NULL.
+  @retval  EFI_OUT_OF_RESOURCES   There are not enough resources available to
+                                  initialize the unit test suite.
 **/
 EFI_STATUS
 EFIAPI
 CreateUnitTestSuite (
-  OUT UNIT_TEST_SUITE_HANDLE      *Suite,
-  IN  UNIT_TEST_FRAMEWORK_HANDLE  Framework,
+  OUT UNIT_TEST_SUITE_HANDLE      *SuiteHandle,
+  IN  UNIT_TEST_FRAMEWORK_HANDLE  FrameworkHandle,
   IN  CHAR8                       *Title,
-  IN  CHAR8                       *Package,
-  IN  UNIT_TEST_SUITE_SETUP       Sup    OPTIONAL,
-  IN  UNIT_TEST_SUITE_TEARDOWN    Tdn    OPTIONAL
+  IN  CHAR8                       *Name,
+  IN  UNIT_TEST_SUITE_SETUP       Setup     OPTIONAL,
+  IN  UNIT_TEST_SUITE_TEARDOWN    Teardown  OPTIONAL
   );
 
 /**
   Adds test case to Suite
 
-  @param[in]  Suite        Suite to add test to.
-  @param[in]  Description  String describing test. String is copied.
-  @param[in]  ClassName    String name of the test. String is copied.
-  @param[in]  Func         Test function.
-  @param[in]  PreReq       Prep function, runs before test.
-  @param[in]  CleanUp      Clean up function, runs after test.
-  @param[in]  Context      Pointer to context.
+  @param[in]  SuiteHandle   Unit test suite to add test to.
+  @param[in]  Description   Null-terminated ASCII string that is the user
+                            friendly description of a test.  String is copied.
+  @param[in]  Name          Null-terminated ASCII string that is the short name
+                            of the test with no spaces.  String is copied.
+  @param[in]  Function      Unit test function.
+  @param[in]  Prerequisite  Prerequisite function, runs before test.  This is
+                            an optional parameter that may be NULL.
+  @param[in]  CleanUp       Clean up function, runs after test.  This is an
+                            optional parameter that may be NULL.
+  @param[in]  Context       Pointer to context.    This is an optional parameter
+                            that may be NULL.
 
-  @retval  EFI_SUCCESS           The unit test case was added to Suite.
-  @retval  EFI_OUT_OF_RESOURCES  There are not enough resources available to add
-                                 the unit test case to Suite.
-
+  @retval  EFI_SUCCESS            The unit test case was added to Suite.
+  @retval  EFI_INVALID_PARAMETER  SuiteHandle is NULL.
+  @retval  EFI_INVALID_PARAMETER  Description is NULL.
+  @retval  EFI_INVALID_PARAMETER  Name is NULL.
+  @retval  EFI_INVALID_PARAMETER  Function is NULL.
+  @retval  EFI_OUT_OF_RESOURCES   There are not enough resources available to
+                                  add the unit test case to Suite.
 **/
 EFI_STATUS
 EFIAPI
 AddTestCase (
-  IN UNIT_TEST_SUITE_HANDLE  Suite,
+  IN UNIT_TEST_SUITE_HANDLE  SuiteHandle,
   IN CHAR8                   *Description,
-  IN CHAR8                   *ClassName,
-  IN UNIT_TEST_FUNCTION      Func,
-  IN UNIT_TEST_PREREQ        PreReq    OPTIONAL,
-  IN UNIT_TEST_CLEANUP       CleanUp   OPTIONAL,
-  IN UNIT_TEST_CONTEXT       Context   OPTIONAL
+  IN CHAR8                   *Name,
+  IN UNIT_TEST_FUNCTION      Function,
+  IN UNIT_TEST_PREREQUISITE  Prerequisite  OPTIONAL,
+  IN UNIT_TEST_CLEANUP       CleanUp       OPTIONAL,
+  IN UNIT_TEST_CONTEXT       Context       OPTIONAL
   );
 
 /**
-  The primary driver of UnitTest execution.
+  Execute all unit test cases in all unit test suites added to a Framework.
 
-  Once a test framework is initialized and all suites and test cases are registered,
-  this function will cause the test framework to dispatch all test cases in sequence
-  and record the results for reporting.
+  Once a unit test framework is initialized and all unit test suites and unit
+  test cases are registered, this function will cause the unit test framework to
+  dispatch all unit test cases in sequence and record the results for reporting.
 
-  @param[in]  Framework  A handle to the current running framework that
-                         dispatched the test.  Necessary for recording certain
-                         test events with the framework.
+  @param[in]  FrameworkHandle  A handle to the current running framework that
+                               dispatched the test.  Necessary for recording
+                               certain test events with the framework.
 
-  @retval  Success
-  @retval  EFI_ERROR()
-
+  @retval  EFI_SUCCESS            All test cases were dispached.
+  @retval  EFI_INVALID_PARAMETER  FrameworkHandle is NULL.
 **/
 EFI_STATUS
 EFIAPI
 RunAllTestSuites (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework
+  IN UNIT_TEST_FRAMEWORK_HANDLE  FrameworkHandle
   );
 
 /**
@@ -273,364 +291,466 @@ RunAllTestSuites (
   After tests are run, this will teardown the entire framework and free all
   allocated data within.
 
-  @param[in]  Framework  A handle to the current running framework that
-                         dispatched the test.  Necessary for recording certain
-                         test events with the framework.
+  @param[in]  FrameworkHandle  A handle to the current running framework that
+                               dispatched the test.  Necessary for recording
+                               certain test events with the framework.
 
-  @retval  Success
-  @retval  EFI_ERROR()
-
+  @retval  EFI_SUCCESS            All resources associated with framework were
+                                  freed.
+  @retval  EFI_INVALID_PARAMETER  FrameworkHandle is NULL.
 **/
 EFI_STATUS
 EFIAPI
 FreeUnitTestFramework (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework
+  IN UNIT_TEST_FRAMEWORK_HANDLE  FrameworkHandle
   );
 
 /**
-  Leverages a framework-specific mechanism (see UnitTestPersistenceLib if you're a framework author)
-  to save the state of the executing framework along with any allocated data so that the test
-  may be resumed upon reentry. A test case should pass any needed context (which, to prevent an infinite
-  loop, should be at least the current execution count) which will be saved by the framework and
+  Leverages a framework-specific mechanism (see UnitTestPersistenceLib if you're
+  a framework author) to save the state of the executing framework along with
+  any allocated data so that the test may be resumed upon reentry. A test case
+  should pass any needed context (which, to prevent an infinite loop, should be
+  at least the current execution count) which will be saved by the framework and
   passed to the test case upon resume.
 
   Generally called from within a test case prior to quitting or rebooting.
 
-  @param[in]  Framework
-  @param[in]  ContextToSave      A buffer of test case-specific data to be saved along with framework
-                                 state. Will be passed as "Context" to the test case upon resume.
+  @param[in]  FrameworkHandle    A handle to the current running framework that
+                                 dispatched the test.  Necessary for recording
+                                 certain test events with the framework.
+  @param[in]  ContextToSave      A buffer of test case-specific data to be saved
+                                 along with framework state.  Will be passed as
+                                 "Context" to the test case upon resume.  This
+                                 is an optional parameter that may be NULL.
   @param[in]  ContextToSaveSize  Size of the ContextToSave buffer.
 
-  @retval  Success
-  @retval  EFI_ERROR()
-
+  @retval  EFI_SUCCESS            The framework state and context were saved.
+  @retval  EFI_INVALID_PARAMETER  FrameworkHandle is NULL.
+  @retval  EFI_INVALID_PARAMETER  ContextToSave is not NULL and
+                                  ContextToSaveSize is 0.
+  @retval  EFI_INVALID_PARAMETER  ContextToSave is >= 4GB.
+  @retval  EFI_OUT_OF_RESOURCES   There are not enough resources available to
+                                  save the framework and context state.
+  @retval  EFI_DEVICE_ERROR       The framework and context state could not be
+                                  saved to a persistent storage devide due to a
+                                  device error.
 **/
 EFI_STATUS
 EFIAPI
 SaveFrameworkState (
-  IN UNIT_TEST_FRAMEWORK_HANDLE  Framework,
+  IN UNIT_TEST_FRAMEWORK_HANDLE  FrameworkHandle,
   IN UNIT_TEST_CONTEXT           ContextToSave     OPTIONAL,
   IN UINTN                       ContextToSaveSize
   );
 
-///
-/// Unit-Test Assertion Macros and Functions
-///
 /**
-  Test assertion macro that checks an expression against the framework assertion logic.
+  This macro uses the framework assertion logic to check an expression for
+  "TRUE". If the expression evaluates to TRUE, execution continues.
+  Otherwise, the test case immediately returns UNIT_TEST_ERROR_TEST_FAILED.
 
-  This macro uses the framework assertion logic to check an expression for "TRUE". If the
-  expression evaluates to TRUE, execution will continue. Otherwise, the test case
-  will immediately return UNIT_TEST_ERROR_TEST_FAILED.
-
-  @param  Expression  Expression to be evaluated for TRUE.
-
+  @param[in]  Expression  Expression to be evaluated for TRUE.
 **/
-#define UT_ASSERT_TRUE(Expression)                                                                   \
+#define UT_ASSERT_TRUE(Expression)                                                        \
   if(!UnitTestAssertTrue ((Expression), __FUNCTION__, __LINE__, __FILE__, #Expression)) { \
-    return UNIT_TEST_ERROR_TEST_FAILED;                                                              \
+    return UNIT_TEST_ERROR_TEST_FAILED;                                                   \
   }
 
 /**
-  Test assertion macro that checks an expression against the framework assertion logic.
+  This macro uses the framework assertion logic to check an expression for
+  "FALSE". If the expression evaluates to FALSE, execution continues.
+  Otherwise, the test case immediately returns UNIT_TEST_ERROR_TEST_FAILED.
 
-  This macro uses the framework assertion logic to check an expression for "FALSE". If the
-  expression evaluates to FALSE, execution will continue. Otherwise, the test case
-  will immediately return UNIT_TEST_ERROR_TEST_FAILED.
-
-  @param  Expression  Expression to be evaluated for FALSE.
-
+  @param[in]  Expression  Expression to be evaluated for FALSE.
 **/
-#define UT_ASSERT_FALSE(Expression)                                                                   \
+#define UT_ASSERT_FALSE(Expression)                                                        \
   if(!UnitTestAssertFalse ((Expression), __FUNCTION__, __LINE__, __FILE__, #Expression)) { \
-    return UNIT_TEST_ERROR_TEST_FAILED;                                                               \
+    return UNIT_TEST_ERROR_TEST_FAILED;                                                    \
   }
 
 /**
-  Test assertion macro that checks an expression against the framework assertion logic.
+  This macro uses the framework assertion logic to check whether two simple
+  values are equal.  If the values are equal, execution continues.
+  Otherwise, the test case immediately returns UNIT_TEST_ERROR_TEST_FAILED.
 
-  This macro uses the framework assertion logic to check whether two simple values are equal.
-  If the values are equal, execution will continue. Otherwise, the test case
-  will immediately return UNIT_TEST_ERROR_TEST_FAILED.
-
-  @param  ValueA,  ValueB    Values to be compared for equality. Will be compared as UINT64.
-
+  @param[in]  ValueA  Value to be compared for equality (64-bit comparison).
+  @param[in]  ValueB  Value to be compared for equality (64-bit comparison).
 **/
-#define UT_ASSERT_EQUAL(ValueA, ValueB)                                                                                      \
+#define UT_ASSERT_EQUAL(ValueA, ValueB)                                                                           \
   if(!UnitTestAssertEqual ((UINT64)ValueA, (UINT64)ValueB, __FUNCTION__, __LINE__, __FILE__, #ValueA, #ValueB)) { \
-    return UNIT_TEST_ERROR_TEST_FAILED;                                                                                      \
+    return UNIT_TEST_ERROR_TEST_FAILED;                                                                           \
   }
 
 /**
-  Test assertion macro that checks an expression against the framework assertion logic.
+  This macro uses the framework assertion logic to check whether two memory
+  buffers are equal.  If the buffers are equal, execution continues.
+  Otherwise, the test case immediately returns UNIT_TEST_ERROR_TEST_FAILED.
 
-  This macro uses the framework assertion logic to check whether two memory buffers are equal.
-  If the buffers are equal, execution will continue. Otherwise, the test case
-  will immediately return UNIT_TEST_ERROR_TEST_FAILED.
-
-  @param  ValueA,  ValueB    Pointers to the buffers for comparison.
-  @param  Length   Number of bytes to compare.
-
+  @param[in]  BufferA  Pointer to a buffer for comparison.
+  @param[in]  BufferB  Pointer to a buffer for comparison.
+  @param[in]  Length   Number of bytes to compare in BufferA and BufferB.
 **/
-#define UT_ASSERT_MEM_EQUAL(ValueA, ValueB, Length)                                                                                          \
-  if(!UnitTestAssertMemEqual ((UINTN)ValueA, (UINTN)ValueB, (UINTN)Length, __FUNCTION__, __LINE__, __FILE__, #ValueA, #ValueB)) { \
-    return UNIT_TEST_ERROR_TEST_FAILED;                                                                                                      \
+#define UT_ASSERT_MEM_EQUAL(BufferA, BufferB, Length)                                                                               \
+  if(!UnitTestAssertMemEqual ((VOID *)(UINTN)BufferA, (VOID *)(UINTN)BufferB, (UINTN)Length, __FUNCTION__, __LINE__, __FILE__, #BufferA, #BufferB)) { \
+    return UNIT_TEST_ERROR_TEST_FAILED;                                                                                           \
   }
 
 /**
-  Test assertion macro that checks an expression against the framework assertion logic.
+  This macro uses the framework assertion logic to check whether two simple
+  values are non-equal.  If the values are non-equal, execution continues.
+  Otherwise, the test case immediately returns UNIT_TEST_ERROR_TEST_FAILED.
 
-  This macro uses the framework assertion logic to check whether two simple values are non-equal.
-  If the values are non-equal, execution will continue. Otherwise, the test case
-  will immediately return UNIT_TEST_ERROR_TEST_FAILED.
-
-  @param  ValueA,  ValueB    Values to be compared for inequality. Will be compared as UINT64.
-
+  @param[in]  ValueA  Value to be compared for inequality (64-bit comparison).
+  @param[in]  ValueB  Value to be compared for inequality (64-bit comparison).
 **/
-#define UT_ASSERT_NOT_EQUAL(ValueA, ValueB)                                                                                     \
+#define UT_ASSERT_NOT_EQUAL(ValueA, ValueB)                                                                          \
   if(!UnitTestAssertNotEqual ((UINT64)ValueA, (UINT64)ValueB, __FUNCTION__, __LINE__, __FILE__, #ValueA, #ValueB)) { \
-    return UNIT_TEST_ERROR_TEST_FAILED;                                                                                         \
+    return UNIT_TEST_ERROR_TEST_FAILED;                                                                              \
   }
 
 /**
-  Test assertion macro that checks an expression against the framework assertion logic.
+  This macro uses the framework assertion logic to check whether an EFI_STATUS
+  value is !EFI_ERROR().  If the status is !EFI_ERROR(), execution continues.
+  Otherwise, the test case immediately returns UNIT_TEST_ERROR_TEST_FAILED.
 
-  This macro uses the framework assertion logic to check whether an EFI_STATUS value is !EFI_ERROR().
-  If the status is !EFI_ERROR(), execution will continue. Otherwise, the test case
-  will immediately return UNIT_TEST_ERROR_TEST_FAILED.
-
-  @param  Status  Status to be checked.
-
+  @param[in]  Status  EFI_STATUS value to check.
 **/
-#define UT_ASSERT_NOT_EFI_ERROR(Status)                                                           \
+#define UT_ASSERT_NOT_EFI_ERROR(Status)                                                \
   if(!UnitTestAssertNotEfiError (Status, __FUNCTION__, __LINE__, __FILE__, #Status)) { \
-    return UNIT_TEST_ERROR_TEST_FAILED;                                                           \
+    return UNIT_TEST_ERROR_TEST_FAILED;                                                \
   }
 
 /**
-  Test assertion macro that checks an expression against the framework assertion logic.
+  This macro uses the framework assertion logic to check whether two EFI_STATUS
+  values are equal.  If the values are equal, execution continues.
+  Otherwise, the test case immediately returns UNIT_TEST_ERROR_TEST_FAILED.
 
-  This macro uses the framework assertion logic to check whether two EFI_STATUS values are equal.
-  If the values are equal, execution will continue. Otherwise, the test case
-  will immediately return UNIT_TEST_ERROR_TEST_FAILED.
-
-  @param  Status,  Expected    Values to be compared for equality.
-
+  @param[in]  Status    EFI_STATUS values to compare for equality.
+  @param[in]  Expected  EFI_STATUS values to compare for equality.
 **/
-#define UT_ASSERT_STATUS_EQUAL(Status, Expected)                                                            \
+#define UT_ASSERT_STATUS_EQUAL(Status, Expected)                                                 \
   if(!UnitTestAssertStatusEqual (Status, Expected, __FUNCTION__, __LINE__, __FILE__, #Status)) { \
-    return UNIT_TEST_ERROR_TEST_FAILED;                                                                     \
+    return UNIT_TEST_ERROR_TEST_FAILED;                                                          \
   }
 
 /**
-  Test assertion macro that checks an expression against the framework assertion logic.
+  This macro uses the framework assertion logic to check whether a pointer is
+  not NULL.  If the pointer is not NULL, execution continues. Otherwise, the
+  test case immediately returns UNIT_TEST_ERROR_TEST_FAILED.
 
-  This macro uses the framework assertion logic to check whether a pointer is not NULL.
-  If the pointer is not NULL, execution will continue. Otherwise, the test case
-  will immediately return UNIT_TEST_ERROR_TEST_FAILED.
-
-  @param  Pointer  Pointer to be checked.
-
+  @param[in]  Pointer  Pointer to be checked against NULL.
 **/
-#define UT_ASSERT_NOT_NULL(Pointer)                                                             \
+#define UT_ASSERT_NOT_NULL(Pointer)                                                  \
   if(!UnitTestAssertNotNull (Pointer, __FUNCTION__, __LINE__, __FILE__, #Pointer)) { \
-    return UNIT_TEST_ERROR_TEST_FAILED;                                                         \
+    return UNIT_TEST_ERROR_TEST_FAILED;                                              \
   }
 
 /**
-  Helper function for the test assertion macros.
-  Please call via the public macro.
-  Do not call directly.
+  If Expression is TRUE, then TRUE is returned.
+  If Expression is FALSE, then an assert is triggered and the location of the
+  assert provided by FunctionName, LineNumber, FileName, and Description are
+  recorded and FALSE is returned.
 
+  @param[in]  Expression    The BOOLEAN result of the expression evaluation.
+  @param[in]  FunctionName  Null-terminated ASCII string of the function
+                            executing the assert macro.
+  @param[in]  LineNumber    The source file line number of the assert macro.
+  @param[in]  FileName      Null-terminated ASCII string of the filename
+                            executing the assert macro.
+  @param[in]  Description   Null-terminated ASCII string of the expression being
+                            evaluated.
+
+  @retval  TRUE   Expression is TRUE.
+  @retval  FALSE  Expression is FALSE.
 **/
 BOOLEAN
 EFIAPI
 UnitTestAssertTrue (
-  IN BOOLEAN                     Expression,
-  IN CONST CHAR8                 *FunctionName,
-  IN UINTN                       LineNumber,
-  IN CONST CHAR8                 *FileName,
-  IN CONST CHAR8                 *Description
+  IN BOOLEAN      Expression,
+  IN CONST CHAR8  *FunctionName,
+  IN UINTN        LineNumber,
+  IN CONST CHAR8  *FileName,
+  IN CONST CHAR8  *Description
   );
 
 /**
-  Helper function for the test assertion macros.
-  Please call via the public macro.
-  Do not call directly.
+  If Expression is FALSE, then TRUE is returned.
+  If Expression is TRUE, then an assert is triggered and the location of the
+  assert provided by FunctionName, LineNumber, FileName, and Description are
+  recorded and FALSE is returned.
 
+  @param[in]  Expression    The BOOLEAN result of the expression evaluation.
+  @param[in]  FunctionName  Null-terminated ASCII string of the function
+                            executing the assert macro.
+  @param[in]  LineNumber    The source file line number of the assert macro.
+  @param[in]  FileName      Null-terminated ASCII string of the filename
+                            executing the assert macro.
+  @param[in]  Description   Null-terminated ASCII string of the expression being
+                            evaluated.
+
+  @retval  TRUE   Expression is FALSE.
+  @retval  FALSE  Expression is TRUE.
 **/
 BOOLEAN
 EFIAPI
 UnitTestAssertFalse (
-  IN BOOLEAN                     Expression,
-  IN CONST CHAR8                 *FunctionName,
-  IN UINTN                       LineNumber,
-  IN CONST CHAR8                 *FileName,
-  IN CONST CHAR8                 *Description
+  IN BOOLEAN      Expression,
+  IN CONST CHAR8  *FunctionName,
+  IN UINTN        LineNumber,
+  IN CONST CHAR8  *FileName,
+  IN CONST CHAR8  *Description
   );
 
 /**
-  Helper function for the test assertion macros.
-  Please call via the public macro.
-  Do not call directly.
+  If Status is not an EFI_ERROR(), then TRUE is returned.
+  If Status is an EFI_ERROR(), then an assert is triggered and the location of
+  the assert provided by FunctionName, LineNumber, FileName, and Description are
+  recorded and FALSE is returned.
 
+  @param[in]  Status        The EFI_STATUS value to evaluate.
+  @param[in]  FunctionName  Null-terminated ASCII string of the function
+                            executing the assert macro.
+  @param[in]  LineNumber    The source file line number of the assert macro.
+  @param[in]  FileName      Null-terminated ASCII string of the filename
+                            executing the assert macro.
+  @param[in]  Description   Null-terminated ASCII string of the status
+                            expression being evaluated.
+
+  @retval  TRUE   Status is not an EFI_ERROR().
+  @retval  FALSE  Status is an EFI_ERROR().
 **/
 BOOLEAN
 EFIAPI
 UnitTestAssertNotEfiError (
-  IN EFI_STATUS                  Status,
-  IN CONST CHAR8                 *FunctionName,
-  IN UINTN                       LineNumber,
-  IN CONST CHAR8                 *FileName,
-  IN CONST CHAR8                 *Description
+  IN EFI_STATUS   Status,
+  IN CONST CHAR8  *FunctionName,
+  IN UINTN        LineNumber,
+  IN CONST CHAR8  *FileName,
+  IN CONST CHAR8  *Description
   );
 
 /**
-  Helper function for the test assertion macros.
-  Please call via the public macro.
-  Do not call directly.
+  If ValueA is equal ValueB, then TRUE is returned.
+  If ValueA is not equal to ValueB, then an assert is triggered and the location
+  of the assert provided by FunctionName, LineNumber, FileName, DescriptionA,
+  and DescriptionB are recorded and FALSE is returned.
 
+  @param[in]  ValueA        64-bit value.
+  @param[in]  ValueB        64-bit value.
+  @param[in]  FunctionName  Null-terminated ASCII string of the function
+                            executing the assert macro.
+  @param[in]  LineNumber    The source file line number of the assert macro.
+  @param[in]  FileName      Null-terminated ASCII string of the filename
+                            executing the assert macro.
+  @param[in]  DescriptionA  Null-terminated ASCII string that is a description
+                            of ValueA.
+  @param[in]  DescriptionB  Null-terminated ASCII string that is a description
+                            of ValueB.
+
+  @retval  TRUE   ValueA is equal to ValueB.
+  @retval  FALSE  ValueA is not equal to ValueB.
 **/
 BOOLEAN
 EFIAPI
 UnitTestAssertEqual (
-  IN UINT64                      ValueA,
-  IN UINT64                      ValueB,
-  IN CONST CHAR8                 *FunctionName,
-  IN UINTN                       LineNumber,
-  IN CONST CHAR8                 *FileName,
-  IN CONST CHAR8                 *DescriptionA,
-  IN CONST CHAR8                 *DescriptionB
+  IN UINT64       ValueA,
+  IN UINT64       ValueB,
+  IN CONST CHAR8  *FunctionName,
+  IN UINTN        LineNumber,
+  IN CONST CHAR8  *FileName,
+  IN CONST CHAR8  *DescriptionA,
+  IN CONST CHAR8  *DescriptionB
   );
 
 /**
-  Helper function for the test assertion macros.
-  Please call via the public macro.
-  Do not call directly.
+  If the contents of BufferA are identical to the contents of BufferB, then TRUE
+  is returned.  If the contents of BufferA are not identical to the contents of
+  BufferB, then an assert is triggered and the location of the assert provided
+  by FunctionName, LineNumber, FileName, DescriptionA, and DescriptionB are
+  recorded and FALSE is returned.
 
+  @param[in]  BufferA       Pointer to a buffer for comparison.
+  @param[in]  BufferB       Pointer to a buffer for comparison.
+  @param[in]  Length        Number of bytes to compare in BufferA and BufferB.
+  @param[in]  FunctionName  Null-terminated ASCII string of the function
+                            executing the assert macro.
+  @param[in]  LineNumber    The source file line number of the assert macro.
+  @param[in]  FileName      Null-terminated ASCII string of the filename
+                            executing the assert macro.
+  @param[in]  DescriptionA  Null-terminated ASCII string that is a description
+                            of BufferA.
+  @param[in]  DescriptionB  Null-terminated ASCII string that is a description
+                            of BufferB.
+
+  @retval  TRUE   The contents of BufferA are identical to the contents of
+                  BufferB.
+  @retval  FALSE  The contents of BufferA are not identical to the contents of
+                  BufferB.
 **/
 BOOLEAN
 EFIAPI
 UnitTestAssertMemEqual (
-  IN UINTN                       ValueA,
-  IN UINTN                       ValueB,
-  IN UINTN                       Length,
-  IN CONST CHAR8                 *FunctionName,
-  IN UINTN                       LineNumber,
-  IN CONST CHAR8                 *FileName,
-  IN CONST CHAR8                 *DescriptionA,
-  IN CONST CHAR8                 *DescriptionB
+  IN VOID         *BufferA,
+  IN VOID         *BufferB,
+  IN UINTN        Length,
+  IN CONST CHAR8  *FunctionName,
+  IN UINTN        LineNumber,
+  IN CONST CHAR8  *FileName,
+  IN CONST CHAR8  *DescriptionA,
+  IN CONST CHAR8  *DescriptionB
   );
 
 /**
-  Helper function for the test assertion macros.
-  Please call via the public macro.
-  Do not call directly.
+  If ValueA is not equal ValueB, then TRUE is returned.
+  If ValueA is equal to ValueB, then an assert is triggered and the location
+  of the assert provided by FunctionName, LineNumber, FileName, DescriptionA
+  and DescriptionB are recorded and FALSE is returned.
 
+  @param[in]  ValueA        64-bit value.
+  @param[in]  ValueB        64-bit value.
+  @param[in]  FunctionName  Null-terminated ASCII string of the function
+                            executing the assert macro.
+  @param[in]  LineNumber    The source file line number of the assert macro.
+  @param[in]  FileName      Null-terminated ASCII string of the filename
+                            executing the assert macro.
+  @param[in]  DescriptionA  Null-terminated ASCII string that is a description
+                            of ValueA.
+  @param[in]  DescriptionB  Null-terminated ASCII string that is a description
+                            of ValueB.
+
+  @retval  TRUE   ValueA is not equal to ValueB.
+  @retval  FALSE  ValueA is equal to ValueB.
 **/
 BOOLEAN
 EFIAPI
 UnitTestAssertNotEqual (
-  IN UINT64                      ValueA,
-  IN UINT64                      ValueB,
-  IN CONST CHAR8                 *FunctionName,
-  IN UINTN                       LineNumber,
-  IN CONST CHAR8                 *FileName,
-  IN CONST CHAR8                 *DescriptionA,
-  IN CONST CHAR8                 *DescriptionB
+  IN UINT64       ValueA,
+  IN UINT64       ValueB,
+  IN CONST CHAR8  *FunctionName,
+  IN UINTN        LineNumber,
+  IN CONST CHAR8  *FileName,
+  IN CONST CHAR8  *DescriptionA,
+  IN CONST CHAR8  *DescriptionB
   );
 
 /**
-  Helper function for the test assertion macros.
-  Please call via the public macro.
-  Do not call directly.
+  If Status is equal to Expected, then TRUE is returned.
+  If Status is not equal to Expected, then an assert is triggered and the
+  location of the assert provided by FunctionName, LineNumber, FileName, and
+  Description are recorded and FALSE is returned.
 
+  @param[in]  Status        EFI_STATUS value returned from an API under test.
+  @param[in]  Expected      The expected EFI_STATUS return value from an API
+                            under test.
+  @param[in]  FunctionName  Null-terminated ASCII string of the function
+                            executing the assert macro.
+  @param[in]  LineNumber    The source file line number of the assert macro.
+  @param[in]  FileName      Null-terminated ASCII string of the filename
+                            executing the assert macro.
+  @param[in]  Description   Null-terminated ASCII string that is a description
+                            of Status.
+
+  @retval  TRUE   Status is equal to Expected.
+  @retval  FALSE  Status is not equal to Expected.
 **/
 BOOLEAN
 EFIAPI
 UnitTestAssertStatusEqual (
-  IN EFI_STATUS                  Status,
-  IN EFI_STATUS                  Expected,
-  IN CONST CHAR8                 *FunctionName,
-  IN UINTN                       LineNumber,
-  IN CONST CHAR8                 *FileName,
-  IN CONST CHAR8                 *Description
+  IN EFI_STATUS   Status,
+  IN EFI_STATUS   Expected,
+  IN CONST CHAR8  *FunctionName,
+  IN UINTN        LineNumber,
+  IN CONST CHAR8  *FileName,
+  IN CONST CHAR8  *Description
   );
 
 /**
-  Helper function for the test assertion macros.
-  Please call via the public macro.
-  Do not call directly.
+  If Pointer is not equal to NULL, then TRUE is returned.
+  If Pointer is equal to NULL, then an assert is triggered and the location of
+  the assert provided by FunctionName, LineNumber, FileName, and PointerName
+  are recorded and FALSE is returned.
 
+  @param[in]  Pointer       Pointer value to be checked against NULL.
+  @param[in]  Expected      The expected EFI_STATUS return value from a function
+                            under test.
+  @param[in]  FunctionName  Null-terminated ASCII string of the function
+                            executing the assert macro.
+  @param[in]  LineNumber    The source file line number of the assert macro.
+  @param[in]  FileName      Null-terminated ASCII string of the filename
+                            executing the assert macro.
+  @param[in]  PointerName   Null-terminated ASCII string that is a description
+                            of Pointer.
+
+  @retval  TRUE   Pointer is not equal to NULL.
+  @retval  FALSE  Pointer is equal to NULL.
 **/
 BOOLEAN
 EFIAPI
 UnitTestAssertNotNull (
-  IN VOID*                       Pointer,
-  IN CONST CHAR8                 *FunctionName,
-  IN UINTN                       LineNumber,
-  IN CONST CHAR8                 *FileName,
-  IN CONST CHAR8                 *PointerName
+  IN VOID         *Pointer,
+  IN CONST CHAR8  *FunctionName,
+  IN UINTN        LineNumber,
+  IN CONST CHAR8  *FileName,
+  IN CONST CHAR8  *PointerName
   );
 
-///
-/// Unit-Test Logging Macros and Functions
-///
 /**
   Test logging macro that records an ERROR message in the test framework log.
-  Record will be associated with this test case during reporting.
+  Record is associated with the currently executing test case.
 
-  @param  Format  Standard C formatting string.
-  @param  ...     Print args.
-
+  @param[in]  Format  Formatting string following the format defined in
+                      MdePkg/Include/Library/PrintLib.h.
+  @param[in]  ...     Print args.
 **/
-#define UT_LOG_ERROR(Format, ...)    \
-  UnitTestLog (DEBUG_ERROR, Format, ##__VA_ARGS__ );
+#define UT_LOG_ERROR(Format, ...)  \
+  UnitTestLog (UNIT_TEST_LOG_LEVEL_ERROR, Format, ##__VA_ARGS__)
 
 /**
   Test logging macro that records a WARNING message in the test framework log.
-  Record will be associated with this test case during reporting.
+  Record is associated with the currently executing test case.
 
-  @param  Format  Standard C formatting string.
-  @param  ...     Print args.
-
+  @param[in]  Format  Formatting string following the format defined in
+                      MdePkg/Include/Library/PrintLib.h.
+  @param[in]  ...     Print args.
 **/
 #define UT_LOG_WARNING(Format, ...)  \
-  UnitTestLog (DEBUG_WARN, Format, ##__VA_ARGS__ );
+  UnitTestLog (UNIT_TEST_LOG_LEVEL_WARN, Format, ##__VA_ARGS__)
 
 /**
   Test logging macro that records an INFO message in the test framework log.
-  Record will be associated with this test case during reporting.
+  Record is associated with the currently executing test case.
 
-  @param  Format  Standard C formatting string.
-  @param  ...     Print args.
-
+  @param[in]  Format  Formatting string following the format defined in
+                      MdePkg/Include/Library/PrintLib.h.
+  @param[in]  ...     Print args.
 **/
-#define UT_LOG_INFO(Format, ...)     \
-  UnitTestLog (DEBUG_INFO, Format, ##__VA_ARGS__ );
+#define UT_LOG_INFO(Format, ...)  \
+  UnitTestLog (UNIT_TEST_LOG_LEVEL_INFO, Format, ##__VA_ARGS__)
 
 /**
   Test logging macro that records a VERBOSE message in the test framework log.
-  Record will be associated with this test case during reporting.
+  Record is associated with the currently executing test case.
 
-  @param  Format  Standard C formatting string.
-  @param  ...     Print args.
-
+  @param[in]  Format  Formatting string following the format defined in
+                      MdePkg/Include/Library/PrintLib.h.
+  @param[in]  ...     Print args.
 **/
 #define UT_LOG_VERBOSE(Format, ...)  \
-  UnitTestLog (DEBUG_VERBOSE, Format, ##__VA_ARGS__ );
+  UnitTestLog (UNIT_TEST_LOG_LEVEL_VERBOSE, Format, ##__VA_ARGS__)
 
 /**
-  Helper function for the test logging macros.
-  Please call via the public macros.
-  Do not call directly.
+  Test logging function that records a messages in the test framework log.
+  Record is associated with the currently executing test case.
 
+  @param[in]  ErrorLevel  The error level of the unit test log message.
+  @param[in]  Format      Formatting string following the format defined in the
+                          MdePkg/Include/Library/PrintLib.h.
+  @param[in]  ...         Print args.
 **/
 VOID
 EFIAPI
 UnitTestLog (
-  IN  UINTN                       ErrorLevel,
-  IN  CONST CHAR8                 *Format,
+  IN  UINTN        ErrorLevel,
+  IN  CONST CHAR8  *Format,
   ...
   );
 

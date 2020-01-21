@@ -75,11 +75,11 @@ RunTestSuite (
 
     //
     // Next, if we're still running, make sure that our test prerequisites are in place.
-    if (Test->Result == UNIT_TEST_PENDING && Test->PreReq != NULL) {
+    if (Test->Result == UNIT_TEST_PENDING && Test->Prerequisite != NULL) {
       DEBUG ((DEBUG_VERBOSE, "PREREQ\n"));
-      if (Test->PreReq (Test->Context) != UNIT_TEST_PASSED) {
-        DEBUG ((DEBUG_ERROR, "PreReq Not Met\n"));
-        Test->Result = UNIT_TEST_ERROR_PREREQ_NOT_MET;
+      if (Test->Prerequisite (Test->Context) != UNIT_TEST_PASSED) {
+        DEBUG ((DEBUG_ERROR, "Prerequisite Not Met\n"));
+        Test->Result = UNIT_TEST_ERROR_PREREQUISITE_NOT_MET;
         ParentFramework->CurrentTest  = NULL;
         continue;
       }
@@ -89,14 +89,14 @@ RunTestSuite (
     // Now we should be ready to call the actual test.
     // We set the status to UNIT_TEST_RUNNING in case the test needs to reboot
     // or quit. The UNIT_TEST_RUNNING state will allow the test to resume
-    // but will prevent the PreReq from being dispatched a second time.
+    // but will prevent the Prerequisite from being dispatched a second time.
     Test->Result = UNIT_TEST_RUNNING;
     Test->Result = Test->RunTest (Test->Context);
 
     //
     // Finally, clean everything up, if need be.
     if (Test->CleanUp != NULL) {
-      DEBUG (( DEBUG_VERBOSE, "CLEANUP\n"));
+      DEBUG ((DEBUG_VERBOSE, "CLEANUP\n"));
       Test->CleanUp (Test->Context);
     }
 
@@ -113,6 +113,20 @@ RunTestSuite (
   return EFI_SUCCESS;
 }
 
+/**
+  Execute all unit test cases in all unit test suites added to a Framework.
+
+  Once a unit test framework is initialized and all unit test suites and unit
+  test cases are registered, this function will cause the unit test framework to
+  dispatch all unit test cases in sequence and record the results for reporting.
+
+  @param[in]  FrameworkHandle  A handle to the current running framework that
+                               dispatched the test.  Necessary for recording
+                               certain test events with the framework.
+
+  @retval  EFI_SUCCESS            All test cases were dispached.
+  @retval  EFI_INVALID_PARAMETER  FrameworkHandle is NULL.
+**/
 EFI_STATUS
 EFIAPI
 RunAllTestSuites (

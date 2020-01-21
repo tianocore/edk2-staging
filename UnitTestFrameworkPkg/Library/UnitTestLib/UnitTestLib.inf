@@ -35,4 +35,4 @@
   UnitTestResultReportLib
 
 [Pcd]
-  gUnitTestPkgTokenSpaceGuid.UnitTestLogLevel  ## CONSUMES
+  gUnitTestFrameworkPkgTokenSpaceGuid.PcdUnitTestLogLevel  ## CONSUMES

@@ -36,4 +36,4 @@
   CmockaLib
 
 [Pcd]
-  gUnitTestPkgTokenSpaceGuid.UnitTestLogLevel  ## CONSUMES
+  gUnitTestFrameworkPkgTokenSpaceGuid.PcdUnitTestLogLevel  ## CONSUMES
