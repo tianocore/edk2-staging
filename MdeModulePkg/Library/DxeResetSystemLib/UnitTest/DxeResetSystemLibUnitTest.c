@@ -51,6 +51,7 @@
 **/
 STATIC
 VOID
+EFIAPI
 MockResetSystem (
   IN EFI_RESET_TYPE           ResetType,
   IN EFI_STATUS               ResetStatus,
