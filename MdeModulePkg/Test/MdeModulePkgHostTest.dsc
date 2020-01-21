@@ -19,6 +19,8 @@
 !include UnitTestFrameworkPkg/UnitTestFrameworkPkgHost.dsc.inc
 
 [Components]
+  MdeModulePkg/Library/DxeResetSystemLib/UnitTest/MockUefiRuntimeServicesTableLib.inf
+
   #
   # Build MdeModulePkg HOST_APPLICATION Tests
   #
