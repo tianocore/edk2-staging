@@ -132,8 +132,6 @@ CmockaUnitTestSuiteSetupFunctionRunner (
   void **state
   )
 {
-  UNIT_TEST_FRAMEWORK  *Framework;
-
   if (mActiveUnitTestSuite == NULL) {
     return -1;
   }
@@ -141,7 +139,6 @@ CmockaUnitTestSuiteSetupFunctionRunner (
     return 0;
   }
 
-  Framework = (UNIT_TEST_FRAMEWORK *)(mActiveUnitTestSuite->ParentFramework);
   mActiveUnitTestSuite->Setup ();
   //
   // Always succeed
@@ -154,8 +151,6 @@ CmockaUnitTestSuiteTeardownFunctionRunner (
   void **state
   )
 {
-  UNIT_TEST_FRAMEWORK  *Framework;
-
   if (mActiveUnitTestSuite == NULL) {
     return -1;
   }
@@ -163,7 +158,6 @@ CmockaUnitTestSuiteTeardownFunctionRunner (
     return 0;
   }
 
-  Framework = (UNIT_TEST_FRAMEWORK *)(mActiveUnitTestSuite->ParentFramework);
   mActiveUnitTestSuite->Teardown ();
   //
   // Always succeed
