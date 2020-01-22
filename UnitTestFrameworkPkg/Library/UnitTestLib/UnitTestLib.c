@@ -802,7 +802,7 @@ SerializeState (
   @retval  EFI_OUT_OF_RESOURCES   There are not enough resources available to
                                   save the framework and context state.
   @retval  EFI_DEVICE_ERROR       The framework and context state could not be
-                                  saved to a persistent storage devide due to a
+                                  saved to a persistent storage device due to a
                                   device error.
 **/
 EFI_STATUS
