@@ -1,9 +1,8 @@
-/** @file -- UnitTestNullPersistenceLib.c
+/** @file
   This is an instance of the Unit Test Persistence Lib that does nothing.
 
   Copyright (c) Microsoft Corporation.<BR>
   SPDX-License-Identifier: BSD-2-Clause-Patent
-
 **/
 
 #include <Uefi.h>
@@ -15,7 +14,7 @@
 
   @param[in]  FrameworkHandle  A pointer to the framework that is being persisted.
 
-  @retval  TRUE 
+  @retval  TRUE
   @retval  FALSE  Cache doesn't exist or an error occurred.
 
 **/

@@ -1,9 +1,8 @@
 /** @file
   UnitTestLib APIs to run unit tests using cmocka
 
-  Copyright (c) 2019, Intel Corporation. All rights reserved.<BR>
+  Copyright (c) 2019 - 2020, Intel Corporation. All rights reserved.<BR>
   SPDX-License-Identifier: BSD-2-Clause-Patent
-
 **/
 
 #include <stdio.h>
@@ -20,7 +19,6 @@
 #include <Library/BaseMemoryLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/DebugLib.h>
-
 
 STATIC UNIT_TEST_FRAMEWORK_HANDLE  mFrameworkHandle = NULL;
 

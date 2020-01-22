@@ -6,11 +6,11 @@
 ##
 
 [Defines]
-  INF_VERSION     = 0x00010005
-  BASE_NAME       = SampleUnitTestHost
-  FILE_GUID       = CC0EA77E-BF2D-4134-B419-0C02E15CE08E
-  MODULE_TYPE     = HOST_APPLICATION
-  VERSION_STRING  = 1.0
+  INF_VERSION    = 0x00010005
+  BASE_NAME      = SampleUnitTestHost
+  FILE_GUID      = CC0EA77E-BF2D-4134-B419-0C02E15CE08E
+  MODULE_TYPE    = HOST_APPLICATION
+  VERSION_STRING = 1.0
 
 #
 # The following information is for reference only and not required by the build tools.

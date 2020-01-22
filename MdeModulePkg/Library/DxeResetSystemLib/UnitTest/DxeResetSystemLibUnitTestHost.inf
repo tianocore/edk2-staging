@@ -1,4 +1,6 @@
 ## @file
+# Unit tests of the DxeResetSystemLib instance of the ResetSystemLib class
+#
 # Copyright (C) Microsoft Corporation.
 # SPDX-License-Identifier: BSD-2-Clause-Patent
 ##

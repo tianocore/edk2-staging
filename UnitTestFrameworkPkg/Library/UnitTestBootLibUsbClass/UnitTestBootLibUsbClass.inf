@@ -4,7 +4,6 @@
 #
 # Copyright (c) Microsoft Corporation.<BR>
 # SPDX-License-Identifier: BSD-2-Clause-Patent
-#
 ##
 
 [Defines]
@@ -32,4 +31,4 @@
   UefiBootManagerLib
 
 [Guids]
-  gEfiGlobalVariableGuid                      ## CONSUMES ## Used to probe boot options and set BootNext.
+  gEfiGlobalVariableGuid  ## CONSUMES ## Used to probe boot options and set BootNext.

@@ -2,7 +2,7 @@
   UEFI OS based application for unit testing the SafeIntLib.
 
   Copyright (c) Microsoft Corporation.<BR>
-  Copyright (c) 2018, Intel Corporation. All rights reserved.<BR>
+  Copyright (c) 2018 - 2020, Intel Corporation. All rights reserved.<BR>
   SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/

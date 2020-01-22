@@ -25,15 +25,6 @@
 #define UNIT_TEST_APP_NAME        "DxeResetSystemLib Unit Tests"
 #define UNIT_TEST_APP_VERSION     "1.0"
 
-
-///================================================================================================
-///================================================================================================
-///
-/// HELPER FUNCTIONS
-///
-///================================================================================================
-///================================================================================================
-
 /**
   Resets the entire platform.
 
@@ -59,186 +50,263 @@ MockResetSystem (
   IN VOID                     *ResetData OPTIONAL
   )
 {
-    check_expected_ptr( ResetType );
-    check_expected_ptr( ResetStatus );
+  check_expected_ptr (ResetType);
+  check_expected_ptr (ResetStatus);
 
-    // NOTE: Mocked functions can also return values, but that
-    //       is for another demo.
-
-    return;
+  //
+  // NOTE: Mocked functions can also return values, but that
+  //       is for another demo.
 }
 
-EFI_RUNTIME_SERVICES    MockRuntime = {
-    {
-        EFI_RUNTIME_SERVICES_SIGNATURE,     // Signature
-        EFI_RUNTIME_SERVICES_REVISION,      // Revision
-        sizeof (EFI_RUNTIME_SERVICES),      // HeaderSize
-        0,                                  // CRC32
-        0                                   // Reserved
-      },
-      NULL,               // GetTime
-      NULL,               // SetTime
-      NULL,               // GetWakeupTime
-      NULL,               // SetWakeupTime
-      NULL,               // SetVirtualAddressMap
-      NULL,               // ConvertPointer
-      NULL,               // GetVariable
-      NULL,               // GetNextVariableName
-      NULL,               // SetVariable
-      NULL,               // GetNextHighMonotonicCount
-      MockResetSystem,    // ResetSystem
-      NULL,               // UpdateCapsule
-      NULL,               // QueryCapsuleCapabilities
-      NULL                // QueryVariableInfo
+///
+/// Mock version of the UEFI Runtime Services Table
+///
+EFI_RUNTIME_SERVICES  MockRuntime = {
+  {
+    EFI_RUNTIME_SERVICES_SIGNATURE,     // Signature
+    EFI_RUNTIME_SERVICES_REVISION,      // Revision
+    sizeof (EFI_RUNTIME_SERVICES),      // HeaderSize
+    0,                                  // CRC32
+    0                                   // Reserved
+  },
+  NULL,               // GetTime
+  NULL,               // SetTime
+  NULL,               // GetWakeupTime
+  NULL,               // SetWakeupTime
+  NULL,               // SetVirtualAddressMap
+  NULL,               // ConvertPointer
+  NULL,               // GetVariable
+  NULL,               // GetNextVariableName
+  NULL,               // SetVariable
+  NULL,               // GetNextHighMonotonicCount
+  MockResetSystem,    // ResetSystem
+  NULL,               // UpdateCapsule
+  NULL,               // QueryCapsuleCapabilities
+  NULL                // QueryVariableInfo
 };
 
-///================================================================================================
-///================================================================================================
-///
-/// TEST CASES
-///
-///================================================================================================
-///================================================================================================
+/**
+  Unit test for ColdReset () API of the ResetSystemLib.
 
+  @param[in]  Context    [Optional] An optional paramter that enables:
+                         1) test-case reuse with varied parameters and
+                         2) test-case re-entry for Target tests that need a
+                         reboot.  This parameter is a VOID* and it is the
+                         responsibility of the test author to ensure that the
+                         contents are well understood by all test cases that may
+                         consume it.
+
+  @retval  UNIT_TEST_PASSED             The Unit test has completed and the test
+                                        case was successful.
+  @retval  UNIT_TEST_ERROR_TEST_FAILED  A test case assertion has failed.
+**/
 UNIT_TEST_STATUS
 EFIAPI
 ResetColdShouldIssueAColdReset (
-  IN UNIT_TEST_CONTEXT           Context
+  IN UNIT_TEST_CONTEXT  Context
   )
 {
-    expect_value( MockResetSystem, ResetType, EfiResetCold );
-    expect_value( MockResetSystem, ResetStatus, EFI_SUCCESS );
+  expect_value (MockResetSystem, ResetType, EfiResetCold);
+  expect_value (MockResetSystem, ResetStatus, EFI_SUCCESS);
 
-    ResetCold();
+  ResetCold ();
 
-    return UNIT_TEST_PASSED;
-} // ResetColdShouldIssueAColdReset()
+  return UNIT_TEST_PASSED;
+}
 
+/**
+  Unit test for WarmReset () API of the ResetSystemLib.
+
+  @param[in]  Context    [Optional] An optional paramter that enables:
+                         1) test-case reuse with varied parameters and
+                         2) test-case re-entry for Target tests that need a
+                         reboot.  This parameter is a VOID* and it is the
+                         responsibility of the test author to ensure that the
+                         contents are well understood by all test cases that may
+                         consume it.
+
+  @retval  UNIT_TEST_PASSED             The Unit test has completed and the test
+                                        case was successful.
+  @retval  UNIT_TEST_ERROR_TEST_FAILED  A test case assertion has failed.
+**/
 UNIT_TEST_STATUS
 EFIAPI
 ResetWarmShouldIssueAWarmReset (
-  IN UNIT_TEST_CONTEXT           Context
+  IN UNIT_TEST_CONTEXT  Context
   )
 {
-    expect_value( MockResetSystem, ResetType, EfiResetWarm );
-    expect_value( MockResetSystem, ResetStatus, EFI_SUCCESS );
+  expect_value (MockResetSystem, ResetType, EfiResetWarm);
+  expect_value (MockResetSystem, ResetStatus, EFI_SUCCESS);
 
-    ResetWarm();
+  ResetWarm ();
 
-    return UNIT_TEST_PASSED;
-} // ResetWarmShouldIssueAWarmReset()
+  return UNIT_TEST_PASSED;
+}
 
+/**
+  Unit test for ResetShutdown () API of the ResetSystemLib.
+
+  @param[in]  Context    [Optional] An optional paramter that enables:
+                         1) test-case reuse with varied parameters and
+                         2) test-case re-entry for Target tests that need a
+                         reboot.  This parameter is a VOID* and it is the
+                         responsibility of the test author to ensure that the
+                         contents are well understood by all test cases that may
+                         consume it.
+
+  @retval  UNIT_TEST_PASSED             The Unit test has completed and the test
+                                        case was successful.
+  @retval  UNIT_TEST_ERROR_TEST_FAILED  A test case assertion has failed.
+**/
 UNIT_TEST_STATUS
 EFIAPI
 ResetShutdownShouldIssueAShutdown (
-  IN UNIT_TEST_CONTEXT           Context
+  IN UNIT_TEST_CONTEXT  Context
   )
 {
-    expect_value( MockResetSystem, ResetType, EfiResetShutdown );
-    expect_value( MockResetSystem, ResetStatus, EFI_SUCCESS );
+  expect_value (MockResetSystem, ResetType, EfiResetShutdown);
+  expect_value (MockResetSystem, ResetStatus, EFI_SUCCESS);
 
-    ResetShutdown();
+  ResetShutdown ();
 
-    return UNIT_TEST_PASSED;
-} // ResetShutdownShouldIssueAShutdown()
+  return UNIT_TEST_PASSED;
+}
 
+/**
+  Unit test for ResetPlatformSpecific () API of the ResetSystemLib.
+
+  @param[in]  Context    [Optional] An optional paramter that enables:
+                         1) test-case reuse with varied parameters and
+                         2) test-case re-entry for Target tests that need a
+                         reboot.  This parameter is a VOID* and it is the
+                         responsibility of the test author to ensure that the
+                         contents are well understood by all test cases that may
+                         consume it.
+
+  @retval  UNIT_TEST_PASSED             The Unit test has completed and the test
+                                        case was successful.
+  @retval  UNIT_TEST_ERROR_TEST_FAILED  A test case assertion has failed.
+**/
 UNIT_TEST_STATUS
 EFIAPI
 ResetPlatformSpecificShouldIssueAPlatformSpecificReset (
-  IN UNIT_TEST_CONTEXT           Context
+  IN UNIT_TEST_CONTEXT  Context
   )
 {
-    expect_value( MockResetSystem, ResetType, EfiResetPlatformSpecific );
-    expect_value( MockResetSystem, ResetStatus, EFI_SUCCESS );
+  expect_value (MockResetSystem, ResetType, EfiResetPlatformSpecific);
+  expect_value (MockResetSystem, ResetStatus, EFI_SUCCESS);
 
-    ResetPlatformSpecific(0, NULL);
+  ResetPlatformSpecific (0, NULL);
 
-    return UNIT_TEST_PASSED;
-} // ResetPlatformSpecificShouldIssueAPlatformSpecificReset()
+  return UNIT_TEST_PASSED;
+}
 
+/**
+  Unit test for ResetSystem () API of the ResetSystemLib.
+
+  @param[in]  Context    [Optional] An optional paramter that enables:
+                         1) test-case reuse with varied parameters and
+                         2) test-case re-entry for Target tests that need a
+                         reboot.  This parameter is a VOID* and it is the
+                         responsibility of the test author to ensure that the
+                         contents are well understood by all test cases that may
+                         consume it.
+
+  @retval  UNIT_TEST_PASSED             The Unit test has completed and the test
+                                        case was successful.
+  @retval  UNIT_TEST_ERROR_TEST_FAILED  A test case assertion has failed.
+**/
 UNIT_TEST_STATUS
 EFIAPI
 ResetSystemShouldPassTheParametersThrough (
-  IN UNIT_TEST_CONTEXT           Context
+  IN UNIT_TEST_CONTEXT  Context
   )
 {
-    expect_value( MockResetSystem, ResetType, EfiResetCold );
-    expect_value( MockResetSystem, ResetStatus, EFI_SUCCESS );
+  expect_value (MockResetSystem, ResetType, EfiResetCold);
+  expect_value (MockResetSystem, ResetStatus, EFI_SUCCESS);
 
-    ResetSystem(EfiResetCold, EFI_SUCCESS, 0, NULL);
+  ResetSystem (EfiResetCold, EFI_SUCCESS, 0, NULL);
 
-    expect_value( MockResetSystem, ResetType, EfiResetShutdown );
-    expect_value( MockResetSystem, ResetStatus, EFI_SUCCESS );
+  expect_value (MockResetSystem, ResetType, EfiResetShutdown);
+  expect_value (MockResetSystem, ResetStatus, EFI_SUCCESS);
 
-    ResetSystem(EfiResetShutdown, EFI_SUCCESS, 0, NULL);
+  ResetSystem (EfiResetShutdown, EFI_SUCCESS, 0, NULL);
 
-    return UNIT_TEST_PASSED;
-} // ResetSystemShouldPassTheParametersThrough()
+  return UNIT_TEST_PASSED;
+}
 
-///================================================================================================
-///================================================================================================
-///
-/// TEST ENGINE
-///
-///================================================================================================
-///================================================================================================
+/**
+  Initialze the unit test framework, suite, and unit tests for the
+  ResetSystemLib and run the ResetSystemLib unit test.
 
-
+  @retval  EFI_SUCCESS           All test cases were dispached.
+  @retval  EFI_OUT_OF_RESOURCES  There are not enough resources available to
+                                 initialize the unit tests.
+**/
 STATIC
 EFI_STATUS
 EFIAPI
-UnitTestingEntry ()
+UnitTestingEntry (
+  VOID
+  )
 {
-    EFI_STATUS                       Status;
-    UNIT_TEST_FRAMEWORK_HANDLE       Framework = NULL;
-    UNIT_TEST_SUITE_HANDLE           ResetTests;
+  EFI_STATUS                  Status;
+  UNIT_TEST_FRAMEWORK_HANDLE  Framework;
+  UNIT_TEST_SUITE_HANDLE      ResetTests;
 
-    DEBUG(( DEBUG_INFO, "%a v%a\n", UNIT_TEST_APP_NAME, UNIT_TEST_APP_VERSION ));
+  Framework = NULL;
 
-    //
-    // Start setting up the test framework for running the tests.
-    //
-    Status = InitUnitTestFramework( &Framework, UNIT_TEST_APP_NAME, gEfiCallerBaseName, UNIT_TEST_APP_VERSION );
-    if (EFI_ERROR( Status )) {
-        DEBUG((DEBUG_ERROR, "Failed in InitUnitTestFramework. Status = %r\n", Status));
-        goto EXIT;
-    }
+  DEBUG(( DEBUG_INFO, "%a v%a\n", UNIT_TEST_APP_NAME, UNIT_TEST_APP_VERSION ));
 
-    //
-    // Populate the B64 Encode Unit Test Suite.
-    //
-    Status = CreateUnitTestSuite( &ResetTests, Framework, "DxeResetSystemLib Reset Tests", "ResetSystemLib.Reset", NULL, NULL );
-    if (EFI_ERROR( Status )){
-        DEBUG((DEBUG_ERROR, "Failed in CreateUnitTestSuite for ResetTests\n"));
-        Status = EFI_OUT_OF_RESOURCES;
-        goto EXIT;
-    }
+  //
+  // Start setting up the test framework for running the tests.
+  //
+  Status = InitUnitTestFramework (&Framework, UNIT_TEST_APP_NAME, gEfiCallerBaseName, UNIT_TEST_APP_VERSION);
+  if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_ERROR, "Failed in InitUnitTestFramework. Status = %r\n", Status));
+      goto EXIT;
+  }
 
-// --------------Suite-----------Description--------------Class Name----------Function--------Pre---Post-------------------Context-----------
-    AddTestCase( ResetTests, "ResetCold should issue a cold reset", "Cold", ResetColdShouldIssueAColdReset, NULL, NULL, NULL);
-    AddTestCase( ResetTests, "ResetWarm should issue a warm reset", "Warm", ResetWarmShouldIssueAWarmReset, NULL, NULL, NULL);
-    AddTestCase( ResetTests, "ResetShutdown should issue a shutdown", "Shutdown", ResetShutdownShouldIssueAShutdown, NULL, NULL, NULL);
-    AddTestCase( ResetTests, "ResetPlatformSpecific should issue a platform-specific reset", "Platform", ResetPlatformSpecificShouldIssueAPlatformSpecificReset, NULL, NULL, NULL);
-    AddTestCase( ResetTests, "ResetSystem should pass all parameters through", "Parameters", ResetSystemShouldPassTheParametersThrough, NULL, NULL, NULL);
+  //
+  // Populate the ResetSytemLib Unit Test Suite.
+  //
+  Status = CreateUnitTestSuite (&ResetTests, Framework, "DxeResetSystemLib Reset Tests", "ResetSystemLib.Reset", NULL, NULL);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "Failed in CreateUnitTestSuite for ResetTests\n"));
+    Status = EFI_OUT_OF_RESOURCES;
+    goto EXIT;
+  }
 
-    //
-    // Execute the tests.
-    //
-    Status = RunAllTestSuites( Framework );
+  //
+  // --------------Suite-----------Description--------------Name----------Function--------Pre---Post-------------------Context-----------
+  //
+  AddTestCase (ResetTests, "ResetCold should issue a cold reset", "Cold", ResetColdShouldIssueAColdReset, NULL, NULL, NULL);
+  AddTestCase (ResetTests, "ResetWarm should issue a warm reset", "Warm", ResetWarmShouldIssueAWarmReset, NULL, NULL, NULL);
+  AddTestCase (ResetTests, "ResetShutdown should issue a shutdown", "Shutdown", ResetShutdownShouldIssueAShutdown, NULL, NULL, NULL);
+  AddTestCase (ResetTests, "ResetPlatformSpecific should issue a platform-specific reset", "Platform", ResetPlatformSpecificShouldIssueAPlatformSpecificReset, NULL, NULL, NULL);
+  AddTestCase (ResetTests, "ResetSystem should pass all parameters through", "Parameters", ResetSystemShouldPassTheParametersThrough, NULL, NULL, NULL);
+
+  //
+  // Execute the tests.
+  //
+  Status = RunAllTestSuites (Framework);
 
 EXIT:
-    if (Framework) {
-      FreeUnitTestFramework( Framework );
-    }
+  if (Framework) {
+    FreeUnitTestFramework (Framework);
+  }
 
-    return Status;
+  return Status;
 }
 
+/**
+  Standard POSIX C entry point for host based unit test execution.
+**/
 int
 main (
   int argc,
   char *argv[]
   )
 {
-  return UnitTestingEntry();
+  return UnitTestingEntry ();
 }

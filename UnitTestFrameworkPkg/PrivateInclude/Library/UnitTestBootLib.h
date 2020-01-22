@@ -5,7 +5,7 @@
   platform customization will make porting to new code base/platform easier.
 
   Copyright (c) Microsoft Corporation.<BR>
-  Copyright (c) 2019, Intel Corporation. All rights reserved.<BR>
+  Copyright (c) 2019 - 2020, Intel Corporation. All rights reserved.<BR>
   SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/

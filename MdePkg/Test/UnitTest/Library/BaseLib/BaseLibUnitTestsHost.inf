@@ -1,8 +1,10 @@
 ## @file
+# Unit tests of Base64 conversion APIs in BaseLib that are run from host
+# environment.
+#
 # Copyright (C) Microsoft Corporation.
 # SPDX-License-Identifier: BSD-2-Clause-Patent
 ##
-
 
 [Defines]
   INF_VERSION                    = 0x00010006
@@ -23,17 +25,8 @@
 [Packages]
   MdePkg/MdePkg.dec
 
-[Protocols]
-
-
 [LibraryClasses]
   BaseLib
   BaseMemoryLib
   DebugLib
   UnitTestLib
-
-[Guids]
-
-
-
-

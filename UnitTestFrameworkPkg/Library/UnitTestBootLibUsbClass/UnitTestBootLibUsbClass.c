@@ -1,6 +1,6 @@
 /**
-  Implement UnitTestBootLib using USB Class Boot option.  This should be industry standard and should
-  work on all platforms
+  Implement UnitTestBootLib using USB Class Boot option.  This should be
+  industry standard and should work on all platforms
 
   Copyright (c) Microsoft Corporation.<BR>
   SPDX-License-Identifier: BSD-2-Clause-Patent

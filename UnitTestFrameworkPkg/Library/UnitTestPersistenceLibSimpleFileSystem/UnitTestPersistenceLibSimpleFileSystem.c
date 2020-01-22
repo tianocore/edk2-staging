@@ -5,7 +5,6 @@
 
   Copyright (c) Microsoft Corporation.<BR>
   SPDX-License-Identifier: BSD-2-Clause-Patent
-
 **/
 
 #include <PiDxe.h>

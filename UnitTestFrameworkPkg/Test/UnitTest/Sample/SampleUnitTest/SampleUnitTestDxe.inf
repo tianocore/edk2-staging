@@ -5,14 +5,13 @@
 # SPDX-License-Identifier: BSD-2-Clause-Patent
 ##
 
-
 [Defines]
-  INF_VERSION                    = 0x00010006
-  BASE_NAME                      = SampleUnitTestDxe
-  FILE_GUID                      = 96BB18BD-FF2B-4B51-B683-0DC9A4BF12CF
-  MODULE_TYPE                    = DXE_DRIVER
-  VERSION_STRING                 = 1.0
-  ENTRY_POINT                    = DxeEntryPoint
+  INF_VERSION    = 0x00010006
+  BASE_NAME      = SampleUnitTestDxe
+  FILE_GUID      = 96BB18BD-FF2B-4B51-B683-0DC9A4BF12CF
+  MODULE_TYPE    = DXE_DRIVER
+  VERSION_STRING = 1.0
+  ENTRY_POINT    = DxeEntryPoint
 
 #
 # The following information is for reference only and not required by the build tools.

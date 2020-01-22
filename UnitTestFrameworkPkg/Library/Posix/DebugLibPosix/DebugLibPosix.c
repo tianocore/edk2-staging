@@ -1,8 +1,10 @@
 /** @file
+  Instance of Debug Library based on POSIX APIs
 
-Copyright (c) 2018, Intel Corporation. All rights reserved.<BR>
-SPDX-License-Identifier: BSD-2-Clause-Patent
+  Uses Print Library to produce formatted output strings sent to printf().
 
+  Copyright (c) 2018 - 2020, Intel Corporation. All rights reserved.<BR>
+  SPDX-License-Identifier: BSD-2-Clause-Patent
 **/
 
 #include <stdio.h>

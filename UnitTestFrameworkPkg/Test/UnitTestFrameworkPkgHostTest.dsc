@@ -1,4 +1,5 @@
 ## @file
+# UnitTestFrameworkPkg DSC file used to build host-based unit tests.
 #
 # Copyright (c) Microsoft Corporation.<BR>
 # SPDX-License-Identifier: BSD-2-Clause-Patent

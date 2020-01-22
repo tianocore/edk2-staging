@@ -3,7 +3,6 @@
 
   Copyright (c) Microsoft Corporation.
   SPDX-License-Identifier: BSD-2-Clause-Patent
-
 **/
 
 #include <Uefi.h>
@@ -15,9 +14,9 @@
 #include <Library/UnitTestPersistenceLib.h>
 #include <Library/UnitTestResultReportLib.h>
 
-//
-// Forward declaration of prototype
-//
+///
+/// Forward declaration of prototype
+///
 STATIC
 VOID
 UpdateTestFromSave (
