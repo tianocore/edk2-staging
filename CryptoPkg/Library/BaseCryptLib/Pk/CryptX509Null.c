@@ -242,6 +242,32 @@ RsaGetPublicKeyFromX509 (
 }
 
 /**
+  Retrieve the EC Public Key from one DER-encoded X509 certificate.
+  
+  Return FALSE to indicate this interface is not supported.
+
+  @param[in]  Cert         Pointer to the DER-encoded X509 certificate.
+  @param[in]  CertSize     Size of the X509 certificate in bytes.
+  @param[out] EcContext    Pointer to new-generated EC context which contain the retrieved
+                           EC public key component. Use EcFree() function to free the
+                           resource.
+
+  @retval FALSE  This interface is not supported.
+
+**/
+BOOLEAN
+EFIAPI
+EcGetPublicKeyFromX509 (
+  IN   CONST UINT8  *Cert,
+  IN   UINTN        CertSize,
+  OUT  VOID         **EcContext
+  )
+{
+  ASSERT (FALSE);
+  return FALSE;
+}
+
+/**
   Verify one X509 certificate was issued by the trusted CA.
 
   Return FALSE to indicate this interface is not supported.

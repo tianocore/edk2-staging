@@ -46,7 +46,7 @@ RandomSeed (
   // The software PRNG implementation built in OpenSSL depends on message digest algorithm.
   // Make sure SHA-1 digest algorithm is available here.
   //
-  if (EVP_add_digest (EVP_sha1 ()) == 0) {
+  if (EVP_add_digest (EVP_sha256 ()) == 0) {
     return FALSE;
   }
 

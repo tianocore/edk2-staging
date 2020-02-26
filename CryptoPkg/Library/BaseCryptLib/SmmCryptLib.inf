@@ -43,8 +43,13 @@
   Hash/CryptCShake256.c
   Hash/CryptParallelHash.c
   Hmac/CryptHmacSha256.c
+  Mac/CryptCmacAesNull.c
+  Mac/CryptGmacAesNull.c
   Kdf/CryptHkdfNull.c
   Cipher/CryptAes.c
+  Cipher/CryptAeadAesCcmNull.c
+  Cipher/CryptAeadAesGcmNull.c
+  Cipher/CryptAeadChaCha20Poly1305Null.c
   Pk/CryptRsaBasic.c
   Pk/CryptRsaExtNull.c
   Pk/CryptPkcs1Oaep.c
@@ -54,6 +59,7 @@
   Pk/CryptPkcs7VerifyBase.c
   Pk/CryptPkcs7VerifyEku.c
   Pk/CryptDhNull.c
+  Pk/CryptEcNull.c
   Pk/CryptX509.c
   Pk/CryptAuthenticodeNull.c
   Pk/CryptTsNull.c

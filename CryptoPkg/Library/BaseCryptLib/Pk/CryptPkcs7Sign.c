@@ -55,6 +55,7 @@ Pkcs7Sign (
   BIO       *DataBio;
   PKCS7     *Pkcs7;
   UINT8     *RsaContext;
+  UINT8     *EcContext;
   UINT8     *P7Data;
   UINTN     P7DataSize;
   UINT8     *Tmp;
@@ -69,6 +70,7 @@ Pkcs7Sign (
   }
 
   RsaContext = NULL;
+  EcContext  = NULL;
   Key        = NULL;
   Pkcs7      = NULL;
   DataBio    = NULL;
@@ -83,6 +85,17 @@ Pkcs7Sign (
              (CONST CHAR8 *)KeyPassword,
              (VOID **)&RsaContext
              );
+  if (!Status) {
+    //
+    // Retrieve EC private key from PEM data.
+    //
+    Status = EcGetPrivateKeyFromPem (
+               PrivateKey,
+               PrivateKeySize,
+               (CONST CHAR8 *) KeyPassword,
+               (VOID **) &EcContext
+               );
+  }
   if (!Status) {
     return Status;
   }
@@ -103,6 +116,12 @@ Pkcs7Sign (
   if (EVP_add_digest (EVP_sha256 ()) == 0) {
     goto _Exit;
   }
+  if (EVP_add_digest (EVP_sha384 ()) == 0) {
+    goto _Exit;
+  }
+  if (EVP_add_digest (EVP_sha512 ()) == 0) {
+    goto _Exit;
+  }
 
   RandomSeed (NULL, 0);
 
@@ -113,9 +132,14 @@ Pkcs7Sign (
   if (Key == NULL) {
     goto _Exit;
   }
-
-  if (EVP_PKEY_assign_RSA (Key, (RSA *)RsaContext) == 0) {
-    goto _Exit;
+  if (RsaContext != NULL) {
+    if (EVP_PKEY_assign_RSA (Key, (RSA *) RsaContext) == 0) {
+      goto _Exit;
+    }
+  } else if (EcContext != NULL) {
+    if (EVP_PKEY_assign_EC_KEY (Key, (EC_KEY *) EcContext) == 0) {
+      goto _Exit;
+    }
   }
 
   //

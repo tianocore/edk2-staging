@@ -40,9 +40,6 @@ extern "C" {
 #ifndef OPENSSL_NO_CAST
 # define OPENSSL_NO_CAST
 #endif
-#ifndef OPENSSL_NO_CHACHA
-# define OPENSSL_NO_CHACHA
-#endif
 #ifndef OPENSSL_NO_CMS
 # define OPENSSL_NO_CMS
 #endif
@@ -66,9 +63,6 @@ extern "C" {
 #endif
 #ifndef OPENSSL_NO_MDC2
 # define OPENSSL_NO_MDC2
-#endif
-#ifndef OPENSSL_NO_POLY1305
-# define OPENSSL_NO_POLY1305
 #endif
 #ifndef OPENSSL_NO_RC2
 # define OPENSSL_NO_RC2

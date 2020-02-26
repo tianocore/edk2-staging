@@ -115,3 +115,33 @@ RsaPkcs1Sign (
   ASSERT (FALSE);
   return FALSE;
 }
+
+
+/**
+  Carries out the RSA-SSA signature generation with EMSA-PSS encoding scheme.
+
+  Return FALSE to indicate this interface is not supported.
+
+  @param[in]       RsaContext   Pointer to RSA context for signature generation.
+  @param[in]       MessageHash  Pointer to octet message hash to be signed.
+  @param[in]       HashSize     Size of the message hash in bytes.
+  @param[out]      Signature    Pointer to buffer to receive RSA-SSA PSS signature.
+  @param[in, out]  SigSize      On input, the size of Signature buffer in bytes.
+                                On output, the size of data returned in Signature buffer in bytes.
+
+  @retval FALSE  This interface is not supported.
+
+**/
+BOOLEAN
+EFIAPI
+RsaPssSign (
+  IN      VOID         *RsaContext,
+  IN      CONST UINT8  *MessageHash,
+  IN      UINTN        HashSize,
+  OUT     UINT8        *Signature,
+  IN OUT  UINTN        *SigSize
+  )
+{
+  ASSERT (FALSE);
+  return FALSE;
+}

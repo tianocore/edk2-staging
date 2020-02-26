@@ -7,6 +7,8 @@
   3) RsaCheckKey
   4) RsaPkcs1Sign
 
+  RFC 8017 - PKCS #1: RSA Cryptography Specifications Version 2.2
+
 Copyright (c) 2009 - 2020, Intel Corporation. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
@@ -18,6 +20,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <openssl/rsa.h>
 #include <openssl/err.h>
 #include <openssl/objects.h>
+#include <openssl/evp.h>
 
 /**
   Gets the tag-designated RSA key component from the established RSA context.
@@ -302,9 +305,70 @@ RsaPkcs1Sign (
   IN OUT  UINTN        *SigSize
   )
 {
-  RSA    *Rsa;
-  UINTN  Size;
-  INT32  DigestType;
+  UINTN        HashNid;
+
+  switch (HashSize) {
+  case SHA256_DIGEST_SIZE:
+    HashNid = CRYPTO_NID_SHA256;
+    break;
+
+  case SHA384_DIGEST_SIZE:
+    HashNid = CRYPTO_NID_SHA384;
+    break;
+
+  case SHA512_DIGEST_SIZE:
+    HashNid = CRYPTO_NID_SHA512;
+    break;
+
+  default:
+    return FALSE;
+  }
+
+  return RsaPkcs1SignWithNid (RsaContext, HashNid, MessageHash, HashSize, Signature, SigSize);
+}
+
+/**
+  Carries out the RSA-SSA signature generation with EMSA-PKCS1-v1_5 encoding scheme.
+
+  This function carries out the RSA-SSA signature generation with EMSA-PKCS1-v1_5 encoding scheme defined in
+  RSA PKCS#1.
+  If the Signature buffer is too small to hold the contents of signature, FALSE
+  is returned and SigSize is set to the required buffer size to obtain the signature.
+
+  If RsaContext is NULL, then return FALSE.
+  If MessageHash is NULL, then return FALSE.
+  If HashSize need match the HashNid. HashNid could be SHA256, SHA384, SHA512, SHA3_256, SHA3_384, SHA3_512.
+  If SigSize is large enough but Signature is NULL, then return FALSE.
+  If this interface is not supported, then return FALSE.
+
+  @param[in]      RsaContext   Pointer to RSA context for signature generation.
+  @param[in]      HashNid      hash NID
+  @param[in]      MessageHash  Pointer to octet message hash to be signed.
+  @param[in]      HashSize     Size of the message hash in bytes.
+  @param[out]     Signature    Pointer to buffer to receive RSA PKCS1-v1_5 signature.
+  @param[in, out] SigSize      On input, the size of Signature buffer in bytes.
+                               On output, the size of data returned in Signature buffer in bytes.
+
+  @retval  TRUE   Signature successfully generated in PKCS1-v1_5.
+  @retval  FALSE  Signature generation failed.
+  @retval  FALSE  SigSize is too small.
+  @retval  FALSE  This interface is not supported.
+
+**/
+BOOLEAN
+EFIAPI
+RsaPkcs1SignWithNid (
+  IN      VOID         *RsaContext,
+  IN      UINTN        HashNid,
+  IN      CONST UINT8  *MessageHash,
+  IN      UINTN        HashSize,
+  OUT     UINT8        *Signature,
+  IN OUT  UINTN        *SigSize
+  )
+{
+  RSA      *Rsa;
+  UINTN    Size;
+  INT32    DigestType;
 
   //
   // Check input parameters.
@@ -325,30 +389,48 @@ RsaPkcs1Sign (
     return FALSE;
   }
 
-  //
-  // Determine the message digest algorithm according to digest size.
-  //   Only MD5, SHA-1, SHA-256, SHA-384 or SHA-512 algorithm is supported.
-  //
-  switch (HashSize) {
-    case MD5_DIGEST_SIZE:
-      DigestType = NID_md5;
-      break;
+  switch (HashNid) {
+  case CRYPTO_NID_SHA256:
+    DigestType = NID_sha256;
+    if (HashSize != SHA256_DIGEST_SIZE) {
+      return FALSE;
+    }
+    break;
 
-    case SHA1_DIGEST_SIZE:
-      DigestType = NID_sha1;
-      break;
+  case CRYPTO_NID_SHA384:
+    DigestType = NID_sha384;
+    if (HashSize != SHA384_DIGEST_SIZE) {
+      return FALSE;
+    }
+    break;
 
-    case SHA256_DIGEST_SIZE:
-      DigestType = NID_sha256;
-      break;
+  case CRYPTO_NID_SHA512:
+    DigestType = NID_sha512;
+    if (HashSize != SHA512_DIGEST_SIZE) {
+      return FALSE;
+    }
+    break;
 
-    case SHA384_DIGEST_SIZE:
-      DigestType = NID_sha384;
-      break;
+  case CRYPTO_NID_SHA3_256:
+    DigestType = NID_sha3_256;
+    if (HashSize != SHA3_256_DIGEST_SIZE) {
+      return FALSE;
+    }
+    break;
 
-    case SHA512_DIGEST_SIZE:
-      DigestType = NID_sha512;
-      break;
+  case CRYPTO_NID_SHA3_384:
+    DigestType = NID_sha3_384;
+    if (HashSize != SHA3_384_DIGEST_SIZE) {
+      return FALSE;
+    }
+    break;
+
+  case CRYPTO_NID_SHA3_512:
+    DigestType = NID_sha3_512;
+    if (HashSize != SHA3_512_DIGEST_SIZE) {
+      return FALSE;
+    }
+    break;
 
     default:
       return FALSE;
@@ -362,4 +444,143 @@ RsaPkcs1Sign (
                     (UINT32 *)SigSize,
                     (RSA *)RsaContext
                     );
+}
+
+/**
+  Carries out the RSA-SSA signature generation with EMSA-PSS encoding scheme.
+
+  This function carries out the RSA-SSA signature generation with EMSA-PSS encoding scheme defined in
+  RSA PKCS#1 v2.2.
+
+  The salt length is same as digest length.
+
+  If the Signature buffer is too small to hold the contents of signature, FALSE
+  is returned and SigSize is set to the required buffer size to obtain the signature.
+
+  If RsaContext is NULL, then return FALSE.
+  If MessageHash is NULL, then return FALSE.
+  If HashSize need match the HashNid. Nid could be SHA256, SHA384, SHA512, SHA3_256, SHA3_384, SHA3_512.
+  If SigSize is large enough but Signature is NULL, then return FALSE.
+
+  @param[in]       RsaContext   Pointer to RSA context for signature generation.
+  @param[in]       HashNid      hash NID
+  @param[in]       MessageHash  Pointer to octet message hash to be signed.
+  @param[in]       HashSize     Size of the message hash in bytes.
+  @param[out]      Signature    Pointer to buffer to receive RSA-SSA PSS signature.
+  @param[in, out]  SigSize      On input, the size of Signature buffer in bytes.
+                                On output, the size of data returned in Signature buffer in bytes.
+
+  @retval  TRUE   Signature successfully generated in RSA-SSA PSS.
+  @retval  FALSE  Signature generation failed.
+  @retval  FALSE  SigSize is too small.
+
+**/
+BOOLEAN
+EFIAPI
+RsaPssSign (
+  IN      VOID         *RsaContext,
+  IN      UINTN        HashNid,
+  IN      CONST UINT8  *MessageHash,
+  IN      UINTN        HashSize,
+  OUT     UINT8        *Signature,
+  IN OUT  UINTN        *SigSize
+  )
+{
+  RSA           *Rsa;
+  BOOLEAN       Result;
+  INT32         Size;
+  CONST EVP_MD  *HashAlg;
+  VOID          *Buffer;
+
+  if (RsaContext == NULL || MessageHash == NULL) {
+    return FALSE;
+  }
+
+  Rsa = (RSA *) RsaContext;
+  Size = RSA_size (Rsa);
+
+  if (*SigSize < (UINTN)Size) {
+    *SigSize = Size;
+    return FALSE;
+  }
+  *SigSize = Size;
+
+  switch (HashNid) {
+  case CRYPTO_NID_SHA256:
+    HashAlg = EVP_sha256();
+    if (HashSize != SHA256_DIGEST_SIZE) {
+      return FALSE;
+    }
+    break;
+
+  case CRYPTO_NID_SHA384:
+    HashAlg = EVP_sha384();
+    if (HashSize != SHA384_DIGEST_SIZE) {
+      return FALSE;
+    }
+    break;
+
+  case CRYPTO_NID_SHA512:
+    HashAlg = EVP_sha512();
+    if (HashSize != SHA512_DIGEST_SIZE) {
+      return FALSE;
+    }
+    break;
+
+  case CRYPTO_NID_SHA3_256:
+    HashAlg = EVP_sha3_256();
+    if (HashSize != SHA3_256_DIGEST_SIZE) {
+      return FALSE;
+    }
+    break;
+
+  case CRYPTO_NID_SHA3_384:
+    HashAlg = EVP_sha3_384();
+    if (HashSize != SHA3_384_DIGEST_SIZE) {
+      return FALSE;
+    }
+    break;
+
+  case CRYPTO_NID_SHA3_512:
+    HashAlg = EVP_sha3_512();
+    if (HashSize != SHA3_512_DIGEST_SIZE) {
+      return FALSE;
+    }
+    break;
+
+  default:
+    return FALSE;
+  }
+
+  Buffer = AllocatePool (Size);
+  if (Buffer == NULL) {
+    return FALSE;
+  }
+
+  Result = (BOOLEAN) RSA_padding_add_PKCS1_PSS (
+             Rsa,
+             Buffer,
+             MessageHash,
+             HashAlg,
+             RSA_PSS_SALTLEN_DIGEST
+             );
+  if (!Result) {
+    FreePool (Buffer);
+    return FALSE;
+  }
+
+  Size = RSA_private_encrypt (
+             Size,
+             Buffer,
+             Signature,
+             Rsa,
+             RSA_NO_PADDING
+             );
+  FreePool (Buffer);
+  if (Size <= 0) {
+    return FALSE;
+  } else {
+    ASSERT (*SigSize == (UINTN)Size);
+    return TRUE;
+  }
 }
