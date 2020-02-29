@@ -1,0 +1,139 @@
+INFO - Log Started: Saturday, February 29, 2020 10:05AM
+SECTION - Init SDE
+DEBUG - --- self_describing_environment.load_workspace()
+DEBUG - Loading workspace: /home/abner/edk2_ci/edk2-staging-riscv-ci
+DEBUG -   Including scopes: cibuild, edk2-build, host-based-test, gcc_aarch64_linux, gcc_arm_linux, gcc_riscv64_unknown, global-nix, global
+DEBUG - Adding descriptor '/home/abner/edk2_ci/edk2-staging-riscv-ci/BaseTools/BinWrappers/PosixLike/posix_path_env.yaml' to the environment with scope 'global-nix'.
+DEBUG - Adding descriptor '/home/abner/edk2_ci/edk2-staging-riscv-ci/BaseTools/basetools_calling_path_env.yaml' to the environment with scope 'global'.
+DEBUG - Adding descriptor '/home/abner/edk2_ci/edk2-staging-riscv-ci/BaseTools/basetools_path_env.yaml' to the environment with scope 'global'.
+DEBUG - Adding descriptor '/home/abner/edk2_ci/edk2-staging-riscv-ci/BaseTools/Source/Python/basetool_tiano_python_path_env.yaml' to the environment with scope 'global'.
+DEBUG - Adding descriptor '/home/abner/edk2_ci/edk2-staging-riscv-ci/BaseTools/Bin/iasl_ext_dep.yaml' to the environment with scope 'cibuild'.
+DEBUG - Adding descriptor '/home/abner/edk2_ci/edk2-staging-riscv-ci/BaseTools/Bin/nasm_ext_dep.yaml' to the environment with scope 'edk2-build'.
+DEBUG - Adding descriptor '/home/abner/edk2_ci/edk2-staging-riscv-ci/BaseTools/Bin/gcc_aarch64_linux_ext_dep.yaml' to the environment with scope 'gcc_aarch64_linux'.
+DEBUG - Adding descriptor '/home/abner/edk2_ci/edk2-staging-riscv-ci/BaseTools/Bin/gcc_arm_linux_ext_dep.yaml' to the environment with scope 'gcc_arm_linux'.
+DEBUG - Adding descriptor '/home/abner/edk2_ci/edk2-staging-riscv-ci/BaseTools/Bin/gcc_riscv64_unknown_ext_dep.yaml' to the environment with scope 'gcc_riscv64_unknown'.
+DEBUG - Adding descriptor '/home/abner/edk2_ci/edk2-staging-riscv-ci/.pytool/Plugin/DependencyCheck/DependencyCheck_plug_in.yaml' to the environment with scope 'cibuild'.
+DEBUG - Adding descriptor '/home/abner/edk2_ci/edk2-staging-riscv-ci/.pytool/Plugin/CompilerPlugin/Compiler_plug_in.yaml' to the environment with scope 'cibuild'.
+DEBUG - Adding descriptor '/home/abner/edk2_ci/edk2-staging-riscv-ci/.pytool/Plugin/LibraryClassCheck/LibraryClassCheck_plug_in.yaml' to the environment with scope 'cibuild'.
+DEBUG - Adding descriptor '/home/abner/edk2_ci/edk2-staging-riscv-ci/.pytool/Plugin/CharEncodingCheck/CharEncodingCheck_plug_in.yaml' to the environment with scope 'cibuild'.
+DEBUG - Adding descriptor '/home/abner/edk2_ci/edk2-staging-riscv-ci/.pytool/Plugin/GuidCheck/GuidCheck_plug_in.yaml' to the environment with scope 'cibuild'.
+DEBUG - Adding descriptor '/home/abner/edk2_ci/edk2-staging-riscv-ci/.pytool/Plugin/SpellCheck/SpellCheck_plug_in.yaml' to the environment with scope 'cibuild'.
+DEBUG - Adding descriptor '/home/abner/edk2_ci/edk2-staging-riscv-ci/.pytool/Plugin/DscCompleteCheck/DscCompleteCheck_plug_in.yaml' to the environment with scope 'cibuild'.
+DEBUG - Adding descriptor '/home/abner/edk2_ci/edk2-staging-riscv-ci/.pytool/Plugin/HostUnitTestDscCompleteCheck/HostUnitTestDscCompleteCheck_plug_in.yaml' to the environment with scope 'host-based-test'.
+DEBUG - Adding descriptor '/home/abner/edk2_ci/edk2-staging-riscv-ci/.pytool/Plugin/HostUnitTestCompilerPlugin/HostUnitTestCompiler_plug_in.yaml' to the environment with scope 'host-based-test'.
+DEBUG - Adding descriptor '/home/abner/edk2_ci/edk2-staging-riscv-ci/BaseTools/Plugin/LinuxGcc5ToolChain/LinuxGcc5ToolChain_plug_in.yaml' to the environment with scope 'global-nix'.
+DEBUG - Adding descriptor '/home/abner/edk2_ci/edk2-staging-riscv-ci/BaseTools/Plugin/BuildToolsReport/BuildToolsReportGenerator_plug_in.yaml' to the environment with scope 'global'.
+DEBUG - --- self_describing_environment.update_simple_paths()
+DEBUG - --- self_describing_environment.update_extdep_paths()
+DEBUG - Verify 'mu_nasm' returning 'False'.
+DEBUG - Verify 'iasl' returning 'False'.
+DEBUG - --- self_describing_environment.report_extdep_version()
+DEBUG - Setting up version aggregator
+DEBUG - Verify 'mu_nasm' returning 'False'.
+DEBUG - Verify 'iasl' returning 'False'.
+SECTION - Loading Plugins
+DEBUG - Loading Plugin from /home/abner/edk2_ci/edk2-staging-riscv-ci/.pytool/Plugin/DependencyCheck/DependencyCheck.py
+DEBUG - Loading Plugin from /home/abner/edk2_ci/edk2-staging-riscv-ci/.pytool/Plugin/CompilerPlugin/CompilerPlugin.py
+DEBUG - Loading Plugin from /home/abner/edk2_ci/edk2-staging-riscv-ci/.pytool/Plugin/LibraryClassCheck/LibraryClassCheck.py
+DEBUG - Loading Plugin from /home/abner/edk2_ci/edk2-staging-riscv-ci/.pytool/Plugin/CharEncodingCheck/CharEncodingCheck.py
+DEBUG - Loading Plugin from /home/abner/edk2_ci/edk2-staging-riscv-ci/.pytool/Plugin/GuidCheck/GuidCheck.py
+DEBUG - Loading Plugin from /home/abner/edk2_ci/edk2-staging-riscv-ci/.pytool/Plugin/SpellCheck/SpellCheck.py
+DEBUG - Loading Plugin from /home/abner/edk2_ci/edk2-staging-riscv-ci/.pytool/Plugin/DscCompleteCheck/DscCompleteCheck.py
+DEBUG - Loading Plugin from /home/abner/edk2_ci/edk2-staging-riscv-ci/.pytool/Plugin/HostUnitTestDscCompleteCheck/HostUnitTestDscCompleteCheck.py
+DEBUG - Loading Plugin from /home/abner/edk2_ci/edk2-staging-riscv-ci/.pytool/Plugin/HostUnitTestCompilerPlugin/HostUnitTestCompilerPlugin.py
+DEBUG - Loading Plugin from /home/abner/edk2_ci/edk2-staging-riscv-ci/BaseTools/Plugin/LinuxGcc5ToolChain/LinuxGcc5ToolChain.py
+DEBUG - Loading Plugin from /home/abner/edk2_ci/edk2-staging-riscv-ci/BaseTools/Plugin/BuildToolsReport/BuildToolsReportGenerator.py
+SECTION - Start Invocable Tool
+SECTION - Initial update of environment
+DEBUG - --- self_describing_environment.update_extdeps()
+DEBUG - Verify 'gcc_riscv64_unknown' returning 'True'.
+DEBUG - Verify 'gcc_arm_linux' returning 'False'.
+DEBUG - Cleaning dependency directory for 'gcc_arm_linux'...
+INFO - /tmp/tmpx7ydfrnt/gcc_arm_linux_7.4.1 is a tar file, trying to unpack it to.
+INFO - Copying directory from /tmp/tmpx7ydfrnt/gcc-linaro-7.4.1-2019.02-x86_64_arm-linux-gnueabihf to /home/abner/edk2_ci/edk2-staging-riscv-ci/BaseTools/Bin/gcc_arm_linux_extdep
+DEBUG - Verify 'gcc_aarch64_linux' returning 'False'.
+DEBUG - Cleaning dependency directory for 'gcc_aarch64_linux'...
+INFO - /tmp/tmpwznhe13d/gcc_aarch64_linux_7.4.1 is a tar file, trying to unpack it to.
+INFO - Copying directory from /tmp/tmpwznhe13d/gcc-linaro-7.4.1-2019.02-x86_64_aarch64-linux-gnu to /home/abner/edk2_ci/edk2-staging-riscv-ci/BaseTools/Bin/gcc_aarch64_linux_extdep
+DEBUG - Verify 'mu_nasm' returning 'False'.
+DEBUG - Verify 'mu_nasm' returning 'False'.
+DEBUG - Cleaning dependency directory for 'mu_nasm'...
+INFO - Cmd to run is: mono /home/abner/edk2_ci/lib/python3.8/site-packages/edk2toolext/bin/NuGet.exe locals global-packages -list
+INFO - ------------------------------------------------
+INFO - --------------Cmd Output Starting---------------
+INFO - ------------------------------------------------
+INFO - global-packages: /home/abner/.nuget/packages/
+INFO - ------------------------------------------------
+INFO - --------------Cmd Output Finished---------------
+INFO - --------- Running Time (mm:ss): 00:07 ----------
+INFO - ------------------------------------------------
+INFO - Local Cache found for Nuget package 'mu_nasm'. Skipping fetch.
+DEBUG - Verify 'mu_nasm' returning 'True'.
+INFO - Computing path for mu_nasm located at /home/abner/edk2_ci/edk2-staging-riscv-ci/BaseTools/Bin/mu_nasm_extdep on Host(os='Linux', arch='x86', bit='64')
+INFO - /home/abner/edk2_ci/edk2-staging-riscv-ci/BaseTools/Bin/mu_nasm_extdep/Linux-x86-64 was found!
+DEBUG - Verify 'iasl' returning 'False'.
+DEBUG - Verify 'iasl' returning 'False'.
+DEBUG - Cleaning dependency directory for 'iasl'...
+INFO - Local Cache found for Nuget package 'iasl'. Skipping fetch.
+DEBUG - Verify 'iasl' returning 'True'.
+INFO - Computing path for iasl located at /home/abner/edk2_ci/edk2-staging-riscv-ci/BaseTools/Bin/iasl_extdep on Host(os='Linux', arch='x86', bit='64')
+DEBUG - /home/abner/edk2_ci/edk2-staging-riscv-ci/BaseTools/Bin/iasl_extdep/Linux-x86-64 does not exist
+INFO - /home/abner/edk2_ci/edk2-staging-riscv-ci/BaseTools/Bin/iasl_extdep/Linux-x86 was found!
+SECTION - 	Updated/Verified 5 dependencies
+SECTION - Second pass update of environment
+DEBUG - --- self_describing_environment.load_workspace()
+DEBUG - Loading workspace: /home/abner/edk2_ci/edk2-staging-riscv-ci
+DEBUG -   Including scopes: cibuild, edk2-build, host-based-test, gcc_aarch64_linux, gcc_arm_linux, gcc_riscv64_unknown, global-nix, global
+DEBUG - Adding descriptor '/home/abner/edk2_ci/edk2-staging-riscv-ci/BaseTools/BinWrappers/PosixLike/posix_path_env.yaml' to the environment with scope 'global-nix'.
+DEBUG - Adding descriptor '/home/abner/edk2_ci/edk2-staging-riscv-ci/BaseTools/basetools_calling_path_env.yaml' to the environment with scope 'global'.
+DEBUG - Adding descriptor '/home/abner/edk2_ci/edk2-staging-riscv-ci/BaseTools/basetools_path_env.yaml' to the environment with scope 'global'.
+DEBUG - Adding descriptor '/home/abner/edk2_ci/edk2-staging-riscv-ci/BaseTools/Source/Python/basetool_tiano_python_path_env.yaml' to the environment with scope 'global'.
+DEBUG - Adding descriptor '/home/abner/edk2_ci/edk2-staging-riscv-ci/BaseTools/Bin/iasl_ext_dep.yaml' to the environment with scope 'cibuild'.
+DEBUG - Adding descriptor '/home/abner/edk2_ci/edk2-staging-riscv-ci/BaseTools/Bin/nasm_ext_dep.yaml' to the environment with scope 'edk2-build'.
+DEBUG - Adding descriptor '/home/abner/edk2_ci/edk2-staging-riscv-ci/BaseTools/Bin/gcc_aarch64_linux_ext_dep.yaml' to the environment with scope 'gcc_aarch64_linux'.
+DEBUG - Adding descriptor '/home/abner/edk2_ci/edk2-staging-riscv-ci/BaseTools/Bin/gcc_arm_linux_ext_dep.yaml' to the environment with scope 'gcc_arm_linux'.
+DEBUG - Adding descriptor '/home/abner/edk2_ci/edk2-staging-riscv-ci/BaseTools/Bin/gcc_riscv64_unknown_ext_dep.yaml' to the environment with scope 'gcc_riscv64_unknown'.
+DEBUG - Adding descriptor '/home/abner/edk2_ci/edk2-staging-riscv-ci/.pytool/Plugin/DependencyCheck/DependencyCheck_plug_in.yaml' to the environment with scope 'cibuild'.
+DEBUG - Adding descriptor '/home/abner/edk2_ci/edk2-staging-riscv-ci/.pytool/Plugin/CompilerPlugin/Compiler_plug_in.yaml' to the environment with scope 'cibuild'.
+DEBUG - Adding descriptor '/home/abner/edk2_ci/edk2-staging-riscv-ci/.pytool/Plugin/LibraryClassCheck/LibraryClassCheck_plug_in.yaml' to the environment with scope 'cibuild'.
+DEBUG - Adding descriptor '/home/abner/edk2_ci/edk2-staging-riscv-ci/.pytool/Plugin/CharEncodingCheck/CharEncodingCheck_plug_in.yaml' to the environment with scope 'cibuild'.
+DEBUG - Adding descriptor '/home/abner/edk2_ci/edk2-staging-riscv-ci/.pytool/Plugin/GuidCheck/GuidCheck_plug_in.yaml' to the environment with scope 'cibuild'.
+DEBUG - Adding descriptor '/home/abner/edk2_ci/edk2-staging-riscv-ci/.pytool/Plugin/SpellCheck/SpellCheck_plug_in.yaml' to the environment with scope 'cibuild'.
+DEBUG - Adding descriptor '/home/abner/edk2_ci/edk2-staging-riscv-ci/.pytool/Plugin/DscCompleteCheck/DscCompleteCheck_plug_in.yaml' to the environment with scope 'cibuild'.
+DEBUG - Adding descriptor '/home/abner/edk2_ci/edk2-staging-riscv-ci/.pytool/Plugin/HostUnitTestDscCompleteCheck/HostUnitTestDscCompleteCheck_plug_in.yaml' to the environment with scope 'host-based-test'.
+DEBUG - Adding descriptor '/home/abner/edk2_ci/edk2-staging-riscv-ci/.pytool/Plugin/HostUnitTestCompilerPlugin/HostUnitTestCompiler_plug_in.yaml' to the environment with scope 'host-based-test'.
+DEBUG - Adding descriptor '/home/abner/edk2_ci/edk2-staging-riscv-ci/BaseTools/Plugin/LinuxGcc5ToolChain/LinuxGcc5ToolChain_plug_in.yaml' to the environment with scope 'global-nix'.
+DEBUG - Adding descriptor '/home/abner/edk2_ci/edk2-staging-riscv-ci/BaseTools/Plugin/BuildToolsReport/BuildToolsReportGenerator_plug_in.yaml' to the environment with scope 'global'.
+DEBUG - --- self_describing_environment.update_simple_paths()
+DEBUG - --- self_describing_environment.update_extdep_paths()
+DEBUG - Verify 'mu_nasm' returning 'True'.
+INFO - Computing path for mu_nasm located at /home/abner/edk2_ci/edk2-staging-riscv-ci/BaseTools/Bin/mu_nasm_extdep on Host(os='Linux', arch='x86', bit='64')
+INFO - /home/abner/edk2_ci/edk2-staging-riscv-ci/BaseTools/Bin/mu_nasm_extdep/Linux-x86-64 was found!
+DEBUG - Verify 'iasl' returning 'True'.
+INFO - Computing path for iasl located at /home/abner/edk2_ci/edk2-staging-riscv-ci/BaseTools/Bin/iasl_extdep on Host(os='Linux', arch='x86', bit='64')
+DEBUG - /home/abner/edk2_ci/edk2-staging-riscv-ci/BaseTools/Bin/iasl_extdep/Linux-x86-64 does not exist
+INFO - /home/abner/edk2_ci/edk2-staging-riscv-ci/BaseTools/Bin/iasl_extdep/Linux-x86 was found!
+DEBUG - --- self_describing_environment.report_extdep_version()
+DEBUG - Verify 'mu_nasm' returning 'True'.
+INFO - Computing path for mu_nasm located at /home/abner/edk2_ci/edk2-staging-riscv-ci/BaseTools/Bin/mu_nasm_extdep on Host(os='Linux', arch='x86', bit='64')
+INFO - /home/abner/edk2_ci/edk2-staging-riscv-ci/BaseTools/Bin/mu_nasm_extdep/Linux-x86-64 was found!
+DEBUG - Verify 'iasl' returning 'True'.
+INFO - Computing path for iasl located at /home/abner/edk2_ci/edk2-staging-riscv-ci/BaseTools/Bin/iasl_extdep on Host(os='Linux', arch='x86', bit='64')
+DEBUG - /home/abner/edk2_ci/edk2-staging-riscv-ci/BaseTools/Bin/iasl_extdep/Linux-x86-64 does not exist
+INFO - /home/abner/edk2_ci/edk2-staging-riscv-ci/BaseTools/Bin/iasl_extdep/Linux-x86 was found!
+DEBUG - --- self_describing_environment.update_extdeps()
+DEBUG - Verify 'gcc_riscv64_unknown' returning 'True'.
+DEBUG - Verify 'gcc_arm_linux' returning 'True'.
+DEBUG - Verify 'gcc_aarch64_linux' returning 'True'.
+DEBUG - Verify 'mu_nasm' returning 'True'.
+INFO - Computing path for mu_nasm located at /home/abner/edk2_ci/edk2-staging-riscv-ci/BaseTools/Bin/mu_nasm_extdep on Host(os='Linux', arch='x86', bit='64')
+INFO - /home/abner/edk2_ci/edk2-staging-riscv-ci/BaseTools/Bin/mu_nasm_extdep/Linux-x86-64 was found!
+DEBUG - Verify 'mu_nasm' returning 'True'.
+DEBUG - Verify 'iasl' returning 'True'.
+INFO - Computing path for iasl located at /home/abner/edk2_ci/edk2-staging-riscv-ci/BaseTools/Bin/iasl_extdep on Host(os='Linux', arch='x86', bit='64')
+DEBUG - /home/abner/edk2_ci/edk2-staging-riscv-ci/BaseTools/Bin/iasl_extdep/Linux-x86-64 does not exist
+INFO - /home/abner/edk2_ci/edk2-staging-riscv-ci/BaseTools/Bin/iasl_extdep/Linux-x86 was found!
+DEBUG - Verify 'iasl' returning 'True'.
+SECTION - 	Updated/Verified 5 dependencies
+SECTION - Summary
+PROGRESS - Success
