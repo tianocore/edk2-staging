@@ -1,0 +1,28 @@
+## @file
+# This package provides EDKII MbedTls related support.
+#
+# Copyright (c) 2020, Intel Corporation. All rights reserved.<BR>
+# SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+##
+
+[Defines]
+  DEC_SPECIFICATION              = 0x00010005
+  PACKAGE_NAME                   = CryptoMbedTlsPkg
+  PACKAGE_GUID                   = A4F89B47-1123-4D73-BB18-566C64CB4BDD
+  PACKAGE_VERSION                = 0.1
+
+[Includes]
+
+[Includes.Common.Private]
+  Library/MbedTlsLib/Include
+  Library/MbedTlsLib/mbedtls/include
+  Library/MbedTlsLib/mbedtls/include/mbedtls
+
+[LibraryClasses]
+
+[Guids]
+
+[Protocols]
+
+[PcdsFixedAtBuild, PcdsPatchableInModule]
