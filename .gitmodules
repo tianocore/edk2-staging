@@ -20,3 +20,7 @@
 [submodule "RedfishPkg/Library/JsonLib/jansson"]
 	path = RedfishPkg/Library/JsonLib/jansson
 	url = https://github.com/akheron/jansson
+	ignore = untracked
+[submodule "CryptoMbedTlsPkg/Library/MbedTlsLib/mbedtls"]
+	path = CryptoMbedTlsPkg/Library/MbedTlsLib/mbedtls
+	url = https://github.com/ARMmbed/mbedtls
