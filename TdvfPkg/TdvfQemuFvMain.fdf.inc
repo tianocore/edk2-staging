@@ -22,7 +22,7 @@ READ_LOCK_STATUS   = TRUE
 APRIORI DXE {
   INF  MdeModulePkg/Universal/DevicePathDxe/DevicePathDxe.inf
   INF  MdeModulePkg/Universal/PCD/Dxe/Pcd.inf
-  INF  TdvfPkg/TdxDxe/TdxDxe.inf
+  INF  TdvfPkg/UefiPayload/TdxDxe/TdxDxe.inf
 }
 
 #
@@ -40,11 +40,11 @@ INF  MdeModulePkg/Universal/EbcDxe/EbcDxe.inf
 INF  UefiCpuPkg/CpuIo2Dxe/CpuIo2Dxe.inf
 
 INF  UefiCpuPkg/CpuDxe/CpuDxe.inf
-INF  TdvfPkg/LocalApicTimerDxe/LocalApicTimerDxe.inf
+INF  TdvfPkg/Override/UefiCpuPkg/LocalApicTimerDxe/LocalApicTimerDxe.inf
 
 INF  OvmfPkg/PciHotPlugInitDxe/PciHotPlugInit.inf
 INF  MdeModulePkg/Bus/Pci/PciHostBridgeDxe/PciHostBridgeDxe.inf
-INF  TdvfPkg/Bus/Pci/PciBusDxe/PciBusDxe.inf
+INF  TdvfPkg/Override/MdeModulePkg/Bus/Pci/PciBusDxe/PciBusDxe.inf
 INF  MdeModulePkg/Universal/ResetSystemRuntimeDxe/ResetSystemRuntimeDxe.inf
 INF  MdeModulePkg/Universal/Metronome/Metronome.inf
 INF  PcAtChipsetPkg/PcatRealTimeClockRuntimeDxe/PcatRealTimeClockRuntimeDxe.inf
@@ -92,8 +92,8 @@ INF  MdeModulePkg/Bus/Pci/PciSioSerialDxe/PciSioSerialDxe.inf
 INF  MdeModulePkg/Bus/Isa/Ps2KeyboardDxe/Ps2KeyboardDxe.inf
 
 INF  MdeModulePkg/Universal/Acpi/AcpiTableDxe/AcpiTableDxe.inf
-INF  TdvfPkg/AcpiPlatformDxe/AcpiPlatformQemuDxe.inf
-INF  RuleOverride=ACPITABLE TdvfPkg/AcpiTables/AcpiTables.inf
+INF  TdvfPkg/UefiPayload/AcpiPlatformDxe/AcpiPlatformQemuDxe.inf
+INF  RuleOverride=ACPITABLE TdvfPkg/UefiPayload/AcpiTables/AcpiTables.inf
 INF  MdeModulePkg/Universal/Acpi/BootGraphicsResourceTableDxe/BootGraphicsResourceTableDxe.inf
 
 INF  FatPkg/EnhancedFatDxe/Fat.inf
@@ -111,24 +111,23 @@ INF  OvmfPkg/QemuVideoDxe/QemuVideoDxe.inf
 INF  OvmfPkg/QemuRamfbDxe/QemuRamfbDxe.inf
 INF  OvmfPkg/VirtioGpuDxe/VirtioGpu.inf
 INF  TdvfPkg/Override/OvmfPkg/IoMmuDxe/IoMmuDxe.inf
-INF  TdvfPkg/TdxDxe/TdxDxe.inf
+INF  TdvfPkg/UefiPayload/TdxDxe/TdxDxe.inf
 
 #
 # Variable driver stack (non-SMM)
 #
-INF  TdvfPkg/EmuVariableFvbRuntimeDxe/Fvb.inf
+INF  TdvfPkg/UefiPayload/EmuVariableFvbRuntimeDxe/Fvb.inf
 INF  MdeModulePkg/Universal/FaultTolerantWriteDxe/FaultTolerantWriteDxe.inf
 INF  MdeModulePkg/Universal/Variable/RuntimeDxe/VariableRuntimeDxe.inf
 
-!if $(SECURE_BOOT_ENABLE) == TRUE
-INF  TdvfPkg/Tcg/Tcg2Dxe/Tcg2Dxe.inf
-!endif
+INF  TdvfPkg/UefiPayload/Tcg/Tcg2Dxe/Tcg2Dxe.inf
+
 INF  TdvfPkg/StorageVolumeKey/Acpi/StorageVolumeKeyAcpi.inf
 INF  TdvfPkg/StorageVolumeKey/HttpKeyLoad/HttpKeyLoad.inf
 !if $(SHELL_ENABLE) == TRUE
 INF  TdvfPkg/StorageVolumeKey/TdTestAgent/TdTestAgentApp.inf
 !endif
-INF TdvfPkg/IncompatiblePciDeviceSupportDxe/IncompatiblePciDeviceSupport.inf
+INF TdvfPkg/UefiPayload/IncompatiblePciDeviceSupportDxe/IncompatiblePciDeviceSupport.inf
 
 !include NetworkPkg/Network.fdf.inc
 INF  OvmfPkg/VirtioNetDxe/VirtioNet.inf

@@ -238,12 +238,8 @@
 [LibraryClasses.common]
   VmgExitLib|OvmfPkg/Library/VmgExitLib/VmgExitLib.inf
   VmTdExitLib|TdvfPkg/Library/VmTdExitLib/VmTdExitLib.inf
-  HashLib|TdvfPkg/Library/HashLibBaseCryptoRouter/HashLibBaseCryptoRouterDxe.inf
-!if $(SECURE_BOOT_ENABLE) == TRUE
-  TpmMeasurementLib|TdvfPkg/Library/DxeTpmMeasurementLibTdx/DxeTpmMeasurementLibTdx.inf
-!else
-  TpmMeasurementLib|MdeModulePkg/Library/TpmMeasurementLibNull/TpmMeasurementLibNull.inf
-!endif
+  HashLib|TdvfPkg/UefiPayload/Library/HashLibBaseCryptoRouter/HashLibBaseCryptoRouterDxe.inf
+  TpmMeasurementLib|TdvfPkg/UefiPayload/Library/DxeTpmMeasurementLibTdx/DxeTpmMeasurementLibTdx.inf
   TdxLib|TdvfPkg/Library/TdxLib/TdxLib.inf
 
 [LibraryClasses.common.SEC]
@@ -294,7 +290,7 @@
   QemuLoadImageLib|OvmfPkg/Library/X86QemuLoadImageLib/X86QemuLoadImageLib.inf
   QemuBootOrderLib|OvmfPkg/Library/QemuBootOrderLib/QemuBootOrderLib.inf
   XenPlatformLib|OvmfPkg/Library/XenPlatformLib/XenPlatformLib.inf
-  MpInitLib|TdvfPkg/Library/MpInitLibTdx/DxeMpInitLibTdx.inf
+  MpInitLib|TdvfPkg/UefiPayload/Library/MpInitLibTdx/DxeMpInitLibTdx.inf
 
 ################################################################################
 #
@@ -469,12 +465,12 @@
 #
 ################################################################################
 [Components]
-  TdvfPkg/ResetVector/ResetVector.inf
+  TdvfPkg/TdShim/ResetVector/ResetVector.inf
 
   #
   # SEC Phase modules
   #
-  TdvfPkg/Sec/SecMain.inf {
+  TdvfPkg/TdShim/Sec/SecMain.inf {
     <LibraryClasses>
       PrePiLib|TdvfPkg/Library/PrePiLibTdx/PrePiLibTdx.inf
       HobLib|TdvfPkg/Library/PrePiHobLibTdx/PrePiHobLibTdx.inf
@@ -504,15 +500,15 @@
     <LibraryClasses>
 !if $(SECURE_BOOT_ENABLE) == TRUE
       NULL|SecurityPkg/Library/DxeImageVerificationLib/DxeImageVerificationLib.inf
-      NULL|TdvfPkg/Library/DxeTpm2MeasureBootLibTdx/DxeTpm2MeasureBootLibTdx.inf
 !endif
+      NULL|TdvfPkg/UefiPayload/Library/DxeTpm2MeasureBootLibTdx/DxeTpm2MeasureBootLibTdx.inf
   }
 
   MdeModulePkg/Universal/EbcDxe/EbcDxe.inf
   UefiCpuPkg/CpuIo2Dxe/CpuIo2Dxe.inf
   UefiCpuPkg/CpuDxe/CpuDxe.inf
 
-  TdvfPkg/LocalApicTimerDxe/LocalApicTimerDxe.inf
+  TdvfPkg/Override/UefiCpuPkg/LocalApicTimerDxe/LocalApicTimerDxe.inf
 
   OvmfPkg/PciHotPlugInitDxe/PciHotPlugInit.inf
   MdeModulePkg/Bus/Pci/PciHostBridgeDxe/PciHostBridgeDxe.inf {
@@ -520,11 +516,11 @@
       PciHostBridgeLib|OvmfPkg/Library/PciHostBridgeLib/PciHostBridgeLib.inf
       NULL|OvmfPkg/Library/PlatformHasIoMmuLib/PlatformHasIoMmuLib.inf
   }
-  TdvfPkg/Bus/Pci/PciBusDxe/PciBusDxe.inf {
+  TdvfPkg/Override/MdeModulePkg/Bus/Pci/PciBusDxe/PciBusDxe.inf {
     <LibraryClasses>
       PcdLib|MdePkg/Library/DxePcdLib/DxePcdLib.inf
   }
-  TdvfPkg/IncompatiblePciDeviceSupportDxe/IncompatiblePciDeviceSupport.inf
+  TdvfPkg/UefiPayload/IncompatiblePciDeviceSupportDxe/IncompatiblePciDeviceSupport.inf
   MdeModulePkg/Universal/ResetSystemRuntimeDxe/ResetSystemRuntimeDxe.inf {
     <LibraryClasses>
       ResetSystemLib|OvmfPkg/Library/ResetSystemLib/DxeResetSystemLib.inf
@@ -596,8 +592,8 @@
   # ACPI Support
   #
   MdeModulePkg/Universal/Acpi/AcpiTableDxe/AcpiTableDxe.inf
-  TdvfPkg/AcpiPlatformDxe/AcpiPlatformQemuDxe.inf
-  TdvfPkg/AcpiTables/AcpiTables.inf
+  TdvfPkg/UefiPayload/AcpiPlatformDxe/AcpiPlatformQemuDxe.inf
+  TdvfPkg/UefiPayload/AcpiTables/AcpiTables.inf
   MdeModulePkg/Universal/Acpi/BootGraphicsResourceTableDxe/BootGraphicsResourceTableDxe.inf
 
 !if $(SECURE_BOOT_ENABLE) == TRUE
@@ -605,12 +601,12 @@
 !endif
 
   TdvfPkg/Override/OvmfPkg/IoMmuDxe/IoMmuDxe.inf
-  TdvfPkg/TdxDxe/TdxDxe.inf
+  TdvfPkg/UefiPayload/TdxDxe/TdxDxe.inf
 
   #
   # Variable driver stack (non-SMM)
   #
-  TdvfPkg/EmuVariableFvbRuntimeDxe/Fvb.inf {
+  TdvfPkg/UefiPayload/EmuVariableFvbRuntimeDxe/Fvb.inf {
     <LibraryClasses>
       PlatformFvbLib|OvmfPkg/Library/EmuVariableFvbLib/EmuVariableFvbLib.inf
   }
@@ -651,15 +647,11 @@
   #
   # TPM(RTMR) support
   #
-!if ($(SECURE_BOOT_ENABLE) == TRUE)
-  TdvfPkg/Library/DxeTpmMeasurementLibTdx/DxeTpmMeasurementLibTdx.inf
-
-  TdvfPkg/Tcg/Tcg2Dxe/Tcg2Dxe.inf {
+  TdvfPkg/UefiPayload/Tcg/Tcg2Dxe/Tcg2Dxe.inf {
     <LibraryClasses>
       TdxLib|TdvfPkg/Library/TdxLib/TdxLib.inf
       NULL|SecurityPkg/Library/HashInstanceLibSha384/HashInstanceLibSha384.inf
   }
-!endif
 
   #
   # Storage Volume Key Support

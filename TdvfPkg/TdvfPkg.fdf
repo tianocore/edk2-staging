@@ -129,9 +129,9 @@ READ_LOCK_STATUS   = TRUE
 # The code in this FV handles the initial firmware startup, and
 # decompresses the PEI and DXE FVs which handles the rest of the boot sequence.
 #
-INF  TdvfPkg/Sec/SecMain.inf
+INF  TdvfPkg/TdShim/Sec/SecMain.inf
 
-INF  RuleOverride=RESET_VECTOR TdvfPkg/ResetVector/ResetVector.inf
+INF  RuleOverride=RESET_VECTOR TdvfPkg/TdShim/ResetVector/ResetVector.inf
 
   FILE FV_IMAGE = 9E21FD93-9C72-4c15-8C4B-E77F1DB2D792 {
     SECTION COMPRESS {
