@@ -44,11 +44,12 @@ Note:
 Usage:  
 `$ build.py [-h] [-p TdvfPkg.dsc] [-t GCC5|VS2015|VS2017|VS2019]`  
 `           [-a X64] [-b RELEASE|DEBUG] [-workspace /path/to/edk2]`  
-`           [-d|-D SHELL_ENABLE=TRUE] [more -d|-D params]`  
+`           [-d|-D TDX_EMULATION_ENABLE=TRUE] [more -d|-D params]`  
 `           [OTHER_PARAMS i.g. -n 4 -y report.log]`  
 `           [-key_enroll]`  
 
 Note:
+  - TDX_EMULATION_ENABLE=TRUE is a mandatory build flag. TRUE for KVM Software SDV, FALSE for real TDX platform.
   - If -key_enroll is set, Secure Boot variables will be enrolled with the data files defined in DefaultSecureBootConfig in build.py. By default -key_enroll is not set.
   - More information about Secure Boot is in following section.
   

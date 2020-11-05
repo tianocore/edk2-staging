@@ -428,7 +428,7 @@ def main():
     KEY_ENROLL = False
     TDVF_NAME = 'TDVF'
     TDVF_SB_ENABLED = 'TDVF.sb'
-    BUILD_OPTOINS = ''
+    BUILD_OPTIONS = ''
     SHOW_HELP = False
 
     SecureBootConfig = {}
@@ -519,7 +519,7 @@ def main():
                 PLATFORMFILE = val
 
             elif arg in ['-d', '-D']:
-                BUILD_OPTOINS += (" -D %s "%val)
+                BUILD_OPTIONS += (" -D %s "%val)
 
             else:
                 build_log.log(LOG_ERR, 'Unsupported command args [%s] ' % arg)
@@ -570,9 +570,14 @@ def main():
             SHOW_HELP = True
 
         else:
-            BUILD_OPTOINS += (" %s" % arg)
+            BUILD_OPTIONS += (" %s" % arg)
 
     if quit:
+        return False
+
+    ## -D TDX_EMULATION_ENABLE is mandatory
+    if '-D TDX_EMULATION_ENABLE=' not in BUILD_OPTIONS:
+        build_log.log(LOG_ERR, "-D TDX_EMULATION_ENABLE=TRUE/FALSE is a mandatory build flag. TRUE for KVM Software SDV, FALSE for the real TDX platform.")
         return False
 
     ## check workspace first
@@ -633,7 +638,7 @@ def main():
     #
     build_log.log(LOG_DBG, 'Running edk2 build for TdvfPkg on %s' % OS)
     os.chdir(work_space)
-    build_cmd = "build -p %s %s -b %s -t %s -a %s" % (PLATFORMFILE, BUILD_OPTOINS, BUILDTARGET, TARGET_TOOLS, ARCH)
+    build_cmd = "build -p %s %s -b %s -t %s -a %s" % (PLATFORMFILE, BUILD_OPTIONS, BUILDTARGET, TARGET_TOOLS, ARCH)
     help_cmd = "build -h"
     if OS == 'Linux':
         cmd = ". edksetup.sh; %s" % (help_cmd if SHOW_HELP else build_cmd)
