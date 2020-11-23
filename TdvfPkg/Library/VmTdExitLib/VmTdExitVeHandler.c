@@ -430,6 +430,10 @@ VmTdExitHandleVe (
 	switch (ReturnData.VeInfo.ExitReason) {
 	case EXIT_REASON_CPUID:
     Status = CpuIdExit(Regs, &ReturnData.VeInfo);
+    DEBUG ((DEBUG_INFO,
+          "CPUID #VE happened, ExitReasion is %d, ExitQualification = 0x%x.\n",
+          ReturnData.VeInfo.ExitReason, ReturnData.VeInfo.ExitQualification.Val
+          ));
     break;
 	case EXIT_REASON_HLT:
     if (FixedPcdGetBool(PcdIgnoreVeHalt) == FALSE) {
@@ -438,15 +442,31 @@ VmTdExitHandleVe (
     break;
 	case EXIT_REASON_IO_INSTRUCTION:
     Status = IoExit(Regs, &ReturnData.VeInfo);
+    DEBUG ((DEBUG_INFO,
+          "IO_Instruction #VE happened, ExitReasion is %d, ExitQualification = 0x%x.\n",
+          ReturnData.VeInfo.ExitReason, ReturnData.VeInfo.ExitQualification.Val
+          ));
     break;
 	case EXIT_REASON_MSR_READ:
     Status = ReadMsrExit(Regs, &ReturnData.VeInfo);
+    DEBUG ((DEBUG_INFO,
+          "RDMSR #VE happened, ExitReasion is %d, ExitQualification = 0x%x.\n",
+          ReturnData.VeInfo.ExitReason, ReturnData.VeInfo.ExitQualification.Val
+          ));
     break;
 	case EXIT_REASON_MSR_WRITE:
     Status = WriteMsrExit(Regs, &ReturnData.VeInfo);
+    DEBUG ((DEBUG_INFO,
+          "WRMSR #VE happened, ExitReasion is %d, ExitQualification = 0x%x.\n",
+          ReturnData.VeInfo.ExitReason, ReturnData.VeInfo.ExitQualification.Val
+          ));
     break;
 	case EXIT_REASON_EPT_VIOLATION:
     Status = MmioExit(Regs, &ReturnData.VeInfo);
+    DEBUG ((DEBUG_INFO,
+          "MMIO #VE happened, ExitReasion is %d, ExitQualification = 0x%x.\n",
+          ReturnData.VeInfo.ExitReason, ReturnData.VeInfo.ExitQualification.Val
+          ));
     break;
 	case EXIT_REASON_VMCALL:
 	case EXIT_REASON_MWAIT_INSTRUCTION:
