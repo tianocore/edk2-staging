@@ -440,8 +440,6 @@
   gEfiMdeModulePkgTokenSpaceGuid.PcdSmbiosDocRev|0x0
   gUefiOvmfPkgTokenSpaceGuid.PcdQemuSmbiosValidated|FALSE
 
-
-
   # UefiCpuPkg PCDs related to initial AP bringup and general AP management.
   gUefiCpuPkgTokenSpaceGuid.PcdCpuMaxLogicalProcessorNumber|128
   gUefiCpuPkgTokenSpaceGuid.PcdCpuApInitTimeOutInMicroSeconds|100000
@@ -449,10 +447,6 @@
   gEfiSecurityPkgTokenSpaceGuid.PcdOptionRomImageVerificationPolicy|0x00
   # SHA384 Only
   gEfiSecurityPkgTokenSpaceGuid.PcdTcg2HashAlgorithmBitmap|4
-  # IPv4 and IPv6 PXE Boot support.
-  gEfiNetworkPkgTokenSpaceGuid.PcdIPv4PXESupport|0x00
-  gEfiNetworkPkgTokenSpaceGuid.PcdIPv6PXESupport|0x00
-
 
 
 ################################################################################
