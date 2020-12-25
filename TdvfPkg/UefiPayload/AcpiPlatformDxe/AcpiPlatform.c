@@ -19,26 +19,6 @@
 STATIC EFI_HOB_PLATFORM_INFO *mPlatformInfoHob = NULL;
 
 STATIC
-UINTN
-CountBits16 (
-  UINT16 Mask
-  )
-{
-  //
-  // For all N >= 1, N bits are enough to represent the number of bits set
-  // among N bits. It's true for N == 1. When adding a new bit (N := N+1),
-  // the maximum number of possibly set bits increases by one, while the
-  // representable maximum doubles.
-  //
-  Mask = ((Mask & 0xAAAA) >> 1) + (Mask & 0x5555);
-  Mask = ((Mask & 0xCCCC) >> 2) + (Mask & 0x3333);
-  Mask = ((Mask & 0xF0F0) >> 4) + (Mask & 0x0F0F);
-  Mask = ((Mask & 0xFF00) >> 8) + (Mask & 0x00FF);
-
-  return Mask;
-}
-
-STATIC
 EFI_STATUS
 EFIAPI
 InstallAcpiMadtTable (
@@ -49,7 +29,6 @@ InstallAcpiMadtTable (
   )
 {
   UINTN                                               CpuCount;
-  UINTN                                               PciLinkIsoCount;
   UINTN                                               NewBufferSize;
   EFI_ACPI_1_0_MULTIPLE_APIC_DESCRIPTION_TABLE_HEADER *Madt;
   EFI_ACPI_1_0_PROCESSOR_LOCAL_APIC_STRUCTURE         *LocalApic;
@@ -74,17 +53,12 @@ InstallAcpiMadtTable (
                          );
   }
   ASSERT (CpuCount >= 1);
-  //
-  // Set Level-tiggered, Active High for these identity mapped IRQs. The bitset
-  // corresponds to the union of all possible interrupt assignments for the LNKA,
-  // LNKB, LNKC, LNKD PCI interrupt lines. See the DSDT.
-  //
-  PciLinkIsoCount = CountBits16 (PcdGet16 (Pcd8259LegacyModeEdgeLevel));
 
+#define NUM_8259_IRQS	16
   NewBufferSize = 1                     * sizeof (*Madt) +
                   CpuCount              * sizeof (*LocalApic) +
                   1                     * sizeof (*IoApic) +
-                  (1 + PciLinkIsoCount) * sizeof (*Iso) +
+                  NUM_8259_IRQS         * sizeof (*Iso) +
                   1                     * sizeof (*LocalApicNmi);
 
   NewBufferSize += sizeof(ACPI_MADT_MPWK_STRUCT);
@@ -129,28 +103,18 @@ InstallAcpiMadtTable (
   Iso->Bus                         = 0x00; // ISA
   Iso->Source                      = 0x00; // IRQ0
   Iso->GlobalSystemInterruptVector = 0x00000002;
-  Iso->Flags                       = 0x0000; // Conforms to specs of the bus
+  Iso->Flags                       = 0x0005; // Edge-triggered, Active High
   ++Iso;
 
-  //
-  // Set Level-tiggered, Active High for all possible PCI link targets.
-  //
-  for (Loop = 0; Loop < 16; ++Loop) {
-    if ((PcdGet16 (Pcd8259LegacyModeEdgeLevel) & (1 << Loop)) == 0) {
-      continue;
-    }
+  for (Loop = 1; Loop < NUM_8259_IRQS; ++Loop) {
     Iso->Type                        = EFI_ACPI_1_0_INTERRUPT_SOURCE_OVERRIDE;
     Iso->Length                      = sizeof (*Iso);
     Iso->Bus                         = 0x00; // ISA
     Iso->Source                      = (UINT8) Loop;
     Iso->GlobalSystemInterruptVector = (UINT32) Loop;
-    Iso->Flags                       = 0x000D; // Level-tiggered, Active High
+    Iso->Flags                       = 0x0005; // Edge-triggered, Active High
     ++Iso;
   }
-  ASSERT (
-    (UINTN) (Iso - (EFI_ACPI_1_0_INTERRUPT_SOURCE_OVERRIDE_STRUCTURE *)Ptr) ==
-      1 + PciLinkIsoCount
-    );
   Ptr = Iso;
 
   LocalApicNmi = Ptr;
