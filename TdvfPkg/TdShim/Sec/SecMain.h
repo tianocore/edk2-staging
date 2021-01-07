@@ -169,6 +169,12 @@ MpAcceptMemoryResourceRange (
   IN EFI_PHYSICAL_ADDRESS        PhysicalEnd
   );
 
+BOOLEAN
+EFIAPI
+ValidateHobList (
+  IN CONST VOID             *HobStart
+  );
+
 VOID
 EFIAPI
 ProcessHobList (
