@@ -270,8 +270,13 @@ SecStartupPhase2(
 
   ZeroMem (&PlatformInfoHob, sizeof(PlatformInfoHob));
   VmmHobList = (VOID *)mTdInitVp;
-  ASSERT(VmmHobList != NULL);
 
+  //
+  // Validate VmmHobList
+  //
+  if (ValidateHobList(VmmHobList) == FALSE) {
+    CpuDeadLoop ();
+  }
   //
   // Process Hoblist for the TD
   //
