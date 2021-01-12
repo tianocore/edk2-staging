@@ -212,6 +212,7 @@
   LocalApicLib|TdvfPkg/Library/BaseXApicX2ApicLib/BaseXApicX2ApicLibDxe.inf
   IoApicLib|PcAtChipsetPkg/Library/BaseIoApicLib/BaseIoApicLib.inf
   MemEncryptLib|TdvfPkg/Library/BaseMemEncryptTdxLib/BaseMemEncryptTdxLib.inf
+  MemEncryptSevLib|OvmfPkg/Library/BaseMemEncryptSevLib/DxeMemEncryptSevLib.inf
 
   #
   # Network libraries
@@ -263,6 +264,8 @@
   DebugLib|OvmfPkg/Library/PlatformDebugLibIoPort/PlatformRomDebugLibIoPort.inf
 !endif
   TdxLib|TdvfPkg/Library/TdxLib/TdxLibSec.inf
+  VmgExitLib|OvmfPkg/Library/VmgExitLib/SecVmgExitLib.inf
+  MemEncryptSevLib|OvmfPkg/Library/BaseMemEncryptSevLib/SecMemEncryptSevLib.inf
 
 [LibraryClasses.common.DXE_CORE]
   PrintLib|MdePkg/Library/BasePrintLib/BasePrintLib.inf
