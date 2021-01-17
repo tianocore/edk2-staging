@@ -35,8 +35,8 @@ STATIC char type_size [] = {
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  //          'B'                  'E'                 'F'            'G'               'H'             'I'                        'L'                'N'      'O'
-  0, 0, sizeof(UINT8), 0, 0, sizeof(EFI_STATUS), sizeof(void*), sizeof(EFI_GUID), sizeof(UINT16), sizeof(unsigned int), 0, 0, sizeof(UINT32), 0, sizeof(UINTN), 0,
+  // 'A'           'B'                  'E'                 'F'            'G'               'H'             'I'                         'L'                'N'            'O'
+  0, sizeof(UINT8), sizeof(UINT8), 0, 0, sizeof(EFI_STATUS), sizeof(void*), sizeof(EFI_GUID), sizeof(UINT16), sizeof(unsigned int), 0, 0, sizeof(UINT32), 0, sizeof(UINTN), 0,
   //     'P'           'Q'                   'T'
   sizeof(void*), sizeof(UINT64), 0, 0, sizeof(EFI_HANDLE), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   //       'a'            'b'                          'h'            'i'                'l'               'n'
@@ -777,6 +777,14 @@ STATIC mp_obj_t get_value(mp_obj_mem_t *self, mp_obj_t index_in)
       FreePool(str);
       break;
 
+    case 'A':
+      if (index_in == mp_const_none) {
+          value = mp_obj_new_bytes(self->addr, self->size);
+      } else {
+        value = MP_OBJ_NEW_SMALL_INT(((UINT8 *)addr)[index]);
+      }
+      break;
+
     case 'a':
       if (index_in == mp_const_none) {
         len = AsciiStrLen(addr);
@@ -993,6 +1001,21 @@ STATIC void set_value(mp_obj_mem_t *self, mp_obj_t index_in, mp_obj_t value)
         }
       } else {
         set_mem_from_obj(self, value, index, 1);
+      }
+      break;
+
+    case 'A':
+      if (index_in == mp_const_none && MP_OBJ_IS_STR_OR_BYTES(value)) {
+        mp_buffer_info_t bufinfo;
+        mp_get_buffer(value, &bufinfo, MP_BUFFER_READ);
+
+        if (bufinfo.buf == NULL || bufinfo.len > self->size) {
+          mp_raise_msg(&mp_type_ValueError, "Out of buffer");
+        }
+        SetMem(self->addr, self->size, 0);
+        CopyMem(self->addr, bufinfo.buf, bufinfo.len);
+      } else {
+        set_mem_from_obj(self, value, index, len - index);
       }
       break;
 
