@@ -199,7 +199,9 @@ ValidateHobList (
                                                           EFI_RESOURCE_ATTRIBUTE_EXECUTION_PROTECTABLE |
                                                           EFI_RESOURCE_ATTRIBUTE_PERSISTABLE |
                                                           EFI_RESOURCE_ATTRIBUTE_READ_ONLY_PROTECTED |
-                                                          EFI_RESOURCE_ATTRIBUTE_MORE_RELIABLE))) != 0) {
+                                                          EFI_RESOURCE_ATTRIBUTE_READ_ONLY_PROTECTABLE |
+                                                          EFI_RESOURCE_ATTRIBUTE_MORE_RELIABLE |
+                                                          EFI_RESOURCE_ATTRIBUTE_ENCRYPTED))) != 0) {
           DEBUG((DEBUG_ERROR, "HOB: Unknow ResourceDescriptor ResourceAttribute type. Type: 0x%08x\n", Hob.ResourceDescriptor->ResourceAttribute));                                                
           return FALSE;
         }
