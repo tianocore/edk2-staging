@@ -355,6 +355,8 @@ SecStartupPhase2(
 
   BuildGuidDataHob(&gUefiTdvfPkgPlatformGuid, &PlatformInfoHob, sizeof(EFI_HOB_PLATFORM_INFO));
 
+  TdxMeasureSystemStates ((EFI_PHYSICAL_ADDRESS) &PlatformInfoHob.SystemStates[0], 6, 1);
+
   BuildStackHob ((UINTN)SecCoreData->StackBase, SecCoreData->StackSize <<=1 );
 
   BuildResourceDescriptorHob (
