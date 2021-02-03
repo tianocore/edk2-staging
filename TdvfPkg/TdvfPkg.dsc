@@ -314,7 +314,7 @@
   gEfiMdeModulePkgTokenSpaceGuid.PcdMaxVariableSize|0x8400
   gEfiMdeModulePkgTokenSpaceGuid.PcdMaxAuthVariableSize|0x8400
   gEfiMdeModulePkgTokenSpaceGuid.PcdVariableStoreSize|0x40000
-
+  gEfiMdeModulePkgTokenSpaceGuid.PcdCpuStackGuard|TRUE
   gEfiMdeModulePkgTokenSpaceGuid.PcdVpdBaseAddress|0x0
   gEfiMdePkgTokenSpaceGuid.PcdReportStatusCodePropertyMask|0x07
 
