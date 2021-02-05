@@ -431,11 +431,6 @@ TimerDriverInitialize (
   //
   Status = gBS->LocateProtocol (&gEfiCpuArchProtocolGuid, NULL, (VOID **) &mCpu);
   ASSERT_EFI_ERROR (Status);
-  //
-  // Force the Local APIC timer to be disabled while setting everything up
-  //
-  DisableApicTimerInterrupt ();
-  InitializeApicTimer (0, 0, FALSE, PcdGet8 (PcdHpetLocalApicVector));
 
   //
   // Install interrupt handler for the Local APIC Timer
@@ -446,6 +441,12 @@ TimerDriverInitialize (
     DEBUG ((DEBUG_ERROR, "Unable to register Local APIC interrupt with CPU Arch Protocol.  Unload Local APIC timer driver.\n"));
     return EFI_DEVICE_ERROR;
   }
+
+  //
+  // Force the Local APIC timer to be disabled while setting everything up
+  //
+  DisableApicTimerInterrupt ();
+  InitializeApicTimer (0, 0, FALSE, PcdGet8 (PcdHpetLocalApicVector));
 
   //
   // Force the Local APIC Timer to be enabled at its default period
