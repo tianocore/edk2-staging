@@ -18,7 +18,6 @@
 #include <Library/LocalApicLib.h>
 #include <Register/LocalApic.h>
 
-
 /**
   This function registers the handler NotifyFunction so it is called every time
   the timer interrupt fires.  It also passes the amount of time since the last
@@ -187,15 +186,15 @@ TimerInterruptHandler (
   IN EFI_SYSTEM_CONTEXT   SystemContext
   )
 {
+
+  EFI_TPL OriginalTPL;
+
+  OriginalTPL = gBS->RaiseTPL (TPL_HIGH_LEVEL);
+
   //
   // Count number of ticks
   //
   DEBUG_CODE (mNumTicks++;);
-
-  //
-  // Local APIC EOI
-  //
-  SendApicEoi ();
 
   //
   // Check to see if there is a registered notification function
@@ -203,6 +202,12 @@ TimerInterruptHandler (
   if (mTimerNotifyFunction != NULL) {
     mTimerNotifyFunction (mTimerPeriod);
   }
+
+  gBS->RestoreTPL (OriginalTPL);
+
+  DisableInterrupts ();
+
+  SendApicEoi();
 }
 
 /**
