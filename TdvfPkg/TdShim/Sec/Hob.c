@@ -144,6 +144,11 @@ ValidateHobList (
       DEBUG((DEBUG_ERROR, "HOB: Hob header Reserved filed should be zero\n"));
       return FALSE; 
     }
+    
+    if (Hob.Header->HobLength == 0) {
+        DEBUG((DEBUG_ERROR, "HOB: Hob header LEANGTH should not be zero\n"));
+        return FALSE;
+    }
 
     switch (Hob.Header->HobType) {
       case EFI_HOB_TYPE_HANDOFF:
