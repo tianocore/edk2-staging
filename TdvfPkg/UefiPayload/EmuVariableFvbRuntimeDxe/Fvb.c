@@ -725,6 +725,12 @@ ValidateTdvfCfv (
       }
 
       VariableOffset += sizeof(AUTHENTICATED_VARIABLE_HEADER) + VariableHeader->NameSize + VariableHeader->DataSize;
+      // Verify VariableOffset should be less than or equal CfvVariableStoreHeader->Size - sizeof(VARIABLE_STORE_HEADER)
+      if (VariableOffset > (CfvVariableStoreHeader->Size - sizeof(VARIABLE_STORE_HEADER))) {
+        DEBUG ((DEBUG_ERROR, "TDVF CFV: Variable header was invalid\n"));
+        return FALSE;
+      }
+
       VariableOffsetBeforeAlign = VariableOffset;
       // 4 byte align
       VariableOffset  = (VariableOffset  + 3) & (UINTN)(~3); 
