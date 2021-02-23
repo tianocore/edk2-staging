@@ -229,3 +229,39 @@ TdxMeasureFvImage (
   return Status;
 }
 
+
+/**
+  Measure SystemStates info.
+  Add it into RTMR[0] after the SystemStates info is measured successfully.
+
+  @param[in]  Base              Base address of SystemStates info.
+  @param[in]  Length            Length of SystemStates info.
+  @param[in]  PcrIndex          Index of PCR
+
+  @retval EFI_SUCCESS           SystemStates info is measured successfully
+                                or it has been already measured.
+  @retval EFI_OUT_OF_RESOURCES  No enough memory to log the new event.
+  @retval EFI_DEVICE_ERROR      The command was unsuccessful.
+
+**/
+EFI_STATUS
+TdxMeasureSystemStates (
+  IN EFI_PHYSICAL_ADDRESS           Base,
+  IN UINTN                          Length,
+  IN UINT8                          PcrIndex
+  )
+{
+  CHAR8                         ConfigInfoTag[] = "etc/system-states";
+  EFI_STATUS                    Status;
+
+  Status = CreateTdxExtendEvent (
+              PcrIndex,                         // PCRIndex
+              EV_PLATFORM_CONFIG_FLAGS,         // EventType
+              (VOID *) ConfigInfoTag,           // EventData
+              sizeof (ConfigInfoTag),           // EventSize
+              (UINT8*) (UINTN) Base,            // HashData
+              (UINTN) Length                    // HashDataLen
+              );
+
+  return Status;
+}
