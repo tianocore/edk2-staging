@@ -18,6 +18,78 @@
 #include <Library/PcdLib.h>
 #include <Library/OrderedCollectionLib.h>
 #include <IndustryStandard/Acpi.h>
+#include <Protocol/Tcg2Protocol.h>
+#include <TcgTdx.h>
+
+EFI_TCG2_PROTOCOL  *mTcg2Protocol = NULL;
+
+/**
+  Mesure firmware acpi configuration data from qemu.
+
+  @param[in] EventData    Pointer to the event data.
+
+  @param[in] EventSize    Size of event data.
+
+  @param[in] CfgDataBase  Configuration data base address.
+
+  @param[in] EventSize    Size of configuration data .
+
+  @retval  EFI_NOT_FOUND           Cannot locate protocol.
+
+  @retval  EFI_OUT_OF_RESOURCES    Allocate zero pool failure.
+
+  @return                          Status codes returned by
+                                   mTcg2Protocol->HashLogExtendEvent.
+**/
+STATIC
+EFI_STATUS
+EFIAPI
+MeasureQemuFwCfgAcpi(
+  IN CHAR8                 *EventData,
+  IN UINT32                EventSize,
+  IN EFI_PHYSICAL_ADDRESS  CfgDataBase,
+  IN UINTN                 CfgDataLength
+)
+{
+  EFI_TCG2_EVENT  *Tcg2Event;
+  EFI_STATUS      Status;
+
+  if (mTcg2Protocol == NULL) {
+    Status = gBS->LocateProtocol (&gTdTcg2ProtocolGuid, NULL, (VOID **) &mTcg2Protocol);
+    if (EFI_ERROR (Status)) {
+      //
+      // Tcg2 protocol is not installed.
+      //
+      DEBUG ((EFI_D_ERROR, "MesureQemuFwCfgAcpi - Tcg2 - %r\n", Status));
+      return EFI_NOT_FOUND;
+    }
+  }
+
+  Tcg2Event = AllocateZeroPool (EventSize + sizeof (EFI_TCG2_EVENT) - sizeof(Tcg2Event->Event));
+  if (Tcg2Event == NULL) {
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  Tcg2Event->Size = EventSize + sizeof (EFI_TCG2_EVENT) - sizeof(Tcg2Event->Event);
+  Tcg2Event->Header.EventType = EV_PLATFORM_CONFIG_FLAGS;
+  Tcg2Event->Header.PCRIndex = 1;
+  Tcg2Event->Header.HeaderSize = sizeof (EFI_TCG2_EVENT_HEADER);
+  Tcg2Event->Header.HeaderVersion = EFI_TCG2_EVENT_HEADER_VERSION;
+  CopyMem (&Tcg2Event->Event[0], EventData, EventSize);
+
+  Status = mTcg2Protocol->HashLogExtendEvent (mTcg2Protocol,
+                                              0,
+                                              CfgDataBase,
+                                              CfgDataLength,
+                                              Tcg2Event
+                                              );
+
+  if (EFI_ERROR (Status)) {
+    FreePool (Tcg2Event);
+  }
+
+  return Status;
+}
 
 //
 // The user structure for the ordered collection that will track the fw_cfg
@@ -381,6 +453,16 @@ ProcessCmdAllocate (
 
   QemuFwCfgSelectItem (FwCfgItem);
   QemuFwCfgReadBytes (FwCfgSize, Blob->Base);
+
+  Status = MeasureQemuFwCfgAcpi ((CHAR8 *) Allocate->File, 
+                                sizeof(Allocate->File), 
+                                (EFI_PHYSICAL_ADDRESS) Blob->Base, 
+                                FwCfgSize
+                                );
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "Measure %s failure\n", Allocate->File));
+  }
+
   ZeroMem (Blob->Base + Blob->Size, EFI_PAGES_TO_SIZE (NumPages) - Blob->Size);
 
   DEBUG ((EFI_D_VERBOSE, "%a: File=\"%a\" Alignment=0x%x Zone=%d Size=0x%Lx "
@@ -964,6 +1046,15 @@ InstallAcpiTablesFromQemu (
   EnablePciDecoding (&OriginalPciAttributes, &OriginalPciAttributesCount);
   QemuFwCfgSelectItem (FwCfgItem);
   QemuFwCfgReadBytes (FwCfgSize, LoaderStart);
+  Status = MeasureQemuFwCfgAcpi ("etc/table-loader", 
+                                sizeof("etc/table-loader"), 
+                                (EFI_PHYSICAL_ADDRESS) LoaderStart, 
+                                FwCfgSize
+                                );
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "Measure etc/table-loader failure\n"));
+  }
+
   RestorePciDecoding (OriginalPciAttributes, OriginalPciAttributesCount);
   LoaderEnd = LoaderStart + FwCfgSize / sizeof *LoaderEntry;
 
