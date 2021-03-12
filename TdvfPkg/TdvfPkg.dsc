@@ -112,7 +112,7 @@
 #
 ################################################################################
 [LibraryClasses]
-  TimerLib|UefiCpuPkg/Library/SecPeiDxeTimerLibUefiCpu/SecPeiDxeTimerLibUefiCpu.inf
+  TimerLib|OvmfPkg/Library/AcpiTimerLib/BaseAcpiTimerLib.inf
   PrintLib|MdePkg/Library/BasePrintLib/BasePrintLib.inf
   BaseMemoryLib|MdePkg/Library/BaseMemoryLibRepStr/BaseMemoryLibRepStr.inf
   BaseLib|MdePkg/Library/BaseLib/BaseLib.inf
@@ -239,6 +239,7 @@
   TdxLib|TdvfPkg/Library/TdxLib/TdxLib.inf
 
 [LibraryClasses.common.SEC]
+  TimerLib|OvmfPkg/Library/AcpiTimerLib/BaseRomAcpiTimerLib.inf
   PcdLib|MdePkg/Library/BasePcdLibNull/BasePcdLibNull.inf
 !if $(QEMU_PLATFORM) == TRUE
   QemuFwCfgLib|TdvfPkg/Library/QemuFwCfgLibTdx/QemuFwCfgSecLibTdx.inf
@@ -279,13 +280,18 @@
   PciLib|MdePkg/Library/BasePciLibCf8/BasePciLibCf8.inf
 
 [LibraryClasses.common.DXE_RUNTIME_DRIVER]
+  TimerLib|OvmfPkg/Library/AcpiTimerLib/DxeAcpiTimerLib.inf
   ReportStatusCodeLib|MdeModulePkg/Library/RuntimeDxeReportStatusCodeLib/RuntimeDxeReportStatusCodeLib.inf
   ResetSystemLib|OvmfPkg/Library/ResetSystemLib/DxeResetSystemLib.inf
   UefiRuntimeLib|MdePkg/Library/UefiRuntimeLib/UefiRuntimeLib.inf
   BaseCryptLib|CryptoPkg/Library/BaseCryptLib/RuntimeCryptLib.inf
   VariablePolicyLib|MdeModulePkg/Library/VariablePolicyLib/VariablePolicyLibRuntimeDxe.inf
 
+[LibraryClasses.common.UEFI_DRIVER]
+  TimerLib|OvmfPkg/Library/AcpiTimerLib/DxeAcpiTimerLib.inf
+
 [LibraryClasses.common.DXE_DRIVER]
+  TimerLib|OvmfPkg/Library/AcpiTimerLib/DxeAcpiTimerLib.inf
   PlatformBootManagerLib|OvmfPkg/Library/PlatformBootManagerLib/PlatformBootManagerLib.inf
   PlatformBmPrintScLib|OvmfPkg/Library/PlatformBmPrintScLib/PlatformBmPrintScLib.inf
   QemuLoadImageLib|OvmfPkg/Library/X86QemuLoadImageLib/X86QemuLoadImageLib.inf
