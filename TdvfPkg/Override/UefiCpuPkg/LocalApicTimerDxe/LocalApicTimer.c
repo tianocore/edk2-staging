@@ -309,13 +309,10 @@ TimerDriverSetTimerPeriod (
   Tpl = gBS->RaiseTPL (TPL_HIGH_LEVEL);
 
   if (TimerPeriod == 0) {
+    //
+    // Disable timer interrupt for a TimerPeriod of 0
+    //
     DisableApicTimerInterrupt ();
-
-    //
-    // If TimerPeriod is 0, then mask Local APIC Timer interrupts
-    //
-
-    InitializeApicTimer (0, 0, FALSE, PcdGet8 (PcdHpetLocalApicVector));
   } else {
     DisableApicTimerInterrupt ();
 
