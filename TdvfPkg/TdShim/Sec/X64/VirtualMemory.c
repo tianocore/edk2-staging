@@ -26,6 +26,29 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 //
 PAGE_TABLE_POOL         *mPageTablePool = NULL;
 
+UINTN   mLevelShift[5] = {
+  0,
+  PAGING_L1_ADDRESS_SHIFT,
+  PAGING_L2_ADDRESS_SHIFT,
+  PAGING_L3_ADDRESS_SHIFT,
+  PAGING_L4_ADDRESS_SHIFT
+};
+
+UINT64  mLevelMask[5] = {
+  0,
+  PAGING_4K_ADDRESS_MASK_64,
+  PAGING_2M_ADDRESS_MASK_64,
+  PAGING_1G_ADDRESS_MASK_64,
+  PAGING_1G_ADDRESS_MASK_64
+};
+
+UINT64  mLevelSize[5] = {
+  0,
+  SIZE_4KB,
+  SIZE_2MB,
+  SIZE_1GB,
+  SIZE_512GB
+};
 
 /**
   Clear legacy memory located at the first 4K-page, if available.
@@ -459,9 +482,6 @@ SetPageTablePoolReadOnly (
   UINT64                *PageTable;
   UINT64                *NewPageTable;
   UINT64                PageAttr;
-  UINT64                LevelSize[5];
-  UINT64                LevelMask[5];
-  UINTN                 LevelShift[5];
   UINTN                 Level;
   UINT64                PoolUnitSize;
 
@@ -474,28 +494,13 @@ SetPageTablePoolReadOnly (
   //
   Address = Address & PAGE_TABLE_POOL_ALIGN_MASK;
 
-  LevelShift[1] = PAGING_L1_ADDRESS_SHIFT;
-  LevelShift[2] = PAGING_L2_ADDRESS_SHIFT;
-  LevelShift[3] = PAGING_L3_ADDRESS_SHIFT;
-  LevelShift[4] = PAGING_L4_ADDRESS_SHIFT;
-
-  LevelMask[1] = PAGING_4K_ADDRESS_MASK_64;
-  LevelMask[2] = PAGING_2M_ADDRESS_MASK_64;
-  LevelMask[3] = PAGING_1G_ADDRESS_MASK_64;
-  LevelMask[4] = PAGING_1G_ADDRESS_MASK_64;
-
-  LevelSize[1] = SIZE_4KB;
-  LevelSize[2] = SIZE_2MB;
-  LevelSize[3] = SIZE_1GB;
-  LevelSize[4] = SIZE_512GB;
-
   AddressEncMask  = PcdGet64 (PcdPteMemoryEncryptionAddressOrMask) &
                     PAGING_1G_ADDRESS_MASK_64;
   PageTable       = (UINT64 *)(UINTN)PageTableBase;
   PoolUnitSize    = PAGE_TABLE_POOL_UNIT_SIZE;
 
   for (Level = (Level4Paging) ? 4 : 3; Level > 0; --Level) {
-    Index = ((UINTN)RShiftU64 (Address, LevelShift[Level]));
+    Index = ((UINTN)RShiftU64 (Address, mLevelShift[Level]));
     Index &= PAGING_PAE_INDEX_MASK;
 
     PageAttr = PageTable[Index];
@@ -508,7 +513,7 @@ SetPageTablePoolReadOnly (
       continue;
     }
 
-    if (PoolUnitSize >= LevelSize[Level]) {
+    if (PoolUnitSize >= mLevelSize[Level]) {
       //
       // Clear R/W bit if current page granularity is not larger than pool unit
       // size.
@@ -523,7 +528,7 @@ SetPageTablePoolReadOnly (
           ASSERT (Index < EFI_PAGE_SIZE/sizeof (UINT64));
 
           PageTable[Index] &= ~(UINT64)IA32_PG_RW;
-          PoolUnitSize    -= LevelSize[Level];
+          PoolUnitSize    -= mLevelSize[Level];
 
           ++Index;
         }
@@ -540,7 +545,7 @@ SetPageTablePoolReadOnly (
       NewPageTable = AllocatePageTableMemory (1);
       ASSERT (NewPageTable != NULL);
 
-      PhysicalAddress = PageAttr & LevelMask[Level];
+      PhysicalAddress = PageAttr & mLevelMask[Level];
       for (EntryIndex = 0;
             EntryIndex < EFI_PAGE_SIZE/sizeof (UINT64);
             ++EntryIndex) {
@@ -549,7 +554,7 @@ SetPageTablePoolReadOnly (
         if (Level > 2) {
           NewPageTable[EntryIndex] |= IA32_PG_PS;
         }
-        PhysicalAddress += LevelSize[Level - 1];
+        PhysicalAddress += mLevelSize[Level - 1];
       }
 
       PageTable[Index] = (UINT64)(UINTN)NewPageTable | AddressEncMask |
