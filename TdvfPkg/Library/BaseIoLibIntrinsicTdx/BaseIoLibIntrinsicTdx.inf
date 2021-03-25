@@ -43,3 +43,5 @@
   BaseLib
   TdxLib
 
+[Pcd]
+  gUefiTdvfPkgTokenSpaceGuid.PcdTdxSharedPageMask

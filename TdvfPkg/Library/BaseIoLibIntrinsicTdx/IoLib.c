@@ -259,6 +259,31 @@ IoWrite64 (
   return 0;
 }
 
+STATIC BOOLEAN mAddressEncMaskChecked = FALSE;
+STATIC UINT64  mAddressEncMask;
+
+STATIC
+UINT64
+GetMemEncryptionAddressMask (
+  VOID
+  )
+{
+  if (mAddressEncMaskChecked) {
+    return mAddressEncMask;
+  }
+
+  mAddressEncMask = PcdGet64(PcdTdxSharedPageMask);
+
+  mAddressEncMaskChecked = TRUE;
+  DEBUG ((
+    DEBUG_INFO,
+    "%a:%a: AddressEncMask=0x%Lx\n",
+    gEfiCallerBaseName,
+    __FUNCTION__,
+    mAddressEncMask));
+
+  return mAddressEncMask;
+}
 
 /**
   Reads an 8-bit MMIO register.
@@ -282,6 +307,8 @@ MmioRead8 (
 {
   UINT64                             Value;
   UINT64                             Status;
+
+  Address |= GetMemEncryptionAddressMask();
 
   MemoryFence ();
   Status = TdVmCall(TDVMCALL_MMIO, 1, 0, Address, 0, &Value);
@@ -318,6 +345,8 @@ MmioWrite8 (
   UINT64                             Value;
   UINT64                             Status;
 
+  Address |= GetMemEncryptionAddressMask();
+
   MemoryFence ();
   Value = Val;
   Status = TdVmCall(TDVMCALL_MMIO, 1, 1, Address, Value, 0);
@@ -352,6 +381,8 @@ MmioRead16 (
 {
   UINT64                             Value;
   UINT64                             Status;
+
+  Address |= GetMemEncryptionAddressMask();
 
   MemoryFence ();
   Status = TdVmCall(TDVMCALL_MMIO, 2, 0, Address, 0, &Value);
@@ -391,6 +422,8 @@ MmioWrite16 (
 
   ASSERT ((Address & 1) == 0);
 
+  Address |= GetMemEncryptionAddressMask();
+
   MemoryFence ();
   Value = Val;
   Status = TdVmCall(TDVMCALL_MMIO, 2, 1, Address, Value, 0);
@@ -425,6 +458,8 @@ MmioRead32 (
 {
   UINT64                             Value;
   UINT64                             Status;
+
+  Address |= GetMemEncryptionAddressMask();
 
   MemoryFence ();
   Status = TdVmCall(TDVMCALL_MMIO, 4, 0, Address, 0, &Value);
@@ -464,6 +499,8 @@ MmioWrite32 (
 
   ASSERT ((Address & 3) == 0);
 
+  Address |= GetMemEncryptionAddressMask();
+
   MemoryFence ();
   Value = Val;
   Status = TdVmCall(TDVMCALL_MMIO, 4, 1, Address, Value, 0);
@@ -499,6 +536,8 @@ MmioRead64 (
   UINT64                             Value;
   UINT64                             Status;
 
+  Address |= GetMemEncryptionAddressMask();
+
   MemoryFence ();
   Status = TdVmCall(TDVMCALL_MMIO, 8, 0, Address, 0, &Value);
   if (Status != 0) {
@@ -533,6 +572,8 @@ MmioWrite64 (
   UINT64                             Status;
 
   ASSERT ((Address & 7) == 0);
+
+  Address |= GetMemEncryptionAddressMask();
 
   MemoryFence ();
   Status = TdVmCall(TDVMCALL_MMIO, 4, 1, Address, Value, 0);
