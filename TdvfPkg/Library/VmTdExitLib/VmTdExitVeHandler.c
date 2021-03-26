@@ -270,51 +270,50 @@ MmioExit(
   UINT64        Status;
   UINT32        MmioSize;
   UINT32        RegSize;;
-	UINT8         OpCode;
-	BOOLEAN       SeenRex;
-	UINT64        *Reg;
-	UINT8         *Rip;
-	UINT64        Val;
+  UINT8         OpCode;
+  BOOLEAN       SeenRex;
+  UINT64        *Reg;
+  UINT8         *Rip;
+  UINT64        Val;
   UINT32        OpSize;
   MODRM         ModRm;
   REX           Rex;
 
-	Rip = (UINT8 *)Regs->Rip;
+  Rip = (UINT8 *)Regs->Rip;
   Val = 0;
   Rex.Val = 0;
-	SeenRex = FALSE;
+  SeenRex = FALSE;
 
   //
   // Default to 32bit transfer
   //
-	OpSize = 4;
+  OpSize = 4;
 
   do {
     OpCode = *Rip++;
-		if (OpCode == 0x66) {
+    if (OpCode == 0x66) {
       OpSize = 2;
-		} else if (OpCode == 0x64 || OpCode == 0x65 || OpCode == 0x67) {
+    } else if (OpCode == 0x64 || OpCode == 0x65 || OpCode == 0x67) {
       continue;
-		} else if (OpCode >= 0x40 && OpCode <= 0x4f) {
-			SeenRex = TRUE;
+    } else if (OpCode >= 0x40 && OpCode <= 0x4f) {
+      SeenRex = TRUE;
       Rex.Val = OpCode;
-		} else {
-			break;
-		}
-	} while (TRUE);
+    } else {
+      break;
+    }
+  } while (TRUE);
 
   //
   // We need to have at least 2 more bytes for this instruction
   //
-	TDX_DECODER_BUG_ON(((UINT64)Rip - Regs->Rip) > 13);
+  TDX_DECODER_BUG_ON(((UINT64)Rip - Regs->Rip) > 13);
 
-  OpCode = *Rip++;
   //
   // Two-byte opecode, get next byte
   //
-	if (OpCode == 0x0F) {
+  if (OpCode == 0x0F) {
     OpCode = *Rip++;
-	}
+  }
 
   switch (OpCode) {
     case 0x88:
@@ -323,74 +322,77 @@ MmioExit(
       MmioSize = 1;
       break;
     case 0xB7:
-		  MmioSize = 2;
+      MmioSize = 2;
       break;
     default:
-		  MmioSize = Rex.Bits.W ? 8 : OpSize;
+      MmioSize = Rex.Bits.W ? 8 : OpSize;
       break;
   } 
 
-	/* Punt on AH/BH/CH/DH unless it shows up. */
-	ModRm.Val = *Rip++;
-	TDX_DECODER_BUG_ON(MmioSize == 1 && ModRm.Bits.Reg > 4 && !SeenRex && OpCode != 0xB6);
-	Reg = GetRegFromContext(Regs, ModRm.Bits.Reg | ((int)Rex.Bits.R << 3));
-	TDX_DECODER_BUG_ON(!Reg);
+  /* Punt on AH/BH/CH/DH unless it shows up. */
+  ModRm.Val = *Rip++;
+  TDX_DECODER_BUG_ON(MmioSize == 1 && ModRm.Bits.Reg > 4 && !SeenRex && OpCode != 0xB6);
+  Reg = GetRegFromContext(Regs, ModRm.Bits.Reg | ((int)Rex.Bits.R << 3));
+  TDX_DECODER_BUG_ON(!Reg);
 
-	if (ModRm.Bits.Rm == 4)
-		++Rip;	/* SIB byte */
+  if (ModRm.Bits.Rm == 4) {
+    ++Rip; /* SIB byte */
+  }
 
-	if (ModRm.Bits.Mod == 2 || (ModRm.Bits.Mod == 0 && ModRm.Bits.Rm == 5))
-		Rip += 4;	/* DISP32 */
-	else if (ModRm.Bits.Mod == 1)
-		++Rip;	/* DISP8 */
+  if ((ModRm.Bits.Mod == 2) || (ModRm.Bits.Mod == 0 && ModRm.Bits.Rm == 5)) {
+    Rip += 4; /* DISP32 */
+  } else if (ModRm.Bits.Mod == 1) {
+    ++Rip; /* DISP8 */
+  }
 
   switch (OpCode) {
     case 0x88:
     case 0x89:
-		  CopyMem((void *)&Val, Reg, MmioSize);
-	    Status = TdVmCall(TDVMCALL_MMIO, MmioSize, 1, Veinfo->GuestPA, Val, 0);
+      CopyMem((void *)&Val, Reg, MmioSize);
+      Status = TdVmCall(TDVMCALL_MMIO, MmioSize, 1, Veinfo->GuestPA, Val, 0);
       break;
     case 0xC7:
-		  CopyMem((void *)&Val, Rip, OpSize);
-	    Status = TdVmCall(TDVMCALL_MMIO, MmioSize, 1, Veinfo->GuestPA, Val, 0);
-		  Rip += OpSize;
+      CopyMem((void *)&Val, Rip, OpSize);
+      Status = TdVmCall(TDVMCALL_MMIO, MmioSize, 1, Veinfo->GuestPA, Val, 0);
+      Rip += OpSize;
     default:
       //
       // 32-bit write registers are zero extended to the full register
-		  // Hence 'MOVZX r[32/64], r/m16' is
-		  // hardcoded to reg size 8, and the straight MOV case has a reg
-		  // size of 8 in the 32-bit read case.
+      // Hence 'MOVZX r[32/64], r/m16' is
+      // hardcoded to reg size 8, and the straight MOV case has a reg
+      // size of 8 in the 32-bit read case.
       //
       switch (OpCode) {
       case 0xB6:
-			  RegSize = Rex.Bits.W ? 8 : OpSize;
+        RegSize = Rex.Bits.W ? 8 : OpSize;
         break;
       case 0xB7:
-			  RegSize =  8;
+        RegSize =  8;
         break;
       default:
-			  RegSize = MmioSize == 4 ? 8 : MmioSize;
+        RegSize = MmioSize == 4 ? 8 : MmioSize;
         break;
       }
 
-	    Status = TdVmCall(TDVMCALL_MMIO, MmioSize, 0, Veinfo->GuestPA, 0, &Val);
+      Status = TdVmCall(TDVMCALL_MMIO, MmioSize, 0, Veinfo->GuestPA, 0, &Val);
+
       if (Status == 0) {
-		    ZeroMem(Reg, RegSize);
-		    CopyMem(Reg, (void *)&Val, MmioSize);
+        ZeroMem(Reg, RegSize);
+        CopyMem(Reg, (void *)&Val, MmioSize);
       }
-	}
+  }
 
   if (Status == 0) {
-	  TDX_DECODER_BUG_ON(((UINT64)Rip - Regs->Rip) > 15);
+    TDX_DECODER_BUG_ON(((UINT64)Rip - Regs->Rip) > 15);
 
     // 
     // We change instruction length to reflect true size so handler can
     // bump rip
     //
-	  Veinfo->ExitInstructionLength =  (UINT32)((UINT64)Rip - Regs->Rip);
+    Veinfo->ExitInstructionLength =  (UINT32)((UINT64)Rip - Regs->Rip);
   }
 
-	return Status;
+  return Status;
 }
 
 /**
@@ -424,58 +426,58 @@ VmTdExitHandleVe (
   Status = TdCall(TDCALL_TDGETVEINFO, 0, 0, 0, &ReturnData);
   ASSERT(Status == 0);
   if (Status != 0) {
-	  TdVmCall(TDVMCALL_HALT, 0, 0, 0, 0, 0);
+    TdVmCall(TDVMCALL_HALT, 0, 0, 0, 0, 0);
   }
       
-	switch (ReturnData.VeInfo.ExitReason) {
-	case EXIT_REASON_CPUID:
+    switch (ReturnData.VeInfo.ExitReason) {
+    case EXIT_REASON_CPUID:
     Status = CpuIdExit(Regs, &ReturnData.VeInfo);
     DEBUG ((DEBUG_VERBOSE ,
           "CPUID #VE happened, ExitReasion is %d, ExitQualification = 0x%x.\n",
           ReturnData.VeInfo.ExitReason, ReturnData.VeInfo.ExitQualification.Val
           ));
     break;
-	case EXIT_REASON_HLT:
+    case EXIT_REASON_HLT:
     if (FixedPcdGetBool(PcdIgnoreVeHalt) == FALSE) {
       Status = TdVmCall(EXIT_REASON_HLT, 0, 0, 0, 0, 0);
     }
     break;
-	case EXIT_REASON_IO_INSTRUCTION:
+    case EXIT_REASON_IO_INSTRUCTION:
     Status = IoExit(Regs, &ReturnData.VeInfo);
     DEBUG ((DEBUG_VERBOSE ,
           "IO_Instruction #VE happened, ExitReasion is %d, ExitQualification = 0x%x.\n",
           ReturnData.VeInfo.ExitReason, ReturnData.VeInfo.ExitQualification.Val
           ));
     break;
-	case EXIT_REASON_MSR_READ:
+    case EXIT_REASON_MSR_READ:
     Status = ReadMsrExit(Regs, &ReturnData.VeInfo);
     DEBUG ((DEBUG_VERBOSE ,
           "RDMSR #VE happened, ExitReasion is %d, ExitQualification = 0x%x.\n",
           ReturnData.VeInfo.ExitReason, ReturnData.VeInfo.ExitQualification.Val
           ));
     break;
-	case EXIT_REASON_MSR_WRITE:
+    case EXIT_REASON_MSR_WRITE:
     Status = WriteMsrExit(Regs, &ReturnData.VeInfo);
     DEBUG ((DEBUG_VERBOSE ,
           "WRMSR #VE happened, ExitReasion is %d, ExitQualification = 0x%x.\n",
           ReturnData.VeInfo.ExitReason, ReturnData.VeInfo.ExitQualification.Val
           ));
     break;
-	case EXIT_REASON_EPT_VIOLATION:
+    case EXIT_REASON_EPT_VIOLATION:
     Status = MmioExit(Regs, &ReturnData.VeInfo);
     DEBUG ((DEBUG_VERBOSE ,
           "MMIO #VE happened, ExitReasion is %d, ExitQualification = 0x%x.\n",
           ReturnData.VeInfo.ExitReason, ReturnData.VeInfo.ExitQualification.Val
           ));
     break;
-	case EXIT_REASON_VMCALL:
-	case EXIT_REASON_MWAIT_INSTRUCTION:
-	case EXIT_REASON_MONITOR_INSTRUCTION:
-	case EXIT_REASON_WBINVD:
-	case EXIT_REASON_RDPMC:
+    case EXIT_REASON_VMCALL:
+    case EXIT_REASON_MWAIT_INSTRUCTION:
+    case EXIT_REASON_MONITOR_INSTRUCTION:
+    case EXIT_REASON_WBINVD:
+    case EXIT_REASON_RDPMC:
     /* Handle as nops. */
     break;
-	default:
+    default:
     DEBUG ((DEBUG_ERROR,
           "Unsupported #VE happened, ExitReasion is %d, ExitQualification = 0x%x.\n",
           ReturnData.VeInfo.ExitReason, ReturnData.VeInfo.ExitQualification.Val
