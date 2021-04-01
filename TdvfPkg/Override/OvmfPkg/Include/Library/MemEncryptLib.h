@@ -110,4 +110,10 @@ MemEncryptLocateInitialSmramSaveStateMapPages (
   OUT UINTN *BaseAddress,
   OUT UINTN *NumberOfPages
   );
+
+VOID
+EFIAPI
+SetMemEncryptionAddressMask (
+  IN UINT64 AddressEncMask
+);
 #endif // _MEM_ENCRYPT_LIB_H_

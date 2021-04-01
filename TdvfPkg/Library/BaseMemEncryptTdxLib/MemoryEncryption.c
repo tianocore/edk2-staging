@@ -53,6 +53,15 @@ MemEncryptIsEnabled (
   return TRUE;
 }
 
+VOID
+EFIAPI
+SetMemEncryptionAddressMask (
+  IN UINT64 AddressEncMask
+)
+{
+  mAddressEncMask = AddressEncMask;
+  mAddressEncMaskChecked = TRUE;
+}
 /**
   Get the memory encryption mask
 

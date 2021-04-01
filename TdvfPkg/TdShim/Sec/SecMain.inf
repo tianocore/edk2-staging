@@ -56,6 +56,7 @@
   CpuExceptionHandlerLib
   SynchronizationLib
   TdxLib
+  MemEncryptLib
 
 [Guids]
   gEfiHobMemoryAllocModuleGuid
@@ -87,6 +88,7 @@
   gUefiTdvfPkgTokenSpaceGuid.PcdBfvSize
   gUefiTdvfPkgTokenSpaceGuid.PcdUseTdxEmulation
   gUefiTdvfPkgTokenSpaceGuid.PcdTdxAcceptPageChunkSize
+  gUefiTdvfPkgTokenSpaceGuid.PcdTdxDisableSharedMask
   gEfiMdeModulePkgTokenSpaceGuid.PcdSetNxForStack               ## CONSUMES
 
 
