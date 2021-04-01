@@ -21,6 +21,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Library/PrePiLib.h>
 #include "X64/PageTables.h"
 #include <Library/ReportStatusCodeLib.h>
+#include <Library/MemEncryptLib.h>
 
 #include "SecMain.h"
 
@@ -38,6 +39,46 @@ EFI_MEMORY_TYPE_INFORMATION mDefaultMemoryTypeInformation[] = {
 };
 
 
+VOID
+SetMmioShareBit (
+  IN UINTN   PageTables
+  )
+{
+  UINT64                          AddressEncMask;
+  EFI_HOB_CPU *                   CpuHob;
+  VOID                            *HobStart;
+  EFI_PEI_HOB_POINTERS            Hob;
+  EFI_STATUS                      Status;
+
+  if (PcdGetBool(PcdTdxDisableSharedMask) == TRUE) {
+    AddressEncMask = 0;
+  } else {
+    CpuHob = GetFirstHob (EFI_HOB_TYPE_CPU);
+    ASSERT (CpuHob != NULL);
+    AddressEncMask = 1ULL << (CpuHob->SizeOfMemorySpace - 1);
+  }
+
+  SetMemEncryptionAddressMask (AddressEncMask);
+
+  HobStart = GetHobList();
+  Hob.Raw = (UINT8 *) HobStart;
+  while (!END_OF_HOB_LIST (Hob)) {
+    if ((Hob.Header->HobType == EFI_HOB_TYPE_RESOURCE_DESCRIPTOR)
+          && (Hob.ResourceDescriptor->ResourceType == EFI_RESOURCE_MEMORY_MAPPED_IO )) {
+      Status = MemEncryptClearPageEncMask (
+                 PageTables,
+                 Hob.ResourceDescriptor->PhysicalStart,
+                 Hob.ResourceDescriptor->ResourceLength / EFI_PAGE_SIZE,
+                 FALSE
+                 );
+      ASSERT_EFI_ERROR (Status);
+      if (EFI_ERROR (Status)) {
+        CpuDeadLoop ();
+      }
+    }
+    Hob.Raw = GET_NEXT_HOB (Hob);
+  }
+}
 /**
    Transfers control to DxeCore.
 
@@ -95,6 +136,7 @@ HandOffToDxeCore (
   }
 
   if (FeaturePcdGet (PcdDxeIplBuildPageTables)) {
+    SetMmioShareBit (PageTables);
     AsmWriteCr3 (PageTables);
   }
 
