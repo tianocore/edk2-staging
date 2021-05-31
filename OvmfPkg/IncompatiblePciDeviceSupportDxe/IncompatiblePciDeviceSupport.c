@@ -45,16 +45,11 @@ STATIC EFI_INCOMPATIBLE_PCI_DEVICE_SUPPORT_PROTOCOL
 typedef struct {
   EFI_ACPI_ADDRESS_SPACE_DESCRIPTOR AddressSpaceDesc;
   EFI_ACPI_END_TAG_DESCRIPTOR       EndDesc;
-} MMIO64_PREFERENCE;
-
-typedef struct {
-  EFI_ACPI_ADDRESS_SPACE_DESCRIPTOR AddressSpaceDesc;
-  EFI_ACPI_END_TAG_DESCRIPTOR       EndDesc;
-} OPTION_ROM_PREFERENCE;
+} ADDRESS_DESCRIPTOR_CONFIGURATION;
 
 #pragma pack ()
 
-STATIC CONST MMIO64_PREFERENCE mMmio6Configuration = {
+STATIC CONST ADDRESS_DESCRIPTOR_CONFIGURATION mMmio6Configuration = {
   //
   // AddressSpaceDesc
   //
@@ -92,7 +87,7 @@ STATIC CONST MMIO64_PREFERENCE mMmio6Configuration = {
   }
 };
 
-STATIC CONST OPTION_ROM_PREFERENCE mOptionRomConfiguration = {
+STATIC CONST ADDRESS_DESCRIPTOR_CONFIGURATION mOptionRomConfiguration = {
   //
   // AddressSpaceDesc
   //
@@ -107,7 +102,7 @@ STATIC CONST OPTION_ROM_PREFERENCE mOptionRomConfiguration = {
       ),
     ACPI_ADDRESS_SPACE_TYPE_MEM,                   // ResType
     0,                                             // GenFlag
-    BIT0,                                          // Disable option roms SpecificFlag
+    0,                                             // Disable option roms SpecificFlag
     64,                                            // AddrSpaceGranularity:
                                                    //   aperture selection hint
                                                    //   for BAR allocation
@@ -115,7 +110,7 @@ STATIC CONST OPTION_ROM_PREFERENCE mOptionRomConfiguration = {
     MAX_UINT64,                                    // AddrRangeMax:
                                                    //   no special alignment
                                                    //   for affected BARs
-    MAX_UINT64,                                    // AddrTranslationOffset:
+    6,                                             // AddrTranslationOffset:
                                                    //   hint covers all
                                                    //   eligible BARs
     0                                              // AddrLen:
@@ -295,7 +290,7 @@ AllocateConfiguration:
     if(TdGuest) {
     DEBUG ((DEBUG_WARN,
       "%a: Check device for Option ROM of PCI 0x%04x:0x%04x (rev %d) failed.\n\n",
-      __FUNCTION__, (UINT32)VendorId, (UINT32)DeviceId, (UINT8)RevisionId));      
+      __FUNCTION__, (UINT32)VendorId, (UINT32)DeviceId, (UINT8)RevisionId));
     } else {
       DEBUG ((DEBUG_WARN,
         "%a: 64-bit MMIO BARs may be degraded for PCI 0x%04x:0x%04x (rev %d)\n",

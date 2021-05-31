@@ -535,9 +535,6 @@ GetMaxOptionRomSize (
   UINT32          TempOptionRomSize;
 
   MaxOptionRomSize = 0;
-  if(ProbeTdGuest()) {
-    return 0;
-  }
 
   //
   // Go through bridges to reach all devices

@@ -73,7 +73,6 @@
   BaseLib
   UefiDriverEntryPoint
   DebugLib
-  TdxProbeLib
 
 [Protocols]
   gEfiPciHotPlugRequestProtocolGuid               ## SOMETIMES_PRODUCES
