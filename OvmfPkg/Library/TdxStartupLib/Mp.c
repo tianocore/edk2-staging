@@ -119,7 +119,7 @@ BspAcceptMemoryResourceRange (
     //
     // Decrease size of near end of resource if needed.
     //
-    Pages = RShiftU64( MIN (AcceptChunkSize, StartAddress + Length - PhysicalAddress), EFI_PAGE_SHIFT);
+    Pages = MIN (AcceptChunkSize, StartAddress + Length - PhysicalAddress) / AcceptPageSize;
 
     MailBox->Tallies[0] += (UINT32)Pages;
 
@@ -196,6 +196,7 @@ MpAcceptMemoryResourceRange (
     Length2 = PhysicalEnd - PhysicalAddress;
     StartAddress3 = 0;
     Length3 = 0;
+    AcceptPageSize = SIZE_4KB;
   } else if (AcceptPageSize == SIZE_2MB) {
     //
     // Total length is bigger than 2M and Page Accept size 2M is supported.
