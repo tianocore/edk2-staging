@@ -1,0 +1,59 @@
+## @file
+#  Library for Memory Encryption
+#
+# Copyright (c) 2020, Intel Corporation. All rights reserved.<BR>
+# Copyright (c) 2017 Advanced Micro Devices. All rights reserved.<BR>
+#
+#  SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+#
+##
+
+[Defines]
+  INF_VERSION                    = 1.25
+  BASE_NAME                      = MemPagingLib
+  FILE_GUID                      = B0CFEE8A-DE60-472E-89CC-BA26C00627C5
+  MODULE_TYPE                    = BASE
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = MemPagingLib|SEC PEIM DXE_DRIVER DXE_RUNTIME_DRIVER DXE_SMM_DRIVER UEFI_DRIVER
+
+#
+# The following information is for reference only and not required by the build
+# tools.
+#
+  VALID_ARCHITECTURES           = X64
+#
+
+[Packages]
+  MdeModulePkg/MdeModulePkg.dec
+  MdePkg/MdePkg.dec
+  OvmfPkg/OvmfPkg.dec
+  UefiCpuPkg/UefiCpuPkg.dec
+
+[Sources]
+  MemPaging.c
+
+[LibraryClasses]
+  BaseLib
+  CacheMaintenanceLib
+  CpuLib
+  DebugLib
+  MemoryAllocationLib
+  PcdLib
+
+[Pcd]
+  //
+  // TODO check these PCDs' impact on Ovmf
+  //
+  gUefiOvmfPkgTokenSpaceGuid.PcdTdxSetNxForStack                     ## CONSUMES
+  gUefiOvmfPkgTokenSpaceGuid.PcdTdxPteMemoryEncryptionAddressOrMask  ## CONSUMES
+  
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSetNxForStack               ## CONSUMES
+  gEfiMdeModulePkgTokenSpaceGuid.PcdDxeIplBuildPageTables       ## CONSUMES
+  gEfiMdeModulePkgTokenSpaceGuid.PcdCpuStackGuard               ## CONSUMES
+  gEfiMdeModulePkgTokenSpaceGuid.PcdUse1GPageTable              ## SOMETIMES_CONSUMES
+  gEfiMdeModulePkgTokenSpaceGuid.PcdDxeNxMemoryProtectionPolicy ## SOMETIMES_CONSUMES
+  gEfiMdeModulePkgTokenSpaceGuid.PcdImageProtectionPolicy       ## SOMETIMES_CONSUMES
+  gEfiMdeModulePkgTokenSpaceGuid.PcdPteMemoryEncryptionAddressOrMask    ## CONSUMES
+  gEfiMdeModulePkgTokenSpaceGuid.PcdNullPointerDetectionPropertyMask    ## CONSUMES
+

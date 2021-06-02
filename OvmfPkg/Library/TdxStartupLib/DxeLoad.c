@@ -19,8 +19,9 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Guid/PcdDataBaseSignatureGuid.h>
 #include <Register/Intel/Cpuid.h>
 #include <Library/PrePiLibTdx.h>
-#include "X64/PageTables.h"
+#include <Library/MemPagingLib.h>
 #include <Library/ReportStatusCodeLib.h>
+#include "X64/VirtualMemory.h"
 
 #define PCD_PEIM_GUID  { \
     0x9b3ada4f, 0xae56, 0x4c24, {0x8d, 0xea, 0xf0, 0x3b, 0x75, 0x58, 0xae, 0x50} \
