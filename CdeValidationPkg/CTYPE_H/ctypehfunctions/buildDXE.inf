@@ -1,0 +1,45 @@
+[Defines]
+  INF_VERSION                    = 1.26
+  BASE_NAME                      = ctypehfunctionsDxe
+  FILE_GUID                      = CDE000FF-A3A6-4F7A-B16C-123708FB4DCD
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = _MainEntryPointDxe
+
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = X64
+#
+
+[Sources]
+	main.c
+
+[Packages]
+	MdePkg/MdePkg.dec
+	CdePkg/CdePkg.dec
+
+[LibraryClasses]
+	CdeLib
+	UefiLib
+	UefiDriverEntryPoint
+#	PcdLib
+
+
+[Guids]
+
+[Protocols]
+
+[Pcd]
+
+[Depex]
+	gCdeDxeProtocolGuid
+
+[Pcd]
+	gCdePkgTokenSpaceGuid.CdeDefaultCommandLine		## CONSUMES
+
+[BuildOptions] 
+#to ENABLE  CDEMOFINE MOdule FIle liNE traces: /DNMOFINE 
+#to DISABLE CDEMOFINE MOdule FIle liNE traces: /DNMOFINE 
+   MSFT:*_*_IA32_CC_FLAGS   = /D_invalid_switch_NMOFINE /D "CDE_CONFIGURATION_STRING=\"EDK2 UEFI DXE(CdeLib)\"" /D "CDE_PLATFORM_STRING=\"x86-32\""
+   MSFT:*_*_X64_CC_FLAGS    = /D_invalid_switch_NMOFINE /D "CDE_CONFIGURATION_STRING=\"EDK2 UEFI DXE(CdeLib)\"" /D "CDE_PLATFORM_STRING=\"x86-64\""

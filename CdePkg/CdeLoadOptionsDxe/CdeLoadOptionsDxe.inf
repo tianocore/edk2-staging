@@ -1,0 +1,41 @@
+#
+#   Copyright (c) 2019, Kilian Kegel. All rights reserved.<BR>
+#   SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+[Defines]
+  INF_VERSION                    = 1.26
+  BASE_NAME                      = CdeLoadOptionsDxe
+  MODULE_UNI_FILE                = CdeLoadOptionsDxe.uni
+  FILE_GUID                      = CDE00011-E3A6-4B9A-AD76-1C0F23938A10
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = _Main
+
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = X64
+#
+
+[Sources]
+	CdeLoadOptionsDxe.c
+	CdeLoadOptionsDxe.uni
+
+[Packages]
+	CdePkg/CdePkg.dec
+	MdePkg/MdePkg.dec
+	MdeModulePkg/MdeModulePkg.dec
+
+[LibraryClasses]
+	UefiLib
+	UefiDriverEntryPoint
+[Guids]
+	gEfiConsoleOutDeviceGuid                      ## SOMETIMES_PRODUCES ## UNDEFINED # protocol GUID installed on device handle
+	gEfiConsoleInDeviceGuid                       ## SOMETIMES_PRODUCES ## UNDEFINED # protocol GUID installed on device handle
+	gEfiConsoleOutDeviceGuid
+	gEfiConsoleInDeviceGuid
+	gCdeConsoleInDeviceGuid
+	gCdeConsoleOutDeviceGuid
+
+[Depex]
+	TRUE

@@ -1,0 +1,45 @@
+#
+#   Copyright (c) 2019, Kilian Kegel. All rights reserved.<BR>
+#   SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+[Defines]
+  INF_VERSION                    = 1.26
+  BASE_NAME                      = CdeWelcomeDxe
+  MODULE_UNI_FILE                = CdeWelcomeDxe.uni
+  FILE_GUID                      = CDE000FF-0A15-41D7-9A7D-7111338CBD8B
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = _MainEntryPointDxe
+
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = X64
+#
+
+[Sources]
+	CdeWelcomeDxe.c
+	CdeWelcomeDxe.uni
+
+[Packages]
+	MdePkg/MdePkg.dec
+	CdePkg/CdePkg.dec
+
+[LibraryClasses]
+	CdeLib
+	UefiLib
+	UefiDriverEntryPoint
+#	PcdLib
+
+
+[Guids]
+
+[Protocols]
+
+[Pcd]
+
+[Depex]
+	gCdeDxeProtocolGuid
+
+[Pcd]
+	gCdePkgTokenSpaceGuid.CdeDefaultCommandLine		## CONSUMES

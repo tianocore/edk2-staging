@@ -1,0 +1,3 @@
+[submodule "CdeBinPkgSrc"]
+	path = CdeBinPkgSrc
+	url = https://github.com/KilianKegel/CdeBinPkgSrc

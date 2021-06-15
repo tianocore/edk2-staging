@@ -1,0 +1,49 @@
+#  
+#   Copyright (c) 2019, Kilian Kegel. All rights reserved.<BR>
+#   SPDX-License-Identifier: BSD-2-Clause-Patent
+#  
+[Defines]
+  INF_VERSION                    = 1.26
+  BASE_NAME                      = stdiohfunctionsDxe
+  MODULE_UNI_FILE                = stdiohfunctionsDxe.uni
+  FILE_GUID                      = CDE000FF-D426-45CF-8D47-4675CCD4C31C
+  #NOTE: CdeDrivers FILE_GUID always start with CDE000FF to ease finding them in the debug traces and in the FV directory
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = _MainEntryPointDxe
+
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = X64
+#
+
+[Sources]
+	main.c
+
+[Packages]
+	MdePkg/MdePkg.dec
+	CdePkg/CdePkg.dec
+
+[LibraryClasses]
+	CdeLib
+	UefiLib
+	UefiDriverEntryPoint
+
+[Guids]
+
+[Protocols]
+
+[Pcd]
+
+[Depex]
+	gCdeDxeProtocolGuid
+
+[Pcd]
+	gCdePkgTokenSpaceGuid.CdeDefaultCommandLine		## CONSUMES
+
+[BuildOptions] 
+#to ENABLE  CDEMOFINE MOdule FIle liNE traces: /DNMOFINE 
+#to DISABLE CDEMOFINE MOdule FIle liNE traces: /DNMOFINE 
+   MSFT:*_*_IA32_CC_FLAGS   = /D_invalid_switch_NMOFINE /D "CDE_CONFIGURATION_STRING=\"EDK2 UEFI DXE(CdeLib)\"" /D "CDE_PLATFORM_STRING=\"x86-32\""
+   MSFT:*_*_X64_CC_FLAGS    = /D_invalid_switch_NMOFINE /D "CDE_CONFIGURATION_STRING=\"EDK2 UEFI DXE(CdeLib)\"" /D "CDE_PLATFORM_STRING=\"x86-64\""
