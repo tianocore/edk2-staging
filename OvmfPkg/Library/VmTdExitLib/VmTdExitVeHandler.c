@@ -112,16 +112,18 @@ IoExit(
       Val = 0;
       if (Write == TRUE) {
         CopyMem (&Val, (VOID *) Regs->Rsi, Size);
+        Regs->Rsi += Size;
       }
-      Regs->Rsi += Size;
+
       Status = TdVmCall(EXIT_REASON_IO_INSTRUCTION, Size, Write, Port, Val, (Write ? NULL : &Val));
       if (Status != 0) {
         break;
       }
       if (Write == FALSE) {
         CopyMem ((VOID *) Regs->Rdi, &Val, Size);
+        Regs->Rdi += Size;
       }
-      Regs->Rdi += Size;
+
       if (Veinfo->ExitQualification.Io.Rep) {
         Regs->Rcx -= 1;
       }
