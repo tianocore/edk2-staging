@@ -1,29 +1,45 @@
 /** @file
 
-  Virtual Memory Management Services to set or clear the memory encryption bit
+  Define Memory Encrypted Virtualization base library helper function
 
-  Copyright (c) 2006 - 2016, Intel Corporation. All rights reserved.<BR>
+  Copyright (c) 2020, Intel Corporation. All rights reserved.<BR>
   Copyright (c) 2017, AMD Incorporated. All rights reserved.<BR>
 
   SPDX-License-Identifier: BSD-2-Clause-Patent
 
-  Code is derived from MdeModulePkg/Core/DxeIplPeim/X64/VirtualMemory.h
-
 **/
 
-#ifndef __VIRTUAL_MEMORY__
-#define __VIRTUAL_MEMORY__
+#ifndef _PAGING_LIB_H_
+#define _PAGING_LIB_H_
 
-#include <Library/BaseLib.h>
-#include <Library/BaseMemoryLib.h>
-#include <Library/CacheMaintenanceLib.h>
-#include <Library/DebugLib.h>
-#include <Library/MemoryAllocationLib.h>
-#include <Uefi.h>
-
-#define SYS_CODE64_SEL 0x38
+#include <Base.h>
 
 #pragma pack(1)
+
+typedef union {
+  struct {
+    UINT32  LimitLow    : 16;
+    UINT32  BaseLow     : 16;
+    UINT32  BaseMid     : 8;
+    UINT32  Type        : 4;
+    UINT32  System      : 1;
+    UINT32  Dpl         : 2;
+    UINT32  Present     : 1;
+    UINT32  LimitHigh   : 4;
+    UINT32  Software    : 1;
+    UINT32  Reserved    : 1;
+    UINT32  DefaultSize : 1;
+    UINT32  Granularity : 1;
+    UINT32  BaseHigh    : 8;
+  } Bits;
+  UINT64  Uint64;
+} IA32_GDT;
+
+typedef struct {
+  IA32_IDT_GATE_DESCRIPTOR  Ia32IdtEntry;
+  UINT32                    Offset32To63;
+  UINT32                    Reserved;
+} X64_IDT_GATE_DESCRIPTOR;
 
 //
 // Page-Map Level-4 Offset (PML4) and
@@ -141,6 +157,8 @@ typedef union {
 
 #pragma pack()
 
+#define CR0_WP                      BIT16
+
 #define IA32_PG_P                   BIT0
 #define IA32_PG_RW                  BIT1
 #define IA32_PG_PS                  BIT7
@@ -178,4 +196,48 @@ typedef struct {
   UINTN           FreePages;
 } PAGE_TABLE_POOL;
 
-#endif
+VOID *
+AllocatePageTableMemory (
+  IN OUT PAGE_TABLE_POOL **PageTablePool,
+  IN UINTN               Pages
+  );
+
+BOOLEAN
+ToSplitPageTable (
+  IN EFI_PHYSICAL_ADDRESS               Address,
+  IN UINTN                              Size,
+  IN EFI_PHYSICAL_ADDRESS               StackBase,
+  IN UINTN                              StackSize
+  );
+
+VOID
+Split2MPageTo4K (
+  IN OUT PAGE_TABLE_POOL                **PageTablePool,
+  IN EFI_PHYSICAL_ADDRESS               PhysicalAddress,
+  IN OUT UINT64                         *PageEntry2M,
+  IN UINT64                             AddressEncMask,
+  IN EFI_PHYSICAL_ADDRESS               StackBase,
+  IN UINTN                              StackSize
+  );
+
+VOID
+Split1GPageTo2M (
+  IN OUT PAGE_TABLE_POOL                **PageTablePool,
+  IN EFI_PHYSICAL_ADDRESS               PhysicalAddress,
+  IN OUT UINT64                         *PageEntry1G,
+  IN UINT64                             AddressEncMask,
+  IN EFI_PHYSICAL_ADDRESS               StackBase,
+  IN UINTN                              StackSize
+  );
+
+VOID
+EnablePageTableProtection (
+  IN  OUT PAGE_TABLE_POOL **PageTablePool,
+  IN  UINTN               PageTableBase,
+  IN  BOOLEAN             Level4Paging,
+  IN  UINT64              AddressEncMask
+  );
+
+
+
+#endif // _MEM_ENCRYPT_TDX_LIB_H_

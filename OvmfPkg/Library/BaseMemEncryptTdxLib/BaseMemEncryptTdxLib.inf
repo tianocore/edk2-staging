@@ -31,7 +31,6 @@
   UefiCpuPkg/UefiCpuPkg.dec
 
 [Sources]
-  VirtualMemory.h
   MemoryEncryption.c
 
 [LibraryClasses]
@@ -43,4 +42,4 @@
   PcdLib
   TdxLib
   TdxProbeLib
-
+  MemPagingLib
