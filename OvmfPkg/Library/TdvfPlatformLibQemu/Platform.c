@@ -140,7 +140,8 @@ PciExBarInitialization (
 
 VOID
 MiscInitialization (
-  EFI_HOB_PLATFORM_INFO *PlatformInfoHob
+  EFI_HOB_PLATFORM_INFO *PlatformInfoHob,
+  BOOLEAN               *CfgSysStateDefault
   )
 {
   RETURN_STATUS                     Status;
@@ -227,6 +228,7 @@ MiscInitialization (
   Status = QemuFwCfgFindFile ("etc/system-states", &FwCfgItem, &FwCfgSize);
   if (Status != RETURN_SUCCESS || FwCfgSize != sizeof PlatformInfoHob->SystemStates) {
     DEBUG ((DEBUG_INFO, "ACPI using S3/S4 defaults\n"));
+    *CfgSysStateDefault = TRUE;
     return;
   }
   QemuFwCfgSelectItem (FwCfgItem);
@@ -239,9 +241,13 @@ MiscInitialization (
 VOID
 EFIAPI
 TdvfPlatformInitialize (
-  EFI_HOB_PLATFORM_INFO *PlatformInfoHob
+  EFI_HOB_PLATFORM_INFO *PlatformInfoHob,
+  BOOLEAN               *CfgSysStateDefault,
+  BOOLEAN               *CfgNxForStackDefault
 )
 {
+  RETURN_STATUS      Status;
+
   DEBUG ((DEBUG_INFO, "Qemu Platform Loaded\n"));
 
   PlatformInfoHob->HostBridgePciDevId = PciRead16 (HOSTBRIDGE_DID);
@@ -264,7 +270,11 @@ TdvfPlatformInitialize (
     );
   }
 
-  MiscInitialization (PlatformInfoHob);
+  MiscInitialization (PlatformInfoHob, CfgSysStateDefault);
 
-  GetNamedFwCfgBoolean ("opt/ovmf/PcdSetNxForStack", &PlatformInfoHob->SetNxForStack);
+  Status = GetNamedFwCfgBoolean ("opt/ovmf/PcdSetNxForStack", &PlatformInfoHob->SetNxForStack);
+  if (Status != RETURN_SUCCESS) {
+    DEBUG ((DEBUG_INFO, "NxForStack using defaults\n"));
+    *CfgNxForStackDefault = TRUE;
+  }
 }

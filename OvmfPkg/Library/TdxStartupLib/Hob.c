@@ -15,6 +15,7 @@
 #include <Library/BaseMemoryLib.h>
 #include <Library/PrePiLibTdx.h>
 #include <Library/TdvfPlatformLib.h>
+#include <Library/TpmMeasurementLib.h>
 #include <IndustryStandard/Tdx.h>
 #include <IndustryStandard/UefiTcgPlatform.h>
 #include "TdxStartupInternal.h"
@@ -438,7 +439,7 @@ LogHobList (
   CopyGuid (&(HandoffTables.TableEntry[0].VendorGuid), &gUefiOvmfPkgTokenSpaceGuid);
   HandoffTables.TableEntry[0].VendorTable = (VOID *) VmmHobList;
 
-  Status = CreateTdxExtendEvent (
+  Status = TpmMeasureAndLogData (
               1,                                // PCRIndex
               EV_EFI_HANDOFF_TABLES2,            // EventType
               (VOID *)&HandoffTables,           // EventData
@@ -449,3 +450,5 @@ LogHobList (
 
   ASSERT_EFI_ERROR (Status);
 }
+
+

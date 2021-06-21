@@ -166,18 +166,9 @@ TdxMeasureFvImage (
   );
 
 EFI_STATUS
-CreateTdxExtendEvent (
-  IN      TCG_PCRINDEX              PCRIndex,
-  IN      TCG_EVENTTYPE             EventType,
-  IN      UINT8                     *EventData,
-  IN      UINTN                     EventSize,
-  IN      UINT8                     *HashData,
-  IN      UINTN                     HashDataLen
-  );
-
-EFI_STATUS
-MeasureQemuCfgSystemSts (
+TdxMeasureQemuCfg (
   IN TCG_PCRINDEX     PCRIndex,
+  IN CHAR8            *ConfigItem,
   IN UINT8            *HashData,
   IN UINTN            HashDataLength
   );

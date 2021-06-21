@@ -8,6 +8,10 @@
 #include <Library/HobLib.h>
 
 #define EFI_RESOURCE_ATTRIBUTE_ENCRYPTED            0x04000000
+
+#define FW_CFG_NX_STACK_ITEM        "opt/ovmf/PcdSetNxForStack"
+#define FW_CFG_SYSTEM_STATE_ITEM    "etc/system-states"
+
 #pragma pack(1)
 typedef struct {
   ///
@@ -21,7 +25,9 @@ typedef struct {
 VOID
 EFIAPI
 TdvfPlatformInitialize (
-  IN OUT EFI_HOB_PLATFORM_INFO *
+  IN OUT EFI_HOB_PLATFORM_INFO *,
+     OUT BOOLEAN *,
+     OUT BOOLEAN *
   );
 
 #endif

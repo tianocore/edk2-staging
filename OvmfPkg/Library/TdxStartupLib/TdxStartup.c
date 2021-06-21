@@ -104,6 +104,8 @@ TdxStartup(
   UINT32                      DxeCodeSize;
   TD_RETURN_DATA              TdReturnData;
   UINT8                       *PlatformInfoPtr;
+  BOOLEAN                     CfgSysStateDefault;
+  BOOLEAN                     CfgNxStackDefault;
 
   Status = EFI_SUCCESS;
   BootFv = NULL;
@@ -150,7 +152,7 @@ TdxStartup(
   //
   // Initialize Platform
   //
-  TdvfPlatformInitialize (&PlatformInfoHob);
+  TdvfPlatformInitialize (&PlatformInfoHob, &CfgSysStateDefault, &CfgNxStackDefault);
 
   //
   // Get information needed to setup aps running in their
@@ -226,7 +228,13 @@ TdxStartup(
   MeasureConfigurationVolume ((UINT64)(UINTN)PcdGet32 (PcdCfvBase));
 
   PlatformInfoPtr = (UINT8*)BuildGuidDataHob (&gUefiOvmfPkgTdxPlatformGuid, &PlatformInfoHob, sizeof (EFI_HOB_PLATFORM_INFO));
-  MeasureQemuCfgSystemSts (1, PlatformInfoPtr + sizeof(EFI_HOB_PLATFORM_INFO) - 6, 6);
+
+  if (!CfgSysStateDefault) {
+    TdxMeasureQemuCfg (1, FW_CFG_NX_STACK_ITEM, PlatformInfoPtr + sizeof(EFI_HOB_PLATFORM_INFO) - 6, 6);
+  }
+  if (!CfgNxStackDefault) {
+    TdxMeasureQemuCfg (1, FW_CFG_SYSTEM_STATE_ITEM, PlatformInfoPtr + sizeof(EFI_HOB_PLATFORM_INFO) - 7, sizeof (BOOLEAN));
+  }
 
   BuildStackHob ((UINTN)SecCoreData->StackBase, SecCoreData->StackSize <<=1 );
 

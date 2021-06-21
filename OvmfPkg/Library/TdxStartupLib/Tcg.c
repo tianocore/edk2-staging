@@ -18,12 +18,10 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Guid/TpmInstance.h>
 #include <Library/DebugLib.h>
 #include <Library/BaseMemoryLib.h>
-#include <Library/Tpm2CommandLib.h>
-#include <Library/Tpm2DeviceLib.h>
+#include <Library/TpmMeasurementLib.h>
 #include <Library/HashLib.h>
 #include <Library/HobLib.h>
 #include <Library/PcdLib.h>
-#include <Protocol/Tcg2Protocol.h>
 #include <Library/PerformanceLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/ReportStatusCodeLib.h>
@@ -43,99 +41,6 @@ typedef struct {
 } FV_HANDOFF_TABLE_POINTERS2;
 
 #pragma pack ()
-
-extern UINT32 GetMappedRtmrIndex(UINT32 PCRIndex);
-
-/**
-  Add a new entry to the Event Log.
-
-  @param[in]     DigestList    A list of digest.
-  @param[in,out] NewEventHdr   Pointer to a TCG_PCR_EVENT_HDR data structure.
-  @param[in]     NewEventData  Pointer to the new event data.
-
-  @retval EFI_SUCCESS           The new event log entry was added.
-  @retval EFI_OUT_OF_RESOURCES  No enough memory to log the new event.
-**/
-EFI_STATUS
-CreateTdxExtendEvent (
-  IN      TCG_PCRINDEX              PCRIndex,
-  IN      TCG_EVENTTYPE             EventType,
-  IN      UINT8                     *EventData,
-  IN      UINTN                     EventSize,
-  IN      UINT8                     *HashData,
-  IN      UINTN                     HashDataLen
-  )
-{
-  EFI_STATUS                        Status;
-  UINT32                            RtmrIndex;
-  VOID                              *EventHobData;
-  TCG_PCR_EVENT2                    *TcgPcrEvent2;
-  UINT8                             *DigestBuffer;
-  TDX_DIGEST_VALUE                  *TdxDigest;
-  TPML_DIGEST_VALUES                DigestList;
-  UINT8                             *Ptr;
-
-
-  DEBUG ((EFI_D_INFO, "Creating TdTcg2PcrEvent PCR %d EventType 0x%x\n", PCRIndex, EventType));
-
-  RtmrIndex = GetMappedRtmrIndex (PCRIndex);
-  Status = HashAndExtend (RtmrIndex,
-                      (VOID*)HashData,
-                      HashDataLen,
-                      &DigestList);
-  if (EFI_ERROR (Status)) {
-    DEBUG ((EFI_D_INFO, "Failed to HashAndExtend. %r\n", Status));
-    return Status;
-  }
-
-  //
-  // Use TDX_DIGEST_VALUE in the GUID HOB DataLength calculation
-  // to reserve enough buffer to hold TPML_DIGEST_VALUES compact binary
-  // which is limited to a SHA384 digest list
-  //
-  EventHobData = BuildGuidHob (
-    &gTcgEvent2EntryHobGuid,
-    sizeof(TcgPcrEvent2->PCRIndex) + sizeof(TcgPcrEvent2->EventType) +
-    sizeof(TDX_DIGEST_VALUE) +
-    sizeof(TcgPcrEvent2->EventSize) + EventSize);
-
-  if (EventHobData == NULL) {
-    return EFI_OUT_OF_RESOURCES;
-  }
-
-  DEBUG ((EFI_D_INFO, "  Tcg2PcrEvent - data %p\n", EventHobData));
-
-  Ptr = (UINT8*)EventHobData;
-  //
-  // Initialize PcrEvent data now
-  //
-  CopyMem(Ptr, &PCRIndex, sizeof(TCG_PCRINDEX));
-  Ptr += sizeof(TCG_PCRINDEX);
-  CopyMem(Ptr, &EventType, sizeof(TCG_EVENTTYPE));
-  Ptr += sizeof(TCG_EVENTTYPE);
-
-  DigestBuffer = Ptr;
-  DEBUG ((EFI_D_INFO, "  Tcg2PcrEvent - digest %p\n", DigestBuffer));
-
-  TdxDigest = (TDX_DIGEST_VALUE *)DigestBuffer;
-  TdxDigest->count = 1;
-  TdxDigest->hashAlg = TPM_ALG_SHA384;
-  CopyMem (TdxDigest->sha384,
-          DigestList.digests[0].digest.sha384,
-          SHA384_DIGEST_SIZE);
-
-  Ptr += sizeof(TDX_DIGEST_VALUE);
-  DEBUG ((EFI_D_INFO, "  Tcg2PcrEvent - eventdata %p\n", DigestBuffer));
-
-  CopyMem (Ptr, &EventSize, sizeof(UINT32));
-  Ptr += sizeof(UINT32);
-  CopyMem (Ptr, EventData, EventSize);
-  Ptr += EventSize;
-
-  Status = EFI_SUCCESS;
-  return Status;
-}
-
 
 /**
   Get the FvName from the FV header.
@@ -219,7 +124,7 @@ TdxMeasureFvImage (
   //
   // Hash the FV, extend digest to the TPM and log TCG event
   //
-  Status = CreateTdxExtendEvent (
+  Status = TpmMeasureAndLogData (
               PcrIndex,                         // PCRIndex
               EV_EFI_PLATFORM_FIRMWARE_BLOB2,   // EventType
               (VOID *)&FvBlob2,                 // EventData
@@ -236,20 +141,20 @@ TdxMeasureFvImage (
 }
 
 EFI_STATUS
-MeasureQemuCfgSystemSts (
+TdxMeasureQemuCfg (
   IN TCG_PCRINDEX     PCRIndex,
+  IN CHAR8            *ConfigItem,
   IN UINT8            *HashData,
   IN UINTN            HashDataLength
   )
 {
   EFI_STATUS    Status;
-  CHAR8         *Item = "etc/system-states";
 
-  Status = CreateTdxExtendEvent (
+  Status = TpmMeasureAndLogData (
               PCRIndex,                   // PCRIndex
               EV_PLATFORM_CONFIG_FLAGS,   // EventType
-              (UINT8*)Item,               // EventData
-              AsciiStrLen(Item),          // EventSize
+              (UINT8*) ConfigItem,              // EventData
+              (UINT32) AsciiStrLen(ConfigItem), // EventSize
               HashData,                   // HashData
               HashDataLength              // HashDataLen
               );

@@ -33,13 +33,11 @@
 [Packages]
   MdePkg/MdePkg.dec
   SecurityPkg/SecurityPkg.dec
-  OvmfPkg/OvmfPkg.dec
 
 [LibraryClasses]
   BaseLib
   BaseMemoryLib
   DebugLib
   PcdLib
-  TdxProbeLib
   TdxLib
 

@@ -9,17 +9,6 @@
 #include <Protocol/DebugSupport.h>
 #include <IndustryStandard/Tpm20.h>
 
-#pragma pack(1)
-
-typedef struct {
-  UINT32            count;
-  TPMI_ALG_HASH     hashAlg;
-  BYTE              sha384[SHA384_DIGEST_SIZE];
-} TDX_DIGEST_VALUE;
-
-#pragma pack()
-
-
 typedef
 VOID
 (EFIAPI * fProcessLibraryConstructorList)(
