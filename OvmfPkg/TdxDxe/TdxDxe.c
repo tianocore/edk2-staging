@@ -28,6 +28,7 @@
 #include <Library/TdvfPlatformLib.h>
 #include <IndustryStandard/Tdx.h>
 #include <Library/TdxLib.h>
+#include <TdxAcpiTable.h>
 
 /**
   Location of resource hob matching type and starting address
@@ -124,23 +125,25 @@ TdxDxeEntryPoint (
   EFI_HOB_GUID_TYPE             *GuidHob;
   UINT32                        CpuMaxLogicalProcessorNumber;
   TD_RETURN_DATA                TdReturnData;
+  EFI_EVENT                     QemuAcpiTableEvent;
+  void                          *Registration;
 
-  GuidHob = GetFirstGuidHob(&gUefiOvmfPkgTdxPlatformGuid);
+  GuidHob = GetFirstGuidHob (&gUefiOvmfPkgTdxPlatformGuid);
 
   if(GuidHob == NULL) {
     return EFI_UNSUPPORTED;
   }
 
-  PlatformInfo = (EFI_HOB_PLATFORM_INFO *)GET_GUID_HOB_DATA (GuidHob);
- 
+  PlatformInfo = (EFI_HOB_PLATFORM_INFO *) GET_GUID_HOB_DATA (GuidHob);
+
   //
   // Call TDINFO to get actual number of cpus in domain
   //
-  Status = TdCall(TDCALL_TDINFO, 0, 0, 0, &TdReturnData);
+  Status = TdCall (TDCALL_TDINFO, 0, 0, 0, &TdReturnData);
   ASSERT(Status == EFI_SUCCESS);
 
   CpuMaxLogicalProcessorNumber = PcdGet32 (PcdCpuMaxLogicalProcessorNumber);
-  
+
   //
   // Adjust PcdCpuMaxLogicalProcessorNumber, if needed. If firmware is configured for
   // more than number of reported cpus, update.
@@ -149,6 +152,25 @@ TdxDxeEntryPoint (
     PcdStatus = PcdSet32S (PcdCpuMaxLogicalProcessorNumber, TdReturnData.TdInfo.NumVcpus);
     ASSERT_RETURN_ERROR(PcdStatus);
   }
+
+  //
+  // Register for protocol notifications to call the AlterAcpiTable(),
+  // the protocol will be installed in AcpiPlatformDxe when the ACPI
+  // table provided by Qemu is ready.
+  //
+  Status = gBS->CreateEvent (
+                  EVT_NOTIFY_SIGNAL,
+                  TPL_CALLBACK,
+                  AlterAcpiTable,
+                  NULL,
+                  &QemuAcpiTableEvent
+                  );
+
+  Status = gBS->RegisterProtocolNotify (
+                  &gQemuAcpiTableNotifyProtocolGuid,
+                  QemuAcpiTableEvent,
+                  &Registration
+                  );
 
 #define INIT_PCDSET(NAME, RES) do { \
   PcdStatus = PcdSet64S (NAME##Base, (RES)->PhysicalStart); \

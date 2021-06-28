@@ -58,6 +58,7 @@
   gEfiFirmwareVolume2ProtocolGuid               # PROTOCOL SOMETIMES_CONSUMED
   gEfiPciIoProtocolGuid                         # PROTOCOL SOMETIMES_CONSUMED
   gTdTcg2ProtocolGuid                           # PROTOCOL SOMETIMES_CONSUMES
+  gQemuAcpiTableNotifyProtocolGuid              # PROTOCOL PRODUCES
 
 [Guids]
   gRootBridgesConnectedEventGroupGuid

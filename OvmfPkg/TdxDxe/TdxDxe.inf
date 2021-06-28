@@ -18,6 +18,7 @@
 
 [Sources]
   TdxDxe.c
+  TdxAcpiTable.c
 
 [Packages]
   MdeModulePkg/MdeModulePkg.dec
@@ -42,6 +43,11 @@
 [Guids]
   gUefiOvmfPkgTdxPlatformGuid                      ## CONSUMES
 
+[Protocols]
+  gQemuAcpiTableNotifyProtocolGuid				   ## CONSUMES
+  gEfiAcpiSdtProtocolGuid						   ## CONSUMES
+  gEfiAcpiTableProtocolGuid						   ## CONSUMES
+
 [Pcd]
   gUefiOvmfPkgTokenSpaceGuid.PcdPciIoBase
   gUefiOvmfPkgTokenSpaceGuid.PcdPciIoSize
@@ -53,3 +59,6 @@
   gUefiCpuPkgTokenSpaceGuid.PcdCpuMaxLogicalProcessorNumber
   gUefiOvmfPkgTokenSpaceGuid.PcdUseTdxEmulation
   gUefiOvmfPkgTokenSpaceGuid.PcdTdRelocatedMailboxBase
+  gUefiCpuPkgTokenSpaceGuid.PcdCpuLocalApicBaseAddress
+  gUefiOvmfPkgTokenSpaceGuid.PcdOvmfFdBaseAddress
+

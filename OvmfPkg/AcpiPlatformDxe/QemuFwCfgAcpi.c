@@ -21,8 +21,11 @@
 #include <Library/TdxProbeLib.h>
 #include <Protocol/Tcg2Protocol.h>
 #include <Protocol/Tdx.h>
+#include <Protocol/QemuAcpiTableNotify.h>
 
-EFI_TCG2_PROTOCOL *mTdTcg2Protocol = NULL;
+EFI_TCG2_PROTOCOL               *mTdTcg2Protocol = NULL;
+EFI_HANDLE                      mQemuAcpiHandle  = NULL;
+QEMU_ACPI_TABLE_NOTIFY_PROTOCOL mAcpiNotifyProtocol;
 
 //
 // The user structure for the ordered collection that will track the fw_cfg
@@ -992,15 +995,9 @@ Process2ndPassCmdAddPointer (
     goto RollbackSeenPointer;
   }
 
-  if(ProbeTdGuest()) {
-    Status = QemuInstallAcpiTable(AcpiProtocol,
-                           (VOID *)(UINTN)PointerValue, TableSize,
-                           &InstalledKey[*NumInstalled]);
-  } else {
-    Status = AcpiProtocol->InstallAcpiTable (AcpiProtocol,
-                           (VOID *)(UINTN)PointerValue, TableSize,
-                           &InstalledKey[*NumInstalled]);
-  }
+  Status = AcpiProtocol->InstallAcpiTable (AcpiProtocol,
+                         (VOID *)(UINTN)PointerValue, TableSize,
+                         &InstalledKey[*NumInstalled]);
 
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "%a: InstallAcpiTable(): %r\n", __FUNCTION__,
@@ -1225,7 +1222,14 @@ UninstallAcpiTables:
       AcpiProtocol->UninstallAcpiTable (AcpiProtocol, InstalledKey[Installed]);
     }
   } else {
-    DEBUG ((DEBUG_INFO, "%a: installed %d tables\n", __FUNCTION__, Installed));
+      //
+      // Install a protocol to notify that the ACPI table provided by Qemu is
+      // ready.
+      //
+      gBS->InstallProtocolInterface (&mQemuAcpiHandle, 
+                    &gQemuAcpiTableNotifyProtocolGuid,
+                    EFI_NATIVE_INTERFACE,
+                    &mAcpiNotifyProtocol);
   }
 
   for (SeenPointerEntry = OrderedCollectionMin (SeenPointers);

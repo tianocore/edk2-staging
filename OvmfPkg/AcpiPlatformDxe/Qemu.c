@@ -481,6 +481,7 @@ QemuInstallAcpiTable (
   }
 
   Hdr = (EFI_ACPI_DESCRIPTION_HEADER*) AcpiTableBuffer;
+  
   switch (Hdr->Signature) {
   case EFI_ACPI_1_0_APIC_SIGNATURE:
     TableInstallFunction = QemuInstallAcpiMadtTable;
