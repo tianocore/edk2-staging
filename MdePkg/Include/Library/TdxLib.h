@@ -57,7 +57,7 @@ TdExtendRtmr (
 
 
 /**
-  This function ges the Td guest shared page mask.
+  This function gets the Td guest shared page mask.
 
   The guest indicates if a page is shared using the Guest Physical Address
   (GPA) Shared (S) bit. If the GPA Width(GPAW) is 48, the S-bit is bit-47.
@@ -68,6 +68,30 @@ TdExtendRtmr (
 UINT64
 EFIAPI
 TdSharedPageMask (
+  VOID
+  );
+
+/**
+  This function gets the maximum number of Virtual CPUs that are usable for
+  Td Guest.
+
+  @return maximum Virtual CPUs number
+**/
+UINT32
+EFIAPI
+TdMaxVCpuNum (
+  VOID
+  );
+
+/**
+  This function gets the number of Virtual CPUs that are usable for Td 
+  Guest.
+
+  @return Virtual CPUs number
+**/
+UINT32
+EFIAPI
+TdVCpuNum (
   VOID
   );
 

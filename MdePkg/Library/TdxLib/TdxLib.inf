@@ -23,7 +23,7 @@
 [Sources]
   AcceptPages.c
   Rtmr.c
-  TdSharedPageMask.c
+  TdInfo.c
   X64/Tdcall.nasm
   X64/Tdvmcall.nasm
 

@@ -12,9 +12,10 @@
 #include <Library/BaseMemoryLib.h>
 
 UINT64  mTdSharedPageMask = 0;
+UINT32  mTdMaxVCpuNum     = 0;
 
 /**
-  This function ges the Td guest shared page mask.
+  This function gets the Td guest shared page mask.
 
   The guest indicates if a page is shared using the Guest Physical Address
   (GPA) Shared (S) bit. If the GPA Width(GPAW) is 48, the S-bit is bit-47.
@@ -44,3 +45,54 @@ TdSharedPageMask (
   ASSERT(Gpaw == 48 || Gpaw == 52);
   return mTdSharedPageMask;
 }
+
+/**
+  This function gets the maximum number of Virtual CPUs that are usable for
+  Td Guest.
+
+  @return maximum Virtual CPUs number
+**/
+UINT32
+EFIAPI
+TdMaxVCpuNum (
+  VOID
+  )
+{
+  UINT64                      Status;
+  TD_RETURN_DATA              TdReturnData;
+
+  if (mTdMaxVCpuNum != 0) {
+    return mTdMaxVCpuNum;
+  }
+
+  Status = TdCall (TDCALL_TDINFO, 0,0,0, &TdReturnData);
+  ASSERT (Status == TDX_EXIT_REASON_SUCCESS);
+
+  return TdReturnData.TdInfo.MaxVcpus;
+}
+
+/**
+  This function gets the number of Virtual CPUs that are usable for Td 
+  Guest.
+
+  @return Virtual CPUs number
+**/
+UINT32
+EFIAPI
+TdVCpuNum (
+  VOID
+  )
+{
+  UINT64                      Status;
+  TD_RETURN_DATA              TdReturnData;
+
+  //
+  // Due to the possible change of vcpu num in run-time, do the Td call
+  // for every query.
+  //
+  Status = TdCall (TDCALL_TDINFO, 0,0,0, &TdReturnData);
+  ASSERT (Status == TDX_EXIT_REASON_SUCCESS);
+
+  return TdReturnData.TdInfo.NumVcpus;
+}
+
