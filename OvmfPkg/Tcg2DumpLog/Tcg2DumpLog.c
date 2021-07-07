@@ -1288,7 +1288,7 @@ DumpTdxEventLog (
       DumpRtmr((UINT8 *)TdReportBuffer, TdReportBufferSize, AdditionalData, DataSize);
       if (TdReportBuffer != NULL && RegisterIndex ==0)
         {
-         Print (L"TDMR dumped:\n");
+         Print (L"MRTD dumped:\n");
          Print (L"    MRTD  - %d\n", RegisterIndex);
          Print (L"    Digest    - ");
          InternalDumpData((UINT8 *)TdReportBuffer->Tdinfo.Mrtd, 0x30);
@@ -1296,7 +1296,7 @@ DumpTdxEventLog (
          }
          else
          {
-         Print (L"RMTR Dumped:\n");
+         Print (L"RTMR Dumped:\n");
          Print (L"    RTMR[%d] \n", (RegisterIndex-1));
          Print (L"    Digest    - ");
          InternalDumpData((UINT8 *)TdReportBuffer->Tdinfo.Rtmrs[RegisterIndex-1], 0x30);
@@ -1596,7 +1596,7 @@ DumpAcpiTdxEventLog (
       DumpRtmr((UINT8 *)TdReportBuffer, TdReportBufferSize, AdditionalData, DataSize);
       if (TdReportBuffer != NULL && RegisterIndex ==0)
         {
-         Print (L"TDMR dumped:\n");
+         Print (L"MRTD dumped:\n");
          Print (L"    MRTD  - %d\n", RegisterIndex);
          Print (L"    Digest    - ");
          InternalDumpData((UINT8 *)TdReportBuffer->Tdinfo.Mrtd, 0x30);
@@ -1604,7 +1604,7 @@ DumpAcpiTdxEventLog (
          }
          else
          {
-         Print (L"RMTR Dumped:\n");
+         Print (L"RTMR Dumped:\n");
          Print (L"    RTMR[%d] \n", (RegisterIndex-1));
          Print (L"    Digest    - ");
          InternalDumpData((UINT8 *)TdReportBuffer->Tdinfo.Rtmrs[RegisterIndex-1], 0x30);
