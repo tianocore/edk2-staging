@@ -56,7 +56,9 @@
   Usb2HcStubLib|UefiHostFuzzTestCasePkg/TestStub/Usb2HcStubLib/Usb2HcStubLib.inf
   Usb2HcPpiStubLib|UefiHostFuzzTestCasePkg/TestStub/Usb2HcPpiStubLib/Usb2HcPpiStubLib.inf
   UsbIoPpiStubLib|UefiHostFuzzTestCasePkg/TestStub/UsbIoPpiStubLib/UsbIoPpiStubLib.inf
-
+  # Add below libs due to Edk2 update
+  VariablePolicyLib|MdeModulePkg/Library/VariablePolicyLib/VariablePolicyLib.inf
+  VariablePolicyHelperLib|MdeModulePkg/Library/VariablePolicyHelperLib/VariablePolicyHelperLib.inf
 !if $(TEST_WITH_INSTRUMENT)
   IniParsingLib|UefiInstrumentTestPkg/Library/IniParsingLib/IniParsingLib.inf
   NULL|UefiInstrumentTestPkg/Library/InstrumentLib/InstrumentLib.inf
