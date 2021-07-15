@@ -384,7 +384,7 @@ GetTcg2Protocol (
   EFI_STATUS                          Status;
   EFI_TCG2_BOOT_SERVICE_CAPABILITY    ProtocolCapability;
 
-  if (ProbeTdGuest()) {
+  if (TdxIsEnabled ()) {
     Status = gBS->LocateProtocol (&gTdTcg2ProtocolGuid, NULL, (VOID **) Tcg2Protocol);
     if (EFI_ERROR (Status)) {
       //

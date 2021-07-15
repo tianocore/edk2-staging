@@ -32,11 +32,13 @@
   QemuFwCfgLib
   ReportStatusCodeLib
   UefiBootServicesTableLib
+  TdxProbeLib
 
 [Protocols]
   gEfiDevicePathProtocolGuid
   gEfiLoadedImageProtocolGuid
   gOvmfLoadedX86LinuxKernelProtocolGuid
+  gTdTcg2ProtocolGuid
 
 [Guids]
   gQemuKernelLoaderFsMediaGuid

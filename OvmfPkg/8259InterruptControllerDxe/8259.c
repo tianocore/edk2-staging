@@ -587,7 +587,7 @@ Install8259 (
   EFI_STATUS   Status;
   EFI_8259_IRQ Irq;
 
-  if(ProbeTdGuest()) {
+  if (TdxIsEnabled ()) {
     return EFI_UNSUPPORTED;
   }
   //

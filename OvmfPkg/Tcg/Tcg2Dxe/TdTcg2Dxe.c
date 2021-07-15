@@ -2516,7 +2516,7 @@ DriverEntry (
   EFI_EVENT                         Event;
   VOID                              *Registration;
 
-  if (!ProbeTdGuest()) {
+  if (!TdxIsEnabled()) {
     DEBUG ((DEBUG_INFO, "TdTcg2Dxe is not loaded in Non-Td guest.\n"));
     return EFI_UNSUPPORTED;
   }

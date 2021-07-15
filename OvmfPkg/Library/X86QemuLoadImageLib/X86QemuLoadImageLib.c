@@ -22,6 +22,12 @@
 #include <Protocol/LoadedImage.h>
 #include <Protocol/OvmfLoadedX86LinuxKernel.h>
 
+#include <Library/BaseMemoryLib.h>
+#include <Library/TdxProbeLib.h>
+#include <Protocol/Tcg2Protocol.h>
+#include <Protocol/Tdx.h>
+
+
 #pragma pack (1)
 typedef struct {
   EFI_DEVICE_PATH_PROTOCOL  FilePathHeader;
@@ -34,6 +40,12 @@ typedef struct {
   EFI_DEVICE_PATH_PROTOCOL  EndNode;
 } KERNEL_VENMEDIA_FILE_DEVPATH;
 #pragma pack ()
+
+EFI_TCG2_PROTOCOL               *mTdTcg2Protocol = NULL;
+#define DIRECT_BOOT_COMMANDLINE "DirectBoot Command Line"
+#define DIRECT_BOOT_INITRD      "DirectBoot Initrd"
+#define DIRECT_BOOT_KERNEL      "DirectBoot Kernel"
+#define DIRECT_BOOT_SETUP       "DirectBoot Setup"
 
 STATIC CONST KERNEL_VENMEDIA_FILE_DEVPATH mKernelDevicePath = {
   {
@@ -78,6 +90,70 @@ FreeLegacyImage (
   }
 }
 
+/**
+  Mesure firmware acpi configuration data from qemu.
+  @param[in] EventData    Pointer to the event data.
+  @param[in] EventSize    Size of event data.
+  @param[in] CfgDataBase  Configuration data base address.
+  @param[in] EventSize    Size of configuration data .
+  @retval  EFI_NOT_FOUND           Cannot locate protocol.
+  @retval  EFI_OUT_OF_RESOURCES    Allocate zero pool failure.
+  @return                          Status codes returned by
+                                   mTcg2Protocol->HashLogExtendEvent.
+**/
+STATIC
+EFI_STATUS
+EFIAPI
+MeasureQemuFwCfgAcpi(
+  IN CHAR8                 *EventData,
+  IN UINT32                EventSize,
+  IN VOID                  *CfgDataBase,
+  IN UINTN                 CfgDataLength
+)
+{
+  EFI_TCG2_EVENT  *Tcg2Event;
+  EFI_STATUS      Status;
+
+  if (TdxIsEnabled () == FALSE) {
+    return EFI_SUCCESS;
+  }
+
+  if (mTdTcg2Protocol == NULL) {
+    Status = gBS->LocateProtocol (&gTdTcg2ProtocolGuid, NULL, (VOID **) &mTdTcg2Protocol);
+    if (EFI_ERROR (Status)) {
+      //
+      // TdTcg2 protocol is not installed.
+      //
+      DEBUG ((EFI_D_ERROR, "X86QemuLoadImageLib: TdTcg2 protocol is not installed.\n"));
+      return EFI_NOT_FOUND;
+    }
+  }
+
+  Tcg2Event = AllocateZeroPool (EventSize + sizeof (EFI_TCG2_EVENT) - sizeof(Tcg2Event->Event));
+  if (Tcg2Event == NULL) {
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  Tcg2Event->Size = EventSize + sizeof (EFI_TCG2_EVENT) - sizeof(Tcg2Event->Event);
+  Tcg2Event->Header.EventType = EV_PLATFORM_CONFIG_FLAGS;
+  Tcg2Event->Header.PCRIndex = 1;
+  Tcg2Event->Header.HeaderSize = sizeof (EFI_TCG2_EVENT_HEADER);
+  Tcg2Event->Header.HeaderVersion = EFI_TCG2_EVENT_HEADER_VERSION;
+  CopyMem (&Tcg2Event->Event[0], EventData, EventSize);
+
+  Status = mTdTcg2Protocol->HashLogExtendEvent (mTdTcg2Protocol,
+                                              0,
+                                              (EFI_PHYSICAL_ADDRESS) (UINTN) CfgDataBase,
+                                              CfgDataLength,
+                                              Tcg2Event
+                                              );
+
+  FreePool (Tcg2Event);
+
+  return Status;
+}
+
+
 STATIC
 EFI_STATUS
 QemuLoadLegacyImage (
@@ -120,6 +196,12 @@ QemuLoadLegacyImage (
   QemuFwCfgReadBytes (LoadedImage->SetupSize, LoadedImage->SetupBuf);
   DEBUG ((DEBUG_INFO, " [done]\n"));
 
+  MeasureQemuFwCfgAcpi (
+    DIRECT_BOOT_SETUP,
+    sizeof (DIRECT_BOOT_SETUP),
+    LoadedImage->SetupBuf,
+    LoadedImage->SetupSize);
+
   Status = LoadLinuxCheckKernelSetup (LoadedImage->SetupBuf,
              LoadedImage->SetupSize);
   if (EFI_ERROR (Status)) {
@@ -154,6 +236,12 @@ QemuLoadLegacyImage (
   QemuFwCfgReadBytes (KernelSize, LoadedImage->KernelBuf);
   DEBUG ((DEBUG_INFO, " [done]\n"));
 
+  MeasureQemuFwCfgAcpi (
+    DIRECT_BOOT_KERNEL,
+    sizeof (DIRECT_BOOT_KERNEL),
+    LoadedImage->KernelBuf,
+    KernelSize);
+
   QemuFwCfgSelectItem (QemuFwCfgItemCommandLineSize);
   LoadedImage->CommandLineSize = (UINTN)QemuFwCfgRead32 ();
 
@@ -163,6 +251,12 @@ QemuLoadLegacyImage (
                                    LoadedImage->CommandLineSize));
     QemuFwCfgSelectItem (QemuFwCfgItemCommandLineData);
     QemuFwCfgReadBytes (LoadedImage->CommandLineSize, LoadedImage->CommandLine);
+
+    MeasureQemuFwCfgAcpi (
+      DIRECT_BOOT_COMMANDLINE,
+      sizeof (DIRECT_BOOT_COMMANDLINE),
+      LoadedImage->CommandLine,
+      LoadedImage->CommandLineSize);
   }
 
   Status = LoadLinuxSetCommandLine (LoadedImage->SetupBuf,
@@ -184,6 +278,12 @@ QemuLoadLegacyImage (
     QemuFwCfgSelectItem (QemuFwCfgItemInitrdData);
     QemuFwCfgReadBytes (LoadedImage->InitrdSize, LoadedImage->InitrdData);
     DEBUG ((DEBUG_INFO, " [done]\n"));
+
+    MeasureQemuFwCfgAcpi (
+      DIRECT_BOOT_INITRD,
+      sizeof (DIRECT_BOOT_INITRD),
+      LoadedImage->InitrdData,
+      LoadedImage->InitrdSize);
   }
 
   Status = LoadLinuxSetInitrd (LoadedImage->SetupBuf, LoadedImage->InitrdData,
@@ -296,6 +396,7 @@ QemuLoadKernelImage (
   //
   CommandLine = NULL;
 
+  DEBUG ((DEBUG_INFO, "%a is called.\n"));
   //
   // Load the image. This should call back into the QEMU EFI loader file system.
   //
@@ -369,6 +470,7 @@ QemuLoadKernelImage (
 
   QemuFwCfgSelectItem (QemuFwCfgItemCommandLineSize);
   CommandLineSize = (UINTN)QemuFwCfgRead32 ();
+  DEBUG ((DEBUG_INFO, "CommandLineSize = %d\n", CommandLineSize));
 
   if (CommandLineSize == 0) {
     KernelLoadedImage->LoadOptionsSize = 0;
@@ -393,6 +495,16 @@ QemuLoadKernelImage (
     }
 
     //
+    // Measure the command line
+    //
+    DEBUG ((DEBUG_INFO, "Measure command line.\n"));
+    MeasureQemuFwCfgAcpi (
+      DIRECT_BOOT_COMMANDLINE,
+      sizeof (DIRECT_BOOT_COMMANDLINE),
+      CommandLine,
+      CommandLineSize);
+
+    //
     // Drop the terminating NUL, convert to UTF-16.
     //
     KernelLoadedImage->LoadOptionsSize = (UINT32) ((CommandLineSize - 1) * 2);
@@ -400,6 +512,7 @@ QemuLoadKernelImage (
 
   QemuFwCfgSelectItem (QemuFwCfgItemInitrdSize);
   InitrdSize = (UINTN)QemuFwCfgRead32 ();
+  DEBUG ((DEBUG_INFO, "InitrdSize = %d\n", InitrdSize));
 
   if (InitrdSize > 0) {
     //

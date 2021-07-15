@@ -62,6 +62,7 @@
   PrePiLib
   HashLib
   TpmMeasurementLib
+  TdxMpLib
 
 [Guids]
   gEfiHobMemoryAllocModuleGuid
@@ -72,12 +73,6 @@
   gPcdDataBaseHobGuid
 
 [Pcd]
-  gUefiOvmfPkgTokenSpaceGuid.PcdTdMailboxBase
-  gUefiOvmfPkgTokenSpaceGuid.PcdTdMailboxSize
-  gUefiOvmfPkgTokenSpaceGuid.PcdTdHobBase
-  gUefiOvmfPkgTokenSpaceGuid.PcdTdHobSize
-  gUefiOvmfPkgTokenSpaceGuid.PcdTdTempStackBase
-  gUefiOvmfPkgTokenSpaceGuid.PcdTdTempStackSize
   gUefiOvmfPkgTokenSpaceGuid.PcdCfvBase
   gUefiOvmfPkgTokenSpaceGuid.PcdCfvRawDataOffset
   gUefiOvmfPkgTokenSpaceGuid.PcdCfvRawDataSize
@@ -89,7 +84,7 @@
   gUefiOvmfPkgTokenSpaceGuid.PcdTdxAcceptPageSize
   gUefiOvmfPkgTokenSpaceGuid.PcdTdxSetNxForStack
   gUefiOvmfPkgTokenSpaceGuid.PcdTdxPteMemoryEncryptionAddressOrMask
-
+  gUefiOvmfPkgTokenSpaceGuid.PcdOvmfSecGhcbBackupBase
   //
   // TODO check these PCDs' impact on Ovmf
   //

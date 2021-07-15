@@ -33,7 +33,7 @@ QemuFwCfgS3Enabled (
   UINTN                  FwCfgSize;
   UINT8                  SystemStates[6];
 
-  if (ProbeTdGuest()) {
+  if (TdxIsEnabled()) {
     
     return FALSE;
     

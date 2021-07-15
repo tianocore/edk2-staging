@@ -246,7 +246,7 @@ CheckDevice (
   BOOLEAN     TdGuest;
 
   mCheckDeviceCalled = TRUE;
-  TdGuest = ProbeTdGuest();
+  TdGuest = TdxIsEnabled ();
   if(TdGuest) {
     ConfigurationPtr = &mOptionRomConfiguration;
     ConfigurationSize = sizeof(mOptionRomConfiguration);
@@ -326,7 +326,7 @@ DriverInitialize (
   EFI_EVENT  Event;
   VOID       *Registration;
 
-  if(ProbeTdGuest()) {
+  if (TdxIsEnabled ()) {
     goto InstallProtocol;
   }
 

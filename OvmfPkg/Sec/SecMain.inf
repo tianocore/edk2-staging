@@ -52,6 +52,8 @@
   LocalApicLib
   CpuExceptionHandlerLib
   TdxStartupLib
+  TdxLib
+  TdxProbeLib
 
 [Ppis]
   gEfiTemporaryRamSupportPpiGuid                # PPI ALWAYS_PRODUCED
@@ -73,13 +75,7 @@
   gEfiMdeModulePkgTokenSpaceGuid.PcdInitValueInTempStack
 
   gUefiOvmfPkgTokenSpaceGuid.PcdUseTdxEmulation
-  gUefiOvmfPkgTokenSpaceGuid.PcdTdTempStackBase
-  gUefiOvmfPkgTokenSpaceGuid.PcdTdTempStackSize
-  gUefiOvmfPkgTokenSpaceGuid.PcdTdTempHeapBase
-  gUefiOvmfPkgTokenSpaceGuid.PcdTdTempHeapSize
-  gUefiOvmfPkgTokenSpaceGuid.PcdTdMailboxBase
-  gUefiOvmfPkgTokenSpaceGuid.PcdTdMailboxSize
-  
+  gUefiOvmfPkgTokenSpaceGuid.PcdOvmfSecGhcbBackupBase
 
 [FeaturePcd]
   gUefiOvmfPkgTokenSpaceGuid.PcdSmmSmramRequire

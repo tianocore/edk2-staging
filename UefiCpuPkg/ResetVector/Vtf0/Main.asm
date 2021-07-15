@@ -35,6 +35,9 @@ Main16:
     OneTimeCall TransitionFromReal16To32BitFlat
 
 BITS    32
+
+%ifdef ARCH_X64
+
     jmp SearchBfv
 
 ;
@@ -62,18 +65,20 @@ BITS    32
 ; @param[out]     SS       Selector allowing flat access to all addresses
 ;
 ; @return         None  This routine jumps to SEC and does not return
-
 Main32:
     ;
     ; Save EBX in EBP because EBX will be changed in ReloadFlat32
     ;
     mov     ebp, ebx
+
     OneTimeCall ReloadFlat32
 
     ;
     ; Init Tdx
     ;
     OneTimeCall  InitTdx
+
+%endif
 
 SearchBfv:
     ;

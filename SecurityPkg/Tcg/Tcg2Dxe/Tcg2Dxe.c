@@ -2638,7 +2638,7 @@ DriverEntry (
   UINT32                            ActivePCRBanks;
   UINT32                            NumberOfPCRBanks;
 
-  if (ProbeTdGuest()) {
+  if (TdxIsEnabled()) {
     return EFI_UNSUPPORTED;
   }
 

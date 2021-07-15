@@ -243,7 +243,7 @@ TpmMeasureAndLogData (
   //
   // Try to measure using TDX protocol
   //
-  if (ProbeTdGuest()) {
+  if (TdxIsEnabled ()) {
     return TdxMeasureAndLogData (
              PcrIndex,
              EventType,

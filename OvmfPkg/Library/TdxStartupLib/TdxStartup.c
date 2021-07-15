@@ -8,31 +8,12 @@
 #include <IndustryStandard/Tdx.h>
 #include <Library/TdvfPlatformLib.h>
 #include <Library/PrePiLibTdx.h>
+#include <Library/TdxMpLib.h>
 #include <Library/TdxStartupLib.h>
 #include "TdxStartupInternal.h"
 
-volatile VOID *mMailBox = NULL;
-UINT32  mNumOfCpus = 0;
 
 #define GET_GPAW_INIT_STATE(INFO)  ((UINT8) ((INFO) & 0x3f))
-
-volatile VOID *
-EFIAPI
-GetMailBox (
-  VOID
-  )
-{
-  return mMailBox;
-}
-
-UINT32
-EFIAPI
-GetNumCpus (
-  VOID
-  )
-{
-  return mNumOfCpus;
-}
 
 /**
   Validates the configuration volume, measures it, and created a FV Hob
@@ -113,15 +94,12 @@ TdxStartup(
 
   Status = TdCall (TDCALL_TDINFO, 0,0,0, &TdReturnData);
   ASSERT (Status == EFI_SUCCESS);
-  mNumOfCpus = TdReturnData.TdInfo.NumVcpus;
-  mMailBox = (VOID *)(UINTN)PcdGet32 (PcdTdMailboxBase);
 
   DEBUG ((EFI_D_INFO,
-    "Tdx started with(Hob: 0x%x, Info: 0x%x, Cpus: %d, MailBox: 0x%x)\n",
+    "Tdx started with(Hob: 0x%x, Info: 0x%x, Cpus: %d)\n",
     (UINT32)(UINTN)VmmHobList,
     (UINT32)(UINTN)Info,
-    mNumOfCpus,
-    (UINT32)(UINTN)mMailBox
+    TdReturnData.TdInfo.NumVcpus
   ));
 
   ZeroMem (&PlatformInfoHob, sizeof (PlatformInfoHob));
@@ -251,7 +229,7 @@ TdxStartup(
     (UINT64)SecCoreData->TemporaryRamSize);
 
   BuildMemoryAllocationHob (
-    FixedPcdGet32 (PcdTdMailboxBase),
+    FixedPcdGet32 (PcdOvmfSecGhcbBackupBase),
     EFI_PAGE_SIZE,
     EfiACPIMemoryNVS
     );

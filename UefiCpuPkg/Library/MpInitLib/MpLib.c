@@ -1951,7 +1951,7 @@ MpInitLibInitialize (
   UINTN                    BackupBufferAddr;
   UINTN                    ApIdtBase;
 
-  if(ProbeTdGuest()) {
+  if(TdxIsEnabled()) {
     return EFI_SUCCESS;
   }
 
@@ -2180,7 +2180,7 @@ MpInitLibGetProcessorInfo (
   CPU_INFO_IN_HOB        *CpuInfoInHob;
   UINTN                  OriginalProcessorNumber;
 
-  if(ProbeTdGuest()) {
+  if(TdxIsEnabled()) {
     return TdxMpInitLibGetProcessorInfo(ProcessorNumber, ProcessorInfoBuffer, HealthData);
   }
 
@@ -2415,7 +2415,7 @@ EnableDisableApWorker (
   CPU_MP_DATA               *CpuMpData;
   UINTN                     CallerNumber;
 
-  if(ProbeTdGuest()) {
+  if(TdxIsEnabled()) {
     return EFI_UNSUPPORTED;
   }
 
@@ -2479,7 +2479,7 @@ MpInitLibWhoAmI (
     return EFI_INVALID_PARAMETER;
   }
 
-  if(ProbeTdGuest()) {
+  if(TdxIsEnabled()) {
     *ProcessorNumber = 0;
     return EFI_SUCCESS;
   }
@@ -2522,7 +2522,7 @@ MpInitLibGetNumberOfProcessors (
   UINTN                   EnabledProcessorNumber;
   UINTN                   Index;
 
-  if(ProbeTdGuest()) {
+  if(TdxIsEnabled()) {
     return TdxMpInitLibGetNumberOfProcessors(NumberOfProcessors, NumberOfEnabledProcessors);
   }
 
@@ -2611,7 +2611,7 @@ StartupAllCPUsWorker (
   BOOLEAN                 HasEnabledAp;
   CPU_STATE               ApState;
 
-  if(ProbeTdGuest()) {
+  if(TdxIsEnabled()) {
     return EFI_SUCCESS;
   }
 

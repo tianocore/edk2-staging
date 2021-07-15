@@ -46,7 +46,7 @@ MemEncryptTdxIsEnabled (
   //
   // If query any encrpytion type this library doesn't support, return FALSE
   //
-  return ProbeTdGuest();
+  return TdxIsEnabled();
 }
 
 /**

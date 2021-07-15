@@ -88,25 +88,6 @@ gUefiCpuPkgTokenSpaceGuid.PcdSevEsWorkAreaBase|gUefiCpuPkgTokenSpaceGuid.PcdSevE
 0x00C000|0x001000
 gUefiOvmfPkgTokenSpaceGuid.PcdOvmfSecGhcbBackupBase|gUefiOvmfPkgTokenSpaceGuid.PcdOvmfSecGhcbBackupSize
 
-0x00D000|0x001000
-gUefiOvmfPkgTokenSpaceGuid.PcdTdMailboxBase|gUefiOvmfPkgTokenSpaceGuid.PcdTdMailboxSize
-DATA = {
-  0x00,0x00,0x00,0x00,
-  0xff,0xff,0xff,0xff,
-  0x00,0x00,0x00,0x00,
-  0x00,0x00,0x00,0x00,
-  0x00,0x00,0x00,0x00,
-  0x00,0x00,0x00,0x00,
-  0x00,0x00,0x00,0x00,
-  0x00,0x00,0x00,0x00
-}
-
-0x00E000|0x001000
-gUefiOvmfPkgTokenSpaceGuid.PcdTdHobBase|gUefiOvmfPkgTokenSpaceGuid.PcdTdHobSize
-
-0x00F000|0x001000
-gUefiOvmfPkgTokenSpaceGuid.PcdOvmfTdExtraPageTablesBase|gUefiOvmfPkgTokenSpaceGuid.PcdOvmfTdExtraPageTablesSize
-
 0x010000|0x010000
 gUefiOvmfPkgTokenSpaceGuid.PcdOvmfSecPeiTempRamBase|gUefiOvmfPkgTokenSpaceGuid.PcdOvmfSecPeiTempRamSize
 

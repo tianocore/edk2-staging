@@ -18,4 +18,10 @@
 #include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
 
+BOOLEAN
+EFIAPI
+IsTdxGuest (
+  VOID
+  );
+
 #endif

@@ -341,7 +341,7 @@ TimerDriverInitialize (
   EFI_STATUS  Status;
   UINT32      TimerVector;
 
-  if(ProbeTdGuest()) {
+  if(TdxIsEnabled()) {
     return EFI_UNSUPPORTED;
   }
 

@@ -28,7 +28,7 @@ InitializeMsrAccess (
   )
 {
   if (!mMsrAccessInitialized) {
-    mUseTdvmcall = ProbeTdGuest();
+    mUseTdvmcall = TdxIsEnabled();
 
     mMsrAccessInitialized = TRUE;
   }

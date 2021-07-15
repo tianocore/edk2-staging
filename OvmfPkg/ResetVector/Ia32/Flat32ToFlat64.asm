@@ -17,7 +17,7 @@ Transition32FlatTo64Flat:
 
     OneTimeCall SetCr3ForPageTables64
 
-    cmp     byte[TDX_WORK_AREA], 1
+    cmp     dword[TDX_WORK_AREA], 0x47584454 ; 'TDXG'
     jz      TdxTransition32FlatTo64Flat
 
     mov     eax, cr4
@@ -29,7 +29,6 @@ Transition32FlatTo64Flat:
     bts     eax, 8                      ; set LME
     wrmsr
 
-SevEsMitigationCheck:
     ;
     ; SEV-ES mitigation check support
     ;
@@ -88,7 +87,6 @@ TdxTransition32FlatTo64Flat:
     bts     eax, 12
 .set_cr4:
     mov     cr4, eax
-
     mov     ebx, cr3
 
     ;
@@ -96,7 +94,7 @@ TdxTransition32FlatTo64Flat:
     ; if using 5-level paging, adjust top-level page directory
     ;
     bt      eax, 12
-    jnc      .set_cr3
+    jnc     .set_cr3
     mov     ebx, TDX_PT_ADDR (0)
 .set_cr3:
     mov     cr3, ebx
@@ -115,8 +113,8 @@ jumpTo64BitAndLandHere:
     ; For Td guest we are done and jump to the end
     ;
     mov     eax, TDX_WORK_AREA
-    cmp     byte[eax], 1
-    jz     GoodCompare
+    cmp     dword [eax], 0x47584454 ; 'TDXG'
+    jz      GoodCompare
 
     ;
     ; Check if the second step of the SEV-ES mitigation is to be performed.

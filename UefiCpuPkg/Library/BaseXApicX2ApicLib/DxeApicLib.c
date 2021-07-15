@@ -50,7 +50,7 @@ InitializeMsrAccess (
   //
   if (!mMsrAccessInitialized) {
 
-    TdGuest = ProbeTdGuest();
+    TdGuest = TdxIsEnabled ();
 
     if(!TdGuest){
       //

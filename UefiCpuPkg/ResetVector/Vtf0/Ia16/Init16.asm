@@ -40,9 +40,3 @@ EarlyInit16:
 
     OneTimeCallRet EarlyInit16
 
-BITS 32
-;
-; Protected Mode entry point for Early BSP/AP
-;
-EarlyPmEntry:
-    jmp     Main32

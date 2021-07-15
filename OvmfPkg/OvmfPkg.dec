@@ -315,30 +315,23 @@
   gUefiOvmfPkgTokenSpaceGuid.PcdSevLaunchSecretBase|0x0|UINT32|0x42
   gUefiOvmfPkgTokenSpaceGuid.PcdSevLaunchSecretSize|0x0|UINT32|0x43
 
-  ## PCD used by TDX
-  gUefiOvmfPkgTokenSpaceGuid.PcdTdMailboxBase|0|UINT32|0x46
-  gUefiOvmfPkgTokenSpaceGuid.PcdTdMailboxSize|0|UINT32|0x47
-  gUefiOvmfPkgTokenSpaceGuid.PcdTdHobBase|0|UINT32|0x48
-  gUefiOvmfPkgTokenSpaceGuid.PcdTdHobSize|0|UINT32|0x49
-  gUefiOvmfPkgTokenSpaceGuid.PcdTdTempStackBase|0|UINT32|0x4a
-  gUefiOvmfPkgTokenSpaceGuid.PcdTdTempStackSize|0|UINT32|0x4b
-  gUefiOvmfPkgTokenSpaceGuid.PcdTdTempHeapBase|0|UINT32|0x4c
-  gUefiOvmfPkgTokenSpaceGuid.PcdTdTempHeapSize|0|UINT32|0x4d
+  ## The base address and size of the TDX Cfv base and size.
+  gUefiOvmfPkgTokenSpaceGuid.PcdCfvBase|0|UINT32|0x47
+  gUefiOvmfPkgTokenSpaceGuid.PcdCfvRawDataOffset|0|UINT32|0x48
+  gUefiOvmfPkgTokenSpaceGuid.PcdCfvRawDataSize|0|UINT32|0x49
 
-  gUefiOvmfPkgTokenSpaceGuid.PcdCfvBase|0|UINT32|0x4e
-  gUefiOvmfPkgTokenSpaceGuid.PcdCfvRawDataOffset|0|UINT32|0x4f
-  gUefiOvmfPkgTokenSpaceGuid.PcdCfvRawDataSize|0|UINT32|0x50
+  ## The base address and size of the TDX Bfv base and size.
+  gUefiOvmfPkgTokenSpaceGuid.PcdBfvBase|0|UINT32|0x4a
+  gUefiOvmfPkgTokenSpaceGuid.PcdBfvRawDataOffset|0|UINT32|0x4b
+  gUefiOvmfPkgTokenSpaceGuid.PcdBfvRawDataSize|0|UINT32|0x4c
 
-  gUefiOvmfPkgTokenSpaceGuid.PcdBfvBase|0|UINT32|0x51
-  gUefiOvmfPkgTokenSpaceGuid.PcdBfvRawDataOffset|0|UINT32|0x52
-  gUefiOvmfPkgTokenSpaceGuid.PcdBfvRawDataSize|0|UINT32|0x53
-
+  ## Size of the Ovmf image in KB
+  gUefiOvmfPkgTokenSpaceGuid.PcdOvmfImageSizeInKb|0|UINT32|0x4d
   gUefiOvmfPkgTokenSpaceGuid.PcdIgnoreVeHalt|FALSE|BOOLEAN|0x54
   gUefiOvmfPkgTokenSpaceGuid.PcdUseTdxEmulation|0x0|UINT32|0x55
 
   gUefiOvmfPkgTokenSpaceGuid.PcdUseTdxMsr|TRUE|BOOLEAN|0x56
 
-  gUefiOvmfPkgTokenSpaceGuid.PcdOvmfImageSizeInKb|0|UINT32|0x58
   gUefiOvmfPkgTokenSpaceGuid.PcdTdxAcceptChunkSize|0x2000|UINT64|0x59
   gUefiOvmfPkgTokenSpaceGuid.PcdTdxSetNxForStack|FALSE|BOOLEAN|0x5b
   gUefiOvmfPkgTokenSpaceGuid.PcdTdxPteMemoryEncryptionAddressOrMask|0|UINT64|0x5c
@@ -346,9 +339,6 @@
   ## The Tdx accept page size. 0x1000,0x200000
   #
   gUefiOvmfPkgTokenSpaceGuid.PcdTdxAcceptPageSize|0x1000|UINT64|0x5d
-
-  gUefiOvmfPkgTokenSpaceGuid.PcdOvmfTdExtraPageTablesBase|0x0|UINT32|0x5e
-  gUefiOvmfPkgTokenSpaceGuid.PcdOvmfTdExtraPageTablesSize|0x0|UINT32|0x5f
 
 [PcdsDynamic, PcdsDynamicEx]
   gUefiOvmfPkgTokenSpaceGuid.PcdEmuVariableEvent|0|UINT64|2

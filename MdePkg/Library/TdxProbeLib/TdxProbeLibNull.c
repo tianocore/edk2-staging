@@ -9,17 +9,17 @@
 
 #include <Library/BaseLib.h>
 #include <Library/TdxProbeLib.h>
-
 /**
-  Probe whether it is TD guest or Non-TD guest.
+  Whether Intel TDX is enabled.
 
-  @return TRUE    TD guest
-  @return FALSE   Non-TD guest
+  @return TRUE    TDX enabled
+  @return FALSE   TDX not enabled
 **/
 BOOLEAN
 EFIAPI
-ProbeTdGuest (
-  VOID )
+TdxIsEnabled (
+  VOID)
 {
   return FALSE;
 }
+

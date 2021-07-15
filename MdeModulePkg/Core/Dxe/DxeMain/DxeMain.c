@@ -250,7 +250,7 @@ DxeMain (
   //
   // Check whether it is of Td guest
   //
-  gTdGuest = ProbeTdGuest();
+  gTdGuest = TdxIsEnabled ();
 
   //
   // Setup the default exception handlers

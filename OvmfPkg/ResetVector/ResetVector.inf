@@ -43,18 +43,9 @@
   gUefiOvmfPkgTokenSpaceGuid.PcdOvmfSecPageTablesSize
   gUefiOvmfPkgTokenSpaceGuid.PcdOvmfSecPeiTempRamBase
   gUefiOvmfPkgTokenSpaceGuid.PcdOvmfSecPeiTempRamSize
-  gUefiOvmfPkgTokenSpaceGuid.PcdOvmfTdExtraPageTablesBase
-  gUefiOvmfPkgTokenSpaceGuid.PcdOvmfTdExtraPageTablesSize
-
-  gUefiOvmfPkgTokenSpaceGuid.PcdTdMailboxBase
-  gUefiOvmfPkgTokenSpaceGuid.PcdTdMailboxSize
-  gUefiOvmfPkgTokenSpaceGuid.PcdTdHobBase
-  gUefiOvmfPkgTokenSpaceGuid.PcdTdHobSize
-  gUefiOvmfPkgTokenSpaceGuid.PcdTdTempStackBase
-  gUefiOvmfPkgTokenSpaceGuid.PcdTdTempStackSize
-  gUefiOvmfPkgTokenSpaceGuid.PcdTdTempHeapBase
-  gUefiOvmfPkgTokenSpaceGuid.PcdTdTempHeapSize
-
+  gUefiOvmfPkgTokenSpaceGuid.PcdOvmfSecGhcbBackupBase
+  gUefiOvmfPkgTokenSpaceGuid.PcdOvmfSecGhcbBackupSize
+  gUefiOvmfPkgTokenSpaceGuid.PcdOvmfImageSizeInKb
   gUefiOvmfPkgTokenSpaceGuid.PcdCfvBase
   gUefiOvmfPkgTokenSpaceGuid.PcdCfvRawDataOffset
   gUefiOvmfPkgTokenSpaceGuid.PcdCfvRawDataSize
@@ -62,7 +53,6 @@
   gUefiOvmfPkgTokenSpaceGuid.PcdBfvRawDataOffset
   gUefiOvmfPkgTokenSpaceGuid.PcdBfvRawDataSize
 
-  gUefiOvmfPkgTokenSpaceGuid.PcdOvmfImageSizeInKb
 [FixedPcd]
   gUefiOvmfPkgTokenSpaceGuid.PcdSevLaunchSecretBase
   gUefiOvmfPkgTokenSpaceGuid.PcdSevLaunchSecretSize

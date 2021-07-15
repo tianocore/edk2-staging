@@ -1,6 +1,6 @@
 ;------------------------------------------------------------------------------
 ; @file
-; TDX metadata and padding the image size to 4k when page tables are in VTF0
+; Tdx Virtual Firmware metadata
 ;
 ; Copyright (c) 2021, Intel Corporation. All rights reserved.<BR>
 ; SPDX-License-Identifier: BSD-2-Clause-Patent
@@ -61,11 +61,11 @@ _Heap:
   DD TDX_METADATA_SECTION_TYPE_TEMP_MEM
   DD 0
 
-_TdxPageTable:
+_MailBox:
   DD 0
   DD 0
-  DQ TDX_EXTRA_PAGE_TABLE_BASE
-  DQ TDX_EXTRA_PAGE_TABLE_SIZE
+  DQ TDX_MAILBOX_MEMORY_BASE
+  DQ TDX_MAILBOX_MEMORY_SIZE
   DD TDX_METADATA_SECTION_TYPE_TEMP_MEM
   DD 0
 
@@ -77,11 +77,11 @@ _TdHob:
   DD TDX_METADATA_SECTION_TYPE_TD_HOB
   DD 0
 
-_MailBox:
+_TdxPageTable:
   DD 0
   DD 0
-  DQ TDX_MAILBOX_MEMORY_BASE
-  DQ TDX_MAILBOX_MEMORY_SIZE
+  DQ TDX_EXTRA_PAGE_TABLE_BASE
+  DQ TDX_EXTRA_PAGE_TABLE_SIZE
   DD TDX_METADATA_SECTION_TYPE_TEMP_MEM
   DD 0
 

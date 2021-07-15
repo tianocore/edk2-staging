@@ -47,9 +47,9 @@ ASM_PFX(_ModuleEntryPoint):
     ;
     ; Td guest flag is stored in TDX_WORK_AREA which is in Mailbox[0x10,0x20]
     ;
-    %define TDX_WORK_AREA (FixedPcdGet32 (PcdTdMailboxBase) + 0x10)
+    %define TDX_WORK_AREA (FixedPcdGet32 (PcdOvmfSecGhcbBackupBase) + 0x10)
     mov     eax, TDX_WORK_AREA
-    cmp     byte[eax], 1
+    cmp     dword[eax], 0x47584454 ; 'TDXG'
     jne     InitStack
 
     mov     rax, TDCALL_TDINFO
@@ -114,7 +114,7 @@ ParkAp:
     mov     rbp,  r9
 
 .do_wait_loop:
-    mov     rsp, FixedPcdGet32 (PcdTdMailboxBase)
+    mov     rsp, FixedPcdGet32 (PcdOvmfSecGhcbBackupBase)
 
     ;
     ; register itself in [rsp + CpuArrivalOffset]
@@ -140,7 +140,13 @@ ParkAp:
     cmp     eax, MpProtectedModeWakeupCommandAcceptPages
     jne     .check_command
 
+    ;
+    ; Accept Page
+    ;
+
+    ;
     ; Get PhysicalAddress/AcceptSize/PageSize
+    ;
     mov     rcx, [rsp + AcceptPageArgsPhysicalStart]
     mov     rbx, [rsp + AcceptPageArgsAcceptSize]
 
@@ -167,6 +173,7 @@ ParkAp:
 .physical_address    
     ;
     ; PhysicalAddress += (CpuId * AcceptSize)
+    ;
     xor     rdx, rdx
     mov     eax, ebp
     mul     ebx
@@ -180,7 +187,6 @@ ParkAp:
     ; Make sure we don't accept page beyond ending page
     ; This could happen is AcceptSize crosses the end of region
     ;
-    ;while (PhysicalAddress < PhysicalEnd) {
     cmp     rcx, [rsp + AcceptPageArgsPhysicalEnd ]
     jge     .do_finish_command
 
@@ -191,7 +197,6 @@ ParkAp:
 
     ; Size = MIN(AcceptSize, PhysicalEnd - PhysicalAddress);
     mov     rax, [rsp + AcceptPageArgsPhysicalEnd]
-
     sub     rax, rcx
     cmp     rax, rbx
     jge     .do_accept_loop
@@ -201,6 +206,7 @@ ParkAp:
 
     ;
     ; Accept address in rcx
+    ; r15 indicates the PageSize (0-4k, 1-2M, 3-1G)
     ;
     mov     rax, TDCALL_TDACCEPTPAGE
     xor     rdx, rdx
@@ -208,10 +214,67 @@ ParkAp:
     tdcall
 
     ;
+    ; Check status code in RAX
+    ;
+    test    rax, rax                  ; TDX_SUCCESS
+    jz      .accept_success
+
+    shr     rax, 32
+    cmp     eax, 0x00000B0A           ; TDX_PAGE_ALREADY_ACCEPTED
+    jz      .already_accepted
+
+    cmp     eax, 0xC0000B0B           ; TDX_PAGE_SIZE_MISMATCH
+    jz      .accept_size_mismatch
+
+    ;
+    ; other error, halt here
+    ;
+    mov     ebx, 0xffaa
+    jmp     $
+
+.accept_size_mismatch
+
+    ;
+    ; Check the previous PageSize.
+    ; Currently we only support 2M back to 4K
+    ;
+    cmp     r15, 1
+    jne     .invalid_accept_size
+
+    ;
+    ; Accept 2M in 4K PageSize, so loop 512 times
+    ; Save rcx in r13 so that rcx can be restored after the fallback accept
+    ;
+    mov     r14, 512
+    and     rcx, ~0x3ULL
+    mov     r13, rcx
+    xor     rdx, rdx
+
+.loop_accept_in_4k
+    mov     rax, TDCALL_TDACCEPTPAGE
+
+    tdcall
+
+    add     rcx, 0x1000
+    dec     r14
+    test    r14, r14
+    jz      .mismatch_accept_success
+    jmp     .loop_accept_in_4k
+
+.invalid_accept_size
+    mov     ebx, 0xffab
+    jmp     $
+
+.mismatch_accept_success
+    mov     rcx, r13
+
+.accept_success
+    ;
     ; Keep track of how many accepts per cpu
     ;
     inc dword[rsp + TalliesOffset + rbp * 4]
-    
+
+.already_accepted
     ;
     ; Reduce accept size by a page, and increment address
     ;

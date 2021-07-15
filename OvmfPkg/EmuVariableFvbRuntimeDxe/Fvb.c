@@ -923,7 +923,7 @@ FvbInitialize (
   //
   // Copy the content from Configuration FV in Td guest
   //
-  if (ProbeTdGuest()) {
+  if (TdxIsEnabled ()) {
     CfvBase = (UINT8*)(UINTN)PcdGet32(PcdCfvBase);
     CfvSize = (UINT32)PcdGet32(PcdCfvRawDataSize);
     DEBUG ((DEBUG_INFO, "Copy the content from Configuration FV. 0x%p : 0x%x\n", CfvBase, CfvSize));

@@ -8,7 +8,7 @@
   We don't advocate putting compiler specifics in libraries or drivers but there
   is no other way to make this work.
 
-  Copyright (c) 2006 - 2018, Intel Corporation. All rights reserved.<BR>
+  Copyright (c) 2006 - 2021, Intel Corporation. All rights reserved.<BR>
   SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
@@ -16,6 +16,7 @@
 
 
 #include "BaseIoLibIntrinsicInternal.h"
+#include "IoLibTdx.h"
 
 //
 // Microsoft Visual Studio 7.1 Function Prototypes for I/O Intrinsics.
@@ -54,6 +55,8 @@ void          _ReadWriteBarrier (void);
 
   If 8-bit I/O port operations are not supported, then ASSERT().
 
+  For Td guest TDVMCALL_IO is invoked to read I/O port.
+
   @param  Port  The I/O port to read.
 
   @return The value read.
@@ -66,6 +69,11 @@ IoRead8 (
   )
 {
   UINT8                             Value;
+
+  if (IsTdxGuest ()) {
+    Value = TdIoRead8 (Port);
+    return Value;
+  }
 
   _ReadWriteBarrier ();
   Value = (UINT8)_inp ((UINT16)Port);
@@ -82,6 +90,8 @@ IoRead8 (
 
   If 8-bit I/O port operations are not supported, then ASSERT().
 
+  For Td guest TDVMCALL_IO is invoked to write I/O port.
+
   @param  Port  The I/O port to write.
   @param  Value The value to write to the I/O port.
 
@@ -95,6 +105,12 @@ IoWrite8 (
   IN      UINT8                     Value
   )
 {
+
+  if (IsTdxGuest ()) {
+    TdIoWrite8 (Port, Value);
+    return Value;
+  }
+
   _ReadWriteBarrier ();
   (UINT8)_outp ((UINT16)Port, Value);
   _ReadWriteBarrier ();
@@ -111,6 +127,8 @@ IoWrite8 (
   If 16-bit I/O port operations are not supported, then ASSERT().
   If Port is not aligned on a 16-bit boundary, then ASSERT().
 
+  For Td guest TDVMCALL_IO is invoked to read I/O port.
+
   @param  Port  The I/O port to read.
 
   @return The value read.
@@ -125,6 +143,12 @@ IoRead16 (
   UINT16                            Value;
 
   ASSERT ((Port & 1) == 0);
+
+  if (IsTdxGuest ()) {
+    Value = TdIoRead16 (Port);
+    return Value;
+  }
+
   _ReadWriteBarrier ();
   Value = _inpw ((UINT16)Port);
   _ReadWriteBarrier ();
@@ -141,6 +165,8 @@ IoRead16 (
   If 16-bit I/O port operations are not supported, then ASSERT().
   If Port is not aligned on a 16-bit boundary, then ASSERT().
 
+  For Td guest TDVMCALL_IO is invoked to write I/O port.
+
   @param  Port  The I/O port to write.
   @param  Value The value to write to the I/O port.
 
@@ -155,6 +181,12 @@ IoWrite16 (
   )
 {
   ASSERT ((Port & 1) == 0);
+
+  if (IsTdxGuest ()) {
+    TdIoWrite16 (Port, Value);
+    return Value;
+  }
+
   _ReadWriteBarrier ();
   _outpw ((UINT16)Port, Value);
   _ReadWriteBarrier ();
@@ -171,6 +203,8 @@ IoWrite16 (
   If 32-bit I/O port operations are not supported, then ASSERT().
   If Port is not aligned on a 32-bit boundary, then ASSERT().
 
+  For Td guest TDVMCALL_IO is invoked to read I/O port.
+
   @param  Port  The I/O port to read.
 
   @return The value read.
@@ -185,6 +219,12 @@ IoRead32 (
   UINT32                            Value;
 
   ASSERT ((Port & 3) == 0);
+
+  if (IsTdxGuest ()) {
+    Value = TdIoRead32 (Port);
+    return Value;
+  }
+
   _ReadWriteBarrier ();
   Value = _inpd ((UINT16)Port);
   _ReadWriteBarrier ();
@@ -201,6 +241,8 @@ IoRead32 (
   If 32-bit I/O port operations are not supported, then ASSERT().
   If Port is not aligned on a 32-bit boundary, then ASSERT().
 
+  For Td guest TDVMCALL_IO is invoked to write I/O port.
+
   @param  Port  The I/O port to write.
   @param  Value The value to write to the I/O port.
 
@@ -215,6 +257,12 @@ IoWrite32 (
   )
 {
   ASSERT ((Port & 3) == 0);
+
+  if (IsTdxGuest ()) {
+    TdIoWrite32 (Port, Value);
+    return Value;
+  }
+
   _ReadWriteBarrier ();
   _outpd ((UINT16)Port, Value);
   _ReadWriteBarrier ();

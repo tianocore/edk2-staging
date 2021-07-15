@@ -31,6 +31,8 @@
 #include <Register/Amd/Msr.h>
 #include <Library/TdxStartupLib.h>
 #include <Library/TdxLib.h>
+#include <Library/TdxProbeLib.h>
+#include <IndustryStandard/Tdx.h>
 
 #include <Ppi/TemporaryRamSupport.h>
 
@@ -38,12 +40,12 @@
 BOOLEAN  mTdxSupported = FALSE;
 
 typedef struct _TDX_WORK_AREA{
-  UINT8 TdxIsEnabled;
-  UINT8 PageLevel5; // 5 page level is supported
-  UINT8 Rsvd[6];
+  UINT32  Signature;
+  UINT8   PageLevel5; // 5 page level is supported
+  UINT8   Rsvd[3];
 
-  UINT32 TdxInitVp;
-  UINT32 Info;
+  UINT32  TdxInitVp;
+  UINT32  Info;
 }TDX_WORK_AREA;
 #endif
 
@@ -885,44 +887,7 @@ InitializeSecCoreData(
 }
 
 
-#ifdef TDX_VIRTUAL_FIRMWARE
-/**
-  Determine if TDX is supported
-
-  During early booting, TDX support code will set a flag to indicate that
-  TDX is supported. Some more information are set in TDX_WORK_AREA if TDX
-  is supported.
-
-  @retval TRUE  TDX is supported
-  @retval FALSE TDX is not supported
-**/
-BOOLEAN
-CheckTdxSupported(
-  IN OUT VOID** TdInitVp,
-  IN OUT UINTN* TdInfo,
-  IN OUT UINT8* PageLevel5
-  )
-{
-  BOOLEAN       Supported;
-  TDX_WORK_AREA *TdxWorkArea;
-  UINT32        TdMailboxBase;
-
-  TdMailboxBase = FixedPcdGet32 (PcdTdMailboxBase);
-  if (TdMailboxBase == 0) {
-    return FALSE;
-  }
-  
-  TdxWorkArea = (TDX_WORK_AREA *) ((UINTN)(TdMailboxBase + 0x10));
-  Supported = (TdxWorkArea != NULL) && (TdxWorkArea->TdxIsEnabled != 0);
-
-  if (Supported) {
-    *TdInitVp = (VOID*)(UINTN)TdxWorkArea->TdxInitVp;
-    *TdInfo = (UINTN)TdxWorkArea->Info;
-    *PageLevel5 = TdxWorkArea->PageLevel5;
-  }
-
-  return Supported;
-}
+#if defined (MDE_CPU_X64)
 
 EFI_STATUS
 EFIAPI
@@ -991,22 +956,27 @@ SecCoreStartupWithStack (
   volatile UINT8              *Table;
 
 #ifdef TDX_VIRTUAL_FIRMWARE  
-  VOID                        *TdInitVp;
-  UINTN                       TdInfo;
-  UINT8                       PageLevel5;
+  EFI_STATUS                  Status;
+  VOID                        *TdHob;
+  TD_RETURN_DATA              TdReturnData;
 
-  //
-  // To check whether it is of Tdx Guest
-  //
-  mTdxSupported = CheckTdxSupported(&TdInitVp, &TdInfo, &PageLevel5);
-
-  if(mTdxSupported){
+  if (TdxIsEnabled ()){
 
     TdxInitialize(&SecCoreData, BootFv, TopOfCurrentStack);
 
-    DEBUG((DEBUG_INFO, "WorkArea: 0x%x, 0x%x, %d\n", TdInitVp, TdInfo, PageLevel5));
+    TdHob = (VOID *) (UINTN) FixedPcdGet32 (PcdOvmfSecGhcbBase);
+    Status = TdCall (TDCALL_TDINFO, 0, 0, 0, &TdReturnData);
+    if (EFI_ERROR (Status)) {
+      CpuDeadLoop ();
+    }
 
-    TdxStartup(&SecCoreData, TdInitVp, TdInfo, ProcessLibraryConstructorList);
+    DEBUG ((DEBUG_INFO,
+      "Intel Tdx Started with (GPAW: %d, Cpus: %d)\n",
+      TdReturnData.TdInfo.Gpaw,
+      TdReturnData.TdInfo.NumVcpus
+    ));
+
+    TdxStartup(&SecCoreData, TdHob, TdReturnData.TdInfo.Gpaw, ProcessLibraryConstructorList);
 
     ASSERT(FALSE);
     CpuDeadLoop();

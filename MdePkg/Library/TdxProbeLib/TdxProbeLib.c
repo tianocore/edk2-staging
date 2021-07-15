@@ -11,25 +11,25 @@
 #include <Library/TdxProbeLib.h>
 #include "InternalTdxProbe.h"
 
-BOOLEAN mTdGuest = FALSE;
-BOOLEAN mTdGuestProbed = FALSE;
+BOOLEAN mTdxEnabled = FALSE;
+BOOLEAN mTdxProbed = FALSE;
 
 /**
-  Probe whether it is TD guest or Non-TD guest.
+  Whether Intel TDX is enabled.
 
-  @return TRUE    TD guest
-  @return FALSE   Non-TD guest
+  @return TRUE    TDX enabled
+  @return FALSE   TDX not enabled
 **/
 BOOLEAN
 EFIAPI
-ProbeTdGuest (
+TdxIsEnabled (
   VOID)
 {
-  if (mTdGuestProbed) {
-    return mTdGuest;
+  if (mTdxProbed) {
+    return mTdxEnabled;
   }
 
-  mTdGuest = TdProbe() == 0;
-  mTdGuestProbed = TRUE;
-  return mTdGuest;
+  mTdxEnabled = TdProbe () == 0;
+  mTdxProbed = TRUE;
+  return mTdxEnabled;
 }

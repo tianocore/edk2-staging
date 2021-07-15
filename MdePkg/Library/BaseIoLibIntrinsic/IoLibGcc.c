@@ -10,13 +10,14 @@
   We don't advocate putting compiler specifics in libraries or drivers but there
   is no other way to make this work.
 
-  Copyright (c) 2006 - 2018, Intel Corporation. All rights reserved.<BR>
+  Copyright (c) 2006 - 2021, Intel Corporation. All rights reserved.<BR>
   SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
 
 #include "BaseIoLibIntrinsicInternal.h"
+#include "IoLibTdx.h"
 
 /**
   Reads an 8-bit I/O port.
@@ -25,7 +26,9 @@
   This function must guarantee that all I/O read and write operations are
   serialized.
 
-  If 8-bit I/O port operations are not supported, then ASSERT().
+  If 8-bit I/O port operations are not supported, then ASSERT()
+
+  For Td guest TDVMCALL_IO is invoked to read I/O port.
 
   @param  Port  The I/O port to read.
 
@@ -40,6 +43,11 @@ IoRead8 (
 {
   UINT8   Data;
 
+  if (IsTdxGuest ()) {
+    Data = TdIoRead8 (Port);
+    return Data;
+  }
+
   __asm__ __volatile__ ("inb %w1,%b0" : "=a" (Data) : "d" ((UINT16)Port));
   return Data;
 }
@@ -52,6 +60,8 @@ IoRead8 (
   operations are serialized.
 
   If 8-bit I/O port operations are not supported, then ASSERT().
+
+  For Td guest TDVMCALL_IO is invoked to write I/O port.
 
   @param  Port  The I/O port to write.
   @param  Value The value to write to the I/O port.
@@ -66,6 +76,10 @@ IoWrite8 (
   IN      UINT8                     Value
   )
 {
+  if (IsTdxGuest ()) {
+    TdIoWrite8 (Port, Value);
+    return Value;
+  }
   __asm__ __volatile__ ("outb %b0,%w1" : : "a" (Value), "d" ((UINT16)Port));
   return Value;;
 }
@@ -79,6 +93,8 @@ IoWrite8 (
 
   If 16-bit I/O port operations are not supported, then ASSERT().
   If Port is not aligned on a 16-bit boundary, then ASSERT().
+
+  For Td guest TDVMCALL_IO is invoked to read I/O port.
 
   @param  Port  The I/O port to read.
 
@@ -94,6 +110,12 @@ IoRead16 (
   UINT16   Data;
 
   ASSERT ((Port & 1) == 0);
+
+  if (IsTdxGuest ()) {
+    Data = TdIoRead16 (Port);
+    return Data;
+  }
+
   __asm__ __volatile__ ("inw %w1,%w0" : "=a" (Data) : "d" ((UINT16)Port));
   return Data;
 }
@@ -107,6 +129,8 @@ IoRead16 (
 
   If 16-bit I/O port operations are not supported, then ASSERT().
   If Port is not aligned on a 16-bit boundary, then ASSERT().
+
+  For Td guest TDVMCALL_IO is invoked to write I/O port.
 
   @param  Port  The I/O port to write.
   @param  Value The value to write to the I/O port.
@@ -122,6 +146,12 @@ IoWrite16 (
   )
 {
   ASSERT ((Port & 1) == 0);
+
+  if (IsTdxGuest ()) {
+    TdIoWrite16 (Port, Value);
+    return Value;
+  }
+
   __asm__ __volatile__ ("outw %w0,%w1" : : "a" (Value), "d" ((UINT16)Port));
   return Value;;
 }
@@ -135,6 +165,8 @@ IoWrite16 (
 
   If 32-bit I/O port operations are not supported, then ASSERT().
   If Port is not aligned on a 32-bit boundary, then ASSERT().
+
+  For Td guest TDVMCALL_IO is invoked to read I/O port.
 
   @param  Port  The I/O port to read.
 
@@ -150,6 +182,12 @@ IoRead32 (
   UINT32   Data;
 
   ASSERT ((Port & 3) == 0);
+
+  if (IsTdxGuest ()) {
+    Data = TdIoRead32 (Port);
+    return Data;
+  }
+
   __asm__ __volatile__ ("inl %w1,%0" : "=a" (Data) : "d" ((UINT16)Port));
   return Data;
 }
@@ -163,6 +201,8 @@ IoRead32 (
 
   If 32-bit I/O port operations are not supported, then ASSERT().
   If Port is not aligned on a 32-bit boundary, then ASSERT().
+
+  For Td guest TDVMCALL_IO is invoked to write I/O port.
 
   @param  Port  The I/O port to write.
   @param  Value The value to write to the I/O port.
@@ -178,6 +218,12 @@ IoWrite32 (
   )
 {
   ASSERT ((Port & 3) == 0);
+
+  if (IsTdxGuest ()) {
+    TdIoWrite32 (Port, Value);
+    return Value;
+  }
+
   __asm__ __volatile__ ("outl %0,%w1" : : "a" (Value), "d" ((UINT16)Port));
   return Value;
 }

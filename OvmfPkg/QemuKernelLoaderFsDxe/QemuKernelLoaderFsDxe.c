@@ -26,6 +26,11 @@
 #include <Protocol/DevicePath.h>
 #include <Protocol/LoadFile2.h>
 #include <Protocol/SimpleFileSystem.h>
+#include <Library/TdxProbeLib.h>
+#include <Protocol/Tcg2Protocol.h>
+#include <Protocol/Tdx.h>
+
+EFI_TCG2_PROTOCOL               *mTdTcg2Protocol = NULL;
 
 //
 // Static data that hosts the fw_cfg blobs and serves file requests.
@@ -903,6 +908,70 @@ STATIC CONST EFI_LOAD_FILE2_PROTOCOL     mInitrdLoadFile2 = {
   InitrdLoadFile2,
 };
 
+/**
+  Mesure Kernel blob.
+  @param[in] EventData    Pointer to the event data.
+  @param[in] EventSize    Size of event data.
+  @param[in] BlobBase     Blob base address.
+  @param[in] BlobSize     Size of blob data .
+  @retval  EFI_NOT_FOUND           Cannot locate protocol.
+  @retval  EFI_OUT_OF_RESOURCES    Allocate zero pool failure.
+  @return                          Status codes returned by
+                                   mTcg2Protocol->HashLogExtendEvent.
+**/
+STATIC
+EFI_STATUS
+EFIAPI
+MeasureKernelBlob(
+  IN CONST CHAR8           *EventData,
+  IN UINT32                EventSize,
+  IN VOID                  *BlobBase,
+  IN UINTN                 BlobSize
+)
+{
+  EFI_TCG2_EVENT  *Tcg2Event;
+  EFI_STATUS      Status;
+
+  if (TdxIsEnabled () == FALSE) {
+    return EFI_SUCCESS;
+  }
+
+  if (mTdTcg2Protocol == NULL) {
+    Status = gBS->LocateProtocol (&gTdTcg2ProtocolGuid, NULL, (VOID **) &mTdTcg2Protocol);
+    if (EFI_ERROR (Status)) {
+      //
+      // TdTcg2 protocol is not installed.
+      //
+      DEBUG ((EFI_D_ERROR, "%a: TdTcg2 protocol is not installed.\n", __FUNCTION__));
+      return EFI_NOT_FOUND;
+    }
+  }
+
+  Tcg2Event = AllocateZeroPool (EventSize + sizeof (EFI_TCG2_EVENT) - sizeof(Tcg2Event->Event));
+  if (Tcg2Event == NULL) {
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  Tcg2Event->Size = EventSize + sizeof (EFI_TCG2_EVENT) - sizeof(Tcg2Event->Event);
+  Tcg2Event->Header.EventType = EV_PLATFORM_CONFIG_FLAGS;
+  Tcg2Event->Header.PCRIndex = 1;
+  Tcg2Event->Header.HeaderSize = sizeof (EFI_TCG2_EVENT_HEADER);
+  Tcg2Event->Header.HeaderVersion = EFI_TCG2_EVENT_HEADER_VERSION;
+  CopyMem (&Tcg2Event->Event[0], EventData, EventSize);
+
+  Status = mTdTcg2Protocol->HashLogExtendEvent (mTdTcg2Protocol,
+                                              0,
+                                              (EFI_PHYSICAL_ADDRESS) (UINTN) BlobBase,
+                                              BlobSize,
+                                              Tcg2Event
+                                              );
+
+  FreePool (Tcg2Event);
+
+  return Status;
+}
+
+
 //
 // Utility functions.
 //
@@ -1033,6 +1102,14 @@ QemuKernelLoaderFsDxeEntrypoint (
     if (EFI_ERROR (Status)) {
       goto FreeBlobs;
     }
+
+    DEBUG ((DEBUG_INFO, "%a: Measure %s (%Ld)\n", __FUNCTION__,
+      CurrentBlob->Name, (INT64)CurrentBlob->Size));
+    MeasureKernelBlob ((CONST CHAR8 *) CurrentBlob->Name,
+        sizeof (CurrentBlob->Name),
+        CurrentBlob->Data,
+        CurrentBlob->Size);
+
     mTotalBlobBytes += CurrentBlob->Size;
   }
   KernelBlob      = &mKernelBlob[KernelBlobTypeKernel];

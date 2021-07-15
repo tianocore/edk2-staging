@@ -1,12 +1,13 @@
 /** @file
   Common I/O Library routines.
 
-  Copyright (c) 2006 - 2018, Intel Corporation. All rights reserved.<BR>
+  Copyright (c) 2006 - 2021, Intel Corporation. All rights reserved.<BR>
   SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
 #include "BaseIoLibIntrinsicInternal.h"
+#include "IoLibTdx.h"
 
 /**
   Reads a 64-bit I/O port.
@@ -70,6 +71,8 @@ IoWrite64 (
 
   If 8-bit MMIO register operations are not supported, then ASSERT().
 
+  For Td guest TDVMCALL_MMIO is invoked to read MMIO registers.
+
   @param  Address The MMIO register to read.
 
   @return The value read.
@@ -82,6 +85,11 @@ MmioRead8 (
   )
 {
   UINT8                             Value;
+
+  if (IsTdxGuest ()) {
+    Value = TdMmioRead8 (Address);
+    return Value;
+  }
 
   MemoryFence ();
   Value = *(volatile UINT8*)Address;
@@ -99,6 +107,8 @@ MmioRead8 (
 
   If 8-bit MMIO register operations are not supported, then ASSERT().
 
+  For Td guest TDVMCALL_MMIO is invoked to write MMIO registers.
+
   @param  Address The MMIO register to write.
   @param  Value   The value to write to the MMIO register.
 
@@ -112,6 +122,11 @@ MmioWrite8 (
   IN      UINT8                     Value
   )
 {
+  if (IsTdxGuest ()) {
+    TdMmioWrite8 (Address, Value);
+    return Value;
+  }
+
   MemoryFence ();
   *(volatile UINT8*)Address = Value;
   MemoryFence ();
@@ -129,6 +144,8 @@ MmioWrite8 (
   If 16-bit MMIO register operations are not supported, then ASSERT().
   If Address is not aligned on a 16-bit boundary, then ASSERT().
 
+  For Td guest TDVMCALL_MMIO is invoked to read MMIO registers.
+
   @param  Address The MMIO register to read.
 
   @return The value read.
@@ -143,6 +160,11 @@ MmioRead16 (
   UINT16                            Value;
 
   ASSERT ((Address & 1) == 0);
+
+  if (IsTdxGuest ()) {
+    Value = TdMmioRead16 (Address);
+    return Value;
+  }
 
   MemoryFence ();
   Value = *(volatile UINT16*)Address;
@@ -161,6 +183,8 @@ MmioRead16 (
   If 16-bit MMIO register operations are not supported, then ASSERT().
   If Address is not aligned on a 16-bit boundary, then ASSERT().
 
+  For Td guest TDVMCALL_MMIO is invoked to write MMIO registers.
+
   @param  Address The MMIO register to write.
   @param  Value   The value to write to the MMIO register.
 
@@ -175,6 +199,11 @@ MmioWrite16 (
   )
 {
   ASSERT ((Address & 1) == 0);
+
+  if (IsTdxGuest ()) {
+    TdMmioWrite16 (Address, Value);
+    return Value;
+  }
 
   MemoryFence ();
   *(volatile UINT16*)Address = Value;
@@ -193,6 +222,8 @@ MmioWrite16 (
   If 32-bit MMIO register operations are not supported, then ASSERT().
   If Address is not aligned on a 32-bit boundary, then ASSERT().
 
+  For Td guest TDVMCALL_MMIO is invoked to read MMIO registers.
+
   @param  Address The MMIO register to read.
 
   @return The value read.
@@ -207,6 +238,11 @@ MmioRead32 (
   UINT32                            Value;
 
   ASSERT ((Address & 3) == 0);
+
+  if (IsTdxGuest ()) {
+    Value = TdMmioRead32 (Address);
+    return Value;
+  }
 
   MemoryFence ();
   Value = *(volatile UINT32*)Address;
@@ -225,6 +261,8 @@ MmioRead32 (
   If 32-bit MMIO register operations are not supported, then ASSERT().
   If Address is not aligned on a 32-bit boundary, then ASSERT().
 
+  For Td guest TDVMCALL_MMIO is invoked to write MMIO registers.
+
   @param  Address The MMIO register to write.
   @param  Value   The value to write to the MMIO register.
 
@@ -239,6 +277,11 @@ MmioWrite32 (
   )
 {
   ASSERT ((Address & 3) == 0);
+
+  if (IsTdxGuest ()) {
+    TdMmioWrite32 (Address, Value);
+    return Value;
+  }
 
   MemoryFence ();
   *(volatile UINT32*)Address = Value;
@@ -257,6 +300,8 @@ MmioWrite32 (
   If 64-bit MMIO register operations are not supported, then ASSERT().
   If Address is not aligned on a 64-bit boundary, then ASSERT().
 
+  For Td guest TDVMCALL_MMIO is invoked to read MMIO registers.
+
   @param  Address The MMIO register to read.
 
   @return The value read.
@@ -271,6 +316,11 @@ MmioRead64 (
   UINT64                            Value;
 
   ASSERT ((Address & 7) == 0);
+
+  if (IsTdxGuest ()) {
+    Value = TdMmioRead64 (Address);
+    return Value;
+  }
 
   MemoryFence ();
   Value = *(volatile UINT64*)Address;
@@ -289,6 +339,8 @@ MmioRead64 (
   If 64-bit MMIO register operations are not supported, then ASSERT().
   If Address is not aligned on a 64-bit boundary, then ASSERT().
 
+  For Td guest TDVMCALL_MMIO is invoked to write MMIO registers.
+
   @param  Address The MMIO register to write.
   @param  Value   The value to write to the MMIO register.
 
@@ -301,6 +353,11 @@ MmioWrite64 (
   )
 {
   ASSERT ((Address & 7) == 0);
+
+  if (IsTdxGuest ()) {
+    TdMmioWrite64 (Address, Value);
+    return Value;
+  }
 
   MemoryFence ();
   *(volatile UINT64*)Address = Value;

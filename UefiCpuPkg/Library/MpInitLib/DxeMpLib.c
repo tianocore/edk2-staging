@@ -784,7 +784,7 @@ MpInitLibStartupThisAP (
 {
   EFI_STATUS              Status;
 
-  if(ProbeTdGuest()) {
+  if (TdxIsEnabled ()) {
     return EFI_UNSUPPORTED;
   }
 
@@ -844,7 +844,7 @@ MpInitLibSwitchBSP (
   EFI_TIMER_ARCH_PROTOCOL      *Timer;
   UINT64                       TimerPeriod;
 
-  if(ProbeTdGuest()) {
+  if (TdxIsEnabled ()) {
     return EFI_UNSUPPORTED;
   }
 
@@ -921,7 +921,7 @@ MpInitLibEnableDisableAP (
   EFI_STATUS     Status;
   BOOLEAN        TempStopCheckState;
 
-  if(ProbeTdGuest()) {
+  if (TdxIsEnabled ()) {
     return EFI_UNSUPPORTED;
   }
 

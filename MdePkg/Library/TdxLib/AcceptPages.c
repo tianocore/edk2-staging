@@ -18,6 +18,28 @@
 
 UINT64  mNumberOfDuplicatedAcceptedPages;
 
+UINT64  mTdxAcceptPageLevelMap[2] = {
+  SIZE_4KB,
+  SIZE_2MB,
+  // SIZE_1GB   // not supported yet
+};
+
+UINTN
+GetGpaPageLevel (
+  UINT64 PageSize
+  )
+{
+  UINTN Index;
+
+  for (Index = 0; Index < sizeof (mTdxAcceptPageLevelMap) / sizeof (mTdxAcceptPageLevelMap[0]); Index++) {
+    if (mTdxAcceptPageLevelMap[Index] == PageSize) {
+      break;
+    }
+  }
+
+  return Index;
+}
+
 /**
   This function accept a pending private page, and initialize the page to
   all-0 using the TD ephemeral private key.
@@ -37,38 +59,68 @@ TdAcceptPages (
   IN UINT64  PageSize
   )
 {
-  UINT64  Address;
-  UINT64  Status;
-  UINT64  Index;
-  UINT64  GpaPageSize;
+  EFI_STATUS  Status;
+  UINT64      Address;
+  UINT64      TdxStatus;
+  UINT64      Index;
+  UINT64      GpaPageLevel;
+  UINT64      PageSize2;
 
   Address = StartAddress;
 
-  if (PageSize == SIZE_4KB) {
-    GpaPageSize = TDCALL_ACCEPT_PAGE_SIZE_4K;
-  } else if (PageSize == SIZE_2MB) {
-    GpaPageSize = TDCALL_ACCEPT_PAGE_SIZE_2M;
-  } else if (PageSize == SIZE_1GB) {
-    GpaPageSize = TDCALL_ACCEPT_PAGE_SIZE_1G;
-  } else {
-    DEBUG ((DEBUG_ERROR, "Accept page size must be 4K/2M/1G. Invalid page size - 0x%llx\n", PageSize));
+  GpaPageLevel = (UINT64) GetGpaPageLevel (PageSize);
+  if (GpaPageLevel > sizeof (mTdxAcceptPageLevelMap) / sizeof (mTdxAcceptPageLevelMap[0])) {
+    DEBUG ((DEBUG_ERROR, "Accept page size must be 4K/2M. Invalid page size - 0x%llx\n", PageSize));
     return EFI_INVALID_PARAMETER;
   }
 
+  Status = EFI_SUCCESS;
   for (Index = 0; Index < NumberOfPages; Index++) {
-    Status = TdCall (TDCALL_TDACCEPTPAGE,Address | GpaPageSize, 0, 0, 0);
-    if (Status != TDX_EXIT_REASON_SUCCESS) {
-        if ((Status & ~0xFFULL) == TDX_EXIT_REASON_PAGE_ALREADY_ACCEPTED) {
+    TdxStatus = TdCall (TDCALL_TDACCEPTPAGE, Address | GpaPageLevel, 0, 0, 0);
+    if (TdxStatus != TDX_EXIT_REASON_SUCCESS) {
+        if ((TdxStatus & ~0xFFFFULL) == TDX_EXIT_REASON_PAGE_ALREADY_ACCEPTED) {
+          //
+          // Already accepted
+          //
           mNumberOfDuplicatedAcceptedPages++;
           DEBUG ((DEBUG_VERBOSE, "Address %llx already accepted. Total number of already accepted pages %ld\n",
             Address, mNumberOfDuplicatedAcceptedPages));
-        } else {
-          DEBUG ((DEBUG_ERROR, "Address %llx failed to be accepted. Error = %ld\n",
-            Address, Status));
-          ASSERT (Status == TDX_EXIT_REASON_SUCCESS);
+        } else if ((TdxStatus & ~0xFFFFULL) == TDX_EXIT_REASON_PAGE_SIZE_MISMATCH) {
+          //
+          // GpaPageLevel is mismatch, fall back to a smaller GpaPageLevel if available
+          //
+          DEBUG ((DEBUG_INFO, "Address %llx cannot be accepted in PageLevel of %d\n", Address, GpaPageLevel));
+
+          if (GpaPageLevel == 0) {
+            //
+            // Cannot fall back to smaller page size
+            //
+            ASSERT (FALSE);
+            Status = EFI_INVALID_PARAMETER;
+            break;
+          } else {
+            //
+            // Fall back to a smaller page size
+            //
+            PageSize2 = mTdxAcceptPageLevelMap [GpaPageLevel - 1];
+            Status = TdAcceptPages(Address, 512, PageSize2);
+            if (EFI_ERROR (Status)) {
+              break;
+            }
+          }
+        }else {
+
+          //
+          // Other errors
+          //
+          DEBUG ((DEBUG_ERROR, "Address %llx (%d) failed to be accepted. Error = 0x%llx\n",
+            Address, Index, TdxStatus));
+          ASSERT (FALSE);
+          Status = EFI_INVALID_PARAMETER;
+          break;
         }
     }
     Address += PageSize;
   }
-  return EFI_SUCCESS;
+  return Status;
 }
