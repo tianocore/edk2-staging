@@ -12,8 +12,8 @@
 
 [Defines]
   INF_VERSION                    = 0x00010005
-  BASE_NAME                      = RtmrDump
-  FILE_GUID                      = b0e2e13f-7c0f-4f62-8b7c-1983c3770a9e
+  BASE_NAME                      = DumpTdxEventLog
+  FILE_GUID                      = 9B09D207-BAEA-4EB5-A266-3F732F8E7DE7
   MODULE_TYPE                    = UEFI_APPLICATION
   VERSION_STRING                 = 1.0
   ENTRY_POINT                    = UefiMain
@@ -25,12 +25,14 @@
 #
 
 [Sources]
-  RtmrDump.c
+  DumpTdxEventLog.c
 
 [Packages]
   MdePkg/MdePkg.dec
   MdeModulePkg/MdeModulePkg.dec
+  SecurityPkg/SecurityPkg.dec
   ShellPkg/ShellPkg.dec
+  CryptoPkg/CryptoPkg.dec
   OvmfPkg/OvmfPkg.dec
 
 [LibraryClasses]
@@ -40,11 +42,16 @@
   UefiApplicationEntryPoint
   UefiRuntimeServicesTableLib
   BaseMemoryLib
+  DebugLib
   PrintLib
   UefiLib
   ShellLib
+  BaseCryptLib
   TdxLib
 
 [Guids]
+  gEfiAcpiTableGuid
 
 [Protocols]
+  gTdTcg2ProtocolGuid                            ## CONSUMES
+  gEfiTcg2FinalEventsTableGuid
