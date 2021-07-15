@@ -166,4 +166,15 @@ TdVmCallCpuid (
   OUT VOID          *Results
   );
 
+EFI_STATUS
+EFIAPI
+DoTdReport(
+  IN UINT8   *Report,
+  IN UINT32  ReportSize,
+  IN UINT8   *AdditionalData,
+  IN UINT32  AdditionalDataSize
+);
+  
+  
+  
 #endif
