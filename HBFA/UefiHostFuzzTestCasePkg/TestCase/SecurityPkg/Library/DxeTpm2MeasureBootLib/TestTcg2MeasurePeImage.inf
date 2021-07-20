@@ -1,0 +1,42 @@
+## @file
+#
+# Copyright (c) 2020, Intel Corporation. All rights reserved.<BR>
+# SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = TestTcg2MeasurePeImage
+  FILE_GUID                      = 778DF4F4-36BD-4ae7-B2F0-10B434B0D164
+  MODULE_TYPE                    = USER_DEFINED
+  VERSION_STRING                 = 1.0
+
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = X64
+#
+
+[Sources]
+  TestTcg2MeasurePeImage.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  OvmfPkg/OvmfPkg.dec
+  SecurityPkg/SecurityPkg.dec
+  CryptoPkg/CryptoPkg.dec
+  UefiHostTestPkg/UefiHostTestPkg.dec
+  UefiHostFuzzTestCasePkg/UefiHostFuzzTestCasePkg.dec
+
+[LibraryClasses]
+  BaseMemoryLib
+  DebugLib
+  MemoryAllocationLib
+  BaseLib
+  DiskStubLib
+  Tcg2StubLib
+  UefiBootServicesTableLib
+  DevicePathLib
+  ToolChainHarnessLib

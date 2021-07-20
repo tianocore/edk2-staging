@@ -1,0 +1,42 @@
+## @file
+#  SEC Driver
+#
+#  Copyright (c) 2008 - 2021, Intel Corporation. All rights reserved.<BR>
+#
+#  SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = TestHobList
+  FILE_GUID                      = 16BA05A4-4245-45EE-BB5D-BCDFDB00F655
+  MODULE_TYPE                    = USER_DEFINED
+  VERSION_STRING                 = 1.0
+
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = X64
+
+[Sources]
+  TestHobList.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  UefiCpuPkg/UefiCpuPkg.dec
+  CryptoPkg/CryptoPkg.dec
+  SecurityPkg/SecurityPkg.dec
+  UefiHostTestPkg/UefiHostTestPkg.dec
+  OvmfPkg/OvmfPkg.dec
+  
+[LibraryClasses]
+  BaseLib
+  DebugLib
+  BaseMemoryLib
+  UefiBootServicesTableLib
+  MemoryAllocationLib
+  ToolChainHarnessLib
+  PcdLib
+  TdxStartupLib
