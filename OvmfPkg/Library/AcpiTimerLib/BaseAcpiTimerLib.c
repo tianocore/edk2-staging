@@ -55,6 +55,9 @@ AcpiTimerLibConstructor (
       AcpiCtlReg = POWER_MGMT_REGISTER_Q35 (ICH9_ACPI_CNTL);
       AcpiEnBit  = ICH9_ACPI_CNTL_ACPI_EN;
       break;
+    case CH_VIRT_HOST_DEVICE_ID:
+      mAcpiTimerIoAddr =  CH_ACPI_TIMER_IO_ADDRESS;
+      return RETURN_SUCCESS;
     default:
       DEBUG ((DEBUG_ERROR, "%a: Unknown Host Bridge Device ID: 0x%04x\n",
         __FUNCTION__, HostBridgeDevId));

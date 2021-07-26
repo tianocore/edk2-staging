@@ -34,6 +34,8 @@ DxeResetInit (
   case INTEL_Q35_MCH_DEVICE_ID:
     mAcpiPmBaseAddress = ICH9_PMBASE_VALUE;
     break;
+  case CH_VIRT_HOST_DEVICE_ID:
+    break;
   default:
     ASSERT (FALSE);
     CpuDeadLoop ();
@@ -56,7 +58,11 @@ ResetShutdown (
   VOID
   )
 {
-  IoBitFieldWrite16 (mAcpiPmBaseAddress + 4, 10, 13, 0);
-  IoOr16 (mAcpiPmBaseAddress + 4, BIT13);
+  if (mAcpiPmBaseAddress == 0) {
+    IoWrite8 (CH_ACPI_SHUTDOWN_IO_ADDRESS, 5 << 2 | 1 << 5);
+  } else {
+    IoBitFieldWrite16 (mAcpiPmBaseAddress + 4, 10, 13, 0);
+    IoOr16 (mAcpiPmBaseAddress + 4, BIT13);
+  }
   CpuDeadLoop ();
 }

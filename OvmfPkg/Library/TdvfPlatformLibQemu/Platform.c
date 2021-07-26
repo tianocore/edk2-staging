@@ -39,6 +39,7 @@
 #include <IndustryStandard/Pci22.h>
 #include <IndustryStandard/Q35MchIch9.h>
 #include <IndustryStandard/I440FxPiix4.h>
+#include <IndustryStandard/CloudHypervisor.h>
 
 
 //
@@ -178,6 +179,8 @@ MiscInitialization (
       AcpiCtlReg = POWER_MGMT_REGISTER_Q35 (ICH9_ACPI_CNTL);
       AcpiEnBit  = ICH9_ACPI_CNTL_ACPI_EN;
       break;
+    case CH_VIRT_HOST_DEVICE_ID:
+      return;
     default:
       DEBUG ((EFI_D_ERROR, "%a: Unknown Host Bridge Device ID: 0x%04x\n",
         __FUNCTION__, PlatformInfoHob->HostBridgePciDevId));

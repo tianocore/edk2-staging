@@ -15,6 +15,7 @@
 #include <IndustryStandard/Q35MchIch9.h>
 #include <IndustryStandard/I440FxPiix4.h>
 #include <IndustryStandard/Bhyve.h>
+#include <IndustryStandard/CloudHypervisor.h>
 
 //
 // OVMF Host Bridge DID Address
