@@ -12,7 +12,7 @@
   DSC_SPECIFICATION              = 0x00010005
   OUTPUT_DIRECTORY               = Build/UefiHostFuzzTestCasePkg
   SUPPORTED_ARCHITECTURES        = IA32|X64
-  BUILD_TARGETS                  = DEBUG|RELEASE
+  BUILD_TARGETS                  = DEBUG|RELEASE|NOOPT
   SKUID_IDENTIFIER               = DEFAULT
 
   DEFINE TEST_WITH_INSTRUMENT = FALSE
@@ -56,6 +56,7 @@
   Usb2HcStubLib|UefiHostFuzzTestCasePkg/TestStub/Usb2HcStubLib/Usb2HcStubLib.inf
   Usb2HcPpiStubLib|UefiHostFuzzTestCasePkg/TestStub/Usb2HcPpiStubLib/Usb2HcPpiStubLib.inf
   UsbIoPpiStubLib|UefiHostFuzzTestCasePkg/TestStub/UsbIoPpiStubLib/UsbIoPpiStubLib.inf
+  Tcg2StubLib|UefiHostFuzzTestCasePkg/TestStub/Tcg2StubLib/Tcg2StubLib.inf
   # Add below libs due to Edk2 update
   VariablePolicyLib|MdeModulePkg/Library/VariablePolicyLib/VariablePolicyLib.inf
   VariablePolicyHelperLib|MdeModulePkg/Library/VariablePolicyHelperLib/VariablePolicyHelperLib.inf
@@ -204,4 +205,74 @@
       PeiServicesTablePointerLib|MdePkg/Library/PeiServicesTablePointerLib/PeiServicesTablePointerLib.inf
   }
 
+  UefiHostFuzzTestCasePkg/TestCase/OvmfPkg/Library/TdxStartupLib/TestHobList.inf {
+  <LibraryClasses>
+   TdxStartupLib|OvmfPkg/Library/TdxStartupLib/TdxStartupLib.inf
+   UefiCpuLib|UefiCpuPkg/Library/BaseUefiCpuLib/BaseUefiCpuLib.inf
+   IoLib|MdePkg/Library/BaseIoLibIntrinsic/BaseIoLibIntrinsicSev.inf
+   LocalApicLib|UefiCpuPkg/Library/BaseXApicX2ApicLib/BaseXApicX2ApicLibSec.inf
+   CpuExceptionHandlerLib|UefiCpuPkg/Library/CpuExceptionHandlerLib/DxeCpuExceptionHandlerLib.inf
+   TdxLib|MdePkg/Library/TdxLib/TdxLib.inf
+   TdvfPlatformLib|OvmfPkg/Library/TdvfPlatformLibQemu/TdvfPlatformLibQemuSec.inf
+   PrePiLib|OvmfPkg/Library/PrePiLibTdx/PrePiLibTdx.inf
+   HashLib|SecurityPkg/Library/HashLibBaseCryptoRouterTdx/HashLibBaseCryptoRouter.inf
+   UefiDecompressLib|MdePkg/Library/BaseUefiDecompressLib/BaseUefiDecompressLib.inf
+   PeCoffLib|MdePkg/Library/BasePeCoffLib/BasePeCoffLib.inf
+   ExtractGuidedSectionLib|MdePkg/Library/BaseExtractGuidedSectionLib/BaseExtractGuidedSectionLib.inf
+   PeCoffExtraActionLib|SourceLevelDebugPkg/Library/PeCoffExtraActionLibDebug/PeCoffExtraActionLibDebug.inf
+   PciLib|MdePkg/Library/BasePciLibCf8/BasePciLibCf8.inf
+   QemuFwCfgLib|OvmfPkg/Library/QemuFwCfgLib/QemuFwCfgDxeLib.inf
+   MemEncryptTdxLib|OvmfPkg/Library/BaseMemEncryptTdxLib/BaseMemEncryptTdxLib.inf
+   MemEncryptSevLib|OvmfPkg/Library/BaseMemEncryptSevLib/DxeMemEncryptSevLib.inf
+   CpuLib|MdePkg/Library/BaseCpuLib/BaseCpuLib.inf
+   PciCf8Lib|MdePkg/Library/BasePciCf8Lib/BasePciCf8Lib.inf
+   VmgExitLib|OvmfPkg/Library/VmgExitLib/VmgExitLib.inf
+   BaseCryptLib|CryptoPkg/Library/BaseCryptLib/BaseCryptLib.inf
+   VmgExitLib|OvmfPkg/Library/VmgExitLib/VmgExitLib.inf
+   VmTdExitLib|OvmfPkg/Library/VmTdExitLib/VmTdExitLib.inf
+   TdxProbeLib|MdePkg/Library/TdxProbeLib/TdxProbeLib.inf
+   TdxMpLib|OvmfPkg/Library/TdxMpLib/TdxMpLib.inf
+   TpmMeasurementLib|SecurityPkg/Library/DxeTpmMeasurementLib/DxeTpmMeasurementLib.inf
+   HobLib|MdePkg/Library/SecHobLib/SecHobLib.inf
+   BaseLib|MdePkg/Library/BaseLib/BaseLib.inf
+  } 
+    UefiHostFuzzTestCasePkg/TestCase/SecurityPkg/Library/DxeTpm2MeasureBootLib/TestTcg2MeasureGptTable.inf{
+  <LibraryClasses>
+   NULL|SecurityPkg/Library/DxeTpm2MeasureBootLib/DxeTpm2MeasureBootLib.inf
+   BaseCryptLib|UefiHostFuzzTestCasePkg/TestCase/SecurityPkg/Library/FmpAuthenticationLibPkcs7/CryptoLibStubPkcs7.inf
+   PeCoffLib|MdePkg/Library/BasePeCoffLib/BasePeCoffLib.inf
+   SecurityManagementLib|MdeModulePkg/Library/DxeSecurityManagementLib/DxeSecurityManagementLib.inf
+   DxeServicesLib|MdePkg/Library/DxeServicesLib/DxeServicesLib.inf
+   PeCoffExtraActionLib|MdePkg/Library/BasePeCoffExtraActionLibNull/BasePeCoffExtraActionLibNull.inf
+   OpensslLib|CryptoPkg/Library/OpensslLib/OpensslLib.inf
+   IntrinsicLib|CryptoPkg/Library/IntrinsicLib/IntrinsicLib.inf
+   RngLib|MdePkg/Library/BaseRngLibTimerLib/BaseRngLibTimerLib.inf
+   TdxProbeLib|MdePkg/Library/TdxProbeLib/TdxProbeLib.inf
+  }
+ 
+  UefiHostFuzzTestCasePkg/TestCase/SecurityPkg/Library/DxeTpm2MeasureBootLib/TestTcg2MeasurePeImage.inf{
+  <LibraryClasses>
+   NULL|SecurityPkg/Library/DxeTpm2MeasureBootLib/DxeTpm2MeasureBootLib.inf
+   BaseCryptLib|UefiHostFuzzTestCasePkg/TestCase/SecurityPkg/Library/FmpAuthenticationLibPkcs7/CryptoLibStubPkcs7.inf
+   PeCoffLib|MdePkg/Library/BasePeCoffLib/BasePeCoffLib.inf
+   SecurityManagementLib|MdeModulePkg/Library/DxeSecurityManagementLib/DxeSecurityManagementLib.inf
+   DxeServicesLib|MdePkg/Library/DxeServicesLib/DxeServicesLib.inf
+   PeCoffExtraActionLib|MdePkg/Library/BasePeCoffExtraActionLibNull/BasePeCoffExtraActionLibNull.inf
+   OpensslLib|CryptoPkg/Library/OpensslLib/OpensslLib.inf
+   IntrinsicLib|CryptoPkg/Library/IntrinsicLib/IntrinsicLib.inf
+   RngLib|MdePkg/Library/BaseRngLibTimerLib/BaseRngLibTimerLib.inf
+   TdxProbeLib|MdePkg/Library/TdxProbeLib/TdxProbeLib.inf
+  }
+ UefiHostFuzzTestCasePkg/TestCase/OvmfPkg/EmuVariableFvbRuntimeDxe/TestValidateTdxCfv.inf{
+  <LibraryClasses>
+   NULL|OvmfPkg/EmuVariableFvbRuntimeDxe/Fvb.inf
+   UefiRuntimeLib|MdePkg/Library/UefiRuntimeLib/UefiRuntimeLib.inf
+   PlatformFvbLib|OvmfPkg/Library/EmuVariableFvbLib/EmuVariableFvbLib.inf
+   TdxProbeLib|MdePkg/Library/TdxProbeLib/TdxProbeLib.inf
+   PcdLib|MdePkg/Library/DxePcdLib/DxePcdLib.inf
+  }
+  [PcdsDynamicDefault]
+    gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageVariableBase64|0
+    gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageFtwWorkingBase|0
+    gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageFtwSpareBase|0
 !include UefiHostFuzzTestPkg/UefiHostFuzzTestBuildOption.dsc

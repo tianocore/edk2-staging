@@ -74,7 +74,6 @@ RunTestHarness(
   // 
   // try to separate EFI lib, use stdlib function.
   // no asm code.
-  CpuBreakpoint();
   EFI_STATUS   Status;
   GptHandle =NULL;
   Status = gBS->InstallMultipleProtocolInterfaces (
@@ -85,8 +84,13 @@ RunTestHarness(
                       DiskIo,
                       NULL
                       );
+  if (Status != 0){
+    printf("Install Protocol failed: 0x%16lX\n",Status);
+  }
   Status = gBS->LocateProtocol (&gTdTcg2ProtocolGuid, NULL, (VOID **) &Tcg2Protocol);
-
+  if (Status != 0){
+  printf("LocateProtocol TdTcg2 failed: 0x%16lX\n",Status);
+  }
   Tcg2MeasureGptTable (Tcg2Protocol, GptHandle);
 
 }
