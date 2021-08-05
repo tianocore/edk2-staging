@@ -101,6 +101,7 @@ IoExit(
   Write = Veinfo->ExitQualification.Io.Direction ? FALSE : TRUE;
   Size = Veinfo->ExitQualification.Io.Size + 1;
   Port = Veinfo->ExitQualification.Io.Port;
+  Status = EFI_SUCCESS;
 
   if (Veinfo->ExitQualification.Io.String) {
     //

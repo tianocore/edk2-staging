@@ -102,6 +102,7 @@ MpAcceptMemoryResourceRange (
   UINT32                      CpusNum;
   volatile MP_WAKEUP_MAILBOX  *MailBox;
 
+  Status = EFI_SUCCESS;
   AcceptChunkSize = FixedPcdGet64 (PcdTdxAcceptChunkSize);
   AcceptPageSize = FixedPcdGet64 (PcdTdxAcceptPageSize);
   TotalLength = PhysicalEnd - PhysicalAddress;

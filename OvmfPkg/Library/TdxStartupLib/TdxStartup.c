@@ -145,6 +145,11 @@ TdxStartup(
   RelocationPages  = EFI_SIZE_TO_PAGES ((UINT32)RelocationMap.RelocateApLoopFuncSize) + 1;
 
   Address = AllocatePagesWithMemoryType (EfiACPIMemoryNVS, RelocationPages);
+  if (Address == NULL) {
+    ASSERT (FALSE);
+    return;
+  }
+
   ApLoopFunc = (VOID *) ((UINTN) Address + EFI_PAGE_SIZE);
 
   CopyMem (

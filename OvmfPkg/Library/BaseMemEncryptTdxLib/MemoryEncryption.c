@@ -210,7 +210,10 @@ Split2MPageTo4K (
 
   PageTableEntry1 = PageTableEntry;
 
-  ASSERT (PageTableEntry != NULL);
+  if (PageTableEntry == NULL) {
+    ASSERT (FALSE);
+    return;
+  }
 
   PhysicalAddress4K = PhysicalAddress;
   for (IndexOfPageTableEntries = 0;
@@ -270,7 +273,10 @@ SetPageTablePoolReadOnly (
   UINTN                 Level;
   UINT64                PoolUnitSize;
 
-  ASSERT (PageTableBase != 0);
+  if (PageTableBase == 0) {
+    ASSERT (FALSE);
+    return;
+  }
 
   //
   // Since the page table is always from page table pool, which is always
@@ -345,7 +351,10 @@ SetPageTablePoolReadOnly (
       ASSERT (Level > 1);
 
       NewPageTable = AllocatePageTableMemory (1);
-      ASSERT (NewPageTable != NULL);
+      if (NewPageTable == NULL) {
+        ASSERT (FALSE);
+        return;
+      }
 
       PhysicalAddress = PageAttr & LevelMask[Level];
       for (EntryIndex = 0;
@@ -442,6 +451,9 @@ Split1GPageTo2M (
   UINT64                            ActiveAddressEncMask;
 
   PageDirectoryEntry = AllocatePageTableMemory(1);
+  if (PageDirectoryEntry == NULL) {
+    return;
+  }
 
   AddressEncMask = GetMemEncryptionAddressMask ();
   ASSERT (PageDirectoryEntry != NULL);

@@ -377,7 +377,11 @@ Split2MPageTo4K (
   AddressEncMask = 0;
 
   PageTableEntry = AllocatePageTableMemory (1);
-  ASSERT (PageTableEntry != NULL);
+
+  if (PageTableEntry == NULL) {
+    ASSERT (FALSE);
+    return;
+  }
 
   //
   // Fill in 2M page entry.
@@ -438,7 +442,11 @@ Split1GPageTo2M (
   AddressEncMask = FixedPcdGet64 (PcdTdxPteMemoryEncryptionAddressOrMask) & PAGING_1G_ADDRESS_MASK_64;
 
   PageDirectoryEntry = AllocatePageTableMemory (1);
-  ASSERT (PageDirectoryEntry != NULL);
+
+  if (PageDirectoryEntry == NULL) {
+    ASSERT (FALSE);
+    return;
+  }
 
   //
   // Fill in 1G page entry.
@@ -489,7 +497,10 @@ SetPageTablePoolReadOnly (
   UINTN                 Level;
   UINT64                PoolUnitSize;
 
-  ASSERT (PageTableBase != 0);
+  if (PageTableBase == 0) {
+    ASSERT (FALSE);
+    return;
+  }
 
   //
   // Since the page table is always from page table pool, which is always
@@ -547,7 +558,11 @@ SetPageTablePoolReadOnly (
       ASSERT (Level > 1);
 
       NewPageTable = AllocatePageTableMemory (1);
-      ASSERT (NewPageTable != NULL);
+
+      if (NewPageTable == NULL) {
+        ASSERT (FALSE);
+        return;
+      }
 
       PhysicalAddress = PageAttr & mLevelMask[Level];
       for (EntryIndex = 0;
@@ -694,7 +709,10 @@ CreateIdentityMappingPageTables (
   // Get physical address bits supported.
   //
   Hob = GetFirstHob (EFI_HOB_TYPE_CPU);
-  ASSERT(Hob != NULL);
+  if (Hob == NULL) {
+    ASSERT (FALSE);
+    return 0;
+  }
   PhysicalAddressBits = ((EFI_HOB_CPU *) Hob)->SizeOfMemorySpace;
 
   //
@@ -746,8 +764,10 @@ CreateIdentityMappingPageTables (
     NumberOfPdpEntriesNeeded, (UINT64)TotalPagesNum));
 
   BigPageAddress = (UINTN) AllocatePageTableMemory (TotalPagesNum);
-  ASSERT (BigPageAddress != 0);
-
+  if (BigPageAddress == 0) {
+    ASSERT (FALSE);
+    return 0;
+  }
   DEBUG((DEBUG_INFO, "BigPageAddress = 0x%llx\n", BigPageAddress));
 
   //

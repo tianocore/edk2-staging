@@ -334,7 +334,11 @@ ProcessHobList (
   }
 
   ASSERT (!EFI_ERROR (Status));
-  ASSERT (LowMemoryResource != NULL);
+
+  if (LowMemoryResource == NULL) {
+    ASSERT (FALSE);
+    Status = EFI_NOT_FOUND;
+  }
 
   if (EFI_ERROR (Status)) {
     return Status;

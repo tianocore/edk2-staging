@@ -1512,6 +1512,7 @@ SetupEventLog (
   UINT8                           *VendorInfoSize;
   UINT32                          NumberOfAlgorithms;
 
+  Status = EFI_SUCCESS;
   DEBUG ((EFI_D_INFO, "Td: SetupEventLog\n"));
 
   //
@@ -2382,6 +2383,9 @@ SyncTdTcgEvent()
 
   while (!EFI_ERROR(Status) && GuidHob.Guid != NULL) {
     TcgEvent = AllocateCopyPool (GET_GUID_HOB_DATA_SIZE (GuidHob.Guid), GET_GUID_HOB_DATA (GuidHob.Guid));
+    if (TcgEvent == NULL) {
+      return EFI_OUT_OF_RESOURCES;
+    }
 
     GuidHob.Guid = GET_NEXT_HOB (GuidHob);
     GuidHob.Guid = GetNextGuidHob (&gTcgEvent2EntryHobGuid, GuidHob.Guid);
