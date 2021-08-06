@@ -71,10 +71,10 @@
 
   gTcgEvent2EntryHobGuid                             ## SOMETIMES_CONSUMES  ## HOB
   gTcg800155PlatformIdEventHobGuid                   ## SOMETIMES_CONSUMES  ## HOB
-  #gTdTcg2ProtocolGuid
+  #gEfiTdProtocolGuid
 
 [Protocols]
-  gTdTcg2ProtocolGuid                                ## PRODUCES
+  gEfiTdProtocolGuid                                 ## PRODUCES
   gEfiTcg2FinalEventsTableGuid                       ## PRODUCES
   gEfiMpServiceProtocolGuid                          ## SOMETIMES_CONSUMES
   gEfiVariableWriteArchProtocolGuid                  ## NOTIFY

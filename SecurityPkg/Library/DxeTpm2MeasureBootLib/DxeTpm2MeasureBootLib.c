@@ -28,6 +28,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Protocol/DiskIo.h>
 #include <Protocol/DevicePathToText.h>
 #include <Protocol/FirmwareVolumeBlock.h>
+#include <Protocol/Tdx.h>
 
 #include <Guid/MeasuredFvHob.h>
 
@@ -395,7 +396,7 @@ GetTcg2Protocol (
   EFI_TCG2_BOOT_SERVICE_CAPABILITY    ProtocolCapability;
 
   if (TdxIsEnabled ()) {
-    Status = gBS->LocateProtocol (&gTdTcg2ProtocolGuid, NULL, (VOID **) Tcg2Protocol);
+    Status = gBS->LocateProtocol (&gEfiTdProtocolGuid, NULL, (VOID **) Tcg2Protocol);
     if (EFI_ERROR (Status)) {
       //
       // TdTcg2 protocol is not installed.

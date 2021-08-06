@@ -46,7 +46,7 @@
   gEfiDevicePathProtocolGuid                ## PRODUCES
   gEfiLoadFile2ProtocolGuid                 ## PRODUCES
   gEfiSimpleFileSystemProtocolGuid          ## PRODUCES
-  gTdTcg2ProtocolGuid
+  gEfiTdProtocolGuid
 
 [Depex]
   gEfiRealTimeClockArchProtocolGuid

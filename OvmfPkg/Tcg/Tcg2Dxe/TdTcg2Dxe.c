@@ -2493,7 +2493,7 @@ InstallTdTcg2 (
   Handle = NULL;
   Status = gBS->InstallMultipleProtocolInterfaces (
                   &Handle,
-                  &gTdTcg2ProtocolGuid,
+                  &gEfiTdProtocolGuid,
                   &mTcg2Protocol,
                   NULL
                   );

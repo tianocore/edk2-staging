@@ -182,7 +182,7 @@ TdxMeasureAndLogData (
   EFI_TCG2_EVENT            *Tcg2Event;
 
   DEBUG ((DEBUG_INFO, "TdxMeasureAndLogData\n"));
-  Status = gBS->LocateProtocol (&gTdTcg2ProtocolGuid, NULL, (VOID **) &Tcg2Protocol);
+  Status = gBS->LocateProtocol (&gEfiTdProtocolGuid, NULL, (VOID **) &Tcg2Protocol);
   if (EFI_ERROR (Status)) {
     return Status;
   }

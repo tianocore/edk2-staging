@@ -937,7 +937,7 @@ MeasureKernelBlob(
   }
 
   if (mTdTcg2Protocol == NULL) {
-    Status = gBS->LocateProtocol (&gTdTcg2ProtocolGuid, NULL, (VOID **) &mTdTcg2Protocol);
+    Status = gBS->LocateProtocol (&gEfiTdProtocolGuid, NULL, (VOID **) &mTdTcg2Protocol);
     if (EFI_ERROR (Status)) {
       //
       // TdTcg2 protocol is not installed.

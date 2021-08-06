@@ -38,7 +38,7 @@
   gEfiDevicePathProtocolGuid
   gEfiLoadedImageProtocolGuid
   gOvmfLoadedX86LinuxKernelProtocolGuid
-  gTdTcg2ProtocolGuid
+  gEfiTdProtocolGuid
 
 [Guids]
   gQemuKernelLoaderFsMediaGuid
