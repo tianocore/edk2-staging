@@ -497,7 +497,10 @@ BuildGuidHob (
   //
   // Make sure Guid is valid
   //
-  ASSERT (Guid != NULL);
+  if (Guid == NULL) {
+    ASSERT (FALSE);
+    return NULL;
+  }
 
   //
   // Make sure that data length is not too long.
@@ -507,7 +510,7 @@ BuildGuidHob (
   Hob = CreateHob (EFI_HOB_TYPE_GUID_EXTENSION, (UINT16) (sizeof (EFI_HOB_GUID_TYPE) + DataLength));
 
   if (Hob == NULL) {
-    ASSERT(FALSE);
+    ASSERT (FALSE);
     return Hob;
   }
   CopyGuid (&Hob->Name, Guid);

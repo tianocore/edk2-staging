@@ -141,38 +141,67 @@ ParkAp:
     jne     .check_command
 
     ;
-    ; Accept Page
+    ; AP Accept Pages
     ;
+    ; Accept Pages in TDX is time-consuming, especially for big memory.
+    ; One of the mitigation is to accept pages by BSP and APs parallely.
+    ;
+    ; For example, there are 4 CPUs (1 BSP and 3 APs). Totally there are
+    ; 1G memory to be accepted.
+    ;
+    ; BSP is responsible for the memory regions of:
+    ;    Start : StartAddress + ChunkSize * (4) * Index
+    ;    Length: ChunkSize
+    ; APs is reponsible for the memory regions of:
+    ;    Start : StartAddress + ChunkSize * (4) * Index + ChunkSize * CpuId
+    ;    Length: ChunkSize
+    ;
+    ; TDCALL_TDACCEPTPAGE supports the PageSize of 4K and 2M. Sometimes when
+    ; the PageSize is 2M, TDX_PAGE_SIZE_MISMATCH is returned as the error code.
+    ; In this case, TDVF need fall back to 4k PageSize to accept again.
+    ;
+    ; If any errors happened in accept pages, an error code is recorded in
+    ; Mailbox [ErrorsOffset + CpuIndex]
+    ;
+.ap_accept_page:
 
     ;
-    ; Get PhysicalAddress/AcceptSize/PageSize
+    ; Clear the errors and fallback flag
+    ;
+    mov     al, ERROR_NON
+    mov     byte[rsp + ErrorsOffset + rbp], al
+    xor     r12, r12
+
+    ;
+    ; Get PhysicalAddress/ChunkSize/PageSize
     ;
     mov     rcx, [rsp + AcceptPageArgsPhysicalStart]
-    mov     rbx, [rsp + AcceptPageArgsAcceptSize]
+    mov     rbx, [rsp + AcceptPageArgsChunkSize]
 
     ;
-    ; Accept Page size
-    ; r15: AcceptPageSize
+    ; Set AcceptPageLevel based on the AcceptPagesize
+    ; Currently only 2M/4K page size is acceptable
+    ;
     mov     r15, [rsp + AcceptPageArgsPageSize]
     cmp     r15, SIZE_4KB
     je      .set_4kb
     cmp     r15, SIZE_2MB
     je      .set_2mb
-    cmp     r15, SIZE_1GB
-    je      .set_1gb
-.set_4kb
-    mov     r15, 0
-    jmp     .physical_address
-.set_2mb
-    mov     r15, 1
-    jmp     .physical_address
-.set_1gb
-    mov     r15, 2
+
+    mov     al, ERROR_INVALID_ACCEPT_PAGE_SIZE
+    mov     byte[rsp + ErrorsOffset + rbp], al
+    jmp     .do_finish_command
+
+.set_4kb:
+    mov     r15, PAGE_ACCEPT_LEVEL_4K
     jmp     .physical_address
 
-.physical_address    
+.set_2mb:
+    mov     r15, PAGE_ACCEPT_LEVEL_2M
+
+.physical_address:
     ;
-    ; PhysicalAddress += (CpuId * AcceptSize)
+    ; PhysicalAddress += (CpuId * ChunkSize)
     ;
     xor     rdx, rdx
     mov     eax, ebp
@@ -182,10 +211,9 @@ ParkAp:
     add     rcx, rdx
 
 .do_accept_next_range:
-
     ;
     ; Make sure we don't accept page beyond ending page
-    ; This could happen is AcceptSize crosses the end of region
+    ; This could happen is ChunkSize crosses the end of region
     ;
     cmp     rcx, [rsp + AcceptPageArgsPhysicalEnd ]
     jge     .do_finish_command
@@ -195,7 +223,9 @@ ParkAp:
     ;
     mov     r11, rcx
 
-    ; Size = MIN(AcceptSize, PhysicalEnd - PhysicalAddress);
+    ;
+    ; Size = MIN(ChunkSize, PhysicalEnd - PhysicalAddress);
+    ;
     mov     rax, [rsp + AcceptPageArgsPhysicalEnd]
     sub     rax, rcx
     cmp     rax, rbx
@@ -203,84 +233,113 @@ ParkAp:
     mov     rbx, rax
 
 .do_accept_loop:
-
     ;
-    ; Accept address in rcx
-    ; r15 indicates the PageSize (0-4k, 1-2M, 3-1G)
+    ; RCX: Accept address
+    ; R15: Accept Page Level
+    ; R12: Flag of fall back accept
     ;
     mov     rax, TDCALL_TDACCEPTPAGE
     xor     rdx, rdx
     or      rcx, r15
+
     tdcall
 
     ;
     ; Check status code in RAX
     ;
-    test    rax, rax                  ; TDX_SUCCESS
+    test    rax, rax
     jz      .accept_success
 
     shr     rax, 32
-    cmp     eax, 0x00000B0A           ; TDX_PAGE_ALREADY_ACCEPTED
+    cmp     eax, TDX_PAGE_ALREADY_ACCEPTED
     jz      .already_accepted
 
-    cmp     eax, 0xC0000B0B           ; TDX_PAGE_SIZE_MISMATCH
+    cmp     eax, TDX_PAGE_SIZE_MISMATCH
     jz      .accept_size_mismatch
 
     ;
-    ; other error, halt here
+    ; other error
     ;
-    mov     ebx, 0xffaa
-    jmp     $
+    mov     al, ERROR_ACCEPT_PAGE_ERROR
+    mov     byte[rsp + ErrorsOffset + rbp], al
+    jmp     .do_finish_command
 
-.accept_size_mismatch
+.accept_size_mismatch:
+    ;
+    ; Check the current PageLevel.
+    ; ACCEPT_LEVEL_4K is the least level and cannot fall back any more.
+    ; If in this case, just record the error and return
+    ;
+    cmp     r15, PAGE_ACCEPT_LEVEL_4K
+    jne     .do_fallback_accept
+    mov     al, ERROR_INVALID_FALLBACK_PAGE_LEVEL
+    mov     byte[rsp + ErrorsOffset + rbp], al
+    jmp     .do_finish_command
 
+.do_fallback_accept:
     ;
-    ; Check the previous PageSize.
-    ; Currently we only support 2M back to 4K
-    ;
-    cmp     r15, 1
-    jne     .invalid_accept_size
-
-    ;
-    ; Accept 2M in 4K PageSize, so loop 512 times
-    ; Save rcx in r13 so that rcx can be restored after the fallback accept
+    ; In fall back accept, just loop 512 times (2M = 512 * 4K)
+    ; Save the rcx in r13.
+    ; Decrease the PageLevel in R15.
+    ; R12 indicates it is in a fall back accept loop.
     ;
     mov     r14, 512
     and     rcx, ~0x3ULL
     mov     r13, rcx
     xor     rdx, rdx
+    dec     r15
+    mov     r12, 1
 
-.loop_accept_in_4k
-    mov     rax, TDCALL_TDACCEPTPAGE
+    jmp     .do_accept_loop
 
-    tdcall
-
-    add     rcx, 0x1000
-    dec     r14
-    test    r14, r14
-    jz      .mismatch_accept_success
-    jmp     .loop_accept_in_4k
-
-.invalid_accept_size
-    mov     ebx, 0xffab
-    jmp     $
-
-.mismatch_accept_success
-    mov     rcx, r13
-
-.accept_success
+.accept_success:
     ;
     ; Keep track of how many accepts per cpu
     ;
     inc dword[rsp + TalliesOffset + rbp * 4]
 
-.already_accepted
     ;
-    ; Reduce accept size by a page, and increment address
+    ; R12 indicate whether it is a fall back accept
+    ; If it is a success of fall back accept
+    ; Just loop 512 times to .do_accept_loop
+    ;
+    test    r12, r12
+    jz      .normal_accept_success
+
+    ;
+    ; This is fallback accept success
+    ;
+    add     rcx, SIZE_4KB
+    dec     r14
+    test    r14, r14
+    jz      .fallback_accept_done
+    jmp     .do_accept_loop
+
+.fallback_accept_done:
+    ;
+    ; Fall back accept done.
+    ; Restore the start address to RCX from R13
+    ; Clear the fall back accept flag
+    ;
+    mov     rcx, r13
+    inc     r15
+    xor     r12, r12
+
+.already_accepted:
+    ;
+    ; Handle the sitution of fall back accpet
+    ;
+    test    r12, r12
+    jnz     .accept_success
+
+.normal_accept_success:
+    ;
+    ; Reduce accept size by a PageSize, and increment address
     ;
     mov     r12, [rsp + AcceptPageArgsPageSize]
     sub     rbx, r12
     add     rcx, r12
+    xor     r12, r12
 
     ;
     ; We may be given multiple pages to accept, make sure we
@@ -290,12 +349,12 @@ ParkAp:
     jne     .do_accept_loop
 
     ;
-    ; Restore address before, and then increment by stride (num-cpus * acceptsize)
+    ; Restore address before, and then increment by stride (num-cpus * ChunkSize)
     ;
     xor     rdx, rdx
     mov     rcx, r11
     mov     eax, r8d
-    mov     ebx, [rsp + AcceptPageArgsAcceptSize]
+    mov     ebx, [rsp + AcceptPageArgsChunkSize]
     mul     ebx
     add     rcx, rax
     shl     rdx, 32

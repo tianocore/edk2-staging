@@ -20,8 +20,7 @@ UINT64  mNumberOfDuplicatedAcceptedPages;
 
 UINT64  mTdxAcceptPageLevelMap[2] = {
   SIZE_4KB,
-  SIZE_2MB,
-  // SIZE_1GB   // not supported yet
+  SIZE_2MB
 };
 
 UINTN
@@ -89,13 +88,13 @@ TdAcceptPages (
           //
           // GpaPageLevel is mismatch, fall back to a smaller GpaPageLevel if available
           //
-          DEBUG ((DEBUG_INFO, "Address %llx cannot be accepted in PageLevel of %d\n", Address, GpaPageLevel));
+          DEBUG ((DEBUG_VERBOSE, "Address %llx cannot be accepted in PageLevel of %d\n", Address, GpaPageLevel));
 
           if (GpaPageLevel == 0) {
             //
             // Cannot fall back to smaller page size
             //
-            ASSERT (FALSE);
+            DEBUG ((DEBUG_ERROR, "AcceptPage cannot fallback from PageLevel %d\n", GpaPageLevel));
             Status = EFI_INVALID_PARAMETER;
             break;
           } else {
@@ -115,7 +114,6 @@ TdAcceptPages (
           //
           DEBUG ((DEBUG_ERROR, "Address %llx (%d) failed to be accepted. Error = 0x%llx\n",
             Address, Index, TdxStatus));
-          ASSERT (FALSE);
           Status = EFI_INVALID_PARAMETER;
           break;
         }

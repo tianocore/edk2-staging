@@ -10,6 +10,13 @@
     DEFAULT REL
     SECTION .text
 
+extern ASM_PFX(IsTdxGuest)
+extern ASM_PFX(TdIoReadFifo8)
+extern ASM_PFX(TdIoReadFifo16)
+extern ASM_PFX(TdIoReadFifo32)
+extern ASM_PFX(TdIoWriteFifo8)
+extern ASM_PFX(TdIoWriteFifo16)
+extern ASM_PFX(TdIoWriteFifo32)
 ;------------------------------------------------------------------------------
 ; Check whether we need to unroll the String I/O in SEV guest
 ;
@@ -75,6 +82,17 @@ ASM_PFX(SevNoRepIo):
 ;------------------------------------------------------------------------------
 global ASM_PFX(IoReadFifo8)
 ASM_PFX(IoReadFifo8):
+    xor     rax, rax
+    call    IsTdxGuest
+    test    rax, rax
+    jz      @NonTd_IoReadFifo8
+
+    sub     rsp, 020h
+    call    TdIoReadFifo8
+    add     rsp, 020h
+    ret
+
+@NonTd_IoReadFifo8:
     xchg    rcx, rdx
     xchg    rdi, r8             ; rdi: buffer address; r8: save rdi
 
@@ -111,6 +129,17 @@ ASM_PFX(IoReadFifo8):
 ;------------------------------------------------------------------------------
 global ASM_PFX(IoReadFifo16)
 ASM_PFX(IoReadFifo16):
+    xor     rax, rax
+    call    IsTdxGuest
+    test    rax, rax
+    jz      @NonTd_IoReadFifo16
+
+    sub     rsp, 020h
+    call    TdIoReadFifo16
+    add     rsp, 020h
+    ret
+
+@NonTd_IoReadFifo16:
     xchg    rcx, rdx
     xchg    rdi, r8             ; rdi: buffer address; r8: save rdi
 
@@ -147,6 +176,17 @@ ASM_PFX(IoReadFifo16):
 ;------------------------------------------------------------------------------
 global ASM_PFX(IoReadFifo32)
 ASM_PFX(IoReadFifo32):
+    xor     rax, rax
+    call    IsTdxGuest
+    test    rax, rax
+    jz      @NonTd_IoReadFifo32
+
+    sub     rsp, 020h
+    call    TdIoReadFifo32
+    add     rsp, 020h
+    ret
+
+@NonTd_IoReadFifo32:
     xchg    rcx, rdx
     xchg    rdi, r8             ; rdi: buffer address; r8: save rdi
 
@@ -183,6 +223,17 @@ ASM_PFX(IoReadFifo32):
 ;------------------------------------------------------------------------------
 global ASM_PFX(IoWriteFifo8)
 ASM_PFX(IoWriteFifo8):
+    xor     rax, rax
+    call    IsTdxGuest
+    test    rax, rax
+    jz      @NonTd_IoWriteFifo8
+
+    sub     rsp, 020h
+    call    TdIoWriteFifo8
+    add     rsp, 020h
+    ret
+
+@NonTd_IoWriteFifo8:
     xchg    rcx, rdx
     xchg    rsi, r8             ; rsi: buffer address; r8: save rsi
 
@@ -219,6 +270,17 @@ ASM_PFX(IoWriteFifo8):
 ;------------------------------------------------------------------------------
 global ASM_PFX(IoWriteFifo16)
 ASM_PFX(IoWriteFifo16):
+    xor     rax, rax
+    call    IsTdxGuest
+    test    rax, rax
+    jz      @NonTd_IoWriteFifo16
+
+    sub     rsp, 020h
+    call    TdIoWriteFifo16
+    add     rsp, 020h
+    ret
+
+@NonTd_IoWriteFifo16:
     xchg    rcx, rdx
     xchg    rsi, r8             ; rsi: buffer address; r8: save rsi
 
@@ -255,6 +317,17 @@ ASM_PFX(IoWriteFifo16):
 ;------------------------------------------------------------------------------
 global ASM_PFX(IoWriteFifo32)
 ASM_PFX(IoWriteFifo32):
+    xor     rax, rax
+    call    IsTdxGuest
+    test    rax, rax
+    jz      @NonTd_IoWriteFifo32
+
+    sub     rsp, 020h
+    call    TdIoWriteFifo32
+    add     rsp, 020h
+    ret
+
+@NonTd_IoWriteFifo32:
     xchg    rcx, rdx
     xchg    rsi, r8             ; rsi: buffer address; r8: save rsi
 

@@ -53,6 +53,7 @@ BspAcceptMemoryResourceRange (
     //
     PhysicalAddress += Stride;
   }
+
   return Status;
 }
 
@@ -80,7 +81,7 @@ BspAcceptMemoryResourceRange (
   @param[in] PhysicalAddress   Start physical adress
   @param[in] PhysicalEnd       End physical address
 **/
-VOID
+EFI_STATUS
 EFIAPI
 MpAcceptMemoryResourceRange (
   IN EFI_PHYSICAL_ADDRESS        PhysicalAddress,
@@ -97,9 +98,11 @@ MpAcceptMemoryResourceRange (
   UINT64                      Length1;
   UINT64                      Length2;
   UINT64                      Length3;
+  UINT32                      Index;
+  UINT32                      CpusNum;
   volatile MP_WAKEUP_MAILBOX  *MailBox;
 
-  MailBox = (volatile MP_WAKEUP_MAILBOX *) GetTdxMailBox ();
+  Status = EFI_SUCCESS;
   AcceptChunkSize = FixedPcdGet64 (PcdTdxAcceptChunkSize);
   AcceptPageSize = FixedPcdGet64 (PcdTdxAcceptPageSize);
   TotalLength = PhysicalEnd - PhysicalAddress;
@@ -211,14 +214,27 @@ MpAcceptMemoryResourceRange (
 
   MpSerializeEnd();
 
-  DEBUG((DEBUG_INFO, "Tallies %x %x %x %x %x %x %x %x\n",
-    MailBox->Tallies[0],
-    MailBox->Tallies[1],
-    MailBox->Tallies[2],
-    MailBox->Tallies[3],
-    MailBox->Tallies[4],
-    MailBox->Tallies[5],
-    MailBox->Tallies[6],
-    MailBox->Tallies[7]));
+  CpusNum = GetCpusNum ();
+  MailBox = (volatile MP_WAKEUP_MAILBOX *) GetTdxMailBox ();
 
+  DEBUG ((DEBUG_INFO, "AcceptPage Tallies:\n"));
+  DEBUG ((DEBUG_INFO, "  "));
+  for (Index = 0; Index < CpusNum; Index++) {
+    DEBUG ((DEBUG_INFO, "%8d", MailBox->Tallies[Index]));
+    if (Index % 8 == 7) {
+      DEBUG ((DEBUG_INFO, "\n"));
+      DEBUG ((DEBUG_INFO, "  "));
+    }
+  }
+  DEBUG ((DEBUG_INFO, "\n"));
+
+  for (Index = 0; Index < CpusNum; Index++) {
+    if (MailBox->Errors[Index] > 0) {
+      Status = EFI_DEVICE_ERROR;
+      DEBUG ((DEBUG_ERROR, "Error(%d) of CPU-%d when accepting memory\n",
+        MailBox->Errors[Index], Index));
+    }
+  }
+
+  return Status;
 }

@@ -8,6 +8,12 @@
 #ifndef __IOLIB_TDX_H__
 #define __IOLIB_TDX_H__
 
+BOOLEAN
+EFIAPI
+IsTdxGuest (
+  VOID
+  );
+
 UINT8
 EFIAPI
 TdIoRead8 (
@@ -98,5 +104,156 @@ TdMmioWrite64 (
   IN      UINTN                     Address,
   IN      UINT64                    Value
   );
+
+/**
+  Reads an 8-bit I/O port fifo into a block of memory in Tdx.
+
+  Reads the 8-bit I/O fifo port specified by Port.
+  The port is read Count times, and the read data is
+  stored in the provided Buffer.
+
+  This function must guarantee that all I/O read and write operations are
+  serialized.
+
+  If 8-bit I/O port operations are not supported, then ASSERT().
+
+  @param  Port    The I/O port to read.
+  @param  Count   The number of times to read I/O port.
+  @param  Buffer  The buffer to store the read data into.
+
+**/
+VOID
+EFIAPI
+TdIoReadFifo8 (
+  IN      UINTN                     Port,
+  IN      UINTN                     Count,
+  OUT     VOID                      *Buffer
+  );
+
+/**
+  Writes a block of memory into an 8-bit I/O port fifo in Tdx.
+
+  Writes the 8-bit I/O fifo port specified by Port.
+  The port is written Count times, and the write data is
+  retrieved from the provided Buffer.
+
+  This function must guarantee that all I/O write and write operations are
+  serialized.
+
+  If 8-bit I/O port operations are not supported, then ASSERT().
+
+  @param  Port    The I/O port to write.
+  @param  Count   The number of times to write I/O port.
+  @param  Buffer  The buffer to retrieve the write data from.
+
+**/
+VOID
+EFIAPI
+TdIoWriteFifo8 (
+  IN      UINTN                     Port,
+  IN      UINTN                     Count,
+  IN      VOID                      *Buffer
+  );
+
+/**
+  Reads a 16-bit I/O port fifo into a block of memory in Tdx.
+
+  Reads the 16-bit I/O fifo port specified by Port.
+  The port is read Count times, and the read data is
+  stored in the provided Buffer.
+
+  This function must guarantee that all I/O read and write operations are
+  serialized.
+
+  If 16-bit I/O port operations are not supported, then ASSERT().
+
+  @param  Port    The I/O port to read.
+  @param  Count   The number of times to read I/O port.
+  @param  Buffer  The buffer to store the read data into.
+
+**/
+VOID
+EFIAPI
+TdIoReadFifo16 (
+  IN      UINTN                     Port,
+  IN      UINTN                     Count,
+  OUT     VOID                      *Buffer
+  );
+
+/**
+  Writes a block of memory into a 16-bit I/O port fifo in Tdx.
+
+  Writes the 16-bit I/O fifo port specified by Port.
+  The port is written Count times, and the write data is
+  retrieved from the provided Buffer.
+
+  This function must guarantee that all I/O write and write operations are
+  serialized.
+
+  If 16-bit I/O port operations are not supported, then ASSERT().
+
+  @param  Port    The I/O port to write.
+  @param  Count   The number of times to write I/O port.
+  @param  Buffer  The buffer to retrieve the write data from.
+
+**/
+VOID
+EFIAPI
+TdIoWriteFifo16 (
+  IN      UINTN                     Port,
+  IN      UINTN                     Count,
+  IN      VOID                      *Buffer
+  );
+
+/**
+  Reads a 32-bit I/O port fifo into a block of memory in Tdx.
+
+  Reads the 32-bit I/O fifo port specified by Port.
+  The port is read Count times, and the read data is
+  stored in the provided Buffer.
+
+  This function must guarantee that all I/O read and write operations are
+  serialized.
+
+  If 32-bit I/O port operations are not supported, then ASSERT().
+
+  @param  Port    The I/O port to read.
+  @param  Count   The number of times to read I/O port.
+  @param  Buffer  The buffer to store the read data into.
+
+**/
+VOID
+EFIAPI
+TdIoReadFifo32 (
+  IN      UINTN                     Port,
+  IN      UINTN                     Count,
+  OUT     VOID                      *Buffer
+  );
+
+/**
+  Writes a block of memory into a 32-bit I/O port fifo in Tdx.
+
+  Writes the 32-bit I/O fifo port specified by Port.
+  The port is written Count times, and the write data is
+  retrieved from the provided Buffer.
+
+  This function must guarantee that all I/O write and write operations are
+  serialized.
+
+  If 32-bit I/O port operations are not supported, then ASSERT().
+
+  @param  Port    The I/O port to write.
+  @param  Count   The number of times to write I/O port.
+  @param  Buffer  The buffer to retrieve the write data from.
+
+**/
+VOID
+EFIAPI
+TdIoWriteFifo32 (
+  IN      UINTN                     Port,
+  IN      UINTN                     Count,
+  IN      VOID                      *Buffer
+  );
+
 
 #endif

@@ -955,7 +955,7 @@ SecCoreStartupWithStack (
   UINT32                      Index;
   volatile UINT8              *Table;
 
-#ifdef TDX_VIRTUAL_FIRMWARE  
+#if defined (MDE_CPU_X64)
   EFI_STATUS                  Status;
   VOID                        *TdHob;
   TD_RETURN_DATA              TdReturnData;

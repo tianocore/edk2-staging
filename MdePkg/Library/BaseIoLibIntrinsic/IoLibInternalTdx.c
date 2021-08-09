@@ -466,4 +466,106 @@ TdMmioWrite64 (
   return Value;
 }
 
+VOID
+EFIAPI
+TdIoReadFifo8 (
+  IN      UINTN                     Port,
+  IN      UINTN                     Count,
+  OUT     VOID                      *Buffer
+  )
+{
+  UINT8   *Buf8;
+  UINTN   Index;
+
+  Buf8 = (UINT8*) Buffer;
+  for (Index = 0; Index < Count; Index++) {
+    Buf8[Index] = TdIoRead8 (Port);
+  }
+}
+
+VOID
+EFIAPI
+TdIoWriteFifo8 (
+  IN      UINTN                     Port,
+  IN      UINTN                     Count,
+  IN      VOID                      *Buffer
+  )
+{
+  UINT8   *Buf8;
+  UINTN   Index;
+
+  Buf8 = (UINT8 *) Buffer;
+  for (Index = 0; Index < Count; Index++) {
+    TdIoWrite8 (Port, Buf8[Index]);
+  }
+}
+
+VOID
+EFIAPI
+TdIoReadFifo16 (
+  IN      UINTN                     Port,
+  IN      UINTN                     Count,
+  OUT     VOID                      *Buffer
+  )
+{
+  UINT16      *Buf16;
+  UINTN       Index;
+
+  Buf16 = (UINT16 *) Buffer;
+  for (Index = 0; Index < Count; Index++) {
+    Buf16[Index] = TdIoRead16 (Port);
+  }
+}
+
+VOID
+EFIAPI
+TdIoWriteFifo16 (
+  IN      UINTN                     Port,
+  IN      UINTN                     Count,
+  IN      VOID                      *Buffer
+  )
+{
+  UINT16   *Buf16;
+  UINTN    Index;
+
+  Buf16 = (UINT16 *) Buffer;
+  for (Index = 0; Index < Count; Index++) {
+    TdIoWrite16 (Port, Buf16[Index]);
+  }
+}
+
+VOID
+EFIAPI
+TdIoReadFifo32 (
+  IN      UINTN                     Port,
+  IN      UINTN                     Count,
+  OUT     VOID                      *Buffer
+  )
+{
+  UINT32      *Buf32;
+  UINTN       Index;
+
+  Buf32 = (UINT32 *) Buffer;
+  for (Index = 0; Index < Count; Index++) {
+    Buf32[Index] = TdIoRead32 (Port);
+  }
+}
+
+VOID
+EFIAPI
+TdIoWriteFifo32 (
+  IN      UINTN                     Port,
+  IN      UINTN                     Count,
+  IN      VOID                      *Buffer
+  )
+{
+  UINT32   *Buf32;
+  UINTN    Index;
+
+  Buf32 = (UINT32 *) Buffer;
+  for (Index = 0; Index < Count; Index++) {
+    TdIoWrite32 (Port, Buf32[Index]);
+  }
+}
+
 

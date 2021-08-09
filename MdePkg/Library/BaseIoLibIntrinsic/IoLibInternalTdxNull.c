@@ -7,7 +7,7 @@
 
 #include <Library/BaseLib.h>
 #include "BaseIoLibIntrinsicInternal.h"
-
+#include "IoLibTdx.h"
 
 BOOLEAN
 EFIAPI
@@ -310,3 +310,71 @@ TdMmioWrite64 (
   ASSERT (FALSE);
   return 0;
 }
+
+VOID
+EFIAPI
+TdIoReadFifo8 (
+  IN      UINTN                     Port,
+  IN      UINTN                     Count,
+  OUT     VOID                      *Buffer
+  )
+{
+  ASSERT (FALSE);
+}
+
+VOID
+EFIAPI
+TdIoWriteFifo8 (
+  IN      UINTN                     Port,
+  IN      UINTN                     Count,
+  IN      VOID                      *Buffer
+  )
+{
+  ASSERT (FALSE);
+}
+
+VOID
+EFIAPI
+TdIoReadFifo16 (
+  IN      UINTN                     Port,
+  IN      UINTN                     Count,
+  OUT     VOID                      *Buffer
+  )
+{
+  ASSERT (FALSE);
+}
+
+VOID
+EFIAPI
+TdIoWriteFifo16 (
+  IN      UINTN                     Port,
+  IN      UINTN                     Count,
+  IN      VOID                      *Buffer
+  )
+{
+  ASSERT (FALSE);
+}
+
+VOID
+EFIAPI
+TdIoReadFifo32 (
+  IN      UINTN                     Port,
+  IN      UINTN                     Count,
+  OUT     VOID                      *Buffer
+  )
+{
+  ASSERT (FALSE);
+}
+
+VOID
+EFIAPI
+TdIoWriteFifo32 (
+  IN      UINTN                     Port,
+  IN      UINTN                     Count,
+  IN      VOID                      *Buffer
+  )
+{
+  ASSERT (FALSE);
+}
+
+

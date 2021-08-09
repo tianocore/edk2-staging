@@ -48,7 +48,8 @@ typedef enum {
     UINT8                   Pad2[0xf8];
     UINT64                  NumCpusExiting;
     UINT32                  Tallies[256];
-    UINT8                   Pad3[0x1f8];
+    UINT8                   Errors[256];
+    UINT8                   Pad3[0xf8];
   } MP_WAKEUP_MAILBOX;
 
 

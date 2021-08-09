@@ -136,7 +136,7 @@ MeasureQemuFwCfgAcpi(
 
   Tcg2Event->Size = EventSize + sizeof (EFI_TCG2_EVENT) - sizeof(Tcg2Event->Event);
   Tcg2Event->Header.EventType = EV_PLATFORM_CONFIG_FLAGS;
-  Tcg2Event->Header.PCRIndex = 1;
+  Tcg2Event->Header.PCRIndex = 4;
   Tcg2Event->Header.HeaderSize = sizeof (EFI_TCG2_EVENT_HEADER);
   Tcg2Event->Header.HeaderVersion = EFI_TCG2_EVENT_HEADER_VERSION;
   CopyMem (&Tcg2Event->Event[0], EventData, EventSize);

@@ -130,8 +130,10 @@ FindPcdPeim (
   EFI_STATUS            Status;
   EFI_PEI_FV_HANDLE     VolumeHandle;
 
-  ASSERT (FileHandle != NULL);
-  ASSERT (FvInstance != -1);
+  if (FileHandle == NULL || FvInstance == -1) {
+    ASSERT (FALSE);
+    return EFI_INVALID_PARAMETER;
+  }
   *FileHandle = NULL;
 
   //
@@ -168,10 +170,14 @@ InitPeimPcd (
   // Find the PcdPeim and initialize the Pcd Database
   //
   Status = FindPcdPeim (FvInstance, &FileHandle);
-  ASSERT_EFI_ERROR (Status);
+  
+  if (EFI_ERROR (Status)) {
+    ASSERT (FALSE);
+    return Status;
+  }
 
   Status = FfsFindSectionData (EFI_SECTION_RAW, FileHandle, (VOID**)(UINTN)&PeiPcdDbBinary);
-  if (EFI_ERROR  (Status)) {
+  if (EFI_ERROR (Status)) {
     return Status;
   }
   Database = BuildGuidHob (&gPcdDataBaseHobGuid, PeiPcdDbBinary->Length + PeiPcdDbBinary->UninitDataBaseSize);
@@ -203,7 +209,11 @@ FindDxeCore (
   EFI_STATUS            Status;
   EFI_PEI_FV_HANDLE     VolumeHandle;
 
-  ASSERT (FileHandle != NULL);
+  if (FileHandle == NULL) {
+    ASSERT (FALSE);
+    return EFI_INVALID_PARAMETER;
+  }
+
   *FileHandle = NULL;
 
   if (FvInstance != -1) {
@@ -269,7 +279,11 @@ DxeLoadCore (
   // Look in all the FVs present and find the DXE Core FileHandle
   //
   Status = FindDxeCore (FvInstance, &FileHandle);
-  ASSERT_EFI_ERROR (Status);
+
+  if (EFI_ERROR (Status)) {
+    ASSERT (FALSE);
+    return Status;
+  }
 
   //
   // Load the DXE Core from a Firmware Volume.

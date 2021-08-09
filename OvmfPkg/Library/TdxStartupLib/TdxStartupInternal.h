@@ -37,7 +37,7 @@ InitPcdPeim (
   IN INTN FvInstance
   );
 
-VOID
+EFI_STATUS
 EFIAPI
 MpAcceptMemoryResourceRange (
   IN EFI_PHYSICAL_ADDRESS        PhysicalAddress,
@@ -60,7 +60,7 @@ ValidateHobList (
   );
 
 
-VOID
+EFI_STATUS
 EFIAPI
 ProcessHobList (
   IN CONST VOID             *HobStart

@@ -92,7 +92,7 @@ TdxStartup(
   BootFv = NULL;
   SecCoreData = (EFI_SEC_PEI_HAND_OFF *) Context;
 
-  Status = TdCall (TDCALL_TDINFO, 0,0,0, &TdReturnData);
+  Status = TdCall (TDCALL_TDINFO, 0, 0, 0, &TdReturnData);
   ASSERT (Status == EFI_SUCCESS);
 
   DEBUG ((EFI_D_INFO,
@@ -115,7 +115,11 @@ TdxStartup(
   //
   // Process Hoblist for the TD
   //
-  ProcessHobList (VmmHobList);
+  Status = ProcessHobList (VmmHobList);
+  if (EFI_ERROR (Status)) {
+    ASSERT (FALSE);
+    CpuDeadLoop();
+  }
 
   //
   // ProcessLibaryConstructorList
@@ -141,6 +145,11 @@ TdxStartup(
   RelocationPages  = EFI_SIZE_TO_PAGES ((UINT32)RelocationMap.RelocateApLoopFuncSize) + 1;
 
   Address = AllocatePagesWithMemoryType (EfiACPIMemoryNVS, RelocationPages);
+  if (Address == NULL) {
+    ASSERT (FALSE);
+    return;
+  }
+
   ApLoopFunc = (VOID *) ((UINTN) Address + EFI_PAGE_SIZE);
 
   CopyMem (

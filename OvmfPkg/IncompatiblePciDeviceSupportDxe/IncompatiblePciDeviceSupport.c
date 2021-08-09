@@ -326,6 +326,8 @@ DriverInitialize (
   EFI_EVENT  Event;
   VOID       *Registration;
 
+  Event = NULL;
+
   if (TdxIsEnabled ()) {
     goto InstallProtocol;
   }
@@ -405,9 +407,10 @@ InstallProtocol:
 CloseEvent:
   if (!mLegacyBiosInstalled) {
     EFI_STATUS CloseStatus;
-
-    CloseStatus = gBS->CloseEvent (Event);
-    ASSERT_EFI_ERROR (CloseStatus);
+    if (Event != NULL) {
+      CloseStatus = gBS->CloseEvent (Event);
+      ASSERT_EFI_ERROR (CloseStatus);
+    }
   }
 
   return Status;

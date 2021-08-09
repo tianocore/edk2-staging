@@ -120,6 +120,8 @@ IoMmuMap (
   COMMON_BUFFER_HEADER                              *CommonBufferHeader;
   VOID                                              *DecryptionSource;
 
+  Status = EFI_SUCCESS;
+
   DEBUG ((
     DEBUG_VERBOSE,
     "%a: Operation=%a Host=0x%p Bytes=0x%Lx\n",
@@ -350,6 +352,8 @@ IoMmuUnmapWorker (
   EFI_STATUS               Status;
   COMMON_BUFFER_HEADER     *CommonBufferHeader;
   VOID                     *EncryptionTarget;
+
+  Status = EFI_SUCCESS;
 
   DEBUG ((
     DEBUG_VERBOSE,

@@ -150,6 +150,7 @@ Tcg2MeasureGptTable (
   if (EFI_ERROR (Status)) {
     return EFI_UNSUPPORTED;
   }
+
   //
   // Read the EFI Partition Table Header
   //
@@ -157,6 +158,15 @@ Tcg2MeasureGptTable (
   if (PrimaryHeader == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
+
+  //
+  // PrimaryHeader->SizeOfPartitionEntry should not be zero
+  //
+  if (PrimaryHeader->SizeOfPartitionEntry == 0) {
+    DEBUG ((EFI_D_ERROR, "SizeOfPartitionEntry should not be zero!\n"));
+    return EFI_BAD_BUFFER_SIZE;
+  }
+
   Status = DiskIo->ReadDisk (
                      DiskIo,
                      BlockIo->Media->MediaId,
