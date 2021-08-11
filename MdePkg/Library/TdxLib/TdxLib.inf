@@ -39,6 +39,6 @@
   BaseLib
   BaseMemoryLib
   DebugLib
-  MemoryAllocationLib
+
 [Pcd]
   gUefiOvmfPkgTokenSpaceGuid.PcdUseTdxEmulation

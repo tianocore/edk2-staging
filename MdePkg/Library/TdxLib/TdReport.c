@@ -2,11 +2,49 @@
 #include <Library/DebugLib.h>
 #include <Library/TdxLib.h>
 #include <Library/BaseMemoryLib.h>
-#include <Library/MemoryAllocationLib.h>
 #include <IndustryStandard/Tdx.h>
 
-#define REPORT_STRUCT_SIZE    1024
-#define ADDITIONAL_DATA_SIZE  64
+#define ADDITIONAL_DATA_SIZE              64
+#define REPORT_STRUCT_SIZE                1024
+#define ADDRESS_MASK_1024                 0x3ff
+#define REPORT_STRUCT_BUF_LEN             (REPORT_STRUCT_SIZE * 2 + ADDITIONAL_DATA_SIZE)
+
+#pragma pack(16)
+typedef struct {
+  UINT8   Buffer[REPORT_STRUCT_BUF_LEN];
+} TDX_TDREPORT_BUFFER;
+#pragma pack()
+
+UINT8                         *mTdReportBufferAddress = NULL;
+TDX_TDREPORT_BUFFER           mTdReportBuffer;
+
+UINT8 *
+EFIAPI
+GetTdReportDataBuffer (
+  VOID
+  )
+{
+  UINT8     *BufferAddress;
+  UINT64    Gap;
+
+  if (mTdReportBufferAddress != NULL) {
+    ASSERT (((UINT64)(UINTN) mTdReportBufferAddress & ADDRESS_MASK_1024) == 0);
+    return mTdReportBufferAddress;
+  }
+
+  BufferAddress = mTdReportBuffer.Buffer;
+
+  Gap = REPORT_STRUCT_SIZE - ((UINT64)(UINTN)BufferAddress & ADDRESS_MASK_1024);
+  mTdReportBufferAddress = (UINT8*)((UINT64)(UINTN) BufferAddress + Gap);
+
+  DEBUG ((DEBUG_VERBOSE, "BufferAddress: 0x%p, Gap: 0x%x\n", BufferAddress, Gap));
+  DEBUG ((DEBUG_VERBOSE, "mTdReportBufferAddress: 0x%p\n", mTdReportBufferAddress));
+
+  ASSERT (((UINT64)(UINTN) mTdReportBufferAddress & ADDRESS_MASK_1024) == 0);
+  ASSERT (mTdReportBufferAddress + REPORT_STRUCT_SIZE <= BufferAddress + REPORT_STRUCT_BUF_LEN);
+
+  return mTdReportBufferAddress;
+}
 
 EFI_STATUS
 EFIAPI
@@ -32,24 +70,20 @@ DoTdReport(
     return EFI_INVALID_PARAMETER;
   }
 
-  Data = AllocatePages(EFI_SIZE_TO_PAGES(REPORT_STRUCT_SIZE + ADDITIONAL_DATA_SIZE));
+  Data = (UINT64*)(UINTN)GetTdReportDataBuffer ();
   if(Data == NULL){
     return EFI_OUT_OF_RESOURCES;
   }
+  ZeroMem (Data, REPORT_STRUCT_SIZE + ADDITIONAL_DATA_SIZE);
 
   Report_Struct = Data;
   Report_Data = Data + REPORT_STRUCT_SIZE;
   if(AdditionalData != NULL){
     CopyMem(Report_Data, AdditionalData, ADDITIONAL_DATA_SIZE);
-  }else{
-    ZeroMem(Report_Data, ADDITIONAL_DATA_SIZE);
   }
 
-  // call TdReport
-  //TdCallStatus = TdReport((UINT64)Report_Struct, (UINT64)Report_Data);
   TdCallStatus = TdCall(TDCALL_TDREPORT, (UINT64)Report_Struct, (UINT64)Report_Data, 0, 0);
-  //ASSERT(TdCallStatus ==0);
-  DEBUG((DEBUG_ERROR,"TDReportStatus = %llx\n",TdCallStatus));
+
   if(TdCallStatus == TDX_EXIT_REASON_SUCCESS){
     Status = EFI_SUCCESS;
   }else if(TdCallStatus == TDX_EXIT_REASON_OPERAND_INVALID){
@@ -63,8 +97,6 @@ DoTdReport(
   }else{
     CopyMem(Report, Data, REPORT_STRUCT_SIZE);
   }
-
-  FreePages(Data, EFI_SIZE_TO_PAGES(REPORT_STRUCT_SIZE + ADDITIONAL_DATA_SIZE));
 
   return Status;
 }
