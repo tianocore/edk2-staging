@@ -86,7 +86,7 @@ MmioRead8 (
 {
   UINT8                             Value;
 
-  if (IsTdxGuest ()) {
+  if (TdxIsEnabled ()) {
     Value = TdMmioRead8 (Address);
     return Value;
   }
@@ -122,7 +122,7 @@ MmioWrite8 (
   IN      UINT8                     Value
   )
 {
-  if (IsTdxGuest ()) {
+  if (TdxIsEnabled ()) {
     TdMmioWrite8 (Address, Value);
     return Value;
   }
@@ -161,7 +161,7 @@ MmioRead16 (
 
   ASSERT ((Address & 1) == 0);
 
-  if (IsTdxGuest ()) {
+  if (TdxIsEnabled ()) {
     Value = TdMmioRead16 (Address);
     return Value;
   }
@@ -200,7 +200,7 @@ MmioWrite16 (
 {
   ASSERT ((Address & 1) == 0);
 
-  if (IsTdxGuest ()) {
+  if (TdxIsEnabled ()) {
     TdMmioWrite16 (Address, Value);
     return Value;
   }
@@ -239,7 +239,7 @@ MmioRead32 (
 
   ASSERT ((Address & 3) == 0);
 
-  if (IsTdxGuest ()) {
+  if (TdxIsEnabled ()) {
     Value = TdMmioRead32 (Address);
     return Value;
   }
@@ -278,7 +278,7 @@ MmioWrite32 (
 {
   ASSERT ((Address & 3) == 0);
 
-  if (IsTdxGuest ()) {
+  if (TdxIsEnabled ()) {
     TdMmioWrite32 (Address, Value);
     return Value;
   }
@@ -317,7 +317,7 @@ MmioRead64 (
 
   ASSERT ((Address & 7) == 0);
 
-  if (IsTdxGuest ()) {
+  if (TdxIsEnabled ()) {
     Value = TdMmioRead64 (Address);
     return Value;
   }
@@ -354,7 +354,7 @@ MmioWrite64 (
 {
   ASSERT ((Address & 7) == 0);
 
-  if (IsTdxGuest ()) {
+  if (TdxIsEnabled ()) {
     TdMmioWrite64 (Address, Value);
     return Value;
   }

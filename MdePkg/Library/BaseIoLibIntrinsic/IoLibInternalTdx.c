@@ -5,13 +5,10 @@
   SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
-
-
-#include "IoLibTdx.h"
 #include "BaseIoLibIntrinsicInternal.h"
 #include <Include/IndustryStandard/Tdx.h>
 #include <Library/TdxLib.h>
-#include <Library/TdxProbeLib.h>
+#include "IoLibTdx.h"
 
 // Size of TDVMCALL Access, including IO and MMIO
 #define TDVMCALL_ACCESS_SIZE_1      1
@@ -22,17 +19,6 @@
 // Direction of TDVMCALL Access, including IO and MMIO
 #define TDVMCALL_ACCESS_READ        0
 #define TDVMCALL_ACCESS_WRITE       1
-
-
-BOOLEAN
-EFIAPI
-IsTdxGuest (
-  VOID
-  )
-{
-  return TdxIsEnabled ();
-}
-
 
 /**
   Reads an 8-bit I/O port.
@@ -57,7 +43,7 @@ TdIoRead8 (
   if (Status != 0) {
     TdVmCall (TDVMCALL_HALT, 0, 0, 0, 0, 0);
   }
-  return (UINT8)Val;
+  return (UINT8) Val;
 }
 
 /**
@@ -85,7 +71,7 @@ TdIoRead16 (
   if (Status != 0) {
     TdVmCall (TDVMCALL_HALT, 0, 0, 0, 0, 0);
   }
-  return (UINT16)Val;
+  return (UINT16) Val;
 }
 
 /**
@@ -113,7 +99,7 @@ TdIoRead32 (
   if (Status != 0) {
     TdVmCall (TDVMCALL_HALT, 0, 0, 0, 0, 0);
   }
-  return (UINT32)Val;
+  return (UINT32) Val;
 }
 
 /**
@@ -142,7 +128,7 @@ TdIoWrite8 (
   if (Status != 0) {
     TdVmCall (TDVMCALL_HALT, 0, 0, 0, 0, 0);
   }
-  return Value;;
+  return Value;
 }
 
 /**
@@ -172,7 +158,7 @@ TdIoWrite16 (
   if (Status != 0) {
     TdVmCall (TDVMCALL_HALT, 0, 0, 0, 0, 0);
   }
-  return Value;;
+  return Value;
 }
 
 /**
@@ -202,7 +188,7 @@ TdIoWrite32 (
   if (Status != 0) {
     TdVmCall (TDVMCALL_HALT, 0, 0, 0, 0, 0);
   }
-  return Value;;
+  return Value;
 }
 
 /**
@@ -229,11 +215,11 @@ TdMmioRead8 (
   MemoryFence ();
   Status = TdVmCall (TDVMCALL_MMIO, TDVMCALL_ACCESS_SIZE_1, TDVMCALL_ACCESS_READ, Address, 0, &Value);
   if (Status != 0) {
-    Value = *(volatile UINT64*)Address;
+    Value = *(volatile UINT64*) Address;
   }
   MemoryFence ();
 
-  return (UINT8)Value;
+  return (UINT8) Value;
 }
 
 /**
@@ -251,23 +237,23 @@ UINT8
 EFIAPI
 TdMmioWrite8 (
   IN      UINTN                     Address,
-  IN      UINT8                     Val
+  IN      UINT8                     Value
   )
 {
-  UINT64                             Value;
+  UINT64                             Val;
   UINT64                             Status;
 
   Address |= TdSharedPageMask ();
 
   MemoryFence ();
-  Value = Val;
-  Status = TdVmCall (TDVMCALL_MMIO, TDVMCALL_ACCESS_SIZE_1, TDVMCALL_ACCESS_WRITE, Address, Value, 0);
+  Val = Value;
+  Status = TdVmCall (TDVMCALL_MMIO, TDVMCALL_ACCESS_SIZE_1, TDVMCALL_ACCESS_WRITE, Address, Val, 0);
   if (Status != 0) {
-    *(volatile UINT8*)Address = Val;
+    *(volatile UINT8*) Address = Value;
   }
   MemoryFence ();
 
-  return Val;
+  return Value;
 }
 
 /**
@@ -294,11 +280,11 @@ TdMmioRead16 (
   MemoryFence ();
   Status = TdVmCall (TDVMCALL_MMIO, TDVMCALL_ACCESS_SIZE_2, TDVMCALL_ACCESS_READ, Address, 0, &Value);
   if (Status != 0) {
-    Value = *(volatile UINT64*)Address;
+    Value = *(volatile UINT64*) Address;
   }
   MemoryFence ();
 
-  return (UINT16)Value;
+  return (UINT16) Value;
 }
 
 /**
@@ -316,10 +302,10 @@ UINT16
 EFIAPI
 TdMmioWrite16 (
   IN      UINTN                     Address,
-  IN      UINT16                    Val
+  IN      UINT16                    Value
   )
 {
-  UINT64                             Value;
+  UINT64                             Val;
   UINT64                             Status;
 
   ASSERT ((Address & 1) == 0);
@@ -327,14 +313,14 @@ TdMmioWrite16 (
   Address |= TdSharedPageMask ();
 
   MemoryFence ();
-  Value = Val;
-  Status = TdVmCall (TDVMCALL_MMIO, TDVMCALL_ACCESS_SIZE_2, TDVMCALL_ACCESS_WRITE, Address, Value, 0);
+  Val = Value;
+  Status = TdVmCall (TDVMCALL_MMIO, TDVMCALL_ACCESS_SIZE_2, TDVMCALL_ACCESS_WRITE, Address, Val, 0);
   if (Status != 0) {
-    *(volatile UINT16*)Address = Val;
+    *(volatile UINT16*) Address = Value;
   }
   MemoryFence ();
 
-  return Val;
+  return Value;
 }
 
 /**
@@ -383,10 +369,10 @@ UINT32
 EFIAPI
 TdMmioWrite32 (
   IN      UINTN                     Address,
-  IN      UINT32                    Val
+  IN      UINT32                    Value
   )
 {
-  UINT64                             Value;
+  UINT64                             Val;
   UINT64                             Status;
 
   ASSERT ((Address & 3) == 0);
@@ -394,14 +380,14 @@ TdMmioWrite32 (
   Address |= TdSharedPageMask ();
 
   MemoryFence ();
-  Value = Val;
-  Status = TdVmCall (TDVMCALL_MMIO, TDVMCALL_ACCESS_SIZE_4, TDVMCALL_ACCESS_WRITE, Address, Value, 0);
+  Val = Value;
+  Status = TdVmCall (TDVMCALL_MMIO, TDVMCALL_ACCESS_SIZE_4, TDVMCALL_ACCESS_WRITE, Address, Val, 0);
   if (Status != 0) {
-    *(volatile UINT32*)Address = Val;
+    *(volatile UINT32*)Address = Value;
   }
   MemoryFence ();
 
-  return Val;
+  return Value;
 }
 
 /**
@@ -451,14 +437,16 @@ TdMmioWrite64 (
   IN      UINT64                    Value
   )
 {
-  UINT64                             Status;
+  UINT64          Status;
+  UINT64          Val;
 
   ASSERT ((Address & 7) == 0);
 
   Address |= TdSharedPageMask ();
 
   MemoryFence ();
-  Status = TdVmCall (TDVMCALL_MMIO, TDVMCALL_ACCESS_SIZE_8, TDVMCALL_ACCESS_WRITE, Address, Value, 0);
+  Val = Value;
+  Status = TdVmCall (TDVMCALL_MMIO, TDVMCALL_ACCESS_SIZE_8, TDVMCALL_ACCESS_WRITE, Address, Val, 0);
   if (Status != 0) {
     *(volatile UINT64*)Address = Value;
   }
@@ -466,6 +454,25 @@ TdMmioWrite64 (
   return Value;
 }
 
+/**
+  Reads an 8-bit I/O port fifo into a block of memory.
+
+  Reads the 8-bit I/O fifo port specified by Port.
+  The port is read Count times, and the read data is
+  stored in the provided Buffer.
+
+  This function must guarantee that all I/O read and write operations are
+  serialized.
+
+  If 8-bit I/O port operations are not supported, then ASSERT().
+
+  In TDX a serial of TdIoRead8 is invoked to read the I/O port fifo.
+
+  @param  Port    The I/O port to read.
+  @param  Count   The number of times to read I/O port.
+  @param  Buffer  The buffer to store the read data into.
+
+**/
 VOID
 EFIAPI
 TdIoReadFifo8 (
@@ -477,12 +484,31 @@ TdIoReadFifo8 (
   UINT8   *Buf8;
   UINTN   Index;
 
-  Buf8 = (UINT8*) Buffer;
+  Buf8 = (UINT8 *) Buffer;
   for (Index = 0; Index < Count; Index++) {
     Buf8[Index] = TdIoRead8 (Port);
   }
 }
 
+/**
+  Writes a block of memory into an 8-bit I/O port fifo.
+
+  Writes the 8-bit I/O fifo port specified by Port.
+  The port is written Count times, and the write data is
+  retrieved from the provided Buffer.
+
+  This function must guarantee that all I/O write and write operations are
+  serialized.
+
+  If 8-bit I/O port operations are not supported, then ASSERT().
+
+  In TDX a serial of TdIoWrite8 is invoked to write data to the I/O port.
+
+  @param  Port    The I/O port to write.
+  @param  Count   The number of times to write I/O port.
+  @param  Buffer  The buffer to retrieve the write data from.
+
+**/
 VOID
 EFIAPI
 TdIoWriteFifo8 (
@@ -500,6 +526,25 @@ TdIoWriteFifo8 (
   }
 }
 
+/**
+  Reads a 16-bit I/O port fifo into a block of memory.
+
+  Reads the 16-bit I/O fifo port specified by Port.
+  The port is read Count times, and the read data is
+  stored in the provided Buffer.
+
+  This function must guarantee that all I/O read and write operations are
+  serialized.
+
+  If 16-bit I/O port operations are not supported, then ASSERT().
+
+  In TDX a serial of TdIoRead16 is invoked to read data from the I/O port.
+
+  @param  Port    The I/O port to read.
+  @param  Count   The number of times to read I/O port.
+  @param  Buffer  The buffer to store the read data into.
+
+**/
 VOID
 EFIAPI
 TdIoReadFifo16 (
@@ -517,6 +562,25 @@ TdIoReadFifo16 (
   }
 }
 
+/**
+  Writes a block of memory into a 16-bit I/O port fifo.
+
+  Writes the 16-bit I/O fifo port specified by Port.
+  The port is written Count times, and the write data is
+  retrieved from the provided Buffer.
+
+  This function must guarantee that all I/O write and write operations are
+  serialized.
+
+  If 16-bit I/O port operations are not supported, then ASSERT().
+
+  In TDX a serial of TdIoWrite16 is invoked to write data to the I/O port.
+
+  @param  Port    The I/O port to write.
+  @param  Count   The number of times to write I/O port.
+  @param  Buffer  The buffer to retrieve the write data from.
+
+**/
 VOID
 EFIAPI
 TdIoWriteFifo16 (
@@ -534,6 +598,25 @@ TdIoWriteFifo16 (
   }
 }
 
+/**
+  Reads a 32-bit I/O port fifo into a block of memory.
+
+  Reads the 32-bit I/O fifo port specified by Port.
+  The port is read Count times, and the read data is
+  stored in the provided Buffer.
+
+  This function must guarantee that all I/O read and write operations are
+  serialized.
+
+  If 32-bit I/O port operations are not supported, then ASSERT().
+
+  In TDX a serial of TdIoRead32 is invoked to read data from the I/O port.
+
+  @param  Port    The I/O port to read.
+  @param  Count   The number of times to read I/O port.
+  @param  Buffer  The buffer to store the read data into.
+
+**/
 VOID
 EFIAPI
 TdIoReadFifo32 (
@@ -551,6 +634,25 @@ TdIoReadFifo32 (
   }
 }
 
+/**
+  Writes a block of memory into a 32-bit I/O port fifo.
+
+  Writes the 32-bit I/O fifo port specified by Port.
+  The port is written Count times, and the write data is
+  retrieved from the provided Buffer.
+
+  This function must guarantee that all I/O write and write operations are
+  serialized.
+
+  If 32-bit I/O port operations are not supported, then ASSERT().
+
+  In TDX a serial of TdIoWrite32 is invoked to write data to the I/O port.
+
+  @param  Port    The I/O port to write.
+  @param  Count   The number of times to write I/O port.
+  @param  Buffer  The buffer to retrieve the write data from.
+
+**/
 VOID
 EFIAPI
 TdIoWriteFifo32 (
@@ -567,5 +669,4 @@ TdIoWriteFifo32 (
     TdIoWrite32 (Port, Buf32[Index]);
   }
 }
-
 
