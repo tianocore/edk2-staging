@@ -918,7 +918,7 @@ DumpTdxEventLog (
           }
         }
           TcgPcrEvent2 = (TCG_PCR_EVENT2 *)((UINTN)TcgPcrEvent2 + GetPcrEvent2Size (TcgPcrEvent2));
-      }       
+      }
       Print (L"Tcg2Event Calculated:\n");
       Print (L"    RegisterIndex  - %d\n", RegisterIndex);
       Print (L"    Digest    - ");
@@ -1102,7 +1102,7 @@ DumpAcpiTdxEventLog (
             }
           }
           TcgPcrEvent2 = (TCG_PCR_EVENT2 *)((UINTN)TcgPcrEvent2 + GetPcrEvent2Size (TcgPcrEvent2));
-        }  
+        }
         Print (L"Tcg2Event Calculated:\n");
         Print (L"    RegisterIndex  - %d\n", RegisterIndex);
         Print (L"    Digest    - ");
@@ -1404,7 +1404,7 @@ UefiMain (
     TdReportBuffer = AllocatePool(TdReportBufferSize);
     AdditionalData = AllocatePool(DataSize);
     DumpRtmr((UINT8 *)TdReportBuffer, TdReportBufferSize, AdditionalData, DataSize);
-    for (RegisterIndex = 0; RegisterIndex <= MAX_TDX_REG_INDEX; RegisterIndex++) 
+    for (RegisterIndex = 0; RegisterIndex <= MAX_TDX_REG_INDEX; RegisterIndex++)
     {
        if (TdReportBuffer != NULL && RegisterIndex ==0)
        {
