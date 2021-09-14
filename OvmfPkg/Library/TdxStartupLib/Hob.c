@@ -20,6 +20,10 @@
 #include <IndustryStandard/UefiTcgPlatform.h>
 #include "TdxStartupInternal.h"
 
+#define MEGABYTE_SHIFT     20
+
+UINT64  mTdxAcceptMemSize = 0;
+
 VOID
 EFIAPI
 DEBUG_HOBLIST (
@@ -282,19 +286,36 @@ ProcessHobList (
   EFI_STATUS                  Status;
   EFI_PEI_HOB_POINTERS        Hob;
   EFI_PHYSICAL_ADDRESS        PhysicalEnd;
-  EFI_PHYSICAL_ADDRESS        PhysicalStart;
-  UINT64                      Length;
-  EFI_HOB_RESOURCE_DESCRIPTOR *LowMemoryResource = NULL;
+  UINT64                      ResourceLength;
+  UINT64                      AccumulateAccepted;
+  EFI_PHYSICAL_ADDRESS        LowMemoryStart;
+  UINT64                      LowMemoryLength;
 
   Status = EFI_SUCCESS;
 
   ASSERT (VmmHobList != NULL);
+
+  AccumulateAccepted = 0;
   Hob.Raw = (UINT8 *) VmmHobList;
+  LowMemoryLength = 0;
+
+  mTdxAcceptMemSize = FixedPcdGet64(PcdTdxAcceptPartialMemorySize);
+
+  //
+  // If specified accept size is equal to or less than zero, accept all of the memory.
+  // Else transfer the size in megabyte to the number in byte.
+  //
+  if (mTdxAcceptMemSize <= 0) {
+    mTdxAcceptMemSize = ~(UINT64) 0;
+  } else {
+    mTdxAcceptMemSize <<= MEGABYTE_SHIFT;
+  }
+  DEBUG ((DEBUG_INFO, "mTdxAcceptMemSize: 0x%llx\n", mTdxAcceptMemSize));
 
   //
   // Parse the HOB list until end of list or matching type is found.
   //
-  while (!END_OF_HOB_LIST (Hob)) {
+  while (!END_OF_HOB_LIST (Hob) && AccumulateAccepted < mTdxAcceptMemSize) {
 
     if (Hob.Header->HobType == EFI_HOB_TYPE_RESOURCE_DESCRIPTOR) {
       DEBUG ((DEBUG_INFO, "\nResourceType: 0x%x\n", Hob.ResourceDescriptor->ResourceType));
@@ -315,19 +336,32 @@ ProcessHobList (
         DEBUG ((DEBUG_INFO, "Owner: %g\n\n", &Hob.ResourceDescriptor->Owner));
 
         PhysicalEnd = Hob.ResourceDescriptor->PhysicalStart + Hob.ResourceDescriptor->ResourceLength;
+        ResourceLength = Hob.ResourceDescriptor->ResourceLength;
 
+        if (AccumulateAccepted + ResourceLength > mTdxAcceptMemSize) {
+          //
+          // If the memory can't be accepted completely, accept the part of it to meet the
+          // TDX_PARTIAL_ACCEPTED_MEM_SIZE.
+          //
+          ResourceLength = mTdxAcceptMemSize - AccumulateAccepted;
+          PhysicalEnd = Hob.ResourceDescriptor->PhysicalStart + ResourceLength;
+        }
         if (PhysicalEnd <= BASE_4GB) {
-          if ((LowMemoryResource == NULL) || (Hob.ResourceDescriptor->ResourceLength > LowMemoryResource->ResourceLength)) {
-            LowMemoryResource = Hob.ResourceDescriptor;
+          if (ResourceLength > LowMemoryLength) {
+            LowMemoryStart = Hob.ResourceDescriptor->PhysicalStart;
+            LowMemoryLength = ResourceLength;
           }
         }
 
+        DEBUG ((DEBUG_INFO, "Accept Start and End: %x, %x\n", Hob.ResourceDescriptor->PhysicalStart, PhysicalEnd));
         Status = MpAcceptMemoryResourceRange (
             Hob.ResourceDescriptor->PhysicalStart,
             PhysicalEnd);
         if (EFI_ERROR (Status)) {
           break;
         }
+
+        AccumulateAccepted += PhysicalEnd - Hob.ResourceDescriptor->PhysicalStart;
       }
     }
     Hob.Raw = GET_NEXT_HOB (Hob);
@@ -335,7 +369,7 @@ ProcessHobList (
 
   ASSERT (!EFI_ERROR (Status));
 
-  if (LowMemoryResource == NULL) {
+  if (LowMemoryLength == 0) {
     ASSERT (FALSE);
     Status = EFI_NOT_FOUND;
   }
@@ -344,25 +378,23 @@ ProcessHobList (
     return Status;
   }
 
-  PhysicalStart = LowMemoryResource->PhysicalStart;
-  Length = LowMemoryResource->ResourceLength;
-
   //
   // HobLib doesn't like HobStart at address 0 so adjust is needed
   //
-  if (PhysicalStart == 0) {
-      PhysicalStart += EFI_PAGE_SIZE;
-      Length -= EFI_PAGE_SIZE;
+  if (LowMemoryStart == 0) {
+    LowMemoryStart += EFI_PAGE_SIZE;
+    LowMemoryLength -= EFI_PAGE_SIZE;
   }
 
+  DEBUG ((DEBUG_INFO, "LowMemory Start and End: %x, %x\n", LowMemoryStart, LowMemoryStart + LowMemoryLength));
   HobConstructor (
-    (VOID *) PhysicalStart,
-    Length,
-    (VOID *) PhysicalStart,
-    (VOID *) (PhysicalStart + Length)
+    (VOID *) LowMemoryStart,
+    LowMemoryLength,
+    (VOID *) LowMemoryStart,
+    (VOID *) (LowMemoryStart + LowMemoryLength)
     );
 
-  PrePeiSetHobList ((VOID *)(UINT64)PhysicalStart);
+  PrePeiSetHobList ((VOID *)(UINT64)LowMemoryStart);
 
   return Status;
 }
@@ -380,28 +412,79 @@ TransferHobList (
   )
 {
   EFI_PEI_HOB_POINTERS        Hob;
+  EFI_RESOURCE_TYPE           ResourceType;
   EFI_RESOURCE_ATTRIBUTE_TYPE ResourceAttribute;
-  EFI_PHYSICAL_ADDRESS        PhysicalEnd;
+  EFI_PHYSICAL_ADDRESS        PhysicalStart;
+  UINT64                      ResourceLength;
+  UINT64                      AccumulateAccepted;
+
+  Hob.Raw            = (UINT8 *) VmmHobList;
+  AccumulateAccepted = 0;
 
   Hob.Raw = (UINT8 *) VmmHobList;
   while (!END_OF_HOB_LIST (Hob)) {
     switch (Hob.Header->HobType) {
     case EFI_HOB_TYPE_RESOURCE_DESCRIPTOR:
       ResourceAttribute = Hob.ResourceDescriptor->ResourceAttribute;
-      PhysicalEnd = Hob.ResourceDescriptor->PhysicalStart + Hob.ResourceDescriptor->ResourceLength;
+      ResourceLength    = Hob.ResourceDescriptor->ResourceLength;
+      ResourceType      = Hob.ResourceDescriptor->ResourceType;
+      PhysicalStart     = Hob.ResourceDescriptor->PhysicalStart;
 
-      //
-      // We mark each resource that we issue AcceptPage to with EFI_RESOURCE_SYSTEM_MEMORY
-      //
-      if ((Hob.ResourceDescriptor->ResourceType == EFI_RESOURCE_SYSTEM_MEMORY) &&
-        (PhysicalEnd <= BASE_4GB)) {
-        ResourceAttribute |= EFI_RESOURCE_ATTRIBUTE_ENCRYPTED;
+      if (ResourceType == EFI_RESOURCE_SYSTEM_MEMORY) {
+        ResourceAttribute |= EFI_RESOURCE_ATTRIBUTE_PRESENT | EFI_RESOURCE_ATTRIBUTE_INITIALIZED;
+
+        //
+        // Set type of systme memory less than TDX_PARTIAL_ACCEPTED_MEM_SIZE to
+        // EFI_RESOURCE_SYSTEM_MEMORY and set other to EFI_RESOURCE_MEMORY_UNACCEPTED.
+        //
+        if (AccumulateAccepted >= mTdxAcceptMemSize) {
+          ResourceType = EFI_RESOURCE_MEMORY_UNACCEPTED;
+          ResourceAttribute &= ~(EFI_RESOURCE_ATTRIBUTE_TESTED | EFI_RESOURCE_ATTRIBUTE_ENCRYPTED);
+        } else {
+          //
+          // Judge if the whole memory is accepted.
+          //
+          if (AccumulateAccepted + ResourceLength <= mTdxAcceptMemSize) {
+            AccumulateAccepted += ResourceLength;
+            ResourceAttribute  |= EFI_RESOURCE_ATTRIBUTE_TESTED;
+            if (PhysicalStart + ResourceLength <= BASE_4GB) {
+              ResourceAttribute |= EFI_RESOURCE_ATTRIBUTE_ENCRYPTED;
+            }
+          } else {
+            //
+            // Set the resouce type, attribute and memory range of the the accepted part
+            // of the memory.
+            //
+            ResourceType = EFI_RESOURCE_SYSTEM_MEMORY;
+            ResourceLength = mTdxAcceptMemSize - AccumulateAccepted;
+
+            ResourceAttribute |= EFI_RESOURCE_ATTRIBUTE_TESTED;
+            if (PhysicalStart + ResourceLength <= BASE_4GB) {
+              ResourceAttribute |= EFI_RESOURCE_ATTRIBUTE_ENCRYPTED;
+            }
+            BuildResourceDescriptorHob (
+              ResourceType,
+              ResourceAttribute,
+              PhysicalStart,
+              ResourceLength);
+            AccumulateAccepted += ResourceLength;
+
+            //
+            // Transfer the other part to the unaccepted memory.
+            //
+            PhysicalStart = PhysicalStart + ResourceLength;
+            ResourceLength = Hob.ResourceDescriptor->ResourceLength - ResourceLength;
+            ResourceType = EFI_RESOURCE_MEMORY_UNACCEPTED;
+            ResourceAttribute &= ~(EFI_RESOURCE_ATTRIBUTE_TESTED | EFI_RESOURCE_ATTRIBUTE_ENCRYPTED);
+          }
+        }
       }
+
       BuildResourceDescriptorHob (
-        Hob.ResourceDescriptor->ResourceType,
+        ResourceType,
         ResourceAttribute,
-        Hob.ResourceDescriptor->PhysicalStart,
-        Hob.ResourceDescriptor->ResourceLength);
+        PhysicalStart,
+        ResourceLength);
       break;
     case EFI_HOB_TYPE_MEMORY_ALLOCATION:
       BuildMemoryAllocationHob (
