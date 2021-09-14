@@ -26,6 +26,7 @@ STATIC CONST CHAR16 NameEfiACPIMemoryNVS[]           = L"ACPIMemoryNVS";
 STATIC CONST CHAR16 NameEfiMemoryMappedIO[]          = L"MemoryMappedIO";
 STATIC CONST CHAR16 NameEfiMemoryMappedIOPortSpace[] = L"MemoryMappedIOPortSpace";
 STATIC CONST CHAR16 NameEfiPalCode[]                 = L"PalCode";
+STATIC CONST CHAR16 NameEfiUnacceptedMemory[]        = L"Unaccepted";
 
 //
 // Need short names for some memory types
@@ -297,6 +298,11 @@ ShellCommandRunMemMap (
               break;
             case EfiPalCode:
               ShellPrintHiiEx(-1, -1, NULL, (EFI_STRING_ID)(!Sfo?STRING_TOKEN (STR_MEMMAP_LIST_ITEM):STRING_TOKEN (STR_MEMMAP_LIST_ITEM_SFO)), gShellDebug1HiiHandle, NameEfiPalCode, Walker->PhysicalStart, Walker->PhysicalStart+MultU64x64(SIZE_4KB,Walker->NumberOfPages)-1, Walker->NumberOfPages, Walker->Attribute);
+              TotalPages += Walker->NumberOfPages;
+              PalCodePages += Walker->NumberOfPages;
+              break;
+            case EfiUnacceptedMemory:
+              ShellPrintHiiEx(-1, -1, NULL, (EFI_STRING_ID)(!Sfo?STRING_TOKEN (STR_MEMMAP_LIST_ITEM):STRING_TOKEN (STR_MEMMAP_LIST_ITEM_SFO)), gShellDebug1HiiHandle, NameEfiUnacceptedMemory, Walker->PhysicalStart, Walker->PhysicalStart+MultU64x64(SIZE_4KB,Walker->NumberOfPages)-1, Walker->NumberOfPages, Walker->Attribute);
               TotalPages += Walker->NumberOfPages;
               PalCodePages += Walker->NumberOfPages;
               break;
