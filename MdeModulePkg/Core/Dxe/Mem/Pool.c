@@ -276,6 +276,16 @@ CoreAllocatePool (
   EFI_STATUS  Status;
 
   Status = CoreInternalAllocatePool (PoolType, Size, Buffer);
+
+  if (Status == EFI_OUT_OF_RESOURCES) {
+    Status = AcceptMemoryResource (AllocateAnyPages, Size, NULL);
+    if (!EFI_ERROR (Status)) {
+      Status = CoreInternalAllocatePool (PoolType, Size, Buffer);
+    } else {
+      Status = EFI_OUT_OF_RESOURCES;
+    }
+  }
+
   if (!EFI_ERROR (Status)) {
     CoreUpdateProfile (
       (EFI_PHYSICAL_ADDRESS) (UINTN) RETURN_ADDRESS (0),
