@@ -16,6 +16,7 @@
 #include <Library/PrePiLibTdx.h>
 #include <Library/TdvfPlatformLib.h>
 #include <Library/TpmMeasurementLib.h>
+#include <Library/QemuFwCfgLib.h>
 #include <IndustryStandard/Tdx.h>
 #include <IndustryStandard/UefiTcgPlatform.h>
 #include "TdxStartupInternal.h"
@@ -23,6 +24,36 @@
 #define MEGABYTE_SHIFT     20
 
 UINT64  mTdxAcceptMemSize = 0;
+
+UINTN
+GetAcceptSize ()
+{
+  UINTN AcceptSize;
+  AcceptSize = FixedPcdGet64 (PcdTdxAcceptPartialMemorySize);
+
+  //
+  // If specified accept size is equal to or less than zero, accept all of the memory.
+  // Else transfer the size in megabyte to the number in byte.
+  //
+  if (AcceptSize <= 0) {
+    AcceptSize = ~(UINT64) 0;
+    return AcceptSize;
+  } else {
+    AcceptSize <<= MEGABYTE_SHIFT;
+  }
+
+  QemuFwCfgSelectItem (QemuFwCfgItemKernelSize);
+  AcceptSize += (UINTN) QemuFwCfgRead32 ();
+  QemuFwCfgSelectItem (QemuFwCfgItemKernelSetupSize);
+  AcceptSize += (UINTN) QemuFwCfgRead32 ();
+  QemuFwCfgSelectItem (QemuFwCfgItemCommandLineSize);
+  AcceptSize += (UINTN) QemuFwCfgRead32 ();
+  QemuFwCfgSelectItem (QemuFwCfgItemInitrdSize);  
+  AcceptSize += (UINTN) QemuFwCfgRead32 ();
+
+  AcceptSize = (AcceptSize + EFI_PAGE_MASK) & (~EFI_PAGE_MASK);
+  return AcceptSize;
+}
 
 VOID
 EFIAPI
@@ -299,17 +330,7 @@ ProcessHobList (
   Hob.Raw = (UINT8 *) VmmHobList;
   LowMemoryLength = 0;
 
-  mTdxAcceptMemSize = FixedPcdGet64(PcdTdxAcceptPartialMemorySize);
-
-  //
-  // If specified accept size is equal to or less than zero, accept all of the memory.
-  // Else transfer the size in megabyte to the number in byte.
-  //
-  if (mTdxAcceptMemSize <= 0) {
-    mTdxAcceptMemSize = ~(UINT64) 0;
-  } else {
-    mTdxAcceptMemSize <<= MEGABYTE_SHIFT;
-  }
+  mTdxAcceptMemSize = GetAcceptSize ();
   DEBUG ((DEBUG_INFO, "mTdxAcceptMemSize: 0x%llx\n", mTdxAcceptMemSize));
 
   //

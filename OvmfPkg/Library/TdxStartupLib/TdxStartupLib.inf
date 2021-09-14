@@ -63,6 +63,7 @@
   HashLib
   TpmMeasurementLib
   TdxMpLib
+  QemuFwCfgLib
 
 [Guids]
   gEfiHobMemoryAllocModuleGuid
