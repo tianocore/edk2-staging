@@ -44,9 +44,10 @@
   gUefiOvmfPkgTdxPlatformGuid                      ## CONSUMES
 
 [Protocols]
-  gQemuAcpiTableNotifyProtocolGuid				   ## CONSUMES
-  gEfiAcpiSdtProtocolGuid						   ## CONSUMES
-  gEfiAcpiTableProtocolGuid						   ## CONSUMES
+  gQemuAcpiTableNotifyProtocolGuid				         ## CONSUMES
+  gEfiAcpiSdtProtocolGuid						               ## CONSUMES
+  gEfiAcpiTableProtocolGuid						             ## CONSUMES
+  gEfiMemoryAcceptProtocolGuid                     ## PRODUCES
 
 [Pcd]
   gUefiOvmfPkgTokenSpaceGuid.PcdPciIoBase
