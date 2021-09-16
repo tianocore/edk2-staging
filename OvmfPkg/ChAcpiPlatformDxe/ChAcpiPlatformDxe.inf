@@ -1,0 +1,42 @@
+#/** @file
+#
+#  OVMF ACPI Platform Driver for Cloud-Hypervisor guests
+#
+#  Copyright (c) 2021, Intel Corporation. All rights reserved.<BR>
+#
+#  SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+#**/
+
+[Defines]
+  INF_VERSION                    = 1.25
+  BASE_NAME                      = ChAcpiPlatformDxe
+  FILE_GUID                      = 6542032E-400D-4D60-A6CC-4402BCCD8A40
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = AcpiPlatformEntryPoint
+
+[Sources]
+  ChAcpiTable.c
+
+[Packages]
+  MdeModulePkg/MdeModulePkg.dec
+  MdePkg/MdePkg.dec
+  OvmfPkg/OvmfPkg.dec
+
+[LibraryClasses]
+  BaseLib
+  BaseMemoryLib
+  DebugLib
+  MemoryAllocationLib
+  PcdLib
+  UefiDriverEntryPoint
+  HobLib
+  ChVmmDataLib
+
+[Depex]
+  gEfiAcpiTableProtocolGuid
+
+[Protocols]
+  gQemuAcpiTableNotifyProtocolGuid			## CONSUMES
+  gEfiAcpiTableProtocolGuid						  ## CONSUMES
