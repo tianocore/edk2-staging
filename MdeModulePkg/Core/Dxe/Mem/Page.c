@@ -465,10 +465,12 @@ AcceptMemoryResource (
 
       if (Type == AllocateMaxAddress) {
         if (GcdEntry->BaseAddress + AcceptSize - 1 > *Memory) {
+          Link = Link->ForwardLink;
           continue;
         }
       } else if (Type == AllocateAddress) {
         if (GcdEntry->BaseAddress > *Memory || GcdEntry->EndAddress < *Memory + AcceptSize - 1) {
+          Link = Link->ForwardLink;
           continue;
         }
       }
@@ -529,7 +531,7 @@ AcceptMemoryResource (
       EfiGcdMemoryTypeSystemMemory,
       Start,
       AcceptSize,
-      EFI_MEMORY_RUNTIME | EFI_MEMORY_CPU_CRYPTO | EFI_MEMORY_RO | EFI_MEMORY_RP | EFI_MEMORY_XP
+      EFI_MEMORY_CPU_CRYPTO
     );
 
   //
