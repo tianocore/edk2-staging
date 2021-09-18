@@ -23,30 +23,6 @@
 
 #define MEGABYTE_SHIFT     20
 
-UINT32 mEfiBootModeList[12] = { BOOT_WITH_FULL_CONFIGURATION,
-                                    BOOT_WITH_MINIMAL_CONFIGURATION,
-                                    BOOT_ASSUMING_NO_CONFIGURATION_CHANGES,
-                                    BOOT_WITH_FULL_CONFIGURATION_PLUS_DIAGNOSTICS,
-                                    BOOT_WITH_DEFAULT_SETTINGS,
-                                    BOOT_ON_S4_RESUME,
-                                    BOOT_ON_S5_RESUME,
-                                    BOOT_WITH_MFG_MODE_SETTINGS,
-                                    BOOT_ON_S2_RESUME,
-                                    BOOT_ON_S3_RESUME,
-                                    BOOT_ON_FLASH_UPDATE,
-                                    BOOT_IN_RECOVERY_MODE
-                                  };
-
-UINT32 mEfiResourceTypeList[8] = { EFI_RESOURCE_SYSTEM_MEMORY,
-                                      EFI_RESOURCE_MEMORY_MAPPED_IO,
-                                      EFI_RESOURCE_IO,
-                                      EFI_RESOURCE_FIRMWARE_DEVICE,
-                                      EFI_RESOURCE_MEMORY_MAPPED_IO_PORT,
-                                      EFI_RESOURCE_MEMORY_RESERVED,
-                                      EFI_RESOURCE_IO_RESERVED,
-                                      EFI_RESOURCE_MAX_MEMORY_TYPE
-                                    };
-
 UINT64  mTdxAcceptMemSize = 0;
 
 UINTN
@@ -115,39 +91,6 @@ DEBUG_HOBLIST (
 }
 
 /**
-  Check the value whether in the valid list.
-
-  @param[in] Value             - A value
-  @param[in] ValidList         - A pointer to valid list
-  @param[in] ValidListLength   - Length of valid list
-
-  @retval  TRUE   - The value is in valid list.
-  @retval  FALSE  - The value is not in valid list.
-
-**/
-BOOLEAN
-EFIAPI
-IsInValidList (
-  IN UINT32    Value,
-  IN UINT32    *ValidList,
-  IN UINT32    ValidListLength
-) {
-  UINT32 index;
-
-  if (ValidList == NULL) {
-    return FALSE;
-  }
-
-  for (index = 0; index < ValidListLength; index ++) {
-    if (ValidList[index] == Value) {
-      return TRUE;
-    }
-  }
-
-  return FALSE;
-}
-
-/**
   Check the integrity of VMM Hob List.
 
   @param[in] VmmHobList - A pointer to Hob List
@@ -192,9 +135,27 @@ ValidateHobList (
           return FALSE;
         }
 
-        if (IsInValidList (Hob.HandoffInformationTable->BootMode, mEfiBootModeList, 12) == FALSE) {
-          DEBUG ((DEBUG_ERROR, "HOB: Unknow HandoffInformationTable BootMode type. Type: 0x%08x\n", Hob.HandoffInformationTable->BootMode));
-          return FALSE;
+        //
+        // Verify the BootMode is valid or not
+        //
+        switch (Hob.HandoffInformationTable->BootMode)
+        {
+          case BOOT_WITH_FULL_CONFIGURATION:
+          case BOOT_WITH_MINIMAL_CONFIGURATION:
+          case BOOT_ASSUMING_NO_CONFIGURATION_CHANGES:
+          case BOOT_WITH_FULL_CONFIGURATION_PLUS_DIAGNOSTICS:
+          case BOOT_WITH_DEFAULT_SETTINGS:
+          case BOOT_ON_S4_RESUME:
+          case BOOT_ON_S5_RESUME:
+          case BOOT_WITH_MFG_MODE_SETTINGS:
+          case BOOT_ON_S2_RESUME:
+          case BOOT_ON_S3_RESUME:
+          case BOOT_ON_FLASH_UPDATE:
+          case BOOT_IN_RECOVERY_MODE:
+            break;
+          default:
+            DEBUG ((DEBUG_ERROR, "HOB: Unknow HandoffInformationTable BootMode type. Type: 0x%08x\n", Hob.HandoffInformationTable->BootMode));
+            return FALSE;
         }
 
         if ((Hob.HandoffInformationTable->EfiFreeMemoryTop % 4096) != 0) {
@@ -210,7 +171,7 @@ ValidateHobList (
           return FALSE;
         }
 
-        if (IsInValidList (Hob.ResourceDescriptor->ResourceType, mEfiResourceTypeList, 8) == FALSE) {
+        if (Hob.ResourceDescriptor->ResourceType >= EFI_RESOURCE_MAX_MEMORY_TYPE) {
           DEBUG ((DEBUG_ERROR, "HOB: Unknow ResourceDescriptor ResourceType type. Type: 0x%08x\n", Hob.ResourceDescriptor->ResourceType));
           return FALSE;
         }
