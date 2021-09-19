@@ -151,6 +151,8 @@ ShellCommandRunMemMap (
   UINT64              UnusableMemoryPagesSize;
   UINT64              PalCodePages;
   UINT64              PalCodePagesSize;
+  UINT64              UnacceptedPages;
+  UINT64              UnacceptedPagesSize;
   UINT64              PersistentPages;
   UINT64              PersistentPagesSize;
   BOOLEAN             Sfo;
@@ -173,6 +175,7 @@ ShellCommandRunMemMap (
   MmioPortPages       = 0;
   UnusableMemoryPages = 0;
   PalCodePages        = 0;
+  UnacceptedPages     = 0;
   PersistentPages     = 0;
   Size                = 0;
   Descriptors         = NULL;
@@ -304,7 +307,7 @@ ShellCommandRunMemMap (
             case EfiUnacceptedMemory:
               ShellPrintHiiEx(-1, -1, NULL, (EFI_STRING_ID)(!Sfo?STRING_TOKEN (STR_MEMMAP_LIST_ITEM):STRING_TOKEN (STR_MEMMAP_LIST_ITEM_SFO)), gShellDebug1HiiHandle, NameEfiUnacceptedMemory, Walker->PhysicalStart, Walker->PhysicalStart+MultU64x64(SIZE_4KB,Walker->NumberOfPages)-1, Walker->NumberOfPages, Walker->Attribute);
               TotalPages += Walker->NumberOfPages;
-              PalCodePages += Walker->NumberOfPages;
+              UnacceptedPages += Walker->NumberOfPages;
               break;
             default:
               //
@@ -336,6 +339,7 @@ ShellCommandRunMemMap (
         MmioSpacePagesSize      = MultU64x64(SIZE_4KB,MmioSpacePages);
         MmioPortPagesSize       = MultU64x64(SIZE_4KB,MmioPortPages);
         PalCodePagesSize        = MultU64x64(SIZE_4KB,PalCodePages);
+        UnacceptedPagesSize     = MultU64x64(SIZE_4KB,UnacceptedPages);
         PersistentPagesSize     = MultU64x64(SIZE_4KB,PersistentPages);
         UnusableMemoryPagesSize = MultU64x64(SIZE_4KB,UnusableMemoryPages);
         if (!Sfo) {
@@ -352,6 +356,7 @@ ShellCommandRunMemMap (
             MmioSpacePages, MmioSpacePagesSize,
             MmioPortPages, MmioPortPagesSize,
             PalCodePages, PalCodePagesSize,
+            UnacceptedPages, UnacceptedPagesSize,
             AvailPages, AvailPagesSize,
             PersistentPages, PersistentPagesSize
             );
@@ -386,6 +391,7 @@ ShellCommandRunMemMap (
             AcpiReclaimPagesSize,
             AcpiNvsPagesSize,
             PalCodePagesSize,
+            UnacceptedPagesSize,
             PersistentPagesSize
            );
         }
