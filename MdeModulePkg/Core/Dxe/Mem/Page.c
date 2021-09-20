@@ -460,7 +460,6 @@ AcceptMemoryResource (
   Link = mGcdMemorySpaceMap.ForwardLink;
   while (Link != &mGcdMemorySpaceMap) {
     GcdEntry = CR (Link, EFI_GCD_MAP_ENTRY, Link, EFI_GCD_MAP_SIGNATURE);
-
     if (GcdEntry->GcdMemoryType == EfiGcdMemoryTypeUnaccepted) {
 
       if (Type == AllocateMaxAddress) {
@@ -475,17 +474,14 @@ AcceptMemoryResource (
         }
       }
 
-      UnacceptedEntry = *GcdEntry;
-
       //
-      // Remove the target memory space from GCD.
+      // Reach the final target.
       //
-      if (AcceptSize <= UnacceptedEntry.EndAddress - UnacceptedEntry.BaseAddress + 1) {
-        CoreRemoveMemorySpace (GcdEntry->BaseAddress, UnacceptedEntry.EndAddress - UnacceptedEntry.BaseAddress + 1);
-
+      if (AcceptSize <= GcdEntry->EndAddress - GcdEntry->BaseAddress + 1) {
+        UnacceptedEntry = *GcdEntry;
         if (Type != AllocateAddress) {
-          Start = GcdEntry->BaseAddress;
-          End   = GcdEntry->BaseAddress + AcceptSize - 1;
+          Start = UnacceptedEntry.BaseAddress;
+          End   = UnacceptedEntry.BaseAddress + AcceptSize - 1;
         }
         break;
       }
@@ -498,12 +494,17 @@ AcceptMemoryResource (
   }
 
   //
-  // Accept the memory using the interface provide by the protocol.
+  // Accept memory using the interface provide by the protocol.
   //
   Status = MemoryAcceptProtocol->AcceptMemory (MemoryAcceptProtocol, Start, AcceptSize);
   if (EFI_ERROR (Status)) {
     return EFI_OUT_OF_RESOURCES;
   }
+
+  //
+  // If memory is accepted successfully, remove the target memory space from GCD.
+  //
+  CoreRemoveMemorySpace (UnacceptedEntry.BaseAddress, UnacceptedEntry.EndAddress - UnacceptedEntry.BaseAddress + 1);
 
   //
   // Fix me! CoreAddMemorySpace() should not be called in the allocation process
@@ -531,7 +532,10 @@ AcceptMemoryResource (
       EfiGcdMemoryTypeSystemMemory,
       Start,
       AcceptSize,
-      EFI_MEMORY_CPU_CRYPTO
+      //
+      // Hardcode memory space attributes.
+      //
+      EFI_MEMORY_CPU_CRYPTO | EFI_MEMORY_XP | EFI_MEMORY_RO | EFI_MEMORY_RP
     );
 
   //
