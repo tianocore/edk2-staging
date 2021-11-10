@@ -203,6 +203,8 @@
       PeiServicesLib|MdePkg/Library/PeiServicesLib/PeiServicesLib.inf
       LockBoxLib|MdeModulePkg/Library/LockBoxNullLib/LockBoxNullLib.inf
       PeiServicesTablePointerLib|MdePkg/Library/PeiServicesTablePointerLib/PeiServicesTablePointerLib.inf
+      TdxLib|MdePkg/Library/TdxLib/TdxLib.inf 
+      TdxProbeLib|MdePkg/Library/TdxProbeLib/TdxProbeLib.inf
   }
 
   UefiHostFuzzTestCasePkg/TestCase/OvmfPkg/Library/TdxStartupLib/TestHobList.inf {
