@@ -12,6 +12,7 @@
 #include <string.h>
 #include <assert.h>
 #include <Protocol/Tcg2Protocol.h>
+#include <Protocol/Tdx.h>
 
 #include <Uefi.h>
 #include <Protocol/BlockIo.h>
@@ -22,7 +23,7 @@
 #include <Library/BaseMemoryLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/DiskStubLib.h>
-#include<Library/Tcg2StubLib.h>
+#include <Library/Tcg2StubLib.h>
 
 
 #define TOTAL_SIZE   (512 * 1024)
@@ -30,13 +31,17 @@
 #define IO_ALIGN     (1)
 
 
+typedef struct {
+  EFI_TCG2_PROTOCOL     *Tcg2Protocol;
+  EFI_TD_PROTOCOL       *TdProtocol;
+} MEASURE_BOOT_PROTOCOLS;
+
 EFI_STATUS
 EFIAPI
 Tcg2MeasureGptTable (
-  IN  EFI_TCG2_PROTOCOL  *Tcg2Protocol,
-  IN  EFI_HANDLE         GptHandle
+  IN  MEASURE_BOOT_PROTOCOLS  *MeasureBootProtocols,
+  IN  EFI_HANDLE              GptHandle
   );
-
 
 VOID
 FixBuffer (
@@ -62,19 +67,24 @@ RunTestHarness(
 {
   EFI_BLOCK_IO_PROTOCOL  *BlockIo;
   EFI_DISK_IO_PROTOCOL   *DiskIo;
-  EFI_TCG2_PROTOCOL  *Tcg2Protocol;
-  EFI_HANDLE         GptHandle;
+  MEASURE_BOOT_PROTOCOLS MeasureBootProtocols;
+  EFI_TCG2_PROTOCOL      *Tcg2Protocol;
+  EFI_HANDLE             GptHandle;
+  EFI_STATUS             Status;
+
   FixBuffer (TestBuffer);
   DiskStubInitialize (TestBuffer, TestBufferSize, BLOCK_SIZE, IO_ALIGN, &BlockIo, &DiskIo);
   Tcg2StubInitlize();
-  
+
+  MeasureBootProtocols.Tcg2Protocol = NULL;
+  MeasureBootProtocols.TdProtocol = NULL;
   // fuzz function:
   // buffer overflow, crash will be detected at place.
   // only care about security, not for function bug.
   // 
   // try to separate EFI lib, use stdlib function.
   // no asm code.
-  EFI_STATUS   Status;
+
   GptHandle =NULL;
   Status = gBS->InstallMultipleProtocolInterfaces (
                       &GptHandle,
@@ -84,13 +94,9 @@ RunTestHarness(
                       DiskIo,
                       NULL
                       );
-  if (Status != 0){
-    printf("Install Protocol failed: 0x%16lX\n",Status);
-  }
-  Status = gBS->LocateProtocol (&gTdTcg2ProtocolGuid, NULL, (VOID **) &Tcg2Protocol);
-  if (Status != 0){
-  printf("LocateProtocol TdTcg2 failed: 0x%16lX\n",Status);
-  }
-  Tcg2MeasureGptTable (Tcg2Protocol, GptHandle);
+					  
+  Status = gBS->LocateProtocol (&gEfiTcg2ProtocolGuid, NULL, (VOID **) &Tcg2Protocol);
+  MeasureBootProtocols.Tcg2Protocol = Tcg2Protocol;
+  Tcg2MeasureGptTable (&MeasureBootProtocols, GptHandle);
 
 }

@@ -251,7 +251,7 @@ Tcg2StubInitlize(
   Handle = NULL;
   Status = gBS->InstallMultipleProtocolInterfaces (
                   &Handle,
-                  &gTdTcg2ProtocolGuid,
+                  &gEfiTcg2ProtocolGuid,
                   &mTcg2Protocol,
                   NULL
                   );

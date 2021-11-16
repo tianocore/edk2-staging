@@ -11,7 +11,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <assert.h>
 
 #include <Uefi.h>
-
+#define MAX_ADDRESS   0xFFFFFFFFFFFFFFFFULL
 VOID *
 EFIAPI
 SetMem (
@@ -158,6 +158,11 @@ ScanMem8 (
   return memchr (Buffer, Value, Length);
 }
 
+VOID
+EFIAPI
+CpuBreakpoint (
+  VOID
+  );
 /**
   Checks whether the contents of a buffer are all zeros.
 

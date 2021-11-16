@@ -10,6 +10,7 @@
 #include <string.h>
 #include <assert.h>
 #include <Protocol/Tcg2Protocol.h>
+#include <Protocol/Tdx.h>
 
 #include <Uefi.h>
 #include <Protocol/BlockIo.h>
@@ -30,11 +31,15 @@
 #define BLOCK_SIZE   (512)
 #define IO_ALIGN     (1)
 
+typedef struct {
+  EFI_TCG2_PROTOCOL     *Tcg2Protocol;
+  EFI_TD_PROTOCOL       *TdProtocol;
+} MEASURE_BOOT_PROTOCOLS;
 
 EFI_STATUS
 EFIAPI
 Tcg2MeasurePeImage (
-  IN  EFI_TCG2_PROTOCOL         *Tcg2Protocol,
+  IN  MEASURE_BOOT_PROTOCOLS    *MeasureBootProtocols,
   IN  EFI_PHYSICAL_ADDRESS      ImageAddress,
   IN  UINTN                     ImageSize,
   IN  UINTN                     LinkTimeBase,
@@ -67,8 +72,11 @@ RunTestHarness(
 {
   EFI_BLOCK_IO_PROTOCOL  *BlockIo;
   EFI_DISK_IO_PROTOCOL   *DiskIo;
-  EFI_TCG2_PROTOCOL  *Tcg2Protocol;
-  EFI_HANDLE         GptHandle;
+  MEASURE_BOOT_PROTOCOLS MeasureBootProtocols;
+  EFI_TCG2_PROTOCOL      *Tcg2Protocol;
+  EFI_HANDLE             GptHandle; 
+  EFI_STATUS             Status;
+  
   PE_COFF_LOADER_IMAGE_CONTEXT        ImageContext;
   EFI_DEVICE_PATH_PROTOCOL            *OrigDevicePathNode;
   //HARDDRIVE_DEVICE_PATH               *Hd;
@@ -79,6 +87,8 @@ RunTestHarness(
   DiskStubInitialize (TestBuffer, TestBufferSize, BLOCK_SIZE, IO_ALIGN, &BlockIo, &DiskIo);
   Tcg2StubInitlize();
   
+  MeasureBootProtocols.Tcg2Protocol = NULL;
+  MeasureBootProtocols.TdProtocol = NULL;
   // fuzz function:
   // buffer overflow, crash will be detected at place.
   // only care about security, not for function bug.
@@ -86,8 +96,6 @@ RunTestHarness(
   // try to separate EFI lib, use stdlib function.
   // no asm code.
   //CpuBreakpoint();
-  EFI_STATUS   Status;
-  
   
   GptHandle =NULL;
   Status = gBS->InstallMultipleProtocolInterfaces (
@@ -98,7 +106,9 @@ RunTestHarness(
                       DiskIo,
                       NULL
                       );
-  Status = gBS->LocateProtocol (&gTdTcg2ProtocolGuid, NULL, (VOID **) &Tcg2Protocol);
+  Status = gBS->LocateProtocol (&gEfiTcg2ProtocolGuid, NULL, (VOID **) &Tcg2Protocol);
+  
+  MeasureBootProtocols.Tcg2Protocol = Tcg2Protocol;
  /* 
   Hd                  = (HARDDRIVE_DEVICE_PATH *) CreateDeviceNode (
                                                     MEDIA_DEVICE_PATH,
@@ -110,14 +120,14 @@ RunTestHarness(
   #pragma warning(disable: 4700)
   ImageContext.ImageType = 0x1;
   ImageContext.ImageAddress = 0x1234; 
-  Tcg2MeasurePeImage (Tcg2Protocol, (EFI_PHYSICAL_ADDRESS)TestBuffer, TestBufferSize,(UINTN) ImageContext.ImageAddress,ImageContext.ImageType,OrigDevicePathNode );
+  Tcg2MeasurePeImage (&MeasureBootProtocols, (EFI_PHYSICAL_ADDRESS)TestBuffer, TestBufferSize,(UINTN) ImageContext.ImageAddress,ImageContext.ImageType,OrigDevicePathNode );
   ImageContext.ImageType = 10;
-  Tcg2MeasurePeImage (Tcg2Protocol, (EFI_PHYSICAL_ADDRESS)TestBuffer, TestBufferSize,(UINTN) ImageContext.ImageAddress,ImageContext.ImageType,OrigDevicePathNode );
+  Tcg2MeasurePeImage (&MeasureBootProtocols, (EFI_PHYSICAL_ADDRESS)TestBuffer, TestBufferSize,(UINTN) ImageContext.ImageAddress,ImageContext.ImageType,OrigDevicePathNode );
    ImageContext.ImageType = 11;
   
-  Tcg2MeasurePeImage (Tcg2Protocol, (EFI_PHYSICAL_ADDRESS)TestBuffer, TestBufferSize,(UINTN) ImageContext.ImageAddress,ImageContext.ImageType,OrigDevicePathNode);
+  Tcg2MeasurePeImage (&MeasureBootProtocols, (EFI_PHYSICAL_ADDRESS)TestBuffer, TestBufferSize,(UINTN) ImageContext.ImageAddress,ImageContext.ImageType,OrigDevicePathNode);
    ImageContext.ImageType = 12;
-  Tcg2MeasurePeImage (Tcg2Protocol, (EFI_PHYSICAL_ADDRESS)TestBuffer, TestBufferSize,(UINTN) ImageContext.ImageAddress,ImageContext.ImageType,OrigDevicePathNode );
+  Tcg2MeasurePeImage (&MeasureBootProtocols, (EFI_PHYSICAL_ADDRESS)TestBuffer, TestBufferSize,(UINTN) ImageContext.ImageAddress,ImageContext.ImageType,OrigDevicePathNode );
    ImageContext.ImageType = 13;
-  Tcg2MeasurePeImage (Tcg2Protocol, (EFI_PHYSICAL_ADDRESS)TestBuffer, TestBufferSize,(UINTN) ImageContext.ImageAddress,ImageContext.ImageType,OrigDevicePathNode );
+  Tcg2MeasurePeImage (&MeasureBootProtocols, (EFI_PHYSICAL_ADDRESS)TestBuffer, TestBufferSize,(UINTN) ImageContext.ImageAddress,ImageContext.ImageType,OrigDevicePathNode );
 }

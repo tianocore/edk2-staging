@@ -62,6 +62,6 @@ RunTestHarness(
   // 
   // try to separate EFI lib, use stdlib function.
   // no asm code.
-  ValidateTdxCfv (TestBuffer, TestBufferSize);
+  ValidateTdxCfv (TestBuffer, (UINT32)TestBufferSize);
 
 }
