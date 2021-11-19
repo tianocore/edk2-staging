@@ -85,7 +85,7 @@ SET gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageFtwSpareSize = $(VARS_SPARE_
 
 SET gUefiOvmfPkgTokenSpaceGuid.PcdCfvBase           = $(FW_BASE_ADDRESS)
 SET gUefiOvmfPkgTokenSpaceGuid.PcdCfvRawDataOffset  = $(VARS_OFFSET)
-SET gUefiOvmfPkgTokenSpaceGuid.PcdCfvRawDataSize    = $(VARS_LIVE_SIZE)
+SET gUefiOvmfPkgTokenSpaceGuid.PcdCfvRawDataSize    = $(VARS_SIZE)
 
 SET gUefiOvmfPkgTokenSpaceGuid.PcdBfvBase           = $(CODE_BASE_ADDRESS)
 SET gUefiOvmfPkgTokenSpaceGuid.PcdBfvRawDataOffset  = $(VARS_SIZE)

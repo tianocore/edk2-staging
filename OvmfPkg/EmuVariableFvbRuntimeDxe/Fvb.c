@@ -671,7 +671,8 @@ ValidateTdxCfv (
       (CfvFvHeader->Signature != EFI_FVH_SIGNATURE) ||
       (CfvFvHeader->Attributes != 0x4feff) ||
       (CfvFvHeader->HeaderLength != EMU_FV_HEADER_LENGTH) ||
-      (CfvFvHeader->Revision != EFI_FVH_REVISION)
+      (CfvFvHeader->Revision != EFI_FVH_REVISION) ||
+	  (CfvFvHeader->FvLength != TdxCfvSize)
       ) {
     DEBUG ((DEBUG_ERROR, "TDX CFV: Basic FV headers were invalid\n"));
     return FALSE;
