@@ -1051,7 +1051,7 @@
   #   TRUE  - UEFI Stack Guard will be enabled.<BR>
   #   FALSE - UEFI Stack Guard will be disabled.<BR>
   # @Prompt Enable UEFI Stack Guard.
-  gEfiMdeModulePkgTokenSpaceGuid.PcdCpuStackGuard|FALSE|BOOLEAN|0x30001055
+  gEfiMdeModulePkgTokenSpaceGuid.PcdCpuStackGuard|TRUE|BOOLEAN|0x30001055
 
 [PcdsFixedAtBuild, PcdsPatchableInModule]
   ## Dynamic type PCD can be registered callback function for Pcd setting action.
