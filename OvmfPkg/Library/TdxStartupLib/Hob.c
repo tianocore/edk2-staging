@@ -107,6 +107,11 @@ ValidateHobList (
   )
 {
   EFI_PEI_HOB_POINTERS  Hob;
+  UINT32                HobMemorySize;
+  UINT32                HobTotalLength;
+
+  HobMemorySize = FixedPcdGet32 (PcdOvmfSecGhcbSize);
+  HobTotalLength = 0;
 
   if (VmmHobList == NULL) {
     DEBUG ((DEBUG_ERROR, "HOB: HOB data pointer is NULL\n"));
@@ -119,6 +124,12 @@ ValidateHobList (
   // Parse the HOB list until end of list or matching type is found.
   //
   while (!END_OF_HOB_LIST (Hob)) {
+    HobTotalLength += Hob.Header->HobLength;
+    if (HobTotalLength > HobMemorySize) {
+      DEBUG ((DEBUG_ERROR, "HOB overflowed: Total Hob length should be less than the memory size reserved fr TD HOB \n"));
+      return FALSE;
+    }
+
     if (Hob.Header->Reserved != (UINT32) 0) {
       DEBUG ((DEBUG_ERROR, "HOB: Hob header Reserved filed should be zero\n"));
       return FALSE;
@@ -254,18 +265,6 @@ ValidateHobList (
 }
 
 /**
-  Only the TdVmmData types needed by SEC phase will be parsed.
-  @param[in] Hob    The hob pointer of the TdVmmData item.
-**/
-VOID
-ProcessTdVmmHob (
-  IN EFI_PEI_HOB_POINTERS        Hob
-  )
-{
-
-}
-
-/**
   Processing the incoming HobList for the TD
 
   Firmware must parse list, and accept the pages of memory before their can be
@@ -359,9 +358,6 @@ ProcessHobList (
 
           AccumulateAccepted += PhysicalEnd - Hob.ResourceDescriptor->PhysicalStart;
         }
-        break;
-      case EFI_HOB_TYPE_GUID_EXTENSION:
-        ProcessTdVmmHob (Hob);
         break;
     }
     Hob.Raw = GET_NEXT_HOB (Hob);
