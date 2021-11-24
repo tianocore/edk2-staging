@@ -901,16 +901,5 @@ CreateIdentityMappingPageTables (
   //
   EnablePageTableProtection ((UINTN)PageMap, TRUE);
 
-  //
-  // Set IA32_EFER.NXE if necessary.
-  //
-  if (IsEnableNonExecNeeded ()) {
-    //
-    // ASSERT for now, TDX doesn't allow us to change EFER
-    //
-    ASSERT(FALSE);
-    EnableExecuteDisableBit ();
-  }
-
   return (UINTN)PageMap;
 }
