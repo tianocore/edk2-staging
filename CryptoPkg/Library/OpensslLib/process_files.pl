@@ -269,11 +269,12 @@ foreach my $product ((@{$unified_info{libraries}},
         foreach my $s (@{$unified_info{sources}->{$o}}) {
             # No need to add unused files in UEFI.
             # So it can reduce porting time, compile time, library size.
-            next if $s =~ "crypto/bio/b_print.c";
             next if $s =~ "crypto/rand/randfile.c";
             next if $s =~ "crypto/store/";
             next if $s =~ "crypto/err/err_all.c";
             next if $s =~ "crypto/aes/aes_ecb.c";
+            next if $s =~ "crypto/bio/bio_print.c";
+            next if $s =~ "providers/implementations/storemgmt/";
 
             if ($unified_info{generate}->{$s}) {
                 if (defined $arch) {
