@@ -520,5 +520,8 @@ for my $file (@hdrs) {
 
 print "\nProcessing Files Done!\n";
 
+# cleanup
+system("make -C $OPENSSL_PATH clean");
+
 exit(0);
 
