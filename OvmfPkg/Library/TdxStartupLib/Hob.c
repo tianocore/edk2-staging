@@ -91,6 +91,51 @@ DEBUG_HOBLIST (
   }
 }
 
+BOOLEAN
+EFIAPI
+ValidateResourceHobRange (
+  IN CONST VOID                         *VmmHobList,
+  IN CONST EFI_HOB_RESOURCE_DESCRIPTOR  *Resource
+  )
+{
+  EFI_PEI_HOB_POINTERS  Hob;
+  EFI_PHYSICAL_ADDRESS  PhysicalEnd;
+  EFI_PHYSICAL_ADDRESS  HobResourcePhysicalEnd;
+
+  PhysicalEnd = Resource->PhysicalStart + Resource->ResourceLength;
+
+  if (VmmHobList == NULL) {
+    DEBUG ((DEBUG_ERROR, "HOB: HOB data pointer is NULL\n"));
+    return FALSE;
+  }
+
+  if (Resource->ResourceLength == 0) {
+    return FALSE;
+  }
+
+  Hob.Raw = (UINT8 *) VmmHobList;
+  //
+  // Parse the HOB list to check if the resource range is overlapped
+  // with the others.
+  //
+  while (!END_OF_HOB_LIST (Hob) && Hob.ResourceDescriptor != Resource) {
+    switch (Hob.Header->HobType) {
+      case EFI_HOB_TYPE_RESOURCE_DESCRIPTOR:
+        HobResourcePhysicalEnd = Hob.ResourceDescriptor->PhysicalStart + Hob.ResourceDescriptor->ResourceLength;
+        if ((Resource->PhysicalStart >= Hob.ResourceDescriptor->PhysicalStart && Resource->PhysicalStart < HobResourcePhysicalEnd)
+          || (PhysicalEnd > Hob.ResourceDescriptor->PhysicalStart && PhysicalEnd <= HobResourcePhysicalEnd)) {
+          return FALSE;
+        }
+        break;
+      default:
+        break;
+    }
+    Hob.Raw = GET_NEXT_HOB (Hob);
+  }
+
+  return TRUE;
+}
+
 /**
   Check the integrity of VMM Hob List.
 
@@ -188,6 +233,11 @@ ValidateHobList (
           return FALSE;
         }
 
+        if (!ValidateResourceHobRange(VmmHobList, Hob.ResourceDescriptor)) {
+          DEBUG ((DEBUG_ERROR, "HOB: ResourceDescriptor Resource Range error.\n"));
+          return FALSE;
+        }
+
         if ((Hob.ResourceDescriptor->ResourceAttribute & (~(EFI_RESOURCE_ATTRIBUTE_PRESENT |
                                                           EFI_RESOURCE_ATTRIBUTE_INITIALIZED |
                                                           EFI_RESOURCE_ATTRIBUTE_TESTED |
@@ -218,7 +268,6 @@ ValidateHobList (
           DEBUG ((DEBUG_ERROR, "HOB: Unknow ResourceDescriptor ResourceAttribute type. Type: 0x%08x\n", Hob.ResourceDescriptor->ResourceAttribute));
           return FALSE;
         }
-
         break;
 	  // EFI_HOB_GUID_TYPE is variable length data, so skip check
       case EFI_HOB_TYPE_GUID_EXTENSION:
@@ -483,6 +532,9 @@ TransferHobList (
         ResourceLength);
       break;
     case EFI_HOB_TYPE_MEMORY_ALLOCATION:
+      if (Hob.ResourceDescriptor->ResourceLength == 0) {
+        break;
+      }
       BuildMemoryAllocationHob (
         Hob.MemoryAllocation->AllocDescriptor.MemoryBaseAddress,
         Hob.MemoryAllocation->AllocDescriptor.MemoryLength,
