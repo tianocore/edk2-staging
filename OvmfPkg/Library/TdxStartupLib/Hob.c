@@ -471,6 +471,7 @@ TransferHobList (
   EFI_RESOURCE_TYPE           ResourceType;
   EFI_RESOURCE_ATTRIBUTE_TYPE ResourceAttribute;
   EFI_PHYSICAL_ADDRESS        PhysicalStart;
+  EFI_PHYSICAL_ADDRESS        PhysicalEnd;
   UINT64                      ResourceLength;
   UINT64                      AccumulateAccepted;
 
@@ -517,6 +518,11 @@ TransferHobList (
             if (PhysicalStart + ResourceLength <= BASE_4GB) {
               ResourceAttribute |= EFI_RESOURCE_ATTRIBUTE_ENCRYPTED;
             }
+
+            PhysicalEnd = PhysicalStart + ResourceLength;
+            if (PhysicalStart >= PhysicalEnd) {
+              break;
+            }
             BuildResourceDescriptorHob (
               ResourceType,
               ResourceAttribute,
@@ -535,6 +541,10 @@ TransferHobList (
         }
       }
 
+      PhysicalEnd = PhysicalStart + ResourceLength;
+      if (PhysicalStart >= PhysicalEnd) {
+        break;
+      }
       BuildResourceDescriptorHob (
         ResourceType,
         ResourceAttribute,
@@ -542,7 +552,11 @@ TransferHobList (
         ResourceLength);
       break;
     case EFI_HOB_TYPE_MEMORY_ALLOCATION:
-      if (Hob.ResourceDescriptor->ResourceLength == 0) {
+      PhysicalStart = Hob.MemoryAllocation->AllocDescriptor.MemoryBaseAddress;
+      PhysicalEnd = Hob.MemoryAllocation->AllocDescriptor.MemoryBaseAddress + 
+        Hob.MemoryAllocation->AllocDescriptor.MemoryLength;
+
+      if (PhysicalStart >= PhysicalEnd) {
         break;
       }
       BuildMemoryAllocationHob (
