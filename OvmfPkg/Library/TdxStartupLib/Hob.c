@@ -18,6 +18,7 @@
 #include <Library/TpmMeasurementLib.h>
 #include <Library/QemuFwCfgLib.h>
 #include <Library/ChVmmDataLib.h>
+#include <Library/TdxLib.h>
 #include <IndustryStandard/Tdx.h>
 #include <IndustryStandard/UefiTcgPlatform.h>
 #include "TdxStartupInternal.h"
@@ -99,6 +100,7 @@ ValidateResourceHobRange (
   )
 {
   EFI_PEI_HOB_POINTERS  Hob;
+  UINTN                 MaximumGpa;
   EFI_PHYSICAL_ADDRESS  PhysicalEnd;
   EFI_PHYSICAL_ADDRESS  HobResourcePhysicalEnd;
 
@@ -109,7 +111,15 @@ ValidateResourceHobRange (
     return FALSE;
   }
 
-  if (Resource->ResourceLength == 0) {
+  //
+  // Fail if resource length equals to zero or PhysicalEnd overflowed
+  //
+  if (Resource->PhysicalStart >= PhysicalEnd) {
+    return FALSE;
+  }
+
+  MaximumGpa = TdSharedPageMask();
+  if (Resource->PhysicalStart >= MaximumGpa || PhysicalEnd >= MaximumGpa) {
     return FALSE;
   }
 
