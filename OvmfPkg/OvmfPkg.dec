@@ -338,7 +338,7 @@
   gUefiOvmfPkgTokenSpaceGuid.PcdUseTdxMsr|TRUE|BOOLEAN|0x56
 
   gUefiOvmfPkgTokenSpaceGuid.PcdTdxAcceptChunkSize|0x2000000|UINT64|0x59
-  gUefiOvmfPkgTokenSpaceGuid.PcdTdxSetNxForStack|TRUE|BOOLEAN|0x5b
+  gUefiOvmfPkgTokenSpaceGuid.PcdTdxSetNxForStack|FALSE|BOOLEAN|0x5b
   gUefiOvmfPkgTokenSpaceGuid.PcdTdxPteMemoryEncryptionAddressOrMask|0|UINT64|0x5c
 
   ## The Tdx accept page size. 0x1000,0x200000

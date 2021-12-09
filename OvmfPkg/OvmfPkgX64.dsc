@@ -637,6 +637,7 @@
   # TDX doesn't allow us to change EFER so make sure these are disabled
   #gEfiMdeModulePkgTokenSpaceGuid.PcdSetNxForStack|FALSE
   gEfiMdeModulePkgTokenSpaceGuid.PcdUse1GPageTable|TRUE
+  gUefiOvmfPkgTokenSpaceGuid.PcdTdxSetNxForStack|TRUE
 
   # Set memory encryption mask
   gUefiOvmfPkgTokenSpaceGuid.PcdTdxPteMemoryEncryptionAddressOrMask|0x0
