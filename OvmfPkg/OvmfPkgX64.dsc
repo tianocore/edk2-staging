@@ -631,7 +631,7 @@
 
   # Noexec settings for DXE.
   # TDX doesn't allow us to change EFER so make sure these are disabled
-  gEfiMdeModulePkgTokenSpaceGuid.PcdImageProtectionPolicy|0x00000000
+  #gEfiMdeModulePkgTokenSpaceGuid.PcdImageProtectionPolicy|0x00000000
   gEfiMdeModulePkgTokenSpaceGuid.PcdDxeNxMemoryProtectionPolicy|0x00000000
   # Noexec settings for DXE.
   # TDX doesn't allow us to change EFER so make sure these are disabled
