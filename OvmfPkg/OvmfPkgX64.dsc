@@ -638,6 +638,7 @@
   #gEfiMdeModulePkgTokenSpaceGuid.PcdSetNxForStack|FALSE
   gEfiMdeModulePkgTokenSpaceGuid.PcdUse1GPageTable|TRUE
   gUefiOvmfPkgTokenSpaceGuid.PcdTdxSetNxForStack|TRUE
+  gEfiMdeModulePkgTokenSpaceGuid.PcdCpuStackGuard|TRUE
 
   # Set memory encryption mask
   gUefiOvmfPkgTokenSpaceGuid.PcdTdxPteMemoryEncryptionAddressOrMask|0x0
