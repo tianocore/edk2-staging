@@ -17,7 +17,6 @@
 #include <Library/TdvfPlatformLib.h>
 #include <Library/TpmMeasurementLib.h>
 #include <Library/QemuFwCfgLib.h>
-#include <Library/ChVmmDataLib.h>
 #include <Library/TdxLib.h>
 #include <IndustryStandard/Tdx.h>
 #include <IndustryStandard/UefiTcgPlatform.h>
@@ -467,7 +466,6 @@ TransferHobList (
   )
 {
   EFI_PEI_HOB_POINTERS        Hob;
-  TD_VMM_DATA                 *VmmData;
   EFI_RESOURCE_TYPE           ResourceType;
   EFI_RESOURCE_ATTRIBUTE_TYPE ResourceAttribute;
   EFI_PHYSICAL_ADDRESS        PhysicalStart;
@@ -563,10 +561,6 @@ TransferHobList (
         Hob.MemoryAllocation->AllocDescriptor.MemoryBaseAddress,
         Hob.MemoryAllocation->AllocDescriptor.MemoryLength,
         Hob.MemoryAllocation->AllocDescriptor.MemoryType);
-      break;
-    case EFI_HOB_TYPE_GUID_EXTENSION:
-      VmmData = (TD_VMM_DATA *) (&Hob.Guid->Name + 1);
-      BuildGuidDataHob (&Hob.Guid->Name, VmmData, sizeof (TD_VMM_DATA));
       break;
     }
     Hob.Raw = GET_NEXT_HOB (Hob);
