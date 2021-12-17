@@ -800,12 +800,12 @@ STATIC mp_obj_t get_value(mp_obj_mem_t *self, mp_obj_t index_in)
       break;
 
     case 'O':
-      value = efi_mem_new_n((UINT8 *)addr + index * self->typesize, 1, NULL, self->readonly, self->page);
+      value = efi_mem_new_n((UINT8 *)addr + index * self->typesize, 1, self->typespec, self->readonly, self->page);
       memobj = MP_OBJ_TO_PTR(value);
-      memobj->typespec = self->typespec;
-      memobj->typesize = self->typesize;
-      memobj->size = self->typesize;
-      memobj->fields = self->fields;
+      // memobj->typespec = self->typespec;
+      // memobj->typesize = self->typesize;
+      // memobj->size = self->typesize;
+      // memobj->fields = self->fields;
       memobj->typeattr = self->typeattr;
       break;
 
