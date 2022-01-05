@@ -472,6 +472,7 @@ TransferHobList (
   EFI_PHYSICAL_ADDRESS        PhysicalEnd;
   UINT64                      ResourceLength;
   UINT64                      AccumulateAccepted;
+  VOID                        *GuidedData;
 
   Hob.Raw            = (UINT8 *) VmmHobList;
   AccumulateAccepted = 0;
@@ -561,6 +562,10 @@ TransferHobList (
           Hob.MemoryAllocation->AllocDescriptor.MemoryBaseAddress,
           Hob.MemoryAllocation->AllocDescriptor.MemoryLength,
           Hob.MemoryAllocation->AllocDescriptor.MemoryType);
+        break;
+      case EFI_HOB_TYPE_GUID_EXTENSION:
+        GuidedData = (VOID *) (&Hob.Guid->Name + 1);
+        BuildGuidDataHob (&Hob.Guid->Name, GuidedData, Hob.Guid->Header.HobLength - sizeof(EFI_HOB_GUID_TYPE));
         break;
     }
     Hob.Raw = GET_NEXT_HOB (Hob);
