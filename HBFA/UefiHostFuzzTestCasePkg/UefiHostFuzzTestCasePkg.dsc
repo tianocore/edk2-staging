@@ -273,8 +273,21 @@
    TdxProbeLib|MdePkg/Library/TdxProbeLib/TdxProbeLib.inf
    PcdLib|MdePkg/Library/DxePcdLib/DxePcdLib.inf
   }
+
+ UefiHostFuzzTestCasePkg/TestCase/OvmfPkg/VirtioPciDecivceDxe/TestVirtioPciDevice.inf{
+  <LibraryClasses>
+   UefiPciCapPciIoLib|OvmfPkg/Library/UefiPciCapPciIoLib/UefiPciCapPciIoLib.inf
+   BasePciCapLib|OvmfPkg/Library/BasePciCapLib/BasePciCapLib.inf
+   VirtioPciDeviceStubLib|UefiHostFuzzTestCasePkg/TestStub/VirtioPciDeviceStubLib/VirtioPciDeviceStubLib.inf
+   VirtioLib|OvmfPkg/Library/VirtioLib/VirtioLib.inf
+   UefiRuntimeLib|MdePkg/Library/UefiRuntimeLib/UefiRuntimeLib.inf
+   OrderedCollectionLib|MdePkg/Library/BaseOrderedCollectionRedBlackTreeLib/BaseOrderedCollectionRedBlackTreeLib.inf
+  }
+
   [PcdsDynamicDefault]
     gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageVariableBase64|0
     gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageFtwWorkingBase|0
     gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageFtwSpareBase|0
+  [PcdsFixedAtBuild]
+    gUefiOvmfPkgTokenSpaceGuid.PcdOvmfSecGhcbSize|0x002000
 !include UefiHostFuzzTestPkg/UefiHostFuzzTestBuildOption.dsc
