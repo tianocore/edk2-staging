@@ -19,7 +19,7 @@
 #include <Library/BaseMemoryLib.h>
 #include <Library/MemoryAllocationLib.h>
 
-#define TOTAL_SIZE   (32* 1024)
+#define TOTAL_SIZE   (1024* 1024)
 #define BLOCK_SIZE   (512)
 #define IO_ALIGN     (1)
 
