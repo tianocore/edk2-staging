@@ -22,6 +22,7 @@
 #include <Library/PcdLib.h>
 #include <Library/TdxStartupLib.h>
 #include <Library/HobLib.h>
+#include <IndustryStandard/Tdx.h>
 
 #define GET_GPAW_INIT_STATE(INFO)  ((UINT8) ((INFO) & 0x3f))
 
@@ -61,6 +62,21 @@ GetMaxBufferSize (
   return TOTAL_SIZE;
 }
 
+EFI_STATUS
+EFIAPI
+TdCall (
+  IN UINT64           Leaf,
+  IN UINT64           Arg1,
+  IN UINT64           Arg2,
+  IN UINT64           Arg3,
+  IN OUT VOID         *Results
+  )
+{
+  TD_RETURN_DATA * Data;
+  Data = (TD_RETURN_DATA *) Results;
+  Data->TdInfo.Gpaw = 48;
+  return EFI_SUCCESS;
+}
 
 VOID
 EFIAPI
