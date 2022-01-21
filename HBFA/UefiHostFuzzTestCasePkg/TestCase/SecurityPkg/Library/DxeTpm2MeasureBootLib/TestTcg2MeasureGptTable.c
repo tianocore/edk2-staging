@@ -12,11 +12,11 @@
 #include <string.h>
 #include <assert.h>
 #include <Protocol/Tcg2Protocol.h>
-#include <Protocol/Tdx.h>
 
 #include <Uefi.h>
 #include <Protocol/BlockIo.h>
 #include <Protocol/DiskIo.h>
+#include <Protocol/CcMeasurement.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
@@ -32,8 +32,8 @@
 
 
 typedef struct {
-  EFI_TCG2_PROTOCOL     *Tcg2Protocol;
-  EFI_TD_PROTOCOL       *TdProtocol;
+  EFI_TCG2_PROTOCOL              *Tcg2Protocol;
+  EFI_CC_MEASUREMENT_PROTOCOL    *CcProtocol;
 } MEASURE_BOOT_PROTOCOLS;
 
 EFI_STATUS
@@ -77,7 +77,7 @@ RunTestHarness(
   Tcg2StubInitlize();
 
   MeasureBootProtocols.Tcg2Protocol = NULL;
-  MeasureBootProtocols.TdProtocol = NULL;
+  MeasureBootProtocols.CcProtocol = NULL;
   // fuzz function:
   // buffer overflow, crash will be detected at place.
   // only care about security, not for function bug.
