@@ -53,11 +53,13 @@ MailBoxLoop:
     ; Spin until command set
     cmp        dword [rbx + CommandOffset], MpProtectedModeWakeupCommandNoop
     je         MailBoxLoop
+
     ; Determine if this is a broadcast or directly for my apic-id, if not, ignore
     cmp        dword [rbx + ApicidOffset], MailboxApicidBroadcast
     je         MailBoxProcessCommand
     cmp        dword [rbx + ApicidOffset], r8d
     jne        MailBoxLoop
+
 MailBoxProcessCommand:
     cmp        dword [rbx + CommandOffset], MpProtectedModeWakeupCommandWakeup
     je         MailBoxWakeUp
@@ -65,9 +67,16 @@ MailBoxProcessCommand:
     je         MailBoxSleep
     ; Don't support this command, so ignore
     jmp        MailBoxLoop
+
 MailBoxWakeUp:
-    mov       rax, [rbx + WakeupVectorOffset]
-    jmp       rax
+    mov        rax, [rbx + WakeupVectorOffset]
+    ; OS sends a wakeup command for a given APIC ID, firmware is supposed to reset
+    ; the command field back to zero as acknowledgement.
+    mov        qword [rbx + WakeupVectorOffset], 0
+    mov        dword [rbx + ApicidOffset], 0
+    mov        dword [rbx + CommandOffset], 0
+    jmp        rax
+
 MailBoxSleep:
     jmp       $
 Panic:
