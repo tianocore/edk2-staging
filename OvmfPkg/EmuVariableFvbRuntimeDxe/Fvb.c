@@ -694,7 +694,9 @@ ValidateTdxCfv (
   CfvVariableStoreHeader = (VARIABLE_STORE_HEADER *) (TdxCfvBase + CfvFvHeader->HeaderLength);
   if ((!CompareGuid (&VarStoreHdrGUID, &CfvVariableStoreHeader->Signature)) ||
       (CfvVariableStoreHeader->Format != VARIABLE_STORE_FORMATTED) ||
-      (CfvVariableStoreHeader->State != VARIABLE_STORE_HEALTHY)
+      (CfvVariableStoreHeader->State != VARIABLE_STORE_HEALTHY) ||
+      (CfvVariableStoreHeader->Size > (CfvFvHeader->FvLength - CfvFvHeader->HeaderLength)) ||
+      (CfvVariableStoreHeader->Size < sizeof (VARIABLE_STORE_HEADER))
       ) {
     DEBUG ((DEBUG_ERROR, "TDX CFV: Variable Store header was invalid\n"));
     return FALSE;
