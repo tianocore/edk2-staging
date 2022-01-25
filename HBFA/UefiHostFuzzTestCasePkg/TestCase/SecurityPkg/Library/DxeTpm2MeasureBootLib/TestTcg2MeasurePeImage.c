@@ -73,6 +73,7 @@ RunTestHarness(
   EFI_DISK_IO_PROTOCOL   *DiskIo;
   MEASURE_BOOT_PROTOCOLS MeasureBootProtocols;
   EFI_TCG2_PROTOCOL      *Tcg2Protocol;
+  EFI_CC_MEASUREMENT_PROTOCOL *CcProtocol;
   EFI_HANDLE             GptHandle; 
   EFI_STATUS             Status;
   
@@ -94,7 +95,6 @@ RunTestHarness(
   // 
   // try to separate EFI lib, use stdlib function.
   // no asm code.
-  //CpuBreakpoint();
   
   GptHandle =NULL;
   Status = gBS->InstallMultipleProtocolInterfaces (
@@ -106,6 +106,7 @@ RunTestHarness(
                       NULL
                       );
   Status = gBS->LocateProtocol (&gEfiTcg2ProtocolGuid, NULL, (VOID **) &Tcg2Protocol);
+  Status = gBS->LocateProtocol (&gEfiCcMeasurementProtocolGuid, NULL, (VOID **) &CcProtocol);
   
   MeasureBootProtocols.Tcg2Protocol = Tcg2Protocol;
  /* 
@@ -117,16 +118,36 @@ RunTestHarness(
   */
   OrigDevicePathNode= (EFI_DEVICE_PATH_PROTOCOL*) DeviceArray;
   #pragma warning(disable: 4700)
+
+  //test case 1:set MeasureBootProtocols.CcProtocol = NULL; 
   ImageContext.ImageType = 0x1;
   ImageContext.ImageAddress = 0x1234; 
   Tcg2MeasurePeImage (&MeasureBootProtocols, (EFI_PHYSICAL_ADDRESS)TestBuffer, TestBufferSize,(UINTN) ImageContext.ImageAddress,ImageContext.ImageType,OrigDevicePathNode );
   ImageContext.ImageType = 10;
   Tcg2MeasurePeImage (&MeasureBootProtocols, (EFI_PHYSICAL_ADDRESS)TestBuffer, TestBufferSize,(UINTN) ImageContext.ImageAddress,ImageContext.ImageType,OrigDevicePathNode );
-   ImageContext.ImageType = 11;
+  ImageContext.ImageType = 11;
   
   Tcg2MeasurePeImage (&MeasureBootProtocols, (EFI_PHYSICAL_ADDRESS)TestBuffer, TestBufferSize,(UINTN) ImageContext.ImageAddress,ImageContext.ImageType,OrigDevicePathNode);
-   ImageContext.ImageType = 12;
+  ImageContext.ImageType = 12;
   Tcg2MeasurePeImage (&MeasureBootProtocols, (EFI_PHYSICAL_ADDRESS)TestBuffer, TestBufferSize,(UINTN) ImageContext.ImageAddress,ImageContext.ImageType,OrigDevicePathNode );
-   ImageContext.ImageType = 13;
+  ImageContext.ImageType = 13;
   Tcg2MeasurePeImage (&MeasureBootProtocols, (EFI_PHYSICAL_ADDRESS)TestBuffer, TestBufferSize,(UINTN) ImageContext.ImageAddress,ImageContext.ImageType,OrigDevicePathNode );
+  
+  //test case 2:set MeasureBootProtocols.Tcg2Protocol = NULL; 
+  MeasureBootProtocols.Tcg2Protocol = NULL;
+  MeasureBootProtocols.CcProtocol = CcProtocol;
+
+  ImageContext.ImageType = 0x1;
+  ImageContext.ImageAddress = 0x1234; 
+  Tcg2MeasurePeImage (&MeasureBootProtocols, (EFI_PHYSICAL_ADDRESS)TestBuffer, TestBufferSize,(UINTN) ImageContext.ImageAddress,ImageContext.ImageType,OrigDevicePathNode );
+  ImageContext.ImageType = 10;
+  Tcg2MeasurePeImage (&MeasureBootProtocols, (EFI_PHYSICAL_ADDRESS)TestBuffer, TestBufferSize,(UINTN) ImageContext.ImageAddress,ImageContext.ImageType,OrigDevicePathNode );
+  ImageContext.ImageType = 11;
+  
+  Tcg2MeasurePeImage (&MeasureBootProtocols, (EFI_PHYSICAL_ADDRESS)TestBuffer, TestBufferSize,(UINTN) ImageContext.ImageAddress,ImageContext.ImageType,OrigDevicePathNode);
+  ImageContext.ImageType = 12;
+  Tcg2MeasurePeImage (&MeasureBootProtocols, (EFI_PHYSICAL_ADDRESS)TestBuffer, TestBufferSize,(UINTN) ImageContext.ImageAddress,ImageContext.ImageType,OrigDevicePathNode );
+  ImageContext.ImageType = 13;
+  Tcg2MeasurePeImage (&MeasureBootProtocols, (EFI_PHYSICAL_ADDRESS)TestBuffer, TestBufferSize,(UINTN) ImageContext.ImageAddress,ImageContext.ImageType,OrigDevicePathNode );
+
 }

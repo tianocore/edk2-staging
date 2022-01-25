@@ -15,6 +15,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Library/MemoryAllocationLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include<Library/Tcg2StubLib.h>
+#include <Protocol/CcMeasurement.h>
 
 
 /**
@@ -242,6 +243,61 @@ EFI_TCG2_PROTOCOL mTcg2Protocol = {
 
 EFI_STATUS
 EFIAPI
+CcGetCapability (
+  IN     EFI_CC_MEASUREMENT_PROTOCOL       *This,
+  IN OUT EFI_CC_BOOT_SERVICE_CAPABILITY    *ProtocolCapability
+  )
+{
+  return EFI_SUCCESS;
+}
+
+EFI_STATUS
+EFIAPI
+CcGetEventlog (
+  IN  EFI_CC_MEASUREMENT_PROTOCOL     *This,
+  IN  EFI_CC_EVENT_LOG_FORMAT         EventLogFormat,
+  OUT EFI_PHYSICAL_ADDRESS            *EventLogLocation,
+  OUT EFI_PHYSICAL_ADDRESS            *EventLogLastEntry,
+  OUT BOOLEAN                         *EventLogTruncated
+  )
+{
+  return EFI_SUCCESS;
+}
+
+EFI_STATUS
+EFIAPI
+CcHashLogExtendEvent (
+  IN EFI_CC_MEASUREMENT_PROTOCOL    *This,
+  IN UINT64                         Flags,
+  IN EFI_PHYSICAL_ADDRESS           DataToHash,
+  IN UINT64                         DataToHashLen,
+  IN EFI_CC_EVENT                   *EfiCcEvent
+  )
+{
+  return EFI_SUCCESS;
+}
+
+EFI_STATUS
+EFIAPI
+CcMapPcrToMrIndex (
+  IN  EFI_CC_MEASUREMENT_PROTOCOL    *This,
+  IN  TCG_PCRINDEX                   PcrIndex,
+  OUT EFI_CC_MR_INDEX                *MrIndex
+  )
+{
+  MrIndex = 0;
+  return EFI_SUCCESS;
+}
+
+EFI_CC_MEASUREMENT_PROTOCOL mCcProtocol = {
+  CcGetCapability,
+  CcGetEventlog,
+  CcHashLogExtendEvent,
+  CcMapPcrToMrIndex,
+};
+
+EFI_STATUS
+EFIAPI
 Tcg2StubInitlize(
     VOID
 ){
@@ -253,6 +309,8 @@ Tcg2StubInitlize(
                   &Handle,
                   &gEfiTcg2ProtocolGuid,
                   &mTcg2Protocol,
+                  &gEfiCcMeasurementProtocolGuid,
+                  &mCcProtocol,
                   NULL
                   );
   return Status;
