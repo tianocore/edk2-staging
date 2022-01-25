@@ -69,6 +69,7 @@ RunTestHarness(
   EFI_DISK_IO_PROTOCOL   *DiskIo;
   MEASURE_BOOT_PROTOCOLS MeasureBootProtocols;
   EFI_TCG2_PROTOCOL      *Tcg2Protocol;
+  EFI_CC_MEASUREMENT_PROTOCOL *CcProtocol;
   EFI_HANDLE             GptHandle;
   EFI_STATUS             Status;
 
@@ -96,7 +97,15 @@ RunTestHarness(
                       );
 					  
   Status = gBS->LocateProtocol (&gEfiTcg2ProtocolGuid, NULL, (VOID **) &Tcg2Protocol);
+  Status = gBS->LocateProtocol (&gEfiCcMeasurementProtocolGuid, NULL, (VOID **) &CcProtocol);
+
+  //case 1: set MeasureBootProtocols.CcProtocol = NULL
   MeasureBootProtocols.Tcg2Protocol = Tcg2Protocol;
+  Tcg2MeasureGptTable (&MeasureBootProtocols, GptHandle);
+  
+  //case2:set MeasureBootProtocols.Tcg2Protocol = NULL
+  MeasureBootProtocols.Tcg2Protocol = NULL;
+  MeasureBootProtocols.CcProtocol = CcProtocol;
   Tcg2MeasureGptTable (&MeasureBootProtocols, GptHandle);
 
 }
