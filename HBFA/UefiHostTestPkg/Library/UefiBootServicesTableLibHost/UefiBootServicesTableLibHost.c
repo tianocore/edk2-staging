@@ -83,6 +83,15 @@ CoreFreePool (
 
 EFI_STATUS
 EFIAPI
+Stall (
+  IN UINTN            Microseconds
+  ) 
+{
+  return EFI_SUCCESS;
+}
+
+EFI_STATUS
+EFIAPI
 CoreEfiNotAvailableYetArg0 (
   VOID
   )
@@ -202,7 +211,7 @@ EFI_BOOT_SERVICES mBootServices = {
   (EFI_IMAGE_UNLOAD)                            CoreEfiNotAvailableYetArg1,               // UnloadImage
   (EFI_EXIT_BOOT_SERVICES)                      CoreEfiNotAvailableYetArg2,               // ExitBootServices
   (EFI_GET_NEXT_MONOTONIC_COUNT)                CoreEfiNotAvailableYetArg1,               // GetNextMonotonicCount
-  (EFI_STALL)                                   CoreEfiNotAvailableYetArg1,               // Stall
+  (EFI_STALL)                                   Stall,               // Stall
   (EFI_SET_WATCHDOG_TIMER)                      CoreEfiNotAvailableYetArg4,               // SetWatchdogTimer
   (EFI_CONNECT_CONTROLLER)                      CoreEfiNotAvailableYetArg4,               // ConnectController
   (EFI_DISCONNECT_CONTROLLER)                   CoreEfiNotAvailableYetArg3,               // DisconnectController
