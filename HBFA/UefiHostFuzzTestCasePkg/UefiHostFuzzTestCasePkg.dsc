@@ -274,11 +274,45 @@
    PcdLib|MdePkg/Library/DxePcdLib/DxePcdLib.inf
   }
 
- UefiHostFuzzTestCasePkg/TestCase/OvmfPkg/VirtioPciDecivceDxe/TestVirtioPciDevice.inf{
+ UefiHostFuzzTestCasePkg/TestCase/OvmfPkg/VirtioPciDeviceDxe/TestVirtioPciDevice.inf{
   <LibraryClasses>
    UefiPciCapPciIoLib|OvmfPkg/Library/UefiPciCapPciIoLib/UefiPciCapPciIoLib.inf
    BasePciCapLib|OvmfPkg/Library/BasePciCapLib/BasePciCapLib.inf
-   VirtioPciDeviceStubLib|UefiHostFuzzTestCasePkg/TestStub/VirtioPciDeviceStubLib/VirtioPciDeviceStubLib.inf
+   VirtioPciDevice10StubLib|UefiHostFuzzTestCasePkg/TestStub/VirtioPciDevice10StubLib/VirtioPciDevice10StubLib.inf
+   VirtioLib|OvmfPkg/Library/VirtioLib/VirtioLib.inf
+   UefiRuntimeLib|MdePkg/Library/UefiRuntimeLib/UefiRuntimeLib.inf
+   OrderedCollectionLib|MdePkg/Library/BaseOrderedCollectionRedBlackTreeLib/BaseOrderedCollectionRedBlackTreeLib.inf
+  }
+
+ UefiHostFuzzTestCasePkg/TestCase/OvmfPkg/Virtio10BlkDxe/TestVirtio10Blk.inf{
+  <LibraryClasses>
+   NULL|OvmfPkg/VirtioBlkDxe/VirtioBlk.inf
+   UefiPciCapPciIoLib|OvmfPkg/Library/UefiPciCapPciIoLib/UefiPciCapPciIoLib.inf
+   BasePciCapLib|OvmfPkg/Library/BasePciCapLib/BasePciCapLib.inf
+   VirtioBlkStubLib|UefiHostFuzzTestCasePkg/TestStub/VirtioBlkStubLib/VirtioBlkStubLib.inf
+   VirtioPciDevice10StubLib|UefiHostFuzzTestCasePkg/TestStub/VirtioPciDevice10StubLib/VirtioPciDevice10StubLib.inf
+   VirtioLib|OvmfPkg/Library/VirtioLib/VirtioLib.inf
+   UefiRuntimeLib|MdePkg/Library/UefiRuntimeLib/UefiRuntimeLib.inf
+   OrderedCollectionLib|MdePkg/Library/BaseOrderedCollectionRedBlackTreeLib/BaseOrderedCollectionRedBlackTreeLib.inf
+  }
+
+ UefiHostFuzzTestCasePkg/TestCase/OvmfPkg/VirtioBlkDxe/TestVirtioBlk.inf{
+  <LibraryClasses>
+   NULL|OvmfPkg/VirtioBlkDxe/VirtioBlk.inf
+   NULL|OvmfPkg/VirtioPciDeviceDxe/VirtioPciDeviceDxe.inf
+   VirtioBlkStubLib|UefiHostFuzzTestCasePkg/TestStub/VirtioBlkStubLib/VirtioBlkStubLib.inf
+   VirtioPciDevice10StubLib|UefiHostFuzzTestCasePkg/TestStub/VirtioPciDeviceStubLib/VirtioPciDeviceStubLib.inf
+   VirtioLib|OvmfPkg/Library/VirtioLib/VirtioLib.inf
+   UefiRuntimeLib|MdePkg/Library/UefiRuntimeLib/UefiRuntimeLib.inf
+   OrderedCollectionLib|MdePkg/Library/BaseOrderedCollectionRedBlackTreeLib/BaseOrderedCollectionRedBlackTreeLib.inf
+  }
+
+ UefiHostFuzzTestCasePkg/TestCase/OvmfPkg/VirtioBlkReadWrite/TestVirtioBlkReadWrite.inf{
+  <LibraryClasses>
+   NULL|OvmfPkg/VirtioBlkDxe/VirtioBlk.inf
+   NULL|OvmfPkg/VirtioPciDeviceDxe/VirtioPciDeviceDxe.inf
+   VirtioBlkStubLib|UefiHostFuzzTestCasePkg/TestStub/VirtioBlkStubLib/VirtioBlkStubLib.inf
+   VirtioPciDevice10StubLib|UefiHostFuzzTestCasePkg/TestStub/VirtioPciDeviceStubLib/VirtioPciDeviceStubLib.inf
    VirtioLib|OvmfPkg/Library/VirtioLib/VirtioLib.inf
    UefiRuntimeLib|MdePkg/Library/UefiRuntimeLib/UefiRuntimeLib.inf
    OrderedCollectionLib|MdePkg/Library/BaseOrderedCollectionRedBlackTreeLib/BaseOrderedCollectionRedBlackTreeLib.inf

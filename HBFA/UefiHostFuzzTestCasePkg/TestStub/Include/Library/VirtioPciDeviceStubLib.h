@@ -18,6 +18,8 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 #define VIRTIO_1_0_SIGNATURE SIGNATURE_32 ('V', 'I', 'O', '1')
 
+#define VIRTIO_PCI_DEVICE_SIGNATURE   SIGNATURE_32 ('V', 'P', 'C', 'I')
+
 //
 // Type of the PCI BAR that contains a VirtIo 1.0 config structure.
 //
@@ -63,6 +65,7 @@ typedef struct
   UINT8      Element[0x100 - sizeof(PCI_TYPE00)];
  } PCI_CFG_SPACE;
 
+// Virtio 1.0
 typedef struct {
   UINT32 Device_Feature_Select;
   UINT32 Device_Feature;
@@ -82,6 +85,18 @@ typedef struct {
   UINT64 Queue_Used;
 } VIRTIO_PCI_CAP_COMMON_CONFIG;
 
+// Virtio 0.9.5
+typedef struct {
+  UINT32 Device_Features;
+  UINT32 Guest_Features;
+  UINT32 Queue_Address;
+  UINT16 Queue_Size;
+  UINT16 Queue_Select;
+  UINT16 Queue_Notify;
+  UINT8  Device_Status;
+  UINT8  ISR_Status;
+} VIRTIO_HDR;
+
 EFI_STATUS
 GetBarType (
   IN  EFI_PCI_IO_PROTOCOL  *PciIo,
@@ -98,12 +113,37 @@ InitVirtioPciDevice (
   IN      EFI_PCI_IO_PROTOCOL    *PciIo
 );
 
+
 EFI_STATUS
 EFIAPI
-ParseBufferAndInitVirtioPciDev (
+ParseBufferAndInitVirtioPciDev10 (
   IN      UINT8                   *TestBuffer,
   IN      UINTN                   BufferSize,
   IN OUT  VIRTIO_1_0_DEV          *Device
 );
 
+// Virtio 0.9.5
+typedef struct {
+  UINT32                 Signature;
+  VIRTIO_DEVICE_PROTOCOL VirtioDevice;
+  EFI_PCI_IO_PROTOCOL   *PciIo;
+  UINT64                 OriginalPciAttributes;
+  UINT32                 DeviceSpecificConfigurationOffset;
+} VIRTIO_PCI_DEVICE;
+
+EFI_STATUS
+EFIAPI
+InitVirtioPciDev (
+  IN      EFI_PCI_IO_PROTOCOL     *PciIo,
+  IN OUT  VIRTIO_PCI_DEVICE       *Device
+);
+
+EFI_STATUS
+EFIAPI
+ParseBufferAndInitVirtioPciDev (
+  IN      UINT8                   *TestBuffer,
+  IN      UINTN                   BufferSize,
+  IN      EFI_PCI_IO_PROTOCOL     *PciIo,
+  IN OUT  VIRTIO_PCI_DEVICE       *Device
+);
 #endif

@@ -8,11 +8,11 @@
 
 [Defines]
   INF_VERSION                    = 0x00010005
-  BASE_NAME                      = VirtioPciDeviceStubLib
-  FILE_GUID                      = 1C7BD2C1-C26C-764C-0927-D8BF49A30DDA
+  BASE_NAME                      = VirtioBlkStubLib
+  FILE_GUID                      = 1C7BD8C1-C26C-764C-0977-D8BF49A10DDA
   MODULE_TYPE                    = BASE
   VERSION_STRING                 = 1.0
-  LIBRARY_CLASS                  = VirtioPciDeviceStubLib
+  LIBRARY_CLASS                  = VirtioBlkStubLib
 
 #
 # The following information is for reference only and not required by the build tools.
@@ -21,7 +21,7 @@
 #
 
 [Sources]
-  VirtioPciDeviceStubLib.c
+  VirtioBlkStubLib.c
 
 [Packages]
   MdePkg/MdePkg.dec

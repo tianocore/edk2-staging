@@ -1,5 +1,5 @@
 ## @file
-# Component description file for TestUdf module.
+# Component description file for TestUsb module.
 #
 # Copyright (c) 2018, Intel Corporation. All rights reserved.<BR>
 # SPDX-License-Identifier: BSD-2-Clause-Patent
@@ -8,11 +8,10 @@
 
 [Defines]
   INF_VERSION                    = 0x00010005
-  BASE_NAME                      = VirtioPciDeviceStubLib
-  FILE_GUID                      = 1C7BD2C1-C26C-764C-0927-D8BF49A30DDA
-  MODULE_TYPE                    = BASE
+  BASE_NAME                      = TestVirtioBlk
+  FILE_GUID                      = 7AF4DF33-6FED-4FCD-A393-C80D76BA9702
+  MODULE_TYPE                    = USER_DEFINED
   VERSION_STRING                 = 1.0
-  LIBRARY_CLASS                  = VirtioPciDeviceStubLib
 
 #
 # The following information is for reference only and not required by the build tools.
@@ -21,7 +20,7 @@
 #
 
 [Sources]
-  VirtioPciDeviceStubLib.c
+  TestVirtioBlk.c
 
 [Packages]
   MdePkg/MdePkg.dec
@@ -30,7 +29,12 @@
   UefiHostFuzzTestCasePkg/UefiHostFuzzTestCasePkg.dec
 
 [LibraryClasses]
-  BaseLib
   BaseMemoryLib
-  MemoryAllocationLib
   DebugLib
+  MemoryAllocationLib
+  UefiDriverEntryPoint
+  UefiLib
+  VirtioLib
+  VirtioPciDevice10StubLib
+  VirtioBlkStubLib
+  ToolChainHarnessLib
