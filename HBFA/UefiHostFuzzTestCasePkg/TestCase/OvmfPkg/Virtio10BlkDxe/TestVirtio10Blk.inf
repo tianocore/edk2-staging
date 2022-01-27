@@ -8,8 +8,8 @@
 
 [Defines]
   INF_VERSION                    = 0x00010005
-  BASE_NAME                      = TestVirtioPciDevice
-  FILE_GUID                      = 7AF4DF33-6FED-4FCD-A313-C80D76BA9602
+  BASE_NAME                      = TestVirtio10Blk
+  FILE_GUID                      = 7AF4DF33-6FED-4FCD-A393-C80D76BA9702
   MODULE_TYPE                    = USER_DEFINED
   VERSION_STRING                 = 1.0
 
@@ -20,7 +20,7 @@
 #
 
 [Sources]
-  TestVirtioPciDevice.c
+  TestVirtio10Blk.c
 
 [Packages]
   MdePkg/MdePkg.dec
@@ -32,8 +32,9 @@
   BaseMemoryLib
   DebugLib
   MemoryAllocationLib
-  UefiBootServicesTableLib
   UefiDriverEntryPoint
   UefiLib
+  VirtioLib
+  VirtioPciDevice10StubLib
+  VirtioBlkStubLib
   ToolChainHarnessLib
-  VirtioPciDeviceStubLib

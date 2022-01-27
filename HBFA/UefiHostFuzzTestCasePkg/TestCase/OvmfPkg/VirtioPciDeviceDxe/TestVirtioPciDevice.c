@@ -44,12 +44,11 @@ ParseCapabilities (
   PCI_CAP_LIST *CapList;
   UINT16       VendorInstance;
   PCI_CAP      *VendorCap;
-  printf("111\n");
+
   Status = PciCapPciIoDeviceInit (Device->PciIo, &PciDevice);
   if (EFI_ERROR (Status)) {
     return Status;
   }
-  printf("222\n");
 
   Status = PciCapListInit (PciDevice, &CapList);
   if (EFI_ERROR (Status)) {
