@@ -31,6 +31,10 @@
   UefiBootServicesTableLib
   UefiDriverEntryPoint
   UefiLib
+  PcdLib
+
+[Pcd]
+  gUefiOvmfPkgTokenSpaceGuid.PcdTdxSystemMemoryEnd
 
 [Protocols]
   gEfiPciIoProtocolGuid     ## TO_START

@@ -9,6 +9,7 @@
 
 #include <IndustryStandard/Pci.h>
 #include <IndustryStandard/Virtio.h>
+#include <IndustryStandard/VirtioBlk.h>
 #include <Protocol/PciIo.h>
 #include <Protocol/PciRootBridgeIo.h>
 #include <Protocol/VirtioDevice.h>
@@ -19,10 +20,43 @@
 #include <Library/PciCapPciIoLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiLib.h>
+#include <Library/PcdLib.h>
 
 #include "Virtio10.h"
 
+//
+//The data structure of GCD memory map entry
+//
+#define PCI_CAP_MAP_SIGNATURE  SIGNATURE_32('p','c','a','p')
+typedef struct {
+  UINT32                Signature;
+  LIST_ENTRY            Link;
+  UINT8                 BarIndex;
+  EFI_PHYSICAL_ADDRESS  BaseAddress;
+  UINT64                EndAddress;
+} PCI_CAP_MAP_ENTRY;
 
+typedef struct {
+  BOOLEAN               Valid;
+  EFI_PHYSICAL_ADDRESS  BaseAddress;
+  UINT64                EndAddress;
+} PCI_BAR_BASIC_INFOMATION;
+
+PCI_CAP_MAP_ENTRY mPciCapMapEntryTemplate = {
+  PCI_CAP_MAP_SIGNATURE,
+  {
+    NULL,
+    NULL
+  },
+  0,
+  0,
+  0
+};
+
+BOOLEAN mPciBarsInitialized = FALSE;
+
+PCI_BAR_BASIC_INFOMATION mPciBars[PCI_MAX_BAR] = {0};
+LIST_ENTRY mPciCapMap  = INITIALIZE_LIST_HEAD_VARIABLE (mPciCapMap);
 //
 // Utility functions
 //
@@ -179,6 +213,272 @@ GetBarType (
   return Status;
 }
 
+EFI_STATUS
+InitializePciBarBasicInformation (
+  IN EFI_PCI_IO_PROTOCOL *PciIo
+  )
+{
+  UINT8       BarIndex;
+  UINT8       Index;
+  VOID        *Resources;
+  BOOLEAN     Valid;
+  EFI_STATUS  Status;
+  BOOLEAN     PciBarInvalid;
+  EFI_ACPI_ADDRESS_SPACE_DESCRIPTOR *Descriptor;
+
+  if (mPciBarsInitialized) {
+    return EFI_SUCCESS;
+  }
+
+  Resources = NULL;
+  PciBarInvalid = FALSE;
+
+  for (BarIndex = 0; BarIndex < PCI_MAX_BAR; BarIndex ++) {
+    Status = PciIo->GetBarAttributes (PciIo, BarIndex, NULL, &Resources);
+    if (EFI_ERROR (Status)) {
+      continue;
+    }
+
+    Descriptor = (EFI_ACPI_ADDRESS_SPACE_DESCRIPTOR *)Resources;
+    mPciBars[BarIndex].BaseAddress = Descriptor->AddrRangeMin;
+    mPciBars[BarIndex].EndAddress = Descriptor->AddrRangeMin + Descriptor->AddrLen - 1;
+
+    if (mPciBars[BarIndex].BaseAddress > mPciBars[BarIndex].EndAddress) {
+      // Overflow
+      mPciBars[BarIndex].Valid = FALSE;
+      Status = EFI_DEVICE_ERROR;
+      PciBarInvalid = TRUE;
+      break;
+    }
+
+    // Check if the address range is overlapped with other BARs
+    Valid = TRUE;
+    for (Index = 0; Index < BarIndex; Index ++) {
+      if (!mPciBars[Index].Valid) {
+        continue;
+      }
+      if (mPciBars[BarIndex].BaseAddress > mPciBars[Index].EndAddress
+      || mPciBars[BarIndex].EndAddress < mPciBars[Index].BaseAddress) {
+        // Not overlapped
+      } else {
+        // Overlapped
+        DEBUG ((DEBUG_ERROR, "PCI Bar %d is overlapped with Bar %d\n"));
+        DEBUG ((DEBUG_ERROR, "  Bar %d: 0x%llx - 0x%llx\n", mPciBars[Index].BaseAddress, mPciBars[Index].EndAddress));
+        DEBUG ((DEBUG_ERROR, "  Bar %d: 0x%llx - 0x%llx\n", mPciBars[BarIndex].BaseAddress, mPciBars[BarIndex].EndAddress));
+        Valid = FALSE;
+        PciBarInvalid = TRUE;
+        break;
+      }
+    }
+
+    if (!Valid) {
+      Status = EFI_DEVICE_ERROR;
+      break;
+    }
+
+    mPciBars[BarIndex].Valid = TRUE;
+    FreePool (Resources);
+    Resources = NULL;
+  }
+
+  for (BarIndex = 0; BarIndex < PCI_MAX_BAR; BarIndex ++) {
+    if (mPciBars[BarIndex].Valid) {
+      DEBUG ((DEBUG_INFO, "PCI Bar %d: BaseAddress = 0x%llx, EndAddress = 0x%llx\n",
+        BarIndex, mPciBars[BarIndex].BaseAddress, mPciBars[BarIndex].EndAddress));
+    }
+  }
+
+  if (Resources != NULL) {
+    FreePool (Resources);
+  }
+
+  mPciBarsInitialized = TRUE;
+
+  return PciBarInvalid ? EFI_DEVICE_ERROR : EFI_SUCCESS;
+}
+
+VOID
+DumpPciCapMap (
+  VOID
+  )
+{
+  LIST_ENTRY        *Link;
+  PCI_CAP_MAP_ENTRY *Entry;
+
+  DEBUG ((DEBUG_INFO, "Pci Caps List\n"));
+  DEBUG ((DEBUG_INFO, "---------------------------------\n"));
+  Link = mPciCapMap.ForwardLink;
+  while (Link != &mPciCapMap) {
+    Entry = CR (Link, PCI_CAP_MAP_ENTRY, Link, PCI_CAP_MAP_SIGNATURE);
+    DEBUG ((DEBUG_INFO, "%d  %llx  %llx\n", Entry->BarIndex, Entry->BaseAddress, Entry->EndAddress));
+    Link = Link->ForwardLink;
+  }
+  DEBUG ((DEBUG_INFO, "---------------------------------\n"));
+}
+
+VOID
+CleanPciCapMap (
+  VOID
+  )
+{
+  LIST_ENTRY        *Link;
+  PCI_CAP_MAP_ENTRY *Entry;
+
+  Link = mPciCapMap.ForwardLink;
+  while (Link != &mPciCapMap) {
+    Entry = CR (Link, PCI_CAP_MAP_ENTRY, Link, PCI_CAP_MAP_SIGNATURE);
+    Link = Link->ForwardLink;
+    FreePool (Entry);
+  }
+}
+
+BOOLEAN
+IsConfigValid (
+  IN VIRTIO_1_0_DEV     *Device,
+  IN VIRTIO_1_0_CONFIG  *VirtIoConfig,
+  IN UINT8              ConfigType
+  )
+{
+  UINT8   BarIndex;
+  UINT32  Offset;
+  UINT32  Length;
+  UINT64  BarLength;
+  UINT64  BaseAddress;
+  UINT64  EndAddress;
+  BOOLEAN Overlapped;
+  EFI_PHYSICAL_ADDRESS  SystemMemoryEnd;
+  PCI_CAP_MAP_ENTRY     *Entry;
+  LIST_ENTRY            *Link;
+
+  SystemMemoryEnd = PcdGet64 (PcdTdxSystemMemoryEnd);
+
+  BarIndex = VirtIoConfig->Bar;
+  Offset = VirtIoConfig->Offset;
+  Length = VirtIoConfig->Length;
+  BarLength = mPciBars[BarIndex].EndAddress - mPciBars[BarIndex].BaseAddress + 1;
+  BaseAddress = mPciBars[BarIndex].BaseAddress + Offset;
+  EndAddress = BaseAddress + Length - 1;
+
+  DEBUG ((DEBUG_INFO, "Check VirtIoPciConfig: %d %llx %llx %d\n",
+    BarIndex, BaseAddress, EndAddress, ConfigType));
+
+  if (BarIndex >= PCI_MAX_BAR) {
+    return FALSE;
+  }
+
+  if (!mPciBars[BarIndex].Valid) {
+    DEBUG ((DEBUG_ERROR, "--Bar %d is invalid.\n", BarIndex));
+    return FALSE;
+  }
+
+  if (ConfigType == VIRTIO_PCI_CAP_COMMON_CFG) {
+    if( Length < sizeof (VIRTIO_PCI_COMMON_CFG)) {
+      DEBUG ((DEBUG_ERROR, "--PciCap length is smaller than VIRTIO_PCI_COMMON_CFG\n"));
+      return FALSE;
+    }
+  } else if (ConfigType == VIRTIO_PCI_CAP_DEVICE_CFG) {
+    if (Device->VirtIo.SubSystemDeviceId == VIRTIO_SUBSYSTEM_BLOCK_DEVICE && Length < sizeof (VIRTIO_BLK_CONFIG)) {
+      // It is virtio-blk
+      DEBUG ((DEBUG_ERROR, "--PciCap length is smaller than VIRTIO_BLK_CFG\n"));
+      return FALSE;
+    }
+  }
+
+  // Check if it is in its Bar range
+  if ( Offset > BarLength
+    || Length > BarLength
+    || Offset + Length > BarLength
+    || Offset + Length < Offset) {
+      DEBUG ((DEBUG_ERROR, "--Invalid in Bar range: %d %llx %llx\n",
+        BarIndex,
+        mPciBars[BarIndex].BaseAddress,
+        mPciBars[BarIndex].EndAddress));
+      return FALSE;
+  }
+
+  // check if it is overlapped with DRAM size
+  if (SystemMemoryEnd != 0) {
+    if (BaseAddress < SystemMemoryEnd) {
+      DEBUG ((DEBUG_ERROR, "--Overlapped with System DRAM. [0x%llx]\n", SystemMemoryEnd));
+      return FALSE;
+    }
+  }
+
+  // check if it is overlapped with other Caps
+  Overlapped = FALSE;
+  Link = mPciCapMap.ForwardLink;
+  while (Link != &mPciCapMap) {
+    Entry = CR (Link, PCI_CAP_MAP_ENTRY, Link, PCI_CAP_MAP_SIGNATURE);
+    if ( (BaseAddress >= Entry->BaseAddress && BaseAddress <= Entry->EndAddress)
+      || (EndAddress  >= Entry->BaseAddress && EndAddress  <= Entry->EndAddress)
+      || (BaseAddress <= Entry->BaseAddress && EndAddress  >= Entry->EndAddress)) {
+      // overlapped
+      DEBUG ((DEBUG_ERROR, "--Overlapped with other Configs [0x%llx, 0x%llx]\n",
+        Entry->BaseAddress, Entry->EndAddress));
+      Overlapped = TRUE;
+      break;
+    }
+    Link = Link->ForwardLink;
+  }
+
+  if (Overlapped) {
+    return FALSE;
+  }
+
+  // It is a valid cap, so insert it into mPciCapMap
+  Entry = AllocateCopyPool (sizeof (PCI_CAP_MAP_ENTRY), &mPciCapMapEntryTemplate);
+  ASSERT (Entry != NULL);
+
+  Entry->BarIndex = BarIndex;
+  Entry->BaseAddress = BaseAddress;
+  Entry->EndAddress = EndAddress;
+
+  InsertHeadList (&mPciCapMap, &Entry->Link);
+
+  return TRUE;
+}
+
+BOOLEAN
+ValidateCapabilities (
+  IN VIRTIO_1_0_DEV *Device
+  )
+{
+  EFI_STATUS  Status;
+  BOOLEAN     Valid;
+
+  Valid = TRUE;
+
+  Status = InitializePciBarBasicInformation (Device->PciIo);
+  if (EFI_ERROR (Status)) {
+    return FALSE;
+  }
+
+  if (Device->CommonConfig.Exists) {
+    if (!IsConfigValid (Device, &Device->CommonConfig, VIRTIO_PCI_CAP_COMMON_CFG)) {
+      Valid = FALSE;
+      goto DoneValidateCapabilities;
+    }
+  }
+
+  if (Device->NotifyConfig.Exists) {
+    if (!IsConfigValid (Device, &Device->NotifyConfig, VIRTIO_PCI_CAP_NOTIFY_CFG)) {
+      Valid = FALSE;
+      goto DoneValidateCapabilities;
+    }
+  }
+
+  if (Device->SpecificConfig.Exists) {
+    if (!IsConfigValid (Device, &Device->SpecificConfig, VIRTIO_PCI_CAP_DEVICE_CFG)) {
+      Valid = FALSE;
+      goto DoneValidateCapabilities;
+    }
+  }
+
+DoneValidateCapabilities:
+  CleanPciCapMap ();
+
+  return Valid;
+}
 
 /*
   Traverse the PCI capabilities list of a virtio-1.0 device, and capture the
@@ -972,6 +1272,11 @@ Virtio10BindingStart (
 
   Status = ParseCapabilities (Device);
   if (EFI_ERROR (Status)) {
+    goto ClosePciIo;
+  }
+
+  if (!ValidateCapabilities (Device)) {
+    Status = EFI_DEVICE_ERROR;
     goto ClosePciIo;
   }
 

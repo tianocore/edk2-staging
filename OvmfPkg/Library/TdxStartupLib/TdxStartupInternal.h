@@ -66,6 +66,12 @@ ProcessHobList (
   IN CONST VOID             *HobStart
   );
 
+EFI_PHYSICAL_ADDRESS
+EFIAPI
+GetSystemMemoryEndAddress (
+  IN CONST VOID             *HobStart
+  );
+
 VOID
 EFIAPI
 TransferHobList (

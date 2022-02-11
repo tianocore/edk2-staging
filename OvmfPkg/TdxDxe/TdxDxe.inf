@@ -62,4 +62,5 @@
   gUefiOvmfPkgTokenSpaceGuid.PcdTdRelocatedMailboxBase
   gUefiCpuPkgTokenSpaceGuid.PcdCpuLocalApicBaseAddress
   gUefiOvmfPkgTokenSpaceGuid.PcdOvmfFdBaseAddress
+  gUefiOvmfPkgTokenSpaceGuid.PcdTdxSystemMemoryEnd
 

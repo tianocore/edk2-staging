@@ -112,6 +112,8 @@ TdxStartup(
     CpuDeadLoop ();
   }
 
+  PlatformInfoHob.SystemMemoryEnd = GetSystemMemoryEndAddress (VmmHobList);
+
   //
   // Process Hoblist for the TD
   //

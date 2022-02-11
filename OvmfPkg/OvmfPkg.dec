@@ -387,6 +387,9 @@
   ## This PCD records LASA field in TDX EVENTLOG ACPI table.
   gUefiOvmfPkgTokenSpaceGuid.PcdTdxEventlogAcpiTableLasa|0|UINT64|0x104
 
+  ## This PCD records the system memory end address in Tdx guest
+  gUefiOvmfPkgTokenSpaceGuid.PcdTdxSystemMemoryEnd|0|UINT64|0x105
+
 [PcdsFeatureFlag]
   gUefiOvmfPkgTokenSpaceGuid.PcdQemuBootOrderPciTranslation|TRUE|BOOLEAN|0x1c
   gUefiOvmfPkgTokenSpaceGuid.PcdQemuBootOrderMmioTranslation|FALSE|BOOLEAN|0x1d

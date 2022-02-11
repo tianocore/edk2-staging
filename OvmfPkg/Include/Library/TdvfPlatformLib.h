@@ -18,6 +18,7 @@ typedef struct {
   UINT16                  HostBridgePciDevId;
   BOOLEAN                 SetNxForStack;
   UINT8                   SystemStates[6];
+  UINT64                  SystemMemoryEnd;
 } EFI_HOB_PLATFORM_INFO;
 #pragma pack()
 VOID

@@ -322,6 +322,39 @@ ValidateHobList (
   return TRUE;
 }
 
+EFI_PHYSICAL_ADDRESS
+EFIAPI
+GetSystemMemoryEndAddress (
+  IN CONST VOID            *VmmHobList
+  )
+{
+  EFI_PEI_HOB_POINTERS        Hob;
+  EFI_PHYSICAL_ADDRESS        PhysicalEnd;
+
+  ASSERT (VmmHobList != NULL);
+
+  Hob.Raw = (UINT8 *) VmmHobList;
+  PhysicalEnd = 0;
+
+  //
+  // Parse the HOB list until end of list or matching type is found.
+  //
+  while (!END_OF_HOB_LIST (Hob)) {
+    switch (Hob.Header->HobType) {
+      case EFI_HOB_TYPE_RESOURCE_DESCRIPTOR:
+        if (Hob.ResourceDescriptor->ResourceType == EFI_RESOURCE_SYSTEM_MEMORY) {
+          if (PhysicalEnd < Hob.ResourceDescriptor->PhysicalStart + Hob.ResourceDescriptor->ResourceLength) {
+            PhysicalEnd = Hob.ResourceDescriptor->PhysicalStart + Hob.ResourceDescriptor->ResourceLength;
+          }
+        }
+    }
+    Hob.Raw = GET_NEXT_HOB (Hob);
+  }
+
+  DEBUG ((DEBUG_INFO, "System memory end address = 0x%llx\n", PhysicalEnd));
+  return PhysicalEnd;
+}
+
 /**
   Processing the incoming HobList for the TD
 

@@ -214,6 +214,9 @@ TdxDxeEntryPoint (
   if (PlatformInfo) {
     PcdSet16S (PcdOvmfHostBridgePciDevId, PlatformInfo->HostBridgePciDevId);
 
+    ASSERT (PlatformInfo->SystemMemoryEnd != 0);
+    PcdSet64S (PcdTdxSystemMemoryEnd, PlatformInfo->SystemMemoryEnd);
+
     if ((Res = GetResourceDescriptor(EFI_RESOURCE_MEMORY_MAPPED_IO, (EFI_PHYSICAL_ADDRESS)0x100000000, (EFI_PHYSICAL_ADDRESS)-1)) != NULL) {
       INIT_PCDSET(PcdPciMmio64, Res);
     }
