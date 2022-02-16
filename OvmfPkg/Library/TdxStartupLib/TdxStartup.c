@@ -112,6 +112,8 @@ TdxStartup(
     CpuDeadLoop ();
   }
 
+  SpeculationBarrier ();
+
   PlatformInfoHob.SystemMemoryEnd = GetSystemMemoryEndAddress (VmmHobList);
 
   //
