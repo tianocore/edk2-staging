@@ -14,6 +14,7 @@
 #include <IndustryStandard/SmBios.h>
 
 #include <Base.h>
+#include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
 #include <Library/PcdLib.h>
@@ -53,6 +54,7 @@ DetectSmbiosVersion (
     return RETURN_SUCCESS;
   }
 
+  SpeculationBarrier ();
   QemuFwCfgSelectItem (Anchor);
 
   switch (AnchorSize) {
