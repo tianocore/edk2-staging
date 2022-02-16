@@ -343,6 +343,7 @@ GetSuspendStates (
       DEBUG ((DEBUG_INFO, "ACPI using S3/S4 defaults\n"));
       return;
     }
+    SpeculationBarrier ();
     QemuFwCfgSelectItem (FwCfgItem);
     QemuFwCfgReadBytes (sizeof SystemStates, SystemStates);
   }

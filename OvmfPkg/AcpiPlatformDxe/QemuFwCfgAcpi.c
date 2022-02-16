@@ -695,6 +695,7 @@ ProcessCmdWritePointer (
     return EFI_PROTOCOL_ERROR;
   }
 
+  SpeculationBarrier ();
   PointeeBlob = OrderedCollectionUserStruct (PointeeEntry);
   PointerValue = WritePointer->PointeeOffset;
   if (PointerValue >= PointeeBlob->Size) {
