@@ -252,6 +252,7 @@ PciHostBridgeGetRootBridges (
   if (EFI_ERROR (Status) || FwCfgSize != sizeof ExtraRootBridges) {
     ExtraRootBridges = 0;
   } else {
+    SpeculationBarrier ();
     QemuFwCfgSelectItem (FwCfgItem);
     QemuFwCfgReadBytes (FwCfgSize, &ExtraRootBridges);
 
