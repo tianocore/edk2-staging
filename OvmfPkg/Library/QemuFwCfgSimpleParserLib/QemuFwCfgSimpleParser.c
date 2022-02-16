@@ -106,6 +106,7 @@ QemuFwCfgGetAsString (
     return RETURN_PROTOCOL_ERROR;
   }
 
+  SpeculationBarrier ();
   QemuFwCfgSelectItem (FwCfgItem);
   QemuFwCfgReadBytes (FwCfgSize, Buffer);
 
