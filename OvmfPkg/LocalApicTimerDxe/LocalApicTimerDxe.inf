@@ -38,7 +38,6 @@
   UefiBootServicesTableLib
   BaseLib
   LocalApicLib
-  TdxProbeLib
 
 [Protocols]
   gEfiTimerArchProtocolGuid                     ## PRODUCES

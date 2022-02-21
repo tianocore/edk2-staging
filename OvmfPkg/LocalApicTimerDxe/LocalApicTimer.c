@@ -18,9 +18,6 @@
 #include <Library/LocalApicLib.h>
 #include <Register/LocalApic.h>
 
-#include <Library/TdxProbeLib.h>
-
-
 /**
   This function registers the handler NotifyFunction so it is called every time
   the timer interrupt fires.  It also passes the amount of time since the last
@@ -423,10 +420,6 @@ TimerDriverInitialize (
   )
 {
   EFI_STATUS                             Status;
-
-  if (!TdxIsEnabled ()) {
-    return EFI_UNSUPPORTED;
-  }
 
   //
   // Make sure the Timer Architectural Protocol is not already installed in the system
