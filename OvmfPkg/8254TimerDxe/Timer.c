@@ -341,10 +341,6 @@ TimerDriverInitialize (
   EFI_STATUS  Status;
   UINT32      TimerVector;
 
-  if(TdxIsEnabled()) {
-    return EFI_UNSUPPORTED;
-  }
-
   //
   // Initialize the pointer to our notify function.
   //
