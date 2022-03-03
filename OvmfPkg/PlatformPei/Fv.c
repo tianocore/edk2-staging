@@ -42,9 +42,10 @@ PeiFvInitialization (
     );
 
   //
-  // Let DXE know about the DXE FV
+  // Let DXE know about the DXE FV and NonCC FV
   //
   BuildFvHob (PcdGet32 (PcdOvmfDxeMemFvBase), PcdGet32 (PcdOvmfDxeMemFvSize));
+  BuildFvHob (PcdGet32 (PcdOvmfDxeNonCcFvBase), PcdGet32 (PcdOvmfDxeNonCcFvSize));
 
   SecureS3Needed = mS3Supported && FeaturePcdGet (PcdSmmSmramRequire);
 
@@ -62,18 +63,25 @@ PeiFvInitialization (
     SecureS3Needed ? EfiACPIMemoryNVS : EfiBootServicesData
     );
 
+  BuildMemoryAllocationHob (
+    PcdGet32 (PcdOvmfDxeNonCcFvBase),
+    PcdGet32 (PcdOvmfDxeNonCcFvSize),
+    SecureS3Needed ? EfiACPIMemoryNVS : EfiBootServicesData
+    );
+
+
   //
   // Additionally, said decompression will use temporary memory above the end
-  // of DXEFV, so let's keep away the OS from there too.
+  // of DXE NonCc FV, so let's keep away the OS from there too.
   //
   if (SecureS3Needed) {
-    UINT32 DxeMemFvEnd;
+    UINT32 DxeNonCcFvEnd;
 
-    DxeMemFvEnd = PcdGet32 (PcdOvmfDxeMemFvBase) +
-                  PcdGet32 (PcdOvmfDxeMemFvSize);
+    DxeNonCcFvEnd = PcdGet32 (PcdOvmfDxeNonCcFvBase) +
+                  PcdGet32 (PcdOvmfDxeNonCcFvSize);
     BuildMemoryAllocationHob (
-      DxeMemFvEnd,
-      PcdGet32 (PcdOvmfDecompressionScratchEnd) - DxeMemFvEnd,
+      DxeNonCcFvEnd,
+      PcdGet32 (PcdOvmfDecompressionScratchEnd) - DxeNonCcFvEnd,
       EfiACPIMemoryNVS
       );
   }
