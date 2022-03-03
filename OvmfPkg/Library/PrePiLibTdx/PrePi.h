@@ -26,4 +26,9 @@
 #include <Library/HobLib.h>
 #include <Guid/MemoryAllocationHob.h>
 
+#define EFI_NONCC_FV_GUID \
+  { 0xae047c6d, 0xbce9, 0x426c, { 0xae, 0x3, 0xa6, 0x8e, 0x3b, 0x8a, 0x4, 0x88 }}
+
+extern EFI_GUID gEfiNonCcFvGuid;
+
 #endif

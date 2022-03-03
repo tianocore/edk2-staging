@@ -36,6 +36,9 @@
   OvmfPkg/OvmfPkg.dec
   MdeModulePkg/MdeModulePkg.dec
 
+[Guids]
+  gEfiNonCcFvGuid
+
 [LibraryClasses]
   BaseLib
   DebugLib

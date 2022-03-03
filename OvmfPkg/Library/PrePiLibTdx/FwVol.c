@@ -931,6 +931,14 @@ FfsProcessFvFile (
     DEBUG((DEBUG_INFO, "  Fv Name=%g, Format=%g, Size=0x%x\n", FvImageInfo.FvName, FvImageInfo.FvFormat, FvImageInfo.FvSize));
 
     //
+    // Skip NonCcFv in Td guest.
+    //
+    if (CompareGuid (&FvImageInfo.FvName, &gEfiNonCcFvGuid)) {
+      DEBUG ((DEBUG_INFO, "Skip NonCcFv\n"));
+      continue;
+    }
+
+    //
     // FvAlignment must be more than 8 bytes required by FvHeader structure.
     //
     FvAlignment = 1 << ((FvImageInfo.FvAttributes & EFI_FVB2_ALIGNMENT) >> 16);
