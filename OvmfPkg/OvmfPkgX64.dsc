@@ -43,6 +43,7 @@
   DEFINE TDX_SUPPORT             = TRUE
   DEFINE TDX_MEM_PARTIAL_ACCEPT  = 0
   DEFINE TDX_ACCEPT_PAGE_SIZE    = 2M
+  DEFINE TDX_SHELL_ENABLE        = TRUE
 
   # Network definition
   #

@@ -43,7 +43,7 @@
 # The total size after decompression is (128 + PcdOvmfPeiMemFvSize + 16 +
 # PcdOvmfDxeMemFvSize).
 
-DEFINE OUTPUT_SIZE = (128 + gUefiOvmfPkgTokenSpaceGuid.PcdOvmfPeiMemFvSize + 16 + gUefiOvmfPkgTokenSpaceGuid.PcdOvmfDxeMemFvSize)
+DEFINE OUTPUT_SIZE = (128 + gUefiOvmfPkgTokenSpaceGuid.PcdOvmfPeiMemFvSize + 16 + gUefiOvmfPkgTokenSpaceGuid.PcdOvmfDxeMemFvSize + 16 + gUefiOvmfPkgTokenSpaceGuid.PcdOvmfDxeNonCcFvSize)
 
 # LzmaCustomDecompressLib uses a constant scratch buffer size of 64KB; see
 # SCRATCH_BUFFER_REQUEST_SIZE in

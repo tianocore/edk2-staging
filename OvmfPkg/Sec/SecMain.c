@@ -348,10 +348,12 @@ DecompressMemFvs (
   UINT16                            SectionAttribute;
   UINT32                            AuthenticationStatus;
   VOID                              *OutputBuffer;
+  UINTN                             BufferPtr;
   VOID                              *ScratchBuffer;
   EFI_COMMON_SECTION_HEADER         *FvSection;
   EFI_FIRMWARE_VOLUME_HEADER        *PeiMemFv;
   EFI_FIRMWARE_VOLUME_HEADER        *DxeMemFv;
+  EFI_FIRMWARE_VOLUME_HEADER        *DxeNonCcFv;
   UINT32                            FvHeaderSize;
   UINT32                            FvSectionSize;
 
@@ -400,6 +402,7 @@ DecompressMemFvs (
     return Status;
   }
 
+  // The first Section is PeiMemFv
   Status = FindFfsSectionInstance (
              OutputBuffer,
              OutputBufferSize,
@@ -425,11 +428,15 @@ DecompressMemFvs (
     return EFI_VOLUME_CORRUPTED;
   }
 
+  // Next Section is DxeMemFv
+  BufferPtr = (UINTN)(FvSection + 1) + PcdGet32 (PcdOvmfPeiMemFvSize);
+  OutputBufferSize -= (UINT32)(BufferPtr - (UINTN)OutputBuffer);
+  OutputBuffer = (VOID *)BufferPtr;
   Status = FindFfsSectionInstance (
              OutputBuffer,
              OutputBufferSize,
              EFI_SECTION_FIRMWARE_VOLUME_IMAGE,
-             1,
+             0,
              &FvSection
              );
   if (EFI_ERROR (Status)) {
@@ -454,6 +461,43 @@ DecompressMemFvs (
 
   if (DxeMemFv->Signature != EFI_FVH_SIGNATURE) {
     DEBUG ((DEBUG_ERROR, "Extracted FV at %p does not have FV header signature\n", DxeMemFv));
+    CpuDeadLoop ();
+    return EFI_VOLUME_CORRUPTED;
+  }
+
+  // Next Section is DxeNonCcFv
+  BufferPtr = (UINTN)(FvSection + 1) + PcdGet32 (PcdOvmfDxeMemFvSize);
+  OutputBufferSize -= (UINT32)(BufferPtr - (UINTN)OutputBuffer);
+  OutputBuffer = (VOID *)BufferPtr;
+  Status = FindFfsSectionInstance (
+             OutputBuffer,
+             OutputBufferSize,
+             EFI_SECTION_FIRMWARE_VOLUME_IMAGE,
+             0,
+             &FvSection
+             );
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "Unable to find DXE NonCc FV section. %r\n", Status));
+    return Status;
+  }
+
+  ASSERT (FvSection->Type == EFI_SECTION_FIRMWARE_VOLUME_IMAGE);
+
+  if (IS_SECTION2 (FvSection)) {
+    FvSectionSize = SECTION2_SIZE (FvSection);
+    FvHeaderSize = sizeof (EFI_COMMON_SECTION_HEADER2);
+  } else {
+    FvSectionSize = SECTION_SIZE (FvSection);
+    FvHeaderSize = sizeof (EFI_COMMON_SECTION_HEADER);
+  }
+
+  ASSERT (FvSectionSize == (PcdGet32 (PcdOvmfDxeNonCcFvSize) + FvHeaderSize));
+
+  DxeNonCcFv = (EFI_FIRMWARE_VOLUME_HEADER*)(UINTN) PcdGet32 (PcdOvmfDxeNonCcFvBase);
+  CopyMem (DxeNonCcFv, (VOID*) ((UINTN)FvSection + FvHeaderSize), PcdGet32 (PcdOvmfDxeNonCcFvSize));
+
+  if (DxeNonCcFv->Signature != EFI_FVH_SIGNATURE) {
+    DEBUG ((DEBUG_ERROR, "Extracted FV at %p does not have FV header signature\n", DxeNonCcFv));
     CpuDeadLoop ();
     return EFI_VOLUME_CORRUPTED;
   }

@@ -73,6 +73,8 @@
   gUefiOvmfPkgTokenSpaceGuid.PcdGuidedExtractHandlerTableSize
   gUefiOvmfPkgTokenSpaceGuid.PcdOvmfDecompressionScratchEnd
   gEfiMdeModulePkgTokenSpaceGuid.PcdInitValueInTempStack
+  gUefiOvmfPkgTokenSpaceGuid.PcdOvmfDxeNonCcFvBase
+  gUefiOvmfPkgTokenSpaceGuid.PcdOvmfDxeNonCcFvSize
 
   gUefiOvmfPkgTokenSpaceGuid.PcdUseTdxEmulation
   gUefiOvmfPkgTokenSpaceGuid.PcdOvmfSecGhcbBackupBase
