@@ -26,7 +26,7 @@ MicroSecondDelay (
   IN      UINTN  MicroSeconds
   )
 {
-  ASSERT (FALSE);
+//  ASSERT (FALSE);
   return MicroSeconds;
 }
 
@@ -67,7 +67,7 @@ GetPerformanceCounter (
   VOID
   )
 {
-  ASSERT (FALSE);
+  //ASSERT (FALSE);
   return 0;
 }
 
