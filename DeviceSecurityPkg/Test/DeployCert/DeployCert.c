@@ -262,6 +262,8 @@ MainEntryPoint (
   EFI_STATUS          Status;
   SPDM_CERT_CHAIN     *CertChain;
   UINTN               CertChainSize;
+  SPDM_CERT_CHAIN     *CertChain2;
+  UINTN               CertChain2Size;
   EFI_SIGNATURE_LIST  *SignatureList;
   EFI_SIGNATURE_DATA  *SignatureData;
   UINTN               SignatureListSize;
@@ -349,6 +351,46 @@ MainEntryPoint (
   ASSERT_EFI_ERROR(Status);
   FreePool (SignatureList);
 
+  if (TestConfig != TEST_CONFIG_NO_TRUST_ANCHOR) {
+    Status = gRT->SetVariable (
+                  L"ProvisionSpdmCertChain",
+                  &gEfiDeviceSecurityPkgTestConfig,
+                  EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_BOOTSERVICE_ACCESS,
+                  CertChainSize,
+                  CertChain
+                  );
+    ASSERT_EFI_ERROR(Status);
+    FreePool(CertChain);
+  } else {
+    CertChain2Size = sizeof(SPDM_CERT_CHAIN) + SHA256_HASH_SIZE + TestRootCer2Size;
+    CertChain2 = AllocateZeroPool (CertChain2Size);
+    ASSERT (CertChain2 != NULL);
+    CertChain2->length = (UINT16)CertChain2Size;
+    CertChain2->reserved = 0;
+    Res = X509GetCertFromCertChain(TestRootCer2, TestRootCer2Size, 0, &RootCert,
+                                  &RootCertLen);
+    if (!Res) {
+      Print(L"fail to get root cert\n");
+      return EFI_DEVICE_ERROR;
+    }
+    Sha256HashAll (RootCert, RootCertLen, (VOID *)(CertChain2 + 1));
+    CopyMem (
+      (UINT8 *)CertChain2 + sizeof(SPDM_CERT_CHAIN) + SHA256_HASH_SIZE,
+      TestRootCer2,
+      TestRootCer2Size
+      );
+
+    Status = gRT->SetVariable (
+                  L"ProvisionSpdmCertChain",
+                  &gEfiDeviceSecurityPkgTestConfig,
+                  EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_BOOTSERVICE_ACCESS,
+                  CertChain2Size,
+                  CertChain2
+                  );
+    ASSERT_EFI_ERROR(Status);
+    FreePool(CertChain2);
+  }
+
   {
     //
     // TBD - we need only include the root-cert, instead of the CertChain
@@ -381,15 +423,27 @@ MainEntryPoint (
     FreePool (SignatureList);
   }
 
-  Status = gRT->SetVariable (
-                  L"PrivDevKey",
-                  &gEdkiiDeviceSignatureDatabaseGuid,
-                  EFI_VARIABLE_NON_VOLATILE |
-                    EFI_VARIABLE_BOOTSERVICE_ACCESS |
-                    EFI_VARIABLE_RUNTIME_ACCESS,
-                  TestRootKeySize,
-                  TestRootKey
-                  );
+  if (TestConfig != TEST_CONFIG_NO_TRUST_ANCHOR) {
+    Status = gRT->SetVariable (
+                    L"PrivDevKey",
+                    &gEdkiiDeviceSignatureDatabaseGuid,
+                    EFI_VARIABLE_NON_VOLATILE |
+                      EFI_VARIABLE_BOOTSERVICE_ACCESS |
+                      EFI_VARIABLE_RUNTIME_ACCESS,
+                    TestRootKeySize,
+                    TestRootKey
+                    );
+  } else {
+    Status = gRT->SetVariable (
+                    L"PrivDevKey",
+                    &gEdkiiDeviceSignatureDatabaseGuid,
+                    EFI_VARIABLE_NON_VOLATILE |
+                      EFI_VARIABLE_BOOTSERVICE_ACCESS |
+                      EFI_VARIABLE_RUNTIME_ACCESS,
+                    TestRootKey2Size,
+                    TestRootKey2
+                    );
+  }
   ASSERT_EFI_ERROR(Status);
 
   return EFI_SUCCESS;
