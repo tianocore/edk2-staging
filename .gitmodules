@@ -24,3 +24,6 @@
 [submodule "CryptoMbedTlsPkg/Library/MbedTlsLib/mbedtls"]
 	path = CryptoMbedTlsPkg/Library/MbedTlsLib/mbedtls
 	url = https://github.com/ARMmbed/mbedtls
+[submodule "DeviceSecurityPkg/Library/SpdmLib/libspdm"]
+	path = DeviceSecurityPkg/Library/SpdmLib/libspdm
+	url = https://github.com/DMTF/libspdm.git
