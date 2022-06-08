@@ -16,6 +16,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Library/MemoryAllocationLib.h>
 #include <Library/PcdLib.h>
 #include <Library/HashLib.h>
+#include <Protocol/Tcg2Protocol.h>
 
 #include "HashLibBaseCryptoRouterCommon.h"
 
@@ -128,6 +129,35 @@ HashUpdate (
   return EFI_SUCCESS;
 }
 
+EFI_STATUS
+EFIAPI
+Tpm2ExtendNvIndex (
+  TPMI_RH_NV_INDEX NvIndex,
+  UINT16 DataSize,
+  BYTE *Data)
+{
+  EFI_STATUS        Status;
+  TPMI_RH_NV_AUTH   AuthHandle;
+  TPM2B_MAX_BUFFER  NvExtendData;
+
+  AuthHandle = TPM_RH_OWNER;
+  ZeroMem (&NvExtendData, sizeof(NvExtendData));
+  CopyMem (NvExtendData.buffer, Data, DataSize);
+  NvExtendData.size = DataSize;
+  Status = Tpm2NvExtend (
+             AuthHandle,
+             NvIndex,
+             NULL,
+             &NvExtendData
+             );
+  if (EFI_ERROR(Status)) {
+    DEBUG ((DEBUG_ERROR, "Extend TPM NV index failed, Index: 0x%x Status: %d\n",
+            NvIndex, Status));
+  }
+
+  return Status;
+}
+
 /**
   Hash sequence complete and extend to PCR.
 
@@ -154,6 +184,11 @@ HashCompleteAndExtend (
   UINTN               Index;
   EFI_STATUS          Status;
   UINT32              HashMask;
+  TPM2B_NV_PUBLIC     PublicInfo;
+  TPM2B_NAME          PubName;
+  TPM_ALG_ID          AlgoId;
+  UINT16              DataSize;
+  TPMI_ALG_HASH       HashAlg;
 
   if (mHashInterfaceCount == 0) {
     return EFI_UNSUPPORTED;
@@ -164,21 +199,60 @@ HashCompleteAndExtend (
   HashCtx = (HASH_HANDLE *)HashHandle;
   ZeroMem (DigestList, sizeof (*DigestList));
 
-  for (Index = 0; Index < mHashInterfaceCount; Index++) {
-    HashMask = Tpm2GetHashMaskFromAlgo (&mHashInterface[Index].HashGuid);
-    if ((HashMask & PcdGet32 (PcdTpm2HashMask)) != 0) {
-      mHashInterface[Index].HashUpdate (HashCtx[Index], DataToHash, DataToHashLen);
-      mHashInterface[Index].HashFinal (HashCtx[Index], &Digest);
-      Tpm2SetHashToDigestList (DigestList, &Digest);
+  if (PcrIndex <= MAX_PCR_INDEX) {
+    for (Index = 0; Index < mHashInterfaceCount; Index++) {
+      HashMask = Tpm2GetHashMaskFromAlgo (&mHashInterface[Index].HashGuid);
+      if ((HashMask & PcdGet32 (PcdTpm2HashMask)) != 0) {
+        mHashInterface[Index].HashUpdate (HashCtx[Index], DataToHash, DataToHashLen);
+        mHashInterface[Index].HashFinal (HashCtx[Index], &Digest);
+        Tpm2SetHashToDigestList (DigestList, &Digest);
+      }
     }
-  }
 
   FreePool (HashCtx);
 
-  Status = Tpm2PcrExtend (
-             PcrIndex,
-             DigestList
-             );
+    Status = Tpm2PcrExtend (
+               PcrIndex,
+               DigestList
+               );
+  } else {
+    Status = Tpm2NvReadPublic (
+               PcrIndex,
+               &PublicInfo,
+               &PubName
+               );
+    if (EFI_ERROR(Status)) {
+      DEBUG ((DEBUG_ERROR, "TPM2 Nv 0x%x ReadPublic failed %r\n", PcrIndex, Status));
+      return Status;
+    }
+    DataSize = PublicInfo.nvPublic.dataSize;
+    HashAlg = PublicInfo.nvPublic.nameAlg;
+    ASSERT (DataSize == GetHashSizeFromAlgo (HashAlg));
+
+    for (Index = 0; Index < mHashInterfaceCount; Index++) {
+      HashMask = Tpm2GetHashMaskFromAlgo (&mHashInterface[Index].HashGuid);
+      AlgoId = Tpm2GetAlgoIdFromAlgo (&mHashInterface[Index].HashGuid);
+      if (((HashMask & PcdGet32 (PcdTpm2HashMask)) != 0)
+           && (AlgoId == HashAlg)) {
+        mHashInterface[Index].HashUpdate (HashCtx[Index], DataToHash, DataToHashLen);
+        mHashInterface[Index].HashFinal (HashCtx[Index], &Digest);
+        Tpm2SetHashToDigestList (DigestList, &Digest);
+      }
+    }
+    FreePool (HashCtx);
+
+    if (DigestList->count == 0) {
+      return EFI_NOT_FOUND;
+    }
+    //
+    // Extend to TPM NvIndex
+    //
+    Status = Tpm2ExtendNvIndex (
+               PcrIndex,
+               DataSize,
+               (BYTE *)DigestList->digests[0].digest.sha1
+               );
+  }
   return Status;
 }
 
