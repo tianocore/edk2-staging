@@ -16,16 +16,16 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Protocol/Tcg2Protocol.h>
 
 typedef struct {
-  EFI_GUID    Guid;
-  UINT32      Mask;
+  EFI_GUID  Guid;
+  UINT32    Mask;
 } TPM2_HASH_MASK;
 
-TPM2_HASH_MASK  mTpm2HashMask[] = {
-  { HASH_ALGORITHM_SHA1_GUID,    HASH_ALG_SHA1    },
-  { HASH_ALGORITHM_SHA256_GUID,  HASH_ALG_SHA256  },
-  { HASH_ALGORITHM_SHA384_GUID,  HASH_ALG_SHA384  },
-  { HASH_ALGORITHM_SHA512_GUID,  HASH_ALG_SHA512  },
-  { HASH_ALGORITHM_SM3_256_GUID, HASH_ALG_SM3_256 },
+TPM2_HASH_MASK mTpm2HashMask[] = {
+  {HASH_ALGORITHM_SHA1_GUID,         HASH_ALG_SHA1},
+  {HASH_ALGORITHM_SHA256_GUID,       HASH_ALG_SHA256},
+  {HASH_ALGORITHM_SHA384_GUID,       HASH_ALG_SHA384},
+  {HASH_ALGORITHM_SHA512_GUID,       HASH_ALG_SHA512},
+  {HASH_ALGORITHM_SM3_256_GUID,      HASH_ALG_SM3_256},
 };
 
 /**
@@ -48,7 +48,6 @@ Tpm2GetHashMaskFromAlgo (
       return mTpm2HashMask[Index].Mask;
     }
   }
-
   return 0;
 }
 
