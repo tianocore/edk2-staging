@@ -38,3 +38,6 @@
 
 [Depex]
   TRUE
+
+[Guids]
+  gEfiDeviceSecurityPkgTestConfig    ## CONSUMES
