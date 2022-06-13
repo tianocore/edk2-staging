@@ -17,5 +17,8 @@
 #define TEST_CONFIG_MEAS_CAP_NO_SIG                         6
 #define TEST_CONFIG_NO_MEAS_CAP                             7
 #define TEST_CONFIG_NO_TRUST_ANCHOR                         8
+#define TEST_CONFIG_SECURITY_POLICY_AUTH_ONLY               9
+#define TEST_CONFIG_SECURITY_POLICY_MEAS_ONLY               10
+#define TEST_CONFIG_SECURITY_POLICY_NONE                    11
 
 #endif

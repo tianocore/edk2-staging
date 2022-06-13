@@ -16,6 +16,8 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Library/BaseMemoryLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/MemoryAllocationLib.h>
+#include <Library/UefiRuntimeServicesTableLib.h>
+#include <Test/TestConfig.h>
 
 EDKII_DEVICE_SECURITY_POLICY           mDeviceSecurityPolicyNone = {
   EDKII_DEVICE_SECURITY_POLICY_REVISION,
@@ -27,6 +29,18 @@ EDKII_DEVICE_SECURITY_POLICY           mDeviceSecurityPolicyFull = {
   EDKII_DEVICE_SECURITY_POLICY_REVISION,
   EDKII_DEVICE_MEASUREMENT_REQUIRED,
   EDKII_DEVICE_AUTHENTICATION_REQUIRED
+};
+
+EDKII_DEVICE_SECURITY_POLICY           mDeviceSecurityPolicyAuthOnly = {
+  EDKII_DEVICE_SECURITY_POLICY_REVISION,
+  0,
+  EDKII_DEVICE_AUTHENTICATION_REQUIRED
+};
+
+EDKII_DEVICE_SECURITY_POLICY           mDeviceSecurityPolicyMeasOnly = {
+  EDKII_DEVICE_SECURITY_POLICY_REVISION,
+  EDKII_DEVICE_MEASUREMENT_REQUIRED,
+  0
 };
 
 /**
@@ -55,6 +69,16 @@ GetDevicePolicy (
   EFI_PCI_IO_PROTOCOL         *PciIo;
   UINT16                      PciVendorId;
   UINT16                      PciDeviceId;
+  UINT8                         TestConfig;
+  UINTN                         TestConfigSize;
+
+  Status = gRT->GetVariable (
+                  L"SpdmTestConfig",
+                  &gEfiDeviceSecurityPkgTestConfig,
+                  NULL,
+                  &TestConfigSize,
+                  &TestConfig
+                  );
 
   CopyMem (DeviceSecurityPolicy, &mDeviceSecurityPolicyNone, sizeof(EDKII_DEVICE_SECURITY_POLICY));
 
@@ -80,7 +104,15 @@ GetDevicePolicy (
   ASSERT_EFI_ERROR(Status);
   DEBUG ((DEBUG_INFO, "PCI Info - %04x:%04x\n", PciVendorId, PciDeviceId));
 
-  CopyMem (DeviceSecurityPolicy, &mDeviceSecurityPolicyFull, sizeof(EDKII_DEVICE_SECURITY_POLICY));
+  if (TestConfig == TEST_CONFIG_SECURITY_POLICY_AUTH_ONLY) {
+    CopyMem (DeviceSecurityPolicy, &mDeviceSecurityPolicyAuthOnly, sizeof(EDKII_DEVICE_SECURITY_POLICY));
+  } else if (TestConfig == TEST_CONFIG_SECURITY_POLICY_MEAS_ONLY) {
+    CopyMem (DeviceSecurityPolicy, &mDeviceSecurityPolicyMeasOnly, sizeof(EDKII_DEVICE_SECURITY_POLICY));
+  } else if (TestConfig == TEST_CONFIG_SECURITY_POLICY_NONE) {
+    CopyMem (DeviceSecurityPolicy, &mDeviceSecurityPolicyNone, sizeof(EDKII_DEVICE_SECURITY_POLICY));
+  } else {
+    CopyMem (DeviceSecurityPolicy, &mDeviceSecurityPolicyFull, sizeof(EDKII_DEVICE_SECURITY_POLICY));
+  }
 
   return EFI_SUCCESS;
 }
