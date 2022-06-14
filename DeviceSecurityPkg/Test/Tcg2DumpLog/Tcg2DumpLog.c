@@ -420,6 +420,7 @@ DumpTcgDeviceSecurityEventStruct (
   } else {
     EventDataHeader2 = (TCG_DEVICE_SECURITY_EVENT_DATA_HEADER2 *)TcgDeviceSecurityEvent;
     Print(L"      Length            - 0x%08x\n", EventDataHeader2->Length);
+    Print(L"      AuthState         - 0x%08x\n", EventDataHeader2->AuthState);
     Print(L"      DeviceType        - 0x%08x\n", EventDataHeader2->DeviceType);
     DeviceType = EventDataHeader2->DeviceType;
 
