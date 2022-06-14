@@ -263,6 +263,7 @@ ExtendCertificate (
 EFI_STATUS
 ExtendAuthentication (
   IN  SPDM_DEVICE_CONTEXT        *SpdmDeviceContext,
+  IN UINT8                        AuthState,
   IN UINT8                        MeasurementSummaryHashType,
   IN UINT8                        *MeasurementHash,
   IN UINT8                        *RequesterNonce,
@@ -327,6 +328,7 @@ ExtendAuthentication (
   EventData2 = (VOID *)EventLogPtr;
   CopyMem (EventData2->Signature, TCG_DEVICE_SECURITY_EVENT_DATA_SIGNATURE_2, sizeof(EventData2->Signature));
   EventData2->Version                  = TCG_DEVICE_SECURITY_EVENT_DATA_VERSION_2;
+  EventData2->AuthState                = AuthState;
   EventData2->Reserved                 = 0;
   EventData2->Length                   = (UINT32)EventLogSize;
   EventData2->DeviceType               = GetSpdmDeviceType (SpdmDeviceContext);
@@ -518,7 +520,7 @@ DoDeviceAuthentication (
       AuthState = TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_SUCCESS;
       ExtendCertificate (SpdmDeviceContext, AuthState, CertChainSize, CertChain, TrustAnchor, TrustAnchorSize);
     }
-    ExtendAuthentication (SpdmDeviceContext, SPDM_CHALLENGE_REQUEST_TCB_COMPONENT_MEASUREMENT_HASH, MeasurementHash, RequesterNonce, ResponderNonce);
+    ExtendAuthentication (SpdmDeviceContext, AuthState, SPDM_CHALLENGE_REQUEST_TCB_COMPONENT_MEASUREMENT_HASH, MeasurementHash, RequesterNonce, ResponderNonce);
   }
 
   return Status;

@@ -9,6 +9,9 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 #include "SpdmSecurityLibInterna.h"
 
+//#define TCG_DEVICE_SECURITY_EVENT_DATA_VERSION_SELECTION TCG_DEVICE_SECURITY_EVENT_DATA_VERSION_1
+#define TCG_DEVICE_SECURITY_EVENT_DATA_VERSION_SELECTION TCG_DEVICE_SECURITY_EVENT_DATA_VERSION_2
+
 /**
   This function returns the SPDM device type for TCG SPDM event.
 
@@ -316,13 +319,13 @@ ExtendMeasurement (
     }
 
     Status = TpmMeasureAndLogData (
-               TCG_NV_EXTEND_INDEX_FOR_INSTANCE,
-               EV_NO_ACTION,
+               PcrIndex,
+               EventType,
                EventLog,
                EventLogSize,
                EventLog,
                EventLogSize
-               );
+             );
     DEBUG((DEBUG_INFO, "TpmMeasureAndLogData (Measurement) - %r\n", Status));
     break;
   case TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_FAIL_INVALID:
@@ -389,13 +392,13 @@ ExtendMeasurement (
     }
 
     Status = TpmMeasureAndLogData (
-               TCG_NV_EXTEND_INDEX_FOR_INSTANCE,
-               EV_NO_ACTION,
+               PcrIndex,
+               EventType,
                EventLog,
                EventLogSize,
                EventLog,
                EventLogSize
-               );
+             );
     DEBUG((DEBUG_INFO, "TpmMeasureAndLogData (Measurement) - %r\n", Status));
     return Status;
   default:
