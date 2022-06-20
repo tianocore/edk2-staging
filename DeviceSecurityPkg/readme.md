@@ -1,4 +1,10 @@
-# This is a sample implementation for UEFI SPDM requester
+# UEFI DeviceSecurity Support
+
+## Branch Description
+
+This is a sample implementation for UEFI SPDM requester.
+
+This branch owner: Jiewen Yao <jiewen.yao@intel.com>, Qi Zhang <qi.zhang@intel.com>.
 
 ## Feature
 
