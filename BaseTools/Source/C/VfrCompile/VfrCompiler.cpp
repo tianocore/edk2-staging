@@ -78,6 +78,7 @@ CVfrCompiler::OptionInitialization (
   mOptions.WarningAsError                = FALSE;
   mOptions.AutoDefault                   = FALSE;
   mOptions.CheckDefault                  = FALSE;
+  mOptions.GenJson                       = FALSE;
   memset (&mOptions.OverrideClassGuid, 0, sizeof (EFI_GUID));
 
   if (Argc == 1) {
@@ -95,6 +96,8 @@ CVfrCompiler::OptionInitialization (
       Version ();
       SET_RUN_STATUS (STATUS_DEAD);
       return;
+    } else if (stricmp(Argv[Index], "--variable") == 0) {
+      mOptions.GenJson = TRUE;
     } else if (stricmp(Argv[Index], "-l") == 0) {
       mOptions.CreateRecordListFile = TRUE;
       gCIfrRecordInfoDB.TurnOn ();
@@ -203,6 +206,9 @@ CVfrCompiler::OptionInitialization (
     goto Fail;
   }
   if (SetRecordListFileName () != 0) {
+    goto Fail;
+  }
+  if (SetRecordListJsonFileName () != 0) {
     goto Fail;
   }
   return;
@@ -462,6 +468,34 @@ CVfrCompiler::SetRecordListFileName (
 
   return 0;
 }
+INT8
+CVfrCompiler::SetRecordListJsonFileName (
+  VOID
+  )
+{
+  INTN Length;
+
+  if (mOptions.VfrBaseFileName == NULL) {
+    return -1;
+  }
+
+  Length = strlen (mOptions.OutputDirectory) +
+           strlen (mOptions.VfrBaseFileName) +
+           strlen (VFR_RECORDLIST_JSON_FILENAME_EXTENSION) +
+           1;
+
+  mOptions.RecordListJsonFile = (CHAR8 *) malloc (Length);
+  if (mOptions.RecordListJsonFile == NULL) {
+    return -1;
+  }
+
+  strcpy (mOptions.RecordListJsonFile, mOptions.OutputDirectory);
+  strcat (mOptions.RecordListJsonFile, mOptions.VfrBaseFileName);
+  strcat (mOptions.RecordListJsonFile, VFR_RECORDLIST_JSON_FILENAME_EXTENSION);
+
+
+  return 0;
+}
 
 CVfrCompiler::CVfrCompiler (
   IN INT32      Argc,
@@ -567,6 +601,7 @@ CVfrCompiler::Usage (
     "                 treat warning as an error",
     "  -a  --autodefaut    generate default value for question opcode if some default is missing",
     "  -d  --checkdefault  check the default information in a question opcode",
+    "  --variable     generate default_data binary",
     NULL
     };
   for (Index = 0; Help[Index] != NULL; Index++) {
@@ -904,6 +939,24 @@ Err1:
   fclose (pInFile);
 }
 
+VOID
+CVfrCompiler::GenRecordListJsonFile(
+  VOID
+  )
+{
+  if (!mOptions.GenJson)
+      return;
+
+  FILE   *pOutFile2   = NULL;
+  if ((pOutFile2 = fopen (LongFilePath (mOptions.RecordListJsonFile), "w")) == NULL) {
+    DebugError (NULL, 0, 0001, "Error opening the record list file", "%s",mOptions.RecordListJsonFile );
+  }
+  gCVfrBufferConfig.DumpJson(pOutFile2);
+  fclose (pOutFile2);
+
+  return;
+
+}
 int
 main (
   IN int             Argc,
@@ -921,6 +974,7 @@ main (
   Compiler.GenBinary();
   Compiler.GenCFile();
   Compiler.GenRecordListFile ();
+  Compiler.GenRecordListJsonFile ();
 
   Status = Compiler.RunStatus ();
   if ((Status == STATUS_DEAD) || (Status == STATUS_FAILED)) {

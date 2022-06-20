@@ -1132,7 +1132,8 @@ vfrStatementVarStoreEfi :
                                                                                     &gCVfrVarDataTypeDB,
                                                                                     TypeName,
                                                                                     VarStoreId,
-                                                                                    IsBitVarStore
+                                                                                    IsBitVarStore,
+                                                                                    Attr
                                                                                     ), LineNum);
                                                          _PCATCH(gCVfrDataStorage.GetVarStoreId(StoreName, &VarStoreId, &Guid), SN);
                                                          _PCATCH(gCVfrVarDataTypeDB.GetDataTypeSize(TypeName, &Size), LineNum);
@@ -1143,7 +1144,8 @@ vfrStatementVarStoreEfi :
                                                                                   &gCVfrVarDataTypeDB,
                                                                                   TypeName,
                                                                                   VarStoreId,
-                                                                                  FALSE
+                                                                                  FALSE,
+                                                                                  Attr
                                                                                   ), LineNum);
                                                          _PCATCH(gCVfrDataStorage.GetVarStoreId(TN->getText(), &VarStoreId, &Guid), VN);
                                                          _PCATCH(gCVfrVarDataTypeDB.GetDataTypeSize(TypeName, &Size), N->getLine());

@@ -88,6 +88,7 @@ public:
   virtual BOOLEAN Eof(VOID);
   virtual UINT8   Select (IN CHAR8 *, IN EFI_GUID *, IN CHAR8 *Info = NULL);
   virtual UINT8   Write (IN CONST CHAR8, IN CHAR8 *, IN EFI_GUID *, IN CHAR8 *, IN UINT8, IN UINT16, IN UINT32, IN EFI_IFR_TYPE_VALUE);
+  virtual VOID    DumpJson(IN FILE *);
 #if 0
   virtual UINT8   Read (OUT CHAR8 **, OUT CHAR8 **, OUT CHAR8 **, OUT CHAR8 **, OUT CHAR8 **);
 #endif
@@ -202,6 +203,14 @@ public:
   CVfrVarDataTypeDB (VOID);
   ~CVfrVarDataTypeDB (VOID);
 
+  inline SVfrDataType * GetDataTypeList(VOID) {
+    return mDataTypeList;
+  }
+
+  inline UINT32 GetPackAlign(VOID) {
+    return mPackAlign;
+  }
+
   VOID                DeclareDataTypeBegin (VOID);
   EFI_VFR_RETURN_CODE SetNewTypeName (IN CHAR8 *);
   EFI_VFR_RETURN_CODE DataTypeAddField (IN CHAR8 *, IN CHAR8 *, IN UINT32, IN BOOLEAN);
@@ -249,6 +258,7 @@ struct SVfrVarStorageNode {
   CHAR8                     *mVarStoreName;
   EFI_VARSTORE_ID           mVarStoreId;
   BOOLEAN                   mAssignedFlag; //Create varstore opcode
+  UINT32                    mAttributes;
   struct SVfrVarStorageNode *mNext;
 
   EFI_VFR_VARSTORE_TYPE     mVarStoreType;
@@ -271,7 +281,7 @@ struct SVfrVarStorageNode {
 
 public:
   SVfrVarStorageNode (IN EFI_GUID *, IN CHAR8 *, IN EFI_VARSTORE_ID, IN EFI_STRING_ID, IN UINT32, IN BOOLEAN Flag = TRUE);
-  SVfrVarStorageNode (IN EFI_GUID *, IN CHAR8 *, IN EFI_VARSTORE_ID, IN SVfrDataType *,IN BOOLEAN, IN BOOLEAN Flag = TRUE);
+  SVfrVarStorageNode (IN EFI_GUID *, IN CHAR8 *, IN EFI_VARSTORE_ID, IN SVfrDataType *,IN BOOLEAN, IN UINT32, IN BOOLEAN Flag = TRUE);
   SVfrVarStorageNode (IN CHAR8 *, IN EFI_VARSTORE_ID);
   ~SVfrVarStorageNode (VOID);
 
@@ -347,7 +357,7 @@ public:
 
   EFI_VFR_RETURN_CODE DeclareEfiVarStore (IN CHAR8 *, IN EFI_GUID *, IN EFI_STRING_ID, IN UINT32, IN BOOLEAN Flag = TRUE);
 
-  EFI_VFR_RETURN_CODE DeclareBufferVarStore (IN CHAR8 *, IN EFI_GUID *, IN CVfrVarDataTypeDB *, IN CHAR8 *, IN EFI_VARSTORE_ID, IN BOOLEAN, IN BOOLEAN Flag = TRUE);
+  EFI_VFR_RETURN_CODE DeclareBufferVarStore (IN CHAR8 *, IN EFI_GUID *, IN CVfrVarDataTypeDB *, IN CHAR8 *, IN EFI_VARSTORE_ID, IN BOOLEAN, IN UINT32 Attr = 0, IN BOOLEAN Flag = TRUE);
 
   EFI_VFR_RETURN_CODE GetVarStoreId (IN CHAR8 *, OUT EFI_VARSTORE_ID *, IN EFI_GUID *VarGuid = NULL);
   EFI_VFR_VARSTORE_TYPE GetVarStoreType (IN EFI_VARSTORE_ID);
