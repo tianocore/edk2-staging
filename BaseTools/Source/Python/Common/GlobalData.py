@@ -92,6 +92,11 @@ gFdfParser = None
 BuildOptionPcd = []
 
 #
+# Build flag for generate default variable binary file
+#
+gGenDefaultVarBin = False
+
+#
 # Mixed PCD name dict
 #
 MixedPcd = {}

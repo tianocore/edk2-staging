@@ -101,5 +101,6 @@ class MyOptionParser():
         Parser.add_option("--binary-source", action="store", type="string", dest="BinCacheSource", help="Consume a cache of binary files from the specified directory.")
         Parser.add_option("--genfds-multi-thread", action="store_true", dest="GenfdsMultiThread", default=True, help="Enable GenFds multi thread to generate ffs file.")
         Parser.add_option("--no-genfds-multi-thread", action="store_true", dest="NoGenfdsMultiThread", default=False, help="Disable GenFds multi thread to generate ffs file.")
+        Parser.add_option("--gen-default-variable-bin", action="store_true", dest="GenDefaultVarBin", default=False, help="Generate default variable binary file.")
         Parser.add_option("--disable-include-path-check", action="store_true", dest="DisableIncludePathCheck", default=False, help="Disable the include path check for outside of package.")
         self.BuildOption, self.BuildTarget = Parser.parse_args()

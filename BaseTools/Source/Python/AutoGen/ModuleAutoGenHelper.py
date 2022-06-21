@@ -646,6 +646,10 @@ class PlatformInfo(AutoGenInfo):
                             else:
                                 BuildOptions[ExpandedTool][Attr] = mws.handleWsMacro(Value)
 
+        if self.DataPipe.Get("GenDefaultVarBin"):
+            if BuildOptions.get('VFR',{}).get('FLAGS'):
+                BuildOptions['VFR']['FLAGS'] += " " + "--variable"
+
         return BuildOptions, BuildRuleOrder
 
     def ApplyLibraryInstance(self,module):

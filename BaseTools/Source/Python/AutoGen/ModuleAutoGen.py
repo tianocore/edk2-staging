@@ -434,6 +434,14 @@ class ModuleAutoGen(AutoGen):
     def DebugDir(self):
         return _MakeDir((self.BuildDir, "DEBUG"))
 
+    @cached_property
+    def DefaultVarJsonFiles(self):
+        rt = []
+        for SrcFile in self.SourceFileList:
+            if SrcFile.Ext.lower() == '.vfr':
+                rt.append(os.path.join(self.DebugDir,os.path.join(os.path.dirname(SrcFile.File), "{}_var.json".format(SrcFile.BaseName))))
+        return rt
+
     ## Return the path of custom file
     @cached_property
     def CustomMakefile(self):
