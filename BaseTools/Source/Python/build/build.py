@@ -1464,7 +1464,7 @@ class Build():
             if GlobalData.gGenDefaultVarBin:
                 from AutoGen.GenDefaultVar import DefaultVariableGenerator
                 variable_info_filelist = os.path.join(AutoGenObject.BuildDir,"variable_info_filelist.txt")
-                DefaultVariableGenerator().generate(variable_info_filelist,AutoGenObject.FvDir)
+                DefaultVariableGenerator().generate(variable_info_filelist,AutoGenObject.FvDir, GlobalData.gOptions.Macros)
             if GenFdsApi(AutoGenObject.GenFdsCommandDict, self.Db):
                 EdkLogger.error("build", COMMAND_FAILURE)
             Threshold = self.GetFreeSizeThreshold()
@@ -2375,7 +2375,7 @@ class Build():
                         if GlobalData.gGenDefaultVarBin:
                             from AutoGen.GenDefaultVar import DefaultVariableGenerator
                             variable_info_filelist = os.path.join(Wa.BuildDir,"variable_info_filelist.txt")
-                            DefaultVariableGenerator().generate(variable_info_filelist,Wa.FvDir)
+                            DefaultVariableGenerator().generate(variable_info_filelist,Wa.FvDir, GlobalData.gOptions.Macros)
                         GenFdsStart = time.time()
                         if GenFdsApi(Wa.GenFdsCommandDict, self.Db):
                             EdkLogger.error("build", COMMAND_FAILURE)

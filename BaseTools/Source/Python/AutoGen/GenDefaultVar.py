@@ -493,7 +493,61 @@ class DefaultVariableGenerator():
 
         return final_buff
 
-    def generate(self, jsonlistfile,output_folder):
+    def GenVariableInfo(self, build_macro):
+        VariableInfo = []
+        VariableInfo.append('Variable Information Report\n')
+        if build_macro:
+            VariableInfo.append('[Platform Definitions]')
+            for define_item in build_macro:
+                if '=' in define_item:
+                    VariableInfo.append('* %-20s= %s'%(define_item.split('=')[0], define_item.split('=')[1]))
+                else:
+                    VariableInfo.append('* ' + define_item)
+        VariableInfo.append('\n[Variable List]')
+        VariableInfo.append('# {} variables used in current setting:'.format(len(self.NvVarInfo)))
+        for item in self.NvVarInfo:
+            VariableInfo.append('* ' + item.mName)
+        VariableInfo.append('\n[Variable Details]')
+        for item in self.NvVarInfo:
+            VariableInfo.append('####################')
+            VariableInfo.append('* Variable Name: ' + item.mName)
+            VariableInfo.append('* Variable Type: ' + item.mType)
+            VariableInfo.append('* Variable Guid: ' + item.guid)
+            VariableInfo.append('* Variable Size: ' + hex(item.mTotalSize))
+            
+            ## Field structure Info
+            VariableInfo.append('* Variable Fields: {} fields'.format(len(item.Struct)))
+            VariableInfo.append('{')
+            VariableInfo.append('# %-5s | %-30s | %-15s | %-5s | %s'%('Index', 'Name', 'Type', 'TotalSize', 'Offset'))
+            FieldsNum = len(item.Struct)
+            Name_Offset = {}
+            if FieldsNum == 0:
+                Name_Offset[0] = field['Name']
+            for i in range(FieldsNum):
+                field = item.Struct[i]
+                Name_Offset[field['Offset']] = field['Name']
+                if i != FieldsNum-1:
+                    nextfield = item.Struct[i+1]
+                    for cur_offset in range(field['Offset']+1, nextfield['Offset']):
+                        Name_Offset[cur_offset] = field['Name']
+                VariableInfo.append('  %-5s | %-30s | %-15s | %-5s | %s'%(i, field['Name'], field['Type'], GetTypeSize(field['Type'], item.TypeList), field['Offset']))
+            VariableInfo.append('}')
+            
+            ## Field value Info
+            VariableInfo.append('* Field value: ')
+            VariableInfo.append('{')
+            VariableInfo.append('# defaultstore %-5s | %-30s | %-15s | %-15s | %s'%('xxxx', 'FieldName', 'FieldType', 'FieldOffset', 'FieldValue'))
+            storenum = len(item.fields)
+            for storeid in range(storenum):
+                for Var in item.fields[storeid]:
+                    print('If Var.Offset in Name_Offset: ', Var.Offset in Name_Offset)
+                    if Var.Offset not in Name_Offset:
+                        print('Offset:', Var.Offset)
+                    VariableInfo.append('  defaultstore %-5s | %-30s | %-15s | %-15s | %s'%(storeid, Name_Offset[Var.Offset], Var.Type, Var.Offset, Var.Value))
+            VariableInfo.append('}\n')
+        return VariableInfo
+
+    def generate(self, jsonlistfile, output_folder, build_macro=None):
         if not os.path.exists(jsonlistfile):
             return
         if not os.path.exists(output_folder):
@@ -510,5 +564,11 @@ class DefaultVariableGenerator():
             for default_id in delta_set:
                 with open(os.path.join(output_folder, "defaultdelta_%s.bin" % default_id), "wb") as fd:
                     fd.write(delta_set[default_id])
+
+            VariableInfo = genVar.GenVariableInfo(build_macro)
+            if VariableInfo:
+                with open(os.path.join(output_folder, "VariableInfo.txt"), "w") as reportfile:
+                    for item in VariableInfo:
+                        reportfile.write(item + '\n')
         except:
             EdkLogger.info("generate varbin file failed")
