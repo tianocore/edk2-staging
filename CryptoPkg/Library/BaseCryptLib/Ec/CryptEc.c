@@ -21,13 +21,13 @@
 #include <openssl/ec.h>
 
 /**
-  Temp comment.
+  Return the Nid of certain ECC group.
 
   @param[in]  Group  Identifying number for the ECC group (IANA "Group
                      Description" attribute registrty for RFC 2409).
 
-  @retval EcGroup object  On success.
-  @retval NULL            On failure.
+  @retval !=-1    On success.
+  @retval -1      ECC group not supported.
 **/
 STATIC
 INT32
