@@ -221,7 +221,7 @@ DumpNvIndex (
   TPM2B_MAX_BUFFER    OutData;
   UINT16              Offset;
 
-  AuthHandle = TPM_RH_OWNER;
+  AuthHandle = TPM_RH_PLATFORM;
   Offset = 0;
   DataSize = GetHashSizeFromAlgo (HashAlg);
   ZeroMem (&OutData, sizeof (OutData));
@@ -254,6 +254,41 @@ GetHashInfo (
   return NULL;
 }
 
+/**
+  Get TPML_DIGEST_VALUES compact binary buffer size.
+
+  @param[in]     DigestListBin    TPML_DIGEST_VALUES compact binary buffer.
+
+  @return TPML_DIGEST_VALUES compact binary buffer size.
+**/
+UINT32
+GetDigestListBinSize (
+  IN VOID  *DigestListBin
+  )
+{
+  UINTN          Index;
+  UINT16         DigestSize;
+  UINT32         TotalSize;
+  UINT32         Count;
+  TPMI_ALG_HASH  HashAlg;
+
+  Count         = ReadUnaligned32 (DigestListBin);
+  TotalSize     = sizeof (Count);
+  DigestListBin = (UINT8 *)DigestListBin + sizeof (Count);
+  for (Index = 0; Index < Count; Index++) {
+    HashAlg       = ReadUnaligned16 (DigestListBin);
+    TotalSize    += sizeof (HashAlg);
+    DigestListBin = (UINT8 *)DigestListBin + sizeof (HashAlg);
+
+    DigestSize    = GetHashSizeFromAlgo (HashAlg);
+    TotalSize    += DigestSize;
+    DigestListBin = (UINT8 *)DigestListBin + DigestSize;
+  }
+
+  return TotalSize;
+}
+
+
 VOID
 ExtendEvent (
   IN     TPM_ALG_ID  HashAlg,
@@ -283,6 +318,40 @@ ExtendEvent (
   HashInfo->Init (HashCtx);
   HashInfo->Update (HashCtx, TcgDigest, DigestSize);
   HashInfo->Update (HashCtx, NewDigest, DigestSize);
+  HashInfo->Final (HashCtx, (UINT8 *)TcgDigest);
+  FreePool (HashCtx);
+}
+
+VOID
+ExtendDigestBinEvent (
+  IN     TPM_ALG_ID  HashAlg,
+  IN OUT VOID        *TcgDigest,
+  IN     VOID        *DigestBin,
+  IN     UINT32      DigestBinSize
+  )
+{
+  VOID                     *HashCtx;
+  UINTN                    CtxSize;
+  UINT16                   DigestSize;
+  EFI_HASH_INFO            *HashInfo;
+
+  DigestSize = GetHashSizeFromAlgo (HashAlg);
+
+  HashInfo = GetHashInfo (HashAlg);
+  if (HashInfo == NULL) {
+    SetMem (TcgDigest, DigestSize, 0xFF);
+    return ;
+  }
+
+  CtxSize = HashInfo->GetContextSize ();
+  HashCtx = AllocatePool (CtxSize);
+  if (HashCtx == NULL) {
+    SetMem (TcgDigest, DigestSize, 0xFF);
+    return ;
+  }
+  HashInfo->Init (HashCtx);
+  HashInfo->Update (HashCtx, TcgDigest, DigestSize);
+  HashInfo->Update (HashCtx, DigestBin, DigestBinSize);
   HashInfo->Final (HashCtx, (UINT8 *)TcgDigest);
   FreePool (HashCtx);
 }
@@ -1386,11 +1455,13 @@ DumpEventLog (
 
         TcgPcrEvent2 = (TCG_PCR_EVENT2 *)((UINTN)TcgEfiSpecIdEventStruct + GetTcgEfiSpecIdEventStructSize (TcgEfiSpecIdEventStruct));
         while ((UINTN)TcgPcrEvent2 <= EventLogLastEntry) {
-          if ((PcrIndex == TcgPcrEvent2->PCRIndex) && ((TcgPcrEvent2->EventType != EV_NO_ACTION) || (PcrIndex > MAX_PCR_INDEX))) {
+          if ((PcrIndex <= MAX_PCR_INDEX) && (PcrIndex == TcgPcrEvent2->PCRIndex) && (TcgPcrEvent2->EventType != EV_NO_ACTION)) {
             DigestBuffer = GetDigestFromPcrEvent2 (TcgPcrEvent2, HashAlg);
             if (DigestBuffer != NULL) {
               ExtendEvent (HashAlg, HashDigest.sha1, DigestBuffer);
             }
+          } else if ((PcrIndex > MAX_PCR_INDEX) && (PcrIndex == TcgPcrEvent2->PCRIndex)) {
+            ExtendDigestBinEvent (HashAlg, HashDigest.sha1, &TcgPcrEvent2->Digest, GetDigestListBinSize (&TcgPcrEvent2->Digest));
           }
           TcgPcrEvent2 = (TCG_PCR_EVENT2 *)((UINTN)TcgPcrEvent2 + GetPcrEvent2Size (TcgPcrEvent2));
         }
