@@ -453,8 +453,7 @@ BigNumRShift (
   OUT VOID       *BnRes
   )
 {
-  // BN_rshift() does not modify the first argument, so we remove const.
-  if (BN_rshift ((BIGNUM *)Bn, BnRes, (int)n) == 1) {
+  if (BN_rshift (BnRes, Bn, (int)n) == 1) {
     return EFI_SUCCESS;
   } else {
     return EFI_PROTOCOL_ERROR;
