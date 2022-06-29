@@ -20,5 +20,6 @@
 #define TEST_CONFIG_SECURITY_POLICY_AUTH_ONLY               9
 #define TEST_CONFIG_SECURITY_POLICY_MEAS_ONLY               10
 #define TEST_CONFIG_SECURITY_POLICY_NONE                    11
+#define TEST_CONFIG_MEASUREMENT_CONTENT_MODIFIED            12
 
 #endif
