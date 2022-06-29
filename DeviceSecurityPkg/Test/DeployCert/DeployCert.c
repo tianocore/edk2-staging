@@ -168,12 +168,13 @@ CreateNvIndex (
   PublicInfo.nvPublic.nameAlg = HashAlg;
   PublicInfo.nvPublic.authPolicy.size = 0;
   PublicInfo.nvPublic.dataSize = DataSize;
-  PublicInfo.nvPublic.attributes.TPMA_NV_OWNERWRITE = 1;
-  PublicInfo.nvPublic.attributes.TPMA_NV_OWNERREAD = 1;
+  PublicInfo.nvPublic.attributes.TPMA_NV_PPREAD = 1;
+  PublicInfo.nvPublic.attributes.TPMA_NV_PPWRITE = 1;
+  PublicInfo.nvPublic.attributes.TPMA_NV_PLATFORMCREATE = 1;
   PublicInfo.nvPublic.attributes.TPMA_NV_CLEAR_STCLEAR = 1;
   PublicInfo.nvPublic.attributes.TPMA_NV_EXTEND = 1;
 
-  AuthHandle = TPM_RH_OWNER;
+  AuthHandle = TPM_RH_PLATFORM;
   ZeroMem (&NullAuth, sizeof (NullAuth));
 
   return Tpm2NvDefineSpace (
@@ -212,7 +213,7 @@ ProvisionNvIndex (
   DataSize = GetHashSizeFromAlgo (TPM_ALG_SHA256);
   Offset = 0;
 
-  AuthHandle = TPM_RH_OWNER;
+  AuthHandle = TPM_RH_PLATFORM;
   ZeroMem (&OutData, sizeof (OutData));
   Status = Tpm2NvRead (
               AuthHandle,
