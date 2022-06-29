@@ -2723,7 +2723,6 @@ BigNumValueOne (
   @param[out]  BnRes   The result.
 
   @retval EFI_SUCCESS          On success.
-  @retval EFI_OUT_OF_RESOURCES In case of internal allocation failures.
   @retval EFI_PROTOCOL_ERROR   Otherwise.
 **/
 EFI_STATUS
@@ -2797,6 +2796,9 @@ BigNumContextFree (
 
   @param[in]   Bn     Big number to set.
   @param[in]   Val    Value to set.
+
+  @retval EFI_SUCCESS          On success.
+  @retval EFI_PROTOCOL_ERROR   Otherwise.
 **/
 EFI_STATUS
 EFIAPI
@@ -3128,6 +3130,7 @@ EcPointSetCompressedCoordinates (
   @param[out] PKey     Pointer to an object that will hold the ECDH key.
 
   @retval EFI_SUCCESS        On success.
+  @retval EFI_UNSUPPORTED    ECC group not supported.
   @retval EFI_PROTOCOL_ERROR On failure.
 **/
 EFI_STATUS
@@ -3155,8 +3158,9 @@ EcDhKeyFree (
   @param[in]  PKey     ECDH Key object.
   @param[out] EcPoint  Properly initialized EC Point to hold the public key.
 
-  @retval EFI_SUCCESS        On success.
-  @retval EFI_PROTOCOL_ERROR On failure.
+  @retval EFI_SUCCESS           On success.
+  @retval EFI_INVALID_PARAMETER EcPoint should be initialized properly.
+  @retval EFI_PROTOCOL_ERROR    On failure.
 **/
 EFI_STATUS
 EFIAPI
@@ -3177,8 +3181,10 @@ EcDhGetPubKey (
                              Should be freed by caller using FreePool()
                              function.
 
-  @retval EFI_SUCCESS        On success.
-  @retval EFI_PROTOCOL_ERROR On failure.
+  @retval EFI_SUCCESS           On success.
+  @retval EFI_UNSUPPORTED       ECC group not supported.
+  @retval EFI_INVALID_PARAMETER Secret and SecretSize should be initialized properly.
+  @retval EFI_PROTOCOL_ERROR    On failure.
 **/
 EFI_STATUS
 EFIAPI
