@@ -274,6 +274,17 @@ RETURN_STATUS SpdmMeasurementCollectionFunc (
     UINTN total_size_needed;
     BOOLEAN use_bit_stream;
     UINTN measurement_block_size;
+    EFI_STATUS Status;
+    UINT8 TestConfig;
+    UINTN TestConfigSize;
+
+    Status = gRT->GetVariable (
+                L"SpdmTestConfig",
+                &gEfiDeviceSecurityPkgTestConfig,
+                NULL,
+                &TestConfigSize,
+                &TestConfig
+                );
 
     LIBSPDM_ASSERT(measurement_specification ==
                    SPDM_MEASUREMENT_BLOCK_HEADER_SPECIFICATION_DMTF);
@@ -451,7 +462,11 @@ RETURN_STATUS SpdmMeasurementCollectionFunc (
         /* return content change*/
         if ((request_attribute & SPDM_GET_MEASUREMENTS_REQUEST_ATTRIBUTES_GENERATE_SIGNATURE) !=
             0) {
-            *content_changed = SPDM_MEASUREMENTS_RESPONSE_CONTENT_NO_CHANGE_DETECTED;
+            if (TestConfig == TEST_CONFIG_MEASUREMENT_CONTENT_MODIFIED) {
+                *content_changed = SPDM_MEASUREMENTS_RESPONSE_CONTENT_CHANGE_DETECTED;
+            } else {
+                *content_changed = SPDM_MEASUREMENTS_RESPONSE_CONTENT_NO_CHANGE_DETECTED;
+            }
         } else {
             *content_changed = SPDM_MEASUREMENTS_RESPONSE_CONTENT_CHANGE_NO_DETECTION;
         }
