@@ -23,19 +23,6 @@ Tpm2GetHashMaskFromAlgo (
   );
 
 /**
-  The function get alg id info from algorithm.
-
-  @param HashGuid Hash Guid
-
-  @return AlgoId
-**/
-TPM_ALG_ID
-EFIAPI
-Tpm2GetAlgoIdFromAlgo (
-  IN EFI_GUID  *HashGuid
-  );
-
-/**
   The function set digest to digest list.
 
   @param DigestList digest list

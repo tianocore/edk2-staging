@@ -140,7 +140,7 @@ Tpm2ExtendNvIndex (
   TPMI_RH_NV_AUTH   AuthHandle;
   TPM2B_MAX_BUFFER  NvExtendData;
 
-  AuthHandle = TPM_RH_OWNER;
+  AuthHandle = TPM_RH_PLATFORM;
   ZeroMem (&NvExtendData, sizeof(NvExtendData));
   CopyMem (NvExtendData.buffer, Data, DataSize);
   NvExtendData.size = DataSize;
@@ -179,16 +179,16 @@ HashCompleteAndExtend (
   OUT TPML_DIGEST_VALUES  *DigestList
   )
 {
-  TPML_DIGEST_VALUES  Digest;
-  HASH_HANDLE         *HashCtx;
-  UINTN               Index;
-  EFI_STATUS          Status;
-  UINT32              HashMask;
-  TPM2B_NV_PUBLIC     PublicInfo;
-  TPM2B_NAME          PubName;
-  TPM_ALG_ID          AlgoId;
-  UINT16              DataSize;
-  TPMI_ALG_HASH       HashAlg;
+  TPML_DIGEST_VALUES                Digest;
+  HASH_HANDLE                       *HashCtx;
+  UINTN                             Index;
+  EFI_STATUS                        Status;
+  UINT32                            HashMask;
+  TPML_DIGEST_VALUES                TcgPcrEvent2Digest;
+  EFI_TCG2_EVENT_ALGORITHM_BITMAP   TpmHashAlgorithmBitmap;
+  UINT32                            ActivePcrBanks;
+  UINT32                            *BufferPtr;
+  UINT32                            DigestListBinSize;
 
   if (mHashInterfaceCount == 0) {
     return EFI_UNSUPPORTED;
@@ -199,58 +199,37 @@ HashCompleteAndExtend (
   HashCtx = (HASH_HANDLE *)HashHandle;
   ZeroMem (DigestList, sizeof (*DigestList));
 
-  if (PcrIndex <= MAX_PCR_INDEX) {
-    for (Index = 0; Index < mHashInterfaceCount; Index++) {
-      HashMask = Tpm2GetHashMaskFromAlgo (&mHashInterface[Index].HashGuid);
-      if ((HashMask & PcdGet32 (PcdTpm2HashMask)) != 0) {
-        mHashInterface[Index].HashUpdate (HashCtx[Index], DataToHash, DataToHashLen);
-        mHashInterface[Index].HashFinal (HashCtx[Index], &Digest);
-        Tpm2SetHashToDigestList (DigestList, &Digest);
-      }
+  for (Index = 0; Index < mHashInterfaceCount; Index++) {
+    HashMask = Tpm2GetHashMaskFromAlgo (&mHashInterface[Index].HashGuid);
+    if ((HashMask & PcdGet32 (PcdTpm2HashMask)) != 0) {
+      mHashInterface[Index].HashUpdate (HashCtx[Index], DataToHash, DataToHashLen);
+      mHashInterface[Index].HashFinal (HashCtx[Index], &Digest);
+      Tpm2SetHashToDigestList (DigestList, &Digest);
     }
+  }
 
   FreePool (HashCtx);
 
+  if (PcrIndex <= MAX_PCR_INDEX) {
     Status = Tpm2PcrExtend (
                PcrIndex,
                DigestList
                );
   } else {
-    Status = Tpm2NvReadPublic (
-               PcrIndex,
-               &PublicInfo,
-               &PubName
-               );
-    if (EFI_ERROR(Status)) {
-      DEBUG ((DEBUG_ERROR, "TPM2 Nv 0x%x ReadPublic failed %r\n", PcrIndex, Status));
-      return Status;
-    }
-    DataSize = PublicInfo.nvPublic.dataSize;
-    HashAlg = PublicInfo.nvPublic.nameAlg;
-    ASSERT (DataSize == GetHashSizeFromAlgo (HashAlg));
+    Status = Tpm2GetCapabilitySupportedAndActivePcrs (&TpmHashAlgorithmBitmap, &ActivePcrBanks);
+    ASSERT_EFI_ERROR (Status);
+    ActivePcrBanks = ActivePcrBanks & mSupportedHashMaskCurrent;
+    ZeroMem (&TcgPcrEvent2Digest, sizeof(TcgPcrEvent2Digest));
+    BufferPtr = CopyDigestListToBuffer (&TcgPcrEvent2Digest, DigestList, ActivePcrBanks);
+    DigestListBinSize = (UINT32)((UINT8 *)BufferPtr - (UINT8 *)&TcgPcrEvent2Digest);
 
-    for (Index = 0; Index < mHashInterfaceCount; Index++) {
-      HashMask = Tpm2GetHashMaskFromAlgo (&mHashInterface[Index].HashGuid);
-      AlgoId = Tpm2GetAlgoIdFromAlgo (&mHashInterface[Index].HashGuid);
-      if (((HashMask & PcdGet32 (PcdTpm2HashMask)) != 0)
-           && (AlgoId == HashAlg)) {
-        mHashInterface[Index].HashUpdate (HashCtx[Index], DataToHash, DataToHashLen);
-        mHashInterface[Index].HashFinal (HashCtx[Index], &Digest);
-        Tpm2SetHashToDigestList (DigestList, &Digest);
-      }
-    }
-    FreePool (HashCtx);
-
-    if (DigestList->count == 0) {
-      return EFI_NOT_FOUND;
-    }
     //
     // Extend to TPM NvIndex
     //
     Status = Tpm2ExtendNvIndex (
                PcrIndex,
-               DataSize,
-               (BYTE *)DigestList->digests[0].digest.sha1
+               (UINT16)DigestListBinSize,
+               (BYTE *)&TcgPcrEvent2Digest
                );
   }
   return Status;
