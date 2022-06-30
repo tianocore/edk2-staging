@@ -57,40 +57,33 @@ typedef struct {
 } TCG_DEVICE_SECURITY_EVENT_DATA_HEADER2;
 
 #define TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_SUCCESS          0
-#define TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_FAIL_NO_AUTH     1
-#define TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_FAIL_NO_SIG      2
-#define TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_FAIL_INVALID     3
-#define TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_FAIL_NO_BINDING  4
+#define TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_NO_AUTH          1
+#define TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_NO_BINDING       2
+#define TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_FAIL_NO_SIG      3
+#define TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_FAIL_INVALID     4
 #define TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_NO_SPDM          0xFF
 
 #define TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_SUB_HEADER_TYPE_SPDM_MEASUREMENT_BLOCK          0
-#define TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_SUB_HEADER_TYPE_SPDM_MEASUREMENT_SUMMARY_HASH   1
-#define TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_SUB_HEADER_TYPE_SPDM_CERT_CHAIN                 2
+#define TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_SUB_HEADER_TYPE_SPDM_CERT_CHAIN                 1
 
 typedef struct {
   UINT16                         SpdmVersion;
-  UINT32                         SpdmMeasurementHashAlgo;
   UINT8                          SpdmMeasurementBlockCount;
+  UINT8                          Reserved;
+  UINT32                         SpdmMeasurementHashAlgo;
 //SPDM_MEASUREMENT_BLOCK         SpdmMeasurementBlock;
 } TCG_DEVICE_SECURITY_EVENT_DATA_SUB_HEADER_SPDM_MEASUREMENT_BLOCK;
 
 typedef struct {
   UINT16                         SpdmVersion;
-  UINT32                         SpdmHashAlgo;
-  UINT8                          SpdmMeasurementSummaryHashType;
-//UINT8                          SpdmMeasurementSummaryHash[HashSize];
-} TCG_DEVICE_SECURITY_EVENT_DATA_SUB_HEADER_SPDM_MEASUREMENT_SUMMARY_HASH;
-
-typedef struct {
-  UINT16                         SpdmVersion;
-  UINT32                         SpdmHashAlgo;
   UINT8                          SpdmSlotId;
+  UINT8                          Reserved;
+  UINT32                         SpdmHashAlgo;
 //SPDM_CERT_CHAIN                SpdmCertChain;
 } TCG_DEVICE_SECURITY_EVENT_DATA_SUB_HEADER_SPDM_CERT_CHAIN;
 
 typedef union {
   TCG_DEVICE_SECURITY_EVENT_DATA_SUB_HEADER_SPDM_MEASUREMENT_BLOCK          SpdmMeasurementBlock;
-  TCG_DEVICE_SECURITY_EVENT_DATA_SUB_HEADER_SPDM_MEASUREMENT_SUMMARY_HASH   SpdmMeasurementSummaryHash;
   TCG_DEVICE_SECURITY_EVENT_DATA_SUB_HEADER_SPDM_CERT_CHAIN                 SpdmCertChain;
 } TCG_DEVICE_SECURITY_EVENT_DATA_SUB_HEADER;
 
