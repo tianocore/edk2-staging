@@ -436,7 +436,6 @@ DumpTcgDeviceSecurityEventStruct (
   UINT64                                                                   DevicePathLength;
   TCG_DEVICE_SECURITY_EVENT_DATA_HEADER2                                   *EventDataHeader2;
   TCG_DEVICE_SECURITY_EVENT_DATA_SUB_HEADER_SPDM_MEASUREMENT_BLOCK         *TcgSpdmMeasurementBlock;
-  TCG_DEVICE_SECURITY_EVENT_DATA_SUB_HEADER_SPDM_MEASUREMENT_SUMMARY_HASH  *TcgSpdmSummaryHash;
   TCG_DEVICE_SECURITY_EVENT_DATA_SUB_HEADER_SPDM_CERT_CHAIN                *TcgSpdmCertChain;
   SPDM_CERT_CHAIN                                                          *SpdmCertChain;
   UINT8                                                                    *Digest;
@@ -509,6 +508,7 @@ DumpTcgDeviceSecurityEventStruct (
       TcgSpdmMeasurementBlock = DeviceContext;
       Print(L"      SpdmMeasurementBlockSubHeader:\n");
       Print(L"        SpdmVersion                      - 0x%04x\n", TcgSpdmMeasurementBlock->SpdmVersion);
+      Print(L"        SpdmMeasurementBlockCount        - 0x%02x\n", TcgSpdmMeasurementBlock->SpdmMeasurementBlockCount);
       Print(L"        SpdmMeasurementHashAlgo          - 0x%08x\n", TcgSpdmMeasurementBlock->SpdmMeasurementHashAlgo);
 
       Print(L"        SpdmMeasurementBlock:\n");
@@ -528,43 +528,12 @@ DumpTcgDeviceSecurityEventStruct (
       }
       Print(L"\n");
       break;
-    
-    case TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_SUB_HEADER_TYPE_SPDM_MEASUREMENT_SUMMARY_HASH:
-      TcgSpdmSummaryHash = DeviceContext;
-      Print(L"      SpdmCertChainSubHeader:\n");
-      Print(L"        SpdmVersion                    - 0x%04x\n", TcgSpdmSummaryHash->SpdmVersion);
-      Print(L"        SpdmHashAlgo                   - 0x%08x\n", TcgSpdmSummaryHash->SpdmHashAlgo);
-      Print(L"        SpdmMeasurementSummaryHashType - 0x%02x\n", TcgSpdmSummaryHash->SpdmMeasurementSummaryHashType);
-
-      Digest = (VOID *)(TcgSpdmSummaryHash + 1);
-      switch (TcgSpdmSummaryHash->SpdmHashAlgo) {
-      case SPDM_ALGORITHMS_BASE_HASH_ALGO_TPM_ALG_SHA_256:
-      case SPDM_ALGORITHMS_BASE_HASH_ALGO_TPM_ALG_SHA3_256:
-        DigestSize = 32;
-        break;
-      case SPDM_ALGORITHMS_BASE_HASH_ALGO_TPM_ALG_SHA_384:
-      case SPDM_ALGORITHMS_BASE_HASH_ALGO_TPM_ALG_SHA3_384:
-        DigestSize = 48;
-        break;
-      case SPDM_ALGORITHMS_BASE_HASH_ALGO_TPM_ALG_SHA_512:
-      case SPDM_ALGORITHMS_BASE_HASH_ALGO_TPM_ALG_SHA3_512:
-        DigestSize = 64;
-        break;
-      default:
-        ASSERT(FALSE);
-        break;
-      }
-      Print(L"          SpdmMeasurementSummaryHash   - ");
-      for (Index = 0; Index < DigestSize; Index++) {
-        Print(L"%02x", Digest[Index]);
-      }
-      Print(L"\n");
-      break;
 
     case TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_SUB_HEADER_TYPE_SPDM_CERT_CHAIN:
       TcgSpdmCertChain = DeviceContext;
       Print(L"      SpdmCertChainSubHeader:\n");
       Print(L"        SpdmVersion   - 0x%04x\n", TcgSpdmCertChain->SpdmVersion);
+      Print(L"        SpdmSlotId    - 0x%02x\n", TcgSpdmCertChain->SpdmSlotId);
       Print(L"        SpdmHashAlgo  - 0x%08x\n", TcgSpdmCertChain->SpdmHashAlgo);
 
       Print(L"        SpdmCertChain:\n");
