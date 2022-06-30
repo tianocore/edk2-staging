@@ -410,7 +410,7 @@ ExtendMeasurement (
   }
 
 #if (TCG_DEVICE_SECURITY_EVENT_DATA_VERSION_SELECTION > TCG_DEVICE_SECURITY_EVENT_DATA_VERSION_1)
-  {
+  if (RequesterNonce != NULL && ResponderNonce != NULL) {
     TCG_NV_INDEX_DYNAMIC_EVENT_LOG_STRUCT_SPDM_GET_MEASUREMENTS  DynamicEventLogSpdmGetMeasurementsEvent;
     TCG_NV_INDEX_DYNAMIC_EVENT_LOG_STRUCT_SPDM_MEASUREMENTS      DynamicEventLogSpdmMeasurementsEvent;
 
@@ -506,6 +506,9 @@ DoDeviceMeasurement (
   ZeroMem (RequesterNonce, sizeof(RequesterNonce));
   ZeroMem (ResponderNonce, sizeof(ResponderNonce));
 
+  //
+  // get all measurement once, with signature.
+  //
   Status = SpdmGetMeasurementEx (
              SpdmContext,
              NULL,
@@ -532,7 +535,11 @@ DoDeviceMeasurement (
           .dmtf_spec_measurement_value_size;
 
       AuthState = TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_SUCCESS;
-      Status = ExtendMeasurement (SpdmDeviceContext, AuthState, MeasurementsBlockSize, (UINT8 *)MeasurementBlock, RequesterNonce, ResponderNonce);
+      if (Index == NumberOfBlocks - 1) {
+        Status = ExtendMeasurement (SpdmDeviceContext, AuthState, MeasurementsBlockSize, (UINT8 *)MeasurementBlock, RequesterNonce, ResponderNonce);
+      } else {
+        Status = ExtendMeasurement (SpdmDeviceContext, AuthState, MeasurementsBlockSize, (UINT8 *)MeasurementBlock, NULL, NULL);
+      }
       MeasurementBlock = (VOID *) ((size_t)MeasurementBlock + MeasurementsBlockSize);
       if (Status != EFI_SUCCESS) {
 	    return Status;
@@ -544,9 +551,6 @@ DoDeviceMeasurement (
     return Status;
   } else {
     RequestAttribute = 0;
-    //
-    // TBD: get all measurement once, with signature.
-    //
 
     //
     // 1. Query the total number of measurements available.
@@ -575,7 +579,7 @@ DoDeviceMeasurement (
       DEBUG((DEBUG_INFO, "Index - 0x%x\n", Index));
       //
       // 2. query measurement one by one
-      // TBD get signature in last message only.
+      //    get signature in last message only.
       //
       if (ReceivedNumberOfBlock == NumberOfBlocks - 1) {
         RequestAttribute = RequestAttribute |
@@ -609,25 +613,18 @@ DoDeviceMeasurement (
       ReceivedNumberOfBlock += 1;
       DEBUG((DEBUG_INFO, "ExtendMeasurement...\n"));
       AuthState = TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_SUCCESS;
-      Status = ExtendMeasurement (SpdmDeviceContext, AuthState, MeasurementRecordLength, MeasurementRecord, RequesterNonce, ResponderNonce);
+      if (ReceivedNumberOfBlock == NumberOfBlocks - 1) {
+        Status = ExtendMeasurement (SpdmDeviceContext, AuthState, MeasurementRecordLength, MeasurementRecord, RequesterNonce, ResponderNonce);
+      } else {
+        Status = ExtendMeasurement (SpdmDeviceContext, AuthState, MeasurementRecordLength, MeasurementRecord, NULL, NULL);
+      }
       if (Status != EFI_SUCCESS) {
         return Status;
       }
     }
     if (ReceivedNumberOfBlock != NumberOfBlocks) {
-	    return EFI_DEVICE_ERROR;
+      return EFI_DEVICE_ERROR;
     }
-  }
-
-  {
-    // BUGBUG: Add SVN for test purpose.
-    UINT8   SvnMeasurementRecord[] = {0x01, 0x01, 0x0b, 0x00, // measurement block header
-                                      0x87, 0x08, 0x00,       // DMTF measurement block header
-                                      0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}; // SVN
-    RandomBytes (RequesterNonce, 32);
-    RandomBytes (ResponderNonce, 32);
-    AuthState = TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_SUCCESS;
-    ExtendMeasurement (SpdmDeviceContext, AuthState, sizeof(SvnMeasurementRecord), SvnMeasurementRecord, RequesterNonce, ResponderNonce);
   }
 
   return EFI_SUCCESS;
