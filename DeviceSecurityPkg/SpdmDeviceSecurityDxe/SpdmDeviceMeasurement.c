@@ -224,7 +224,7 @@ ExtendMeasurement (
   switch (SpdmMeasurementBlockDmtfHeader->dmtf_spec_measurement_value_type & 0x7F) {
   case SPDM_MEASUREMENT_BLOCK_MEASUREMENT_TYPE_IMMUTABLE_ROM:
   case SPDM_MEASUREMENT_BLOCK_MEASUREMENT_TYPE_MUTABLE_FIRMWARE:
-  case 7: // SVN
+  case SPDM_MEASUREMENT_BLOCK_MEASUREMENT_TYPE_SECURE_VERSION_NUMBER:
     PcrIndex = 2;
     EventType = EV_EFI_SPDM_FIRMWARE_BLOB;
     break;
@@ -323,7 +323,7 @@ ExtendMeasurement (
   DEBUG((DEBUG_INFO, "TpmMeasureAndLogData (Measurement) - %r\n", Status));
 
 #if (TCG_DEVICE_SECURITY_EVENT_DATA_VERSION_SELECTION > TCG_DEVICE_SECURITY_EVENT_DATA_VERSION_1)
-  {
+  if (RequesterNonce != NULL && ResponderNonce != NULL) {
     TCG_NV_INDEX_DYNAMIC_EVENT_LOG_STRUCT_SPDM_GET_MEASUREMENTS  DynamicEventLogSpdmGetMeasurementsEvent;
     TCG_NV_INDEX_DYNAMIC_EVENT_LOG_STRUCT_SPDM_MEASUREMENTS      DynamicEventLogSpdmMeasurementsEvent;
 
@@ -391,71 +391,130 @@ SpdmSendReceiveGetMeasurement (
   UINT8                                     RequesterNonceIn[SPDM_NONCE_SIZE];
   UINT8                                     RequesterNonce[SPDM_NONCE_SIZE];
   UINT8                                     ResponderNonce[SPDM_NONCE_SIZE];
+  UINT8                                     RequestAttribute;
+  UINT32                                    MeasurementsBlockSize;
+  SPDM_MEASUREMENT_BLOCK_DMTF               *MeasurementBlock;
+  UINT8                                     NumberOfBlock;
+  UINT8                                     ReceivedNumberOfBlock;
 
   SpdmContext = SpdmDriverContext->SpdmContext;
 
+  RequestAttribute = SPDM_GET_MEASUREMENTS_REQUEST_ATTRIBUTES_GENERATE_SIGNATURE;
+
+  MeasurementRecordLength = sizeof (MeasurementRecord);
+  ZeroMem (RequesterNonceIn, sizeof(RequesterNonceIn));
+  ZeroMem (RequesterNonce, sizeof(RequesterNonce));
+  ZeroMem (ResponderNonce, sizeof(ResponderNonce));
+
   //
-  // 1. Query the total number of measurements available.
+  // get all measurement once, with signature.
   //
-  Status = SpdmGetMeasurement (
+  Status = SpdmGetMeasurementEx (
              SpdmContext,
              NULL,
-             SPDM_GET_MEASUREMENTS_REQUEST_ATTRIBUTES_GENERATE_SIGNATURE,
-             SPDM_GET_MEASUREMENTS_REQUEST_MEASUREMENT_OPERATION_TOTAL_NUMBER_OF_MEASUREMENTS,
+             RequestAttribute,
+             SPDM_GET_MEASUREMENTS_REQUEST_MEASUREMENT_OPERATION_ALL_MEASUREMENTS,
              0,
              NULL,
              &NumberOfBlocks,
-             NULL,
-             NULL
+             &MeasurementRecordLength,
+             MeasurementRecord,
+             RequesterNonceIn,
+             RequesterNonce,
+             ResponderNonce
              );
-  if (EFI_ERROR(Status)) {
-    return Status;
-  }
-  DEBUG((DEBUG_INFO, "NumberOfBlocks - 0x%x\n", NumberOfBlocks));
+  if (!EFI_ERROR(Status)) {
+    DEBUG((DEBUG_INFO, "NumberOfBlocks %d\n", NumberOfBlocks));
 
-  for (Index = 1; Index <= NumberOfBlocks; Index++) {
-    DEBUG((DEBUG_INFO, "Index - 0x%x\n", Index));
+    MeasurementBlock = (VOID *)MeasurementRecord;
+    for (Index = 0; Index < NumberOfBlocks; Index++) {
+      MeasurementsBlockSize =
+        sizeof(spdm_measurement_block_dmtf_t) +
+        MeasurementBlock
+          ->measurement_block_dmtf_header
+          .dmtf_spec_measurement_value_size;
+
+      if (Index == NumberOfBlocks - 1) {
+        Status = ExtendMeasurement (SpdmDriverContext, MeasurementsBlockSize, (UINT8 *)MeasurementBlock, RequesterNonce, ResponderNonce);
+      } else {
+        Status = ExtendMeasurement (SpdmDriverContext, MeasurementsBlockSize, (UINT8 *)MeasurementBlock, NULL, NULL);
+      }
+      MeasurementBlock = (VOID *) ((size_t)MeasurementBlock + MeasurementsBlockSize);
+      if (Status != EFI_SUCCESS) {
+	    return Status;
+      }
+    }
+  } else {
+    RequestAttribute = 0;
+
     //
-    // 2. query measurement one by one
-    // TBD get signature in last message only.
+    // 1. Query the total number of measurements available.
     //
-    MeasurementRecordLength = sizeof(MeasurementRecord);
-    ZeroMem (RequesterNonceIn, sizeof(RequesterNonceIn));
-    ZeroMem (RequesterNonce, sizeof(RequesterNonce));
-    ZeroMem (ResponderNonce, sizeof(ResponderNonce));
-    Status = SpdmGetMeasurementEx (
-              SpdmContext,
-              NULL,
-              SPDM_GET_MEASUREMENTS_REQUEST_ATTRIBUTES_GENERATE_SIGNATURE,
-              Index,
-              0,
-              NULL,
-              &NumberOfBlock,
-              &MeasurementRecordLength,
-              MeasurementRecord,
-              RequesterNonceIn,
-              RequesterNonce,
-              ResponderNonce
-              );
+    Status = SpdmGetMeasurement (
+               SpdmContext,
+               NULL,
+               RequestAttribute,
+               SPDM_GET_MEASUREMENTS_REQUEST_MEASUREMENT_OPERATION_TOTAL_NUMBER_OF_MEASUREMENTS,
+               0,
+               NULL,
+               &NumberOfBlocks,
+               NULL,
+               NULL
+               );
     if (EFI_ERROR(Status)) {
       return Status;
     }
+    DEBUG((DEBUG_INFO, "NumberOfBlocks - 0x%x\n", NumberOfBlocks));
 
-    DEBUG((DEBUG_INFO, "ExtendMeasurement...\n", ExtendMeasurement));
-    Status = ExtendMeasurement (SpdmDriverContext, MeasurementRecordLength, MeasurementRecord, RequesterNonce, ResponderNonce);
-    if (Status != EFI_SUCCESS) {
-      return Status;
+    ReceivedNumberOfBlock = 0;
+    for (Index = 1; Index <= 0xFE; Index++) {
+      if (ReceivedNumberOfBlock == NumberOfBlocks) {
+        break;
+      }
+      DEBUG((DEBUG_INFO, "Index - 0x%x\n", Index));
+      //
+      // 2. query measurement one by one
+      //    get signature in last message only.
+      //
+      if (ReceivedNumberOfBlock == NumberOfBlocks - 1) {
+        RequestAttribute = RequestAttribute |
+                           SPDM_GET_MEASUREMENTS_REQUEST_ATTRIBUTES_GENERATE_SIGNATURE;
+      }
+      MeasurementRecordLength = sizeof(MeasurementRecord);
+      ZeroMem (RequesterNonceIn, sizeof(RequesterNonceIn));
+      ZeroMem (RequesterNonce, sizeof(RequesterNonce));
+      ZeroMem (ResponderNonce, sizeof(ResponderNonce));
+      Status = SpdmGetMeasurementEx (
+                SpdmContext,
+                NULL,
+                RequestAttribute,
+                Index,
+                0,
+                NULL,
+                &NumberOfBlock,
+                &MeasurementRecordLength,
+                MeasurementRecord,
+                RequesterNonceIn,
+                RequesterNonce,
+                ResponderNonce
+                );
+      if (EFI_ERROR(Status)) {
+        continue;
+      }
+      ReceivedNumberOfBlock += 1;
+      DEBUG((DEBUG_INFO, "ExtendMeasurement...\n", ExtendMeasurement));
+      if (ReceivedNumberOfBlock == NumberOfBlocks - 1) {
+        Status = ExtendMeasurement (SpdmDriverContext, MeasurementRecordLength, MeasurementRecord, RequesterNonce, ResponderNonce);
+      } else {
+        Status = ExtendMeasurement (SpdmDriverContext, MeasurementRecordLength, MeasurementRecord, NULL, NULL);
+      }
+      if (Status != EFI_SUCCESS) {
+        return Status;
+      }
     }
-  }
-
-  {
-    // BUGBUG: Add SVN for test purpose.
-    UINT8   SvnMeasurementRecord[] = {0x01, 0x01, 0x0b, 0x00, // measurement block header
-                                      0x87, 0x08, 0x00,       // DMTF measurement block header
-                                      0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}; // SVN
-    RandomBytes (RequesterNonce, 32);
-    RandomBytes (ResponderNonce, 32);
-    ExtendMeasurement (SpdmDriverContext, sizeof(SvnMeasurementRecord), SvnMeasurementRecord, RequesterNonce, ResponderNonce);
+    if (ReceivedNumberOfBlock != NumberOfBlocks) {
+      return EFI_DEVICE_ERROR;
+    }
   }
 
   return EFI_SUCCESS;
