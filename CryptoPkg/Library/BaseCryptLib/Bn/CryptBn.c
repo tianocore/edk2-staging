@@ -197,7 +197,7 @@ BigNumExpMod (
     return EFI_OUT_OF_RESOURCES;
   }
 
-  Res = BN_mod_exp (BnRes, BnA, BnP, BnM, Bnctx);
+  Res = BN_mod_exp_mont (BnRes, BnA, BnP, BnM, Bnctx, NULL);
   BN_CTX_free (Bnctx);
 
   return Res ? EFI_SUCCESS : EFI_PROTOCOL_ERROR;
