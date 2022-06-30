@@ -303,6 +303,8 @@ ExtendMeasurement (
 
     TcgSpdmMeasurementBlock = (VOID *)EventLogPtr;
     TcgSpdmMeasurementBlock->SpdmVersion = SpdmDeviceContext->SpdmVersion;
+    TcgSpdmMeasurementBlock->SpdmMeasurementBlockCount = 1;
+    TcgSpdmMeasurementBlock->Reserved = 0;
     TcgSpdmMeasurementBlock->SpdmMeasurementHashAlgo = MeasurementHashAlgo;
     EventLogPtr += sizeof(TCG_DEVICE_SECURITY_EVENT_DATA_SUB_HEADER_SPDM_MEASUREMENT_BLOCK);
 
@@ -380,6 +382,8 @@ ExtendMeasurement (
 
     TcgSpdmMeasurementBlock = (VOID *)EventLogPtr;
     TcgSpdmMeasurementBlock->SpdmVersion = SpdmDeviceContext->SpdmVersion;
+    TcgSpdmMeasurementBlock->SpdmMeasurementBlockCount = 1;
+    TcgSpdmMeasurementBlock->Reserved = 0;
     TcgSpdmMeasurementBlock->SpdmMeasurementHashAlgo = MeasurementHashAlgo;
 #endif
 
