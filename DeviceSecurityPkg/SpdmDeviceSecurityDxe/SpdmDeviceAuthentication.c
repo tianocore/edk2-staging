@@ -181,6 +181,8 @@ ExtendCertificate (
 
   TcgSpdmCertChain = (VOID *)EventLogPtr;
   TcgSpdmCertChain->SpdmVersion = SPDM_MESSAGE_VERSION_11; // TBD - hardcoded
+  TcgSpdmCertChain->SpdmSlotId = 0; // TBD - hardcode
+  TcgSpdmCertChain->Reserved = 0;
   TcgSpdmCertChain->SpdmHashAlgo = BaseHashAlgo;
   EventLogPtr += sizeof(TCG_DEVICE_SECURITY_EVENT_DATA_SUB_HEADER_SPDM_CERT_CHAIN);
 
@@ -242,105 +244,7 @@ ExtendAuthentication (
   IN UINT8                        *ResponderNonce
   )
 {
-  VOID                                                     *EventLog;
-  UINT32                                                   EventLogSize;
-  UINT8                                                    *EventLogPtr;
-  TCG_DEVICE_SECURITY_EVENT_DATA_HEADER2                   *EventData2;
-  TCG_DEVICE_SECURITY_EVENT_DATA_SUB_HEADER_SPDM_MEASUREMENT_SUMMARY_HASH *TcgSpdmSummaryHash;
-  VOID                                                     *DeviceContext;
-  UINTN                                                    DeviceContextSize;
   EFI_STATUS                                               Status;
-  UINTN                                                    DevicePathSize;
-  UINT32                                                   BaseHashAlgo;
-  UINTN                                                    HashSize;
-  UINTN                                                    DataSize;
-  VOID                                                     *SpdmContext;
-  SPDM_DATA_PARAMETER                                      Parameter;
-
-  SpdmContext = SpdmDriverContext->SpdmContext;
-
-  ZeroMem (&Parameter, sizeof(Parameter));
-  Parameter.location = SpdmDataLocationConnection;
-  DataSize = sizeof(BaseHashAlgo);
-  Status = SpdmGetData (SpdmContext, SpdmDataBaseHashAlgo, &Parameter, &BaseHashAlgo, &DataSize);
-  ASSERT_EFI_ERROR(Status);
-
-  switch (BaseHashAlgo) {
-  case SPDM_ALGORITHMS_BASE_HASH_ALGO_TPM_ALG_SHA_256:
-  case SPDM_ALGORITHMS_BASE_HASH_ALGO_TPM_ALG_SHA3_256:
-    HashSize = 32;
-    break;
-  case SPDM_ALGORITHMS_BASE_HASH_ALGO_TPM_ALG_SHA_384:
-  case SPDM_ALGORITHMS_BASE_HASH_ALGO_TPM_ALG_SHA3_384:
-    HashSize = 48;
-    break;
-  case SPDM_ALGORITHMS_BASE_HASH_ALGO_TPM_ALG_SHA_512:
-  case SPDM_ALGORITHMS_BASE_HASH_ALGO_TPM_ALG_SHA3_512:
-    HashSize = 64;
-    break;
-  default:
-    ASSERT(FALSE);
-    break;
-  }
-
-  DeviceContextSize = GetDeviceMeasurementContextSize (SpdmDriverContext);
-  DevicePathSize = GetDevicePathSize (SpdmDriverContext->DevicePath);
-
-  EventLogSize = (UINT32)(sizeof(TCG_DEVICE_SECURITY_EVENT_DATA_HEADER2) +
-                          sizeof(UINT64) + DevicePathSize +
-                          sizeof(TCG_DEVICE_SECURITY_EVENT_DATA_SUB_HEADER_SPDM_MEASUREMENT_SUMMARY_HASH) +
-                          HashSize +
-                          DeviceContextSize);
-  EventLog = AllocatePool (EventLogSize);
-  if (EventLog == NULL) {
-    return EFI_OUT_OF_RESOURCES;
-  }
-  EventLogPtr = EventLog;
-
-  EventData2 = (VOID *)EventLogPtr;
-  CopyMem (EventData2->Signature, TCG_DEVICE_SECURITY_EVENT_DATA_SIGNATURE_2, sizeof(EventData2->Signature));
-  EventData2->Version                  = TCG_DEVICE_SECURITY_EVENT_DATA_VERSION_2;
-  EventData2->Reserved                 = 0;
-  EventData2->Length                   = (UINT32)EventLogSize;
-  EventData2->DeviceType               = GetSpdmDeviceType (SpdmDriverContext);
-
-  EventData2->SubHeaderType            = TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_SUB_HEADER_TYPE_SPDM_MEASUREMENT_SUMMARY_HASH;
-  EventData2->SubHeaderLength          = (UINT32)(sizeof(TCG_DEVICE_SECURITY_EVENT_DATA_SUB_HEADER_SPDM_MEASUREMENT_SUMMARY_HASH) + HashSize);
-  EventData2->SubHeaderUID             = SpdmDriverContext->DeviceUID;
-
-  EventLogPtr = (VOID *)(EventData2 + 1);
-
-  *(UINT64 *)EventLogPtr = (UINT64)DevicePathSize;
-  EventLogPtr += sizeof(UINT64);
-  CopyMem (EventLogPtr, SpdmDriverContext->DevicePath, DevicePathSize);
-  EventLogPtr += DevicePathSize;
-
-  TcgSpdmSummaryHash = (VOID *)EventLogPtr;
-  TcgSpdmSummaryHash->SpdmVersion = SPDM_MESSAGE_VERSION_11; // TBD - hardcoded
-  TcgSpdmSummaryHash->SpdmHashAlgo = BaseHashAlgo;
-  TcgSpdmSummaryHash->SpdmMeasurementSummaryHashType = MeasurementSummaryHashType;
-  EventLogPtr += sizeof(TCG_DEVICE_SECURITY_EVENT_DATA_SUB_HEADER_SPDM_MEASUREMENT_SUMMARY_HASH);
-
-  CopyMem (EventLogPtr, MeasurementHash, HashSize);
-  EventLogPtr += HashSize;
-
-  if (DeviceContextSize != 0) {
-    DeviceContext = (VOID *)EventLogPtr;
-    Status = CreateDeviceMeasurementContext (SpdmDriverContext, DeviceContext, DeviceContextSize);
-    if (Status != EFI_SUCCESS) {
-      return EFI_DEVICE_ERROR;
-    }
-  }
-
-  Status = TpmMeasureAndLogData (
-             2,
-             EV_EFI_SPDM_DEVICE_BLOB,
-             EventLog,
-             EventLogSize,
-             EventLog,
-             EventLogSize
-             );
-  DEBUG((DEBUG_INFO, "TpmMeasureAndLogData (SummaryHash) - %r\n", Status));
 
   {
     TCG_NV_INDEX_DYNAMIC_EVENT_LOG_STRUCT_SPDM_CHALLENGE           DynamicEventLogSpdmChallengeEvent;
