@@ -402,7 +402,7 @@ CreateSpdmDriverContext (
 
     ZeroMem (&Parameter, sizeof(Parameter));
     Parameter.location = SpdmDataLocationLocal;
-    SpdmSetData (SpdmContext, SpdmDataPeerPublicCertChains, &Parameter, Data, DataSize);
+    SpdmSetData (SpdmContext, SpdmDataPeerPublicRootCert, &Parameter, Data, DataSize);
     // Do not free it.
   } else {
     HasRspPubCert = FALSE;
