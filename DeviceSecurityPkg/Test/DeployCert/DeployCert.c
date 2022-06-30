@@ -32,6 +32,9 @@
 extern UINT8 TestRootCer[];
 extern UINTN TestRootCerSize;
 
+extern UINT8 TestCertChain[];
+extern UINTN TestCertChainSize;
+
 extern UINT8 TestRootKey[];
 extern UINTN TestRootKeySize;
 
@@ -261,8 +264,8 @@ MainEntryPoint (
   )
 {
   EFI_STATUS          Status;
-  SPDM_CERT_CHAIN     *CertChain;
-  UINTN               CertChainSize;
+  SPDM_CERT_CHAIN     *ResponderCertChain;
+  UINTN               ResponderCertChainSize;
   SPDM_CERT_CHAIN     *CertChain2;
   UINTN               CertChain2Size;
   EFI_SIGNATURE_LIST  *SignatureList;
@@ -304,40 +307,20 @@ MainEntryPoint (
                   &TestConfig
                   );
 
-  CertChainSize = sizeof(SPDM_CERT_CHAIN) + SHA256_HASH_SIZE + TestRootCerSize;
-  CertChain = AllocateZeroPool (CertChainSize);
-  ASSERT (CertChain != NULL);
-  CertChain->length = (UINT16)CertChainSize;
-  CertChain->reserved = 0;
-  if (TestConfig != TEST_CONFIG_INVALID_CERT_CHAIN) {
-    Res = X509GetCertFromCertChain(TestRootCer, TestRootCerSize, 0, &RootCert,
-                                   &RootCertLen);
-    if (!Res) {
-      Print(L"fail to get root cert\n");
-      return EFI_DEVICE_ERROR;
-    }
-    Sha256HashAll (RootCert, RootCertLen, (VOID *)(CertChain + 1));
-  }
-  CopyMem (
-    (UINT8 *)CertChain + sizeof(SPDM_CERT_CHAIN) + SHA256_HASH_SIZE,
-    TestRootCer,
-    TestRootCerSize
-    );
-
   SignatureHeaderSize = 0;
-  SignatureListSize = sizeof(EFI_SIGNATURE_LIST) + SignatureHeaderSize + sizeof(EFI_GUID) + CertChainSize;
+  SignatureListSize = sizeof(EFI_SIGNATURE_LIST) + SignatureHeaderSize + sizeof(EFI_GUID) + TestRootCerSize;
   SignatureList = AllocateZeroPool (SignatureListSize);
   ASSERT (SignatureList != NULL);
   CopyGuid (&SignatureList->SignatureType, &gEdkiiCertSpdmCertChainGuid);
   SignatureList->SignatureListSize = (UINT32)SignatureListSize;
   SignatureList->SignatureHeaderSize = (UINT32)SignatureHeaderSize;
-  SignatureList->SignatureSize = (UINT32)(sizeof(EFI_GUID) + CertChainSize);
+  SignatureList->SignatureSize = (UINT32)(sizeof(EFI_GUID) + TestRootCerSize);
   SignatureData = (VOID *)((UINT8 *)SignatureList + sizeof(EFI_SIGNATURE_LIST));
   CopyGuid (&SignatureData->SignatureOwner, &gEfiCallerIdGuid);
   CopyMem (
     (UINT8 *)SignatureList + sizeof(EFI_SIGNATURE_LIST) + SignatureHeaderSize + sizeof(EFI_GUID),
-    CertChain,
-    CertChainSize
+    TestRootCer,
+    TestRootCerSize
     );
 
   Status = gRT->SetVariable (
@@ -353,15 +336,35 @@ MainEntryPoint (
   FreePool (SignatureList);
 
   if (TestConfig != TEST_CONFIG_NO_TRUST_ANCHOR) {
+    ResponderCertChainSize = sizeof(SPDM_CERT_CHAIN) + SHA256_HASH_SIZE + TestCertChainSize;
+    ResponderCertChain = AllocateZeroPool (ResponderCertChainSize);
+    ASSERT (ResponderCertChain != NULL);
+    ResponderCertChain->length = (UINT16)ResponderCertChainSize;
+    ResponderCertChain->reserved = 0;
+    if (TestConfig != TEST_CONFIG_INVALID_CERT_CHAIN) {
+      Res = X509GetCertFromCertChain(TestCertChain, TestCertChainSize, 0, &RootCert,
+                                     &RootCertLen);
+      if (!Res) {
+        Print(L"fail to get root cert\n");
+        return EFI_DEVICE_ERROR;
+      }
+      Sha256HashAll (RootCert, RootCertLen, (VOID *)(ResponderCertChain + 1));
+    }
+    CopyMem (
+      (UINT8 *)ResponderCertChain + sizeof(SPDM_CERT_CHAIN) + SHA256_HASH_SIZE,
+       TestCertChain,
+       TestCertChainSize
+    );
+
     Status = gRT->SetVariable (
                   L"ProvisionSpdmCertChain",
                   &gEfiDeviceSecurityPkgTestConfig,
                   EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_BOOTSERVICE_ACCESS,
-                  CertChainSize,
-                  CertChain
+                  ResponderCertChainSize,
+                  ResponderCertChain
                   );
     ASSERT_EFI_ERROR(Status);
-    FreePool(CertChain);
+    FreePool(ResponderCertChain);
   } else {
     CertChain2Size = sizeof(SPDM_CERT_CHAIN) + SHA256_HASH_SIZE + TestRootCer2Size;
     CertChain2 = AllocateZeroPool (CertChain2Size);
