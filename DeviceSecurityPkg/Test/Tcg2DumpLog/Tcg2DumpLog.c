@@ -681,7 +681,6 @@ VARIABLE_TYPE  mSecureBootDatabaseVariableType[] = {
   {EFI_IMAGE_SECURITY_DATABASE,  &gEfiImageSecurityDatabaseGuid},
   {EFI_IMAGE_SECURITY_DATABASE1, &gEfiImageSecurityDatabaseGuid},
   {EDKII_DEVICE_SECURITY_DATABASE, &gEdkiiDeviceSignatureDatabaseGuid},
-  {EDKII_DEVICE_SECURITY_DATABASE1, &gEdkiiDeviceSignatureDatabaseGuid},
 };
 
 BOOLEAN
