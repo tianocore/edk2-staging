@@ -290,8 +290,6 @@ CreateSpdmDriverContext (
   SPDM_DRIVER_DEVICE_CONTEXT        *SpdmDriverContext;
   VOID                              *SpdmContext;
   EFI_STATUS                        Status;
-  EFI_SIGNATURE_LIST                *SignatureList;
-  UINTN                             SignatureListSize;
   VOID                              *Data;
   UINTN                             DataSize;
   SPDM_DATA_PARAMETER               Parameter;
@@ -381,28 +379,16 @@ CreateSpdmDriverContext (
   RecordSpdmDeviceInList (SpdmDriverContext);
 
   Status = GetVariable2 (
-             EDKII_DEVICE_SECURITY_DATABASE,
-             &gEdkiiDeviceSignatureDatabaseGuid,
-             &SignatureList,
-             &SignatureListSize
-             );
+              L"ProvisionSpdmCertChain",
+              &gEfiDeviceSecurityPkgTestConfig,
+              &Data,
+              &DataSize
+              );
   if (!EFI_ERROR(Status)) {
     HasRspPubCert = TRUE;
-    // BUGBUG: Assume only 1 SPDM cert.
-    ASSERT (CompareGuid (&SignatureList->SignatureType, &gEdkiiCertSpdmCertChainGuid));
-    ASSERT (SignatureList->SignatureListSize == SignatureList->SignatureListSize);
-    ASSERT (SignatureList->SignatureHeaderSize == 0);
-    ASSERT (SignatureList->SignatureSize == SignatureList->SignatureListSize - (sizeof(EFI_SIGNATURE_LIST) + SignatureList->SignatureHeaderSize));
-
-    Data = (VOID *)((UINT8 *)SignatureList +
-                             sizeof(EFI_SIGNATURE_LIST) +
-                             SignatureList->SignatureHeaderSize +
-                             sizeof(EFI_GUID));
-    DataSize = SignatureList->SignatureSize - sizeof(EFI_GUID);
-
     ZeroMem (&Parameter, sizeof(Parameter));
     Parameter.location = SpdmDataLocationLocal;
-    SpdmSetData (SpdmContext, SpdmDataPeerPublicRootCert, &Parameter, Data, DataSize);
+    SpdmSetData (SpdmContext, SpdmDataPeerPublicCertChains, &Parameter, Data, DataSize);
     // Do not free it.
   } else {
     HasRspPubCert = FALSE;
