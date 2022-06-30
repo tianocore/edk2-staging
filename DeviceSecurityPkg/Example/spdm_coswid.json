@@ -1,5 +1,8 @@
 {
-      "concise-swid-tag": {
+  "corim": { // #6.501 (unsigned-corim-map)
+    "corim.id": "6F8FE7AF-57A0-4087-83DB-D9D95AB237D4", // 0
+    "corim.tags": [
+      { // 1: #6.505 (concise-coswid-tag)
         "tag-id": "C43C3BDB-74E6-4336-8676-79B3D405FAEA",   // 0
         "tag-version": 0,   // 12
         "software-name": "device_software_name_AAA",   // 1
@@ -46,7 +49,7 @@
                   "size": 65536,   // 20
                   "hash": [   // 7
                     "SHA_256", // 1
-                    "7EB24A18990EE4C958C89773DA6CC9FBC5C278357762D02EC6AB947EB28726FF"
+                    "C8BED0AF5473E956F38C0DEF7C0B5047FF756A6A7E666F5F3FB956C5C1652B1E"
                   ]
                 },
                 {
@@ -54,7 +57,7 @@
                   "size": 65536,   // 20
                   "hash": [   // 7
                     "SHA_256", // 1
-                    "9E50F90FD035924A202C1F5C5246ACC40AB0C3211366E89F0C5D9CF42A6A8D78"
+                    "C6F392711FFFABBEA5986F8E2CEF7F6BAD3BC4BDA1664259406E4675FC66ED8E"
                   ]
                 },
                 {
@@ -62,7 +65,7 @@
                   "size": 4096,   // 20
                   "hash": [   // 7
                     "SHA_256", // 1
-                    "262CAFD9AEC68ED56EA179EC74E067D73711E60DE530D50AA0F3D6087BAD0677"
+                    "C3BE3AAD7A60E53C9BAA8F52219CEF642C32085AD8D42FB42C62D6CF7875D441"
                   ]
                 },
                 {
@@ -70,28 +73,14 @@
                   "size": 4096,   // 20
                   "hash": [   // 7
                     "SHA_256", // 1
-                    "3C902E18125F2DA0E87B76F334A19335925453713E04E52A6606244BFF74F4CA"
+                    "946901532CEC8B44733B6BE24618C3BAF940E3EC23191693FA1932AC2E6241C5"
                   ]
                 }
               ]
             }
           }
-        },
-        "reference-measurement": {   // 58
-          "payload-type": "direct",   // 59 : 0
-          "binding-spec-name": "RIMIM",   // 63
-          "binding-spec-version": "01",   // 64
-          "platform-manufacturer-id": 343,   // 65
-          "platform-manufacturer-name": "device_vendor",   // 66
-          "platform-model-name": "device_model_AAA",   // 67
-          "platform-version": "device_platform_version_3.7.6",   // 68
-          "firmware-manufacturer-id": 343,   // 69
-          "firmware-manufacturer-name": "device_vendor",   // 70
-          "firmware-version": "device_firmware_version_3.7.6",   // 72
-          "rim-link-hash": [   // 73
-            "SHA_256", // 1
-            "1234567812345678123456781234567812345678123456781234567812345678"
-          ]
         }
       }
+    ]
+  }
 }
