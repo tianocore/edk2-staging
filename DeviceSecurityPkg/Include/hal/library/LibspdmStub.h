@@ -149,7 +149,7 @@ typedef enum {
   //
   SpdmDataLocalPublicCertChain,
   SpdmDataLocalSlotCount,
-  SpdmDataPeerPublicRootCertHash,
+  SpdmDataPeerPublicRootCert,
   SpdmDataPeerPublicCertChains,
   SpdmDataBasicMutAuthRequested,
   SpdmDataMutAuthRequested,
