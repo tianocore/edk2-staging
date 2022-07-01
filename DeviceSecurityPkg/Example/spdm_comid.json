@@ -4,7 +4,8 @@
     "corim.tags": [
       { // 1: #6.506 (concise-mid-tag)
         "comid.tag-identity": { // 1
-          "comid.tag-id": "3f06af63a93c11e4979700505690773f" // 0
+          "comid.tag-id": "3f06af63a93c11e4979700505690773f", // 0
+          "comid.tag-version": 0 // 1
         },
         "comid.entity": { // 2
           "comid.entity-name": "device_entity_name_AAA", // 0
