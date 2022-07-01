@@ -171,11 +171,17 @@ CreateNvIndex (
   PublicInfo.nvPublic.nameAlg = HashAlg;
   PublicInfo.nvPublic.authPolicy.size = 0;
   PublicInfo.nvPublic.dataSize = DataSize;
-  PublicInfo.nvPublic.attributes.TPMA_NV_PPREAD = 1;
   PublicInfo.nvPublic.attributes.TPMA_NV_PPWRITE = 1;
-  PublicInfo.nvPublic.attributes.TPMA_NV_PLATFORMCREATE = 1;
-  PublicInfo.nvPublic.attributes.TPMA_NV_CLEAR_STCLEAR = 1;
   PublicInfo.nvPublic.attributes.TPMA_NV_EXTEND = 1;
+  PublicInfo.nvPublic.attributes.TPMA_NV_WRITEALL = 1;
+  PublicInfo.nvPublic.attributes.TPMA_NV_PPREAD = 1;
+  PublicInfo.nvPublic.attributes.TPMA_NV_OWNERREAD = 1;
+  PublicInfo.nvPublic.attributes.TPMA_NV_AUTHREAD = 1;
+  PublicInfo.nvPublic.attributes.TPMA_NV_POLICYREAD = 1;
+  PublicInfo.nvPublic.attributes.TPMA_NV_NO_DA = 1;
+  PublicInfo.nvPublic.attributes.TPMA_NV_ORDERLY = 1;
+  PublicInfo.nvPublic.attributes.TPMA_NV_CLEAR_STCLEAR = 1;
+  PublicInfo.nvPublic.attributes.TPMA_NV_PLATFORMCREATE = 1;
 
   AuthHandle = TPM_RH_PLATFORM;
   ZeroMem (&NullAuth, sizeof (NullAuth));
