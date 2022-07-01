@@ -221,7 +221,7 @@ DumpNvIndex (
   TPM2B_MAX_BUFFER    OutData;
   UINT16              Offset;
 
-  AuthHandle = TPM_RH_PLATFORM;
+  AuthHandle = TPM_RH_OWNER;
   Offset = 0;
   DataSize = GetHashSizeFromAlgo (HashAlg);
   ZeroMem (&OutData, sizeof (OutData));
