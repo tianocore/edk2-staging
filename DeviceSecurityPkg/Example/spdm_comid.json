@@ -103,7 +103,7 @@
             ],
             [
               {
-                "comid_class": { // 0
+                "comid.class": { // 0
                   "comid.class-id": "67b28b6c34cc40a19117ab5b05911e37", // 0
                   "comid.vendor": "device_vendor", // 1
                   "comid.model": "device_model_AAA", // 2
