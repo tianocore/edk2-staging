@@ -89,7 +89,7 @@ EFIAPI
 LibspdmX509GetExtensionDataStub (
   IN     CONST UINT8 *Cert,
   IN     UINTN       CertSize,
-  IN     UINT8       *Oid,
+  IN     CONST UINT8 *Oid,
   IN     UINTN       OidSize,
      OUT UINT8       *ExtensionData,
   IN OUT UINTN       *ExtensionDataSize
@@ -214,4 +214,4 @@ LibspdmX509GetExtendedBasicConstraints            (
   CONST UINT8 *cert,
   UINTN cert_size,
   UINT8 *basic_constraints,
-  UINTN *basic_constraints_size);
+  UINTN *basic_constraints_size);

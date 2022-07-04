@@ -852,3 +852,12 @@ SpdmPskMasterSecretHkdfExpandFunc (
   return Result;
 }
 
+BOOLEAN
+EFIAPI
+SpdmGenCsrFun (UINT32 BaseHashAlgo, UINT32 BaseAsymAlgo, BOOLEAN *NeedReset,
+                    UINT8 *RequesterInfo, UINTN RequesterInfoLength,
+                    UINTN *CsrLen, UINT8 **CsrPointer)
+{
+    return FALSE;
+}
+

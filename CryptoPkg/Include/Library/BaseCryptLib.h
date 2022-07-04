@@ -33,12 +33,12 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #define CRYPTO_NID_RSAPSS2048          0x0104
 #define CRYPTO_NID_RSAPSS3072          0x0105
 #define CRYPTO_NID_RSAPSS4096          0x0106
-#define CRYPTO_NID_ECDSA_NIST_P256     0x0106
-#define CRYPTO_NID_ECDSA_NIST_P384     0x0107
-#define CRYPTO_NID_ECDSA_NIST_P521     0x0108
-#define CRYPTO_NID_ECDSA_SM2_P256      0x0109
-#define CRYPTO_NID_EDDSA_ED25519       0x010A
-#define CRYPTO_NID_EDDSA_ED448         0x010B
+#define CRYPTO_NID_ECDSA_NIST_P256     0x0107
+#define CRYPTO_NID_ECDSA_NIST_P384     0x0108
+#define CRYPTO_NID_ECDSA_NIST_P521     0x0109
+#define CRYPTO_NID_ECDSA_SM2_P256      0x010A
+#define CRYPTO_NID_EDDSA_ED25519       0x010B
+#define CRYPTO_NID_EDDSA_ED448         0x010C
 
 // Key Exchange
 #define CRYPTO_NID_FFDHE2048           0x0201
@@ -3901,9 +3901,9 @@ X509VerifyCert (
 BOOLEAN
 EFIAPI
 X509VerifyCertChain (
-  IN UINT8 *  RootCert,
-  IN UINTN    RootCartLength,
-  IN UINT8 *  CertChain,
+  IN CONST UINT8 *  RootCert,
+  IN UINTN RootCertLength,
+  IN CONST UINT8 *  CertChain,
   IN UINTN    CertChainLength
   );
 
@@ -3929,13 +3929,12 @@ X509VerifyCertChain (
 BOOLEAN
 EFIAPI
 X509GetCertFromCertChain (
-  IN UINT8  *CertChain,
+  IN CONST UINT8  *CertChain,
   IN UINTN  CertChainLength,
-  IN INT32  CertIndex,
-  OUT UINT8 **Cert,
+  IN CONST INT32  CertIndex,
+  OUT CONST UINT8 **Cert,
   OUT UINTN *CertLength
   );
-
 
 /**
   Construct a X509 object from DER-encoded certificate data.

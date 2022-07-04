@@ -23,6 +23,10 @@ typedef UINTN   uintn;
 typedef INTN    intn;
 typedef uintn   return_status;
 
+#ifndef SIZE_MAX
+#define SIZE_MAX MAX_UINTN
+#endif
+
 #ifndef true
 #define true    1
 #endif
@@ -438,6 +442,7 @@ typedef enum {
 #define        libspdm_responder_data_sign                SpdmResponderDataSignFunc
 #define        libspdm_psk_handshake_secret_hkdf_expand      SpdmPskHandshakeSecretHkdfExpandFunc
 #define        libspdm_psk_master_secret_hkdf_expand          SpdmPskMasterSecretHkdfExpandFunc
+#define        libspdm_gen_csr                                SpdmGenCsrFun
 /*Interface of spdm_lib_config.h*/
 /*Interface of spdm_requester_lib.h*/
 #define        SpdmSendRequest            libspdm_send_request

@@ -2085,9 +2085,9 @@ X509GetTBSCert (
 BOOLEAN
 EFIAPI
 X509VerifyCertChain (
-  IN UINT8 *  RootCert,
-  IN UINTN    RootCertLength,
-  IN UINT8 *  CertChain,
+  IN CONST UINT8 *  RootCert,
+  IN UINTN RootCertLength,
+  IN CONST UINT8 *  CertChain,
   IN UINTN    CertChainLength
   )
 {
@@ -2169,10 +2169,10 @@ X509VerifyCertChain (
 BOOLEAN
 EFIAPI
 X509GetCertFromCertChain (
-  IN UINT8  *CertChain,
+  IN CONST UINT8  *CertChain,
   IN UINTN  CertChainLength,
-  IN INT32  CertIndex,
-  OUT UINT8 **Cert,
+  IN CONST INT32  CertIndex,
+  OUT CONST UINT8 **Cert,
   OUT UINTN *CertLength
   )
 {
