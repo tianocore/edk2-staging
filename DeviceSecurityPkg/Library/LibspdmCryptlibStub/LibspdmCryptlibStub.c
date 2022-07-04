@@ -194,9 +194,9 @@ EFIAPI
 LibspdmX509GetExtensionDataStub (
   IN     CONST UINT8 *Cert,
   IN     UINTN       CertSize,
-  IN     UINT8       *Oid,
+  IN     CONST UINT8 *Oid,
   IN     UINTN       OidSize,
-     OUT UINT8       *ExtensionData,
+  OUT    UINT8       *ExtensionData,
   IN OUT UINTN       *ExtensionDataSize
   )
 {
@@ -205,7 +205,7 @@ LibspdmX509GetExtensionDataStub (
   Status = X509GetExtensionData (
              Cert,
              CertSize,
-             Oid,
+             (UINT8 *)Oid,
              OidSize,
              ExtensionData,
              ExtensionDataSize
@@ -449,4 +449,3 @@ LibspdmX509GetExtendedBasicConstraints            (
 
   return TRUE;
 }
-                                                          
