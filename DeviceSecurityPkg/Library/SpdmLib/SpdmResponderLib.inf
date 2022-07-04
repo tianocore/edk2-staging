@@ -46,6 +46,7 @@
   libspdm/library/spdm_responder_lib/libspdm_rsp_receive_send.c
   libspdm/library/spdm_responder_lib/libspdm_rsp_respond_if_ready.c
   libspdm/library/spdm_responder_lib/libspdm_rsp_version.c
+  libspdm/library/spdm_responder_lib/libspdm_rsp_csr.c
 
 [Packages]
   MdePkg/MdePkg.dec
