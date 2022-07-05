@@ -24,23 +24,25 @@ SpdmDeviceAuthenticationAndMeasurement (
 {
   EFI_STATUS                  Status;
   SPDM_DEVICE_CONTEXT         *SpdmDeviceContext;
+  BOOLEAN                     IsAuthenticated;
 
   SpdmDeviceContext = CreateSpdmDeviceContext (SpdmDeviceInfo);
   if (SpdmDeviceContext == NULL) {
     return EFI_UNSUPPORTED;
   }
 
-
+  IsAuthenticated = FALSE;
   if ((SecuriryPolicy->AuthenticationPolicy & EDKII_DEVICE_AUTHENTICATION_REQUIRED) != 0) {
     Status = DoDeviceAuthentication (SpdmDeviceContext);
     if (EFI_ERROR(Status)) {
       DEBUG((DEBUG_ERROR, "DoDeviceAuthentication failed - %r\n", Status));
       return Status;
     }
+    IsAuthenticated = TRUE;
   }
 
   if ((SecuriryPolicy->MeasurementPolicy & EDKII_DEVICE_MEASUREMENT_REQUIRED) != 0) {
-    Status = DoDeviceMeasurement (SpdmDeviceContext);
+    Status = DoDeviceMeasurement (SpdmDeviceContext, IsAuthenticated);
     if (EFI_ERROR(Status)) {
 	  DEBUG((DEBUG_ERROR, "DoDeviceMeasurement failed - %r\n", Status));
 	  return Status;
