@@ -127,7 +127,8 @@ CreateDeviceMeasurementContext (
 **/
 EFI_STATUS
 DoDeviceMeasurement (
-  IN  SPDM_DEVICE_CONTEXT         *SpdmDeviceContext
+  IN  SPDM_DEVICE_CONTEXT         *SpdmDeviceContext,
+  IN  BOOLEAN                     IsAuthenticated
   );
 
 /**
