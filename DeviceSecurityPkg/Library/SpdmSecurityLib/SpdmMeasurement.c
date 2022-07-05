@@ -464,7 +464,8 @@ ExtendMeasurement (
 **/
 EFI_STATUS
 DoDeviceMeasurement (
-  IN  SPDM_DEVICE_CONTEXT         *SpdmDeviceContext
+  IN  SPDM_DEVICE_CONTEXT         *SpdmDeviceContext,
+  IN  BOOLEAN                     IsAuthenticated
   )
 {
   EFI_STATUS                    Status;
@@ -499,7 +500,10 @@ DoDeviceMeasurement (
     return EFI_UNSUPPORTED;
   }
 
-  RequestAttribute = SPDM_GET_MEASUREMENTS_REQUEST_ATTRIBUTES_GENERATE_SIGNATURE;
+  RequestAttribute = 0;
+  if (IsAuthenticated) {
+    RequestAttribute |= SPDM_GET_MEASUREMENTS_REQUEST_ATTRIBUTES_GENERATE_SIGNATURE;
+  }
 
   MeasurementRecordLength = sizeof (MeasurementRecord);
   ZeroMem (RequesterNonceIn, sizeof(RequesterNonceIn));
