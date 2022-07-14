@@ -211,8 +211,7 @@ PciIoRead (
   default:
     break;
   }
-
-  CopyMem (Buffer, (void *) ((UINT64) PciCfg->PciBasicCfg.Device.Bar[0] + Offset), Len);
+  CopyMem (Buffer, (void *) ((UINT64) (PciCfg->PciBasicCfg.Device.Bar[1]) << 32 | PciCfg->PciBasicCfg.Device.Bar[0] + Offset), Len);
   return EFI_SUCCESS;
 }
 
@@ -242,8 +241,7 @@ PciIoWrite (
   default:
     break;
   }
-
-  CopyMem ((void *) ((UINT64) PciCfg->PciBasicCfg.Device.Bar[0] + Offset), Buffer, Len);
+  CopyMem ((void *) ((UINT64) (PciCfg->PciBasicCfg.Device.Bar[1]) << 32 | PciCfg->PciBasicCfg.Device.Bar[0] + Offset), Buffer, Len);
   return EFI_SUCCESS;
 }
 
@@ -273,11 +271,12 @@ EFI_STATUS
 EFIAPI
 InitVirtioPciDev (
   IN      EFI_PCI_IO_PROTOCOL     *PciIo,
+  IN      VOID                    *ConfigRegion,
   IN OUT  VIRTIO_PCI_DEVICE       *Device
 ) {
-  VOID                          *ConfigRegion;
+  // VOID                          *ConfigRegion;
 
-  ConfigRegion = (VOID *) AllocatePool(sizeof (PCI_CFG_SPACE) + sizeof(VIRTIO_HDR) + sizeof (VIRTIO_BLK_CONFIG));
+  // ConfigRegion = (VOID *) AllocatePool(sizeof (PCI_CFG_SPACE) + sizeof(VIRTIO_HDR) + sizeof (VIRTIO_BLK_CONFIG));
   if (ConfigRegion == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
@@ -311,6 +310,7 @@ InitVirtioPciDev (
   fclose (f);
   
   PciCfg->PciBasicCfg.Device.Bar[0] = (UINT32) ((UINT64)PciCfg + sizeof(PCI_CFG_SPACE));
+  PciCfg->PciBasicCfg.Device.Bar[1] = (UINT32) (((UINT64)PciCfg + sizeof(PCI_CFG_SPACE)) >> 32);
   
   Device->VirtioDevice.SubSystemDeviceId = PciCfg->PciBasicCfg.Device.SubsystemID;
 
@@ -327,7 +327,7 @@ InitVirtioPciDev (
   return EFI_SUCCESS;
 
 FreeDevice:
-  FreePool (ConfigRegion);
+  // FreePool (ConfigRegion);
 
   return EFI_OUT_OF_RESOURCES;
 }
@@ -338,13 +338,14 @@ ParseBufferAndInitVirtioPciDev (
   IN      UINT8                   *TestBuffer,
   IN      UINTN                   BufferSize,
   IN      EFI_PCI_IO_PROTOCOL     *PciIo,
+  IN      VOID                    *ConfigRegion,
   IN OUT  VIRTIO_PCI_DEVICE       *Device
-) 
+)
 {
   VIRTIO_HDR                    *VirtioHdr;
-  VOID                          *ConfigRegion;
+  
 
-  ConfigRegion = (VOID *) AllocatePool(sizeof (PCI_CFG_SPACE) + sizeof(VIRTIO_HDR) + sizeof (VIRTIO_BLK_CONFIG));
+  // ConfigRegion = (VOID *) AllocatePool(sizeof (PCI_CFG_SPACE) + sizeof(VIRTIO_HDR) + sizeof (VIRTIO_BLK_CONFIG));
   if (ConfigRegion == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
@@ -378,6 +379,7 @@ ParseBufferAndInitVirtioPciDev (
   }
 
   PciCfg->PciBasicCfg.Device.Bar[0] = (UINT32) ((UINT64)PciCfg + sizeof(PCI_CFG_SPACE));
+  PciCfg->PciBasicCfg.Device.Bar[1] = (UINT32) (((UINT64)PciCfg + sizeof(PCI_CFG_SPACE)) >> 32);
   
   Device->VirtioDevice.SubSystemDeviceId = PciCfg->PciBasicCfg.Device.SubsystemID;
 
@@ -394,7 +396,5 @@ ParseBufferAndInitVirtioPciDev (
   return EFI_SUCCESS;
 
 FreeDevice:
-  FreePool (ConfigRegion);
-
   return EFI_OUT_OF_RESOURCES;
 }

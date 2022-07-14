@@ -41,12 +41,14 @@ RunTestHarness(
 {
   VBLK_DEV                        *VblkDev;
   VIRTIO_1_0_DEV                  *VirtioDev;
+  VOID                            *ConfigRegion;
   EFI_STATUS                      Status;
 
   VirtioDev = (VIRTIO_1_0_DEV *) AllocateZeroPool (sizeof *VirtioDev);
   VblkDev = (VBLK_DEV *) AllocateZeroPool (sizeof *VblkDev);
+  ConfigRegion = (VOID *) AllocatePool(sizeof (PCI_CFG_SPACE) + sizeof(VIRTIO_PCI_CAP_COMMON_CONFIG) + sizeof (VIRTIO_BLK_CONFIG) + 0x100);
 
-  Status = ParseBufferAndInitVirtioPciDev10 (TestBuffer, TestBufferSize, (VIRTIO_1_0_DEV *) VirtioDev);
+  Status = ParseBufferAndInitVirtioPciDev10 (TestBuffer, TestBufferSize, ConfigRegion, (VIRTIO_1_0_DEV *) VirtioDev);
 
   if (!EFI_ERROR(Status)) {
     if (VirtioDev->VirtIo.SubSystemDeviceId == VIRTIO_SUBSYSTEM_BLOCK_DEVICE) {
@@ -56,6 +58,7 @@ RunTestHarness(
     }
   }
 
+  FreePool (ConfigRegion);
   FreePool (VirtioDev);
   FreePool (VblkDev); 
 }
