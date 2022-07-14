@@ -119,6 +119,7 @@ EFIAPI
 ParseBufferAndInitVirtioPciDev10 (
   IN      UINT8                   *TestBuffer,
   IN      UINTN                   BufferSize,
+  IN      VOID                    *ConfigRegion,
   IN OUT  VIRTIO_1_0_DEV          *Device
 );
 
@@ -135,6 +136,7 @@ EFI_STATUS
 EFIAPI
 InitVirtioPciDev (
   IN      EFI_PCI_IO_PROTOCOL     *PciIo,
+  IN      VOID                    *ConfigRegion,
   IN OUT  VIRTIO_PCI_DEVICE       *Device
 );
 
@@ -144,6 +146,7 @@ ParseBufferAndInitVirtioPciDev (
   IN      UINT8                   *TestBuffer,
   IN      UINTN                   BufferSize,
   IN      EFI_PCI_IO_PROTOCOL     *PciIo,
+  IN      VOID                    *ConfigRegion,
   IN OUT  VIRTIO_PCI_DEVICE       *Device
 );
 #endif

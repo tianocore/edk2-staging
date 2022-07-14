@@ -116,10 +116,10 @@ Virtio10Transfer (
   }
   
   if (Write) {
-    CopyMem ((void *) ((UINT64) PciCfg->PciBasicCfg.Device.Bar[0] + Config->Offset + FieldOffset), Buffer, FieldSize);
+    CopyMem ((void *) (((UINT64) PciCfg->PciBasicCfg.Device.Bar[1] << 32) | PciCfg->PciBasicCfg.Device.Bar[0] + Config->Offset + FieldOffset), Buffer, FieldSize);
   }
   else {
-    CopyMem (Buffer, (void *) ((UINT64) PciCfg->PciBasicCfg.Device.Bar[0] + Config->Offset + FieldOffset), FieldSize);
+    CopyMem (Buffer, (void *) (((UINT64) PciCfg->PciBasicCfg.Device.Bar[1] << 32) | PciCfg->PciBasicCfg.Device.Bar[0] + Config->Offset + FieldOffset), FieldSize);
   }
 
   return EFI_SUCCESS;
@@ -882,6 +882,7 @@ EFIAPI
 ParseBufferAndInitVirtioPciDev10 (
   IN      UINT8                   *TestBuffer,
   IN      UINTN                   BufferSize,
+  IN      VOID                    *ConfigRegion,
   IN OUT  VIRTIO_1_0_DEV          *Device
 ) 
 {
@@ -890,9 +891,9 @@ ParseBufferAndInitVirtioPciDev10 (
   VIRTIO_BLK_CONFIG             *BlkConfig;
   VIRTIO_PCI_CAP_COMMON_CONFIG  *PciCommonConfig;
   VOID                          *PciNotifyConfig;
-  VOID                          *ConfigRegion;
+  // VOID                          *ConfigRegion;
 
-  ConfigRegion = (VOID *) AllocatePool(sizeof (PCI_CFG_SPACE) + sizeof(VIRTIO_PCI_CAP_COMMON_CONFIG) + sizeof (VIRTIO_BLK_CONFIG) + 0x100);
+  // ConfigRegion = (VOID *) AllocatePool(sizeof (PCI_CFG_SPACE) + sizeof(VIRTIO_PCI_CAP_COMMON_CONFIG) + sizeof (VIRTIO_BLK_CONFIG) + 0x100);
   if (ConfigRegion == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
@@ -935,6 +936,7 @@ ParseBufferAndInitVirtioPciDev10 (
   }
 
   PciCfg->PciBasicCfg.Device.Bar[0] = (UINT32) ((UINT64)PciCommonConfig);
+  PciCfg->PciBasicCfg.Device.Bar[1] = (UINT32) ((UINT64)PciCommonConfig >> 32);
   
   Device->VirtIo.SubSystemDeviceId = PciCfg->PciBasicCfg.Hdr.DeviceId - 0x1040;
 
@@ -964,7 +966,7 @@ ParseBufferAndInitVirtioPciDev10 (
   return EFI_SUCCESS;
 
 FreeDevice:
-  FreePool (ConfigRegion);
+  // FreePool (ConfigRegion);
 
   return EFI_OUT_OF_RESOURCES;
 }

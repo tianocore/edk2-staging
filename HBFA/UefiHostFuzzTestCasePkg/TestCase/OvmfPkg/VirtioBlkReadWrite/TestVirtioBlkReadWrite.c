@@ -16,6 +16,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Library/DebugLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/MemoryAllocationLib.h>
+#include <Library/VirtioLib.h>
 #include <Library/VirtioBlkStubLib.h>
 #include <Library/VirtioPciDeviceStubLib.h>
 
@@ -42,13 +43,15 @@ RunTestHarness(
   VBLK_DEV                        *VblkDev;
   VIRTIO_PCI_DEVICE               *VirtioDev;
   EFI_PCI_IO_PROTOCOL             *PciIo;
+  VOID                            *ConfigRegion;
   EFI_STATUS                      Status;
 
   VirtioDev = (VIRTIO_PCI_DEVICE *) AllocateZeroPool (sizeof *VirtioDev);
   VblkDev = (VBLK_DEV *) AllocateZeroPool (sizeof *VblkDev);
   PciIo = (EFI_PCI_IO_PROTOCOL *)AllocateZeroPool(sizeof (*PciIo));
+  ConfigRegion = (VOID *) AllocatePool(sizeof (PCI_CFG_SPACE) + sizeof(VIRTIO_HDR) + sizeof (VIRTIO_BLK_CONFIG));
 
-  Status = InitVirtioPciDev (PciIo, VirtioDev);
+  Status = InitVirtioPciDev (PciIo, ConfigRegion, VirtioDev);
 
   if (!EFI_ERROR(Status)) {
     if (VirtioDev->VirtioDevice.SubSystemDeviceId == VIRTIO_SUBSYSTEM_BLOCK_DEVICE) {
@@ -63,7 +66,9 @@ RunTestHarness(
       }
     }
   }
-
+  
+  VirtioRingUninit (VblkDev->VirtIo, &VblkDev->Ring);
+  FreePool (ConfigRegion);
   FreePool (VirtioDev);
   FreePool (VblkDev); 
   FreePool (PciIo);
