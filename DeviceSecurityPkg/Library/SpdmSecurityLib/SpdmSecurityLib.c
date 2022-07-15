@@ -36,16 +36,16 @@ SpdmDeviceAuthenticationAndMeasurement (
     Status = DoDeviceAuthentication (SpdmDeviceContext);
     if (EFI_ERROR(Status)) {
       DEBUG((DEBUG_ERROR, "DoDeviceAuthentication failed - %r\n", Status));
-      return Status;
+      IsAuthenticated = FALSE;
+    } else {
+      IsAuthenticated = TRUE;
     }
-    IsAuthenticated = TRUE;
   }
 
   if ((SecuriryPolicy->MeasurementPolicy & EDKII_DEVICE_MEASUREMENT_REQUIRED) != 0) {
     Status = DoDeviceMeasurement (SpdmDeviceContext, IsAuthenticated);
     if (EFI_ERROR(Status)) {
 	  DEBUG((DEBUG_ERROR, "DoDeviceMeasurement failed - %r\n", Status));
-	  return Status;
     }
   }
 
