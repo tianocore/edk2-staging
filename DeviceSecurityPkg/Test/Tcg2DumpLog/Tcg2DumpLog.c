@@ -530,6 +530,9 @@ DumpTcgDeviceSecurityEventStruct (
       break;
 
     case TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_SUB_HEADER_TYPE_SPDM_CERT_CHAIN:
+      if (EventDataHeader2->SubHeaderLength == 0) {
+        break;
+      }
       TcgSpdmCertChain = DeviceContext;
       Print(L"      SpdmCertChainSubHeader:\n");
       Print(L"        SpdmVersion   - 0x%04x\n", TcgSpdmCertChain->SpdmVersion);
