@@ -40,15 +40,6 @@
   Ia32/MathLShiftS64.nasm   | GCC
   Ia32/MathRShiftU64.nasm   | GCC
 
-  Ia32/MathDivS64x64.c           | MSFT
-  Ia32/MathDivS64x64Remainder.c  | MSFT
-  Ia32/MathDivU64x64.c           | MSFT
-  Ia32/MathDivU64x64Remainder.c  | MSFT
-  Ia32/MathMultS64x64.c          | MSFT
-  Ia32/MathRShiftS64.c           | MSFT
-  Ia32/MathRemainderS64x64.c     | MSFT
-  Ia32/MathRemainderU64x64.c     | MSFT
-
 [Sources.X64]
   CopyMem.c
 

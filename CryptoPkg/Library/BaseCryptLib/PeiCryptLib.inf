@@ -38,43 +38,32 @@
   Hash/CryptMd5.c
   Hash/CryptSha1.c
   Hash/CryptSha256.c
+  Hash/CryptSm3.c
   Hash/CryptSha512.c
   Hash/CryptParallelHashNull.c
-  Hash/CryptSm3.c
   Hmac/CryptHmacSha256.c
-  Mac/CryptCmacAesNull.c
-  Mac/CryptGmacAesNull.c
   Kdf/CryptHkdf.c
   Cipher/CryptAesNull.c
-  Cipher/CryptAeadAesCcmNull.c
-  Cipher/CryptAeadAesGcm.c
-  Cipher/CryptAeadChaCha20Poly1305Null.c
   Pk/CryptRsaBasic.c
-  Pk/CryptRsaExt.c
+  Pk/CryptRsaExtNull.c
   Pk/CryptPkcs1OaepNull.c
   Pk/CryptPkcs5Pbkdf2Null.c
   Pk/CryptPkcs7SignNull.c
   Pk/CryptPkcs7VerifyCommon.c
   Pk/CryptPkcs7VerifyBase.c
   Pk/CryptPkcs7VerifyEku.c
-  Pk/CryptDh.c
-  Pk/CryptEc.c
-  Pk/CryptEd.c
-  Pk/CryptSm2.c
-  Pk/CryptX509.c
+  Pk/CryptDhNull.c
+  Pk/CryptX509Null.c
   Pk/CryptAuthenticodeNull.c
   Pk/CryptTsNull.c
-  Pem/CryptPem.c
+  Pk/CryptRsaPss.c
+  Pk/CryptRsaPssSignNull.c
+  Pem/CryptPemNull.c
+  Rand/CryptRandNull.c
 
   SysCall/CrtWrapper.c
   SysCall/ConstantTimeClock.c
   SysCall/BaseMemAllocation.c
-
-[Sources.Ia32]
-  Rand/CryptRandTsc.c
-
-[Sources.X64]
-  Rand/CryptRandTsc.c
 
 [Packages]
   MdePkg/MdePkg.dec

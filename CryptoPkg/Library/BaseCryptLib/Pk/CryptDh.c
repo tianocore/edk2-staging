@@ -9,7 +9,6 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include "InternalCryptLib.h"
 #include <openssl/bn.h>
 #include <openssl/dh.h>
-#include <openssl/objects.h>
 
 /**
   Allocates and Initializes one Diffie-Hellman Context for subsequent use.
@@ -27,35 +26,7 @@ DhNew (
   //
   // Allocates & Initializes DH Context by OpenSSL DH_new()
   //
-  return (VOID *) DH_new ();
-}
-
-/**
-  Allocates and Initializes one Diffie-Hellman Context for subsequent use
-  with the NID.
-
-  @param Nid cipher NID
-
-  @return  Pointer to the Diffie-Hellman Context that has been initialized.
-           If the allocations fails, DhNew() returns NULL.
-
-**/
-VOID *
-EFIAPI
-DhNewByNid (
-  IN UINTN  Nid
-  )
-{
-  switch (Nid) {
-  case CRYPTO_NID_FFDHE2048:
-    return DH_new_by_nid (NID_ffdhe2048);
-  case CRYPTO_NID_FFDHE3072:
-    return DH_new_by_nid (NID_ffdhe3072);
-  case CRYPTO_NID_FFDHE4096:
-    return DH_new_by_nid (NID_ffdhe4096);
-  default:
-    return NULL;
-  }
+  return (VOID *)DH_new ();
 }
 
 /**
@@ -228,11 +199,10 @@ DhGenerateKey (
   IN OUT  UINTN  *PublicKeySize
   )
 {
-  BOOLEAN RetVal;
-  DH      *Dh;
-  BIGNUM  *DhPubKey;
-  INTN    Size;
-  UINTN   FinalPubKeySize;
+  BOOLEAN  RetVal;
+  DH       *Dh;
+  BIGNUM   *DhPubKey;
+  INTN     Size;
 
   //
   // Check input parameters.
@@ -245,40 +215,22 @@ DhGenerateKey (
     return FALSE;
   }
 
-  Dh = (DH *) DhContext;
-  switch (DH_size (Dh)) {
-  case 256:
-    FinalPubKeySize = 256;
-    break;
-  case 384:
-    FinalPubKeySize = 384;
-    break;
-  case 512:
-    FinalPubKeySize = 512;
-    break;
-  default:
-    return FALSE;
-  }
+  Dh = (DH *)DhContext;
 
-  if (*PublicKeySize < FinalPubKeySize) {
-    *PublicKeySize = FinalPubKeySize;
-    return FALSE;
-  }
-  *PublicKeySize = FinalPubKeySize;
-
-  RetVal = (BOOLEAN) DH_generate_key (DhContext);
+  RetVal = (BOOLEAN)DH_generate_key (DhContext);
   if (RetVal) {
     DH_get0_key (Dh, (const BIGNUM **)&DhPubKey, NULL);
     Size = BN_num_bytes (DhPubKey);
-    if (Size <= 0) {
+    if ((Size > 0) && (*PublicKeySize < (UINTN)Size)) {
+      *PublicKeySize = Size;
       return FALSE;
     }
-    ASSERT ((UINTN)Size <= FinalPubKeySize);
 
     if (PublicKey != NULL) {
-      ZeroMem (PublicKey, *PublicKeySize);
-      BN_bn2bin (DhPubKey, &PublicKey[0 + FinalPubKeySize - Size]);
+      BN_bn2bin (DhPubKey, PublicKey);
     }
+
+    *PublicKeySize = Size;
   }
 
   return RetVal;

@@ -62,22 +62,23 @@
   @retval EFI_NOT_FOUND             The number of signers found was not 1.
 
 **/
-RETURN_STATUS
+EFI_STATUS
 GetSignerCertificate (
   IN CONST PKCS7  *CertChain,
   OUT X509        **SignerCert
   )
 {
-  RETURN_STATUS      Status;
-  STACK_OF(X509)  *Signers;
-  INT32           NumberSigners;
+  EFI_STATUS  Status;
 
-  Status         = RETURN_SUCCESS;
-  Signers        = NULL;
-  NumberSigners  = 0;
+  STACK_OF (X509)  *Signers;
+  INT32  NumberSigners;
 
-  if (CertChain == NULL || SignerCert == NULL) {
-    Status = RETURN_INVALID_PARAMETER;
+  Status        = EFI_SUCCESS;
+  Signers       = NULL;
+  NumberSigners = 0;
+
+  if ((CertChain == NULL) || (SignerCert == NULL)) {
+    Status = EFI_INVALID_PARAMETER;
     goto Exit;
   }
 
@@ -89,7 +90,7 @@ GetSignerCertificate (
     //
     // Fail to get signers form PKCS7
     //
-    Status = RETURN_INVALID_PARAMETER;
+    Status = EFI_INVALID_PARAMETER;
     goto Exit;
   }
 
@@ -101,7 +102,7 @@ GetSignerCertificate (
     //
     // The number of singers should have been 1
     //
-    Status = RETURN_NOT_FOUND;
+    Status = EFI_NOT_FOUND;
     goto Exit;
   }
 
@@ -131,13 +132,13 @@ Exit:
   @retval EFI_NOT_FOUND             One or more EKU's were not found in the signature.
 
 **/
-RETURN_STATUS
+EFI_STATUS
 IsEkuInCertificate (
   IN CONST X509   *Cert,
   IN ASN1_OBJECT  *Asn1ToFind
   )
 {
-  RETURN_STATUS          Status;
+  EFI_STATUS          Status;
   X509                *ClonedCert;
   X509_EXTENSION      *Extension;
   EXTENDED_KEY_USAGE  *Eku;
@@ -146,16 +147,16 @@ IsEkuInCertificate (
   ASN1_OBJECT         *Asn1InCert;
   INTN                Index;
 
-  Status            = RETURN_NOT_FOUND;
-  ClonedCert        = NULL;
-  Extension         = NULL;
-  Eku               = NULL;
-  ExtensionIndex    = -1;
-  NumExtensions     = 0;
-  Asn1InCert        = NULL;
+  Status         = EFI_NOT_FOUND;
+  ClonedCert     = NULL;
+  Extension      = NULL;
+  Eku            = NULL;
+  ExtensionIndex = -1;
+  NumExtensions  = 0;
+  Asn1InCert     = NULL;
 
-  if (Cert == NULL || Asn1ToFind == NULL) {
-    Status = RETURN_INVALID_PARAMETER;
+  if ((Cert == NULL) || (Asn1ToFind == NULL)) {
+    Status = EFI_INVALID_PARAMETER;
     goto Exit;
   }
 
@@ -168,7 +169,7 @@ IsEkuInCertificate (
     //
     // Fail to duplicate cert.
     //
-    Status = RETURN_INVALID_PARAMETER;
+    Status = EFI_INVALID_PARAMETER;
     goto Exit;
   }
 
@@ -220,7 +221,7 @@ IsEkuInCertificate (
       //
       // Found Eku in certificate.
       //
-      Status = RETURN_SUCCESS;
+      Status = EFI_SUCCESS;
       goto Exit;
     }
   }
@@ -254,25 +255,25 @@ Exit:
   @retval EFI_INVALID_PARAMETER     A parameter was invalid.
   @retval EFI_NOT_FOUND             One or more EKU's were not found in the signature.
 **/
-RETURN_STATUS
-CheckEKUs(
-  IN CONST X509     *SignerCert,
-  IN CONST CHAR8    *RequiredEKUs[],
-  IN CONST UINT32   RequiredEKUsSize,
-  IN BOOLEAN        RequireAllPresent
+EFI_STATUS
+CheckEKUs (
+  IN CONST X509    *SignerCert,
+  IN CONST CHAR8   *RequiredEKUs[],
+  IN CONST UINT32  RequiredEKUsSize,
+  IN BOOLEAN       RequireAllPresent
   )
 {
-  RETURN_STATUS    Status;
-  ASN1_OBJECT   *Asn1ToFind;
-  UINT32        NumEkusFound;
-  UINT32        Index;
+  EFI_STATUS   Status;
+  ASN1_OBJECT  *Asn1ToFind;
+  UINT32       NumEkusFound;
+  UINT32       Index;
 
-  Status       = RETURN_SUCCESS;
+  Status       = EFI_SUCCESS;
   Asn1ToFind   = NULL;
   NumEkusFound = 0;
 
-  if (SignerCert == NULL || RequiredEKUs == NULL || RequiredEKUsSize == 0) {
-    Status = RETURN_INVALID_PARAMETER;
+  if ((SignerCert == NULL) || (RequiredEKUs == NULL) || (RequiredEKUsSize == 0)) {
+    Status = EFI_INVALID_PARAMETER;
     goto Exit;
   }
 
@@ -290,12 +291,12 @@ CheckEKUs(
       //
       // Fail to convert required EKU to ASN1.
       //
-      Status = RETURN_INVALID_PARAMETER;
+      Status = EFI_INVALID_PARAMETER;
       goto Exit;
     }
 
     Status = IsEkuInCertificate (SignerCert, Asn1ToFind);
-    if (Status == RETURN_SUCCESS) {
+    if (Status == EFI_SUCCESS) {
       NumEkusFound++;
       if (!RequireAllPresent) {
         //
@@ -322,7 +323,7 @@ Exit:
     //
     // Found all required EKUs in certificate.
     //
-    Status = RETURN_SUCCESS;
+    Status = EFI_SUCCESS;
   }
 
   return Status;
@@ -358,7 +359,7 @@ Exit:
   @retval EFI_NOT_FOUND            One or more EKU's were not found in the signature.
 
 **/
-RETURN_STATUS
+EFI_STATUS
 EFIAPI
 VerifyEKUsInPkcs7Signature (
   IN CONST UINT8   *Pkcs7Signature,
@@ -368,37 +369,39 @@ VerifyEKUsInPkcs7Signature (
   IN BOOLEAN       RequireAllPresent
   )
 {
-  RETURN_STATUS        Status;
-  PKCS7             *Pkcs7;
-  STACK_OF(X509)    *CertChain;
-  INT32             SignatureType;
-  INT32             NumberCertsInSignature;
-  X509              *SignerCert;
-  UINT8             *SignedData;
-  UINT8             *Temp;
-  UINTN             SignedDataSize;
-  BOOLEAN           IsWrapped;
-  BOOLEAN           Ok;
+  EFI_STATUS  Status;
+  PKCS7       *Pkcs7;
 
-  Status                    = RETURN_SUCCESS;
-  Pkcs7                     = NULL;
-  CertChain                 = NULL;
-  SignatureType             = 0;
-  NumberCertsInSignature    = 0;
-  SignerCert                = NULL;
-  SignedData                = NULL;
-  SignedDataSize            = 0;
-  IsWrapped                 = FALSE;
-  Ok                        = FALSE;
+  STACK_OF (X509)    *CertChain;
+  INT32    SignatureType;
+  INT32    NumberCertsInSignature;
+  X509     *SignerCert;
+  UINT8    *SignedData;
+  UINT8    *Temp;
+  UINTN    SignedDataSize;
+  BOOLEAN  IsWrapped;
+  BOOLEAN  Ok;
+
+  Status                 = EFI_SUCCESS;
+  Pkcs7                  = NULL;
+  CertChain              = NULL;
+  SignatureType          = 0;
+  NumberCertsInSignature = 0;
+  SignerCert             = NULL;
+  SignedData             = NULL;
+  SignedDataSize         = 0;
+  IsWrapped              = FALSE;
+  Ok                     = FALSE;
 
   //
   // Validate the input parameters.
   //
-  if (Pkcs7Signature   == NULL ||
-      SignatureSize    == 0    ||
-      RequiredEKUs     == NULL ||
-      RequiredEKUsSize == 0) {
-    Status = RETURN_INVALID_PARAMETER;
+  if ((Pkcs7Signature   == NULL) ||
+      (SignatureSize    == 0) ||
+      (RequiredEKUs     == NULL) ||
+      (RequiredEKUsSize == 0))
+  {
+    Status = EFI_INVALID_PARAMETER;
     goto Exit;
   }
 
@@ -420,7 +423,7 @@ VerifyEKUsInPkcs7Signature (
     //
     // Fail to Wrap the PKCS7 data.
     //
-    Status = RETURN_INVALID_PARAMETER;
+    Status = EFI_INVALID_PARAMETER;
     goto Exit;
   }
 
@@ -434,7 +437,7 @@ VerifyEKUsInPkcs7Signature (
     //
     // Fail to read PKCS7 data.
     //
-    Status = RETURN_INVALID_PARAMETER;
+    Status = EFI_INVALID_PARAMETER;
     goto Exit;
   }
 
@@ -466,7 +469,7 @@ VerifyEKUsInPkcs7Signature (
     //
     // Fail to get the certificate stack from signature.
     //
-    Status = RETURN_INVALID_PARAMETER;
+    Status = EFI_INVALID_PARAMETER;
     goto Exit;
   }
 
@@ -479,7 +482,7 @@ VerifyEKUsInPkcs7Signature (
     //
     // Fail to find any certificates in signature.
     //
-    Status = RETURN_INVALID_PARAMETER;
+    Status = EFI_INVALID_PARAMETER;
     goto Exit;
   }
 
@@ -487,16 +490,16 @@ VerifyEKUsInPkcs7Signature (
   // Get the leaf signer.
   //
   Status = GetSignerCertificate (Pkcs7, &SignerCert);
-  if (Status != RETURN_SUCCESS || SignerCert == NULL) {
+  if ((Status != EFI_SUCCESS) || (SignerCert == NULL)) {
     //
     // Fail to get the end-entity leaf signer certificate.
     //
-    Status = RETURN_INVALID_PARAMETER;
+    Status = EFI_INVALID_PARAMETER;
     goto Exit;
   }
 
   Status = CheckEKUs (SignerCert, RequiredEKUs, RequiredEKUsSize, RequireAllPresent);
-  if (Status != RETURN_SUCCESS) {
+  if (Status != EFI_SUCCESS) {
     goto Exit;
   }
 

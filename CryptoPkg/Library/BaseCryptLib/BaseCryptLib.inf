@@ -36,14 +36,8 @@
   Hash/CryptSm3.c
   Hash/CryptParallelHashNull.c
   Hmac/CryptHmacSha256.c
-  Mac/CryptCmacAes.c
-  Mac/CryptGmacAes.c
   Kdf/CryptHkdf.c
   Cipher/CryptAes.c
-  Cipher/CryptAeadAesCcm.c
-  Cipher/CryptAeadAesGcm.c
-  Cipher/CryptAeadChaCha20Poly1305.c
-  Cipher/CryptAeadSm4Gcm.c
   Pk/CryptRsaBasic.c
   Pk/CryptRsaExt.c
   Pk/CryptPkcs1Oaep.c
@@ -53,14 +47,11 @@
   Pk/CryptPkcs7VerifyBase.c
   Pk/CryptPkcs7VerifyEku.c
   Pk/CryptDh.c
-  Pk/CryptEc.c
-  Pk/CryptEd.c
-  Pk/CryptSm2.c
   Pk/CryptX509.c
   Pk/CryptAuthenticode.c
   Pk/CryptTs.c
-  #Pk/CryptRsaPss.c
-  #Pk/CryptRsaPssSign.c
+  Pk/CryptRsaPss.c
+  Pk/CryptRsaPssSign.c
   Pem/CryptPem.c
 
   SysCall/CrtWrapper.c
