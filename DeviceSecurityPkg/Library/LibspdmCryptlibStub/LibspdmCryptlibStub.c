@@ -449,3 +449,79 @@ LibspdmX509GetExtendedBasicConstraints            (
 
   return TRUE;
 }
+
+//Internal use ONLY
+struct LibspdmEcContext
+{
+  VOID *PKey;
+  VOID *EcGroup;
+  VOID *PeerPKey;
+};
+
+VOID*
+LibspdmEcNewByNid (
+  UINTN Nid
+  )
+{
+  struct LibspdmEcContext *LibspdmEcContext;
+
+  LibspdmEcContext = AllocatePool (sizeof (struct LibspdmEcContext));
+  LibspdmEcContext->EcGroup = EcGroupInit (Nid);
+  LibspdmEcContext->PKey = NULL;
+  LibspdmEcContext->PeerPKey = NULL;
+  if (LibspdmEcContext->EcGroup == NULL) {
+    return NULL;
+  } else {
+    return LibspdmEcContext;
+  }
+}
+
+BOOLEAN
+EFIAPI
+LibspdmEcGenerateKey (
+  VOID  *EcContext,
+  UINT8 *PublicKey,
+  UINTN *PublicKeySize
+  )
+{
+  struct LibspdmEcContext *LibspdmEcContext;
+
+  LibspdmEcContext = EcContext;
+  EcGenerateKey (LibspdmEcContext->EcGroup,
+                  &LibspdmEcContext->PKey);
+  // if true:
+  EcDhGetPubKey(LibspdmEcContext->PKey, LibspdmEcContext->EcGroup,
+                  PublicKey, PublicKeySize);
+}
+
+BOOLEAN
+EFIAPI
+LibspdmEcComputeKey (
+  VOID *EcContext,
+  CONST UINT8 *PeerPublic,
+  UINTN PeerPublicSize,
+  UINT8 *Key,
+  UINTN *KeySize
+  )
+{
+  struct LibspdmEcContext *LibspdmEcContext;
+
+  LibspdmEcContext = EcContext;
+  EcSetPubKey (LibspdmEcContext->PeerPKey, LibspdmEcContext->EcGroup, PeerPublic, PeerPublicSize, NULL);
+  // if true:
+  EcDhDeriveSecret (LibspdmEcContext->PKey, LibspdmEcContext->EcGroup,
+                    LibspdmEcContext->PeerPKey, Key, KeySize);
+}
+
+VOID 
+LibspdmEcFree (
+  VOID *EcContext
+  )
+{
+  struct LibspdmEcContext *LibspdmEcContext;
+  LibspdmEcContext = EcContext;
+  EcDhKeyFree (LibspdmEcContext->PKey);
+  EcGroupFree (LibspdmEcContext->EcGroup);
+  EcDhKeyFree (LibspdmEcContext->PeerPKey);
+  FreePool (LibspdmEcContext);
+}
