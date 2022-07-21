@@ -28,6 +28,7 @@
 #include <Test/TestConfig.h>
 
 #define SHA256_HASH_SIZE  32
+#define SHA384_HASH_SIZE  48
 
 extern UINT8 TestRootCer[];
 extern UINTN TestRootCerSize;
@@ -41,8 +42,20 @@ extern UINTN TestRootKeySize;
 extern UINT8 TestRootCer2[];
 extern UINTN TestRootCer2Size;
 
+extern UINT8 TestCertChain2[];
+extern UINTN TestCertChain2Size;
+
 extern UINT8 TestRootKey2[];
 extern UINTN TestRootKey2Size;
+
+extern UINT8 TestRootCer3[];
+extern UINTN TestRootCer3Size;
+
+extern UINT8 TestCertChain3[];
+extern UINTN TestCertChain3Size;
+
+extern UINT8 TestRootKey3[];
+extern UINTN TestRootKey3Size;
 
 extern UINT8 EccTestRootCer[];
 extern UINTN EccTestRootCerSize;
@@ -55,6 +68,10 @@ SHELL_PARAM_ITEM mParamList[] = {
   {L"-T",   TypeValue},
   {NULL,    TypeMax},
   };
+
+typedef BOOLEAN (*ShaHashAllFunc)(CONST VOID  *Data,
+                              UINTN       DataSize,
+                              UINT8       *HashValue);
 
 EFI_STATUS
 EFIAPI
@@ -272,18 +289,21 @@ MainEntryPoint (
   EFI_STATUS          Status;
   SPDM_CERT_CHAIN     *ResponderCertChain;
   UINTN               ResponderCertChainSize;
-  SPDM_CERT_CHAIN     *CertChain2;
-  UINTN               CertChain2Size;
+  UINT8               *CertChain;
+  UINTN               CertChainSize;
   EFI_SIGNATURE_LIST  *SignatureList;
   EFI_SIGNATURE_DATA  *SignatureData;
   UINTN               SignatureListSize;
   UINTN               SignatureHeaderSize;
-  BOOLEAN             Res;
   UINT8               *RootCert;
-  UINTN               RootCertLen;
+  UINTN               RootCertSize;
   LIST_ENTRY          *ParamPackage;
   CHAR16              *TestConfigName;
   UINT8               TestConfig;
+  UINTN               HashSize;
+  ShaHashAllFunc      ShaHashAll;
+  UINT8               *RootKey;
+  UINTN               RootKeySize;
 
   Status = ShellCommandLineParse (mParamList, &ParamPackage, NULL, TRUE);
   if (EFI_ERROR(Status)) {
@@ -313,20 +333,55 @@ MainEntryPoint (
                   &TestConfig
                   );
 
+  switch (TestConfig) {
+  case TEST_CONFIG_NO_TRUST_ANCHOR:
+    CertChain = TestCertChain2;
+    CertChainSize = TestCertChain2Size;
+    RootCert = TestRootCer;
+    RootCertSize = TestRootCerSize;
+    HashSize = SHA256_HASH_SIZE;
+    ShaHashAll = Sha256HashAll;
+    RootKey = TestRootKey2;
+    RootKeySize = TestRootKey2Size;
+    break;
+
+  case TEST_CONFIG_RSASSA_3072_SHA_384:
+    CertChain = TestCertChain3;
+    CertChainSize = TestCertChain3Size;
+    RootCert = TestRootCer3;
+    RootCertSize = TestRootCer3Size;
+    HashSize = SHA384_HASH_SIZE;
+    ShaHashAll = Sha384HashAll;
+    RootKey = TestRootKey3;
+    RootKeySize = TestRootKey3Size;
+    break;
+
+  default:
+    CertChain = TestCertChain;
+    CertChainSize = TestCertChainSize;
+    RootCert = TestRootCer;
+    RootCertSize = TestRootCerSize;
+    HashSize = SHA256_HASH_SIZE;
+    ShaHashAll = Sha256HashAll;
+    RootKey = TestRootKey;
+    RootKeySize = TestRootKeySize;
+    break;
+  }
+
   SignatureHeaderSize = 0;
-  SignatureListSize = sizeof(EFI_SIGNATURE_LIST) + SignatureHeaderSize + sizeof(EFI_GUID) + TestRootCerSize;
+  SignatureListSize = sizeof(EFI_SIGNATURE_LIST) + SignatureHeaderSize + sizeof(EFI_GUID) + RootCertSize;
   SignatureList = AllocateZeroPool (SignatureListSize);
   ASSERT (SignatureList != NULL);
   CopyGuid (&SignatureList->SignatureType, &gEdkiiCertSpdmCertChainGuid);
   SignatureList->SignatureListSize = (UINT32)SignatureListSize;
   SignatureList->SignatureHeaderSize = (UINT32)SignatureHeaderSize;
-  SignatureList->SignatureSize = (UINT32)(sizeof(EFI_GUID) + TestRootCerSize);
+  SignatureList->SignatureSize = (UINT32)(sizeof(EFI_GUID) + RootCertSize);
   SignatureData = (VOID *)((UINT8 *)SignatureList + sizeof(EFI_SIGNATURE_LIST));
   CopyGuid (&SignatureData->SignatureOwner, &gEfiCallerIdGuid);
   CopyMem (
     (UINT8 *)SignatureList + sizeof(EFI_SIGNATURE_LIST) + SignatureHeaderSize + sizeof(EFI_GUID),
-    TestRootCer,
-    TestRootCerSize
+    RootCert,
+    RootCertSize
     );
 
   Status = gRT->SetVariable (
@@ -341,65 +396,34 @@ MainEntryPoint (
   ASSERT_EFI_ERROR(Status);
   FreePool (SignatureList);
 
-  if (TestConfig != TEST_CONFIG_NO_TRUST_ANCHOR) {
-    ResponderCertChainSize = sizeof(SPDM_CERT_CHAIN) + SHA256_HASH_SIZE + TestCertChainSize;
-    ResponderCertChain = AllocateZeroPool (ResponderCertChainSize);
-    ASSERT (ResponderCertChain != NULL);
-    ResponderCertChain->length = (UINT16)ResponderCertChainSize;
-    ResponderCertChain->reserved = 0;
-    if (TestConfig != TEST_CONFIG_INVALID_CERT_CHAIN) {
-      Res = X509GetCertFromCertChain(TestCertChain, TestCertChainSize, 0, &RootCert,
-                                     &RootCertLen);
-      if (!Res) {
-        Print(L"fail to get root cert\n");
-        return EFI_DEVICE_ERROR;
-      }
-      Sha256HashAll (RootCert, RootCertLen, (VOID *)(ResponderCertChain + 1));
+  ResponderCertChainSize = sizeof(SPDM_CERT_CHAIN) + HashSize + CertChainSize;
+  ResponderCertChain = AllocateZeroPool (ResponderCertChainSize);
+  ASSERT (ResponderCertChain != NULL);
+  ResponderCertChain->length = (UINT16)ResponderCertChainSize;
+  ResponderCertChain->reserved = 0;
+  if (TestConfig != TEST_CONFIG_INVALID_CERT_CHAIN) {
+    if (TestConfig == TEST_CONFIG_NO_TRUST_ANCHOR){
+      ShaHashAll (TestRootCer2, TestRootCer2Size, (VOID *)(ResponderCertChain + 1));
+    } else {
+      ShaHashAll (RootCert, RootCertSize, (VOID *)(ResponderCertChain + 1));
     }
-    CopyMem (
-      (UINT8 *)ResponderCertChain + sizeof(SPDM_CERT_CHAIN) + SHA256_HASH_SIZE,
-       TestCertChain,
-       TestCertChainSize
-    );
-
-    Status = gRT->SetVariable (
-                  L"ProvisionSpdmCertChain",
-                  &gEfiDeviceSecurityPkgTestConfig,
-                  EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_BOOTSERVICE_ACCESS,
-                  ResponderCertChainSize,
-                  ResponderCertChain
-                  );
-    ASSERT_EFI_ERROR(Status);
-    FreePool(ResponderCertChain);
-  } else {
-    CertChain2Size = sizeof(SPDM_CERT_CHAIN) + SHA256_HASH_SIZE + TestRootCer2Size;
-    CertChain2 = AllocateZeroPool (CertChain2Size);
-    ASSERT (CertChain2 != NULL);
-    CertChain2->length = (UINT16)CertChain2Size;
-    CertChain2->reserved = 0;
-    Res = X509GetCertFromCertChain(TestRootCer2, TestRootCer2Size, 0, &RootCert,
-                                  &RootCertLen);
-    if (!Res) {
-      Print(L"fail to get root cert\n");
-      return EFI_DEVICE_ERROR;
-    }
-    Sha256HashAll (RootCert, RootCertLen, (VOID *)(CertChain2 + 1));
-    CopyMem (
-      (UINT8 *)CertChain2 + sizeof(SPDM_CERT_CHAIN) + SHA256_HASH_SIZE,
-      TestRootCer2,
-      TestRootCer2Size
-      );
-
-    Status = gRT->SetVariable (
-                  L"ProvisionSpdmCertChain",
-                  &gEfiDeviceSecurityPkgTestConfig,
-                  EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_BOOTSERVICE_ACCESS,
-                  CertChain2Size,
-                  CertChain2
-                  );
-    ASSERT_EFI_ERROR(Status);
-    FreePool(CertChain2);
   }
+  CopyMem (
+    (UINT8 *)ResponderCertChain + sizeof(SPDM_CERT_CHAIN) + HashSize,
+      CertChain,
+      CertChainSize
+  );
+
+  Status = gRT->SetVariable (
+                L"ProvisionSpdmCertChain",
+                &gEfiDeviceSecurityPkgTestConfig,
+                EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_BOOTSERVICE_ACCESS,
+                ResponderCertChainSize,
+                ResponderCertChain
+                );
+  ASSERT_EFI_ERROR(Status);
+  FreePool(ResponderCertChain);
+
 
   {
     //
@@ -407,19 +431,19 @@ MainEntryPoint (
     // BUGBUG: Hardcode here to pass measurement at first
     //
     SignatureHeaderSize = 0;
-    SignatureListSize = sizeof(EFI_SIGNATURE_LIST) + SignatureHeaderSize + sizeof(EFI_GUID) + TestRootCerSize;
+    SignatureListSize = sizeof(EFI_SIGNATURE_LIST) + SignatureHeaderSize + sizeof(EFI_GUID) + RootCertSize;
     SignatureList = AllocateZeroPool (SignatureListSize);
     ASSERT (SignatureList != NULL);
     CopyGuid (&SignatureList->SignatureType, &gEfiCertX509Guid);
     SignatureList->SignatureListSize = (UINT32)SignatureListSize;
     SignatureList->SignatureHeaderSize = (UINT32)SignatureHeaderSize;
-    SignatureList->SignatureSize = (UINT32)(sizeof(EFI_GUID) + TestRootCerSize);
+    SignatureList->SignatureSize = (UINT32)(sizeof(EFI_GUID) + RootCertSize);
     SignatureData = (VOID *)((UINT8 *)SignatureList + sizeof(EFI_SIGNATURE_LIST));
     CopyGuid (&SignatureData->SignatureOwner, &gEfiCallerIdGuid);
     CopyMem (
       (UINT8 *)SignatureList + sizeof(EFI_SIGNATURE_LIST) + SignatureHeaderSize + sizeof(EFI_GUID),
-      TestRootCer,
-      TestRootCerSize
+      RootCert,
+      RootCertSize
       );
 
     MeasureVariable (
@@ -433,27 +457,16 @@ MainEntryPoint (
     FreePool (SignatureList);
   }
 
-  if (TestConfig != TEST_CONFIG_NO_TRUST_ANCHOR) {
-    Status = gRT->SetVariable (
-                    L"PrivDevKey",
-                    &gEdkiiDeviceSignatureDatabaseGuid,
-                    EFI_VARIABLE_NON_VOLATILE |
-                      EFI_VARIABLE_BOOTSERVICE_ACCESS |
-                      EFI_VARIABLE_RUNTIME_ACCESS,
-                    TestRootKeySize,
-                    TestRootKey
-                    );
-  } else {
-    Status = gRT->SetVariable (
-                    L"PrivDevKey",
-                    &gEdkiiDeviceSignatureDatabaseGuid,
-                    EFI_VARIABLE_NON_VOLATILE |
-                      EFI_VARIABLE_BOOTSERVICE_ACCESS |
-                      EFI_VARIABLE_RUNTIME_ACCESS,
-                    TestRootKey2Size,
-                    TestRootKey2
-                    );
-  }
+  Status = gRT->SetVariable (
+                  L"PrivDevKey",
+                  &gEdkiiDeviceSignatureDatabaseGuid,
+                  EFI_VARIABLE_NON_VOLATILE |
+                  EFI_VARIABLE_BOOTSERVICE_ACCESS |
+                  EFI_VARIABLE_RUNTIME_ACCESS,
+                  RootKeySize,
+                  RootKey
+                  );
+
   ASSERT_EFI_ERROR(Status);
 
   return EFI_SUCCESS;
