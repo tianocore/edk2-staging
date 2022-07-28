@@ -19,6 +19,7 @@
 #include <Protocol/Spdm.h>
 #include <Protocol/SpdmTest.h>
 #include <Protocol/DeviceSecurity.h>
+#include <hal/library/LibspdmStub.h>
 
 #define USE_PSK 0
 
@@ -264,10 +265,10 @@ TestSpdm (
   ASSERT_EFI_ERROR(Status);
 
 #if USE_PSK
-  Status = SpdmProtocol->SetData (SpdmProtocol, SpdmDataPsk, NULL, "TestPskData", sizeof("TestPskData"));
+  Status = SpdmProtocol->SetData (SpdmProtocol, SpdmDataPskHint, NULL, "TestPskData", sizeof("TestPskData"));
   ASSERT_EFI_ERROR(Status);
 
-  Status = SpdmTestProtocol->SetData (SpdmTestProtocol, SpdmDataPsk, NULL, "TestPskData", sizeof("TestPskData"));
+  Status = SpdmTestProtocol->SetData (SpdmTestProtocol, SpdmDataPskHint, NULL, "TestPskData", sizeof("TestPskData"));
   ASSERT_EFI_ERROR(Status);
 #endif
 

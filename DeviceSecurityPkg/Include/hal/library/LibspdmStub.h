@@ -163,6 +163,8 @@ typedef enum {
   //
   SpdmDataLocalUsedCertChainBuffer,
   SpdmDataPeerUsedCertChainBuffer,
+  SpdmDataPeerSlotMask,
+  SpdmDataPeerTotalDigestBuffer,
   //
   // Pre-shared Key Hint
   // If PSK is present, then PSK_EXCHANGE is used.
@@ -180,6 +182,8 @@ typedef enum {
   SpdmDataAppContextData,
 
   SpdmDataHandleErrorReturnPolicy,
+
+  SpdmDataVcaCache,
 
   //
   // MAX
