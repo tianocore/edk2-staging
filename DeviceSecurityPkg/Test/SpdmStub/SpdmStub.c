@@ -288,7 +288,7 @@ MainEntryPoint (
   SpdmSetData (SpdmContext, SpdmDataBaseHashAlgo, &Parameter, &Data32, sizeof(Data32));
   Data16 = SPDM_ALGORITHMS_DHE_NAMED_GROUP_FFDHE_2048;
   SpdmSetData (SpdmContext, SpdmDataDHENamedGroup, &Parameter, &Data16, sizeof(Data16));
-  Data16 = SPDM_ALGORITHMS_KEY_SCHEDULE_HMAC_HASH;
+  Data16 = SPDM_ALGORITHMS_AEAD_CIPHER_SUITE_AES_128_GCM;
   SpdmSetData (SpdmContext, SpdmDataAEADCipherSuite, &Parameter, &Data16, sizeof(Data16));
   Data16 = SPDM_ALGORITHMS_KEY_SCHEDULE_HMAC_HASH;
   SpdmSetData (SpdmContext, SpdmDataKeySchedule, &Parameter, &Data16, sizeof(Data16));
