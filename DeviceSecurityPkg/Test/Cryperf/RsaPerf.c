@@ -15,76 +15,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include "Cryperf.h"
 
 EFI_STATUS
-TestRsaPss (
-  IN UINTN KeyBit,
-  IN UINTN HashBit
-  )
-{
-  VOID     *Rsa;
-  UINT8    HashValue[SHA512_DIGEST_SIZE];
-  UINTN    HashSize = HashBit / 8;
-  UINT8    Signature[4096 / 8];
-  UINTN    SigSize = KeyBit / 8;
-  BOOLEAN  Status;
-  UINT64   StartTsc;
-  UINT64   EndTsc;
-  UINTN    Iteration = GetIteration();
-  UINTN    Index;
-  UINTN    HashNid;
-
-  switch (HashSize) {
-  case 256 / 8:
-    HashNid = CRYPTO_NID_SHA256;
-    break;
-  case 384 / 8:
-    HashNid = CRYPTO_NID_SHA384;
-    break;
-  case 512 / 8:
-    HashNid = CRYPTO_NID_SHA512;
-    break;
-  }
-  
-  Rsa = RsaNew ();
-  if (Rsa == NULL) {
-    goto Error;
-  }
-    
-  Status = RsaGenerateKey (Rsa, 1024, NULL, 0);
-  if (!Status) {
-    goto Error;
-  }
-  
-  Print (L"RSA-PSS%d/SHA%d Signature Generation   ... ", KeyBit, HashBit);
-  StartTsc = AsmReadTsc ();
-  for (Index = 0; Index < Iteration; Index++) {
-    Status  = RsaPssSign (Rsa, HashNid, HashValue, HashSize, Signature, &SigSize);
-  }
-  EndTsc = AsmReadTsc ();
-  if (!Status) {
-    goto Error;
-  }
-  Print (L"[Pass] - %duS\n", TscToMicrosecond((EndTsc - StartTsc) / Iteration));
-  
-  Print (L"RSA-PSS%d/SHA%d Signature Verification ... ", KeyBit, HashBit);
-  StartTsc = AsmReadTsc ();
-  for (Index = 0; Index < Iteration; Index++) {
-    Status = RsaPssVerify (Rsa, HashNid, HashValue, HashSize, Signature, SigSize);
-  }
-  EndTsc = AsmReadTsc ();
-  if (!Status) {
-    goto Error;
-  }
-  Print (L"[Pass] - %duS\n", TscToMicrosecond((EndTsc - StartTsc) / Iteration));
-  
-  RsaFree (Rsa);
-  return EFI_SUCCESS;
-Error:
-  Print (L"[Fail]\n");
-  RsaFree (Rsa);
-  return EFI_ABORTED;
-}
-
-EFI_STATUS
 TestRsaSsa (
   IN UINTN KeyBit,
   IN UINTN HashBit
@@ -158,10 +88,6 @@ ValidateCryptRsa (
   TestRsaSsa (2048, 256);
   TestRsaSsa (3072, 384);
   TestRsaSsa (4096, 512);
-
-  TestRsaPss (2048, 256);
-  TestRsaPss (3072, 384);
-  TestRsaPss (4096, 512);
 
   Print (L"\n");
 

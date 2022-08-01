@@ -35,14 +35,12 @@
   HashVerify.c
   HmacVerify.c
   BlockCipherVerify.c
-  MacVerify.c
   AeadVerify.c
   RsaVerify.c
   RsaVerify2.c
   Pkcs5Pbkdf2Verify.c
   AuthenticodeVerify.c
   TSVerify.c
-  DhVerify.c
   EcVerify.c
   EcVerify2.c
   RandVerify.c
