@@ -777,7 +777,7 @@ SpdmPskHandshakeSecretHkdfExpandFunc (
 
   HashSize = GetSpdmHashSize (BaseHashAlgo);
 
-  Result = SpdmHmacAll (BaseHashAlgo, mMyZeroFilledBuffer, HashSize, Psk, PskSize, HandshakeSecret);
+  Result = SpdmHmacAll (BaseHashAlgo, Psk, PskSize, mMyZeroFilledBuffer, HashSize, HandshakeSecret);
   if (!Result) {
     return Result;
   }
@@ -828,7 +828,7 @@ SpdmPskMasterSecretHkdfExpandFunc (
 
   HashSize = GetSpdmHashSize (BaseHashAlgo);
 
-  Result = SpdmHmacAll (BaseHashAlgo, mMyZeroFilledBuffer, HashSize, Psk, PskSize, HandshakeSecret);
+  Result = SpdmHmacAll (BaseHashAlgo, Psk, PskSize, mMyZeroFilledBuffer, HashSize, HandshakeSecret);
   if (!Result) {
     return Result;
   }
@@ -840,7 +840,7 @@ SpdmPskMasterSecretHkdfExpandFunc (
     return Result;
   }
 
-  Result = SpdmHmacAll (BaseHashAlgo, Salt1, HashSize, mMyZeroFilledBuffer, HashSize, MasterSecret);
+  Result = SpdmHmacAll (BaseHashAlgo, mMyZeroFilledBuffer, HashSize, Salt1, HashSize, MasterSecret);
   ZeroMem (Salt1, HashSize);
   if (!Result) {
     return Result;
