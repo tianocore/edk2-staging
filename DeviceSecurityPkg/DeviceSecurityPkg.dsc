@@ -217,6 +217,7 @@ DEFINE CRYPT_LIB = OPENSSL
   gEfiMdePkgTokenSpaceGuid.PcdDebugPrintErrorLevel|0x0
   gEfiMdePkgTokenSpaceGuid.PcdReportStatusCodePropertyMask|0x0
 !endif
+  gEfiCryptoPkgTokenSpaceGuid.PcdOpensslEcEnabled|TRUE
 
 ###################################################################################################
 #
