@@ -286,7 +286,7 @@ MainEntryPoint (
     Data32 = SPDM_ALGORITHMS_BASE_HASH_ALGO_TPM_ALG_SHA_256;
   }
   SpdmSetData (SpdmContext, SpdmDataBaseHashAlgo, &Parameter, &Data32, sizeof(Data32));
-  Data16 = SPDM_ALGORITHMS_DHE_NAMED_GROUP_FFDHE_2048;
+  Data16 = SPDM_ALGORITHMS_DHE_NAMED_GROUP_SECP_384_R1;
   SpdmSetData (SpdmContext, SpdmDataDHENamedGroup, &Parameter, &Data16, sizeof(Data16));
   Data16 = SPDM_ALGORITHMS_AEAD_CIPHER_SUITE_AES_128_GCM;
   SpdmSetData (SpdmContext, SpdmDataAEADCipherSuite, &Parameter, &Data16, sizeof(Data16));
