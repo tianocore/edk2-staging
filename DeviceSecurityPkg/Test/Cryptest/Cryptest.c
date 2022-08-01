@@ -91,11 +91,6 @@ CryptestMain (
   if (EFI_ERROR (Status)) {
     return Status;
   }
-  
-  Status = ValidateCryptMac ();
-  if (EFI_ERROR (Status)) {
-    return Status;
-  }
 
   Status = ValidateCryptAeadCipher ();
   if (EFI_ERROR (Status)) {
@@ -117,10 +112,12 @@ CryptestMain (
     return Status;
   }
 
+#if 1
   Status = ValidateCryptPkcs7 ();
   if (EFI_ERROR (Status)) {
     return Status;
   }
+#endif
 
   Status = ValidateAuthenticode ();
   if (EFI_ERROR (Status)) {
@@ -132,21 +129,16 @@ CryptestMain (
     return Status;
   }
 
-  Status = ValidateCryptDh ();
-  if (EFI_ERROR (Status)) {
-    return Status;
-  }
-  
   Status = ValidateCryptEc ();
   if (EFI_ERROR (Status)) {
     return Status;
   }
-  
+
   Status = ValidateCryptEc2 ();
   if (EFI_ERROR (Status)) {
     return Status;
   }
-  
+
   Status = ValidateCryptPkcs7Ec ();
   if (EFI_ERROR (Status)) {
     return Status;

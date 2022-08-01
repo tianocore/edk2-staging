@@ -395,63 +395,6 @@ ValidateCryptRsa (
   }
 
   //
-  // Sign RSA PSS-encoded Signature
-  //
-  Print (L"PSS Signature ... ");
-
-  RsaFree (Rsa);
-
-  Rsa = RsaNew ();
-  if (Rsa == NULL) {
-    Print (L"[Fail]");
-    return EFI_ABORTED;
-  }
-
-  Status = RsaSetKey (Rsa, RsaKeyN, RsaN, sizeof (RsaN));
-  if (!Status) {
-    Print (L"[Fail]");
-    return EFI_ABORTED;
-  }
-
-  Status = RsaSetKey (Rsa, RsaKeyE, RsaE, sizeof (RsaE));
-  if (!Status) {
-    Print (L"[Fail]");
-    return EFI_ABORTED;
-  }
-
-  Status = RsaSetKey (Rsa, RsaKeyD, RsaD, sizeof (RsaD));
-  if (!Status) {
-    Print (L"[Fail]");
-    return EFI_ABORTED;
-  }
-
-  SigSize = 0;
-  Status  = RsaPssSign (Rsa, CRYPTO_NID_SHA256, HashValue, HashSize, NULL, &SigSize);
-  if (Status || SigSize == 0) {
-    Print (L"[Fail]");
-    return EFI_ABORTED;
-  }
-
-  Signature = AllocatePool (SigSize);
-  Status  = RsaPssSign (Rsa, CRYPTO_NID_SHA256, HashValue, HashSize, Signature, &SigSize);
-  if (!Status) {
-    Print (L"[Fail]");
-    return EFI_ABORTED;
-  }
-
-  //
-  // Verify RSA PSS-encoded Signature
-  //
-
-  Print (L"PSS Signature Verification ... ");
-
-  Status = RsaPssVerify (Rsa, CRYPTO_NID_SHA256, HashValue, HashSize, Signature, SigSize);
-  if (!Status) {
-    Print (L"[Fail]");
-    return EFI_ABORTED;
-  }
-
-  //
   // Release Resources
   //
   RsaFree (Rsa);
