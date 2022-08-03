@@ -86,7 +86,7 @@ ValidateCryptHmac (
     return EFI_ABORTED;
   }
 
-  FreePool (HmacCtx);
+  HmacSha256Free (HmacCtx);
 
   Print (L"Check Value... ");
   if (CompareMem (Digest, HmacSha256Digest, SHA256_DIGEST_SIZE) != 0) {
