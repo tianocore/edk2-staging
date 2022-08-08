@@ -27,6 +27,14 @@
 #define ALIGNED_2MB_MASK  0x1fffff
 #define MEGABYTE_SHIFT    20
 
+//
+// Physical memory encrypted attribute. This
+// memory uses platform encrpytion capabilities for
+// protection. If this bit is clear, the memory does
+// not use platform encryption protection
+//
+#define EFI_RESOURCE_ATTRIBUTE_ENCRYPTED                0x04000000
+
 /**
   This function will be called to accept pages. Only BSP accepts pages.
 
@@ -292,7 +300,8 @@ ValidateHobList (
                                                             EFI_RESOURCE_ATTRIBUTE_PERSISTABLE |
                                                             EFI_RESOURCE_ATTRIBUTE_READ_ONLY_PROTECTED |
                                                             EFI_RESOURCE_ATTRIBUTE_READ_ONLY_PROTECTABLE |
-                                                            EFI_RESOURCE_ATTRIBUTE_MORE_RELIABLE))) != 0)
+                                                            EFI_RESOURCE_ATTRIBUTE_MORE_RELIABLE |
+                                                            EFI_RESOURCE_ATTRIBUTE_ENCRYPTED))) != 0)
         {
           DEBUG ((DEBUG_ERROR, "HOB: Unknow ResourceDescriptor ResourceAttribute type. Type: 0x%08x\n", Hob.ResourceDescriptor->ResourceAttribute));
           return FALSE;
@@ -406,7 +415,7 @@ ProcessHobList (
     if (Hob.Header->HobType == EFI_HOB_TYPE_RESOURCE_DESCRIPTOR) {
       DEBUG ((DEBUG_INFO, "\nResourceType: 0x%x\n", Hob.ResourceDescriptor->ResourceType));
 
-      if (Hob.ResourceDescriptor->ResourceType == EFI_RESOURCE_MEMORY_UNACCEPTED) {
+      if (Hob.ResourceDescriptor->ResourceType == EFI_RESOURCE_SYSTEM_MEMORY) {
         DEBUG ((DEBUG_INFO, "ResourceAttribute: 0x%x\n", Hob.ResourceDescriptor->ResourceAttribute));
         DEBUG ((DEBUG_INFO, "PhysicalStart: 0x%llx\n", Hob.ResourceDescriptor->PhysicalStart));
         DEBUG ((DEBUG_INFO, "ResourceLength: 0x%llx\n", Hob.ResourceDescriptor->ResourceLength));
@@ -524,7 +533,7 @@ BuildResourceDescriptorHobForUnacceptedMemory (
   EFI_RESOURCE_ATTRIBUTE_TYPE  ResourceAttribute;
   UINT64                       AcceptedResourceLength;
 
-  ASSERT (Hob->ResourceType == EFI_RESOURCE_MEMORY_UNACCEPTED);
+  // ASSERT (Hob->ResourceType == EFI_RESOURCE_MEMORY_UNACCEPTED);
 
   ResourceType      = EFI_RESOURCE_MEMORY_UNACCEPTED;
   ResourceAttribute = Hob->ResourceAttribute;
@@ -543,6 +552,7 @@ BuildResourceDescriptorHobForUnacceptedMemory (
     // This memory region hasn't been accepted.
     // So keep the ResourceType and ResourceAttribute unchange.
     //
+    ResourceAttribute &= ~EFI_RESOURCE_ATTRIBUTE_ENCRYPTED;
   } else {
     //
     // This memory region is splitted into 2 parts:
@@ -561,6 +571,7 @@ BuildResourceDescriptorHobForUnacceptedMemory (
 
     PhysicalStart   = Hob->PhysicalStart + AcceptedResourceLength;
     ResourceLength -= AcceptedResourceLength;
+    ResourceAttribute &= ~EFI_RESOURCE_ATTRIBUTE_ENCRYPTED;
   }
 
   BuildResourceDescriptorHob (
@@ -609,7 +620,7 @@ TransferTdxHobList (
         ResourceType      = Hob.ResourceDescriptor->ResourceType;
         ResourceAttribute = Hob.ResourceDescriptor->ResourceAttribute;
 
-        if (ResourceType == EFI_RESOURCE_MEMORY_UNACCEPTED) {
+        if (ResourceType == EFI_RESOURCE_SYSTEM_MEMORY) {
           BuildResourceDescriptorHobForUnacceptedMemory (Hob.ResourceDescriptor, MaxAcceptedMemoryAddress);
         } else {
           BuildResourceDescriptorHob (
