@@ -168,7 +168,18 @@ applicationProcessorEntryPoint:
 ; location.  (0xffffffe0)  This allows the Local APIC Startup IPI to be
 ; used to wake up the application processors.
 ;
+;
+; Application Processors entry point
+;
+; GenFv generates code aligned on a 4k boundary which will jump to this
+; location.  (0xffffffe0)  This allows the Local APIC Startup IPI to be
+; used to wake up the application processors.
+;
+%ifdef ARCH_X64
+    DD      OVMF_IMAGE_SIZE_IN_KB * 1024 - (fourGigabytes - TdxMetadataGuid - 16)
+%else
     jmp     EarlyApInitReal16
+%endif
 
 ALIGN   8
 

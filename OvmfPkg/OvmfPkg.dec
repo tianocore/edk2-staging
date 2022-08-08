@@ -403,6 +403,9 @@
   ## The default value is 0 which means lazy accept is turned off.
   gUefiOvmfPkgTokenSpaceGuid.PcdLazyAcceptPartialMemorySize|0|UINT64|0x68
 
+  ## Size of Ovmf image in KB
+  gUefiOvmfPkgTokenSpaceGuid.PcdOvmfImageSizeInKb|0|UINT32|0x69
+
 [PcdsDynamic, PcdsDynamicEx]
   gUefiOvmfPkgTokenSpaceGuid.PcdEmuVariableEvent|0|UINT64|2
   gUefiOvmfPkgTokenSpaceGuid.PcdOvmfFlashVariablesEnable|FALSE|BOOLEAN|0x10

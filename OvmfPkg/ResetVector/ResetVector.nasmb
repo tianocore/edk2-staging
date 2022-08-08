@@ -142,5 +142,6 @@
   %define SEV_LAUNCH_SECRET_SIZE  FixedPcdGet32 (PcdSevLaunchSecretSize)
   %define SEV_FW_HASH_BLOCK_BASE  FixedPcdGet32 (PcdQemuHashTableBase)
   %define SEV_FW_HASH_BLOCK_SIZE  FixedPcdGet32 (PcdQemuHashTableSize)
+  %define OVMF_IMAGE_SIZE_IN_KB   FixedPcdGet32 (PcdOvmfImageSizeInKb)
 %include "Ia16/ResetVectorVtf0.asm"
 

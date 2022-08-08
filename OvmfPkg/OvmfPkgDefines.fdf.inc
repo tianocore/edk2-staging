@@ -67,6 +67,7 @@ DEFINE SECFV_OFFSET      = 0x003CC000
 DEFINE SECFV_SIZE        = 0x34000
 !endif
 
+SET gUefiOvmfPkgTokenSpaceGuid.PcdOvmfImageSizeInKb     = $(FD_SIZE_IN_KB)
 SET gUefiOvmfPkgTokenSpaceGuid.PcdOvmfFdBaseAddress     = $(FW_BASE_ADDRESS)
 SET gUefiOvmfPkgTokenSpaceGuid.PcdOvmfFirmwareFdSize    = $(FW_SIZE)
 SET gUefiOvmfPkgTokenSpaceGuid.PcdOvmfFirmwareBlockSize = $(BLOCK_SIZE)

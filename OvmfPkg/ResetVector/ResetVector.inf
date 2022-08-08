@@ -53,6 +53,7 @@
   gUefiOvmfPkgTokenSpaceGuid.PcdBfvBase
   gUefiOvmfPkgTokenSpaceGuid.PcdBfvRawDataOffset
   gUefiOvmfPkgTokenSpaceGuid.PcdBfvRawDataSize
+  gUefiOvmfPkgTokenSpaceGuid.PcdOvmfImageSizeInKb
 
 [FixedPcd]
   gUefiOvmfPkgTokenSpaceGuid.PcdOvmfCpuidBase
