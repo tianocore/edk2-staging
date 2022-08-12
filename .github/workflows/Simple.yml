@@ -1,0 +1,22 @@
+## @file
+# Simple GitHub Action Workflow that echos a hello world message
+#
+# Copyright (c) 2022, Intel Corporation. All rights reserved.<BR>
+# SPDX-License-Identifier: BSD-2-Clause-Patent
+##
+
+name: Hello World
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches:
+      - edk2-ci
+
+jobs:
+  hello_world:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Echo Hello World
+        run: echo Hello World
