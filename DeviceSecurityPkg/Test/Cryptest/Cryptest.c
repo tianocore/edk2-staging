@@ -139,11 +139,6 @@ CryptestMain (
     return Status;
   }
 
-  Status = ValidateCryptPkcs7Ec ();
-  if (EFI_ERROR (Status)) {
-    return Status;
-  }
-
   Status = ValidateCryptPrng ();
   if (EFI_ERROR (Status)) {
     return Status;
