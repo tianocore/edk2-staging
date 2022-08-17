@@ -276,12 +276,16 @@ MainEntryPoint (
   SpdmSetData (SpdmContext, SpdmDataMeasurementHashAlgo, &Parameter, &Data32, sizeof(Data32));
   if (TestConfig == TEST_CONFIG_RSASSA_3072_SHA_384) {
     Data32 = SPDM_ALGORITHMS_BASE_ASYM_ALGO_TPM_ALG_RSASSA_3072;
+  } else if (TestConfig == TEST_CONFIG_RSASSA_4096_SHA_512) {
+    Data32 = SPDM_ALGORITHMS_BASE_ASYM_ALGO_TPM_ALG_RSASSA_4096;
   } else {
     Data32 = SPDM_ALGORITHMS_BASE_ASYM_ALGO_TPM_ALG_RSASSA_2048;
   }
   SpdmSetData (SpdmContext, SpdmDataBaseAsymAlgo, &Parameter, &Data32, sizeof(Data32));
   if (TestConfig == TEST_CONFIG_RSASSA_3072_SHA_384) {
     Data32 = SPDM_ALGORITHMS_BASE_HASH_ALGO_TPM_ALG_SHA_384;
+  } else if (TestConfig == TEST_CONFIG_RSASSA_4096_SHA_512) {
+    Data32 = SPDM_ALGORITHMS_BASE_HASH_ALGO_TPM_ALG_SHA_512;
   } else {
     Data32 = SPDM_ALGORITHMS_BASE_HASH_ALGO_TPM_ALG_SHA_256;
   }
