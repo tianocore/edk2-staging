@@ -29,6 +29,7 @@
 
 #define SHA256_HASH_SIZE  32
 #define SHA384_HASH_SIZE  48
+#define SHA512_HASH_SIZE  64
 
 extern UINT8 TestRootCer[];
 extern UINTN TestRootCerSize;
@@ -56,6 +57,15 @@ extern UINTN TestCertChain3Size;
 
 extern UINT8 TestRootKey3[];
 extern UINTN TestRootKey3Size;
+
+extern UINT8 TestRootCer4[];
+extern UINTN TestRootCer4Size;
+
+extern UINT8 TestCertChain4[];
+extern UINTN TestCertChain4Size;
+
+extern UINT8 TestRootKey4[];
+extern UINTN TestRootKey4Size;
 
 extern UINT8 EccTestRootCer[];
 extern UINTN EccTestRootCerSize;
@@ -354,6 +364,17 @@ MainEntryPoint (
     ShaHashAll = Sha384HashAll;
     RootKey = TestRootKey3;
     RootKeySize = TestRootKey3Size;
+    break;
+
+  case TEST_CONFIG_RSASSA_4096_SHA_512:
+    CertChain = TestCertChain4;
+    CertChainSize = TestCertChain4Size;
+    RootCert = TestRootCer4;
+    RootCertSize = TestRootCer4Size;
+    HashSize = SHA512_HASH_SIZE;
+    ShaHashAll = Sha512HashAll;
+    RootKey = TestRootKey4;
+    RootKeySize = TestRootKey4Size;
     break;
 
   default:

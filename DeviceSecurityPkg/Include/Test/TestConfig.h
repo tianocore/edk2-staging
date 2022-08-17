@@ -22,5 +22,6 @@
 #define TEST_CONFIG_SECURITY_POLICY_NONE                    11
 #define TEST_CONFIG_MEASUREMENT_CONTENT_MODIFIED            12
 #define TEST_CONFIG_RSASSA_3072_SHA_384                     13
+#define TEST_CONFIG_RSASSA_4096_SHA_512                     14
 
 #endif
