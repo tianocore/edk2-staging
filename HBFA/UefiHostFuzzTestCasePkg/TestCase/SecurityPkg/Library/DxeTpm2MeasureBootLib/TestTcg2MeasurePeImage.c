@@ -23,7 +23,7 @@
 #include <Library/Tcg2StubLib.h>
 #include <Library/PeCoffLib.h>
 #include <Library/DevicePathLib.h>
-
+#include <Protocol/CcMeasurement.h>
 
 
 #define TOTAL_SIZE   (512 * 1024)
