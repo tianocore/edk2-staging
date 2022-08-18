@@ -18,6 +18,8 @@
   DeployCert.c
   TestRootCer.c
   TestRootKey.c
+  EccTestRootCer.c
+  EccTestRootKey.c
 
 [Packages]
   MdePkg/MdePkg.dec
