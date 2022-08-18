@@ -23,5 +23,6 @@
 #define TEST_CONFIG_MEASUREMENT_CONTENT_MODIFIED            12
 #define TEST_CONFIG_RSASSA_3072_SHA_384                     13
 #define TEST_CONFIG_RSASSA_4096_SHA_512                     14
+#define TEST_CONFIG_ECDSA_ECC_P256_SHA_256                  15
 
 #endif
