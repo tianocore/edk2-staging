@@ -70,6 +70,9 @@ extern UINTN TestRootKey4Size;
 extern UINT8 EccTestRootCer[];
 extern UINTN EccTestRootCerSize;
 
+extern UINT8 EccTestCertChain[];
+extern UINTN EccTestCertChainSize;
+
 extern UINT8 EccTestRootKey[];
 extern UINTN EccTestRootKeySize;
 
@@ -375,6 +378,17 @@ MainEntryPoint (
     ShaHashAll = Sha512HashAll;
     RootKey = TestRootKey4;
     RootKeySize = TestRootKey4Size;
+    break;
+
+  case TEST_CONFIG_ECDSA_ECC_P256_SHA_256:
+    CertChain = EccTestCertChain;
+    CertChainSize = EccTestCertChainSize;
+    RootCert = EccTestRootCer;
+    RootCertSize = EccTestRootCerSize;
+    HashSize = SHA256_HASH_SIZE;
+    ShaHashAll = Sha256HashAll;
+    RootKey = EccTestRootKey;
+    RootKeySize = EccTestRootKeySize;
     break;
 
   default:
