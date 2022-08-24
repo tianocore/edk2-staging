@@ -55,6 +55,7 @@
   GCC:*_LIBFUZZERWIN_*_DLINK2_FLAGS == -fsanitize=fuzzer,address
 
   GCC:*_AFL_*_CC_PATH = afl-gcc
+  GCC:*_AFL_X64_CC_FLAGS = -DUSING_LTO
 
   GCC:*_KLEE_IA32_DLINK_FLAGS == -o $(BIN_DIR)/$(BASE_NAME)
   GCC:*_KLEE_IA32_CC_FLAGS == -m32 -MD -g -fshort-wchar -fno-strict-aliasing -Wno-int-to-void-pointer-cast -Wall  -c -include $(DEST_DIR_DEBUG)/AutoGen.h
