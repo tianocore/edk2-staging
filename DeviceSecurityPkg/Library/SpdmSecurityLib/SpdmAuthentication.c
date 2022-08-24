@@ -346,7 +346,7 @@ DoDeviceAuthentication (
   VOID                  *TrustAnchor;
   UINTN                 TrustAnchorSize;
   BOOLEAN               IsValidCertChain;
-  BOOLEAN               IsValidChanllegeAuthSig;
+  BOOLEAN               IsValidChallengeAuthSig;
   BOOLEAN               RootCertMatch;
   UINT8                 AuthState;
 
@@ -358,8 +358,8 @@ DoDeviceAuthentication (
   SpdmGetData (SpdmContext, SpdmDataCapabilityFlags, &Parameter, &CapabilityFlags, &DataSize);
 
   IsValidCertChain = FALSE;
-  IsValidChanllegeAuthSig = FALSE;
-  IsValidChanllegeAuthSig = FALSE;
+  IsValidChallengeAuthSig = FALSE;
+  RootCertMatch = FALSE;
 
   if ((CapabilityFlags & SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_CERT_CAP) == 0) {
     AuthState = TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_FAIL_NO_SIG;
@@ -405,21 +405,21 @@ DoDeviceAuthentication (
     ZeroMem (RequesterNonceIn, sizeof(RequesterNonceIn));
     Status = SpdmChallengeEx (SpdmContext, 0, SPDM_CHALLENGE_REQUEST_TCB_COMPONENT_MEASUREMENT_HASH, MeasurementHash, NULL, RequesterNonceIn, RequesterNonce, ResponderNonce);
     if (Status == LIBSPDM_STATUS_SUCCESS) {
-      IsValidChanllegeAuthSig = TRUE;
+      IsValidChallengeAuthSig = TRUE;
     } else if (Status == LIBSPDM_STATUS_VERIF_FAIL) {
-      IsValidChanllegeAuthSig = FALSE;
+      IsValidChallengeAuthSig = FALSE;
       AuthState = TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_FAIL_INVALID;
       ExtendCertificate (SpdmDeviceContext, AuthState, 0, NULL, NULL, 0);
       return Status;
     } else {
       return Status;
     }
-    if (IsValidCertChain && IsValidChanllegeAuthSig && !RootCertMatch) {
+    if (IsValidCertChain && IsValidChallengeAuthSig && !RootCertMatch) {
       AuthState = TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_NO_AUTH;
       ExtendCertificate (SpdmDeviceContext, AuthState, CertChainSize, CertChain, NULL, 0);
       return Status;
     }
-    if (IsValidCertChain && IsValidChanllegeAuthSig && RootCertMatch) {
+    if (IsValidCertChain && IsValidChallengeAuthSig && RootCertMatch) {
       AuthState = TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_SUCCESS;
       ExtendCertificate (SpdmDeviceContext, AuthState, CertChainSize, CertChain, TrustAnchor, TrustAnchorSize);
     }
