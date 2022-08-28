@@ -25,5 +25,6 @@
 #define TEST_CONFIG_RSASSA_4096_SHA_512                     14
 #define TEST_CONFIG_ECDSA_ECC_P256_SHA_256                  15
 #define TEST_CONFIG_ECDSA_ECC_P384_SHA_384                  16
+#define TEST_CONFIG_ECDSA_ECC_P521_SHA_512                  17
 
 #endif
