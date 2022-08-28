@@ -85,6 +85,15 @@ extern UINTN EccTestCertChain2Size;
 extern UINT8 EccTestRootKey2[];
 extern UINTN EccTestRootKey2Size;
 
+extern UINT8 EccTestRootCer3[];
+extern UINTN EccTestRootCer3Size;
+
+extern UINT8 EccTestCertChain3[];
+extern UINTN EccTestCertChain3Size;
+
+extern UINT8 EccTestRootKey3[];
+extern UINTN EccTestRootKey3Size;
+
 SHELL_PARAM_ITEM mParamList[] = {
   {L"-P",   TypeFlag},
   {L"-T",   TypeValue},
@@ -409,6 +418,17 @@ MainEntryPoint (
     ShaHashAll = Sha384HashAll;
     RootKey = EccTestRootKey2;
     RootKeySize = EccTestRootKey2Size;
+    break;
+
+  case TEST_CONFIG_ECDSA_ECC_P521_SHA_512:
+    CertChain = EccTestCertChain3;
+    CertChainSize = EccTestCertChain3Size;
+    RootCert = EccTestRootCer3;
+    RootCertSize = EccTestRootCer3Size;
+    HashSize = SHA512_HASH_SIZE;
+    ShaHashAll = Sha512HashAll;
+    RootKey = EccTestRootKey3;
+    RootKeySize = EccTestRootKey3Size;
     break;
 
   default:
