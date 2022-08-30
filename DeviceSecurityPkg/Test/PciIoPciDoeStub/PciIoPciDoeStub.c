@@ -14,6 +14,7 @@
 #include <Library/BaseMemoryLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/UefiBootServicesTableLib.h>
+#include <Library/UefiRuntimeServicesTableLib.h>
 #include <Library/DevicePathLib.h>
 #include <library/spdm_lib_config.h>
 #include <Library/UefiLib.h>
@@ -24,6 +25,7 @@
 #include <Protocol/Spdm.h>
 #include <Protocol/SpdmIo.h>
 #include <Protocol/SpdmTest.h>
+#include <Test/TestConfig.h>
 
 SPDM_TEST_DEVICE_CONTEXT  mSpdmTestDeviceContext = {
   SPDM_TEST_DEVICE_CONTEXT_SIGNATURE,
@@ -886,6 +888,16 @@ MainEntryPoint (
   BOOLEAN                           HasRspPubCert;
   BOOLEAN                           HasRspPrivKey;
   UINTN                             ScratchBufferSize;
+  UINT8                             TestConfig;
+  UINTN                             TestConfigSize;
+
+  Status = gRT->GetVariable (
+                  L"SpdmTestConfig",
+                  &gEfiDeviceSecurityPkgTestConfig,
+                  NULL,
+                  &TestConfigSize,
+                  &TestConfig
+                  );
 
   mPciDeviceBuffer = AllocateZeroPool (0x1000);
   ASSERT(mPciDeviceBuffer != NULL);
@@ -977,19 +989,56 @@ MainEntryPoint (
     Data32 |= SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_MEAS_CAP_SIG;
     Data32 &= ~SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_MEAS_CAP_NO_SIG;
   }
+
+  if (TestConfig == TEST_CONFIG_NO_CERT_CAP) {
+    Data32 &= ~SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_CERT_CAP;
+  } else if (TestConfig == TEST_CONFIG_NO_CHAL_CAP) {
+    Data32 &= ~SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_CHAL_CAP;
+  } else if (TestConfig == TEST_CONFIG_MEAS_CAP_NO_SIG) {
+    Data32 &= ~SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_MEAS_CAP_SIG;
+    Data32 |= SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_MEAS_CAP_NO_SIG;
+  } else if (TestConfig == TEST_CONFIG_NO_MEAS_CAP) {
+    Data32 &= ~SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_MEAS_CAP_SIG;
+    Data32 &= ~SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_MEAS_CAP_NO_SIG;
+  }
+
   SpdmSetData (SpdmContext, SpdmDataCapabilityFlags, &Parameter, &Data32, sizeof(Data32));
 
   Data8 = SPDM_MEASUREMENT_BLOCK_HEADER_SPECIFICATION_DMTF;
   SpdmSetData (SpdmContext, SpdmDataMeasurementSpec, &Parameter, &Data8, sizeof(Data8));
   Data32 = SPDM_ALGORITHMS_MEASUREMENT_HASH_ALGO_TPM_ALG_SHA_256;
   SpdmSetData (SpdmContext, SpdmDataMeasurementHashAlgo, &Parameter, &Data32, sizeof(Data32));
-  Data32 = SPDM_ALGORITHMS_BASE_ASYM_ALGO_TPM_ALG_RSASSA_2048;
+  if (TestConfig == TEST_CONFIG_RSASSA_3072_SHA_384) {
+    Data32 = SPDM_ALGORITHMS_BASE_ASYM_ALGO_TPM_ALG_RSASSA_3072;
+  } else if (TestConfig == TEST_CONFIG_RSASSA_4096_SHA_512) {
+    Data32 = SPDM_ALGORITHMS_BASE_ASYM_ALGO_TPM_ALG_RSASSA_4096;
+  } else if (TestConfig == TEST_CONFIG_ECDSA_ECC_P256_SHA_256) {
+    Data32 = SPDM_ALGORITHMS_BASE_ASYM_ALGO_TPM_ALG_ECDSA_ECC_NIST_P256;
+  } else if (TestConfig == TEST_CONFIG_ECDSA_ECC_P384_SHA_384) {
+    Data32 = SPDM_ALGORITHMS_BASE_ASYM_ALGO_TPM_ALG_ECDSA_ECC_NIST_P384;
+  } else if (TestConfig == TEST_CONFIG_ECDSA_ECC_P521_SHA_512) {
+    Data32 = SPDM_ALGORITHMS_BASE_ASYM_ALGO_TPM_ALG_ECDSA_ECC_NIST_P521;
+  } else {
+    Data32 = SPDM_ALGORITHMS_BASE_ASYM_ALGO_TPM_ALG_RSASSA_2048;
+  }
   SpdmSetData (SpdmContext, SpdmDataBaseAsymAlgo, &Parameter, &Data32, sizeof(Data32));
-  Data32 = SPDM_ALGORITHMS_BASE_HASH_ALGO_TPM_ALG_SHA_256;
+  if (TestConfig == TEST_CONFIG_RSASSA_3072_SHA_384) {
+    Data32 = SPDM_ALGORITHMS_BASE_HASH_ALGO_TPM_ALG_SHA_384;
+  } else if (TestConfig == TEST_CONFIG_RSASSA_4096_SHA_512) {
+    Data32 = SPDM_ALGORITHMS_BASE_HASH_ALGO_TPM_ALG_SHA_512;
+  } else if (TestConfig == TEST_CONFIG_ECDSA_ECC_P256_SHA_256) {
+    Data32 = SPDM_ALGORITHMS_BASE_HASH_ALGO_TPM_ALG_SHA_256;
+  } else if (TestConfig == TEST_CONFIG_ECDSA_ECC_P384_SHA_384) {
+    Data32 = SPDM_ALGORITHMS_BASE_HASH_ALGO_TPM_ALG_SHA_384;
+  } else if (TestConfig == TEST_CONFIG_ECDSA_ECC_P521_SHA_512) {
+    Data32 = SPDM_ALGORITHMS_BASE_HASH_ALGO_TPM_ALG_SHA_512;
+  } else {
+    Data32 = SPDM_ALGORITHMS_BASE_HASH_ALGO_TPM_ALG_SHA_256;
+  }
   SpdmSetData (SpdmContext, SpdmDataBaseHashAlgo, &Parameter, &Data32, sizeof(Data32));
   Data16 = SPDM_ALGORITHMS_DHE_NAMED_GROUP_SECP_384_R1;
   SpdmSetData (SpdmContext, SpdmDataDHENamedGroup, &Parameter, &Data16, sizeof(Data16));
-  Data16 = SPDM_ALGORITHMS_KEY_SCHEDULE_HMAC_HASH;
+  Data16 = SPDM_ALGORITHMS_AEAD_CIPHER_SUITE_AES_128_GCM;
   SpdmSetData (SpdmContext, SpdmDataAEADCipherSuite, &Parameter, &Data16, sizeof(Data16));
   Data16 = SPDM_ALGORITHMS_KEY_SCHEDULE_HMAC_HASH;
   SpdmSetData (SpdmContext, SpdmDataKeySchedule, &Parameter, &Data16, sizeof(Data16));
