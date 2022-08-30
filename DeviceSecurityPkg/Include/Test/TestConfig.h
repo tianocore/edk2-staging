@@ -26,5 +26,7 @@
 #define TEST_CONFIG_ECDSA_ECC_P256_SHA_256                  15
 #define TEST_CONFIG_ECDSA_ECC_P384_SHA_384                  16
 #define TEST_CONFIG_ECDSA_ECC_P521_SHA_512                  17
+#define TEST_CONFIG_SECP_256_R1_AES_256_GCM                 18
+#define TEST_CONFIG_SECP_521_R1_CHACHA20_POLY1305           19
 
 #endif
