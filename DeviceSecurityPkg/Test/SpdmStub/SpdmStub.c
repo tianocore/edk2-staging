@@ -310,9 +310,21 @@ MainEntryPoint (
     Data32 = SPDM_ALGORITHMS_BASE_HASH_ALGO_TPM_ALG_SHA_256;
   }
   SpdmSetData (SpdmContext, SpdmDataBaseHashAlgo, &Parameter, &Data32, sizeof(Data32));
-  Data16 = SPDM_ALGORITHMS_DHE_NAMED_GROUP_SECP_384_R1;
+  if (TestConfig == TEST_CONFIG_SECP_256_R1_AES_256_GCM) {
+    Data16 = SPDM_ALGORITHMS_DHE_NAMED_GROUP_SECP_256_R1;
+  } else if (TestConfig == TEST_CONFIG_SECP_521_R1_CHACHA20_POLY1305) {
+    Data16 = SPDM_ALGORITHMS_DHE_NAMED_GROUP_SECP_521_R1;
+  } else {
+    Data16 = SPDM_ALGORITHMS_DHE_NAMED_GROUP_SECP_384_R1;
+  }
   SpdmSetData (SpdmContext, SpdmDataDHENamedGroup, &Parameter, &Data16, sizeof(Data16));
-  Data16 = SPDM_ALGORITHMS_AEAD_CIPHER_SUITE_AES_128_GCM;
+  if (TestConfig == TEST_CONFIG_SECP_256_R1_AES_256_GCM) {
+    Data16 = SPDM_ALGORITHMS_AEAD_CIPHER_SUITE_AES_256_GCM;
+  } else if (TestConfig == TEST_CONFIG_SECP_521_R1_CHACHA20_POLY1305) {
+    Data16 = SPDM_ALGORITHMS_AEAD_CIPHER_SUITE_CHACHA20_POLY1305;
+  } else {
+    Data16 = SPDM_ALGORITHMS_AEAD_CIPHER_SUITE_AES_128_GCM;
+  }
   SpdmSetData (SpdmContext, SpdmDataAEADCipherSuite, &Parameter, &Data16, sizeof(Data16));
   Data16 = SPDM_ALGORITHMS_KEY_SCHEDULE_HMAC_HASH;
   SpdmSetData (SpdmContext, SpdmDataKeySchedule, &Parameter, &Data16, sizeof(Data16));
