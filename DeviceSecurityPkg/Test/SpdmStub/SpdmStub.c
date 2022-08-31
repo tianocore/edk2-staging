@@ -270,9 +270,17 @@ MainEntryPoint (
 
   SpdmSetData (SpdmContext, SpdmDataCapabilityFlags, &Parameter, &Data32, sizeof(Data32));
 
-  Data8 = SPDM_MEASUREMENT_BLOCK_HEADER_SPECIFICATION_DMTF;
+  if (TestConfig == TEST_CONFIG_NO_MEAS_CAP) {
+    Data8 = 0;
+  } else {
+    Data8 = SPDM_MEASUREMENT_BLOCK_HEADER_SPECIFICATION_DMTF;
+  }
   SpdmSetData (SpdmContext, SpdmDataMeasurementSpec, &Parameter, &Data8, sizeof(Data8));
-  Data32 = SPDM_ALGORITHMS_MEASUREMENT_HASH_ALGO_TPM_ALG_SHA_256;
+  if (TestConfig == TEST_CONFIG_NO_MEAS_CAP) {
+    Data32 = 0;
+  } else {
+    Data32 = SPDM_ALGORITHMS_MEASUREMENT_HASH_ALGO_TPM_ALG_SHA_256;
+  }
   SpdmSetData (SpdmContext, SpdmDataMeasurementHashAlgo, &Parameter, &Data32, sizeof(Data32));
   if (TestConfig == TEST_CONFIG_RSASSA_3072_SHA_384) {
     Data32 = SPDM_ALGORITHMS_BASE_ASYM_ALGO_TPM_ALG_RSASSA_3072;
