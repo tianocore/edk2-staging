@@ -13,12 +13,12 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <openssl/asn1.h>
 #include <openssl/rsa.h>
 
-///
-/// OID
-///
-STATIC CONST UINT8  OID_extKeyUsage[] = {
-  0x55, 0x1D, 0x25
-};
+/* OID*/
+#define OID_EXT_KEY_USAGE      { 0x55, 0x1D, 0x25 }
+#define OID_BASIC_CONSTRAINTS  { 0x55, 0x1D, 0x13 }
+
+static CONST UINT8  mOidExtKeyUsage[]      = OID_EXT_KEY_USAGE;
+static CONST UINT8  mOidBasicConstraints[] = OID_BASIC_CONSTRAINTS;
 
 #define CRYPTO_ASN1_TAG_CLASS_MASK  0xC0
 #define CRYPTO_ASN1_TAG_PC_MASK     0x20
@@ -951,12 +951,12 @@ _Exit:
   @param[in]      CertSize     Size of the X509 certificate in bytes.
   @param[out]     Version      Pointer to the retrieved version integer.
 
-  @retval RETURN_SUCCESS           The certificate version retrieved successfully.
-  @retval RETURN_INVALID_PARAMETER If  Cert is NULL or CertSize is Zero.
-  @retval RETURN_UNSUPPORTED       The operation is not supported.
+  @retval TRUE           The certificate version retrieved successfully.
+  @retval FALSE          If  Cert is NULL or CertSize is Zero.
+  @retval FALSE          The operation is not supported.
 
 **/
-RETURN_STATUS
+BOOLEAN
 EFIAPI
 X509GetVersion (
   IN      CONST UINT8  *Cert,
@@ -964,21 +964,19 @@ X509GetVersion (
   OUT     UINTN        *Version
   )
 {
-  RETURN_STATUS  ReturnStatus;
-  BOOLEAN        Status;
-  X509           *X509Cert;
+  BOOLEAN  Status;
+  X509     *X509Cert;
 
-  X509Cert     = NULL;
-  ReturnStatus = RETURN_SUCCESS;
-  Status       = X509ConstructCertificate (Cert, CertSize, (UINT8 **)&X509Cert);
+  X509Cert = NULL;
+  Status   = X509ConstructCertificate (Cert, CertSize, (UINT8 **)&X509Cert);
   if ((X509Cert == NULL) || (!Status)) {
     //
     // Invalid X.509 Certificate
     //
-    ReturnStatus = RETURN_INVALID_PARAMETER;
+    Status = FALSE;
   }
 
-  if (!RETURN_ERROR (ReturnStatus)) {
+  if (Status) {
     *Version = X509_get_version (X509Cert);
   }
 
@@ -986,7 +984,7 @@ X509GetVersion (
     X509_free (X509Cert);
   }
 
-  return ReturnStatus;
+  return Status;
 }
 
 /**
@@ -1002,17 +1000,17 @@ X509GetVersion (
   @param[in, out] SerialNumberSize  The size in bytes of the SerialNumber buffer on input,
                                and the size of buffer returned SerialNumber on output.
 
-  @retval RETURN_SUCCESS           The certificate serialNumber retrieved successfully.
-  @retval RETURN_INVALID_PARAMETER If Cert is NULL or CertSize is Zero.
+  @retval TRUE                     The certificate serialNumber retrieved successfully.
+  @retval FALSE                    If Cert is NULL or CertSize is Zero.
                                    If SerialNumberSize is NULL.
                                    If Certificate is invalid.
-  @retval RETURN_NOT_FOUND         If no SerialNumber exists.
-  @retval RETURN_BUFFER_TOO_SMALL  If the SerialNumber is NULL. The required buffer size
+  @retval FALSE                    If no SerialNumber exists.
+  @retval FALSE                    If the SerialNumber is NULL. The required buffer size
                                    (including the final null) is returned in the
                                    SerialNumberSize parameter.
-  @retval RETURN_UNSUPPORTED       The operation is not supported.
+  @retval FALSE                    The operation is not supported.
 **/
-RETURN_STATUS
+BOOLEAN
 EFIAPI
 X509GetSerialNumber (
   IN      CONST UINT8 *Cert,
@@ -1021,18 +1019,16 @@ X509GetSerialNumber (
   IN OUT  UINTN         *SerialNumberSize
   )
 {
-  BOOLEAN        Status;
-  X509           *X509Cert;
-  ASN1_INTEGER   *Asn1Integer;
-  RETURN_STATUS  ReturnStatus;
+  BOOLEAN       Status;
+  X509          *X509Cert;
+  ASN1_INTEGER  *Asn1Integer;
 
-  ReturnStatus = RETURN_INVALID_PARAMETER;
-
+  Status = FALSE;
   //
   // Check input parameters.
   //
   if ((Cert == NULL) || (SerialNumberSize == NULL)) {
-    return ReturnStatus;
+    return Status;
   }
 
   X509Cert = NULL;
@@ -1042,6 +1038,8 @@ X509GetSerialNumber (
   //
   Status = X509ConstructCertificate (Cert, CertSize, (UINT8 **)&X509Cert);
   if ((X509Cert == NULL) || (!Status)) {
+    *SerialNumberSize = 0;
+    Status            = FALSE;
     goto _Exit;
   }
 
@@ -1050,21 +1048,23 @@ X509GetSerialNumber (
   //
   Asn1Integer = X509_get_serialNumber (X509Cert);
   if (Asn1Integer == NULL) {
-    ReturnStatus = RETURN_NOT_FOUND;
+    *SerialNumberSize = 0;
+    Status            = FALSE;
     goto _Exit;
   }
 
   if (*SerialNumberSize < (UINTN)Asn1Integer->length) {
     *SerialNumberSize = (UINTN)Asn1Integer->length;
-    ReturnStatus      = RETURN_BUFFER_TOO_SMALL;
+    Status            = FALSE;
     goto _Exit;
   }
 
-  *SerialNumberSize = (UINTN)Asn1Integer->length;
   if (SerialNumber != NULL) {
     CopyMem (SerialNumber, Asn1Integer->data, *SerialNumberSize);
-    ReturnStatus = RETURN_SUCCESS;
+    Status = TRUE;
   }
+
+  *SerialNumberSize = (UINTN)Asn1Integer->length;
 
 _Exit:
   //
@@ -1074,7 +1074,7 @@ _Exit:
     X509_free (X509Cert);
   }
 
-  return ReturnStatus;
+  return Status;
 }
 
 /**
@@ -1169,17 +1169,17 @@ _Exit:
   @param[out]     Oid              Signature Algorithm Object identifier buffer.
   @param[in,out]  OidSize          Signature Algorithm Object identifier buffer size
 
-  @retval RETURN_SUCCESS           The certificate Extension data retrieved successfully.
-  @retval RETURN_INVALID_PARAMETER If Cert is NULL.
+  @retval TRUE           The certificate Extension data retrieved successfully.
+  @retval FALSE                    If Cert is NULL.
                                    If OidSize is NULL.
                                    If Oid is not NULL and *OidSize is 0.
                                    If Certificate is invalid.
-  @retval RETURN_NOT_FOUND         If no SignatureType.
-  @retval RETURN_BUFFER_TOO_SMALL  If the Oid is NULL. The required buffer size
+  @retval FALSE                    If no SignatureType.
+  @retval FALSE                    If the Oid is NULL. The required buffer size
                                    is returned in the OidSize.
-  @retval RETURN_UNSUPPORTED       The operation is not supported.
+  @retval FALSE                    The operation is not supported.
 **/
-RETURN_STATUS
+BOOLEAN
 EFIAPI
 X509GetSignatureAlgorithm (
   IN CONST UINT8 *Cert,
@@ -1188,28 +1188,27 @@ X509GetSignatureAlgorithm (
   IN OUT   UINTN       *OidSize
   )
 {
-  BOOLEAN        Status;
-  RETURN_STATUS  ReturnStatus;
-  X509           *X509Cert;
-  int            Nid;
-  ASN1_OBJECT    *Asn1Obj;
+  BOOLEAN      Status;
+  X509         *X509Cert;
+  int          Nid;
+  ASN1_OBJECT  *Asn1Obj;
 
   //
   // Check input parameters.
   //
   if ((Cert == NULL) || (OidSize == NULL) || (CertSize == 0)) {
-    return RETURN_INVALID_PARAMETER;
+    return FALSE;
   }
 
-  X509Cert     = NULL;
-  ReturnStatus = RETURN_INVALID_PARAMETER;
+  X509Cert = NULL;
+  Status   = FALSE;
 
   //
   // Read DER-encoded X509 Certificate and Construct X509 object.
   //
   Status = X509ConstructCertificate (Cert, CertSize, (UINT8 **)&X509Cert);
   if ((X509Cert == NULL) || (!Status)) {
-    ReturnStatus = RETURN_INVALID_PARAMETER;
+    Status = FALSE;
     goto _Exit;
   }
 
@@ -1218,19 +1217,21 @@ X509GetSignatureAlgorithm (
   //
   Nid = X509_get_signature_nid (X509Cert);
   if (Nid == NID_undef) {
-    ReturnStatus = RETURN_NOT_FOUND;
+    *OidSize = 0;
+    Status   = FALSE;
     goto _Exit;
   }
 
   Asn1Obj = OBJ_nid2obj (Nid);
   if (Asn1Obj == NULL) {
-    ReturnStatus = RETURN_NOT_FOUND;
+    *OidSize = 0;
+    Status   = FALSE;
     goto _Exit;
   }
 
   if (*OidSize < (UINTN)Asn1Obj->length) {
-    *OidSize     = Asn1Obj->length;
-    ReturnStatus = RETURN_BUFFER_TOO_SMALL;
+    *OidSize = Asn1Obj->length;
+    Status   = FALSE;
     goto _Exit;
   }
 
@@ -1238,8 +1239,8 @@ X509GetSignatureAlgorithm (
     CopyMem (Oid, Asn1Obj->data, Asn1Obj->length);
   }
 
-  *OidSize     = Asn1Obj->length;
-  ReturnStatus = RETURN_SUCCESS;
+  *OidSize = Asn1Obj->length;
+  Status   = TRUE;
 
 _Exit:
   //
@@ -1249,7 +1250,7 @@ _Exit:
     X509_free (X509Cert);
   }
 
-  return ReturnStatus;
+  return Status;
 }
 
 /**
@@ -1262,44 +1263,43 @@ _Exit:
   @param[out]     ExtensionData    Extension bytes.
   @param[in, out] ExtensionDataSize Extension bytes size.
 
-  @retval RETURN_SUCCESS           The certificate Extension data retrieved successfully.
-  @retval RETURN_INVALID_PARAMETER If Cert is NULL.
+  @retval TRUE                     The certificate Extension data retrieved successfully.
+  @retval FALSE                    If Cert is NULL.
                                    If ExtensionDataSize is NULL.
                                    If ExtensionData is not NULL and *ExtensionDataSize is 0.
                                    If Certificate is invalid.
-  @retval RETURN_NOT_FOUND         If no Extension entry match Oid.
-  @retval RETURN_BUFFER_TOO_SMALL  If the ExtensionData is NULL. The required buffer size
+  @retval FALSE                    If no Extension entry match Oid.
+  @retval FALSE                    If the ExtensionData is NULL. The required buffer size
                                    is returned in the ExtensionDataSize parameter.
-  @retval RETURN_UNSUPPORTED       The operation is not supported.
+  @retval FALSE                    The operation is not supported.
 **/
-RETURN_STATUS
+BOOLEAN
 EFIAPI
 X509GetExtensionData (
   IN     CONST UINT8  *Cert,
   IN     UINTN        CertSize,
-  IN     UINT8        *Oid,
+  IN     CONST UINT8  *Oid,
   IN     UINTN        OidSize,
   OUT UINT8           *ExtensionData,
   IN OUT UINTN        *ExtensionDataSize
   )
 {
-  RETURN_STATUS  ReturnStatus;
-  INTN           i;
-  BOOLEAN        Status;
-  X509           *X509Cert;
+  BOOLEAN  Status;
+  INTN     i;
+  X509     *X509Cert;
 
   CONST STACK_OF (X509_EXTENSION) *Extensions;
   ASN1_OBJECT        *Asn1Obj;
   ASN1_OCTET_STRING  *Asn1Oct;
   X509_EXTENSION     *Ext;
-
-  ReturnStatus = RETURN_INVALID_PARAMETER;
+  UINTN              ObjLength;
+  UINTN              OctLength;
 
   //
   // Check input parameters.
   //
   if ((Cert == NULL) || (CertSize == 0) || (Oid == NULL) || (OidSize == 0) || (ExtensionDataSize == NULL)) {
-    return ReturnStatus;
+    return FALSE;
   }
 
   X509Cert = NULL;
@@ -1310,21 +1310,25 @@ X509GetExtensionData (
   //
   Status = X509ConstructCertificate (Cert, CertSize, (UINT8 **)&X509Cert);
   if ((X509Cert == NULL) || (!Status)) {
+    *ExtensionDataSize = 0;
     goto Cleanup;
   }
 
   //
   // Retrieve Extensions from certificate object.
   //
-  ReturnStatus = RETURN_NOT_FOUND;
-  Extensions   = X509_get0_extensions (X509Cert);
+  Extensions = X509_get0_extensions (X509Cert);
   if (sk_X509_EXTENSION_num (Extensions) <= 0) {
+    *ExtensionDataSize = 0;
     goto Cleanup;
   }
 
   //
   // Traverse Extensions
   //
+  Status    = FALSE;
+  Asn1Oct   = NULL;
+  OctLength = 0;
   for (i = 0; i < sk_X509_EXTENSION_num (Extensions); i++) {
     Ext = sk_X509_EXTENSION_value (Extensions, (int)i);
     if (Ext == NULL) {
@@ -1341,28 +1345,36 @@ X509GetExtensionData (
       continue;
     }
 
-    if ((OidSize == (UINTN)Asn1Obj->length) && (CompareMem (Asn1Obj->data, Oid, OidSize) == 0)) {
+    ObjLength = OBJ_length (Asn1Obj);
+    OctLength = ASN1_STRING_length (Asn1Oct);
+    if ((OidSize == ObjLength) && (CompareMem (OBJ_get0_data (Asn1Obj), Oid, OidSize) == 0)) {
       //
       // Extension Found
       //
-      ReturnStatus = RETURN_SUCCESS;
+      Status = TRUE;
       break;
     }
+
+    //
+    // reset to 0 if not found
+    //
+    OctLength = 0;
   }
 
-  if (ReturnStatus == RETURN_SUCCESS) {
-    if (*ExtensionDataSize < (UINTN)Asn1Oct->length) {
-      *ExtensionDataSize = Asn1Oct->length;
-      ReturnStatus       = RETURN_BUFFER_TOO_SMALL;
+  if (Status) {
+    if (*ExtensionDataSize < OctLength) {
+      *ExtensionDataSize = OctLength;
+      Status             = FALSE;
       goto Cleanup;
     }
 
-    if (Oid != NULL) {
-      CopyMem (ExtensionData, Asn1Oct->data, Asn1Oct->length);
+    if (Asn1Oct != NULL) {
+      CopyMem (ExtensionData, ASN1_STRING_get0_data (Asn1Oct), OctLength);
     }
 
-    *ExtensionDataSize = Asn1Oct->length;
-    ReturnStatus       = RETURN_SUCCESS;
+    *ExtensionDataSize = OctLength;
+  } else {
+    *ExtensionDataSize = 0;
   }
 
 Cleanup:
@@ -1373,7 +1385,7 @@ Cleanup:
     X509_free (X509Cert);
   }
 
-  return ReturnStatus;
+  return Status;
 }
 
 /**
@@ -1384,16 +1396,16 @@ Cleanup:
   @param[out]     Usage            Key Usage bytes.
   @param[in, out] UsageSize        Key Usage buffer sizs in bytes.
 
-  @retval RETURN_SUCCESS           The Usage bytes retrieve successfully.
-  @retval RETURN_INVALID_PARAMETER If Cert is NULL.
+  @retval TRUE                     The Usage bytes retrieve successfully.
+  @retval FALSE                    If Cert is NULL.
                                    If CertSize is NULL.
                                    If Usage is not NULL and *UsageSize is 0.
                                    If Cert is invalid.
-  @retval RETURN_BUFFER_TOO_SMALL  If the Usage is NULL. The required buffer size
+  @retval FALSE                    If the Usage is NULL. The required buffer size
                                    is returned in the UsageSize parameter.
-  @retval RETURN_UNSUPPORTED       The operation is not supported.
+  @retval FALSE                    The operation is not supported.
 **/
-RETURN_STATUS
+BOOLEAN
 EFIAPI
 X509GetExtendedKeyUsage (
   IN     CONST UINT8  *Cert,
@@ -1402,10 +1414,10 @@ X509GetExtendedKeyUsage (
   IN OUT UINTN        *UsageSize
   )
 {
-  RETURN_STATUS  ReturnStatus;
+  BOOLEAN  Status;
 
-  ReturnStatus = X509GetExtensionData (Cert, CertSize, (UINT8 *)OID_extKeyUsage, sizeof (OID_extKeyUsage), Usage, UsageSize);
-  return ReturnStatus;
+  Status = X509GetExtensionData (Cert, CertSize, mOidExtKeyUsage, sizeof (mOidExtKeyUsage), Usage, UsageSize);
+  return Status;
 }
 
 /**
@@ -1527,17 +1539,17 @@ _Exit:
   @param[in,out]  DateTime         Pointer to a DateTime object.
   @param[in,out]  DateTimeSize     DateTime object buffer size.
 
-  @retval RETURN_SUCCESS           The DateTime object create successfully.
-  @retval RETURN_INVALID_PARAMETER If DateTimeStr is NULL.
+  @retval TRUE                     The DateTime object create successfully.
+  @retval FALSE                    If DateTimeStr is NULL.
                                    If DateTimeSize is NULL.
                                    If DateTime is not NULL and *DateTimeSize is 0.
                                    If Year Month Day Hour Minute Second combination is invalid datetime.
-  @retval RETURN_BUFFER_TOO_SMALL  If the DateTime is NULL. The required buffer size
+  @retval FALSE                    If the DateTime is NULL. The required buffer size
                                    (including the final null) is returned in the
                                    DateTimeSize parameter.
-  @retval RETURN_UNSUPPORTED       The operation is not supported.
+  @retval FALSE                    The operation is not supported.
 **/
-RETURN_STATUS
+BOOLEAN
 EFIAPI
 X509SetDateTime (
   IN     CHAR8  *DateTimeStr,
@@ -1545,30 +1557,30 @@ X509SetDateTime (
   IN OUT UINTN  *DateTimeSize
   )
 {
-  RETURN_STATUS  ReturnStatus;
-  INT32          Ret;
-  ASN1_TIME      *Dt;
-  UINTN          DSize;
+  BOOLEAN    Status;
+  INT32      Ret;
+  ASN1_TIME  *Dt;
+  UINTN      DSize;
 
-  Dt           = NULL;
-  ReturnStatus = RETURN_INVALID_PARAMETER;
+  Dt     = NULL;
+  Status = FALSE;
 
   Dt = ASN1_TIME_new ();
   if (Dt == NULL) {
-    ReturnStatus = RETURN_OUT_OF_RESOURCES;
+    Status = FALSE;
     goto Cleanup;
   }
 
   Ret = ASN1_TIME_set_string_X509 (Dt, DateTimeStr);
   if (Ret != 1) {
-    ReturnStatus = RETURN_INVALID_PARAMETER;
+    Status = FALSE;
     goto Cleanup;
   }
 
   DSize = sizeof (ASN1_TIME) + Dt->length;
   if (*DateTimeSize < DSize) {
     *DateTimeSize = DSize;
-    ReturnStatus  = RETURN_BUFFER_TOO_SMALL;
+    Status        = FALSE;
     goto Cleanup;
   }
 
@@ -1579,14 +1591,14 @@ X509SetDateTime (
     CopyMem ((UINT8 *)DateTime + sizeof (ASN1_TIME), Dt->data, Dt->length);
   }
 
-  ReturnStatus = RETURN_SUCCESS;
+  Status = TRUE;
 
 Cleanup:
   if (Dt != NULL) {
     ASN1_TIME_free (Dt);
   }
 
-  return ReturnStatus;
+  return Status;
 }
 
 /**
@@ -1605,14 +1617,14 @@ Cleanup:
   @retval  1      If DateTime1 > DateTime2
   @retval  -1     If DateTime1 < DateTime2
 **/
-INTN
+INT32
 EFIAPI
 X509CompareDateTime (
-  IN    VOID  *DateTime1,
-  IN    VOID  *DateTime2
+  IN CONST  VOID  *DateTime1,
+  IN CONST  VOID  *DateTime2
   )
 {
-  return (INTN)ASN1_TIME_compare (DateTime1, DateTime2);
+  return (INT32)ASN1_TIME_compare (DateTime1, DateTime2);
 }
 
 /**
@@ -1903,4 +1915,49 @@ Asn1GetTag (
     *Ptr = PtrOld;
     return FALSE;
   }
+}
+
+/**
+  Retrieve the basic constraints from one X.509 certificate.
+
+  @param[in]      Cert                     Pointer to the DER-encoded X509 certificate.
+  @param[in]      CertSize                 size of the X509 certificate in bytes.
+  @param[out]     BasicConstraints         basic constraints bytes.
+  @param[in, out] BasicConstraintsSize     basic constraints buffer sizs in bytes.
+
+  @retval TRUE                     The basic constraints retrieve successfully.
+  @retval FALSE                    If cert is NULL.
+                                   If cert_size is NULL.
+                                   If basic_constraints is not NULL and *basic_constraints_size is 0.
+                                   If cert is invalid.
+  @retval FALSE                    The required buffer size is small.
+                                   The return buffer size is basic_constraints_size parameter.
+  @retval FALSE                    If no Extension entry match oid.
+  @retval FALSE                    The operation is not supported.
+ **/
+BOOLEAN
+EFIAPI
+X509GetExtendedBasicConstraints             (
+  CONST UINT8  *Cert,
+  UINTN        CertSize,
+  UINT8        *BasicConstraints,
+  UINTN        *BasicConstraintsSize
+  )
+{
+  BOOLEAN  Status;
+
+  if ((Cert == NULL) || (CertSize == 0) || (BasicConstraintsSize == NULL)) {
+    return FALSE;
+  }
+
+  Status = X509GetExtensionData (
+             (UINT8 *)Cert,
+             CertSize,
+             mOidBasicConstraints,
+             sizeof (mOidBasicConstraints),
+             BasicConstraints,
+             BasicConstraintsSize
+             );
+
+  return Status;
 }

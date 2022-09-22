@@ -39,6 +39,7 @@
   ParallelhashTests.c
   HkdfTests.c
   AeadAesGcmTests.c
+  X509Tests.c
 
 [Packages]
   MdePkg/MdePkg.dec

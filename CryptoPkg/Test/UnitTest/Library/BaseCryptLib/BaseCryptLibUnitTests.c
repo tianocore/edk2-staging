@@ -27,6 +27,7 @@ SUITE_DESC  mSuiteDesc[] = {
   { "OAEP encrypt verify tests",     "CryptoPkg.BaseCryptLib", NULL, NULL, &mOaepTestNum,           mOaepTest           },
   { "Hkdf extract and expand tests", "CryptoPkg.BaseCryptLib", NULL, NULL, &mHkdfTestNum,           mHkdfTest           },
   { "Aead AES Gcm tests",            "CryptoPkg.BaseCryptLib", NULL, NULL, &mAeadAesGcmTestNum,     mAeadAesGcmTest     },
+  { "X509 Verify tests",             "CryptoPkg.BaseCryptLib", NULL, NULL, &mX509TestNum,           mX509Test           },
 };
 
 EFI_STATUS
