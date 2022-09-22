@@ -2432,13 +2432,13 @@ BOOLEAN
   @param[in]      CertSize     Size of the X509 certificate in bytes.
   @param[out]     Version      Pointer to the retrieved version integer.
 
-  @retval RETURN_SUCCESS           The certificate version retrieved successfully.
-  @retval RETURN_INVALID_PARAMETER If  Cert is NULL or CertSize is Zero.
-  @retval RETURN_UNSUPPORTED       The operation is not supported.
+  @retval TRUE           The certificate version retrieved successfully.
+  @retval FALSE          If  Cert is NULL or CertSize is Zero.
+  @retval FALSE          The operation is not supported.
 
 **/
 typedef
-EFI_STATUS
+BOOLEAN
 (EFIAPI *EDKII_CRYPTO_X509_GET_VERSION)(
   IN      CONST UINT8  *Cert,
   IN      UINTN        CertSize,
@@ -2458,18 +2458,18 @@ EFI_STATUS
   @param[in, out] SerialNumberSize  The size in bytes of the SerialNumber buffer on input,
                                and the size of buffer returned SerialNumber on output.
 
-  @retval RETURN_SUCCESS           The certificate serialNumber retrieved successfully.
-  @retval RETURN_INVALID_PARAMETER If Cert is NULL or CertSize is Zero.
+  @retval TRUE                     The certificate serialNumber retrieved successfully.
+  @retval FALSE                    If Cert is NULL or CertSize is Zero.
                                    If SerialNumberSize is NULL.
                                    If Certificate is invalid.
-  @retval RETURN_NOT_FOUND         If no SerialNumber exists.
-  @retval RETURN_BUFFER_TOO_SMALL  If the SerialNumber is NULL. The required buffer size
+  @retval FALSE                    If no SerialNumber exists.
+  @retval FALSE                    If the SerialNumber is NULL. The required buffer size
                                    (including the final null) is returned in the
                                    SerialNumberSize parameter.
-  @retval RETURN_UNSUPPORTED       The operation is not supported.
+  @retval FALSE                    The operation is not supported.
 **/
 typedef
-EFI_STATUS
+BOOLEAN
 (EFIAPI *EDKII_CRYPTO_X509_GET_SERIAL_NUMBER)(
   IN      CONST UINT8 *Cert,
   IN      UINTN CertSize,
@@ -2513,18 +2513,18 @@ BOOLEAN
   @param[out]     Oid              Signature Algorithm Object identifier buffer.
   @param[in,out]  OidSize          Signature Algorithm Object identifier buffer size
 
-  @retval RETURN_SUCCESS           The certificate Extension data retrieved successfully.
-  @retval RETURN_INVALID_PARAMETER If Cert is NULL.
+  @retval TRUE           The certificate Extension data retrieved successfully.
+  @retval FALSE                    If Cert is NULL.
                                    If OidSize is NULL.
                                    If Oid is not NULL and *OidSize is 0.
                                    If Certificate is invalid.
-  @retval RETURN_NOT_FOUND         If no SignatureType.
-  @retval RETURN_BUFFER_TOO_SMALL  If the Oid is NULL. The required buffer size
+  @retval FALSE                    If no SignatureType.
+  @retval FALSE                    If the Oid is NULL. The required buffer size
                                    is returned in the OidSize.
-  @retval RETURN_UNSUPPORTED       The operation is not supported.
+  @retval FALSE                    The operation is not supported.
 **/
 typedef
-EFI_STATUS
+BOOLEAN
 (EFIAPI *EDKII_CRYPTO_X509_GET_SIGNATURE_ALGORITHM)(
   IN CONST UINT8 *Cert,
   IN       UINTN CertSize,
@@ -2542,22 +2542,22 @@ EFI_STATUS
   @param[out]     ExtensionData    Extension bytes.
   @param[in, out] ExtensionDataSize Extension bytes size.
 
-  @retval RETURN_SUCCESS           The certificate Extension data retrieved successfully.
-  @retval RETURN_INVALID_PARAMETER If Cert is NULL.
+  @retval TRUE                     The certificate Extension data retrieved successfully.
+  @retval FALSE                    If Cert is NULL.
                                    If ExtensionDataSize is NULL.
                                    If ExtensionData is not NULL and *ExtensionDataSize is 0.
                                    If Certificate is invalid.
-  @retval RETURN_NOT_FOUND         If no Extension entry match Oid.
-  @retval RETURN_BUFFER_TOO_SMALL  If the ExtensionData is NULL. The required buffer size
+  @retval FALSE                    If no Extension entry match Oid.
+  @retval FALSE                    If the ExtensionData is NULL. The required buffer size
                                    is returned in the ExtensionDataSize parameter.
-  @retval RETURN_UNSUPPORTED       The operation is not supported.
+  @retval FALSE                    The operation is not supported.
 **/
 typedef
-EFI_STATUS
+BOOLEAN
 (EFIAPI *EDKII_CRYPTO_X509_GET_EXTENSION_DATA)(
   IN     CONST UINT8  *Cert,
   IN     UINTN        CertSize,
-  IN     UINT8        *Oid,
+  IN     CONST UINT8  *Oid,
   IN     UINTN        OidSize,
   OUT UINT8           *ExtensionData,
   IN OUT UINTN        *ExtensionDataSize
@@ -2571,17 +2571,17 @@ EFI_STATUS
   @param[out]     Usage            Key Usage bytes.
   @param[in, out] UsageSize        Key Usage buffer sizs in bytes.
 
-  @retval RETURN_SUCCESS           The Usage bytes retrieve successfully.
-  @retval RETURN_INVALID_PARAMETER If Cert is NULL.
+  @retval TRUE                     The Usage bytes retrieve successfully.
+  @retval FALSE                    If Cert is NULL.
                                    If CertSize is NULL.
                                    If Usage is not NULL and *UsageSize is 0.
                                    If Cert is invalid.
-  @retval RETURN_BUFFER_TOO_SMALL  If the Usage is NULL. The required buffer size
+  @retval FALSE                    If the Usage is NULL. The required buffer size
                                    is returned in the UsageSize parameter.
-  @retval RETURN_UNSUPPORTED       The operation is not supported.
+  @retval FALSE                    The operation is not supported.
 **/
 typedef
-EFI_STATUS
+BOOLEAN
 (EFIAPI *EDKII_CRYPTO_X509_GET_EXTENDED_KEY_USAGE)(
   IN     CONST UINT8  *Cert,
   IN     UINTN        CertSize,
@@ -2634,18 +2634,18 @@ BOOLEAN
   @param[in,out]  DateTime         Pointer to a DateTime object.
   @param[in,out]  DateTimeSize     DateTime object buffer size.
 
-  @retval RETURN_SUCCESS           The DateTime object create successfully.
-  @retval RETURN_INVALID_PARAMETER If DateTimeStr is NULL.
+  @retval TRUE                     The DateTime object create successfully.
+  @retval FALSE                    If DateTimeStr is NULL.
                                    If DateTimeSize is NULL.
                                    If DateTime is not NULL and *DateTimeSize is 0.
                                    If Year Month Day Hour Minute Second combination is invalid datetime.
-  @retval RETURN_BUFFER_TOO_SMALL  If the DateTime is NULL. The required buffer size
+  @retval FALSE                    If the DateTime is NULL. The required buffer size
                                    (including the final null) is returned in the
                                    DateTimeSize parameter.
-  @retval RETURN_UNSUPPORTED       The operation is not supported.
+  @retval FALSE                    The operation is not supported.
 **/
 typedef
-EFI_STATUS
+BOOLEAN
 (EFIAPI *EDKII_CRYPTO_X509_SET_DATE_TIME)(
   IN     CHAR8  *DateTimeStr,
   OUT VOID      *DateTime,
@@ -2669,10 +2669,10 @@ EFI_STATUS
   @retval  -1     If DateTime1 < DateTime2
 **/
 typedef
-INTN
+INT32
 (EFIAPI *EDKII_CRYPTO_X509_COMPARE_DATE_TIME)(
-  IN    VOID  *DateTime1,
-  IN    VOID  *DateTime2
+  IN CONST  VOID  *DateTime1,
+  IN CONST  VOID  *DateTime2
   );
 
 /**
@@ -2767,6 +2767,33 @@ BOOLEAN
   IN     UINT8   *End,
   OUT UINTN      *Length,
   IN     UINT32  Tag
+  );
+
+/**
+  Retrieve the basic constraints from one X.509 certificate.
+
+  @param[in]      Cert                     Pointer to the DER-encoded X509 certificate.
+  @param[in]      CertSize                 size of the X509 certificate in bytes.
+  @param[out]     BasicConstraints         basic constraints bytes.
+  @param[in, out] BasicConstraintsSize     basic constraints buffer sizs in bytes.
+
+  @retval TRUE                     The basic constraints retrieve successfully.
+  @retval FALSE                    If cert is NULL.
+                                   If cert_size is NULL.
+                                   If basic_constraints is not NULL and *basic_constraints_size is 0.
+                                   If cert is invalid.
+  @retval FALSE                    The required buffer size is small.
+                                   The return buffer size is basic_constraints_size parameter.
+  @retval FALSE                    If no Extension entry match oid.
+  @retval FALSE                    The operation is not supported.
+ **/
+typedef
+BOOLEAN
+(EFIAPI *EDKII_CRYPTO_X509_GET_EXTENDED_BASIC_CONSTRAINTS)            (
+  CONST UINT8  *Cert,
+  UINTN        CertSize,
+  UINT8        *BasicConstraints,
+  UINTN        *BasicConstraintsSize
   );
 
 // =====================================================================================
@@ -4479,6 +4506,7 @@ struct _EDKII_CRYPTO_PROTOCOL {
   EDKII_CRYPTO_X509_VERIFY_CERT_CHAIN                X509VerifyCertChain;
   EDKII_CRYPTO_X509_GET_CERT_FROM_CERT_CHAIN         X509GetCertFromCertChain;
   EDKII_CRYPTO_ASN1_GET_TAG                          Asn1GetTag;
+  EDKII_CRYPTO_X509_GET_EXTENDED_BASIC_CONSTRAINTS   X509GetExtendedBasicConstraints;
   /// TLS
   EDKII_CRYPTO_TLS_INITIALIZE                        TlsInitialize;
   EDKII_CRYPTO_TLS_CTX_FREE                          TlsCtxFree;
