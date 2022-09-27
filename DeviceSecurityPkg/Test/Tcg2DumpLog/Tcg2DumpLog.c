@@ -233,6 +233,10 @@ DumpNvIndex (
               Offset,
               &OutData
               );
+  if (EFI_ERROR (Status)) {
+    Print (L"Tpm2NvRead - %r\n", Status);
+    return ;
+  }
 
   Print (L"PCR[0x%x] (Hash:0x%x): ", NvIndex, HashAlg);
   InternalDumpData (OutData.buffer, DataSize);
