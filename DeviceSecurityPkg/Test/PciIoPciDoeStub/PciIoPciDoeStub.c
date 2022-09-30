@@ -824,7 +824,7 @@ UINT8 mPciConfigTemplate[]= {
 
 EFI_HANDLE  mPciIoHandle;
 
-RETURN_STATUS
+libspdm_return_t
 SpdmDeviceAcquireSenderBuffer (
     VOID *Context, UINTN *MaxMsgSize, VOID **MsgBufPtr)
 {
@@ -834,7 +834,7 @@ SpdmDeviceAcquireSenderBuffer (
     ZeroMem (mSendReceiveBuffer, sizeof(mSendReceiveBuffer));
     mSendReceiveBufferAcquired = TRUE;
 
-    return RETURN_SUCCESS;
+    return LIBSPDM_STATUS_SUCCESS;
 }
 
 VOID SpdmDeviceReleaseSenderBuffer (
@@ -847,7 +847,7 @@ VOID SpdmDeviceReleaseSenderBuffer (
     return;
 }
 
-RETURN_STATUS SpdmDeviceAcquireReceiverBuffer (
+libspdm_return_t SpdmDeviceAcquireReceiverBuffer (
     VOID *Context, UINTN *MaxMsgSize, VOID **MsgBufPtr)
 {
     ASSERT (!mSendReceiveBufferAcquired);
@@ -856,7 +856,7 @@ RETURN_STATUS SpdmDeviceAcquireReceiverBuffer (
     ZeroMem (mSendReceiveBuffer, sizeof(mSendReceiveBuffer));
     mSendReceiveBufferAcquired = TRUE;
 
-    return RETURN_SUCCESS;
+    return LIBSPDM_STATUS_SUCCESS;
 }
 
 VOID SpdmDeviceReleaseReceiverBuffer (
@@ -925,6 +925,7 @@ MainEntryPoint (
   ASSERT(mScratchBuffer != NULL);
 
   mSpdmTestDeviceContext.SpdmContext = SpdmContext;
+
   SpdmRegisterDeviceIoFunc (SpdmContext, SpdmDeviceSendMessage, SpdmDeviceReceiveMessage);
 //  SpdmRegisterTransportLayerFunc (SpdmContext, SpdmTransportMctpEncodeMessage, SpdmTransportMctpDecodeMessage);
   SpdmRegisterTransportLayerFunc (SpdmContext, SpdmTransportPciDoeEncodeMessage,

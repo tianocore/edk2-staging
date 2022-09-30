@@ -9,8 +9,9 @@
  * version 1.2.0 in Distributed Management Task Force (DMTF).
  **/
 
-#ifndef __SPDM_H__
-#define __SPDM_H__
+#ifndef SPDM_H
+#define SPDM_H
+#include "hal/base.h"
 #include <hal/library/LibspdmStub.h>
 #pragma pack(1)
 
@@ -1037,6 +1038,8 @@ typedef struct {
      * param2 == RSVD*/
     uint16_t requester_info_length;
     uint16_t opaque_data_length;
+    /* uint8_t RequesterInfo[requester_info_length];
+     * uint8_t opaque_data[opaque_data_length]; */
 } spdm_get_csr_request_t;
 
 /* SPDM CSR response*/
@@ -1122,4 +1125,7 @@ typedef struct {
  **/
 #define SPDM_ST1_VALUE_US 100000
 
-#endif
+#define SPDM_OID_EXTENSION {0x2B, 0x06, 0x01, 0x04, 0x01, 0x83, 0x1C, 0x82, 0x12, 0x06}
+#define SPDM_OID_HARDWARE_IDENTITY {0x2B, 0x06, 0x01, 0x04, 0x01, 0x83, 0x1C, 0x82, 0x12, 0x02}
+
+#endif /* SPDM_H */

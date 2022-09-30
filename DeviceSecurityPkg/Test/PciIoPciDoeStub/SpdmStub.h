@@ -49,7 +49,7 @@ InitializeSpdmTest (
   IN OUT SPDM_TEST_DEVICE_CONTEXT  *SpdmTestDeviceContext
   );
 
-RETURN_STATUS
+libspdm_return_t
 EFIAPI
 SpdmDeviceSendMessage (
   IN     VOID                                   *SpdmContext,
@@ -58,7 +58,7 @@ SpdmDeviceSendMessage (
   IN     UINT64                                 Timeout
   );
 
-RETURN_STATUS
+libspdm_return_t
 EFIAPI
 SpdmDeviceReceiveMessage (
   IN     VOID                                   *SpdmContext,

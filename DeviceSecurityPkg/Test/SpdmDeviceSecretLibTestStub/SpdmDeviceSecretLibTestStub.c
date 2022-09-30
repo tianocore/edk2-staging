@@ -20,6 +20,8 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Guid/ImageAuthentication.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 #include <Test/TestConfig.h>
+#include "library/spdm_crypt_lib.h"
+#include "hal/library/memlib.h"
 
 #define LIBSPDM_MEASUREMENT_BLOCK_HASH_NUMBER 4
 #define LIBSPDM_MEASUREMENT_BLOCK_NUMBER (LIBSPDM_MEASUREMENT_BLOCK_HASH_NUMBER /*Index - 1~4*/ + \
@@ -286,7 +288,7 @@ RETURN_STATUS SpdmMeasurementCollectionFunc (
                 &TestConfig
                 );
 
-    LIBSPDM_ASSERT(measurement_specification ==
+    ASSERT (measurement_specification ==
                    SPDM_MEASUREMENT_BLOCK_HEADER_SPECIFICATION_DMTF);
 
     if (measurement_specification !=
@@ -383,7 +385,7 @@ RETURN_STATUS SpdmMeasurementCollectionFunc (
                     sizeof(spdm_measurement_block_dmtf_t) +
                     LIBSPDM_MEASUREMENT_RAW_DATA_SIZE;
             }
-            LIBSPDM_ASSERT(total_size_needed <= *measurements_size);
+            ASSERT(total_size_needed <= *measurements_size);
             if (total_size_needed > *measurements_size) {
                 return LIBSPDM_STATUS_BUFFER_TOO_SMALL;
             }
@@ -438,7 +440,7 @@ RETURN_STATUS SpdmMeasurementCollectionFunc (
             total_size_needed =
                 sizeof(spdm_measurement_block_dmtf_t) +
                 sizeof(spdm_measurements_device_mode_t);
-            LIBSPDM_ASSERT(total_size_needed <= *measurements_size);
+            ASSERT(total_size_needed <= *measurements_size);
             if (total_size_needed > *measurements_size) {
                 return LIBSPDM_STATUS_BUFFER_TOO_SMALL;
             }
@@ -521,7 +523,7 @@ SpdmGenerateMeasurementSummaryHash (
             return false;
         }
 
-        LIBSPDM_ASSERT(device_measurement_count <=
+        ASSERT(device_measurement_count <=
                        LIBSPDM_MAX_MEASUREMENT_BLOCK_COUNT);
 
         /* double confirm that MeasurmentData internal size is correct*/
@@ -545,7 +547,7 @@ SpdmGenerateMeasurementSummaryHash (
                 ->measurement_block_common_header
                 .measurement_size;
             cached_measurment_block =
-                (void *)((uintn)cached_measurment_block +
+                (void *)((UINTN)cached_measurment_block +
                          measurment_block_size);
         }
 
@@ -587,7 +589,7 @@ SpdmGenerateMeasurementSummaryHash (
                     .measurement_size;
             }
             cached_measurment_block =
-                (void *)((uintn)cached_measurment_block +
+                (void *)((UINTN)cached_measurment_block +
                          measurment_block_size);
         }
 
