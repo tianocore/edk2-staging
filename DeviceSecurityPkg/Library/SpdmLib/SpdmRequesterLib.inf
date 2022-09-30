@@ -54,3 +54,4 @@
 [LibraryClasses]
   SpdmCommonLib
   SpdmSecuredMessageLib
+  PlatformLibWrapper
