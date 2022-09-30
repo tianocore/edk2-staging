@@ -359,42 +359,6 @@ LibspdmSha3_512HashAllStub (
   return FALSE;
 }
 
-VOID
-LibspdmSleepStub (
-  UINT64  milliseconds
-  )
-{
-  return;
-}
-
-BOOLEAN
-EFIAPI
-LibspdmStartWatchdog (
-  UINT32  session_id,
-  UINT16  seconds
-  )
-{
-  return TRUE;
-}
-
-BOOLEAN
-EFIAPI
-LibspdmStopWatchdog (
-  UINT32  session_id
-  )
-{
-  return TRUE;
-}
-
-BOOLEAN
-EFIAPI
-LibspdmResetWatchdog (
-  UINT32  session_id
-  )
-{
-  return TRUE;
-}
-
 BOOLEAN
 EFIAPI
 RsaPssSignStub (
