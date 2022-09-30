@@ -16,6 +16,9 @@
   Include
   Library/SpdmLib/libspdm/include
 
+[Includes.X64]
+  Library/SpdmLib/libspdm/include/hal/x64
+
 [Includes.Common.Private]
   Include/PrivateTest
 

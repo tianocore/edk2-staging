@@ -10,7 +10,7 @@
 
 extern SPDM_TEST_DEVICE_CONTEXT  mSpdmTestDeviceContext;
 
-UINTN
+libspdm_return_t
 SpdmGetResponseVendorDefinedRequest (
   IN     VOID                 *SpdmContext,
   IN     CONST UINT32         *SessionId,
@@ -21,14 +21,14 @@ SpdmGetResponseVendorDefinedRequest (
   OUT    VOID                  *Response
   )
 {
-  EFI_STATUS               Status;
+  EFI_STATUS         Status;
   SPDM_TEST_DEVICE_CONTEXT *SpdmTestContext;
 
   SpdmTestContext = &mSpdmTestDeviceContext;
 
   if (SpdmTestContext->ProcessPacketCallback == NULL) {
     SpdmGenerateErrorResponse (SpdmContext, SPDM_ERROR_CODE_INVALID_REQUEST, 0, ResponseSize, Response);
-    return EFI_SUCCESS;
+    return LIBSPDM_STATUS_SUCCESS;
   }
 
   Status = SpdmTestContext->ProcessPacketCallback (
@@ -39,10 +39,10 @@ SpdmGetResponseVendorDefinedRequest (
                                 );
   if (EFI_ERROR(Status)) {
     SpdmGenerateErrorResponse (SpdmContext, SPDM_ERROR_CODE_INVALID_REQUEST, 0, ResponseSize, Response);
-    return EFI_SUCCESS;
+    return LIBSPDM_STATUS_SUCCESS;
   }
 
-  return EFI_SUCCESS;
+  return LIBSPDM_STATUS_SUCCESS;
 }
 
 /**
@@ -153,6 +153,6 @@ InitializeSpdmTest (
                   EFI_NATIVE_INTERFACE,
                   &SpdmTestDeviceContext->SpdmTestProtocol
                   );
-  
+
   SpdmRegisterGetResponseFunc (SpdmTestDeviceContext->SpdmContext, SpdmGetResponseVendorDefinedRequest);
 }

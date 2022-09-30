@@ -11,11 +11,17 @@
  * functionality enabling.
  **/
 
-#ifndef __SPDM_CRYPT_LIB_H__
-#define __SPDM_CRYPT_LIB_H__
+#ifndef CRYPTLIB_H
+#define CRYPTLIB_H
+
+#ifndef LIBSPDM_CONFIG
+#include "library/spdm_lib_config.h"
+#else
+#include LIBSPDM_CONFIG
+#endif
 
 #include <Library/BaseCryptLib.h>
-#include <hal/library/LibSpdmCryptlibStub.h>
+#include "hal/library/LibSpdmCryptlibStub.h"
 
 #define LIBSPDM_CRYPTO_NID_NULL  0x0000
 
@@ -53,17 +59,22 @@
 #define LIBSPDM_CRYPTO_NID_CURVE_X25519           0x0208
 #define LIBSPDM_CRYPTO_NID_CURVE_X448             0x0209
 
-/* X.509 v3 key usage Extension flags*/
+/* AEAD */
+#define LIBSPDM_CRYPTO_NID_AES_128_GCM 0x0301
+#define LIBSPDM_CRYPTO_NID_AES_256_GCM 0x0302
+#define LIBSPDM_CRYPTO_NID_CHACHA20_POLY1305 0x0303
+#define LIBSPDM_CRYPTO_NID_SM4_128_GCM 0x0304
 
-#define LIBSPDM_CRYPTO_X509_KU_DIGITAL_SIGNATURE  (0x80)   /* bit 0*/
-#define LIBSPDM_CRYPTO_X509_KU_NON_REPUDIATION    (0x40)   /* bit 1*/
-#define LIBSPDM_CRYPTO_X509_KU_KEY_ENCIPHERMENT   (0x20)   /* bit 2*/
-#define LIBSPDM_CRYPTO_X509_KU_DATA_ENCIPHERMENT  (0x10)   /* bit 3*/
-#define LIBSPDM_CRYPTO_X509_KU_KEY_AGREEMENT      (0x08)   /* bit 4*/
-#define LIBSPDM_CRYPTO_X509_KU_KEY_CERT_SIGN      (0x04)   /* bit 5*/
-#define LIBSPDM_CRYPTO_X509_KU_CRL_SIGN           (0x02)   /* bit 6*/
-#define LIBSPDM_CRYPTO_X509_KU_ENCIPHER_ONLY      (0x01)   /* bit 7*/
-#define LIBSPDM_CRYPTO_X509_KU_DECIPHER_ONLY      (0x8000) /* bit 8*/
+/* X.509 v3 key usage extension flags. */
+#define LIBSPDM_CRYPTO_X509_KU_DIGITAL_SIGNATURE 0x80 /* bit 0 */
+#define LIBSPDM_CRYPTO_X509_KU_NON_REPUDIATION 0x40 /* bit 1 */
+#define LIBSPDM_CRYPTO_X509_KU_KEY_ENCIPHERMENT 0x20 /* bit 2 */
+#define LIBSPDM_CRYPTO_X509_KU_DATA_ENCIPHERMENT 0x10 /* bit 3 */
+#define LIBSPDM_CRYPTO_X509_KU_KEY_AGREEMENT 0x08 /* bit 4 */
+#define LIBSPDM_CRYPTO_X509_KU_KEY_CERT_SIGN 0x04 /* bit 5 */
+#define LIBSPDM_CRYPTO_X509_KU_CRL_SIGN 0x02 /* bit 6 */
+#define LIBSPDM_CRYPTO_X509_KU_ENCIPHER_ONLY 0x01 /* bit 7 */
+#define LIBSPDM_CRYPTO_X509_KU_DECIPHER_ONLY 0x8000 /* bit 8 */
 
 /* These constants comply with the DER encoded ASN.1 type tags.*/
 
@@ -90,6 +101,18 @@
 #define LIBSPDM_CRYPTO_ASN1_TAG_CLASS_MASK  0xC0
 #define LIBSPDM_CRYPTO_ASN1_TAG_PC_MASK     0x20
 #define LIBSPDM_CRYPTO_ASN1_TAG_VALUE_MASK  0x1F
+
+#include "hal/library/cryptlib/cryptlib_hash.h"
+#include "hal/library/cryptlib/cryptlib_mac.h"
+#include "hal/library/cryptlib/cryptlib_aead.h"
+#include "hal/library/cryptlib/cryptlib_cert.h"
+#include "hal/library/cryptlib/cryptlib_hkdf.h"
+#include "hal/library/cryptlib/cryptlib_rsa.h"
+#include "hal/library/cryptlib/cryptlib_ec.h"
+#include "hal/library/cryptlib/cryptlib_dh.h"
+#include "hal/library/cryptlib/cryptlib_ecd.h"
+#include "hal/library/cryptlib/cryptlib_sm2.h"
+#include "hal/library/cryptlib/cryptlib_rng.h"
 
 #define        libspdm_sha256_new             LibspdmSha256NewStub
 #define        libspdm_sha256_free            LibspdmSha256FreeStub
@@ -309,7 +332,7 @@
 #define        sm2_sign                                Sm2Sign
 #define        sm2_verify                              Sm2Verify
 #define        libspdm_random_seed                     RandomSeed
-#define        random_bytes                            RandomBytes
+#define        libspdm_random_bytes                    RandomBytes
 #define        libspdm_hkdf_sha256_extract_and_expand  HkdfSha256ExtractAndExpand
 #define        libspdm_hkdf_sha256_extract             HkdfSha256Extract
 #define        libspdm_hkdf_sha256_expand              HkdfSha256Expand
@@ -325,4 +348,4 @@
 #define        libspdm_hkdf_sha3_512_expand  NULL
 #define        libspdm_hkdf_sm3_256_expand   NULL
 
-#endif // __SPDM_CRYPT_LIB_H__
+#endif /* CRYPTLIB_H */
