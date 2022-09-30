@@ -22,7 +22,7 @@ typedef struct {
 #define SPDM_PRIVATE_DATA_SIGNATURE  SIGNATURE_32 ('S', 'P', 'D', 'S')
 #define SPDM_PRIVATE_DATA_FROM_SPDM_IO(a)  CR (a, SPDM_PRIVATE_DATA, SpdmIo, SPDM_PRIVATE_DATA_SIGNATURE)
 
-EFI_STATUS
+libspdm_return_t
 EFIAPI
 SpdmIoSendRequest (
   IN     SPDM_IO_PROTOCOL               *This,
@@ -31,7 +31,7 @@ SpdmIoSendRequest (
   IN     UINT64                         Timeout
   );
 
-EFI_STATUS
+libspdm_return_t
 EFIAPI
 SpdmIoReceiveResponse (
   IN     SPDM_IO_PROTOCOL               *This,

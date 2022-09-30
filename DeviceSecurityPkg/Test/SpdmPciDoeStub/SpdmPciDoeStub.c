@@ -220,7 +220,7 @@ PcieDoeReadMailboxWrite32 (
   return;
 }
 
-EFI_STATUS
+libspdm_return_t
 EFIAPI
 SpdmIoSendRequest (
   IN     SPDM_IO_PROTOCOL       *This,
@@ -229,7 +229,7 @@ SpdmIoSendRequest (
   IN     UINT64                 Timeout
   )
 {
-  EFI_STATUS                    Status;
+  libspdm_return_t              Status;
   SPDM_PRIVATE_DATA             *SpdmPrivateData = NULL;
   UINT32                        Index = 0;
   PCI_EXPRESS_REG_DOE_CONTROL   DoeControl;
@@ -242,11 +242,11 @@ SpdmIoSendRequest (
   DEBUG((DEBUG_ERROR, "[SpdmIoSendRequest] RequestSize = 0x%x \n", RequestSize));
 
   if (Request == NULL) {
-    return EFI_INVALID_PARAMETER;
+    return LIBSPDM_STATUS_INVALID_PARAMETER;
   }
 
   if (RequestSize == 0) {
-    return EFI_INVALID_PARAMETER;
+    return LIBSPDM_STATUS_INVALID_PARAMETER;
   }
 
   SpdmPrivateData = SPDM_PRIVATE_DATA_FROM_SPDM_IO(This);
@@ -299,15 +299,15 @@ SpdmIoSendRequest (
   } while (Delay != 0);
 
   if (Delay == 0) {
-    Status = EFI_TIMEOUT;
+    Status = LIBSPDM_STATUS_SEND_FAIL;
   } else {
-    Status = EFI_SUCCESS;
+    Status = LIBSPDM_STATUS_SUCCESS;
   }
 
   return Status;
 }
 
-EFI_STATUS
+libspdm_return_t
 EFIAPI
 SpdmIoReceiveResponse (
   IN     SPDM_IO_PROTOCOL       *This,
@@ -316,7 +316,7 @@ SpdmIoReceiveResponse (
   IN     UINT64                 Timeout
   )
 {
-  EFI_STATUS                    Status;
+  libspdm_return_t               Status;
   SPDM_PRIVATE_DATA             *SpdmPrivateData = NULL;
   UINT8                         *ResponseDataObjectBuffer = NULL;
   UINT32                        ResponseDataObjectSize = 0;
@@ -331,11 +331,11 @@ SpdmIoReceiveResponse (
   DEBUG((DEBUG_ERROR, "[SpdmIoReceiveResponse] ResponseSize = 0x%x \n", *ResponseSize));
 
   if (*Response == NULL) {
-    return EFI_INVALID_PARAMETER;
+    return LIBSPDM_STATUS_INVALID_PARAMETER;
   }
 
   if (ResponseSize == NULL) {
-    return EFI_INVALID_PARAMETER;
+    return LIBSPDM_STATUS_INVALID_PARAMETER;
   }
 
   SpdmPrivateData = SPDM_PRIVATE_DATA_FROM_SPDM_IO(This);
@@ -348,7 +348,7 @@ SpdmIoReceiveResponse (
   DataObjectHeader = (PCI_DOE_DATA_OBJECT_HEADER *)*Response;
   if (*ResponseSize < sizeof(PCI_DOE_DATA_OBJECT_HEADER)) {
     *ResponseSize = sizeof(PCI_DOE_DATA_OBJECT_HEADER);
-    return EFI_BUFFER_TOO_SMALL;
+    return LIBSPDM_STATUS_BUFFER_TOO_SMALL;
   }
 
   do {
@@ -383,7 +383,7 @@ SpdmIoReceiveResponse (
 
       if (DataObjectSize > *ResponseSize) {
         *ResponseSize = DataObjectSize;
-        return EFI_BUFFER_TOO_SMALL;
+        return LIBSPDM_STATUS_BUFFER_TOO_SMALL;
       }
 
       ResponseDataObjectSize = DataObjectSize - sizeof(PCI_DOE_DATA_OBJECT_HEADER);
@@ -418,9 +418,9 @@ SpdmIoReceiveResponse (
   } while (Delay != 0);
 
   if (Delay == 0) {
-    Status = EFI_TIMEOUT;
+    Status = LIBSPDM_STATUS_RECEIVE_FAIL;
   } else {
-    Status = EFI_SUCCESS;
+    Status = LIBSPDM_STATUS_SUCCESS;
   }
 
   return Status;
