@@ -469,9 +469,4 @@ typedef enum {
 #define        SpdmPciDoeGetSequenceNumber             libspdm_pci_doe_get_sequence_number
 #define        SpdmPciDoeGetMaxRandomNumberCount       libspdm_pci_doe_get_max_random_number_count
 
-#define        libspdm_sleep                           LibspdmSleepStub
-#define        libspdm_start_watchdog                  LibspdmStartWatchdog
-#define        libspdm_stop_watchdog                   LibspdmStopWatchdog
-#define        libspdm_reset_watchdog                  LibspdmResetWatchdog
-
-#endif
+#endif
