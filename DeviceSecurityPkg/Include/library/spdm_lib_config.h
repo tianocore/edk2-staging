@@ -4,8 +4,8 @@
  *  License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/libspdm/blob/main/LICENSE.md
  **/
 
-#ifndef __SPDM_LIB_CONFIG_H__
-#define __SPDM_LIB_CONFIG_H__
+#ifndef SPDM_LIB_CONFIG_H
+#define SPDM_LIB_CONFIG_H
 
 /* The SPDM specification allows a Responder to return up to 256 version entries in the `VERSION`
  * response to the Requester, including duplicate entries. For a Requester this value specifies the
@@ -103,7 +103,7 @@
 #endif
 
 
-/* Crypto Configuation
+/* Cryptography Configuration
  * In each category, at least one should be selected.
  * NOTE: Not all combination can be supported. E.g. Don't mix NIST algo with SMx.*/
 
@@ -182,11 +182,14 @@
 
 /* LIBSPDM_ENABLE_CAPABILITY_CERT_CAP - Enable/Disable single CERT capability.
  * LIBSPDM_ENABLE_CAPABILITY_CHAL_CAP - Enable/Disable single CHAL capability.
- * SPDM_ENABLE_CAPABILTIY_MEAS_CAP - Enable/Disables multiple MEAS capabilities:
+ * LIBSPDM_ENABLE_CAPABILTIY_MEAS_CAP - Enable/Disables multiple MEAS capabilities:
  *                                  (MEAS_CAP_NO_SIG, MEAS_CAP_SIG, MEAS_FRESH_CAP)*/
 
 /* LIBSPDM_ENABLE_CAPABILITY_KEY_EX_CAP - Enable/Disable single Key Exchange capability.
  * LIBSPDM_ENABLE_CAPABILITY_PSK_EX_CAP - Enable/Disable PSK_EX and PSK_FINISH.*/
+
+/* LIBSPDM_ENABLE_CAPABILITY_GET_CSR_CAP - Enable/Disable get csr capability.
+ * LIBSPDM_ENABLE_CAPABILITY_SET_CERTIFICATE_CAP - Enable/Disable set certificate capability. */
 
 #ifndef LIBSPDM_ENABLE_CAPABILITY_CERT_CAP
 #define LIBSPDM_ENABLE_CAPABILITY_CERT_CAP 1
@@ -205,14 +208,16 @@
 #define LIBSPDM_ENABLE_CAPABILITY_PSK_EX_CAP 1
 #endif
 
-#ifndef LIBSPDM_ENABLE_SET_CERTIFICATE_CAP
-#define LIBSPDM_ENABLE_SET_CERTIFICATE_CAP 0
+#ifndef LIBSPDM_ENABLE_CAPABILITY_GET_CSR_CAP
+#define LIBSPDM_ENABLE_CAPABILITY_GET_CSR_CAP 0
+#endif
+#ifndef LIBSPDM_ENABLE_CAPABILITY_SET_CERTIFICATE_CAP
+#define LIBSPDM_ENABLE_CAPABILITY_SET_CERTIFICATE_CAP 0
 #endif
 
-#ifndef LIBSPDM_ENABLE_CHUNK_CAP
-#define LIBSPDM_ENABLE_CHUNK_CAP 0
+#ifndef LIBSPDM_ENABLE_CAPABILITY_CHUNK_CAP
+#define LIBSPDM_ENABLE_CAPABILITY_CHUNK_CAP 0
 #endif
-
 
 /*
  * MinDataTransferSize = 42
@@ -318,32 +323,62 @@
  * in case of chunking.
  *
  * If chunking is not supported, it may be just LIBSPDM_SENDER_RECEIVE_BUFFER_SIZE.
- * If chunking is supported, it should be at least LIBSPDM_SENDER_RECEIVE_BUFFER_SIZE
- * + LIBSPDM_MAX_SPDM_MSG_SIZE + LIBSPDM_SENDER_RECEIVE_BUFFER_SIZE.
+ * If chunking is supported, it should be at least below.
+ *
+ * +---------------+--------------+--------------------------+------------------------------+
+ * |SECURE_MESSAGE |LARGE_MESSAGE |    SENDER_RECEIVER       | LARGE_SENDER_RECEIVER        |
+ * +---------------+--------------+--------------------------+------------------------------+
+ * |<-Secure msg ->|<-Large msg ->|<-Snd/Rcv buf for chunk ->|<-Snd/Rcv buf for large msg ->|
  *
  * The value is NOT configurable.
- * The value MAY be chnaged in different libspdm version.
+ * The value MAY be changed in different libspdm version.
  * It is exposed here, just in case the libspdm consumer wants to configure the setting at build time.
  */
-#if LIBSPDM_ENABLE_CHUNK_CAP
+#if LIBSPDM_ENABLE_CAPABILITY_CHUNK_CAP
 
+/* first section */
+#define LIBSPDM_SCRATCH_BUFFER_SECURE_MESSAGE_OFFSET \
+    (0)
+
+#define LIBSPDM_SCRATCH_BUFFER_SECURE_MESSAGE_CAPACITY \
+    (LIBSPDM_MAX_SPDM_MSG_SIZE)
+
+/* second section */
 #define LIBSPDM_SCRATCH_BUFFER_LARGE_MESSAGE_OFFSET \
-    (LIBSPDM_SENDER_RECEIVE_BUFFER_SIZE)
+    (LIBSPDM_SCRATCH_BUFFER_SECURE_MESSAGE_CAPACITY)
 
 #define LIBSPDM_SCRATCH_BUFFER_LARGE_MESSAGE_CAPACITY \
     (LIBSPDM_MAX_SPDM_MSG_SIZE)
 
+/* third section */
 #define LIBSPDM_SCRATCH_BUFFER_SENDER_RECEIVER_OFFSET  \
-    (LIBSPDM_SENDER_RECEIVE_BUFFER_SIZE + \
+    (LIBSPDM_SCRATCH_BUFFER_SECURE_MESSAGE_CAPACITY + \
      LIBSPDM_SCRATCH_BUFFER_LARGE_MESSAGE_CAPACITY)
 
-#define LIBSPDM_SCRATCH_BUFFER_SIZE (LIBSPDM_SENDER_RECEIVE_BUFFER_SIZE + \
-                                     LIBSPDM_MAX_SPDM_MSG_SIZE +          \
-                                     LIBSPDM_SENDER_RECEIVE_BUFFER_SIZE \
+#define LIBSPDM_SCRATCH_BUFFER_SENDER_RECEIVER_CAPACITY \
+    (LIBSPDM_MAX_SPDM_MSG_SIZE)
+
+/* fourth section */
+#define LIBSPDM_SCRATCH_BUFFER_LARGE_SENDER_RECEIVER_OFFSET  \
+    (LIBSPDM_SCRATCH_BUFFER_SECURE_MESSAGE_CAPACITY + \
+     LIBSPDM_SCRATCH_BUFFER_LARGE_MESSAGE_CAPACITY + \
+     LIBSPDM_SCRATCH_BUFFER_SENDER_RECEIVER_CAPACITY)
+
+#define LIBSPDM_SCRATCH_BUFFER_LARGE_SENDER_RECEIVER_CAPACITY \
+    (LIBSPDM_MAX_SPDM_MSG_SIZE)
+
+#define LIBSPDM_SCRATCH_BUFFER_SIZE (LIBSPDM_SCRATCH_BUFFER_SECURE_MESSAGE_CAPACITY + \
+                                     LIBSPDM_SCRATCH_BUFFER_LARGE_MESSAGE_CAPACITY + \
+                                     LIBSPDM_SCRATCH_BUFFER_SENDER_RECEIVER_CAPACITY + \
+                                     LIBSPDM_SCRATCH_BUFFER_LARGE_SENDER_RECEIVER_CAPACITY \
                                      )
 
 #else
 #define LIBSPDM_SCRATCH_BUFFER_SIZE (LIBSPDM_SENDER_RECEIVE_BUFFER_SIZE)
 #endif
 
+#ifndef LIBSPDM_ENABLE_MSG_LOG
+#define LIBSPDM_ENABLE_MSG_LOG 0
 #endif
+
+#endif /* SPDM_LIB_CONFIG_H */

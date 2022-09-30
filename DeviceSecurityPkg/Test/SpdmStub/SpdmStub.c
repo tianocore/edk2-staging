@@ -20,7 +20,7 @@ UINT8 mSendReceiveBuffer[LIBSPDM_MAX_MESSAGE_BUFFER_SIZE];
 UINTN mSendReceiveBufferSize;
 VOID *mScratchBuffer;
 
-EFI_STATUS
+libspdm_return_t
 EFIAPI
 SpdmIoSendMessage (
   IN     SPDM_IO_PROTOCOL                       *This,
@@ -36,10 +36,10 @@ SpdmIoSendMessage (
   SpdmContext = SpdmTestContext->SpdmContext;
 
   if (Message == NULL) {
-    return EFI_INVALID_PARAMETER;
+    return LIBSPDM_STATUS_INVALID_PARAMETER;
   }
   if (MessageSize == 0) {
-    return EFI_INVALID_PARAMETER;
+    return LIBSPDM_STATUS_INVALID_PARAMETER;
   }
   if (mSpdmIoLastSpdmRequest != NULL) {
     FreePool (mSpdmIoLastSpdmRequest);
@@ -49,10 +49,10 @@ SpdmIoSendMessage (
   mSpdmIoLastSpdmRequestSize = MessageSize;
   mSpdmIoLastSpdmRequest = AllocateCopyPool (MessageSize, Message);
 
-  return EFI_SUCCESS;
+  return LIBSPDM_STATUS_SUCCESS;
 }
 
-EFI_STATUS
+libspdm_return_t
 EFIAPI
 SpdmIoReceiveMessage (
   IN     SPDM_IO_PROTOCOL                       *This,
@@ -65,7 +65,7 @@ SpdmIoReceiveMessage (
   VOID                      *SpdmContext;
   UINT32                    *SessionId;
   BOOLEAN                   IsAppMessage;
-  EFI_STATUS                Status;
+  libspdm_return_t          Status;
   UINT32                    TmpSessionId;
   UINT32                    *SessionIdPtr;
 
@@ -76,7 +76,7 @@ SpdmIoReceiveMessage (
 
   Status = SpdmProcessRequest (SpdmContext, &SessionId, &IsAppMessage,
                                mSpdmIoLastSpdmRequestSize, mSpdmIoLastSpdmRequest);
-  if (EFI_ERROR(Status)) {
+  if (LIBSPDM_STATUS_IS_ERROR(Status)) {
     DEBUG ((DEBUG_ERROR, "SpdmProcessRequest - %r\n", Status));
     return Status;
   }
@@ -90,7 +90,7 @@ SpdmIoReceiveMessage (
 
   ZeroMem (*Message, *MessageSize);
   Status = SpdmBuildResponse (SpdmContext, SessionIdPtr, IsAppMessage, MessageSize, Message);
-  if (EFI_ERROR(Status)) {
+  if (LIBSPDM_STATUS_IS_ERROR(Status)) {
     DEBUG ((DEBUG_ERROR, "SpdmBuildResponse - %r\n", Status));
     return Status;
   }
@@ -107,7 +107,7 @@ SPDM_TEST_DEVICE_CONTEXT  mSpdmTestDeviceContext = {
   },
 };
 
-RETURN_STATUS
+libspdm_return_t
 SpdmDeviceAcquireSenderBuffer (
     VOID *Context, UINTN *MaxMsgSize, VOID **MsgBufPtr)
 {
@@ -117,7 +117,7 @@ SpdmDeviceAcquireSenderBuffer (
     ZeroMem (mSendReceiveBuffer, sizeof(mSendReceiveBuffer));
     mSendReceiveBufferAcquired = TRUE;
 
-    return RETURN_SUCCESS;
+    return LIBSPDM_STATUS_SUCCESS;
 }
 
 VOID SpdmDeviceReleaseSenderBuffer (
@@ -130,7 +130,7 @@ VOID SpdmDeviceReleaseSenderBuffer (
     return;
 }
 
-RETURN_STATUS SpdmDeviceAcquireReceiverBuffer (
+libspdm_return_t SpdmDeviceAcquireReceiverBuffer (
     VOID *Context, UINTN *MaxMsgSize, VOID **MsgBufPtr)
 {
     ASSERT (!mSendReceiveBufferAcquired);
@@ -139,7 +139,7 @@ RETURN_STATUS SpdmDeviceAcquireReceiverBuffer (
     ZeroMem (mSendReceiveBuffer, sizeof(mSendReceiveBuffer));
     mSendReceiveBufferAcquired = TRUE;
 
-    return RETURN_SUCCESS;
+    return LIBSPDM_STATUS_SUCCESS;
 }
 
 VOID SpdmDeviceReleaseReceiverBuffer (
@@ -191,6 +191,7 @@ MainEntryPoint (
   ASSERT(mScratchBuffer != NULL);
 
   mSpdmTestDeviceContext.SpdmContext = SpdmContext;
+
   SpdmRegisterDeviceIoFunc (SpdmContext, SpdmDeviceSendMessage, SpdmDeviceReceiveMessage);
 //  SpdmRegisterTransportLayerFunc (SpdmContext, SpdmTransportMctpEncodeMessage, SpdmTransportMctpDecodeMessage);
   SpdmRegisterTransportLayerFunc (SpdmContext, SpdmTransportPciDoeEncodeMessage,

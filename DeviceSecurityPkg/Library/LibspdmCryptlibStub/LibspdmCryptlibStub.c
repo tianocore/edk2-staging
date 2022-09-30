@@ -12,7 +12,6 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Library/BaseCryptLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/MemoryAllocationLib.h>
-#include <hal/library/cryptlib.h>
 
 /* OID*/
 

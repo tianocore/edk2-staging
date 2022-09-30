@@ -8,59 +8,6 @@
 #ifndef __LIBSPDM_STUB_H__
 #define __LIBSPDM_STUB_H__
 
-/*Interface of base.h*/
-typedef UINT64  uint64_t;
-typedef INT64   int64_t;
-typedef UINT32  uint32_t;
-typedef INT32   int32_t;
-typedef UINT16  uint16_t;
-typedef INT16   int16_t;
-typedef BOOLEAN bool;
-typedef UINT8   uint8_t;
-typedef CHAR8   char8_t;
-typedef INT8    int8_t;
-typedef UINTN   uintn;
-typedef INTN    intn;
-typedef uintn   return_status;
-
-#ifndef SIZE_MAX
-#define SIZE_MAX MAX_UINTN
-#endif
-
-#ifndef true
-#define true    1
-#endif
-
-#ifndef false
-#define false   0
-#endif
-
-#define LIBSPDM_MIN(a, b) (((a) < (b)) ? (a) : (b))
-
-#define LIBSPDM_ARRAY_SIZE(array) (sizeof(array) / sizeof((array)[0]))
-
-#if defined(_MSC_EXTENSIONS) && _MSC_VER < 1800
-
-/* Remove global variable from the linked image if there are no references to
- * it after all compiler and linker optimizations have been performed.*/
-
-
-#define LIBSPDM_GLOBAL_REMOVE_IF_UNREFERENCED __declspec(selectany)
-#else
-
-/* Remove the global variable from the linked image if there are no references
- *  to it after all compiler and linker optimizations have been performed.*/
-
-
-#define LIBSPDM_GLOBAL_REMOVE_IF_UNREFERENCED
-#endif
-
-#if (defined(__GNUC__) && __GNUC__ >= 4) || defined(__clang__)
-#define LIBSPDM_OFFSET_OF(TYPE, field) ((size_t) __builtin_offsetof(TYPE, field))
-#else
-#define LIBSPDM_OFFSET_OF(TYPE, field) ((size_t) &(((TYPE *)0)->field))
-#endif
-
 /*Interface of spdm.h*/
 #define        SPDM_MESSAGE_HEADER        spdm_message_header_t
 #define        SPDM_GET_VERSION_REQUEST        spdm_get_version_request_t
@@ -163,6 +110,9 @@ typedef enum {
   //
   SpdmDataLocalUsedCertChainBuffer,
   SpdmDataPeerUsedCertChainBuffer,
+  SpdmDataPeerSlotMask,
+  SpdmDataPeerTotalDigestBuffer,
+
   //
   // Pre-shared Key Hint
   // If PSK is present, then PSK_EXCHANGE is used.
@@ -180,6 +130,9 @@ typedef enum {
   SpdmDataAppContextData,
 
   SpdmDataHandleErrorReturnPolicy,
+
+  /* VCA cached for CACHE_CAP in 1.2 for transcript.*/
+  SpdmDataVcaCache,
 
   //
   // MAX
