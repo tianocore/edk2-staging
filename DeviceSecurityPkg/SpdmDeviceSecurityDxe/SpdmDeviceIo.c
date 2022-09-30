@@ -9,7 +9,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 #include "SpdmDeviceSecurityDxe.h"
 
-RETURN_STATUS
+libspdm_return_t
 EFIAPI
 SpdmDeviceSendMessage (
   IN     VOID                                   *SpdmContext,
@@ -25,12 +25,12 @@ SpdmDeviceSendMessage (
   ASSERT (SpdmDriverContext != NULL);
   SpdmIo = SpdmDriverContext->SpdmIoProtocol;
   if (SpdmIo == NULL) {
-    return RETURN_NOT_FOUND;
+    return LIBSPDM_STATUS_SEND_FAIL;
   }
   return SpdmIo->SendMessage (SpdmIo, MessageSize, Message, Timeout);
 }
 
-RETURN_STATUS
+libspdm_return_t
 EFIAPI
 SpdmDeviceReceiveMessage (
   IN     VOID                                   *SpdmContext,
@@ -46,7 +46,7 @@ SpdmDeviceReceiveMessage (
   ASSERT (SpdmDriverContext != NULL);
   SpdmIo = SpdmDriverContext->SpdmIoProtocol;
   if (SpdmIo == NULL) {
-    return RETURN_NOT_FOUND;
+    return LIBSPDM_STATUS_RECEIVE_FAIL;
   }
   return SpdmIo->ReceiveMessage (SpdmIo, MessageSize, Message, Timeout);
 }

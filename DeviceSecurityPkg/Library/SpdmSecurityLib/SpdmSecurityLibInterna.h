@@ -35,6 +35,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 #include <Protocol/PciIo.h>
 #include <library/SpdmSecurityLib.h>
+#include "library/spdm_crypt_lib.h"
 
 #define SPDM_DEVICE_CONTEXT_SIGNATURE  SIGNATURE_32 ('S', 'P', 'D', 'C')
 

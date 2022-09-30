@@ -15,8 +15,8 @@
   defined, then debug and assert related macros wrapped by it are the NULL implementations.
 **/
 
-#ifndef __SPDM_DEBUG_LIB_H__
-#define __SPDM_DEBUG_LIB_H__
+#ifndef DEBUG_LIB_H
+#define DEBUG_LIB_H
 
 #include <Library/DebugLib.h>
 
@@ -31,4 +31,4 @@
 #define LIBSPDM_DEBUG_CODE_BEGIN      DEBUG_CODE_BEGIN
 #define LIBSPDM_DEBUG_CODE_END        DEBUG_CODE_END
 
-#endif
+#endif /* DEBUG_LIB_H */

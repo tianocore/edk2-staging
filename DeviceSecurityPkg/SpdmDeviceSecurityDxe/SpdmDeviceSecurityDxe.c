@@ -230,7 +230,7 @@ IsSpdmDeviceInAuthenticationList (
   return SpdmDriverContext->IsDeviceAuthenticated;
 }
 
-RETURN_STATUS
+libspdm_return_t
 SpdmDeviceAcquireSenderBuffer (
     VOID *Context, UINTN *MaxMsgSize, VOID **MsgBufPtr)
 {
@@ -240,7 +240,7 @@ SpdmDeviceAcquireSenderBuffer (
     ZeroMem (mSendReceiveBuffer, sizeof(mSendReceiveBuffer));
     mSendReceiveBufferAcquired = TRUE;
 
-    return RETURN_SUCCESS;
+    return LIBSPDM_STATUS_SUCCESS;
 }
 
 VOID SpdmDeviceReleaseSenderBuffer (
@@ -253,7 +253,7 @@ VOID SpdmDeviceReleaseSenderBuffer (
     return;
 }
 
-RETURN_STATUS SpdmDeviceAcquireReceiverBuffer (
+libspdm_return_t SpdmDeviceAcquireReceiverBuffer (
     VOID *Context, UINTN *MaxMsgSize, VOID **MsgBufPtr)
 {
     ASSERT (!mSendReceiveBufferAcquired);
@@ -262,7 +262,7 @@ RETURN_STATUS SpdmDeviceAcquireReceiverBuffer (
     ZeroMem (mSendReceiveBuffer, sizeof(mSendReceiveBuffer));
     mSendReceiveBufferAcquired = TRUE;
 
-    return RETURN_SUCCESS;
+    return LIBSPDM_STATUS_SUCCESS;
 }
 
 VOID SpdmDeviceReleaseReceiverBuffer (
@@ -458,7 +458,7 @@ Error:
   return NULL;
 }
 
-RETURN_STATUS
+libspdm_return_t
 EFIAPI
 SpdmIoProtocolDeviceSendMessage (
   IN     VOID                                   *SpdmContext,
@@ -471,12 +471,12 @@ SpdmIoProtocolDeviceSendMessage (
 
   SpdmIoProtocol = SpdmGetIoProtocolViaSpdmContext (SpdmContext);
   if (SpdmIoProtocol == NULL) {
-    return RETURN_NOT_FOUND;
+    return LIBSPDM_STATUS_INVALID_PARAMETER;
   }
   return SpdmIoProtocol->SendMessage (SpdmIoProtocol, MessageSize, Message, Timeout);
 }
 
-RETURN_STATUS
+libspdm_return_t
 EFIAPI
 SpdmIoProtocolDeviceReceiveMessage (
   IN     VOID                                   *SpdmContext,
@@ -489,7 +489,7 @@ SpdmIoProtocolDeviceReceiveMessage (
 
   SpdmIoProtocol = SpdmGetIoProtocolViaSpdmContext (SpdmContext);
   if (SpdmIoProtocol == NULL) {
-    return RETURN_NOT_FOUND;
+    return LIBSPDM_STATUS_INVALID_PARAMETER;
   }
   return SpdmIoProtocol->ReceiveMessage (SpdmIoProtocol, MessageSize, Message, Timeout);
 }
