@@ -42,3 +42,4 @@
   RngLib
   SpdmCryptLib
   SpdmDeviceSecretLib
+  MemLibWrapper
