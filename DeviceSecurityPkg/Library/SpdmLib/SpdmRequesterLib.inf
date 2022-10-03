@@ -55,3 +55,4 @@
   SpdmCommonLib
   SpdmSecuredMessageLib
   PlatformLibWrapper
+  MemLibWrapper
