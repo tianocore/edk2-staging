@@ -57,3 +57,4 @@
   SpdmCommonLib
   SpdmSecuredMessageLib
   PlatformLibWrapper
+  MemLibWrapper
