@@ -40,7 +40,7 @@
   BaseCryptLib
   SpdmResponderLib
   SpdmTransportPciDoeLib
-  LibspdmCryptlibStub
+  CryptlibWrapper
   
 [Guids]
   gEdkiiDeviceSignatureDatabaseGuid  ## CONSUMES
