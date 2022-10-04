@@ -8,6 +8,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 **/
 
 #include <Uefi.h>
+#include "hal/base.h"
 #include <industry_standard/spdm.h>
 #include <industry_standard/spdm_secured_message.h>
 #include <Library/BaseLib.h>
@@ -22,6 +23,8 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Test/TestConfig.h>
 #include "library/spdm_crypt_lib.h"
 #include "hal/library/memlib.h"
+#include <hal/library/SpdmLibStub.h>
+#include "library/spdm_device_secret_lib.h"
 
 #define LIBSPDM_MEASUREMENT_BLOCK_HASH_NUMBER 4
 #define LIBSPDM_MEASUREMENT_BLOCK_NUMBER (LIBSPDM_MEASUREMENT_BLOCK_HASH_NUMBER /*Index - 1~4*/ + \
@@ -61,7 +64,7 @@ UINTN SpdmFillMeasurementImageHashBlock (
     UINT8 data[LIBSPDM_MEASUREMENT_RAW_DATA_SIZE];
     BOOLEAN result;
 
-    hash_size = GetSpdmMeasurementHashSize (measurement_hash_algo);
+    hash_size = SpdmGetMeasurementHashSize (measurement_hash_algo);
 
     measurement_block->measurement_block_common_header
     .index = measurements_index;
@@ -259,7 +262,7 @@ UINTN SpdmFillMeasurementDeviceModeBlock (
   @retval TRUE  the device measurement collection success and measurement is returned.
   @retval FALSE the device measurement collection fail.
 **/
-RETURN_STATUS SpdmMeasurementCollectionFunc (
+libspdm_return_t SpdmMeasurementCollectionFunc (
     SPDM_VERSION_NUMBER spdm_version,
     UINT8 measurement_specification,
     UINT32 measurement_hash_algo,
@@ -296,7 +299,7 @@ RETURN_STATUS SpdmMeasurementCollectionFunc (
         return LIBSPDM_STATUS_UNSUPPORTED_CAP;
     }
 
-    hash_size = GetSpdmMeasurementHashSize (measurement_hash_algo);
+    hash_size = SpdmGetMeasurementHashSize (measurement_hash_algo);
     ASSERT (hash_size != 0);
 
     use_bit_stream = false;
@@ -505,7 +508,7 @@ SpdmGenerateMeasurementSummaryHash (
 
     case SPDM_CHALLENGE_REQUEST_TCB_COMPONENT_MEASUREMENT_HASH:
     case SPDM_CHALLENGE_REQUEST_ALL_MEASUREMENTS_HASH:
-        if (*measurement_summary_hash_size != GetSpdmHashSize (base_hash_algo)) {
+        if (*measurement_summary_hash_size != SpdmGetHashSize (base_hash_algo)) {
             return false;
         }
 
@@ -734,6 +737,48 @@ SpdmResponderDataSignFunc (
   return Result;
 }
 
+libspdm_return_t libspdm_measurement_collection(
+    spdm_version_number_t spdm_version,
+    uint8_t measurement_specification,
+    uint32_t measurement_hash_algo,
+    uint8_t measurement_index,
+    uint8_t request_attribute,
+    uint8_t *content_changed,
+    uint8_t *measurements_count,
+    void *measurements,
+    size_t *measurements_size)
+{
+  return SpdmMeasurementCollectionFunc(spdm_version, measurement_specification,
+                                       measurement_hash_algo, measurement_index,
+                                       request_attribute, content_changed,
+                                       measurements_count, measurements,
+                                       measurements_size);
+}
+
+bool libspdm_requester_data_sign(
+    spdm_version_number_t spdm_version,
+    uint8_t op_code,
+    uint16_t req_base_asym_alg,
+    uint32_t base_hash_algo, bool is_data_hash,
+    const uint8_t *message, size_t message_size,
+    uint8_t *signature, size_t *sig_size)
+{
+  return false;
+}
+
+bool libspdm_responder_data_sign(
+    spdm_version_number_t spdm_version,
+    uint8_t op_code,
+    uint32_t base_asym_algo,
+    uint32_t base_hash_algo, bool is_data_hash,
+    const uint8_t *message, size_t message_size,
+    uint8_t *signature, size_t *sig_size)
+{
+  return SpdmResponderDataSignFunc(spdm_version, op_code, base_asym_algo,
+                                   base_hash_algo, is_data_hash, message,
+                                   message_size, signature, sig_size);
+}
+
 UINT8  mMyZeroFilledBuffer[64];
 UINT8  gBinStr0[0x12] = {
        0x00, 0x00, // Length - To be filled
@@ -777,7 +822,7 @@ SpdmPskHandshakeSecretHkdfExpandFunc (
   Psk = TEST_PSK_DATA_STRING;
   PskSize = sizeof(TEST_PSK_DATA_STRING);
 
-  HashSize = GetSpdmHashSize (BaseHashAlgo);
+  HashSize = SpdmGetHashSize (BaseHashAlgo);
 
   Result = SpdmHmacAll (BaseHashAlgo, mMyZeroFilledBuffer, HashSize, Psk, PskSize, HandshakeSecret);
   if (!Result) {
@@ -828,7 +873,7 @@ SpdmPskMasterSecretHkdfExpandFunc (
   Psk = TEST_PSK_DATA_STRING;
   PskSize = sizeof(TEST_PSK_DATA_STRING);
 
-  HashSize = GetSpdmHashSize (BaseHashAlgo);
+  HashSize = SpdmGetHashSize (BaseHashAlgo);
 
   Result = SpdmHmacAll (BaseHashAlgo, mMyZeroFilledBuffer, HashSize, Psk, PskSize, HandshakeSecret);
   if (!Result) {
@@ -852,6 +897,46 @@ SpdmPskMasterSecretHkdfExpandFunc (
   ZeroMem (MasterSecret, HashSize);
 
   return Result;
+}
+
+
+bool libspdm_generate_measurement_summary_hash(
+    spdm_version_number_t spdm_version, uint32_t base_hash_algo,
+    uint8_t measurement_specification, uint32_t measurement_hash_algo,
+    uint8_t measurement_summary_hash_type,
+    uint8_t *measurement_summary_hash,
+    size_t *measurement_summary_hash_size)
+{
+  return SpdmGenerateMeasurementSummaryHash (
+           spdm_version, base_hash_algo,
+           measurement_specification, measurement_hash_algo,
+           measurement_summary_hash_type, measurement_summary_hash,
+           measurement_summary_hash_size);
+}
+
+bool libspdm_psk_master_secret_hkdf_expand(
+    spdm_version_number_t spdm_version,
+    uint32_t base_hash_algo,
+    const uint8_t *psk_hint,
+    size_t psk_hint_size,
+    const uint8_t *info,
+    size_t info_size, uint8_t *out,
+    size_t out_size)
+{
+  return SpdmPskMasterSecretHkdfExpandFunc(spdm_version, base_hash_algo, psk_hint,
+                                           psk_hint_size, info, info_size,
+                                           out, out_size);
+}
+
+bool libspdm_psk_handshake_secret_hkdf_expand(
+    spdm_version_number_t spdm_version,
+    uint32_t base_hash_algo, const uint8_t *psk_hint,
+    size_t psk_hint_size, const uint8_t *info,
+    size_t info_size, uint8_t *out, size_t out_size)
+{
+  return SpdmPskHandshakeSecretHkdfExpandFunc(spdm_version, base_hash_algo, psk_hint,
+                                              psk_hint_size, info, info_size,
+                                              out, out_size);
 }
 
 BOOLEAN

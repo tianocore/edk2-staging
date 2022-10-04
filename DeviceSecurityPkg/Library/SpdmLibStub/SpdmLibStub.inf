@@ -1,0 +1,35 @@
+## @file
+#  SPDM library.
+#
+#  Copyright (c) 2022, Intel Corporation. All rights reserved.<BR>
+#
+#  SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = SpdmLibStub
+  FILE_GUID                      = d4ec6742-9c1e-4970-8e3a-729d8d676820
+  MODULE_TYPE                    = BASE
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = SpdmLibStub
+
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = IA32 X64 AARCH64
+#
+
+[Sources]
+  SpdmLibStub.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  DeviceSecurityPkg/DeviceSecurityPkg.dec
+
+[LibraryClasses]
+  BaseLib
+  DebugLib
+  SpdmRequesterLib
+  SpdmResponderLib

@@ -10,6 +10,7 @@
 #define _SPDM_STUB_H_
 
 #include <Uefi.h>
+#include <hal/base.h>
 #include <industry_standard/spdm.h>
 #include <industry_standard/spdm_secured_message.h>
 #include <Library/BaseLib.h>
