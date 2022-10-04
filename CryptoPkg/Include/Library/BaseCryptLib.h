@@ -2057,7 +2057,7 @@ X509GetSubjectName (
   @retval RETURN_UNSUPPORTED       The operation is not supported.
 
 **/
-RETURN_STATUS
+BOOLEAN
 EFIAPI
 X509GetCommonName (
   IN      CONST UINT8  *Cert,
@@ -2092,7 +2092,7 @@ X509GetCommonName (
   @retval RETURN_UNSUPPORTED       The operation is not supported.
 
 **/
-RETURN_STATUS
+BOOLEAN
 EFIAPI
 X509GetOrganizationName (
   IN      CONST UINT8  *Cert,
@@ -2863,7 +2863,7 @@ X509GetValidity (
 BOOLEAN
 EFIAPI
 X509SetDateTime (
-  IN   CHAR8    *DateTimeStr,
+  IN CONST CHAR8    *DateTimeStr,
   OUT  VOID     *DateTime,
   IN OUT UINTN  *DateTimeSize
   );
@@ -3005,7 +3005,7 @@ BOOLEAN
 EFIAPI
 Asn1GetTag (
   IN OUT UINT8   **Ptr,
-  IN     UINT8   *End,
+  IN CONST UINT8   *End,
   OUT UINTN      *Length,
   IN     UINT32  Tag
   );

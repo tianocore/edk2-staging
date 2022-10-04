@@ -366,7 +366,7 @@ _Exit:
 
 **/
 STATIC
-RETURN_STATUS
+BOOLEAN
 InternalX509GetNIDName (
   IN      CONST UINT8  *Cert,
   IN      UINTN        CertSize,
@@ -375,7 +375,6 @@ InternalX509GetNIDName (
   IN OUT  UINTN        *CommonNameSize
   )
 {
-  RETURN_STATUS    ReturnStatus;
   BOOLEAN          Status;
   X509             *X509Cert;
   X509_NAME        *X509Name;
@@ -385,18 +384,17 @@ InternalX509GetNIDName (
   ASN1_STRING      *EntryData;
   UINT8            *UTF8Name;
 
-  ReturnStatus = RETURN_INVALID_PARAMETER;
   UTF8Name     = NULL;
 
   //
   // Check input parameters.
   //
   if ((Cert == NULL) || (CertSize > INT_MAX) || (CommonNameSize == NULL)) {
-    return ReturnStatus;
+    return FALSE;
   }
 
   if ((CommonName != NULL) && (*CommonNameSize == 0)) {
-    return ReturnStatus;
+    return FALSE;
   }
 
   X509Cert = NULL;
@@ -433,7 +431,6 @@ InternalX509GetNIDName (
     // No Request_NID name entry exists in X509_NAME object
     //
     *CommonNameSize = 0;
-    ReturnStatus    = RETURN_NOT_FOUND;
     goto _Exit;
   }
 
@@ -443,7 +440,6 @@ InternalX509GetNIDName (
     // Fail to retrieve name entry data
     //
     *CommonNameSize = 0;
-    ReturnStatus    = RETURN_NOT_FOUND;
     goto _Exit;
   }
 
@@ -455,18 +451,16 @@ InternalX509GetNIDName (
     // Fail to convert the Name string
     //
     *CommonNameSize = 0;
-    ReturnStatus    = RETURN_INVALID_PARAMETER;
     goto _Exit;
   }
 
   if (CommonName == NULL) {
     *CommonNameSize = Length + 1;
-    ReturnStatus    = RETURN_BUFFER_TOO_SMALL;
   } else {
     *CommonNameSize = MIN ((UINTN)Length, *CommonNameSize - 1) + 1;
     CopyMem (CommonName, UTF8Name, *CommonNameSize - 1);
     CommonName[*CommonNameSize - 1] = '\0';
-    ReturnStatus                    = RETURN_SUCCESS;
+    Status = TRUE;
   }
 
 _Exit:
@@ -481,7 +475,7 @@ _Exit:
     OPENSSL_free (UTF8Name);
   }
 
-  return ReturnStatus;
+  return Status;
 }
 
 /**
@@ -510,7 +504,7 @@ _Exit:
   @retval RETURN_UNSUPPORTED       The operation is not supported.
 
 **/
-RETURN_STATUS
+BOOLEAN
 EFIAPI
 X509GetCommonName (
   IN      CONST UINT8  *Cert,
@@ -548,7 +542,7 @@ X509GetCommonName (
   @retval RETURN_UNSUPPORTED       The operation is not supported.
 
 **/
-RETURN_STATUS
+BOOLEAN
 EFIAPI
 X509GetOrganizationName (
   IN      CONST UINT8  *Cert,
@@ -1552,7 +1546,7 @@ _Exit:
 BOOLEAN
 EFIAPI
 X509SetDateTime (
-  IN     CHAR8  *DateTimeStr,
+  IN  CONST  CHAR8  *DateTimeStr,
   OUT VOID      *DateTime,
   IN OUT UINTN  *DateTimeSize
   )
@@ -1887,7 +1881,7 @@ BOOLEAN
 EFIAPI
 Asn1GetTag (
   IN OUT UINT8   **Ptr,
-  IN     UINT8   *End,
+  IN CONST UINT8   *End,
   OUT UINTN      *Length,
   IN     UINT32  Tag
   )
