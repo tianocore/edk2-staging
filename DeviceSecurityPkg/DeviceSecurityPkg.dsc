@@ -111,6 +111,7 @@ DEFINE CRYPT_LIB = OPENSSL
   CryptlibWrapper|DeviceSecurityPkg/Library/OsStub/CryptlibWrapper/CryptlibWrapper.inf
   PlatformLibWrapper|DeviceSecurityPkg/Library/OsStub/PlatformLibWrapper/PlatformLibWrapper.inf
   MemLibWrapper|DeviceSecurityPkg/Library/OsStub/MemLibWrapper/MemLibWrapper.inf
+  SpdmLibStub|DeviceSecurityPkg/Library/SpdmLibStub/SpdmLibStub.inf
 [LibraryClasses.ARM]
   ArmSoftFloatLib|ArmPkg/Library/ArmSoftFloatLib/ArmSoftFloatLib.inf
 
