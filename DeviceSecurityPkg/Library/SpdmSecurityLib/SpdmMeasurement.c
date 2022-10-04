@@ -130,6 +130,14 @@ CreateDeviceMeasurementContext (
   return EFI_UNSUPPORTED;
 }
 
+VOID InternalDumpData(CONST UINT8 *Data, UINTN Size)
+{
+    UINTN Index;
+    for (Index = 0; Index < Size; Index++) {
+        DEBUG((DEBUG_INFO, "%02x ", (UINTN)Data[Index]));
+    }
+}
+
 /**
   This function extend the PCI digest from the DvSec register.
   
