@@ -7,6 +7,7 @@
 **/
 
 #include <Uefi.h>
+#include <hal/base.h>
 #include <IndustryStandard/UefiTcgPlatform.h>
 #include <IndustryStandard/TcgSpdm.h>
 #include <Library/BaseLib.h>
@@ -19,7 +20,7 @@
 #include <Library/TpmMeasurementLib.h>
 #include <Guid/DeviceAuthentication.h>
 #include <Guid/ImageAuthentication.h>
-#include <hal/library/LibspdmStub.h>
+#include <hal/library/SpdmLibStub.h>
 #include <industry_standard/spdm.h>
 #include <IndustryStandard/TcgSpdm.h>
 #include <Library/Tpm2CommandLib.h>

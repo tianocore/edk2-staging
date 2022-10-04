@@ -19,6 +19,7 @@
 #include <IndustryStandard/PcieDoeCapbility.h>
 #include <industry_standard/pcidoe.h>
 #include <SpdmPciDoeStub.h>
+#include <hal/library/SpdmLibStub.h>
 
 #define SPDM_TIMEOUT 1000000    // 1 second
 
