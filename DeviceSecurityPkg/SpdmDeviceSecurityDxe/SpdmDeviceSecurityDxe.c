@@ -8,7 +8,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 **/
 
 #include "SpdmDeviceSecurityDxe.h"
-#include "library/SpdmSecurityLib.h"
+#include "Library/SpdmSecurityLib.h"
 
 LIST_ENTRY mSpdmDeviceList = INITIALIZE_LIST_HEAD_VARIABLE(mSpdmDeviceList);
 
@@ -230,7 +230,7 @@ IsSpdmDeviceInAuthenticationList (
   return SpdmDriverContext->IsDeviceAuthenticated;
 }
 
-libspdm_return_t
+SPDM_RETURN
 SpdmDeviceAcquireSenderBuffer (
     VOID *Context, UINTN *MaxMsgSize, VOID **MsgBufPtr)
 {
@@ -253,7 +253,7 @@ VOID SpdmDeviceReleaseSenderBuffer (
     return;
 }
 
-libspdm_return_t SpdmDeviceAcquireReceiverBuffer (
+SPDM_RETURN SpdmDeviceAcquireReceiverBuffer (
     VOID *Context, UINTN *MaxMsgSize, VOID **MsgBufPtr)
 {
     ASSERT (!mSendReceiveBufferAcquired);
@@ -458,13 +458,12 @@ Error:
   return NULL;
 }
 
-libspdm_return_t
-EFIAPI
+SPDM_RETURN
 SpdmIoProtocolDeviceSendMessage (
   IN     VOID                                   *SpdmContext,
   IN     UINTN                                  MessageSize,
   IN     CONST VOID                             *Message,
-  IN     UINT64                                 Timeout
+  IN     uint64_t                               Timeout
   )
 {
   SPDM_IO_PROTOCOL *SpdmIoProtocol;
@@ -476,13 +475,12 @@ SpdmIoProtocolDeviceSendMessage (
   return SpdmIoProtocol->SendMessage (SpdmIoProtocol, MessageSize, Message, Timeout);
 }
 
-libspdm_return_t
-EFIAPI
+SPDM_RETURN
 SpdmIoProtocolDeviceReceiveMessage (
   IN     VOID                                   *SpdmContext,
   IN OUT UINTN                                  *MessageSize,
   IN OUT VOID                                   **Message,
-  IN     UINT64                                 Timeout
+  IN     uint64_t                               Timeout
   )
 {
   SPDM_IO_PROTOCOL *SpdmIoProtocol;
