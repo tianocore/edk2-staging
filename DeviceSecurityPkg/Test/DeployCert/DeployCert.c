@@ -101,7 +101,7 @@ SHELL_PARAM_ITEM mParamList[] = {
   {NULL,    TypeMax},
   };
 
-typedef BOOLEAN (*ShaHashAllFunc)(CONST VOID  *Data,
+typedef BOOLEAN (EFIAPI *ShaHashAllFunc)(CONST VOID  *Data,
                               UINTN       DataSize,
                               UINT8       *HashValue);
 

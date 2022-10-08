@@ -35,7 +35,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Guid/ImageAuthentication.h>
 
 #include <Protocol/PciIo.h>
-#include <library/SpdmSecurityLib.h>
+#include <Library/SpdmSecurityLib.h>
 #include "library/spdm_crypt_lib.h"
 
 #define SPDM_DEVICE_CONTEXT_SIGNATURE  SIGNATURE_32 ('S', 'P', 'D', 'C')
@@ -149,6 +149,6 @@ DoDeviceAuthentication (
  * @param  data  raw data
  * @param  size  raw data size
  **/
-VOID InternalDumpData (const uint8_t *data, size_t size);
+VOID InternalDumpData(CONST UINT8 *Data, UINTN Size);
 
 #endif

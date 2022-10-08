@@ -10,7 +10,7 @@
 
 extern SPDM_TEST_DEVICE_CONTEXT  mSpdmTestDeviceContext;
 
-libspdm_return_t
+SPDM_RETURN
 SpdmGetResponseVendorDefinedRequest (
   IN     VOID                 *SpdmContext,
   IN     CONST UINT32         *SessionId,
@@ -153,6 +153,9 @@ InitializeSpdmTest (
                   EFI_NATIVE_INTERFACE,
                   &SpdmTestDeviceContext->SpdmTestProtocol
                   );
+  if (EFI_ERROR(Status)) {
+    return;
+  }
 
   SpdmRegisterGetResponseFunc (SpdmTestDeviceContext->SpdmContext, SpdmGetResponseVendorDefinedRequest);
 }
