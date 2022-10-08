@@ -14,7 +14,7 @@ SpdmDeviceSendMessage (
   IN     VOID                                   *SpdmContext,
   IN     UINTN                                  MessageSize,
   IN     CONST VOID                             *Message,
-  IN     uint64_t                               Timeout
+  IN     UINT64                                 Timeout
   )
 {
   return LIBSPDM_STATUS_SUCCESS;
@@ -25,7 +25,7 @@ SpdmDeviceReceiveMessage (
   IN     VOID                                   *SpdmContext,
   IN OUT UINTN                                  *MessageSize,
   IN OUT VOID                                   **Message,
-  IN     uint64_t                               Timeout
+  IN     UINT64                                 Timeout
   )
 {
   return LIBSPDM_STATUS_SUCCESS;
