@@ -7,6 +7,7 @@
 #ifndef BASE_H
 #define BASE_H
 
+#define LIBSPDM_STDINT_ALT "hal/LibspdmStdIntAlt.h"
 #define LIBSPDM_STDBOOL_ALT "hal/LibspdmStdBoolAlt.h"
 #define LIBSPDM_STDDEF_ALT "hal/LibspdmStdDefAlt.h"
 
