@@ -11,6 +11,7 @@
 
 #include <Base.h>
 #include <industry_standard/spdm.h>
+#include <hal/library/SpdmLibStub.h>
 
 typedef struct _SPDM_IO_PROTOCOL SPDM_IO_PROTOCOL;
 
@@ -40,8 +41,8 @@ typedef struct _SPDM_IO_PROTOCOL SPDM_IO_PROTOCOL;
                                        to execute.
 **/
 typedef
-libspdm_return_t
-(EFIAPI *SPDM_IO_SECURE_SEND_MESSAGE_FUNC) (
+SPDM_RETURN
+(*SPDM_IO_SECURE_SEND_MESSAGE_FUNC) (
   IN     SPDM_IO_PROTOCOL                       *This,
   IN     UINTN                                  MessageSize,
   IN CONST VOID                                   *Message,
@@ -75,8 +76,8 @@ libspdm_return_t
                                        to execute.
 **/
 typedef
-libspdm_return_t
-(EFIAPI *SPDM_IO_SECURE_RECEIVE_MESSAGE_FUNC) (
+SPDM_RETURN
+(*SPDM_IO_SECURE_RECEIVE_MESSAGE_FUNC) (
   IN     SPDM_IO_PROTOCOL                       *This,
   IN OUT UINTN                                  *MessageSize,
      OUT VOID                                   **Message,
