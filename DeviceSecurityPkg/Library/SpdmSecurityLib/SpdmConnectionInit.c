@@ -157,7 +157,7 @@ CreateSpdmDeviceContext (
   Status = GetVariable2 (
              EDKII_DEVICE_SECURITY_DATABASE,
              &gEdkiiDeviceSignatureDatabaseGuid,
-             &SignatureList,
+             (VOID **)&SignatureList,
              &SignatureListSize
              );
   if (!EFI_ERROR(Status)) {
