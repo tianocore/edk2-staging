@@ -290,6 +290,9 @@ libspdm_return_t SpdmMeasurementCollectionFunc (
                 &TestConfigSize,
                 &TestConfig
                 );
+    if (EFI_ERROR(Status)) {
+      return LIBSPDM_STATUS_INVALID_PARAMETER;
+    }
 
     ASSERT (measurement_specification ==
                    SPDM_MEASUREMENT_BLOCK_HEADER_SPECIFICATION_DMTF);

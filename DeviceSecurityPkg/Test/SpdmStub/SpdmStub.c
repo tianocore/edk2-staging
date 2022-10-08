@@ -20,8 +20,7 @@ UINT8 mSendReceiveBuffer[LIBSPDM_MAX_MESSAGE_BUFFER_SIZE];
 UINTN mSendReceiveBufferSize;
 VOID *mScratchBuffer;
 
-libspdm_return_t
-EFIAPI
+SPDM_RETURN
 SpdmIoSendMessage (
   IN     SPDM_IO_PROTOCOL                       *This,
   IN     UINTN                                  MessageSize,
@@ -29,12 +28,6 @@ SpdmIoSendMessage (
   IN     UINT64                                 Timeout
   )
 {
-  SPDM_TEST_DEVICE_CONTEXT  *SpdmTestContext;
-  VOID                      *SpdmContext;
-
-  SpdmTestContext = SPDM_TEST_DEVICE_CONTEXT_FROM_SPDM_IO_PROTOCOL(This);
-  SpdmContext = SpdmTestContext->SpdmContext;
-
   if (Message == NULL) {
     return LIBSPDM_STATUS_INVALID_PARAMETER;
   }
@@ -52,8 +45,7 @@ SpdmIoSendMessage (
   return LIBSPDM_STATUS_SUCCESS;
 }
 
-libspdm_return_t
-EFIAPI
+SPDM_RETURN
 SpdmIoReceiveMessage (
   IN     SPDM_IO_PROTOCOL                       *This,
   IN OUT UINTN                                  *MessageSize,
@@ -65,7 +57,7 @@ SpdmIoReceiveMessage (
   VOID                      *SpdmContext;
   UINT32                    *SessionId;
   BOOLEAN                   IsAppMessage;
-  libspdm_return_t          Status;
+  SPDM_RETURN               Status;
   UINT32                    TmpSessionId;
   UINT32                    *SessionIdPtr;
 
@@ -107,7 +99,7 @@ SPDM_TEST_DEVICE_CONTEXT  mSpdmTestDeviceContext = {
   },
 };
 
-libspdm_return_t
+SPDM_RETURN
 SpdmDeviceAcquireSenderBuffer (
     VOID *Context, UINTN *MaxMsgSize, VOID **MsgBufPtr)
 {
@@ -130,7 +122,7 @@ VOID SpdmDeviceReleaseSenderBuffer (
     return;
 }
 
-libspdm_return_t SpdmDeviceAcquireReceiverBuffer (
+SPDM_RETURN SpdmDeviceAcquireReceiverBuffer (
     VOID *Context, UINTN *MaxMsgSize, VOID **MsgBufPtr)
 {
     ASSERT (!mSendReceiveBufferAcquired);

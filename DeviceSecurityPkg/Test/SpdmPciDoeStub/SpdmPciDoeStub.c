@@ -221,8 +221,7 @@ PcieDoeReadMailboxWrite32 (
   return;
 }
 
-libspdm_return_t
-EFIAPI
+SPDM_RETURN
 SpdmIoSendRequest (
   IN     SPDM_IO_PROTOCOL       *This,
   IN     UINTN                  RequestSize,
@@ -230,7 +229,7 @@ SpdmIoSendRequest (
   IN     UINT64                 Timeout
   )
 {
-  libspdm_return_t              Status;
+  SPDM_RETURN                   Status;
   SPDM_PRIVATE_DATA             *SpdmPrivateData = NULL;
   UINT32                        Index = 0;
   PCI_EXPRESS_REG_DOE_CONTROL   DoeControl;
@@ -308,8 +307,7 @@ SpdmIoSendRequest (
   return Status;
 }
 
-libspdm_return_t
-EFIAPI
+SPDM_RETURN
 SpdmIoReceiveResponse (
   IN     SPDM_IO_PROTOCOL       *This,
   IN OUT UINTN                  *ResponseSize,
@@ -317,7 +315,7 @@ SpdmIoReceiveResponse (
   IN     UINT64                 Timeout
   )
 {
-  libspdm_return_t               Status;
+  SPDM_RETURN                   Status;
   SPDM_PRIVATE_DATA             *SpdmPrivateData = NULL;
   UINT8                         *ResponseDataObjectBuffer = NULL;
   UINT32                        ResponseDataObjectSize = 0;

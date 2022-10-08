@@ -8,6 +8,7 @@
 #define BASE_H
 
 #define LIBSPDM_STDBOOL_ALT "hal/LibspdmStdBoolAlt.h"
+#define LIBSPDM_STDDEF_ALT "hal/LibspdmStdDefAlt.h"
 
 /* Include processor-specific binding. */
 #include <processor_bind.h>

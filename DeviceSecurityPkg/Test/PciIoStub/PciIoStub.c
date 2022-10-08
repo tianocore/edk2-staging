@@ -206,8 +206,8 @@ PciIoStubConfigWrite (
   UINTN                                 Size;
   UINTN                                 Index;
   UINTN                                 TotalSize;
-  UINTN                                 FinalOffset;
-  UINT8                                 Data;
+  //UINTN                                 FinalOffset;
+  //UINT8                                 Data;
 
   switch (Width) {
   case EfiPciIoWidthUint8:
@@ -240,8 +240,8 @@ PciIoStubConfigWrite (
   //
   TotalSize = Size * Count;
   for (Index = 0; Index < TotalSize; Index++) {
-    FinalOffset = Offset + Index;
-    Data = *((UINT8 *)Buffer + Index);
+    //FinalOffset = Offset + Index;
+    //Data = *((UINT8 *)Buffer + Index);
     // Ignore the write
   }
 

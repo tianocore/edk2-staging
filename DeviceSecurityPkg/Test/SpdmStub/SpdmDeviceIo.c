@@ -9,25 +9,23 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 #include "SpdmStub.h"
 
-libspdm_return_t
-EFIAPI
+SPDM_RETURN
 SpdmDeviceSendMessage (
   IN     VOID                                   *SpdmContext,
   IN     UINTN                                  MessageSize,
   IN     CONST VOID                             *Message,
-  IN     UINT64                                 Timeout
+  IN     uint64_t                               Timeout
   )
 {
   return LIBSPDM_STATUS_SUCCESS;
 }
 
-libspdm_return_t
-EFIAPI
+SPDM_RETURN
 SpdmDeviceReceiveMessage (
   IN     VOID                                   *SpdmContext,
   IN OUT UINTN                                  *MessageSize,
   IN OUT VOID                                   **Message,
-  IN     UINT64                                 Timeout
+  IN     uint64_t                               Timeout
   )
 {
   return LIBSPDM_STATUS_SUCCESS;

@@ -11,6 +11,7 @@
 
 #include <Protocol/PciIo.h>
 #include <Protocol/SpdmIo.h>
+#include <hal/library/SpdmLibStub.h>
 
 typedef struct {
   UINTN                     Signature;
@@ -22,8 +23,7 @@ typedef struct {
 #define SPDM_PRIVATE_DATA_SIGNATURE  SIGNATURE_32 ('S', 'P', 'D', 'S')
 #define SPDM_PRIVATE_DATA_FROM_SPDM_IO(a)  CR (a, SPDM_PRIVATE_DATA, SpdmIo, SPDM_PRIVATE_DATA_SIGNATURE)
 
-libspdm_return_t
-EFIAPI
+SPDM_RETURN
 SpdmIoSendRequest (
   IN     SPDM_IO_PROTOCOL               *This,
   IN     UINTN                          RequestSize,
@@ -31,12 +31,11 @@ SpdmIoSendRequest (
   IN     UINT64                         Timeout
   );
 
-libspdm_return_t
-EFIAPI
+SPDM_RETURN
 SpdmIoReceiveResponse (
   IN     SPDM_IO_PROTOCOL               *This,
   IN OUT UINTN                          *ResponseSize,
-  IN OUT VOID                           *Response,
+  IN OUT VOID                           **Response,
   IN     UINT64                         Timeout
   );
 
