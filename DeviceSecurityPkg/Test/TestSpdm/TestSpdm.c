@@ -73,7 +73,7 @@ TestPci (
   EDKII_DEVICE_SECURITY_PROTOCOL  *DeviceSecurity;
   EDKII_DEVICE_IDENTIFIER         DeviceId;
 
-  Status = gBS->LocateProtocol (&gSpdmIoProtocolGuid, NULL, &SpdmIo);
+  Status = gBS->LocateProtocol (&gSpdmIoProtocolGuid, NULL, (VOID **)&SpdmIo);
   ASSERT_EFI_ERROR(Status);
 
   BufferSize = sizeof(Handle);
@@ -94,7 +94,7 @@ TestPci (
                   );
   ASSERT_EFI_ERROR(Status);
   
-  Status = gBS->LocateProtocol (&gEdkiiDeviceSecurityProtocolGuid, NULL, &DeviceSecurity);
+  Status = gBS->LocateProtocol (&gEdkiiDeviceSecurityProtocolGuid, NULL, (VOID **)&DeviceSecurity);
   ASSERT_EFI_ERROR(Status);
 
   DeviceId.Version = EDKII_DEVICE_IDENTIFIER_REVISION;
@@ -257,10 +257,10 @@ TestSpdm (
   UINT8                            HeartbeatPeriod;
   UINT8                            MeasurementHash[64];
 
-  Status = gBS->LocateProtocol (&gSpdmProtocolGuid, NULL, &SpdmProtocol);
+  Status = gBS->LocateProtocol (&gSpdmProtocolGuid, NULL, (VOID **)&SpdmProtocol);
   ASSERT_EFI_ERROR(Status);
 
-  Status = gBS->LocateProtocol (&gSpdmTestProtocolGuid, NULL, &SpdmTestProtocol);
+  Status = gBS->LocateProtocol (&gSpdmTestProtocolGuid, NULL, (VOID **)&SpdmTestProtocol);
   ASSERT_EFI_ERROR(Status);
 
 #if USE_PSK

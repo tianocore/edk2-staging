@@ -375,7 +375,7 @@ DoDeviceAuthentication (
     ZeroMem (CertChain, sizeof(CertChain));
     TrustAnchor = NULL;
     TrustAnchorSize = 0;
-    Status = SpdmGetCertificateEx (SpdmContext, 0, &CertChainSize, CertChain, &TrustAnchor, &TrustAnchorSize);
+    Status = SpdmGetCertificateEx (SpdmContext, 0, &CertChainSize, CertChain, (CONST VOID **)&TrustAnchor, &TrustAnchorSize);
     if (Status == LIBSPDM_STATUS_SUCCESS) {
       IsValidCertChain = TRUE;
     } else if (Status == LIBSPDM_STATUS_VERIF_FAIL) {
