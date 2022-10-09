@@ -10,11 +10,11 @@
 typedef BOOLEAN bool;
 
 #ifndef true
-#define true    1
+#define true    TRUE
 #endif
 
 #ifndef false
-#define false   0
+#define false   FALSE
 #endif
 
 #endif /* LIBSPDM_STDBOOL_ALT */
