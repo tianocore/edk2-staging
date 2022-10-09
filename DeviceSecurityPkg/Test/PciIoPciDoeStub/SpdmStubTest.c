@@ -12,17 +12,17 @@ extern SPDM_TEST_DEVICE_CONTEXT  mSpdmTestDeviceContext;
 
 SPDM_RETURN
 SpdmGetResponseVendorDefinedRequest (
-  IN     VOID                 *SpdmContext,
-  IN     CONST UINT32         *SessionId,
-  IN     BOOLEAN              IsAppMessage,
-  IN     UINTN                RequestSize,
-  IN     CONST VOID           *Request,
-  IN OUT UINTN                *ResponseSize,
-  OUT    VOID                  *Response
+  IN     VOID          *SpdmContext,
+  IN     CONST UINT32  *SessionId,
+  IN     BOOLEAN       IsAppMessage,
+  IN     UINTN         RequestSize,
+  IN     CONST VOID    *Request,
+  IN OUT UINTN         *ResponseSize,
+  OUT    VOID          *Response
   )
 {
-  EFI_STATUS               Status;
-  SPDM_TEST_DEVICE_CONTEXT *SpdmTestContext;
+  EFI_STATUS                Status;
+  SPDM_TEST_DEVICE_CONTEXT  *SpdmTestContext;
 
   SpdmTestContext = &mSpdmTestDeviceContext;
 
@@ -32,12 +32,12 @@ SpdmGetResponseVendorDefinedRequest (
   }
 
   Status = SpdmTestContext->ProcessPacketCallback (
-                                (VOID*)Request,
-                                RequestSize,
-                                Response,
-                                ResponseSize
-                                );
-  if (EFI_ERROR(Status)) {
+                              (VOID *)Request,
+                              RequestSize,
+                              Response,
+                              ResponseSize
+                              );
+  if (EFI_ERROR (Status)) {
     SpdmGenerateErrorResponse (SpdmContext, SPDM_ERROR_CODE_INVALID_REQUEST, 0, ResponseSize, Response);
     return EFI_SUCCESS;
   }
@@ -62,18 +62,18 @@ SpdmGetResponseVendorDefinedRequest (
 EFI_STATUS
 EFIAPI
 SpdmTestProtocolSetData (
-  IN     SPDM_TEST_PROTOCOL        *This,
-  IN     SPDM_DATA_TYPE            DataType,
-  IN     SPDM_DATA_PARAMETER       *Parameter,
-  IN     VOID                      *Data,
-  IN     UINTN                     DataSize
+  IN     SPDM_TEST_PROTOCOL   *This,
+  IN     SPDM_DATA_TYPE       DataType,
+  IN     SPDM_DATA_PARAMETER  *Parameter,
+  IN     VOID                 *Data,
+  IN     UINTN                DataSize
   )
 {
-  VOID                     *SpdmContext;
-  SPDM_TEST_DEVICE_CONTEXT *SpdmTestContext;
+  VOID                      *SpdmContext;
+  SPDM_TEST_DEVICE_CONTEXT  *SpdmTestContext;
 
-  SpdmTestContext = SPDM_TEST_DEVICE_CONTEXT_FROM_SPDM_TEST_PROTOCOL(This);
-  SpdmContext = SpdmTestContext->SpdmContext;
+  SpdmTestContext = SPDM_TEST_DEVICE_CONTEXT_FROM_SPDM_TEST_PROTOCOL (This);
+  SpdmContext     = SpdmTestContext->SpdmContext;
 
   return SpdmSetData (SpdmContext, DataType, Parameter, Data, DataSize);
 }
@@ -99,18 +99,18 @@ SpdmTestProtocolSetData (
 EFI_STATUS
 EFIAPI
 SpdmTestProtocolGetData (
-  IN     SPDM_TEST_PROTOCOL        *This,
-  IN     SPDM_DATA_TYPE            DataType,
-  IN     SPDM_DATA_PARAMETER       *Parameter,
-  IN OUT VOID                      *Data,
-  IN OUT UINTN                     *DataSize
+  IN     SPDM_TEST_PROTOCOL   *This,
+  IN     SPDM_DATA_TYPE       DataType,
+  IN     SPDM_DATA_PARAMETER  *Parameter,
+  IN OUT VOID                 *Data,
+  IN OUT UINTN                *DataSize
   )
 {
-  VOID                     *SpdmContext;
-  SPDM_TEST_DEVICE_CONTEXT *SpdmTestContext;
+  VOID                      *SpdmContext;
+  SPDM_TEST_DEVICE_CONTEXT  *SpdmTestContext;
 
-  SpdmTestContext = SPDM_TEST_DEVICE_CONTEXT_FROM_SPDM_TEST_PROTOCOL(This);
-  SpdmContext = SpdmTestContext->SpdmContext;
+  SpdmTestContext = SPDM_TEST_DEVICE_CONTEXT_FROM_SPDM_TEST_PROTOCOL (This);
+  SpdmContext     = SpdmTestContext->SpdmContext;
 
   return SpdmGetData (SpdmContext, DataType, Parameter, Data, DataSize);
 }
@@ -126,13 +126,13 @@ SpdmTestProtocolGetData (
 EFI_STATUS
 EFIAPI
 SpdmTestProtocolRegisterProcessPacketCallback (
-  IN     SPDM_TEST_PROTOCOL                     *This,
-  IN     SPDM_TEST_PROCESS_PACKET_CALLBACK      Callback
+  IN     SPDM_TEST_PROTOCOL                 *This,
+  IN     SPDM_TEST_PROCESS_PACKET_CALLBACK  Callback
   )
 {
-  SPDM_TEST_DEVICE_CONTEXT *SpdmTestContext;
+  SPDM_TEST_DEVICE_CONTEXT  *SpdmTestContext;
 
-  SpdmTestContext = SPDM_TEST_DEVICE_CONTEXT_FROM_SPDM_TEST_PROTOCOL(This);
+  SpdmTestContext                        = SPDM_TEST_DEVICE_CONTEXT_FROM_SPDM_TEST_PROTOCOL (This);
   SpdmTestContext->ProcessPacketCallback = Callback;
   return EFI_SUCCESS;
 }
@@ -144,17 +144,18 @@ InitializeSpdmTest (
 {
   EFI_STATUS  Status;
 
-  SpdmTestDeviceContext->SpdmTestProtocol.SetData = SpdmTestProtocolSetData;
-  SpdmTestDeviceContext->SpdmTestProtocol.GetData = SpdmTestProtocolGetData;
+  SpdmTestDeviceContext->SpdmTestProtocol.SetData                       = SpdmTestProtocolSetData;
+  SpdmTestDeviceContext->SpdmTestProtocol.GetData                       = SpdmTestProtocolGetData;
   SpdmTestDeviceContext->SpdmTestProtocol.RegisterProcessPacketCallback = SpdmTestProtocolRegisterProcessPacketCallback;
-  Status = gBS->InstallProtocolInterface (
-                  &SpdmTestDeviceContext->SpdmHandle,
-                  &gSpdmTestProtocolGuid,
-                  EFI_NATIVE_INTERFACE,
-                  &SpdmTestDeviceContext->SpdmTestProtocol
-                  );
-  if (EFI_ERROR(Status)) {
+  Status                                                                = gBS->InstallProtocolInterface (
+                                                                                 &SpdmTestDeviceContext->SpdmHandle,
+                                                                                 &gSpdmTestProtocolGuid,
+                                                                                 EFI_NATIVE_INTERFACE,
+                                                                                 &SpdmTestDeviceContext->SpdmTestProtocol
+                                                                                 );
+  if (EFI_ERROR (Status)) {
     return;
   }
+
   SpdmRegisterGetResponseFunc (SpdmTestDeviceContext->SpdmContext, SpdmGetResponseVendorDefinedRequest);
 }

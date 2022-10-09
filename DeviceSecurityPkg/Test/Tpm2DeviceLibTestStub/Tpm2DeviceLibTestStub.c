@@ -27,13 +27,13 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 EFI_STATUS
 EFIAPI
 Tpm2SubmitCommand (
-  IN UINT32            InputParameterBlockSize,
-  IN UINT8             *InputParameterBlock,
-  IN OUT UINT32        *OutputParameterBlockSize,
-  IN UINT8             *OutputParameterBlock
+  IN UINT32      InputParameterBlockSize,
+  IN UINT8       *InputParameterBlock,
+  IN OUT UINT32  *OutputParameterBlockSize,
+  IN UINT8       *OutputParameterBlock
   )
 {
-  ASSERT(FALSE);
+  ASSERT (FALSE);
   return EFI_DEVICE_ERROR;
 }
 
