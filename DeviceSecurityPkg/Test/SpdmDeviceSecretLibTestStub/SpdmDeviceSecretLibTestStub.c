@@ -262,7 +262,7 @@ UINTN SpdmFillMeasurementDeviceModeBlock (
   @retval TRUE  the device measurement collection success and measurement is returned.
   @retval FALSE the device measurement collection fail.
 **/
-libspdm_return_t SpdmMeasurementCollectionFunc (
+SPDM_RETURN SpdmMeasurementCollectionFunc (
     SPDM_VERSION_NUMBER spdm_version,
     UINT8 measurement_specification,
     UINT32 measurement_hash_algo,
@@ -484,7 +484,6 @@ libspdm_return_t SpdmMeasurementCollectionFunc (
 }
 
 BOOLEAN
-EFIAPI
 SpdmGenerateMeasurementSummaryHash (
     IN      SPDM_VERSION_NUMBER SpdmVersion,
     IN      UINT32              base_hash_algo,
@@ -627,7 +626,6 @@ SpdmGenerateMeasurementSummaryHash (
   @retval FALSE signing fail.
 **/
 BOOLEAN
-EFIAPI
 SpdmRequesterDataSignFunc (
   IN      SPDM_VERSION_NUMBER SpdmVersion,
   IN      UINT8        OpCode,
@@ -658,7 +656,6 @@ SpdmRequesterDataSignFunc (
   @retval FALSE signing fail.
 **/
 BOOLEAN
-EFIAPI
 SpdmResponderDataSignFunc (
   IN      SPDM_VERSION_NUMBER SpdmVersion,
   IN      UINT8        OpCode,
@@ -740,48 +737,6 @@ SpdmResponderDataSignFunc (
   return Result;
 }
 
-libspdm_return_t libspdm_measurement_collection(
-    spdm_version_number_t spdm_version,
-    uint8_t measurement_specification,
-    uint32_t measurement_hash_algo,
-    uint8_t measurement_index,
-    uint8_t request_attribute,
-    uint8_t *content_changed,
-    uint8_t *measurements_count,
-    void *measurements,
-    size_t *measurements_size)
-{
-  return SpdmMeasurementCollectionFunc(spdm_version, measurement_specification,
-                                       measurement_hash_algo, measurement_index,
-                                       request_attribute, content_changed,
-                                       measurements_count, measurements,
-                                       measurements_size);
-}
-
-bool libspdm_requester_data_sign(
-    spdm_version_number_t spdm_version,
-    uint8_t op_code,
-    uint16_t req_base_asym_alg,
-    uint32_t base_hash_algo, bool is_data_hash,
-    const uint8_t *message, size_t message_size,
-    uint8_t *signature, size_t *sig_size)
-{
-  return false;
-}
-
-bool libspdm_responder_data_sign(
-    spdm_version_number_t spdm_version,
-    uint8_t op_code,
-    uint32_t base_asym_algo,
-    uint32_t base_hash_algo, bool is_data_hash,
-    const uint8_t *message, size_t message_size,
-    uint8_t *signature, size_t *sig_size)
-{
-  return SpdmResponderDataSignFunc(spdm_version, op_code, base_asym_algo,
-                                   base_hash_algo, is_data_hash, message,
-                                   message_size, signature, sig_size);
-}
-
 UINT8  mMyZeroFilledBuffer[64];
 UINT8  gBinStr0[0x12] = {
        0x00, 0x00, // Length - To be filled
@@ -804,7 +759,6 @@ UINT8  gBinStr0[0x12] = {
   @retval FALSE  Hkdf generation failed.
 **/
 BOOLEAN
-EFIAPI
 SpdmPskHandshakeSecretHkdfExpandFunc (
   IN      SPDM_VERSION_NUMBER SpdmVersion,
   IN      UINT32       BaseHashAlgo,
@@ -853,7 +807,6 @@ SpdmPskHandshakeSecretHkdfExpandFunc (
   @retval FALSE  Hkdf generation failed.
 **/
 BOOLEAN
-EFIAPI
 SpdmPskMasterSecretHkdfExpandFunc (
   IN      SPDM_VERSION_NUMBER SpdmVersion,
   IN      UINT32       BaseHashAlgo,
@@ -900,46 +853,6 @@ SpdmPskMasterSecretHkdfExpandFunc (
   ZeroMem (MasterSecret, HashSize);
 
   return Result;
-}
-
-
-bool libspdm_generate_measurement_summary_hash(
-    spdm_version_number_t spdm_version, uint32_t base_hash_algo,
-    uint8_t measurement_specification, uint32_t measurement_hash_algo,
-    uint8_t measurement_summary_hash_type,
-    uint8_t *measurement_summary_hash,
-    size_t *measurement_summary_hash_size)
-{
-  return SpdmGenerateMeasurementSummaryHash (
-           spdm_version, base_hash_algo,
-           measurement_specification, measurement_hash_algo,
-           measurement_summary_hash_type, measurement_summary_hash,
-           measurement_summary_hash_size);
-}
-
-bool libspdm_psk_master_secret_hkdf_expand(
-    spdm_version_number_t spdm_version,
-    uint32_t base_hash_algo,
-    const uint8_t *psk_hint,
-    size_t psk_hint_size,
-    const uint8_t *info,
-    size_t info_size, uint8_t *out,
-    size_t out_size)
-{
-  return SpdmPskMasterSecretHkdfExpandFunc(spdm_version, base_hash_algo, psk_hint,
-                                           psk_hint_size, info, info_size,
-                                           out, out_size);
-}
-
-bool libspdm_psk_handshake_secret_hkdf_expand(
-    spdm_version_number_t spdm_version,
-    uint32_t base_hash_algo, const uint8_t *psk_hint,
-    size_t psk_hint_size, const uint8_t *info,
-    size_t info_size, uint8_t *out, size_t out_size)
-{
-  return SpdmPskHandshakeSecretHkdfExpandFunc(spdm_version, base_hash_algo, psk_hint,
-                                              psk_hint_size, info, info_size,
-                                              out, out_size);
 }
 
 BOOLEAN

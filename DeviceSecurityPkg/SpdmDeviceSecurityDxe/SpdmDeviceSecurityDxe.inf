@@ -41,11 +41,11 @@
   TpmMeasurementLib
   RngLib
   BaseCryptLib
+  SpdmRequesterLib
   SpdmTransportMctpLib
   SpdmTransportPciDoeLib
   SpdmMeasurementLib
   CryptlibWrapper
-  SpdmLibStub
 
 [Guids]
   gEdkiiDeviceSignatureDatabaseGuid       ## CONSUMES
