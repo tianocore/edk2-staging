@@ -21,6 +21,7 @@ InternalDumpData (
   )
 {
   UINTN  Index;
+
   for (Index = 0; Index < Size; Index++) {
     DEBUG ((EFI_D_INFO, "%02x ", (UINTN)Data[Index]));
   }
@@ -32,11 +33,11 @@ InternalDumpHex (
   IN UINTN  Size
   )
 {
-  UINTN   Index;
-  UINTN   Count;
-  UINTN   Left;
+  UINTN  Index;
+  UINTN  Count;
+  UINTN  Left;
 
-#define COLUME_SIZE  (16 * 2)
+  #define COLUME_SIZE  (16 * 2)
 
   Count = Size / COLUME_SIZE;
   Left  = Size % COLUME_SIZE;
@@ -66,8 +67,8 @@ InternalDumpHex (
 EFI_STATUS
 EFIAPI
 CryptestMain (
-  IN     EFI_HANDLE                 ImageHandle,
-  IN     EFI_SYSTEM_TABLE           *SystemTable
+  IN     EFI_HANDLE        ImageHandle,
+  IN     EFI_SYSTEM_TABLE  *SystemTable
   )
 {
   EFI_STATUS  Status;
@@ -112,12 +113,13 @@ CryptestMain (
     return Status;
   }
 
-#if 1
+ #if 1
   Status = ValidateCryptPkcs7 ();
   if (EFI_ERROR (Status)) {
     return Status;
   }
-#endif
+
+ #endif
 
   Status = ValidateAuthenticode ();
   if (EFI_ERROR (Status)) {

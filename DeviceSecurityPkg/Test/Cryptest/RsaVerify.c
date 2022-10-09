@@ -1,4 +1,4 @@
-/** @file  
+/** @file
   Application for RSA Primitives Validation.
 
 Copyright (c) 2010, Intel Corporation. All rights reserved.<BR>
@@ -23,7 +23,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 //
 // Public Modulus of RSA2048 Key
 //
-GLOBAL_REMOVE_IF_UNREFERENCED CONST UINT8 RsaN[] = {
+GLOBAL_REMOVE_IF_UNREFERENCED CONST UINT8  RsaN[] = {
   0xDB, 0x10, 0x1A, 0xC2, 0xA3, 0xF1, 0xDC, 0xFF, 0x13, 0x6B, 0xED, 0x44, 0xDF, 0xF0, 0x02, 0x6D,
   0x13, 0xC7, 0x88, 0xDA, 0x70, 0x6B, 0x54, 0xF1, 0xE8, 0x27, 0xDC, 0xC3, 0x0F, 0x99, 0x6A, 0xFA,
   0xC6, 0x67, 0xFF, 0x1D, 0x1E, 0x3C, 0x1D, 0xC1, 0xB5, 0x5F, 0x6C, 0xC0, 0xB2, 0x07, 0x3A, 0x6D,
@@ -40,17 +40,17 @@ GLOBAL_REMOVE_IF_UNREFERENCED CONST UINT8 RsaN[] = {
   0x55, 0xE6, 0x29, 0x69, 0xD1, 0xC2, 0xE8, 0xB9, 0x78, 0x59, 0xF6, 0x79, 0x10, 0xC6, 0x4E, 0xEB,
   0x6A, 0x5E, 0xB9, 0x9A, 0xC7, 0xC4, 0x5B, 0x63, 0xDA, 0xA3, 0x3F, 0x5E, 0x92, 0x7A, 0x81, 0x5E,
   0xD6, 0xB0, 0xE2, 0x62, 0x8F, 0x74, 0x26, 0xC2, 0x0C, 0xD3, 0x9A, 0x17, 0x47, 0xE6, 0x8E, 0xAB
-  };
+};
 
 //
 // Public Exponent of RSA2048 Key
 //
-GLOBAL_REMOVE_IF_UNREFERENCED CONST UINT8 RsaE[] = { 0x01, 0x00, 0x01 };
+GLOBAL_REMOVE_IF_UNREFERENCED CONST UINT8  RsaE[] = { 0x01, 0x00, 0x01 };
 
 //
 // Private Exponent of RSA2048 Key
 //
-GLOBAL_REMOVE_IF_UNREFERENCED CONST UINT8 RsaD[] = {
+GLOBAL_REMOVE_IF_UNREFERENCED CONST UINT8  RsaD[] = {
   0x52, 0x41, 0xF4, 0xDA, 0x7B, 0xB7, 0x59, 0x55, 0xCA, 0xD4, 0x2F, 0x0F, 0x3A, 0xCB, 0xA4, 0x0D,
   0x93, 0x6C, 0xCC, 0x9D, 0xC1, 0xB2, 0xFB, 0xFD, 0xAE, 0x40, 0x31, 0xAC, 0x69, 0x52, 0x21, 0x92,
   0xB3, 0x27, 0xDF, 0xEA, 0xEE, 0x2C, 0x82, 0xBB, 0xF7, 0x40, 0x32, 0xD5, 0x14, 0xC4, 0x94, 0x12,
@@ -67,18 +67,18 @@ GLOBAL_REMOVE_IF_UNREFERENCED CONST UINT8 RsaD[] = {
   0x62, 0xFF, 0xE9, 0x46, 0xB8, 0xD8, 0x44, 0xDB, 0xA5, 0xCC, 0x31, 0x54, 0x34, 0xCE, 0x3E, 0x82,
   0xD6, 0xBF, 0x7A, 0x0B, 0x64, 0x21, 0x6D, 0x88, 0x7E, 0x5B, 0x45, 0x12, 0x1E, 0x63, 0x8D, 0x49,
   0xA7, 0x1D, 0xD9, 0x1E, 0x06, 0xCD, 0xE8, 0xBA, 0x2C, 0x8C, 0x69, 0x32, 0xEA, 0xBE, 0x60, 0x71
-  };
+};
 
 //
 // signature input message
 //
-GLOBAL_REMOVE_IF_UNREFERENCED CONST CHAR8 RsaSignData[] = "OpenSSL FIPS 140-2 Public Key RSA KAT";
+GLOBAL_REMOVE_IF_UNREFERENCED CONST CHAR8  RsaSignData[] = "OpenSSL FIPS 140-2 Public Key RSA KAT";
 
 //
 // RSA2048 SHA-256 PAD_PKCS1 signature for the above message.
 // This is not FIPS 140-2 KAT, because the padding way is different.
 //
-GLOBAL_REMOVE_IF_UNREFERENCED CONST UINT8 RsaPkcs1Signature[] = {
+GLOBAL_REMOVE_IF_UNREFERENCED CONST UINT8  RsaPkcs1Signature[] = {
   0x6E, 0x5F, 0xB3, 0x06, 0x47, 0x20, 0xE7, 0x94, 0xCE, 0xC1, 0x82, 0xD1, 0xC4, 0x8A, 0x05, 0x8F,
   0xED, 0xE7, 0x81, 0x04, 0xE6, 0x1C, 0x42, 0xE1, 0x58, 0x14, 0x5E, 0xC1, 0xE2, 0x9F, 0xBB, 0x30,
   0x43, 0xF5, 0x00, 0x54, 0x73, 0x8F, 0xF7, 0xBF, 0xE5, 0x1C, 0x18, 0xF8, 0xFB, 0xF0, 0x44, 0x0A,
@@ -95,12 +95,12 @@ GLOBAL_REMOVE_IF_UNREFERENCED CONST UINT8 RsaPkcs1Signature[] = {
   0x63, 0xD4, 0xC1, 0xC0, 0x23, 0xE9, 0x95, 0xCF, 0x96, 0xC3, 0x6B, 0xCA, 0x61, 0xDA, 0x8F, 0xC2,
   0x2A, 0xE4, 0xEF, 0x80, 0xF1, 0x9B, 0x31, 0xFE, 0xE6, 0x58, 0x3F, 0xA9, 0x49, 0x7B, 0xDC, 0xAE,
   0x1B, 0x6D, 0x68, 0x98, 0x55, 0x9D, 0x73, 0xF0, 0xCC, 0x23, 0xC0, 0x84, 0x46, 0x67, 0x35, 0x54
-  };
+};
 
 //
 // Default public key 0x10001 = 65537
 //
-GLOBAL_REMOVE_IF_UNREFERENCED CONST UINT8 DefaultPublicKey[] = {
+GLOBAL_REMOVE_IF_UNREFERENCED CONST UINT8  DefaultPublicKey[] = {
   0x01, 0x00, 0x01
 };
 
@@ -154,15 +154,15 @@ ValidateCryptRsa (
   }
 
   KeySize = 0;
-  Status = RsaGetKey (Rsa, RsaKeyN, NULL, &KeySize);
-  if (Status || KeySize != sizeof (RsaN)) {
+  Status  = RsaGetKey (Rsa, RsaKeyN, NULL, &KeySize);
+  if (Status || (KeySize != sizeof (RsaN))) {
     Print (L"[Fail]");
     return EFI_ABORTED;
   }
 
   KeyBuffer = AllocatePool (KeySize);
-  Status = RsaGetKey (Rsa, RsaKeyN, KeyBuffer, &KeySize);
-  if (!Status || KeySize != sizeof (RsaN)) {
+  Status    = RsaGetKey (Rsa, RsaKeyN, KeyBuffer, &KeySize);
+  if (!Status || (KeySize != sizeof (RsaN))) {
     Print (L"[Fail]");
     return EFI_ABORTED;
   }
@@ -184,15 +184,15 @@ ValidateCryptRsa (
   }
 
   KeySize = 0;
-  Status = RsaGetKey (Rsa, RsaKeyE, NULL, &KeySize);
-  if (Status || KeySize != sizeof (RsaE)) {
+  Status  = RsaGetKey (Rsa, RsaKeyE, NULL, &KeySize);
+  if (Status || (KeySize != sizeof (RsaE))) {
     Print (L"[Fail]");
     return EFI_ABORTED;
   }
 
   KeyBuffer = AllocatePool (KeySize);
-  Status = RsaGetKey (Rsa, RsaKeyE, KeyBuffer, &KeySize);
-  if (!Status || KeySize != sizeof (RsaE)) {
+  Status    = RsaGetKey (Rsa, RsaKeyE, KeyBuffer, &KeySize);
+  if (!Status || (KeySize != sizeof (RsaE))) {
     Print (L"[Fail]");
     return EFI_ABORTED;
   }
@@ -219,8 +219,8 @@ ValidateCryptRsa (
   }
 
   KeySize = 1;
-  Status = RsaGetKey (Rsa, RsaKeyN, NULL, &KeySize);
-  if (!Status || KeySize != 0) {
+  Status  = RsaGetKey (Rsa, RsaKeyN, NULL, &KeySize);
+  if (!Status || (KeySize != 0)) {
     Print (L"[Fail]");
     return EFI_ABORTED;
   }
@@ -235,8 +235,8 @@ ValidateCryptRsa (
   }
 
   KeySize = 1;
-  Status = RsaGetKey (Rsa, RsaKeyE, NULL, &KeySize);
-  if (!Status || KeySize != 0) {
+  Status  = RsaGetKey (Rsa, RsaKeyE, NULL, &KeySize);
+  if (!Status || (KeySize != 0)) {
     Print (L"[Fail]");
     return EFI_ABORTED;
   }
@@ -252,22 +252,23 @@ ValidateCryptRsa (
     return EFI_ABORTED;
   }
 
-  KeySize = RSA_MODULUS_LENGTH / 8;
+  KeySize   = RSA_MODULUS_LENGTH / 8;
   KeyBuffer = AllocatePool (KeySize);
-  Status = RsaGetKey (Rsa, RsaKeyE, KeyBuffer, &KeySize);
+  Status    = RsaGetKey (Rsa, RsaKeyE, KeyBuffer, &KeySize);
   if (!Status) {
     Print (L"[Fail]");
     return EFI_ABORTED;
   }
-  
-  if (KeySize != 3 ||
-      CompareMem (KeyBuffer, DefaultPublicKey, 3) != 0) {
+
+  if ((KeySize != 3) ||
+      (CompareMem (KeyBuffer, DefaultPublicKey, 3) != 0))
+  {
     Print (L"[Fail]");
     return EFI_ABORTED;
   }
 
   KeySize = RSA_MODULUS_LENGTH / 8;
-  Status = RsaGetKey (Rsa, RsaKeyN, KeyBuffer, &KeySize);
+  Status  = RsaGetKey (Rsa, RsaKeyN, KeyBuffer, &KeySize);
   if (!Status) {
     Print (L"[Fail]");
     return EFI_ABORTED;
@@ -324,7 +325,7 @@ ValidateCryptRsa (
   FreePool (KeyBuffer);
 
   //
-  // SHA-1 Digest Message for PKCS#1 Signature 
+  // SHA-1 Digest Message for PKCS#1 Signature
   //
   Print (L"Hash Original Message ... ");
   HashSize = SHA256_DIGEST_SIZE;
@@ -332,19 +333,19 @@ ValidateCryptRsa (
   CtxSize = Sha256GetContextSize ();
   Sha1Ctx = AllocatePool (CtxSize);
 
-  Status  = Sha256Init (Sha1Ctx);
+  Status = Sha256Init (Sha1Ctx);
   if (!Status) {
     Print (L"[Fail]");
     return EFI_ABORTED;
   }
 
-  Status  = Sha256Update (Sha1Ctx, RsaSignData, AsciiStrLen (RsaSignData));
+  Status = Sha256Update (Sha1Ctx, RsaSignData, AsciiStrLen (RsaSignData));
   if (!Status) {
     Print (L"[Fail]");
     return EFI_ABORTED;
   }
 
-  Status  = Sha256Final (Sha1Ctx, HashValue);
+  Status = Sha256Final (Sha1Ctx, HashValue);
   if (!Status) {
     Print (L"[Fail]");
     return EFI_ABORTED;
@@ -385,13 +386,13 @@ ValidateCryptRsa (
 
   SigSize = 0;
   Status  = RsaPkcs1Sign (Rsa, HashValue, HashSize, NULL, &SigSize);
-  if (Status || SigSize == 0) {
+  if (Status || (SigSize == 0)) {
     Print (L"[Fail]");
     return EFI_ABORTED;
   }
 
   Signature = AllocatePool (SigSize);
-  Status  = RsaPkcs1Sign (Rsa, HashValue, HashSize, Signature, &SigSize);
+  Status    = RsaPkcs1Sign (Rsa, HashValue, HashSize, Signature, &SigSize);
   if (!Status) {
     Print (L"[Fail]");
     return EFI_ABORTED;

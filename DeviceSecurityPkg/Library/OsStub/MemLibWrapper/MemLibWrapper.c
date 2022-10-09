@@ -49,51 +49,55 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
  * @return   0 on success. non-zero on error.
  *
  **/
-int libspdm_copy_mem(void *dst_buf, size_t dst_len,
-                     const void *src_buf, size_t src_len)
+int
+libspdm_copy_mem (
+  void        *dst_buf,
+  size_t      dst_len,
+  const void  *src_buf,
+  size_t      src_len
+  )
 {
-    volatile uint8_t* dst;
-    const volatile uint8_t* src;
+  volatile uint8_t        *dst;
+  const volatile uint8_t  *src;
 
-    dst = (volatile uint8_t*) dst_buf;
-    src = (const volatile uint8_t*) src_buf;
+  dst = (volatile uint8_t *)dst_buf;
+  src = (const volatile uint8_t *)src_buf;
 
-    /* Check for case where "dst" or "dst_len" may be invalid.
-     * Do not zero "dst" in this case. */
-    if (dst == NULL || dst_len > (SIZE_MAX >> 1)) {
-        ASSERT(0);
-        return -1;
-    }
+  /* Check for case where "dst" or "dst_len" may be invalid.
+   * Do not zero "dst" in this case. */
+  if ((dst == NULL) || (dst_len > (SIZE_MAX >> 1))) {
+    ASSERT (0);
+    return -1;
+  }
 
-    /* Gaurd against invalid source. Zero "dst" in this case. */
-    if (src == NULL) {
-        ZeroMem(dst_buf, dst_len);
-        ASSERT(0);
-        return -1;
-    }
+  /* Gaurd against invalid source. Zero "dst" in this case. */
+  if (src == NULL) {
+    ZeroMem (dst_buf, dst_len);
+    ASSERT (0);
+    return -1;
+  }
 
-    /* Guard against overlap case. Zero "dst" in these cases. */
-    if ((src < dst && src + src_len > dst) || (dst < src && dst + src_len > src)) {
-        ZeroMem(dst_buf, dst_len);
-        ASSERT(0);
-        return -1;
-    }
+  /* Guard against overlap case. Zero "dst" in these cases. */
+  if (((src < dst) && (src + src_len > dst)) || ((dst < src) && (dst + src_len > src))) {
+    ZeroMem (dst_buf, dst_len);
+    ASSERT (0);
+    return -1;
+  }
 
-    /* Guard against invalid lengths. Zero "dst" in these cases. */
-    if (src_len > dst_len ||
-        src_len > (SIZE_MAX >> 1)) {
+  /* Guard against invalid lengths. Zero "dst" in these cases. */
+  if ((src_len > dst_len) ||
+      (src_len > (SIZE_MAX >> 1)))
+  {
+    ZeroMem (dst_buf, dst_len);
+    ASSERT (0);
+    return -1;
+  }
 
-        ZeroMem(dst_buf, dst_len);
-        ASSERT(0);
-        return -1;
-    }
+  while (src_len-- != 0) {
+    *(dst++) = *(src++);
+  }
 
-    while (src_len-- != 0) {
-        *(dst++) = *(src++);
-    }
-
-    return 0;
-
+  return 0;
 }
 
 /**
@@ -110,7 +114,12 @@ int libspdm_copy_mem(void *dst_buf, size_t dst_len,
  * @return buffer.
  *
  **/
-void *libspdm_set_mem(void *buffer, size_t length, uint8_t value)
+void *
+libspdm_set_mem (
+  void     *buffer,
+  size_t   length,
+  uint8_t  value
+  )
 {
   return SetMem (buffer, length, value);
 }
@@ -129,7 +138,11 @@ void *libspdm_set_mem(void *buffer, size_t length, uint8_t value)
  * @return buffer.
  *
  **/
-void *libspdm_zero_mem(void *buffer, size_t length)
+void *
+libspdm_zero_mem (
+  void    *buffer,
+  size_t  length
+  )
 {
   return ZeroMem (buffer, length);
 }
@@ -155,8 +168,12 @@ void *libspdm_zero_mem(void *buffer, size_t length)
  * @retval Non-zero          There is mismatched between source_buffer and destination_buffer.
  *
  **/
-int32_t libspdm_const_compare_mem(const void *destination_buffer,
-                                  const void *source_buffer, size_t length)
+int32_t
+libspdm_const_compare_mem (
+  const void  *destination_buffer,
+  const void  *source_buffer,
+  size_t      length
+  )
 {
-  return (int32_t) CompareMem (destination_buffer, source_buffer, length);
+  return (int32_t)CompareMem (destination_buffer, source_buffer, length);
 }

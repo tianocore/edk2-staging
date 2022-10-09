@@ -14,10 +14,10 @@
 #include <hal/library/SpdmLibStub.h>
 
 typedef struct {
-  UINTN                     Signature;
-  SPDM_IO_PROTOCOL          SpdmIo;
-  EFI_PCI_IO_PROTOCOL       *PciIo;
-  UINT32                    DoeCapabilityOffset;
+  UINTN                  Signature;
+  SPDM_IO_PROTOCOL       SpdmIo;
+  EFI_PCI_IO_PROTOCOL    *PciIo;
+  UINT32                 DoeCapabilityOffset;
 } SPDM_PRIVATE_DATA;
 
 #define SPDM_PRIVATE_DATA_SIGNATURE  SIGNATURE_32 ('S', 'P', 'D', 'S')
@@ -25,18 +25,18 @@ typedef struct {
 
 SPDM_RETURN
 SpdmIoSendRequest (
-  IN     SPDM_IO_PROTOCOL               *This,
-  IN     UINTN                          RequestSize,
-  IN     CONST VOID                     *Request,
-  IN     UINT64                         Timeout
+  IN     SPDM_IO_PROTOCOL  *This,
+  IN     UINTN             RequestSize,
+  IN     CONST VOID        *Request,
+  IN     UINT64            Timeout
   );
 
 SPDM_RETURN
 SpdmIoReceiveResponse (
-  IN     SPDM_IO_PROTOCOL               *This,
-  IN OUT UINTN                          *ResponseSize,
-  IN OUT VOID                           **Response,
-  IN     UINT64                         Timeout
+  IN     SPDM_IO_PROTOCOL  *This,
+  IN OUT UINTN             *ResponseSize,
+  IN OUT VOID              **Response,
+  IN     UINT64            Timeout
   );
 
 #endif
