@@ -200,177 +200,51 @@ typedef enum {
 #define     SPDM_RETURN               libspdm_return_t
 
 /* FUNCTION */
-SPDM_RETURN SpdmSetData (VOID *Context, SPDM_DATA_TYPE DataType,
-                              CONST SPDM_DATA_PARAMETER *Parameter, VOID *Data,
-                              UINTN DataSize);
+#define SpdmSetData                    libspdm_set_data
+#define SpdmGetData                    libspdm_get_data
+#define SpdmInitContext                libspdm_init_context
+#define SpdmGetContextSize             libspdm_get_context_size
+#define SpdmRegisterDeviceIoFunc       libspdm_register_device_io_func
+#define SpdmRegisterTransportLayerFunc     libspdm_register_transport_layer_func
+#define SpdmGetSizeofRequiredScratchBuffer libspdm_get_sizeof_required_scratch_buffer
+#define SpdmRegisterDeviceBufferFunc       libspdm_register_device_buffer_func
+#define SpdmSetScratchBuffer               libspdm_set_scratch_buffer
 
-SPDM_RETURN SpdmGetData (VOID *Context, SPDM_DATA_TYPE DataType,
-                              CONST SPDM_DATA_PARAMETER *Parameter, VOID *Data,
-                              UINTN *DataSize);
+#define SpdmGetHashSize                    libspdm_get_hash_size
+#define SpdmHashAll                        libspdm_hash_all
+#define SpdmGetMeasurementHashSize         libspdm_get_measurement_hash_size
+#define SpdmMeasurementHashAll             libspdm_measurement_hash_all
+#define SpdmHmacAll                        libspdm_hmac_all
+#define SpdmHkdfExpand                     libspdm_hkdf_expand
+#define SpdmAsymFree                       libspdm_asym_free
+#define SpdmAsymGetPrivateKeyFromPem       libspdm_asym_get_private_key_from_pem
+#define SpdmAsymSign                       libspdm_asym_sign
+#define SpdmAsymSignHash                   libspdm_asym_sign_hash
 
-SPDM_RETURN SpdmInitContext (VOID *Context);
+#define SpdmInitConnection                 libspdm_init_connection
+#define SpdmGetDigest                      libspdm_get_digest
+#define SpdmGetCertificate                 libspdm_get_certificate
+#define SpdmGetCertificateEx               libspdm_get_certificate_ex
+#define SpdmChallenge                      libspdm_challenge
+#define SpdmChallengeEx                    libspdm_challenge_ex
+#define SpdmGetMeasurement                 libspdm_get_measurement
+#define SpdmGetMeasurementEx               libspdm_get_measurement_ex
+#define SpdmStartSession                   libspdm_start_session
+#define SpdmStopSession                    libspdm_stop_session
+#define SpdmSendReceiveData                libspdm_send_receive_data
+#define SpdmRegisterGetResponseFunc        libspdm_register_get_response_func
+#define SpdmProcessRequest                 libspdm_process_request
+#define SpdmBuildResponse                  libspdm_build_response
+#define SpdmGenerateErrorResponse          libspdm_generate_error_response
+#define SpdmTransportPciDoeEncodeMessage   libspdm_transport_pci_doe_encode_message
+#define SpdmTransportPciDoeDecodeMessage   libspdm_transport_pci_doe_decode_message
+#define SpdmTransportPciDoeGetHeaderSize   libspdm_transport_pci_doe_get_header_size
 
-UINTN SpdmGetContextSize (VOID);
+#define SpdmMeasurementCollectionFunc      libspdm_measurement_collection
+#define SpdmRequesterDataSignFunc          libspdm_requester_data_sign
+#define SpdmResponderDataSignFunc          libspdm_responder_data_sign
+#define SpdmGenerateMeasurementSummaryHash libspdm_generate_measurement_summary_hash
+#define SpdmPskMasterSecretHkdfExpandFunc  libspdm_psk_master_secret_hkdf_expand
+#define SpdmPskHandshakeSecretHkdfExpandFunc  libspdm_psk_handshake_secret_hkdf_expand
 
-VOID SpdmRegisterDeviceIoFunc (
-    VOID *Context, libspdm_device_send_message_func SendMessage,
-    libspdm_device_receive_message_func ReceiveMessage);
-
-VOID SpdmRegisterTransportLayerFunc (
-    VOID *Context,
-    libspdm_transport_encode_message_func TransportEncodeMessage,
-    libspdm_transport_decode_message_func TransportDecodeMessage,
-    libspdm_transport_get_header_size_func TransportGetHeaderSize);
-
-UINTN SpdmGetSizeofRequiredScratchBuffer (VOID *Context);
-
-VOID SpdmRegisterDeviceBufferFunc (
-    VOID *context,
-    libspdm_device_acquire_sender_buffer_func AcquireSenderBuffer,
-    libspdm_device_release_sender_buffer_func ReleaseSenderBuffer,
-    libspdm_device_acquire_receiver_buffer_func AcquireReceiverBuffer,
-    libspdm_device_release_receiver_buffer_func ReleaseReceiverBuffer);
-
-VOID SpdmSetScratchBuffer (
-    VOID *Context,
-    VOID *ScratchBuffer,
-    UINTN ScratchBufferSize);
-
-UINT32 SpdmGetHashSize (UINT32 BaseHashAlgo);
-
-BOOLEAN SpdmHashAll (UINT32 BaseHashAlgo, CONST VOID *Data,
-                      UINTN DataSize, UINT8 *HashValue);
-
-UINT32 SpdmGetMeasurementHashSize (UINT32 MeasurementHashAlgo);
-
-BOOLEAN SpdmMeasurementHashAll (UINT32 MeasurementHashAlgo,
-                                  CONST VOID *Data, UINTN DataSize,
-                                  UINT8 *HashValue);
-
-BOOLEAN SpdmHmacAll (UINT32 BaseHashAlgo, CONST VOID *Data,
-                      UINTN DataSize, CONST UINT8 *Key,
-                      UINTN KeySize, UINT8 *HmacValue);
-
-BOOLEAN SpdmHkdfExpand (UINT32 BaseHashAlgo, CONST UINT8 *Prk,
-                         UINTN PrkSize, CONST UINT8 *Info,
-                         UINTN InfoSize, UINT8 *Out, UINTN OutSize);
-
-VOID SpdmAsymFree (UINT32 BaseAsymAlgo, VOID *Context);
-
-BOOLEAN SpdmAsymGetPrivateKeyFromPem (UINT32 BaseAsymAlgo,
-                                           CONST UINT8 *PemData,
-                                           UINTN PemSize,
-                                           CONST CHAR8 *Password,
-                                           VOID **Context);
-
-BOOLEAN SpdmAsymSign (
-    SPDM_VERSION_NUMBER SpdmVersion, UINT8 OpCode,
-    UINT32 BaseAsymAlgo, UINT32 BaseHashAlgo,
-    VOID *Context, CONST UINT8 *Message,
-    UINTN MessageSize, UINT8 *Signature,
-    UINTN *SigSize);
-
-BOOLEAN SpdmAsymSignHash (
-    SPDM_VERSION_NUMBER SpdmVersion, UINT8 OpCode,
-    UINT32 BaseAsymAlgo, UINT32 BaseHashAlgo,
-    VOID *Context, CONST UINT8 *MessageHash,
-    UINTN HashSize, UINT8 *Signature,
-    UINTN *SigSize);
-
-SPDM_RETURN SpdmInitConnection (VOID *Context, BOOLEAN GetVersionOnly);
-
-SPDM_RETURN SpdmGetDigest (VOID *Context, UINT8 *SlotMask, VOID *TotalDigestBuffer);
-
-SPDM_RETURN SpdmGetCertificate (VOID *Context, UINT8 SlotId,
-                                         UINTN *CertChainSize,
-                                         VOID *CertChain);
-
-SPDM_RETURN SpdmGetCertificateEx (VOID *Context, UINT8 SlotId,
-                                            UINTN *CertChainSize,
-                                            VOID *CertChain,
-                                            CONST VOID **TrustAnchor,
-                                            UINTN *TrustAnchorSize);
-
-SPDM_RETURN SpdmChallenge (VOID *Context, UINT8 SlotId,
-                                   UINT8 MeasurementHashType,
-                                   VOID *MeasurementHash,
-                                   UINT8 *SlotMask);
-
-SPDM_RETURN SpdmChallengeEx (VOID *Context, UINT8 SlotId,
-                                   UINT8 MeasurementHashType,
-                                   VOID *MeasurementHash,
-                                   UINT8 *SlotMask,
-                                   CONST VOID *RequesterNonceIn,
-                                   VOID *RequesterNonce,
-                                   VOID *ResponderNonce);
-
-SPDM_RETURN SpdmGetMeasurement (VOID *Context, CONST UINT32 *SessionId,
-                                         UINT8 RequestAttribute,
-                                         UINT8 MeasurementOperation,
-                                         UINT8 SlotIdParam,
-                                         UINT8 *ContentChanged,
-                                         UINT8 *NumberOfBlocks,
-                                         UINT32 *MeasurementRecordLength,
-                                         VOID *MeasurementRecord);
-
-SPDM_RETURN SpdmGetMeasurementEx (VOID *Context, CONST UINT32 *SessionId,
-                                         UINT8 RequestAttribute,
-                                         UINT8 MeasurementOperation,
-                                         UINT8 SlotIdParam,
-                                         UINT8 *ContentChanged,
-                                         UINT8 *NumberOfBlocks,
-                                         UINT32 *MeasurementRecordLength,
-                                         VOID *MeasurementRecord,
-                                         CONST VOID *RequesterNonceIn,
-                                         VOID *RequesterNonce,
-                                         VOID *ResponderNonce);
-
-SPDM_RETURN SpdmStartSession (VOID *Context, BOOLEAN UsePsk,
-                                       UINT8 MeasurementHashType,
-                                       UINT8 SlotId,
-                                       UINT8 SessionPolicy,
-                                       UINT32 *SessionId,
-                                       UINT8 *HeartbeatPeriod,
-                                       VOID *MeasurementHash);
-
-SPDM_RETURN SpdmStopSession (VOID *Context, UINT32 SessionId,
-                                      UINT8 EndSessionAttributes);
-
-SPDM_RETURN SpdmSendReceiveData (VOID *Context, CONST UINT32 *SessionId,
-                                           BOOLEAN IsAppMessage,
-                                           CONST VOID *Request, UINTN RequestSize,
-                                           VOID *Response,
-                                           UINTN *ResponseSize);
-
-VOID SpdmRegisterGetResponseFunc (
-    VOID *Context, libspdm_get_response_func GetResponseFunc);
-
-SPDM_RETURN SpdmProcessRequest (VOID *Context, UINT32 **SessionId,
-                                         BOOLEAN *IsAppMessage,
-                                         UINTN RequestSize, VOID *Request);
-
-SPDM_RETURN SpdmBuildResponse (VOID *Context, CONST UINT32 *SessionId,
-                                        BOOLEAN IsAppMessage,
-                                        UINTN *ResponseSize,
-                                        VOID **Response);
-
-SPDM_RETURN SpdmGenerateErrorResponse (CONST VOID *Context,
-                                                 UINT8 ErrorCode,
-                                                 UINT8 ErrorData,
-                                                 UINTN *ResponseSize,
-                                                 VOID *Response);
-
-SPDM_RETURN SpdmTransportPciDoeEncodeMessage (
-    VOID *SpdmContext, CONST UINT32 *SessionId, BOOLEAN IsAppMessage,
-    BOOLEAN IsRequester, UINTN MessageSize, VOID *Message,
-    UINTN *TransportMessageSize, VOID **TransportMessage);
-
-SPDM_RETURN SpdmTransportPciDoeDecodeMessage (
-    VOID *SpdmContext, UINT32 **SessionId,
-    BOOLEAN *IsAppMessage, BOOLEAN IsRequester,
-    UINTN TransportMessageSize, VOID *TransportMessage,
-    UINTN *MessageSize, VOID **Message);
-
-UINT32 SpdmTransportPciDoeGetHeaderSize (
-    VOID *SpdmContext);
-#endif
+#endif
