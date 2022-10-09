@@ -1,4 +1,4 @@
-/** @file  
+/** @file
   Application for RSA Primitives Validation.
 
 Copyright (c) 2010, Intel Corporation. All rights reserved.<BR>
@@ -16,8 +16,8 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 EFI_STATUS
 TestRsaSsa (
-  IN UINTN KeyBit,
-  IN UINTN HashBit
+  IN UINTN  KeyBit,
+  IN UINTN  HashBit
   )
 {
   VOID     *Rsa;
@@ -28,9 +28,9 @@ TestRsaSsa (
   BOOLEAN  Status;
   UINT64   StartTsc;
   UINT64   EndTsc;
-  UINTN    Iteration = GetIteration();
+  UINTN    Iteration = GetIteration ();
   UINTN    Index;
-  
+
   Rsa = RsaNew ();
   if (Rsa == NULL) {
     goto Error;
@@ -40,28 +40,32 @@ TestRsaSsa (
   if (!Status) {
     goto Error;
   }
-  
+
   Print (L"RSA-SSA%d/SHA%d Signature Generation   ... ", KeyBit, HashBit);
   StartTsc = AsmReadTsc ();
   for (Index = 0; Index < Iteration; Index++) {
-    Status  = RsaPkcs1Sign (Rsa, HashValue, HashSize, Signature, &SigSize);
+    Status = RsaPkcs1Sign (Rsa, HashValue, HashSize, Signature, &SigSize);
   }
+
   EndTsc = AsmReadTsc ();
   if (!Status) {
     goto Error;
   }
-  Print (L"[Pass] - %duS\n", TscToMicrosecond((EndTsc - StartTsc) / Iteration));
-  
+
+  Print (L"[Pass] - %duS\n", TscToMicrosecond ((EndTsc - StartTsc) / Iteration));
+
   Print (L"RSA-SSA%d/SHA%d Signature Verification ... ", KeyBit, HashBit);
   StartTsc = AsmReadTsc ();
   for (Index = 0; Index < Iteration; Index++) {
     Status = RsaPkcs1Verify (Rsa, HashValue, HashSize, Signature, SigSize);
   }
+
   EndTsc = AsmReadTsc ();
   if (!Status) {
     goto Error;
   }
-  Print (L"[Pass] - %duS\n", TscToMicrosecond((EndTsc - StartTsc) / Iteration));
+
+  Print (L"[Pass] - %duS\n", TscToMicrosecond ((EndTsc - StartTsc) / Iteration));
 
   RsaFree (Rsa);
   return EFI_SUCCESS;
@@ -84,7 +88,7 @@ ValidateCryptRsa (
   )
 {
   Print (L"\nUEFI-OpenSSL RSA Engine Testing: \n");
-  
+
   TestRsaSsa (2048, 256);
   TestRsaSsa (3072, 384);
   TestRsaSsa (4096, 512);

@@ -7,7 +7,7 @@
 #ifndef LIBSPDM_STD_DEF_ALT_H
 #define LIBSPDM_STD_DEF_ALT_H
 
-typedef UINTN   size_t;
+typedef UINTN size_t;
 #define offsetof(type, member)  OFFSET_OF(type,member)
 
 #endif /* LIBSPDM_STDDEF_ALT */

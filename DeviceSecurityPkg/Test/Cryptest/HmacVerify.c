@@ -1,4 +1,4 @@
-/** @file  
+/** @file
   Application for HMAC Primitives Validation.
 
 Copyright (c) 2010 - 2016, Intel Corporation. All rights reserved.<BR>
@@ -17,28 +17,28 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 //
 // Max Known Digest Size is SHA512 Output (64 bytes) by far
 //
-#define MAX_DIGEST_SIZE    64
+#define MAX_DIGEST_SIZE  64
 
 //
 // Data string for HMAC validation
 //
-GLOBAL_REMOVE_IF_UNREFERENCED CONST CHAR8 *HmacData = "Hi There";
+GLOBAL_REMOVE_IF_UNREFERENCED CONST CHAR8  *HmacData = "Hi There";
 
 //
 // Key value for HMAC-SHA-256 validation. (From "4. Test Vectors" of IETF RFC4231)
 //
-GLOBAL_REMOVE_IF_UNREFERENCED CONST UINT8 HmacSha256Key[20] = {
+GLOBAL_REMOVE_IF_UNREFERENCED CONST UINT8  HmacSha256Key[20] = {
   0x0b, 0x0b, 0x0b, 0x0b, 0x0b, 0x0b, 0x0b, 0x0b, 0x0b, 0x0b, 0x0b, 0x0b, 0x0b, 0x0b, 0x0b, 0x0b,
   0x0b, 0x0b, 0x0b, 0x0b
-  };
+};
 
 //
 // Result for HMAC-SHA-256 ("Hi There"). (From "4. Test Vectors" of IETF RFC4231)
 //
-GLOBAL_REMOVE_IF_UNREFERENCED CONST UINT8 HmacSha256Digest[] = {
+GLOBAL_REMOVE_IF_UNREFERENCED CONST UINT8  HmacSha256Digest[] = {
   0xb0, 0x34, 0x4c, 0x61, 0xd8, 0xdb, 0x38, 0x53, 0x5c, 0xa8, 0xaf, 0xce, 0xaf, 0x0b, 0xf1, 0x2b,
   0x88, 0x1d, 0xc2, 0x00, 0xc9, 0x83, 0x3d, 0xa7, 0x26, 0xe9, 0x37, 0x6c, 0x2e, 0x32, 0xcf, 0xf7
-  };
+};
 
 /**
   Validate UEFI-OpenSSL Message Authentication Codes Interfaces.
@@ -66,21 +66,21 @@ ValidateCryptHmac (
   HmacCtx = HmacSha256New ();
 
   Print (L"Init... ");
-  Status  = HmacSha256SetKey (HmacCtx, HmacSha256Key, sizeof (HmacSha256Key));
+  Status = HmacSha256SetKey (HmacCtx, HmacSha256Key, sizeof (HmacSha256Key));
   if (!Status) {
     Print (L"[Fail]");
     return EFI_ABORTED;
   }
 
   Print (L"Update... ");
-  Status  = HmacSha256Update (HmacCtx, HmacData, 8);
+  Status = HmacSha256Update (HmacCtx, HmacData, 8);
   if (!Status) {
     Print (L"[Fail]");
     return EFI_ABORTED;
   }
 
   Print (L"Finalize... ");
-  Status  = HmacSha256Final (HmacCtx, Digest);
+  Status = HmacSha256Final (HmacCtx, Digest);
   if (!Status) {
     Print (L"[Fail]");
     return EFI_ABORTED;

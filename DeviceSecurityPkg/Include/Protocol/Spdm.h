@@ -31,7 +31,7 @@ typedef struct _SPDM_PROTOCOL SPDM_PROTOCOL;
 **/
 typedef
 RETURN_STATUS
-(EFIAPI *SPDM_SET_DATA_FUNC) (
+(EFIAPI *SPDM_SET_DATA_FUNC)(
   IN     SPDM_PROTOCOL             *This,
   IN     SPDM_DATA_TYPE            DataType,
   IN     SPDM_DATA_PARAMETER       *Parameter,
@@ -61,7 +61,7 @@ RETURN_STATUS
 **/
 typedef
 RETURN_STATUS
-(EFIAPI *SPDM_GET_DATA_FUNC) (
+(EFIAPI *SPDM_GET_DATA_FUNC)(
   IN     SPDM_PROTOCOL             *This,
   IN     SPDM_DATA_TYPE            DataType,
   IN     SPDM_DATA_PARAMETER       *Parameter,
@@ -78,14 +78,14 @@ RETURN_STATUS
 **/
 typedef
 RETURN_STATUS
-(EFIAPI *SPDM_START_SESSION_FUNC) (
+(EFIAPI *SPDM_START_SESSION_FUNC)(
   IN     SPDM_PROTOCOL        *This,
   IN     BOOLEAN              UsePsk,
   IN     UINT8                MeasurementHashType,
   IN     UINT8                SlotNum,
-     OUT UINT32               *SessionId,
-     OUT UINT8                *HeartbeatPeriod,
-     OUT VOID                 *MeasurementHash
+  OUT UINT32               *SessionId,
+  OUT UINT8                *HeartbeatPeriod,
+  OUT VOID                 *MeasurementHash
   );
 
 /**
@@ -97,7 +97,7 @@ RETURN_STATUS
 **/
 typedef
 RETURN_STATUS
-(EFIAPI *SPDM_STOP_SESSION_FUNC) (
+(EFIAPI *SPDM_STOP_SESSION_FUNC)(
   IN     SPDM_PROTOCOL        *This,
   IN     UINT32               SessionId,
   IN     UINT8                EndSessionAttributes
@@ -110,7 +110,7 @@ RETURN_STATUS
 */
 typedef
 RETURN_STATUS
-(EFIAPI *SPDM_INIT_CONNECTION_FUNC) (
+(EFIAPI *SPDM_INIT_CONNECTION_FUNC)(
   IN     SPDM_PROTOCOL        *This
   );
 
@@ -121,10 +121,10 @@ RETURN_STATUS
 */
 typedef
 RETURN_STATUS
-(EFIAPI *SPDM_GET_DIGEST_FUNC) (
+(EFIAPI *SPDM_GET_DIGEST_FUNC)(
   IN     SPDM_PROTOCOL        *This,
-     OUT UINT8                *SlotMask,
-     OUT VOID                 *TotalDigestBuffer
+  OUT UINT8                *SlotMask,
+  OUT VOID                 *TotalDigestBuffer
   );
 
 /*
@@ -132,11 +132,11 @@ RETURN_STATUS
 */
 typedef
 RETURN_STATUS
-(EFIAPI *SPDM_GET_CERTIFICATE_FUNC) (
+(EFIAPI *SPDM_GET_CERTIFICATE_FUNC)(
   IN     SPDM_PROTOCOL        *This,
   IN     UINT8                SlotNum,
   IN OUT UINTN                *CertChainSize,
-     OUT VOID                 *CertChain
+  OUT VOID                 *CertChain
   );
 
 /*
@@ -144,11 +144,11 @@ RETURN_STATUS
 */
 typedef
 RETURN_STATUS
-(EFIAPI *SPDM_CHALLENGE_FUNC) (
+(EFIAPI *SPDM_CHALLENGE_FUNC)(
   IN     SPDM_PROTOCOL        *This,
   IN     UINT8                SlotNum,
   IN     UINT8                MeasurementHashType,
-     OUT VOID                 *MeasurementHash
+  OUT VOID                 *MeasurementHash
   );
 
 /*
@@ -156,14 +156,14 @@ RETURN_STATUS
 */
 typedef
 RETURN_STATUS
-(EFIAPI *SPDM_GET_MEASUREMENT_FUNC) (
+(EFIAPI *SPDM_GET_MEASUREMENT_FUNC)(
   IN     SPDM_PROTOCOL        *This,
   IN     UINT8                RequestAttribute,
   IN     UINT8                MeasurementOperation,
   IN     UINT8                SlotNum,
-     OUT UINT8                *NumberOfBlocks,
+  OUT UINT8                *NumberOfBlocks,
   IN OUT UINT32               *MeasurementRecordLength,
-     OUT VOID                 *MeasurementRecord
+  OUT VOID                 *MeasurementRecord
   );
 
 /*
@@ -171,7 +171,7 @@ RETURN_STATUS
 */
 typedef
 RETURN_STATUS
-(EFIAPI *SPDM_SEND_RECEIVE_DATA_FUNC) (
+(EFIAPI *SPDM_SEND_RECEIVE_DATA_FUNC)(
   IN     SPDM_PROTOCOL        *This,
   IN     UINT32               *SessionId,
   IN     BOOLEAN              IsAppMessage,
@@ -182,16 +182,16 @@ RETURN_STATUS
   );
 
 struct _SPDM_PROTOCOL {
-  SPDM_SET_DATA_FUNC                   SetData;
-  SPDM_GET_DATA_FUNC                   GetData;
-  SPDM_INIT_CONNECTION_FUNC            InitConnection;
-  SPDM_GET_DIGEST_FUNC                 GetDigest;
-  SPDM_GET_CERTIFICATE_FUNC            GetCertificate;
-  SPDM_CHALLENGE_FUNC                  Challenge;
-  SPDM_GET_MEASUREMENT_FUNC            GetMeasurement;
-  SPDM_START_SESSION_FUNC              StartSession;
-  SPDM_STOP_SESSION_FUNC               StopSession;
-  SPDM_SEND_RECEIVE_DATA_FUNC          SendReceiveData;
+  SPDM_SET_DATA_FUNC             SetData;
+  SPDM_GET_DATA_FUNC             GetData;
+  SPDM_INIT_CONNECTION_FUNC      InitConnection;
+  SPDM_GET_DIGEST_FUNC           GetDigest;
+  SPDM_GET_CERTIFICATE_FUNC      GetCertificate;
+  SPDM_CHALLENGE_FUNC            Challenge;
+  SPDM_GET_MEASUREMENT_FUNC      GetMeasurement;
+  SPDM_START_SESSION_FUNC        StartSession;
+  SPDM_STOP_SESSION_FUNC         StopSession;
+  SPDM_SEND_RECEIVE_DATA_FUNC    SendReceiveData;
 };
 
 #endif

@@ -11,10 +11,10 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 SPDM_RETURN
 SpdmDeviceSendMessage (
-  IN     VOID                                   *SpdmContext,
-  IN     UINTN                                  MessageSize,
-  IN     CONST VOID                             *Message,
-  IN     UINT64                                 Timeout
+  IN     VOID        *SpdmContext,
+  IN     UINTN       MessageSize,
+  IN     CONST VOID  *Message,
+  IN     UINT64      Timeout
   )
 {
   return LIBSPDM_STATUS_SUCCESS;
@@ -22,10 +22,10 @@ SpdmDeviceSendMessage (
 
 SPDM_RETURN
 SpdmDeviceReceiveMessage (
-  IN     VOID                                   *SpdmContext,
-  IN OUT UINTN                                  *MessageSize,
-  IN OUT VOID                                   **Message,
-  IN     UINT64                                 Timeout
+  IN     VOID    *SpdmContext,
+  IN OUT UINTN   *MessageSize,
+  IN OUT VOID    **Message,
+  IN     UINT64  Timeout
   )
 {
   return LIBSPDM_STATUS_SUCCESS;

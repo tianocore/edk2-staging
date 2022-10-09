@@ -21,13 +21,13 @@
 #include <SpdmPciDoeStub.h>
 #include <hal/library/SpdmLibStub.h>
 
-#define SPDM_TIMEOUT 1000000    // 1 second
+#define SPDM_TIMEOUT  1000000   // 1 second
 
 // Template for SPDM private data structure.
-// The pointer to PciIo protocol interface and PCIe DOE capability 
+// The pointer to PciIo protocol interface and PCIe DOE capability
 // structure offset are assigned dynamically.
 //
-SPDM_PRIVATE_DATA   gSpdmPrivateDataTemplate = {
+SPDM_PRIVATE_DATA  gSpdmPrivateDataTemplate = {
   SPDM_PRIVATE_DATA_SIGNATURE,
   {
     SpdmIoSendRequest,
@@ -37,20 +37,20 @@ SPDM_PRIVATE_DATA   gSpdmPrivateDataTemplate = {
 
 EFI_STATUS
 LocatePcieDoeCapStructure (
-  IN     EFI_PCI_IO_PROTOCOL    *PciIo,
-  IN OUT UINT32                 *Offset
+  IN     EFI_PCI_IO_PROTOCOL  *PciIo,
+  IN OUT UINT32               *Offset
   )
 {
-  EFI_STATUS        Status;
-  UINT8             CapPtr;
-  UINT16            CapHeader;
-  UINT16            ExtendedCapPtr;
-  UINT32            ExtendedCapHeader;
+  EFI_STATUS  Status;
+  UINT8       CapPtr;
+  UINT16      CapHeader;
+  UINT16      ExtendedCapPtr;
+  UINT32      ExtendedCapHeader;
 
   //
   // Locate Pcie Capability structure
   //
-  DEBUG((DEBUG_ERROR, "[LocatePcieDoeCapStructure] Locate PCIe Cap structure ...\n"));
+  DEBUG ((DEBUG_ERROR, "[LocatePcieDoeCapStructure] Locate PCIe Cap structure ...\n"));
 
   Status = PciIo->Pci.Read (
                         PciIo,
@@ -59,7 +59,7 @@ LocatePcieDoeCapStructure (
                         1,
                         &CapPtr
                         );
-  if (EFI_ERROR(Status) || CapPtr == MAX_UINT8) {
+  if (EFI_ERROR (Status) || (CapPtr == MAX_UINT8)) {
     return EFI_UNSUPPORTED;
   }
 
@@ -71,7 +71,7 @@ LocatePcieDoeCapStructure (
                           1,
                           &CapHeader
                           );
-    if (EFI_ERROR(Status) || CapHeader == MAX_UINT16) {
+    if (EFI_ERROR (Status) || (CapHeader == MAX_UINT16)) {
       CapPtr = 0;
       break;
     }
@@ -87,8 +87,8 @@ LocatePcieDoeCapStructure (
     return EFI_UNSUPPORTED;
   }
 
-  DEBUG((DEBUG_ERROR, "[LocatePcieDoeCapStructure] PCIe Cap structure is located\n"));
-  DEBUG((DEBUG_ERROR, "[LocatePcieDoeCapStructure] Locate PCIe DOE Cap structure ...\n"));
+  DEBUG ((DEBUG_ERROR, "[LocatePcieDoeCapStructure] PCIe Cap structure is located\n"));
+  DEBUG ((DEBUG_ERROR, "[LocatePcieDoeCapStructure] Locate PCIe DOE Cap structure ...\n"));
 
   //
   // Locate Doe Extended Capability structure
@@ -103,7 +103,7 @@ LocatePcieDoeCapStructure (
                           1,
                           &ExtendedCapHeader
                           );
-    if (EFI_ERROR(Status) || ExtendedCapHeader == MAX_UINT32) {
+    if (EFI_ERROR (Status) || (ExtendedCapHeader == MAX_UINT32)) {
       ExtendedCapPtr = 0;
       break;
     }
@@ -117,129 +117,129 @@ LocatePcieDoeCapStructure (
   }
 
   if (ExtendedCapPtr == 0) {
-    DEBUG((DEBUG_ERROR, "[LocatePcieDoeCapStructure] PCIe DOE Cap structure is not located.\n"));
+    DEBUG ((DEBUG_ERROR, "[LocatePcieDoeCapStructure] PCIe DOE Cap structure is not located.\n"));
     return EFI_UNSUPPORTED;
   } else {
-    DEBUG((DEBUG_ERROR, "[LocatePcieDoeCapStructure] PCIe DOE Cap structure is located. Offset = 0x%x\n", *Offset));
+    DEBUG ((DEBUG_ERROR, "[LocatePcieDoeCapStructure] PCIe DOE Cap structure is located. Offset = 0x%x\n", *Offset));
     return EFI_SUCCESS;
   }
 }
 
 VOID
 PcieDoeControlRead32 (
-  IN     SPDM_PRIVATE_DATA      *Private,
-  IN OUT UINT32                 *Buffer
+  IN     SPDM_PRIVATE_DATA  *Private,
+  IN OUT UINT32             *Buffer
   )
 {
   Private->PciIo->Pci.Read (
-                    Private->PciIo,
-                    EfiPciIoWidthUint32, 
-                    Private->DoeCapabilityOffset + PCI_EXPRESS_REG_DOE_CONTROL_OFFSET,
-                    1, 
-                    Buffer
-                    );
+                        Private->PciIo,
+                        EfiPciIoWidthUint32,
+                        Private->DoeCapabilityOffset + PCI_EXPRESS_REG_DOE_CONTROL_OFFSET,
+                        1,
+                        Buffer
+                        );
   return;
 }
 
 VOID
 PcieDoeControlWrite32 (
-  IN     SPDM_PRIVATE_DATA      *Private,
-  IN     UINT32                 *Buffer
+  IN     SPDM_PRIVATE_DATA  *Private,
+  IN     UINT32             *Buffer
   )
 {
   Private->PciIo->Pci.Write (
-                    Private->PciIo,
-                    EfiPciIoWidthUint32, 
-                    Private->DoeCapabilityOffset + PCI_EXPRESS_REG_DOE_CONTROL_OFFSET,
-                    1, 
-                    Buffer
-                    );
+                        Private->PciIo,
+                        EfiPciIoWidthUint32,
+                        Private->DoeCapabilityOffset + PCI_EXPRESS_REG_DOE_CONTROL_OFFSET,
+                        1,
+                        Buffer
+                        );
   return;
 }
 
 VOID
 PcieDoeStatusRead32 (
-  IN     SPDM_PRIVATE_DATA      *Private,
-  IN OUT UINT32                 *Buffer
+  IN     SPDM_PRIVATE_DATA  *Private,
+  IN OUT UINT32             *Buffer
   )
 {
   Private->PciIo->Pci.Read (
-                    Private->PciIo,
-                    EfiPciIoWidthUint32, 
-                    Private->DoeCapabilityOffset + PCI_EXPRESS_REG_DOE_STATUS_OFFSET,
-                    1, 
-                    Buffer
-                    );
+                        Private->PciIo,
+                        EfiPciIoWidthUint32,
+                        Private->DoeCapabilityOffset + PCI_EXPRESS_REG_DOE_STATUS_OFFSET,
+                        1,
+                        Buffer
+                        );
   return;
 }
 
 VOID
 PcieDoeWriteMailboxWrite32 (
-  IN     SPDM_PRIVATE_DATA      *Private,
-  IN     UINT32                 *Buffer
+  IN     SPDM_PRIVATE_DATA  *Private,
+  IN     UINT32             *Buffer
   )
 {
   Private->PciIo->Pci.Write (
-                    Private->PciIo,
-                    EfiPciIoWidthUint32, 
-                    Private->DoeCapabilityOffset + PCI_EXPRESS_REG_DOE_WRITE_DATA_MAILBOX_OFFSET,
-                    1, 
-                    Buffer
-                    );
+                        Private->PciIo,
+                        EfiPciIoWidthUint32,
+                        Private->DoeCapabilityOffset + PCI_EXPRESS_REG_DOE_WRITE_DATA_MAILBOX_OFFSET,
+                        1,
+                        Buffer
+                        );
   return;
 }
 
 VOID
 PcieDoeReadMailboxRead32 (
-  IN     SPDM_PRIVATE_DATA      *Private,
-  IN OUT UINT32                 *Buffer
+  IN     SPDM_PRIVATE_DATA  *Private,
+  IN OUT UINT32             *Buffer
   )
 {
   Private->PciIo->Pci.Read (
-                    Private->PciIo,
-                    EfiPciIoWidthUint32, 
-                    Private->DoeCapabilityOffset + PCI_EXPRESS_REG_DOE_READ_DATA_MAILBOX_OFFSET,
-                    1, 
-                    Buffer
-                    );
+                        Private->PciIo,
+                        EfiPciIoWidthUint32,
+                        Private->DoeCapabilityOffset + PCI_EXPRESS_REG_DOE_READ_DATA_MAILBOX_OFFSET,
+                        1,
+                        Buffer
+                        );
   return;
 }
 
 VOID
 PcieDoeReadMailboxWrite32 (
-  IN     SPDM_PRIVATE_DATA      *Private,
-  IN     UINT32                 *Buffer
+  IN     SPDM_PRIVATE_DATA  *Private,
+  IN     UINT32             *Buffer
   )
 {
   Private->PciIo->Pci.Write (
-                    Private->PciIo,
-                    EfiPciIoWidthUint32, 
-                    Private->DoeCapabilityOffset + PCI_EXPRESS_REG_DOE_READ_DATA_MAILBOX_OFFSET,
-                    1, 
-                    Buffer
-                    );
+                        Private->PciIo,
+                        EfiPciIoWidthUint32,
+                        Private->DoeCapabilityOffset + PCI_EXPRESS_REG_DOE_READ_DATA_MAILBOX_OFFSET,
+                        1,
+                        Buffer
+                        );
   return;
 }
 
 SPDM_RETURN
 SpdmIoSendRequest (
-  IN     SPDM_IO_PROTOCOL       *This,
-  IN     UINTN                  RequestSize,
-  IN     CONST VOID             *Request,
-  IN     UINT64                 Timeout
+  IN     SPDM_IO_PROTOCOL  *This,
+  IN     UINTN             RequestSize,
+  IN     CONST VOID        *Request,
+  IN     UINT64            Timeout
   )
 {
-  SPDM_RETURN                   Status;
-  SPDM_PRIVATE_DATA             *SpdmPrivateData = NULL;
-  UINT32                        Index = 0;
-  PCI_EXPRESS_REG_DOE_CONTROL   DoeControl;
-  PCI_EXPRESS_REG_DOE_STATUS    DoeStatus;
-  UINT64                        Delay = 0;
-  UINT32                        DataObjectSize;
-  UINT8                         *DataObjectBuffer;
+  SPDM_RETURN                  Status;
+  SPDM_PRIVATE_DATA            *SpdmPrivateData = NULL;
+  UINT32                       Index            = 0;
+  PCI_EXPRESS_REG_DOE_CONTROL  DoeControl;
+  PCI_EXPRESS_REG_DOE_STATUS   DoeStatus;
+  UINT64                       Delay = 0;
+  UINT32                       DataObjectSize;
+  UINT8                        *DataObjectBuffer;
 
-  DEBUG((DEBUG_ERROR, "[SpdmIoSendRequest] Start ... \n"));
-  DEBUG((DEBUG_ERROR, "[SpdmIoSendRequest] RequestSize = 0x%x \n", RequestSize));
+  DEBUG ((DEBUG_ERROR, "[SpdmIoSendRequest] Start ... \n"));
+  DEBUG ((DEBUG_ERROR, "[SpdmIoSendRequest] RequestSize = 0x%x \n", RequestSize));
 
   if (Request == NULL) {
     return LIBSPDM_STATUS_INVALID_PARAMETER;
@@ -249,17 +249,18 @@ SpdmIoSendRequest (
     return LIBSPDM_STATUS_INVALID_PARAMETER;
   }
 
-  SpdmPrivateData = SPDM_PRIVATE_DATA_FROM_SPDM_IO(This);
+  SpdmPrivateData = SPDM_PRIVATE_DATA_FROM_SPDM_IO (This);
 
-  DataObjectSize = (UINT32)RequestSize;
+  DataObjectSize   = (UINT32)RequestSize;
   DataObjectBuffer = (UINT8 *)Request;
 
-  DEBUG((DEBUG_ERROR, "[SpdmIoSendData] Start ... \n"));
+  DEBUG ((DEBUG_ERROR, "[SpdmIoSendData] Start ... \n"));
 
   if (Timeout == 0) {
     Timeout = SPDM_TIMEOUT;
   }
-  Delay = DivU64x32(Timeout, 30) + 1;
+
+  Delay = DivU64x32 (Timeout, 30) + 1;
 
   do {
     //
@@ -270,32 +271,30 @@ SpdmIoSendRequest (
       //
       // Write the entire data object a DWORD at a time via the DOE Write Data Mailbox register.
       //
-      DEBUG((DEBUG_ERROR, "[SpdmIoSendData] 'DOE Busy' bit is cleared. Start writing Mailbox ...\n"));
+      DEBUG ((DEBUG_ERROR, "[SpdmIoSendData] 'DOE Busy' bit is cleared. Start writing Mailbox ...\n"));
       Index = 0;
       do {
-        PcieDoeWriteMailboxWrite32 (SpdmPrivateData, (UINT32*)(DataObjectBuffer + Index));
-        Index += sizeof(UINT32);
+        PcieDoeWriteMailboxWrite32 (SpdmPrivateData, (UINT32 *)(DataObjectBuffer + Index));
+        Index += sizeof (UINT32);
       } while (Index < DataObjectSize);
 
       //
       // Write 1b to the DOE Go bit.
       //
-      DEBUG((DEBUG_ERROR, "[SpdmIoSendData] Set 'DOE Go' bit, the instance start consuming the data object.\n"));
-      PcieDoeControlRead32(SpdmPrivateData, &DoeControl.Uint32);
+      DEBUG ((DEBUG_ERROR, "[SpdmIoSendData] Set 'DOE Go' bit, the instance start consuming the data object.\n"));
+      PcieDoeControlRead32 (SpdmPrivateData, &DoeControl.Uint32);
       DoeControl.Bits.DoeGo = 1;
-      PcieDoeControlWrite32(SpdmPrivateData, &DoeControl.Uint32);
+      PcieDoeControlWrite32 (SpdmPrivateData, &DoeControl.Uint32);
 
       break;
-
     } else {
       //
       // Stall for 30 microseconds..
       //
-      DEBUG((DEBUG_ERROR, "[SpdmIoSendData] 'DOE Busy' bit is not cleared! Waiting ...\n"));
+      DEBUG ((DEBUG_ERROR, "[SpdmIoSendData] 'DOE Busy' bit is not cleared! Waiting ...\n"));
       gBS->Stall (30);
       Delay--;
     }
-
   } while (Delay != 0);
 
   if (Delay == 0) {
@@ -309,25 +308,25 @@ SpdmIoSendRequest (
 
 SPDM_RETURN
 SpdmIoReceiveResponse (
-  IN     SPDM_IO_PROTOCOL       *This,
-  IN OUT UINTN                  *ResponseSize,
-  IN OUT VOID                   **Response,
-  IN     UINT64                 Timeout
+  IN     SPDM_IO_PROTOCOL  *This,
+  IN OUT UINTN             *ResponseSize,
+  IN OUT VOID              **Response,
+  IN     UINT64            Timeout
   )
 {
-  SPDM_RETURN                   Status;
-  SPDM_PRIVATE_DATA             *SpdmPrivateData = NULL;
-  UINT8                         *ResponseDataObjectBuffer = NULL;
-  UINT32                        ResponseDataObjectSize = 0;
-  UINT32                        DataObjectSize = 0;
-  UINT32                        Index = 0;
-  PCI_DOE_DATA_OBJECT_HEADER    *DataObjectHeader;
-  PCI_EXPRESS_REG_DOE_STATUS    DoeStatus;
-  UINT32                        Data32 = 0;
-  UINT64                        Delay = 0;
+  SPDM_RETURN                 Status;
+  SPDM_PRIVATE_DATA           *SpdmPrivateData          = NULL;
+  UINT8                       *ResponseDataObjectBuffer = NULL;
+  UINT32                      ResponseDataObjectSize    = 0;
+  UINT32                      DataObjectSize            = 0;
+  UINT32                      Index                     = 0;
+  PCI_DOE_DATA_OBJECT_HEADER  *DataObjectHeader;
+  PCI_EXPRESS_REG_DOE_STATUS  DoeStatus;
+  UINT32                      Data32 = 0;
+  UINT64                      Delay  = 0;
 
-  DEBUG((DEBUG_ERROR, "[SpdmIoReceiveResponse] Start ... \n"));
-  DEBUG((DEBUG_ERROR, "[SpdmIoReceiveResponse] ResponseSize = 0x%x \n", *ResponseSize));
+  DEBUG ((DEBUG_ERROR, "[SpdmIoReceiveResponse] Start ... \n"));
+  DEBUG ((DEBUG_ERROR, "[SpdmIoReceiveResponse] ResponseSize = 0x%x \n", *ResponseSize));
 
   if (*Response == NULL) {
     return LIBSPDM_STATUS_INVALID_PARAMETER;
@@ -337,16 +336,17 @@ SpdmIoReceiveResponse (
     return LIBSPDM_STATUS_INVALID_PARAMETER;
   }
 
-  SpdmPrivateData = SPDM_PRIVATE_DATA_FROM_SPDM_IO(This);
+  SpdmPrivateData = SPDM_PRIVATE_DATA_FROM_SPDM_IO (This);
 
   if (Timeout == 0) {
     Timeout = SPDM_TIMEOUT;
   }
-  Delay = DivU64x32(Timeout, 30) + 1;
+
+  Delay = DivU64x32 (Timeout, 30) + 1;
 
   DataObjectHeader = (PCI_DOE_DATA_OBJECT_HEADER *)*Response;
-  if (*ResponseSize < sizeof(PCI_DOE_DATA_OBJECT_HEADER)) {
-    *ResponseSize = sizeof(PCI_DOE_DATA_OBJECT_HEADER);
+  if (*ResponseSize < sizeof (PCI_DOE_DATA_OBJECT_HEADER)) {
+    *ResponseSize = sizeof (PCI_DOE_DATA_OBJECT_HEADER);
     return LIBSPDM_STATUS_BUFFER_TOO_SMALL;
   }
 
@@ -357,63 +357,60 @@ SpdmIoReceiveResponse (
     PcieDoeStatusRead32 (SpdmPrivateData, &DoeStatus.Uint32);
 
     if (DoeStatus.Bits.DataObjectReady == 1) {
-      DEBUG((DEBUG_ERROR, "[SpdmIoReceiveResponse] 'Data Object Ready' bit is set. Start reading Mailbox ...\n"));
+      DEBUG ((DEBUG_ERROR, "[SpdmIoReceiveResponse] 'Data Object Ready' bit is set. Start reading Mailbox ...\n"));
 
       //
       // Get DataObjectHeader1.
       //
-      PcieDoeReadMailboxRead32(SpdmPrivateData, (UINT32*)*Response);
+      PcieDoeReadMailboxRead32 (SpdmPrivateData, (UINT32 *)*Response);
       //
       // Write to the DOE Read Data Mailbox to indicate a successful read.
       //
-      PcieDoeReadMailboxWrite32(SpdmPrivateData, &Data32);
+      PcieDoeReadMailboxWrite32 (SpdmPrivateData, &Data32);
 
       //
       // Get DataObjectHeader2.
       //
-      PcieDoeReadMailboxRead32(SpdmPrivateData, (UINT32*)*Response + 1);
+      PcieDoeReadMailboxRead32 (SpdmPrivateData, (UINT32 *)*Response + 1);
       //
       // Write to the DOE Read Data Mailbox to indicate a successful read.
       //
-      PcieDoeReadMailboxWrite32(SpdmPrivateData, &Data32);
+      PcieDoeReadMailboxWrite32 (SpdmPrivateData, &Data32);
 
-      DataObjectSize = DataObjectHeader->length * sizeof(UINT32);
-      DEBUG((DEBUG_ERROR, "[SpdmIoReceiveResponse] DataObjectSize = 0x%x\n", DataObjectSize));
+      DataObjectSize = DataObjectHeader->length * sizeof (UINT32);
+      DEBUG ((DEBUG_ERROR, "[SpdmIoReceiveResponse] DataObjectSize = 0x%x\n", DataObjectSize));
 
       if (DataObjectSize > *ResponseSize) {
         *ResponseSize = DataObjectSize;
         return LIBSPDM_STATUS_BUFFER_TOO_SMALL;
       }
 
-      ResponseDataObjectSize = DataObjectSize - sizeof(PCI_DOE_DATA_OBJECT_HEADER);
-      ResponseDataObjectBuffer = (UINT8 *)*Response + sizeof(PCI_DOE_DATA_OBJECT_HEADER);
-      Index = 0;
+      ResponseDataObjectSize   = DataObjectSize - sizeof (PCI_DOE_DATA_OBJECT_HEADER);
+      ResponseDataObjectBuffer = (UINT8 *)*Response + sizeof (PCI_DOE_DATA_OBJECT_HEADER);
+      Index                    = 0;
       do {
         //
         // Read data from the DOE Read Data Mailbox and save it.
         //
-        PcieDoeReadMailboxRead32(SpdmPrivateData, (UINT32*)(ResponseDataObjectBuffer + Index));
-        Index += sizeof(UINT32);
+        PcieDoeReadMailboxRead32 (SpdmPrivateData, (UINT32 *)(ResponseDataObjectBuffer + Index));
+        Index += sizeof (UINT32);
         //
         // Write to the DOE Read Data Mailbox to indicate a successful read.
         //
-        PcieDoeReadMailboxWrite32(SpdmPrivateData, &Data32);
-
+        PcieDoeReadMailboxWrite32 (SpdmPrivateData, &Data32);
       } while (Index < ResponseDataObjectSize);
 
       *ResponseSize = DataObjectSize;
 
       break;
-
     } else {
       //
       // Stall for 30 microseconds..
       //
-      DEBUG((DEBUG_ERROR, "[SpdmIoReceiveResponse] 'Data Object Ready' bit is not set! Waiting ...\n"));
+      DEBUG ((DEBUG_ERROR, "[SpdmIoReceiveResponse] 'Data Object Ready' bit is not set! Waiting ...\n"));
       gBS->Stall (30);
       Delay--;
     }
-
   } while (Delay != 0);
 
   if (Delay == 0) {
@@ -432,52 +429,52 @@ MainEntryPoint (
   IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
-  EFI_STATUS                   Status;
-  EFI_HANDLE                   Handle;
-  UINTN                        BufferSize;
-  EFI_PCI_IO_PROTOCOL          *PciIo = NULL;
-  UINT32                       DoeCapOffset = 0;
-  SPDM_PRIVATE_DATA            *SpdmPrivateData = NULL;
+  EFI_STATUS           Status;
+  EFI_HANDLE           Handle;
+  UINTN                BufferSize;
+  EFI_PCI_IO_PROTOCOL  *PciIo           = NULL;
+  UINT32               DoeCapOffset     = 0;
+  SPDM_PRIVATE_DATA    *SpdmPrivateData = NULL;
 
-  DEBUG((DEBUG_ERROR, "[SpdmPciDoeStub] Start ... \n"));
+  DEBUG ((DEBUG_ERROR, "[SpdmPciDoeStub] Start ... \n"));
 
   //
   // Locate EFI_PCI_IO_PROTOCOL.
   //
-  BufferSize = sizeof(Handle);
-  Status = gBS->LocateHandle (
-                  ByProtocol,
-                  &gEdkiiDeviceIdentifierTypePciGuid,
-                  NULL,
-                  &BufferSize,
-                  &Handle
-                  );
-  DEBUG((DEBUG_ERROR, "[SpdmPciDoeStub] LocateHandle (ByProtocol DeviceIdTypePci) - %r  (BufferSize = 0x%x)\n", Status, BufferSize));
-  ASSERT_EFI_ERROR(Status);
+  BufferSize = sizeof (Handle);
+  Status     = gBS->LocateHandle (
+                      ByProtocol,
+                      &gEdkiiDeviceIdentifierTypePciGuid,
+                      NULL,
+                      &BufferSize,
+                      &Handle
+                      );
+  DEBUG ((DEBUG_ERROR, "[SpdmPciDoeStub] LocateHandle (ByProtocol DeviceIdTypePci) - %r  (BufferSize = 0x%x)\n", Status, BufferSize));
+  ASSERT_EFI_ERROR (Status);
 
   Status = gBS->HandleProtocol (
                   Handle,
                   &gEdkiiDeviceIdentifierTypePciGuid,
                   (VOID **)&PciIo
                   );
-  DEBUG((DEBUG_ERROR, "[SpdmPciDoeStub] HandleProtocol (DeviceIdTypePci) - %r\n", Status));
-  ASSERT_EFI_ERROR(Status);
+  DEBUG ((DEBUG_ERROR, "[SpdmPciDoeStub] HandleProtocol (DeviceIdTypePci) - %r\n", Status));
+  ASSERT_EFI_ERROR (Status);
 
   //
   // Locate PCIe DOE Capability.
   //
   Status = LocatePcieDoeCapStructure (PciIo, &DoeCapOffset);
-  if (EFI_ERROR(Status)) {
+  if (EFI_ERROR (Status)) {
     return Status;
   }
 
   //
   // Create and initial SPDM_PRIVATE_DATA.
   //
-  SpdmPrivateData = AllocateCopyPool(sizeof(*SpdmPrivateData), &gSpdmPrivateDataTemplate);
-  ASSERT(SpdmPrivateData != NULL);
+  SpdmPrivateData = AllocateCopyPool (sizeof (*SpdmPrivateData), &gSpdmPrivateDataTemplate);
+  ASSERT (SpdmPrivateData != NULL);
   SpdmPrivateData->DoeCapabilityOffset = DoeCapOffset;
-  SpdmPrivateData->PciIo = PciIo;
+  SpdmPrivateData->PciIo               = PciIo;
 
   Handle = NULL;
   Status = gBS->InstallProtocolInterface (
@@ -486,7 +483,7 @@ MainEntryPoint (
                   EFI_NATIVE_INTERFACE,
                   &SpdmPrivateData->SpdmIo
                   );
-  DEBUG((DEBUG_ERROR, "[SpdmPciDoeStub] InstallProtocolInterface (Spdm) - %r\n", Status));
+  DEBUG ((DEBUG_ERROR, "[SpdmPciDoeStub] InstallProtocolInterface (Spdm) - %r\n", Status));
 
   return Status;
 }

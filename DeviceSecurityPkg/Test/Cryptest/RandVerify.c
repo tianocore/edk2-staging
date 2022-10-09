@@ -1,4 +1,4 @@
-/** @file  
+/** @file
   Application for Pseudorandom Number Generator Validation.
 
 Copyright (c) 2010, Intel Corporation. All rights reserved.<BR>
@@ -47,7 +47,7 @@ ValidateCryptPrng (
     return EFI_ABORTED;
   }
 
-  for (Index = 0; Index < 10; Index ++) {
+  for (Index = 0; Index < 10; Index++) {
     Status = RandomBytes (RandomBuffer, RANDOM_NUMBER_SIZE);
     if (!Status) {
       Print (L"[Fail]");
@@ -65,5 +65,4 @@ ValidateCryptPrng (
   Print (L"[Pass]\n");
 
   return EFI_SUCCESS;
-
 }
