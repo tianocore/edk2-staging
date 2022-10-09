@@ -6,7 +6,6 @@
 
 **/
 
-
 #ifndef __EDKII_DEVICE_AUTHENTICATION_GUID_H__
 #define __EDKII_DEVICE_AUTHENTICATION_GUID_H__
 
@@ -15,7 +14,7 @@
 
   The content is UINT8.
 **/
-#define EDKII_DEVICE_AUTH_BOOT    L"devAuthBoot"
+#define EDKII_DEVICE_AUTH_BOOT  L"devAuthBoot"
 
 /**
   This is a signature database for device authentication, instead of image authentication.
@@ -24,9 +23,9 @@
 **/
 #define EDKII_DEVICE_SIGNATURE_DATABASE_GUID \
   {0xb9c2b4f4, 0xbf5f, 0x462d, 0x8a, 0xdf, 0xc5, 0xc7, 0xa, 0xc3, 0x5d, 0xad}
-#define EDKII_DEVICE_SECURITY_DATABASE    L"devdb"
+#define EDKII_DEVICE_SECURITY_DATABASE  L"devdb"
 
-extern EFI_GUID gEdkiiDeviceSignatureDatabaseGuid;
+extern EFI_GUID  gEdkiiDeviceSignatureDatabaseGuid;
 
 /**
   Signature Database:

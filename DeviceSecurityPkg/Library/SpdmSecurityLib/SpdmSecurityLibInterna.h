@@ -41,26 +41,26 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #define SPDM_DEVICE_CONTEXT_SIGNATURE  SIGNATURE_32 ('S', 'P', 'D', 'C')
 
 typedef struct {
-  UINT32                                          Signature;
+  UINT32                      Signature;
   // UEFI Context
-  EDKII_DEVICE_IDENTIFIER                         DeviceId;
-  BOOLEAN                                         IsEmbeddedDevice;
-  EFI_DEVICE_PATH_PROTOCOL                        *DevicePath;
-  VOID                                            *DeviceIo;
-  UINT64                                          DeviceUID;
+  EDKII_DEVICE_IDENTIFIER     DeviceId;
+  BOOLEAN                     IsEmbeddedDevice;
+  EFI_DEVICE_PATH_PROTOCOL    *DevicePath;
+  VOID                        *DeviceIo;
+  UINT64                      DeviceUID;
   // SPDM Context
-  UINTN                                           SpdmContextSize;
-  VOID                                            *SpdmContext;
-  UINTN                                           ScratchBufferSize;
-  VOID                                            *ScratchBuffer;
-  UINT8                                           SpdmVersion;
-  VOID                                            *SpdmIoProtocol;
+  UINTN                       SpdmContextSize;
+  VOID                        *SpdmContext;
+  UINTN                       ScratchBufferSize;
+  VOID                        *ScratchBuffer;
+  UINT8                       SpdmVersion;
+  VOID                        *SpdmIoProtocol;
 } SPDM_DEVICE_CONTEXT;
 
 typedef struct {
-  UINTN                        Signature;
-  LIST_ENTRY                   Link;
-  SPDM_DEVICE_CONTEXT         *SpdmDeviceContext;
+  UINTN                  Signature;
+  LIST_ENTRY             Link;
+  SPDM_DEVICE_CONTEXT    *SpdmDeviceContext;
 } SPDM_DEVICE_CONTEXT_INSTANCE;
 
 #define SPDM_DEVICE_CONTEXT_INSTANCE_SIGNATURE  SIGNATURE_32 ('S', 'D', 'C', 'S')
@@ -68,17 +68,17 @@ typedef struct {
 
 VOID *
 GetSpdmIoProtocolViaSpdmContext (
-  IN VOID *SpdmContext
+  IN VOID  *SpdmContext
   );
 
 SPDM_DEVICE_CONTEXT *
 CreateSpdmDeviceContext (
-  IN EDKII_SPDM_DEVICE_INFO         *SpdmDeviceInfo
+  IN EDKII_SPDM_DEVICE_INFO  *SpdmDeviceInfo
   );
 
 VOID
 DestroySpdmDeviceContext (
-  IN SPDM_DEVICE_CONTEXT         *SpdmDeviceContext
+  IN SPDM_DEVICE_CONTEXT  *SpdmDeviceContext
   );
 
 /**
@@ -124,13 +124,13 @@ CreateDeviceMeasurementContext (
 
 /**
   This function executes SPDM measurement and extend to TPM.
-  
+
   @param[in]  SpdmDeviceContext            The SPDM context for the device.
 **/
 EFI_STATUS
 DoDeviceMeasurement (
-  IN  SPDM_DEVICE_CONTEXT         *SpdmDeviceContext,
-  IN  BOOLEAN                     IsAuthenticated
+  IN  SPDM_DEVICE_CONTEXT  *SpdmDeviceContext,
+  IN  BOOLEAN              IsAuthenticated
   );
 
 /**
@@ -140,7 +140,7 @@ DoDeviceMeasurement (
 **/
 EFI_STATUS
 DoDeviceAuthentication (
-  IN  SPDM_DEVICE_CONTEXT         *SpdmDeviceContext
+  IN  SPDM_DEVICE_CONTEXT  *SpdmDeviceContext
   );
 
 /**
@@ -149,6 +149,10 @@ DoDeviceAuthentication (
  * @param  data  raw data
  * @param  size  raw data size
  **/
-VOID InternalDumpData(CONST UINT8 *Data, UINTN Size);
+VOID
+InternalDumpData (
+  CONST UINT8  *Data,
+  UINTN        Size
+  );
 
 #endif

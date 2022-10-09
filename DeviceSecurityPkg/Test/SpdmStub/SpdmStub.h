@@ -31,19 +31,18 @@
 #include <Protocol/Spdm.h>
 #include <Protocol/SpdmTest.h>
 
-
 typedef struct {
-  UINTN                                           Signature;
-  EFI_HANDLE                                      SpdmHandle;
-  SPDM_IO_PROTOCOL                                SpdmIoProtocol;
-  SPDM_TEST_PROTOCOL                              SpdmTestProtocol;
-  SPDM_TEST_PROCESS_PACKET_CALLBACK               ProcessPacketCallback;
-  VOID                                            *SpdmContext;
+  UINTN                                Signature;
+  EFI_HANDLE                           SpdmHandle;
+  SPDM_IO_PROTOCOL                     SpdmIoProtocol;
+  SPDM_TEST_PROTOCOL                   SpdmTestProtocol;
+  SPDM_TEST_PROCESS_PACKET_CALLBACK    ProcessPacketCallback;
+  VOID                                 *SpdmContext;
 } SPDM_TEST_DEVICE_CONTEXT;
 
 #define SPDM_TEST_DEVICE_CONTEXT_SIGNATURE  SIGNATURE_32 ('S', 'T', 'D', 'C')
 #define SPDM_TEST_DEVICE_CONTEXT_FROM_SPDM_TEST_PROTOCOL(a)  CR (a, SPDM_TEST_DEVICE_CONTEXT, SpdmTestProtocol, SPDM_TEST_DEVICE_CONTEXT_SIGNATURE)
-#define SPDM_TEST_DEVICE_CONTEXT_FROM_SPDM_IO_PROTOCOL(a)  CR (a, SPDM_TEST_DEVICE_CONTEXT, SpdmIoProtocol, SPDM_TEST_DEVICE_CONTEXT_SIGNATURE)
+#define SPDM_TEST_DEVICE_CONTEXT_FROM_SPDM_IO_PROTOCOL(a)    CR (a, SPDM_TEST_DEVICE_CONTEXT, SpdmIoProtocol, SPDM_TEST_DEVICE_CONTEXT_SIGNATURE)
 
 VOID
 InitializeSpdmTest (
@@ -52,21 +51,20 @@ InitializeSpdmTest (
 
 SPDM_RETURN
 SpdmDeviceSendMessage (
-  IN     VOID                                   *SpdmContext,
-  IN     UINTN                                  MessageSize,
-  IN     CONST VOID                             *Message,
-  IN     UINT64                                 Timeout
+  IN     VOID        *SpdmContext,
+  IN     UINTN       MessageSize,
+  IN     CONST VOID  *Message,
+  IN     UINT64      Timeout
   );
 
 SPDM_RETURN
 SpdmDeviceReceiveMessage (
-  IN     VOID                                   *SpdmContext,
-  IN OUT UINTN                                  *MessageSize,
-  IN OUT VOID                                   **Message,
-  IN     UINT64                                 Timeout
+  IN     VOID    *SpdmContext,
+  IN OUT UINTN   *MessageSize,
+  IN OUT VOID    **Message,
+  IN     UINT64  Timeout
   );
 
 extern EFI_HANDLE  mSpdmHandle;
 
 #endif
-
