@@ -43,10 +43,10 @@ typedef struct _SPDM_IO_PROTOCOL SPDM_IO_PROTOCOL;
 typedef
 SPDM_RETURN
 (*SPDM_IO_SECURE_SEND_MESSAGE_FUNC) (
-  IN     SPDM_IO_PROTOCOL                       *This,
-  IN     UINTN                                  MessageSize,
-  IN CONST VOID                                   *Message,
-  IN     UINT64                                 Timeout
+  IN     SPDM_IO_PROTOCOL  *This,
+  IN     UINTN             MessageSize,
+  IN CONST VOID            *Message,
+  IN     UINT64            Timeout
   );
 
 /**
@@ -78,15 +78,15 @@ SPDM_RETURN
 typedef
 SPDM_RETURN
 (*SPDM_IO_SECURE_RECEIVE_MESSAGE_FUNC) (
-  IN     SPDM_IO_PROTOCOL                       *This,
-  IN OUT UINTN                                  *MessageSize,
-     OUT VOID                                   **Message,
-  IN     UINT64                                 Timeout
+  IN     SPDM_IO_PROTOCOL  *This,
+  IN OUT UINTN             *MessageSize,
+  OUT VOID                 **Message,
+  IN     UINT64            Timeout
   );
 
 struct _SPDM_IO_PROTOCOL {
-  SPDM_IO_SECURE_SEND_MESSAGE_FUNC        SendMessage;
-  SPDM_IO_SECURE_RECEIVE_MESSAGE_FUNC     ReceiveMessage;
+  SPDM_IO_SECURE_SEND_MESSAGE_FUNC       SendMessage;
+  SPDM_IO_SECURE_RECEIVE_MESSAGE_FUNC    ReceiveMessage;
 };
 
 #endif

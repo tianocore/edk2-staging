@@ -20,25 +20,25 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Library/UefiRuntimeServicesTableLib.h>
 #include <Test/TestConfig.h>
 
-EDKII_DEVICE_SECURITY_POLICY           mDeviceSecurityPolicyNone = {
+EDKII_DEVICE_SECURITY_POLICY  mDeviceSecurityPolicyNone = {
   EDKII_DEVICE_SECURITY_POLICY_REVISION,
   0,
   0,
 };
 
-EDKII_DEVICE_SECURITY_POLICY           mDeviceSecurityPolicyFull = {
+EDKII_DEVICE_SECURITY_POLICY  mDeviceSecurityPolicyFull = {
   EDKII_DEVICE_SECURITY_POLICY_REVISION,
   EDKII_DEVICE_MEASUREMENT_REQUIRED,
   EDKII_DEVICE_AUTHENTICATION_REQUIRED
 };
 
-EDKII_DEVICE_SECURITY_POLICY           mDeviceSecurityPolicyAuthOnly = {
+EDKII_DEVICE_SECURITY_POLICY  mDeviceSecurityPolicyAuthOnly = {
   EDKII_DEVICE_SECURITY_POLICY_REVISION,
   0,
   EDKII_DEVICE_AUTHENTICATION_REQUIRED
 };
 
-EDKII_DEVICE_SECURITY_POLICY           mDeviceSecurityPolicyMeasOnly = {
+EDKII_DEVICE_SECURITY_POLICY  mDeviceSecurityPolicyMeasOnly = {
   EDKII_DEVICE_SECURITY_POLICY_REVISION,
   EDKII_DEVICE_MEASUREMENT_REQUIRED,
   0
@@ -66,12 +66,12 @@ GetDevicePolicy (
   OUT EDKII_DEVICE_SECURITY_POLICY           *DeviceSecurityPolicy
   )
 {
-  EFI_STATUS                  Status;
-  EFI_PCI_IO_PROTOCOL         *PciIo;
-  UINT16                      PciVendorId;
-  UINT16                      PciDeviceId;
-  UINT8                         TestConfig;
-  UINTN                         TestConfigSize;
+  EFI_STATUS           Status;
+  EFI_PCI_IO_PROTOCOL  *PciIo;
+  UINT16               PciVendorId;
+  UINT16               PciDeviceId;
+  UINT8                TestConfig;
+  UINTN                TestConfigSize;
 
   Status = gRT->GetVariable (
                   L"SpdmTestConfig",
@@ -81,7 +81,7 @@ GetDevicePolicy (
                   &TestConfig
                   );
 
-  CopyMem (DeviceSecurityPolicy, &mDeviceSecurityPolicyNone, sizeof(EDKII_DEVICE_SECURITY_POLICY));
+  CopyMem (DeviceSecurityPolicy, &mDeviceSecurityPolicyNone, sizeof (EDKII_DEVICE_SECURITY_POLICY));
 
   DEBUG ((DEBUG_INFO, "GetDevicePolicy - 0x%g\n", &DeviceId->DeviceType));
 
@@ -94,25 +94,25 @@ GetDevicePolicy (
                   &gEdkiiDeviceIdentifierTypePciGuid,
                   (VOID **)&PciIo
                   );
-  if (EFI_ERROR(Status)) {
+  if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "Locate - DeviceIdentifierTypePci - %r\n", Status));
     return EFI_SUCCESS;
   }
 
   Status = PciIo->Pci.Read (PciIo, EfiPciIoWidthUint16, PCI_VENDOR_ID_OFFSET, 1, &PciVendorId);
-  ASSERT_EFI_ERROR(Status);
+  ASSERT_EFI_ERROR (Status);
   Status = PciIo->Pci.Read (PciIo, EfiPciIoWidthUint16, PCI_DEVICE_ID_OFFSET, 1, &PciDeviceId);
-  ASSERT_EFI_ERROR(Status);
+  ASSERT_EFI_ERROR (Status);
   DEBUG ((DEBUG_INFO, "PCI Info - %04x:%04x\n", PciVendorId, PciDeviceId));
 
   if (TestConfig == TEST_CONFIG_SECURITY_POLICY_AUTH_ONLY) {
-    CopyMem (DeviceSecurityPolicy, &mDeviceSecurityPolicyAuthOnly, sizeof(EDKII_DEVICE_SECURITY_POLICY));
+    CopyMem (DeviceSecurityPolicy, &mDeviceSecurityPolicyAuthOnly, sizeof (EDKII_DEVICE_SECURITY_POLICY));
   } else if (TestConfig == TEST_CONFIG_SECURITY_POLICY_MEAS_ONLY) {
-    CopyMem (DeviceSecurityPolicy, &mDeviceSecurityPolicyMeasOnly, sizeof(EDKII_DEVICE_SECURITY_POLICY));
+    CopyMem (DeviceSecurityPolicy, &mDeviceSecurityPolicyMeasOnly, sizeof (EDKII_DEVICE_SECURITY_POLICY));
   } else if (TestConfig == TEST_CONFIG_SECURITY_POLICY_NONE) {
-    CopyMem (DeviceSecurityPolicy, &mDeviceSecurityPolicyNone, sizeof(EDKII_DEVICE_SECURITY_POLICY));
+    CopyMem (DeviceSecurityPolicy, &mDeviceSecurityPolicyNone, sizeof (EDKII_DEVICE_SECURITY_POLICY));
   } else {
-    CopyMem (DeviceSecurityPolicy, &mDeviceSecurityPolicyFull, sizeof(EDKII_DEVICE_SECURITY_POLICY));
+    CopyMem (DeviceSecurityPolicy, &mDeviceSecurityPolicyFull, sizeof (EDKII_DEVICE_SECURITY_POLICY));
   }
 
   return EFI_SUCCESS;
@@ -145,14 +145,14 @@ NotifyDeviceState (
   IN  EDKII_DEVICE_SECURITY_STATE            *DeviceSecurityState
   )
 {
-  EFI_STATUS                  Status;
-  EFI_PCI_IO_PROTOCOL         *PciIo;
-  UINT16                      PciVendorId;
-  UINT16                      PciDeviceId;
-  UINTN                       Segment;
-  UINTN                       Bus;
-  UINTN                       Device;
-  UINTN                       Function;
+  EFI_STATUS           Status;
+  EFI_PCI_IO_PROTOCOL  *PciIo;
+  UINT16               PciVendorId;
+  UINT16               PciDeviceId;
+  UINTN                Segment;
+  UINTN                Bus;
+  UINTN                Device;
+  UINTN                Function;
 
   DEBUG ((DEBUG_INFO, "NotifyDeviceState - 0x%g\n", &DeviceId->DeviceType));
 
@@ -165,15 +165,15 @@ NotifyDeviceState (
                   &gEdkiiDeviceIdentifierTypePciGuid,
                   (VOID **)&PciIo
                   );
-  if (EFI_ERROR(Status)) {
+  if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "Locate - DeviceIdentifierTypePci - %r\n", Status));
     return EFI_SUCCESS;
   }
 
   Status = PciIo->Pci.Read (PciIo, EfiPciIoWidthUint16, PCI_VENDOR_ID_OFFSET, 1, &PciVendorId);
-  ASSERT_EFI_ERROR(Status);
+  ASSERT_EFI_ERROR (Status);
   Status = PciIo->Pci.Read (PciIo, EfiPciIoWidthUint16, PCI_DEVICE_ID_OFFSET, 1, &PciDeviceId);
-  ASSERT_EFI_ERROR(Status);
+  ASSERT_EFI_ERROR (Status);
   DEBUG ((DEBUG_INFO, "PCI Info - %04x:%04x\n", PciVendorId, PciDeviceId));
 
   Status = PciIo->GetLocation (
@@ -183,12 +183,20 @@ NotifyDeviceState (
                     &Device,
                     &Function
                     );
-  if (!EFI_ERROR(Status)) {
-    DEBUG ((DEBUG_INFO, "PCI Loc - %04x:%02x:%02x:%02x\n",
-      Segment, Bus, Device, Function));
+  if (!EFI_ERROR (Status)) {
+    DEBUG ((
+      DEBUG_INFO,
+      "PCI Loc - %04x:%02x:%02x:%02x\n",
+      Segment,
+      Bus,
+      Device,
+      Function
+      ));
   }
 
-  DEBUG ((DEBUG_INFO, "State - Measurement - 0x%08x, Authentication - 0x%08x\n",
+  DEBUG ((
+    DEBUG_INFO,
+    "State - Measurement - 0x%08x, Authentication - 0x%08x\n",
     DeviceSecurityState->MeasurementState,
     DeviceSecurityState->AuthenticationState
     ));
@@ -230,7 +238,7 @@ MainEntryPoint (
                   EFI_NATIVE_INTERFACE,
                   &mDeviceSecurityPolicy
                   );
-  ASSERT_EFI_ERROR(Status);
+  ASSERT_EFI_ERROR (Status);
 
   return Status;
 }

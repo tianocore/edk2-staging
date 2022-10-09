@@ -16,7 +16,7 @@ typedef INT16   int16_t;
 typedef UINT8   uint8_t;
 
 #ifndef SIZE_MAX
-#define SIZE_MAX MAX_UINTN
+#define SIZE_MAX  MAX_UINTN
 #endif
 
 #endif /* LIBSPDM_STDINT_ALT */
