@@ -9,11 +9,11 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 #include "SpdmSecurityLibInterna.h"
 
-LIST_ENTRY mSpdmDeviceContextList = INITIALIZE_LIST_HEAD_VARIABLE(mSpdmDeviceContextList);
+LIST_ENTRY  mSpdmDeviceContextList = INITIALIZE_LIST_HEAD_VARIABLE (mSpdmDeviceContextList);
 
 VOID
 RecordSpdmDeviceContextInList (
-  IN SPDM_DEVICE_CONTEXT          *SpdmDeviceContext
+  IN SPDM_DEVICE_CONTEXT  *SpdmDeviceContext
   )
 {
   SPDM_DEVICE_CONTEXT_INSTANCE  *NewSpdmDeviceContext;
@@ -21,19 +21,18 @@ RecordSpdmDeviceContextInList (
 
   SpdmDeviceContextList = &mSpdmDeviceContextList;
 
-  NewSpdmDeviceContext = AllocateZeroPool(sizeof(*NewSpdmDeviceContext));
-  ASSERT(NewSpdmDeviceContext != NULL);
+  NewSpdmDeviceContext = AllocateZeroPool (sizeof (*NewSpdmDeviceContext));
+  ASSERT (NewSpdmDeviceContext != NULL);
 
-  NewSpdmDeviceContext->Signature = SPDM_DEVICE_CONTEXT_INSTANCE_SIGNATURE;
+  NewSpdmDeviceContext->Signature         = SPDM_DEVICE_CONTEXT_INSTANCE_SIGNATURE;
   NewSpdmDeviceContext->SpdmDeviceContext = SpdmDeviceContext;
 
-  InsertTailList(SpdmDeviceContextList, &NewSpdmDeviceContext->Link);
+  InsertTailList (SpdmDeviceContextList, &NewSpdmDeviceContext->Link);
 }
-
 
 VOID *
 GetSpdmIoProtocolViaSpdmContext (
-  IN VOID *SpdmContext
+  IN VOID  *SpdmContext
   )
 {
   LIST_ENTRY                    *Link;
@@ -42,15 +41,15 @@ GetSpdmIoProtocolViaSpdmContext (
 
   SpdmDeviceContextList = &mSpdmDeviceContextList;
 
-  Link = GetFirstNode(SpdmDeviceContextList);
-  while (!IsNull(SpdmDeviceContextList, Link)) {
-    CurrentSpdmDeviceContext = SPDM_DEVICE_CONTEXT_INSTANCE_FROM_LINK(Link);
+  Link = GetFirstNode (SpdmDeviceContextList);
+  while (!IsNull (SpdmDeviceContextList, Link)) {
+    CurrentSpdmDeviceContext = SPDM_DEVICE_CONTEXT_INSTANCE_FROM_LINK (Link);
 
     if (CurrentSpdmDeviceContext->SpdmDeviceContext->SpdmContext == SpdmContext) {
       return CurrentSpdmDeviceContext->SpdmDeviceContext->SpdmIoProtocol;
     }
 
-    Link = GetNextNode(SpdmDeviceContextList, Link);
+    Link = GetNextNode (SpdmDeviceContextList, Link);
   }
 
   return NULL;
@@ -58,64 +57,70 @@ GetSpdmIoProtocolViaSpdmContext (
 
 SPDM_DEVICE_CONTEXT *
 CreateSpdmDeviceContext (
-  IN EDKII_SPDM_DEVICE_INFO         *SpdmDeviceInfo
+  IN EDKII_SPDM_DEVICE_INFO  *SpdmDeviceInfo
   )
 {
-  SPDM_DEVICE_CONTEXT               *SpdmDeviceContext;
-  VOID                              *SpdmContext;
-  UINTN                             SpdmContextSize;
-  VOID                              *ScratchBuffer;
-  UINTN                             ScratchBufferSize;
-  EFI_STATUS                        Status;
-  EFI_SIGNATURE_LIST                *SignatureList;
-  UINTN                             SignatureListSize;
-  VOID                              *Data;
-  UINTN                             DataSize;
-  SPDM_DATA_PARAMETER               Parameter;
-  UINT8                             Data8;
-  UINT16                            Data16;
-  UINT32                            Data32;
+  SPDM_DEVICE_CONTEXT  *SpdmDeviceContext;
+  VOID                 *SpdmContext;
+  UINTN                SpdmContextSize;
+  VOID                 *ScratchBuffer;
+  UINTN                ScratchBufferSize;
+  EFI_STATUS           Status;
+  EFI_SIGNATURE_LIST   *SignatureList;
+  UINTN                SignatureListSize;
+  VOID                 *Data;
+  UINTN                DataSize;
+  SPDM_DATA_PARAMETER  Parameter;
+  UINT8                Data8;
+  UINT16               Data16;
+  UINT32               Data32;
 
-  SpdmDeviceContext = AllocateZeroPool (sizeof(*SpdmDeviceContext));
-  ASSERT(SpdmDeviceContext != NULL);
+  SpdmDeviceContext = AllocateZeroPool (sizeof (*SpdmDeviceContext));
+  ASSERT (SpdmDeviceContext != NULL);
   SpdmDeviceContext->Signature = SPDM_DEVICE_CONTEXT_SIGNATURE;
-  CopyMem (&SpdmDeviceContext->DeviceId, SpdmDeviceInfo->DeviceId, sizeof(EDKII_DEVICE_IDENTIFIER));
+  CopyMem (&SpdmDeviceContext->DeviceId, SpdmDeviceInfo->DeviceId, sizeof (EDKII_DEVICE_IDENTIFIER));
   SpdmDeviceContext->IsEmbeddedDevice = SpdmDeviceInfo->IsEmbeddedDevice;
 
-  SpdmContextSize = SpdmGetContextSize();
-  SpdmContext = AllocateZeroPool (SpdmContextSize);
-  ASSERT(SpdmContext != NULL);
+  SpdmContextSize = SpdmGetContextSize ();
+  SpdmContext     = AllocateZeroPool (SpdmContextSize);
+  ASSERT (SpdmContext != NULL);
 
-  ScratchBufferSize = SpdmGetSizeofRequiredScratchBuffer(SpdmContext);
-  ScratchBuffer = AllocateZeroPool(ScratchBufferSize);
-  ASSERT(ScratchBuffer != NULL);
+  ScratchBufferSize = SpdmGetSizeofRequiredScratchBuffer (SpdmContext);
+  ScratchBuffer     = AllocateZeroPool (ScratchBufferSize);
+  ASSERT (ScratchBuffer != NULL);
 
   SpdmInitContext (SpdmContext);
-  SpdmRegisterDeviceIoFunc (SpdmContext,
+  SpdmRegisterDeviceIoFunc (
+    SpdmContext,
     SpdmDeviceInfo->SendMessage,
-    SpdmDeviceInfo->ReceiveMessage);
-  SpdmRegisterTransportLayerFunc (SpdmContext,
+    SpdmDeviceInfo->ReceiveMessage
+    );
+  SpdmRegisterTransportLayerFunc (
+    SpdmContext,
     SpdmDeviceInfo->TransportEncodeMessage,
     SpdmDeviceInfo->TransportDecodeMessage,
-    SpdmDeviceInfo->TransportGetHeaderSize);
-  SpdmRegisterDeviceBufferFunc (SpdmContext,
+    SpdmDeviceInfo->TransportGetHeaderSize
+    );
+  SpdmRegisterDeviceBufferFunc (
+    SpdmContext,
     SpdmDeviceInfo->AcquireSenderBuffer,
     SpdmDeviceInfo->ReleaseSenderBuffer,
     SpdmDeviceInfo->AcquireReceiverBuffer,
-    SpdmDeviceInfo->ReleaseReceiverBuffer);
+    SpdmDeviceInfo->ReleaseReceiverBuffer
+    );
   SpdmSetScratchBuffer (SpdmContext, ScratchBuffer, ScratchBufferSize);
 
-  SpdmDeviceContext->SpdmContextSize = SpdmContextSize;
-  SpdmDeviceContext->SpdmContext = SpdmContext;
+  SpdmDeviceContext->SpdmContextSize   = SpdmContextSize;
+  SpdmDeviceContext->SpdmContext       = SpdmContext;
   SpdmDeviceContext->ScratchBufferSize = ScratchBufferSize;
-  SpdmDeviceContext->ScratchBuffer = ScratchBuffer;
+  SpdmDeviceContext->ScratchBuffer     = ScratchBuffer;
 
   Status = gBS->HandleProtocol (
                   SpdmDeviceContext->DeviceId.DeviceHandle,
                   &gEfiDevicePathProtocolGuid,
                   (VOID **)&SpdmDeviceContext->DevicePath
                   );
-  if (EFI_ERROR(Status)) {
+  if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "Locate - DevicePath - %r\n", Status));
     goto Error;
   }
@@ -125,7 +130,7 @@ CreateSpdmDeviceContext (
                   &SpdmDeviceContext->DeviceId.DeviceType,
                   (VOID **)&SpdmDeviceContext->DeviceIo
                   );
-  if (EFI_ERROR(Status)) {
+  if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "Locate - DeviceIo - %r\n", Status));
     // This is optional, only check known device type later.
   }
@@ -136,7 +141,7 @@ CreateSpdmDeviceContext (
                     SpdmDeviceInfo->SpdmIoProtocolGuid,
                     (VOID **)&SpdmDeviceContext->SpdmIoProtocol
                     );
-    if (EFI_ERROR(Status)) {
+    if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_ERROR, "Locate - SpdmIoProtocol - %r\n", Status));
       goto Error;
     }
@@ -149,7 +154,7 @@ CreateSpdmDeviceContext (
     }
   }
 
-#define SPDM_UID  1 // TBD - hardcoded
+  #define SPDM_UID  1// TBD - hardcoded
   SpdmDeviceContext->DeviceUID = SPDM_UID;
 
   RecordSpdmDeviceContextInList (SpdmDeviceContext);
@@ -160,35 +165,35 @@ CreateSpdmDeviceContext (
              (VOID **)&SignatureList,
              &SignatureListSize
              );
-  if (!EFI_ERROR(Status)) {
+  if (!EFI_ERROR (Status)) {
     // BUGBUG: Assume only 1 SPDM cert.
     ASSERT (CompareGuid (&SignatureList->SignatureType, &gEdkiiCertSpdmCertChainGuid));
     ASSERT (SignatureList->SignatureListSize == SignatureList->SignatureListSize);
     ASSERT (SignatureList->SignatureHeaderSize == 0);
-    ASSERT (SignatureList->SignatureSize == SignatureList->SignatureListSize - (sizeof(EFI_SIGNATURE_LIST) + SignatureList->SignatureHeaderSize));
+    ASSERT (SignatureList->SignatureSize == SignatureList->SignatureListSize - (sizeof (EFI_SIGNATURE_LIST) + SignatureList->SignatureHeaderSize));
 
     Data = (VOID *)((UINT8 *)SignatureList +
-                             sizeof(EFI_SIGNATURE_LIST) +
-                             SignatureList->SignatureHeaderSize +
-                             sizeof(EFI_GUID));
-    DataSize = SignatureList->SignatureSize - sizeof(EFI_GUID);
+                    sizeof (EFI_SIGNATURE_LIST) +
+                    SignatureList->SignatureHeaderSize +
+                    sizeof (EFI_GUID));
+    DataSize = SignatureList->SignatureSize - sizeof (EFI_GUID);
 
-    ZeroMem (&Parameter, sizeof(Parameter));
+    ZeroMem (&Parameter, sizeof (Parameter));
     Parameter.location = SpdmDataLocationLocal;
     SpdmSetData (SpdmContext, SpdmDataPeerPublicRootCert, &Parameter, Data, DataSize);
     // Do not free it.
   }
 
   Data8 = 0;
-  ZeroMem (&Parameter, sizeof(Parameter));
+  ZeroMem (&Parameter, sizeof (Parameter));
   Parameter.location = SpdmDataLocationLocal;
-  SpdmSetData (SpdmContext, SpdmDataCapabilityCTExponent, &Parameter, &Data8, sizeof(Data8));
+  SpdmSetData (SpdmContext, SpdmDataCapabilityCTExponent, &Parameter, &Data8, sizeof (Data8));
 
   Data32 = 0;
-  SpdmSetData (SpdmContext, SpdmDataCapabilityFlags, &Parameter, &Data32, sizeof(Data32));
+  SpdmSetData (SpdmContext, SpdmDataCapabilityFlags, &Parameter, &Data32, sizeof (Data32));
 
   Data8 = SPDM_MEASUREMENT_BLOCK_HEADER_SPECIFICATION_DMTF;
-  SpdmSetData (SpdmContext, SpdmDataMeasurementSpec, &Parameter, &Data8, sizeof(Data8));
+  SpdmSetData (SpdmContext, SpdmDataMeasurementSpec, &Parameter, &Data8, sizeof (Data8));
   if (SpdmDeviceInfo->BaseAsymAlgo != 0) {
     Data32 = SpdmDeviceInfo->BaseAsymAlgo;
   } else {
@@ -199,7 +204,8 @@ CreateSpdmDeviceContext (
              SPDM_ALGORITHMS_BASE_ASYM_ALGO_TPM_ALG_ECDSA_ECC_NIST_P384 |
              SPDM_ALGORITHMS_BASE_ASYM_ALGO_TPM_ALG_ECDSA_ECC_NIST_P521;
   }
-  SpdmSetData (SpdmContext, SpdmDataBaseAsymAlgo, &Parameter, &Data32, sizeof(Data32));
+
+  SpdmSetData (SpdmContext, SpdmDataBaseAsymAlgo, &Parameter, &Data32, sizeof (Data32));
   if (SpdmDeviceInfo->BaseHashAlgo != 0) {
     Data32 = SpdmDeviceInfo->BaseHashAlgo;
   } else {
@@ -207,17 +213,18 @@ CreateSpdmDeviceContext (
              SPDM_ALGORITHMS_BASE_HASH_ALGO_TPM_ALG_SHA_384 |
              SPDM_ALGORITHMS_BASE_HASH_ALGO_TPM_ALG_SHA_512;
   }
-  SpdmSetData (SpdmContext, SpdmDataBaseHashAlgo, &Parameter, &Data32, sizeof(Data32));
+
+  SpdmSetData (SpdmContext, SpdmDataBaseHashAlgo, &Parameter, &Data32, sizeof (Data32));
 
   Status = SpdmInitConnection (SpdmContext, FALSE);
-  if (EFI_ERROR(Status)) {
+  if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "SpdmInitConnection - %r\n", Status));
     goto Error;
   }
 
-  ZeroMem (&Parameter, sizeof(Parameter));
+  ZeroMem (&Parameter, sizeof (Parameter));
   Parameter.location = SpdmDataLocationConnection;
-  DataSize = sizeof(Data16);
+  DataSize           = sizeof (Data16);
   SpdmGetData (SpdmContext, SpdmDataSpdmVersion, &Parameter, &Data16, &DataSize);
   SpdmDeviceContext->SpdmVersion = (Data16 >> 8);
 
@@ -229,7 +236,7 @@ Error:
 
 VOID
 DestroySpdmDeviceContext (
-  IN SPDM_DEVICE_CONTEXT         *SpdmDeviceContext
+  IN SPDM_DEVICE_CONTEXT  *SpdmDeviceContext
   )
 {
   // need zero memory in case of secret in memory.

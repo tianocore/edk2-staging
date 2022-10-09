@@ -39,33 +39,33 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Protocol/DeviceSecurity.h>
 #include <Protocol/DeviceSecurityPolicy.h>
 
-//#define TCG_DEVICE_SECURITY_EVENT_DATA_VERSION_SELECTION TCG_DEVICE_SECURITY_EVENT_DATA_VERSION_1
-#define TCG_DEVICE_SECURITY_EVENT_DATA_VERSION_SELECTION TCG_DEVICE_SECURITY_EVENT_DATA_VERSION_2
+// #define TCG_DEVICE_SECURITY_EVENT_DATA_VERSION_SELECTION TCG_DEVICE_SECURITY_EVENT_DATA_VERSION_1
+#define TCG_DEVICE_SECURITY_EVENT_DATA_VERSION_SELECTION  TCG_DEVICE_SECURITY_EVENT_DATA_VERSION_2
 
 typedef struct {
-  UINTN                                           Signature;
-  EDKII_DEVICE_IDENTIFIER                         DeviceId;
-  EFI_DEVICE_PATH_PROTOCOL                        *DevicePath;
-  VOID                                            *DeviceIo;
-  SPDM_IO_PROTOCOL                                *SpdmIoProtocol;
-  //TBD
-  SPDM_PROTOCOL                                   *SpdmProtocol;
+  UINTN                       Signature;
+  EDKII_DEVICE_IDENTIFIER     DeviceId;
+  EFI_DEVICE_PATH_PROTOCOL    *DevicePath;
+  VOID                        *DeviceIo;
+  SPDM_IO_PROTOCOL            *SpdmIoProtocol;
+  // TBD
+  SPDM_PROTOCOL               *SpdmProtocol;
   //
   // Status
   //
-  BOOLEAN                                         IsDeviceMeasured;
-  BOOLEAN                                         IsDeviceAuthenticated;
-  UINT64                                          DeviceUID;
+  BOOLEAN                     IsDeviceMeasured;
+  BOOLEAN                     IsDeviceAuthenticated;
+  UINT64                      DeviceUID;
 
-  VOID                                            *SpdmContext;
+  VOID                        *SpdmContext;
 } SPDM_DRIVER_DEVICE_CONTEXT;
 
 #define SPDM_DRIVER_DEVICE_CONTEXT_SIGNATURE  SIGNATURE_32 ('S', 'D', 'D', 'C')
 
 typedef struct {
-  UINTN                        Signature;
-  LIST_ENTRY                   Link;
-  SPDM_DRIVER_DEVICE_CONTEXT   *SpdmDriverContext;
+  UINTN                         Signature;
+  LIST_ENTRY                    Link;
+  SPDM_DRIVER_DEVICE_CONTEXT    *SpdmDriverContext;
 } SPDM_DEVICE_INSTANCE;
 
 #define SPDM_DEVICE_INSTANCE_SIGNATURE  SIGNATURE_32 ('S', 'D', 'C', 'S')
@@ -83,8 +83,8 @@ typedef struct {
 **/
 BOOLEAN
 CompareDevicePath (
-  IN EFI_DEVICE_PATH_PROTOCOL *DevicePath1,
-  IN EFI_DEVICE_PATH_PROTOCOL *DevicePath2
+  IN EFI_DEVICE_PATH_PROTOCOL  *DevicePath1,
+  IN EFI_DEVICE_PATH_PROTOCOL  *DevicePath2
   );
 
 /**
@@ -94,7 +94,7 @@ CompareDevicePath (
 **/
 VOID
 RecordSpdmDeviceInMeasurementList (
-  IN SPDM_DRIVER_DEVICE_CONTEXT          *SpdmDriverContext
+  IN SPDM_DRIVER_DEVICE_CONTEXT  *SpdmDriverContext
   );
 
 /**
@@ -107,7 +107,7 @@ RecordSpdmDeviceInMeasurementList (
 **/
 BOOLEAN
 IsSpdmDeviceInMeasurementList (
-  IN SPDM_DRIVER_DEVICE_CONTEXT          *SpdmDriverContext
+  IN SPDM_DRIVER_DEVICE_CONTEXT  *SpdmDriverContext
   );
 
 /**
@@ -117,7 +117,7 @@ IsSpdmDeviceInMeasurementList (
 **/
 VOID
 RecordSpdmDeviceInAuthenticationList (
-  IN SPDM_DRIVER_DEVICE_CONTEXT          *SpdmDriverContext
+  IN SPDM_DRIVER_DEVICE_CONTEXT  *SpdmDriverContext
   );
 
 /**
@@ -130,7 +130,7 @@ RecordSpdmDeviceInAuthenticationList (
 **/
 BOOLEAN
 IsSpdmDeviceInAuthenticationList (
-  IN SPDM_DRIVER_DEVICE_CONTEXT          *SpdmDriverContext
+  IN SPDM_DRIVER_DEVICE_CONTEXT  *SpdmDriverContext
   );
 
 /**
@@ -142,7 +142,7 @@ IsSpdmDeviceInAuthenticationList (
 **/
 SPDM_DRIVER_DEVICE_CONTEXT *
 GetSpdmDriverContextViaSpdmProtocol (
-  IN SPDM_PROTOCOL *SpdmProtocol
+  IN SPDM_PROTOCOL  *SpdmProtocol
   );
 
 /**
@@ -154,7 +154,7 @@ GetSpdmDriverContextViaSpdmProtocol (
 **/
 SPDM_DRIVER_DEVICE_CONTEXT *
 GetSpdmDriverContextViaSpdmContext (
-  IN VOID *SpdmContext
+  IN VOID  *SpdmContext
   );
 
 /**
@@ -165,8 +165,8 @@ GetSpdmDriverContextViaSpdmContext (
 **/
 EFI_STATUS
 DoDeviceMeasurement (
-  IN  SPDM_DRIVER_DEVICE_CONTEXT  *SpdmDriverContext,
-  OUT EDKII_DEVICE_SECURITY_STATE *DeviceSecurityState
+  IN  SPDM_DRIVER_DEVICE_CONTEXT   *SpdmDriverContext,
+  OUT EDKII_DEVICE_SECURITY_STATE  *DeviceSecurityState
   );
 
 /**
@@ -177,8 +177,8 @@ DoDeviceMeasurement (
 **/
 EFI_STATUS
 DoDeviceAuthentication (
-  IN  SPDM_DRIVER_DEVICE_CONTEXT  *SpdmDriverContext,
-  OUT EDKII_DEVICE_SECURITY_STATE *DeviceSecurityState
+  IN  SPDM_DRIVER_DEVICE_CONTEXT   *SpdmDriverContext,
+  OUT EDKII_DEVICE_SECURITY_STATE  *DeviceSecurityState
   );
 
 VOID
@@ -188,18 +188,18 @@ InitializeSpdmCommunication (
 
 SPDM_RETURN
 SpdmDeviceSendMessage (
-  IN     VOID                                   *SpdmContext,
-  IN     UINTN                                  MessageSize,
-  IN CONST VOID                                   *Message,
-  IN     UINT64                                 Timeout
+  IN     VOID    *SpdmContext,
+  IN     UINTN   MessageSize,
+  IN CONST VOID  *Message,
+  IN     UINT64  Timeout
   );
 
 SPDM_RETURN
 SpdmDeviceReceiveMessage (
-  IN     VOID                                   *SpdmContext,
-  IN OUT UINTN                                  *MessageSize,
-  IN OUT VOID                                   **Message,
-  IN     UINT64                                 Timeout
+  IN     VOID    *SpdmContext,
+  IN OUT UINTN   *MessageSize,
+  IN OUT VOID    **Message,
+  IN     UINT64  Timeout
   );
 
 #endif

@@ -31,7 +31,7 @@ typedef struct _SPDM_TEST_PROTOCOL SPDM_TEST_PROTOCOL;
 **/
 typedef
 RETURN_STATUS
-(EFIAPI *SPDM_TEST_SET_DATA) (
+(EFIAPI *SPDM_TEST_SET_DATA)(
   IN     SPDM_TEST_PROTOCOL        *This,
   IN     SPDM_DATA_TYPE            DataType,
   IN     SPDM_DATA_PARAMETER       *Parameter,
@@ -59,14 +59,13 @@ RETURN_STATUS
 **/
 typedef
 RETURN_STATUS
-(EFIAPI *SPDM_TEST_GET_DATA) (
+(EFIAPI *SPDM_TEST_GET_DATA)(
   IN     SPDM_TEST_PROTOCOL        *This,
   IN     SPDM_DATA_TYPE            DataType,
   IN     SPDM_DATA_PARAMETER       *Parameter,
   IN OUT VOID                      *Data,
   IN OUT UINTN                     *DataSize
   );
-
 
 /**
   Process a packet in the current SPDM session.
@@ -91,13 +90,12 @@ RETURN_STATUS
 **/
 typedef
 RETURN_STATUS
-(EFIAPI *SPDM_TEST_PROCESS_PACKET_CALLBACK) (
+(EFIAPI *SPDM_TEST_PROCESS_PACKET_CALLBACK)(
   IN     VOID                         *Request,
   IN     UINTN                        RequestSize,
-     OUT VOID                         *Response,
+  OUT VOID                         *Response,
   IN OUT UINTN                        *ResponseSize
   );
-
 
 /**
   Register a callback function to process a packet in the current SPDM session.
@@ -109,17 +107,17 @@ RETURN_STATUS
 **/
 typedef
 RETURN_STATUS
-(EFIAPI *SPDM_TEST_REGISTER_PROCESS_PACKET_CALLBACK) (
+(EFIAPI *SPDM_TEST_REGISTER_PROCESS_PACKET_CALLBACK)(
   IN     SPDM_TEST_PROTOCOL                     *This,
   IN     SPDM_TEST_PROCESS_PACKET_CALLBACK      Callback
   );
 
 struct _SPDM_TEST_PROTOCOL {
-  SPDM_TEST_SET_DATA                          SetData;
-  SPDM_TEST_GET_DATA                          GetData;
-  SPDM_TEST_REGISTER_PROCESS_PACKET_CALLBACK  RegisterProcessPacketCallback;
+  SPDM_TEST_SET_DATA                            SetData;
+  SPDM_TEST_GET_DATA                            GetData;
+  SPDM_TEST_REGISTER_PROCESS_PACKET_CALLBACK    RegisterProcessPacketCallback;
 };
 
-extern GUID gSpdmTestProtocolGuid;
+extern GUID  gSpdmTestProtocolGuid;
 
 #endif

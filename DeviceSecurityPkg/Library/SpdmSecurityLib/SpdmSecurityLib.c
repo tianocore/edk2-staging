@@ -17,14 +17,14 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 EFI_STATUS
 EFIAPI
 SpdmDeviceAuthenticationAndMeasurement (
-  IN  EDKII_SPDM_DEVICE_INFO         *SpdmDeviceInfo,
-  IN  EDKII_DEVICE_SECURITY_POLICY   *SecuriryPolicy,
-  OUT EDKII_DEVICE_SECURITY_STATE    *SecuriryState
+  IN  EDKII_SPDM_DEVICE_INFO        *SpdmDeviceInfo,
+  IN  EDKII_DEVICE_SECURITY_POLICY  *SecuriryPolicy,
+  OUT EDKII_DEVICE_SECURITY_STATE   *SecuriryState
   )
 {
-  EFI_STATUS                  Status;
-  SPDM_DEVICE_CONTEXT         *SpdmDeviceContext;
-  BOOLEAN                     IsAuthenticated;
+  EFI_STATUS           Status;
+  SPDM_DEVICE_CONTEXT  *SpdmDeviceContext;
+  BOOLEAN              IsAuthenticated;
 
   SpdmDeviceContext = CreateSpdmDeviceContext (SpdmDeviceInfo);
   if (SpdmDeviceContext == NULL) {
@@ -34,8 +34,8 @@ SpdmDeviceAuthenticationAndMeasurement (
   IsAuthenticated = FALSE;
   if ((SecuriryPolicy->AuthenticationPolicy & EDKII_DEVICE_AUTHENTICATION_REQUIRED) != 0) {
     Status = DoDeviceAuthentication (SpdmDeviceContext);
-    if (EFI_ERROR(Status)) {
-      DEBUG((DEBUG_ERROR, "DoDeviceAuthentication failed - %r\n", Status));
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_ERROR, "DoDeviceAuthentication failed - %r\n", Status));
       IsAuthenticated = FALSE;
     } else {
       IsAuthenticated = TRUE;
@@ -44,20 +44,20 @@ SpdmDeviceAuthenticationAndMeasurement (
 
   if ((SecuriryPolicy->MeasurementPolicy & EDKII_DEVICE_MEASUREMENT_REQUIRED) != 0) {
     Status = DoDeviceMeasurement (SpdmDeviceContext, IsAuthenticated);
-    if (EFI_ERROR(Status)) {
-	  DEBUG((DEBUG_ERROR, "DoDeviceMeasurement failed - %r\n", Status));
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_ERROR, "DoDeviceMeasurement failed - %r\n", Status));
     }
   }
 
-  DestroySpdmDeviceContext (SpdmDeviceContext);;
+  DestroySpdmDeviceContext (SpdmDeviceContext);
 
   return EFI_SUCCESS;
 }
 
 VOID *
 SpdmGetIoProtocolViaSpdmContext (
-  IN VOID *SpdmContext
+  IN VOID  *SpdmContext
   )
 {
-  return GetSpdmIoProtocolViaSpdmContext(SpdmContext);
+  return GetSpdmIoProtocolViaSpdmContext (SpdmContext);
 }

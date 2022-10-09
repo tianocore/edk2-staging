@@ -20,7 +20,7 @@
 #include <Protocol/SpdmTest.h>
 #include <Protocol/DeviceSecurity.h>
 
-#define USE_PSK 0
+#define USE_PSK  0
 
 VOID
 InternalDumpData (
@@ -29,6 +29,7 @@ InternalDumpData (
   )
 {
   UINTN  Index;
+
   for (Index = 0; Index < Size; Index++) {
     Print (L"%02x ", (UINTN)Data[Index]);
   }
@@ -40,11 +41,11 @@ InternalDumpHex (
   IN UINTN  Size
   )
 {
-  UINTN   Index;
-  UINTN   Count;
-  UINTN   Left;
+  UINTN  Index;
+  UINTN  Count;
+  UINTN  Left;
 
-#define COLUME_SIZE  (16 * 2)
+  #define COLUME_SIZE  (16 * 2)
 
   Count = Size / COLUME_SIZE;
   Left  = Size % COLUME_SIZE;
@@ -74,17 +75,17 @@ TestPci (
   EDKII_DEVICE_IDENTIFIER         DeviceId;
 
   Status = gBS->LocateProtocol (&gSpdmIoProtocolGuid, NULL, (VOID **)&SpdmIo);
-  ASSERT_EFI_ERROR(Status);
+  ASSERT_EFI_ERROR (Status);
 
-  BufferSize = sizeof(Handle);
-  Status = gBS->LocateHandle (
-                  ByProtocol,
-                  &gEdkiiDeviceIdentifierTypePciGuid,
-                  NULL,
-                  &BufferSize,
-                  &Handle
-                  );
-  ASSERT_EFI_ERROR(Status);
+  BufferSize = sizeof (Handle);
+  Status     = gBS->LocateHandle (
+                      ByProtocol,
+                      &gEdkiiDeviceIdentifierTypePciGuid,
+                      NULL,
+                      &BufferSize,
+                      &Handle
+                      );
+  ASSERT_EFI_ERROR (Status);
 
   Status = gBS->InstallProtocolInterface (
                   &Handle,
@@ -92,52 +93,52 @@ TestPci (
                   EFI_NATIVE_INTERFACE,
                   SpdmIo
                   );
-  ASSERT_EFI_ERROR(Status);
-  
+  ASSERT_EFI_ERROR (Status);
+
   Status = gBS->LocateProtocol (&gEdkiiDeviceSecurityProtocolGuid, NULL, (VOID **)&DeviceSecurity);
-  ASSERT_EFI_ERROR(Status);
+  ASSERT_EFI_ERROR (Status);
 
   DeviceId.Version = EDKII_DEVICE_IDENTIFIER_REVISION;
   CopyGuid (&DeviceId.DeviceType, &gEdkiiDeviceIdentifierTypePciGuid);
   DeviceId.DeviceHandle = Handle;
-  Status = DeviceSecurity->DeviceAuthenticate (DeviceSecurity, &DeviceId);
+  Status                = DeviceSecurity->DeviceAuthenticate (DeviceSecurity, &DeviceId);
 }
 
 typedef struct {
-  SPDM_DATA_TYPE  DataType;
-  CHAR8                 *String;
+  SPDM_DATA_TYPE    DataType;
+  CHAR8             *String;
 } DATA_TYPE_STRING;
 
 #pragma pack(1)
-#define TEST_PAYLOAD_CLIENT "Hello Client!"
-#define TEST_PAYLOAD_SERVER "Hello Server!"
-#define TEST_PAYLOAD_LEN (sizeof("Hello XXXXXX!"))
+#define TEST_PAYLOAD_CLIENT  "Hello Client!"
+#define TEST_PAYLOAD_SERVER  "Hello Server!"
+#define TEST_PAYLOAD_LEN     (sizeof("Hello XXXXXX!"))
 ///
 /// SPDM VENDOR_DEFINED request
 ///
 typedef struct {
-  SPDM_MESSAGE_HEADER  Header;
+  SPDM_MESSAGE_HEADER    Header;
   // Param1 == RSVD
   // Param2 == RSVD
-  UINT16               StandardID;
-  UINT8                Len;
-  UINT16               VendorID;
-  UINT16               PayloadLength;
-  UINT8                VendorDefinedPayload[TEST_PAYLOAD_LEN];
+  UINT16                 StandardID;
+  UINT8                  Len;
+  UINT16                 VendorID;
+  UINT16                 PayloadLength;
+  UINT8                  VendorDefinedPayload[TEST_PAYLOAD_LEN];
 } SPDM_VENDOR_DEFINED_REQUEST_MINE;
 
 ///
 /// SPDM VENDOR_DEFINED response
 ///
 typedef struct {
-  SPDM_MESSAGE_HEADER  Header;
+  SPDM_MESSAGE_HEADER    Header;
   // Param1 == RSVD
   // Param2 == RSVD
-  UINT16               StandardID;
-  UINT8                Len;
-  UINT16               VendorID;
-  UINT16               PayloadLength;
-  UINT8                VendorDefinedPayload[TEST_PAYLOAD_LEN];
+  UINT16                 StandardID;
+  UINT8                  Len;
+  UINT16                 VendorID;
+  UINT16                 PayloadLength;
+  UINT8                  VendorDefinedPayload[TEST_PAYLOAD_LEN];
 } SPDM_VENDOR_DEFINED_RESPONSE_MINE;
 
 #pragma pack()
@@ -150,10 +151,10 @@ SPDM_VENDOR_DEFINED_REQUEST_MINE  mVendorDefinedRequest = {
     0, // Param2
   },
   SPDM_REGISTRY_ID_PCISIG, // StandardID
-  2, // Len
-  0x8086, // VendorID
-  TEST_PAYLOAD_LEN, // PayloadLength
-  {TEST_PAYLOAD_CLIENT}
+  2,                       // Len
+  0x8086,                  // VendorID
+  TEST_PAYLOAD_LEN,        // PayloadLength
+  { TEST_PAYLOAD_CLIENT }
 };
 
 SPDM_VENDOR_DEFINED_RESPONSE_MINE  mVendorDefinedResponse = {
@@ -164,10 +165,10 @@ SPDM_VENDOR_DEFINED_RESPONSE_MINE  mVendorDefinedResponse = {
     0, // Param2
   },
   SPDM_REGISTRY_ID_PCISIG, // StandardID
-  2, // Len
-  0x8086, // VendorID
-  TEST_PAYLOAD_LEN, // PayloadLength
-  {TEST_PAYLOAD_SERVER}
+  2,                       // Len
+  0x8086,                  // VendorID
+  TEST_PAYLOAD_LEN,        // PayloadLength
+  { TEST_PAYLOAD_SERVER }
 };
 
 /**
@@ -195,31 +196,32 @@ SPDM_VENDOR_DEFINED_RESPONSE_MINE  mVendorDefinedResponse = {
 EFI_STATUS
 EFIAPI
 TestSpdmProcessPacketCallback (
-  IN     VOID                         *Request,
-  IN     UINTN                        RequestSize,
-     OUT VOID                         *Response,
-  IN OUT UINTN                        *ResponseSize
+  IN     VOID   *Request,
+  IN     UINTN  RequestSize,
+  OUT VOID      *Response,
+  IN OUT UINTN  *ResponseSize
   )
 {
-  SPDM_VENDOR_DEFINED_REQUEST_MINE   *SpmdRequest;
+  SPDM_VENDOR_DEFINED_REQUEST_MINE  *SpmdRequest;
+
   SpmdRequest = Request;
-  ASSERT (RequestSize == sizeof(SPDM_VENDOR_DEFINED_REQUEST_MINE));
+  ASSERT (RequestSize == sizeof (SPDM_VENDOR_DEFINED_REQUEST_MINE));
   ASSERT (SpmdRequest->Header.request_response_code == SPDM_VENDOR_DEFINED_REQUEST);
   ASSERT (SpmdRequest->StandardID == SPDM_REGISTRY_ID_PCISIG);
   ASSERT (SpmdRequest->VendorID == 0x8086);
   ASSERT (SpmdRequest->PayloadLength == TEST_PAYLOAD_LEN);
   ASSERT (CompareMem (SpmdRequest->VendorDefinedPayload, TEST_PAYLOAD_CLIENT, TEST_PAYLOAD_LEN) == 0);
 
-  CopyMem (Response, &mVendorDefinedResponse, sizeof(mVendorDefinedResponse));
-  *ResponseSize = sizeof(mVendorDefinedResponse);
+  CopyMem (Response, &mVendorDefinedResponse, sizeof (mVendorDefinedResponse));
+  *ResponseSize = sizeof (mVendorDefinedResponse);
   return EFI_SUCCESS;
 }
 
 VOID
 TestSpdmApplication (
-  IN SPDM_PROTOCOL            *SpdmProtocol,
-  IN SPDM_TEST_PROTOCOL       *SpdmTestProtocol,
-  IN UINT32                   SessionId
+  IN SPDM_PROTOCOL       *SpdmProtocol,
+  IN SPDM_TEST_PROTOCOL  *SpdmTestProtocol,
+  IN UINT32              SessionId
   )
 {
   EFI_STATUS                         Status;
@@ -230,14 +232,14 @@ TestSpdmApplication (
 
   Status = SpdmTestProtocol->RegisterProcessPacketCallback (SpdmTestProtocol, TestSpdmProcessPacketCallback);
 
-  CopyMem (&Request, &mVendorDefinedRequest, sizeof(Request));
+  CopyMem (&Request, &mVendorDefinedRequest, sizeof (Request));
 
-  RequestSize = sizeof(Request);
-  ResponseSize = sizeof(Response);
-  Status = SpdmProtocol->SendReceiveData (SpdmProtocol, &SessionId, FALSE, &Request, RequestSize, &Response, &ResponseSize);
-  ASSERT_EFI_ERROR(Status);
+  RequestSize  = sizeof (Request);
+  ResponseSize = sizeof (Response);
+  Status       = SpdmProtocol->SendReceiveData (SpdmProtocol, &SessionId, FALSE, &Request, RequestSize, &Response, &ResponseSize);
+  ASSERT_EFI_ERROR (Status);
 
-  ASSERT (ResponseSize == sizeof(SPDM_VENDOR_DEFINED_RESPONSE_MINE));
+  ASSERT (ResponseSize == sizeof (SPDM_VENDOR_DEFINED_RESPONSE_MINE));
   ASSERT (Response.Header.request_response_code == SPDM_VENDOR_DEFINED_RESPONSE);
   ASSERT (Response.StandardID == SPDM_REGISTRY_ID_PCISIG);
   ASSERT (Response.VendorID == 0x8086);
@@ -250,29 +252,29 @@ TestSpdm (
   VOID
   )
 {
-  EFI_STATUS                       Status;
-  SPDM_PROTOCOL                    *SpdmProtocol;
-  SPDM_TEST_PROTOCOL               *SpdmTestProtocol;
-  UINT32                           SessionId;
-  UINT8                            HeartbeatPeriod;
-  UINT8                            MeasurementHash[64];
+  EFI_STATUS          Status;
+  SPDM_PROTOCOL       *SpdmProtocol;
+  SPDM_TEST_PROTOCOL  *SpdmTestProtocol;
+  UINT32              SessionId;
+  UINT8               HeartbeatPeriod;
+  UINT8               MeasurementHash[64];
 
   Status = gBS->LocateProtocol (&gSpdmProtocolGuid, NULL, (VOID **)&SpdmProtocol);
-  ASSERT_EFI_ERROR(Status);
+  ASSERT_EFI_ERROR (Status);
 
   Status = gBS->LocateProtocol (&gSpdmTestProtocolGuid, NULL, (VOID **)&SpdmTestProtocol);
-  ASSERT_EFI_ERROR(Status);
+  ASSERT_EFI_ERROR (Status);
 
-#if USE_PSK
-  Status = SpdmProtocol->SetData (SpdmProtocol, SpdmDataPsk, NULL, "TestPskData", sizeof("TestPskData"));
-  ASSERT_EFI_ERROR(Status);
+ #if USE_PSK
+  Status = SpdmProtocol->SetData (SpdmProtocol, SpdmDataPsk, NULL, "TestPskData", sizeof ("TestPskData"));
+  ASSERT_EFI_ERROR (Status);
 
-  Status = SpdmTestProtocol->SetData (SpdmTestProtocol, SpdmDataPsk, NULL, "TestPskData", sizeof("TestPskData"));
-  ASSERT_EFI_ERROR(Status);
-#endif
+  Status = SpdmTestProtocol->SetData (SpdmTestProtocol, SpdmDataPsk, NULL, "TestPskData", sizeof ("TestPskData"));
+  ASSERT_EFI_ERROR (Status);
+ #endif
 
   HeartbeatPeriod = 0;
-  ZeroMem(MeasurementHash, sizeof(MeasurementHash));
+  ZeroMem (MeasurementHash, sizeof (MeasurementHash));
   Status = SpdmProtocol->StartSession (
                            SpdmProtocol,
                            USE_PSK,
@@ -282,15 +284,15 @@ TestSpdm (
                            &HeartbeatPeriod,
                            MeasurementHash
                            );
-  if (EFI_ERROR(Status)) {
+  if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "StartSession - %r\n", Status));
     return;
   }
 
   TestSpdmApplication (SpdmProtocol, SpdmTestProtocol, SessionId);
-  
+
   Status = SpdmProtocol->StopSession (SpdmProtocol, SessionId, 0);
-  if (EFI_ERROR(Status)) {
+  if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "StopSession - %r\n", Status));
     return;
   }
@@ -303,7 +305,7 @@ MainEntryPoint (
   IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
-  //CpuBreakpoint();
+  // CpuBreakpoint();
   TestPci ();
 
   TestSpdm ();

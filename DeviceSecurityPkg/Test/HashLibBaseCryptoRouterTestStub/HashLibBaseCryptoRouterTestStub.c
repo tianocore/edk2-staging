@@ -18,8 +18,12 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 #include "HashLibBaseCryptoRouterCommon.h"
 
-HASH_INTERFACE   mHashInterface[HASH_COUNT] = {{{0}, NULL, NULL, NULL}};
-UINTN            mHashInterfaceCount = 0;
+HASH_INTERFACE  mHashInterface[HASH_COUNT] = {
+  {
+    { 0 }, NULL, NULL, NULL
+  }
+};
+UINTN           mHashInterfaceCount = 0;
 
 /**
   Start hash sequence.
@@ -32,7 +36,7 @@ UINTN            mHashInterfaceCount = 0;
 EFI_STATUS
 EFIAPI
 HashStart (
-  OUT HASH_HANDLE    *HashHandle
+  OUT HASH_HANDLE  *HashHandle
   )
 {
   HASH_HANDLE  *HashCtx;
@@ -42,7 +46,7 @@ HashStart (
     return EFI_UNSUPPORTED;
   }
 
-  HashCtx = AllocatePool (sizeof(*HashCtx) * mHashInterfaceCount);
+  HashCtx = AllocatePool (sizeof (*HashCtx) * mHashInterfaceCount);
   ASSERT (HashCtx != NULL);
 
   for (Index = 0; Index < mHashInterfaceCount; Index++) {
@@ -66,9 +70,9 @@ HashStart (
 EFI_STATUS
 EFIAPI
 HashUpdate (
-  IN HASH_HANDLE    HashHandle,
-  IN VOID           *DataToHash,
-  IN UINTN          DataToHashLen
+  IN HASH_HANDLE  HashHandle,
+  IN VOID         *DataToHash,
+  IN UINTN        DataToHashLen
   )
 {
   HASH_HANDLE  *HashCtx;
@@ -101,23 +105,23 @@ HashUpdate (
 EFI_STATUS
 EFIAPI
 HashCompleteAndExtend (
-  IN HASH_HANDLE         HashHandle,
-  IN TPMI_DH_PCR         PcrIndex,
-  IN VOID                *DataToHash,
-  IN UINTN               DataToHashLen,
-  OUT TPML_DIGEST_VALUES *DigestList
+  IN HASH_HANDLE          HashHandle,
+  IN TPMI_DH_PCR          PcrIndex,
+  IN VOID                 *DataToHash,
+  IN UINTN                DataToHashLen,
+  OUT TPML_DIGEST_VALUES  *DigestList
   )
 {
-  TPML_DIGEST_VALUES Digest;
-  HASH_HANDLE        *HashCtx;
-  UINTN              Index;
+  TPML_DIGEST_VALUES  Digest;
+  HASH_HANDLE         *HashCtx;
+  UINTN               Index;
 
   if (mHashInterfaceCount == 0) {
     return EFI_UNSUPPORTED;
   }
 
   HashCtx = (HASH_HANDLE *)HashHandle;
-  ZeroMem (DigestList, sizeof(*DigestList));
+  ZeroMem (DigestList, sizeof (*DigestList));
 
   for (Index = 0; Index < mHashInterfaceCount; Index++) {
     mHashInterface[Index].HashUpdate (HashCtx[Index], DataToHash, DataToHashLen);
@@ -153,14 +157,14 @@ HashCompleteAndExtend (
 EFI_STATUS
 EFIAPI
 HashAndExtend (
-  IN TPMI_DH_PCR                    PcrIndex,
-  IN VOID                           *DataToHash,
-  IN UINTN                          DataToHashLen,
-  OUT TPML_DIGEST_VALUES            *DigestList
+  IN TPMI_DH_PCR          PcrIndex,
+  IN VOID                 *DataToHash,
+  IN UINTN                DataToHashLen,
+  OUT TPML_DIGEST_VALUES  *DigestList
   )
 {
-  HASH_HANDLE    HashHandle;
-  EFI_STATUS     Status;
+  HASH_HANDLE  HashHandle;
+  EFI_STATUS   Status;
 
   if (mHashInterfaceCount == 0) {
     return EFI_UNSUPPORTED;
@@ -185,15 +189,15 @@ HashAndExtend (
 EFI_STATUS
 EFIAPI
 RegisterHashInterfaceLib (
-  IN HASH_INTERFACE   *HashInterface
+  IN HASH_INTERFACE  *HashInterface
   )
 {
-  if (mHashInterfaceCount >= sizeof(mHashInterface)/sizeof(mHashInterface[0])) {
+  if (mHashInterfaceCount >= sizeof (mHashInterface)/sizeof (mHashInterface[0])) {
     return EFI_OUT_OF_RESOURCES;
   }
 
-  CopyMem (&mHashInterface[mHashInterfaceCount], HashInterface, sizeof(*HashInterface));
-  mHashInterfaceCount ++;
+  CopyMem (&mHashInterface[mHashInterfaceCount], HashInterface, sizeof (*HashInterface));
+  mHashInterfaceCount++;
 
   return EFI_SUCCESS;
 }
