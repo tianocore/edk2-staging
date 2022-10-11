@@ -372,9 +372,34 @@ libspdm_rsa_pkcs1_sign_with_nid (
   size_t         *sig_size
   )
 {
-  return RsaPkcs1SignWithNid (
+  switch (hash_nid) {
+    case CRYPTO_NID_SHA256:
+      if (hash_size != SHA256_DIGEST_SIZE) {
+        return FALSE;
+      }
+
+      break;
+
+    case CRYPTO_NID_SHA384:
+      if (hash_size != SHA384_DIGEST_SIZE) {
+        return FALSE;
+      }
+
+      break;
+
+    case CRYPTO_NID_SHA512:
+      if (hash_size != SHA512_DIGEST_SIZE) {
+        return FALSE;
+      }
+
+      break;
+
+    default:
+      return FALSE;
+  }
+
+  return RsaPkcs1Sign (
            rsa_context,
-           hash_nid,
            message_hash,
            hash_size,
            signature,
@@ -392,9 +417,34 @@ libspdm_rsa_pkcs1_verify_with_nid (
   size_t         sig_size
   )
 {
-  return RsaPkcs1VerifyWithNid (
+  switch (hash_nid) {
+    case CRYPTO_NID_SHA256:
+      if (hash_size != SHA256_DIGEST_SIZE) {
+        return false;
+      }
+
+      break;
+
+    case CRYPTO_NID_SHA384:
+      if (hash_size != SHA384_DIGEST_SIZE) {
+        return false;
+      }
+
+      break;
+
+    case CRYPTO_NID_SHA512:
+      if (hash_size != SHA512_DIGEST_SIZE) {
+        return false;
+      }
+
+      break;
+
+    default:
+      return false;
+  }
+
+  return RsaPkcs1Verify (
            rsa_context,
-           hash_nid,
            message_hash,
            hash_size,
            signature,
