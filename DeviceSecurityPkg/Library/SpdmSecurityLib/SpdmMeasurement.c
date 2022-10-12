@@ -300,8 +300,10 @@ ExtendMeasurement (
 
       EventLogPtr = (VOID *)(EventData + 1);
 
-      CopyMem (EventLogPtr, MeasurementRecord, MeasurementRecordLength);
-      EventLogPtr += MeasurementRecordLength;
+      if ((MeasurementRecord != NULL) && (MeasurementRecordLength != 0)) {
+        CopyMem (EventLogPtr, MeasurementRecord, MeasurementRecordLength);
+        EventLogPtr += MeasurementRecordLength;
+      }
 
       *(UINT64 *)EventLogPtr = (UINT64)DevicePathSize;
       EventLogPtr           += sizeof (UINT64);
@@ -334,8 +336,10 @@ ExtendMeasurement (
       TcgSpdmMeasurementBlock->SpdmMeasurementHashAlgo   = MeasurementHashAlgo;
       EventLogPtr                                       += sizeof (TCG_DEVICE_SECURITY_EVENT_DATA_SUB_HEADER_SPDM_MEASUREMENT_BLOCK);
 
-      CopyMem (EventLogPtr, MeasurementRecord, MeasurementRecordLength);
-      EventLogPtr += MeasurementRecordLength;
+      if ((MeasurementRecord != NULL) && (MeasurementRecordLength != 0)) {
+        CopyMem (EventLogPtr, MeasurementRecord, MeasurementRecordLength);
+        EventLogPtr += MeasurementRecordLength;
+      }
  #endif
 
       if (DeviceContextSize != 0) {
