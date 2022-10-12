@@ -68,7 +68,10 @@ RecordSpdmDeviceInList (
   SpdmDeviceList = &mSpdmDeviceList;
 
   NewSpdmDevice = AllocateZeroPool (sizeof (*NewSpdmDevice));
-  ASSERT (NewSpdmDevice != NULL);
+  if (NewSpdmDevice == NULL) {
+    ASSERT (NewSpdmDevice != NULL);
+    return;
+  }
 
   NewSpdmDevice->Signature         = SPDM_DEVICE_INSTANCE_SIGNATURE;
   NewSpdmDevice->SpdmDriverContext = SpdmDriverContext;
@@ -313,9 +316,16 @@ CreateSpdmDriverContext (
   UINTN                       ScratchBufferSize;
 
   SpdmDriverContext = AllocateZeroPool (sizeof (*SpdmDriverContext));
-  ASSERT (SpdmDriverContext != NULL);
+  if (SpdmDriverContext == NULL) {
+    ASSERT (SpdmDriverContext != NULL);
+    return NULL;
+  }
   SpdmContext = AllocateZeroPool (SpdmGetContextSize ());
-  ASSERT (SpdmContext != NULL);
+  if (SpdmContext == NULL) {
+    ASSERT (SpdmContext != NULL);
+    FreePool (SpdmDriverContext);
+    return NULL;
+  }
   SpdmInitContext (SpdmContext);
 
   ScratchBufferSize = SpdmGetSizeofRequiredScratchBuffer (SpdmContext);

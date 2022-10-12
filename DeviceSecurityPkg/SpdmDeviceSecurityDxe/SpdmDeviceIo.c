@@ -21,7 +21,10 @@ SpdmDeviceSendMessage (
   SPDM_IO_PROTOCOL            *SpdmIo;
 
   SpdmDriverContext = GetSpdmDriverContextViaSpdmContext (SpdmContext);
-  ASSERT (SpdmDriverContext != NULL);
+  if (SpdmDriverContext == NULL) {
+    ASSERT (SpdmDriverContext != NULL);
+    return LIBSPDM_STATUS_INVALID_PARAMETER;
+  }
   SpdmIo = SpdmDriverContext->SpdmIoProtocol;
   if (SpdmIo == NULL) {
     return LIBSPDM_STATUS_SEND_FAIL;
@@ -42,7 +45,10 @@ SpdmDeviceReceiveMessage (
   SPDM_IO_PROTOCOL            *SpdmIo;
 
   SpdmDriverContext = GetSpdmDriverContextViaSpdmContext (SpdmContext);
-  ASSERT (SpdmDriverContext != NULL);
+  if (SpdmDriverContext == NULL) {
+    ASSERT (SpdmDriverContext != NULL);
+    return LIBSPDM_STATUS_INVALID_PARAMETER;
+  }
   SpdmIo = SpdmDriverContext->SpdmIoProtocol;
   if (SpdmIo == NULL) {
     return LIBSPDM_STATUS_RECEIVE_FAIL;
