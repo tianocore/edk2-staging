@@ -25,7 +25,10 @@ MeasureVariable (
   UEFI_VARIABLE_DATA  *VarLog;
   UINT32              VarLogSize;
 
-  ASSERT ((VarSize == 0 && VarData == NULL) || (VarSize != 0 && VarData != NULL));
+  if (!((VarSize == 0 && VarData == NULL) || (VarSize != 0 && VarData != NULL))) {
+    ASSERT_EFI_ERROR (EFI_INVALID_PARAMETER);
+    return EFI_INVALID_PARAMETER;
+  }
 
   VarNameLength = StrLen (VarName);
   VarLogSize    = (UINT32)(sizeof (*VarLog) + VarNameLength * sizeof (*VarName) + VarSize
@@ -52,8 +55,8 @@ MeasureVariable (
       );
   }
 
-  DEBUG ((EFI_D_INFO, "VariableDxe: MeasureVariable (Pcr - %x, EventType - %x, ", (UINTN)7, (UINTN)EV_EFI_SPDM_DEVICE_POLICY));
-  DEBUG ((EFI_D_INFO, "VariableName - %s, VendorGuid - %g)\n", VarName, VendorGuid));
+  DEBUG ((DEBUG_INFO, "VariableDxe: MeasureVariable (Pcr - %x, EventType - %x, ", (UINTN)7, (UINTN)EV_EFI_SPDM_DEVICE_POLICY));
+  DEBUG ((DEBUG_INFO, "VariableName - %s, VendorGuid - %g)\n", VarName, VendorGuid));
 
   Status = TpmMeasureAndLogData (
              PcrIndex,
@@ -91,6 +94,8 @@ ExtendCertificate (
   UINTN                                                      DataSize;
   VOID                                                       *SpdmContext;
   SPDM_DATA_PARAMETER                                        Parameter;
+  EFI_SIGNATURE_DATA                                         *SignatureData;
+  UINTN                                                      SignatureDataSize;
 
   SpdmContext = SpdmDeviceContext->SpdmContext;
 
@@ -236,13 +241,13 @@ ExtendCertificate (
       return EFI_UNSUPPORTED;
   }
 
-  {
-    EFI_SIGNATURE_DATA  *SignatureData;
-    UINTN               SignatureDataSize;
-
+  if ((TrustAnchor != NULL) && (TrustAnchorSize != 0)) {
     SignatureDataSize = sizeof (EFI_GUID) + TrustAnchorSize;
     SignatureData     = AllocateZeroPool (SignatureDataSize);
-    ASSERT (SignatureData != NULL);
+    if (SignatureData == NULL) {
+      ASSERT (SignatureData != NULL);
+      return EFI_OUT_OF_RESOURCES;
+    }
     CopyGuid (&SignatureData->SignatureOwner, &gEfiCallerIdGuid);
     CopyMem (
       (UINT8 *)SignatureData + sizeof (EFI_GUID),
@@ -393,7 +398,7 @@ DoDeviceAuthentication (
       RootCertMatch = TRUE;
     }
 
-    DEBUG ((DEBUG_ERROR, "SpdmGetCertificateEx - Status %r, TrustAnchorSize 0x%x\n", Status, TrustAnchorSize));
+    DEBUG ((DEBUG_INFO, "SpdmGetCertificateEx - Status %r, TrustAnchorSize 0x%x, RootCertMatch %d\n", Status, TrustAnchorSize, RootCertMatch));
   }
 
   if ((CapabilityFlags & SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_CHAL_CAP) == 0) {

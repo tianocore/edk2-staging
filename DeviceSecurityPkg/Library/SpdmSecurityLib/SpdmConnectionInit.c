@@ -22,7 +22,10 @@ RecordSpdmDeviceContextInList (
   SpdmDeviceContextList = &mSpdmDeviceContextList;
 
   NewSpdmDeviceContext = AllocateZeroPool (sizeof (*NewSpdmDeviceContext));
-  ASSERT (NewSpdmDeviceContext != NULL);
+  if (NewSpdmDeviceContext == NULL) {
+    ASSERT (NewSpdmDeviceContext != NULL);
+    return;
+  }
 
   NewSpdmDeviceContext->Signature         = SPDM_DEVICE_CONTEXT_INSTANCE_SIGNATURE;
   NewSpdmDeviceContext->SpdmDeviceContext = SpdmDeviceContext;
@@ -76,7 +79,10 @@ CreateSpdmDeviceContext (
   UINT32               Data32;
 
   SpdmDeviceContext = AllocateZeroPool (sizeof (*SpdmDeviceContext));
-  ASSERT (SpdmDeviceContext != NULL);
+  if (SpdmDeviceContext == NULL) {
+    ASSERT (SpdmDeviceContext != NULL);
+    return NULL;
+  }
   SpdmDeviceContext->Signature = SPDM_DEVICE_CONTEXT_SIGNATURE;
   CopyMem (&SpdmDeviceContext->DeviceId, SpdmDeviceInfo->DeviceId, sizeof (EDKII_DEVICE_IDENTIFIER));
   SpdmDeviceContext->IsEmbeddedDevice = SpdmDeviceInfo->IsEmbeddedDevice;
@@ -165,7 +171,7 @@ CreateSpdmDeviceContext (
              (VOID **)&SignatureList,
              &SignatureListSize
              );
-  if (!EFI_ERROR (Status)) {
+  if ((!EFI_ERROR (Status)) && (SignatureList != NULL)) {
     // BUGBUG: Assume only 1 SPDM cert.
     ASSERT (CompareGuid (&SignatureList->SignatureType, &gEdkiiCertSpdmCertChainGuid));
     ASSERT (SignatureList->SignatureListSize == SignatureList->SignatureListSize);
