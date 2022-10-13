@@ -186,6 +186,7 @@ MainEntryPoint (
   UINT8                TestConfig;
   UINTN                TestConfigSize;
 
+  TestConfigSize = sizeof(UINT8);
   Status = gRT->GetVariable (
                   L"SpdmTestConfig",
                   &gEfiDeviceSecurityPkgTestConfig,
@@ -193,6 +194,9 @@ MainEntryPoint (
                   &TestConfigSize,
                   &TestConfig
                   );
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
 
   SpdmContext = AllocateZeroPool (SpdmGetContextSize ());
   ASSERT (SpdmContext != NULL);
