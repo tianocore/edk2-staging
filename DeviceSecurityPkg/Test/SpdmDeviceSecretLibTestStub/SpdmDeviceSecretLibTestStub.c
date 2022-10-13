@@ -296,6 +296,7 @@ SpdmMeasurementCollectionFunc (
   UINT8                        TestConfig;
   UINTN                        TestConfigSize;
 
+  TestConfigSize = sizeof(UINT8);
   Status = gRT->GetVariable (
                   L"SpdmTestConfig",
                   &gEfiDeviceSecurityPkgTestConfig,
@@ -735,6 +736,7 @@ SpdmResponderDataSignFunc (
     return FALSE;
   }
 
+  TestConfigSize = sizeof(UINT8);
   Status = gRT->GetVariable (
                   L"SpdmTestConfig",
                   &gEfiDeviceSecurityPkgTestConfig,
@@ -742,6 +744,9 @@ SpdmResponderDataSignFunc (
                   &TestConfigSize,
                   &TestConfig
                   );
+  if (EFI_ERROR (Status)) {
+    return FALSE;
+  }
 
   Result = SpdmAsymGetPrivateKeyFromPem (BaseAsymAlgo, PrivatePem, PrivatePemSize, NULL, &Context);
   if (!Result) {

@@ -908,6 +908,7 @@ MainEntryPoint (
   UINT8                TestConfig;
   UINTN                TestConfigSize;
 
+  TestConfigSize = sizeof(UINT8);
   Status = gRT->GetVariable (
                   L"SpdmTestConfig",
                   &gEfiDeviceSecurityPkgTestConfig,
@@ -915,6 +916,9 @@ MainEntryPoint (
                   &TestConfigSize,
                   &TestConfig
                   );
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
 
   mPciDeviceBuffer = AllocateZeroPool (0x1000);
   ASSERT (mPciDeviceBuffer != NULL);

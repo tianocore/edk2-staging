@@ -73,6 +73,7 @@ GetDevicePolicy (
   UINT8                TestConfig;
   UINTN                TestConfigSize;
 
+  TestConfigSize = sizeof(UINT8);
   Status = gRT->GetVariable (
                   L"SpdmTestConfig",
                   &gEfiDeviceSecurityPkgTestConfig,
@@ -80,6 +81,9 @@ GetDevicePolicy (
                   &TestConfigSize,
                   &TestConfig
                   );
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
 
   CopyMem (DeviceSecurityPolicy, &mDeviceSecurityPolicyNone, sizeof (EDKII_DEVICE_SECURITY_POLICY));
 
