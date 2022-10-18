@@ -35,6 +35,7 @@ SpdmProtocolSetData (
 {
   SPDM_DRIVER_DEVICE_CONTEXT  *SpdmDriverContext;
   VOID                        *SpdmContext;
+  SPDM_RETURN                 SpdmReturn;
 
   SpdmDriverContext = GetSpdmDriverContextViaSpdmProtocol (This);
   if (SpdmDriverContext == NULL) {
@@ -43,7 +44,12 @@ SpdmProtocolSetData (
 
   SpdmContext = SpdmDriverContext->SpdmContext;
 
-  return SpdmSetData (SpdmContext, DataType, Parameter, Data, DataSize);
+  SpdmReturn = SpdmSetData (SpdmContext, DataType, Parameter, Data, DataSize);
+  if (LIBSPDM_STATUS_IS_SUCCESS (SpdmReturn)) {
+    return EFI_SUCCESS;
+  } else {
+    return EFI_DEVICE_ERROR;
+  }
 }
 
 /**
@@ -76,6 +82,7 @@ SpdmProtocolGetData (
 {
   SPDM_DRIVER_DEVICE_CONTEXT  *SpdmDriverContext;
   VOID                        *SpdmContext;
+  SPDM_RETURN                 SpdmReturn;
 
   SpdmDriverContext = GetSpdmDriverContextViaSpdmProtocol (This);
   if (SpdmDriverContext == NULL) {
@@ -84,7 +91,12 @@ SpdmProtocolGetData (
 
   SpdmContext = SpdmDriverContext->SpdmContext;
 
-  return SpdmGetData (SpdmContext, DataType, Parameter, Data, DataSize);
+  SpdmReturn = SpdmGetData (SpdmContext, DataType, Parameter, Data, DataSize);
+  if (LIBSPDM_STATUS_IS_SUCCESS (SpdmReturn)) {
+    return EFI_SUCCESS;
+  } else {
+    return EFI_DEVICE_ERROR;
+  }
 }
 
 /*
@@ -100,7 +112,7 @@ SpdmProtocolInitConnection (
 {
   SPDM_DRIVER_DEVICE_CONTEXT  *SpdmDriverDeviceContext;
   VOID                        *SpdmContext;
-  EFI_STATUS                  Status;
+  SPDM_RETURN                 SpdmReturn;
 
   SpdmDriverDeviceContext = GetSpdmDriverContextViaSpdmProtocol (This);
   if (SpdmDriverDeviceContext == NULL) {
@@ -109,12 +121,12 @@ SpdmProtocolInitConnection (
 
   SpdmContext = SpdmDriverDeviceContext->SpdmContext;
 
-  Status = SpdmInitConnection (SpdmContext, FALSE);
-  if (EFI_ERROR (Status)) {
-    return Status;
+  SpdmReturn = SpdmInitConnection (SpdmContext, FALSE);
+  if (LIBSPDM_STATUS_IS_SUCCESS (SpdmReturn)) {
+    return EFI_SUCCESS;
+  } else {
+    return EFI_DEVICE_ERROR;
   }
-
-  return EFI_SUCCESS;
 }
 
 /*
@@ -132,6 +144,7 @@ SpdmProtocolGetDigest (
 {
   SPDM_DRIVER_DEVICE_CONTEXT  *SpdmDriverDeviceContext;
   VOID                        *SpdmContext;
+  SPDM_RETURN                 SpdmReturn;
 
   SpdmDriverDeviceContext = GetSpdmDriverContextViaSpdmProtocol (This);
   if (SpdmDriverDeviceContext == NULL) {
@@ -140,7 +153,12 @@ SpdmProtocolGetDigest (
 
   SpdmContext = SpdmDriverDeviceContext->SpdmContext;
 
-  return SpdmGetDigest (SpdmContext, SlotMask, TotalDigestBuffer);
+  SpdmReturn = SpdmGetDigest (SpdmContext, SlotMask, TotalDigestBuffer);
+  if (LIBSPDM_STATUS_IS_SUCCESS (SpdmReturn)) {
+    return EFI_SUCCESS;
+  } else {
+    return EFI_DEVICE_ERROR;
+  }
 }
 
 /*
@@ -157,6 +175,7 @@ SpdmProtocolGetCertificate (
 {
   SPDM_DRIVER_DEVICE_CONTEXT  *SpdmDriverDeviceContext;
   VOID                        *SpdmContext;
+  SPDM_RETURN                 SpdmReturn;
 
   SpdmDriverDeviceContext = GetSpdmDriverContextViaSpdmProtocol (This);
   if (SpdmDriverDeviceContext == NULL) {
@@ -165,7 +184,12 @@ SpdmProtocolGetCertificate (
 
   SpdmContext = SpdmDriverDeviceContext->SpdmContext;
 
-  return SpdmGetCertificate (SpdmContext, SlotNum, CertChainSize, CertChain);
+  SpdmReturn = SpdmGetCertificate (SpdmContext, SlotNum, CertChainSize, CertChain);
+  if (LIBSPDM_STATUS_IS_SUCCESS (SpdmReturn)) {
+    return EFI_SUCCESS;
+  } else {
+    return EFI_DEVICE_ERROR;
+  }
 }
 
 /*
@@ -182,6 +206,7 @@ SpdmProtocolChallenge (
 {
   SPDM_DRIVER_DEVICE_CONTEXT  *SpdmDriverDeviceContext;
   VOID                        *SpdmContext;
+  SPDM_RETURN                 SpdmReturn;
 
   SpdmDriverDeviceContext = GetSpdmDriverContextViaSpdmProtocol (This);
   if (SpdmDriverDeviceContext == NULL) {
@@ -190,7 +215,12 @@ SpdmProtocolChallenge (
 
   SpdmContext = SpdmDriverDeviceContext->SpdmContext;
 
-  return SpdmChallenge (SpdmContext, SlotNum, MeasurementHashType, MeasurementHash, NULL);
+  SpdmReturn = SpdmChallenge (SpdmContext, SlotNum, MeasurementHashType, MeasurementHash, NULL);
+  if (LIBSPDM_STATUS_IS_SUCCESS (SpdmReturn)) {
+    return EFI_SUCCESS;
+  } else {
+    return EFI_DEVICE_ERROR;
+  }
 }
 
 /*
@@ -210,6 +240,7 @@ SpdmProtocolGetMeasurement (
 {
   SPDM_DRIVER_DEVICE_CONTEXT  *SpdmDriverDeviceContext;
   VOID                        *SpdmContext;
+  SPDM_RETURN                 SpdmReturn;
 
   SpdmDriverDeviceContext = GetSpdmDriverContextViaSpdmProtocol (This);
   if (SpdmDriverDeviceContext == NULL) {
@@ -218,17 +249,22 @@ SpdmProtocolGetMeasurement (
 
   SpdmContext = SpdmDriverDeviceContext->SpdmContext;
 
-  return SpdmGetMeasurement (
-           SpdmContext,
-           NULL,
-           RequestAttribute,
-           MeasurementOperation,
-           SlotNum,
-           NULL,
-           NumberOfBlocks,
-           MeasurementRecordLength,
-           MeasurementRecord
-           );
+  SpdmReturn = SpdmGetMeasurement (
+                 SpdmContext,
+                 NULL,
+                 RequestAttribute,
+                 MeasurementOperation,
+                 SlotNum,
+                 NULL,
+                 NumberOfBlocks,
+                 MeasurementRecordLength,
+                 MeasurementRecord
+                 );
+  if (LIBSPDM_STATUS_IS_SUCCESS (SpdmReturn)) {
+    return EFI_SUCCESS;
+  } else {
+    return EFI_DEVICE_ERROR;
+  }
 }
 
 /*
@@ -248,6 +284,7 @@ SpdmProtocolSendReceiveData (
 {
   SPDM_DRIVER_DEVICE_CONTEXT  *SpdmDriverDeviceContext;
   VOID                        *SpdmContext;
+  SPDM_RETURN                 SpdmReturn;
 
   SpdmDriverDeviceContext = GetSpdmDriverContextViaSpdmProtocol (This);
   if (SpdmDriverDeviceContext == NULL) {
@@ -256,7 +293,12 @@ SpdmProtocolSendReceiveData (
 
   SpdmContext = SpdmDriverDeviceContext->SpdmContext;
 
-  return SpdmSendReceiveData (SpdmContext, SessionId, IsAppMessage, Request, RequestSize, Response, ResponseSize);
+  SpdmReturn = SpdmSendReceiveData (SpdmContext, SessionId, IsAppMessage, Request, RequestSize, Response, ResponseSize);
+  if (LIBSPDM_STATUS_IS_SUCCESS (SpdmReturn)) {
+    return EFI_SUCCESS;
+  } else {
+    return EFI_DEVICE_ERROR;
+  }
 }
 
 /**
@@ -281,6 +323,7 @@ SpdmProtocolStartSession (
   SPDM_DRIVER_DEVICE_CONTEXT  *SpdmDriverDeviceContext;
   VOID                        *SpdmContext;
   UINT8                       SessionPolicy;
+  SPDM_RETURN                 SpdmReturn;
 
   SpdmDriverDeviceContext = GetSpdmDriverContextViaSpdmProtocol (This);
   if (SpdmDriverDeviceContext == NULL) {
@@ -290,16 +333,21 @@ SpdmProtocolStartSession (
   SpdmContext = SpdmDriverDeviceContext->SpdmContext;
 
   SessionPolicy = SPDM_KEY_EXCHANGE_REQUEST_SESSION_POLICY_TERMINATION_POLICY_RUNTIME_UPDATE;
-  return SpdmStartSession (
-           SpdmContext,
-           UsePsk,
-           MeasurementHashType,
-           SlotNum,
-           SessionPolicy,
-           SessionId,
-           HeartbeatPeriod,
-           MeasurementHash
-           );
+  SpdmReturn    = SpdmStartSession (
+                    SpdmContext,
+                    UsePsk,
+                    MeasurementHashType,
+                    SlotNum,
+                    SessionPolicy,
+                    SessionId,
+                    HeartbeatPeriod,
+                    MeasurementHash
+                    );
+  if (LIBSPDM_STATUS_IS_SUCCESS (SpdmReturn)) {
+    return EFI_SUCCESS;
+  } else {
+    return EFI_DEVICE_ERROR;
+  }
 }
 
 /**
@@ -319,6 +367,7 @@ SpdmProtocolStopSession (
 {
   SPDM_DRIVER_DEVICE_CONTEXT  *SpdmDriverDeviceContext;
   VOID                        *SpdmContext;
+  SPDM_RETURN                 SpdmReturn;
 
   SpdmDriverDeviceContext = GetSpdmDriverContextViaSpdmProtocol (This);
   if (SpdmDriverDeviceContext == NULL) {
@@ -327,7 +376,12 @@ SpdmProtocolStopSession (
 
   SpdmContext = SpdmDriverDeviceContext->SpdmContext;
 
-  return SpdmStopSession (SpdmContext, SessionId, EndSessionAttributes);
+  SpdmReturn = SpdmStopSession (SpdmContext, SessionId, EndSessionAttributes);
+  if (LIBSPDM_STATUS_IS_SUCCESS (SpdmReturn)) {
+    return EFI_SUCCESS;
+  } else {
+    return EFI_DEVICE_ERROR;
+  }
 }
 
 SPDM_PROTOCOL  mSpdmProtocol = {
