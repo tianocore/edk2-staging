@@ -71,11 +71,17 @@ SpdmTestProtocolSetData (
 {
   VOID                      *SpdmContext;
   SPDM_TEST_DEVICE_CONTEXT  *SpdmTestContext;
+  SPDM_RETURN               SpdmReturn;
 
   SpdmTestContext = SPDM_TEST_DEVICE_CONTEXT_FROM_SPDM_TEST_PROTOCOL (This);
   SpdmContext     = SpdmTestContext->SpdmContext;
 
-  return SpdmSetData (SpdmContext, DataType, Parameter, Data, DataSize);
+  SpdmReturn = SpdmSetData (SpdmContext, DataType, Parameter, Data, DataSize);
+  if (LIBSPDM_STATUS_IS_SUCCESS (SpdmReturn)) {
+    return EFI_SUCCESS;
+  } else {
+    return EFI_DEVICE_ERROR;
+  }
 }
 
 /**
@@ -108,11 +114,17 @@ SpdmTestProtocolGetData (
 {
   VOID                      *SpdmContext;
   SPDM_TEST_DEVICE_CONTEXT  *SpdmTestContext;
+  SPDM_RETURN               SpdmReturn;
 
   SpdmTestContext = SPDM_TEST_DEVICE_CONTEXT_FROM_SPDM_TEST_PROTOCOL (This);
   SpdmContext     = SpdmTestContext->SpdmContext;
 
-  return SpdmGetData (SpdmContext, DataType, Parameter, Data, DataSize);
+  SpdmReturn = SpdmGetData (SpdmContext, DataType, Parameter, Data, DataSize);
+  if (LIBSPDM_STATUS_IS_SUCCESS (SpdmReturn)) {
+    return EFI_SUCCESS;
+  } else {
+    return EFI_DEVICE_ERROR;
+  }
 }
 
 /**

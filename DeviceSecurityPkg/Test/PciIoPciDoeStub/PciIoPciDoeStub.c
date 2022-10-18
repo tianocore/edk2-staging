@@ -299,12 +299,12 @@ PciIoStubConfigWrite (
   IN OUT VOID                       *Buffer
   )
 {
-  UINTN       Size;
-  EFI_STATUS  Status;
-  UINT32      *SessionId;
-  BOOLEAN     IsAppMessage;
-  UINT32      TmpSessionId;
-  UINT32      *SessionIdPtr;
+  UINTN        Size;
+  SPDM_RETURN  SpdmReturn;
+  UINT32       *SessionId;
+  BOOLEAN      IsAppMessage;
+  UINT32       TmpSessionId;
+  UINT32       *SessionIdPtr;
 
   switch (Width) {
     case EfiPciIoWidthUint8:
@@ -350,17 +350,17 @@ PciIoStubConfigWrite (
       mResponseDataSize = sizeof (mResponseDataBuffer);
       DEBUG ((DEBUG_ERROR, " [PciIoCfg] Get ResponseData via SpdmProcessRequest and SpdmBuildResponse.\n"));
 
-      SessionId = NULL;
-      Status    = SpdmProcessRequest (
-                    mSpdmContext,
-                    &SessionId,
-                    &IsAppMessage,
-                    mRequestDataSize,
-                    mRequestDataBuffer
-                    );
-      if (EFI_ERROR (Status)) {
-        DEBUG ((DEBUG_ERROR, "SpdmProcessRequest - %r\n", Status));
-        return Status;
+      SessionId  = NULL;
+      SpdmReturn = SpdmProcessRequest (
+                     mSpdmContext,
+                     &SessionId,
+                     &IsAppMessage,
+                     mRequestDataSize,
+                     mRequestDataBuffer
+                     );
+      if (LIBSPDM_STATUS_IS_ERROR (SpdmReturn)) {
+        DEBUG ((DEBUG_ERROR, "SpdmProcessRequest - %p\n", SpdmReturn));
+        return EFI_DEVICE_ERROR;
       }
 
       if (SessionId != NULL) {
@@ -371,15 +371,15 @@ PciIoStubConfigWrite (
       }
 
       mResponseDataBufferPtr = mResponseDataBuffer;
-      Status                 = SpdmBuildResponse (mSpdmContext, SessionIdPtr, IsAppMessage, &mResponseDataSize, (VOID **)&mResponseDataBufferPtr);
-      if (EFI_ERROR (Status)) {
-        DEBUG ((DEBUG_ERROR, "SpdmBuildResponse - %r\n", Status));
-        return Status;
+      SpdmReturn             = SpdmBuildResponse (mSpdmContext, SessionIdPtr, IsAppMessage, &mResponseDataSize, (VOID **)&mResponseDataBufferPtr);
+      if (LIBSPDM_STATUS_IS_ERROR (SpdmReturn)) {
+        DEBUG ((DEBUG_ERROR, "SpdmBuildResponse - %p\n", SpdmReturn));
+        return EFI_DEVICE_ERROR;
       }
 
-      DEBUG ((DEBUG_ERROR, " [PciIoCfg] SpdmBuildResponse - %r, ResponseDataSize = 0x%x\n", Status, mResponseDataSize));
+      DEBUG ((DEBUG_INFO, " [PciIoCfg] SpdmBuildResponse - %p ResponseDataSize = 0x%x\n", SpdmReturn, mResponseDataSize));
 
-      if (!EFI_ERROR (Status)) {
+      if (LIBSPDM_STATUS_IS_SUCCESS (SpdmReturn)) {
         //
         // Simulate setting "Data Object Ready" bit.
         //
@@ -908,14 +908,14 @@ MainEntryPoint (
   UINT8                TestConfig;
   UINTN                TestConfigSize;
 
-  TestConfigSize = sizeof(UINT8);
-  Status = gRT->GetVariable (
-                  L"SpdmTestConfig",
-                  &gEfiDeviceSecurityPkgTestConfig,
-                  NULL,
-                  &TestConfigSize,
-                  &TestConfig
-                  );
+  TestConfigSize = sizeof (UINT8);
+  Status         = gRT->GetVariable (
+                          L"SpdmTestConfig",
+                          &gEfiDeviceSecurityPkgTestConfig,
+                          NULL,
+                          &TestConfigSize,
+                          &TestConfig
+                          );
   if (EFI_ERROR (Status)) {
     return Status;
   }
