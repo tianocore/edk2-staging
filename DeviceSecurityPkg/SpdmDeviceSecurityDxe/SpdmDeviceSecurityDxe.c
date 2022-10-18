@@ -306,6 +306,7 @@ CreateSpdmDriverContext (
   SPDM_DRIVER_DEVICE_CONTEXT  *SpdmDriverContext;
   VOID                        *SpdmContext;
   EFI_STATUS                  Status;
+  SPDM_RETURN                 SpdmReturn;
   VOID                        *Data;
   UINTN                       DataSize;
   SPDM_DATA_PARAMETER         Parameter;
@@ -320,12 +321,14 @@ CreateSpdmDriverContext (
     ASSERT (SpdmDriverContext != NULL);
     return NULL;
   }
+
   SpdmContext = AllocateZeroPool (SpdmGetContextSize ());
   if (SpdmContext == NULL) {
     ASSERT (SpdmContext != NULL);
     FreePool (SpdmDriverContext);
     return NULL;
   }
+
   SpdmInitContext (SpdmContext);
 
   ScratchBufferSize = SpdmGetSizeofRequiredScratchBuffer (SpdmContext);
@@ -480,9 +483,9 @@ CreateSpdmDriverContext (
   Data8 = SPDM_ALGORITHMS_OPAQUE_DATA_FORMAT_1;
   SpdmSetData (SpdmContext, SpdmDataOtherParamsSsupport, &Parameter, &Data8, sizeof (Data8));
 
-  Status = SpdmInitConnection (SpdmContext, FALSE);
-  if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_ERROR, "SpdmInitConnection - %r\n", Status));
+  SpdmReturn = SpdmInitConnection (SpdmContext, FALSE);
+  if (LIBSPDM_STATUS_IS_ERROR (SpdmReturn)) {
+    DEBUG ((DEBUG_ERROR, "SpdmInitConnection - %p\n", SpdmReturn));
     goto Error;
   }
 

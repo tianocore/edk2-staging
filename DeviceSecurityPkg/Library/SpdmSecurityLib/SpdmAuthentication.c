@@ -25,7 +25,7 @@ MeasureVariable (
   UEFI_VARIABLE_DATA  *VarLog;
   UINT32              VarLogSize;
 
-  if (!((VarSize == 0 && VarData == NULL) || (VarSize != 0 && VarData != NULL))) {
+  if (!(((VarSize == 0) && (VarData == NULL)) || ((VarSize != 0) && (VarData != NULL)))) {
     ASSERT_EFI_ERROR (EFI_INVALID_PARAMETER);
     return EFI_INVALID_PARAMETER;
   }
@@ -248,6 +248,7 @@ ExtendCertificate (
       ASSERT (SignatureData != NULL);
       return EFI_OUT_OF_RESOURCES;
     }
+
     CopyGuid (&SignatureData->SignatureOwner, &gEfiCallerIdGuid);
     CopyMem (
       (UINT8 *)SignatureData + sizeof (EFI_GUID),
@@ -338,6 +339,7 @@ DoDeviceAuthentication (
   )
 {
   EFI_STATUS           Status;
+  SPDM_RETURN          SpdmReturn;
   VOID                 *SpdmContext;
   UINT32               CapabilityFlags;
   UINTN                DataSize;
@@ -362,7 +364,10 @@ DoDeviceAuthentication (
   ZeroMem (&Parameter, sizeof (Parameter));
   Parameter.location = SpdmDataLocationConnection;
   DataSize           = sizeof (CapabilityFlags);
-  SpdmGetData (SpdmContext, SpdmDataCapabilityFlags, &Parameter, &CapabilityFlags, &DataSize);
+  SpdmReturn         = SpdmGetData (SpdmContext, SpdmDataCapabilityFlags, &Parameter, &CapabilityFlags, &DataSize);
+  if (LIBSPDM_STATUS_IS_ERROR (SpdmReturn)) {
+    return EFI_DEVICE_ERROR;
+  }
 
   IsValidCertChain        = FALSE;
   IsValidChallengeAuthSig = FALSE;
@@ -376,29 +381,32 @@ DoDeviceAuthentication (
 
   if ((CapabilityFlags & SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_CERT_CAP) != 0) {
     ZeroMem (TotalDigestBuffer, sizeof (TotalDigestBuffer));
-    Status = SpdmGetDigest (SpdmContext, &SlotMask, TotalDigestBuffer);
+    SpdmReturn = SpdmGetDigest (SpdmContext, &SlotMask, TotalDigestBuffer);
+    if (LIBSPDM_STATUS_IS_ERROR (SpdmReturn)) {
+      return EFI_DEVICE_ERROR;
+    }
 
     CertChainSize = sizeof (CertChain);
     ZeroMem (CertChain, sizeof (CertChain));
     TrustAnchor     = NULL;
     TrustAnchorSize = 0;
-    Status          = SpdmGetCertificateEx (SpdmContext, 0, &CertChainSize, CertChain, (CONST VOID **)&TrustAnchor, &TrustAnchorSize);
-    if (Status == LIBSPDM_STATUS_SUCCESS) {
+    SpdmReturn      = SpdmGetCertificateEx (SpdmContext, 0, &CertChainSize, CertChain, (CONST VOID **)&TrustAnchor, &TrustAnchorSize);
+    if (LIBSPDM_STATUS_IS_SUCCESS (SpdmReturn)) {
       IsValidCertChain = TRUE;
-    } else if (Status == LIBSPDM_STATUS_VERIF_FAIL) {
+    } else if (SpdmReturn == LIBSPDM_STATUS_VERIF_FAIL) {
       IsValidCertChain = FALSE;
       AuthState        = TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_FAIL_INVALID;
-      ExtendCertificate (SpdmDeviceContext, AuthState, 0, NULL, NULL, 0);
+      Status           = ExtendCertificate (SpdmDeviceContext, AuthState, 0, NULL, NULL, 0);
       return Status;
     } else {
-      return Status;
+      return EFI_DEVICE_ERROR;
     }
 
     if (TrustAnchor != NULL) {
       RootCertMatch = TRUE;
     }
 
-    DEBUG ((DEBUG_INFO, "SpdmGetCertificateEx - Status %r, TrustAnchorSize 0x%x, RootCertMatch %d\n", Status, TrustAnchorSize, RootCertMatch));
+    DEBUG ((DEBUG_INFO, "SpdmGetCertificateEx - SpdmReturn %p, TrustAnchorSize 0x%x, RootCertMatch %d\n", SpdmReturn, TrustAnchorSize, RootCertMatch));
   }
 
   if ((CapabilityFlags & SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_CHAL_CAP) == 0) {
@@ -412,30 +420,30 @@ DoDeviceAuthentication (
     ZeroMem (RequesterNonce, sizeof (RequesterNonce));
     ZeroMem (ResponderNonce, sizeof (ResponderNonce));
     ZeroMem (RequesterNonceIn, sizeof (RequesterNonceIn));
-    Status = SpdmChallengeEx (SpdmContext, 0, SPDM_CHALLENGE_REQUEST_TCB_COMPONENT_MEASUREMENT_HASH, MeasurementHash, NULL, RequesterNonceIn, RequesterNonce, ResponderNonce);
-    if (Status == LIBSPDM_STATUS_SUCCESS) {
+    SpdmReturn = SpdmChallengeEx (SpdmContext, 0, SPDM_CHALLENGE_REQUEST_TCB_COMPONENT_MEASUREMENT_HASH, MeasurementHash, NULL, RequesterNonceIn, RequesterNonce, ResponderNonce);
+    if (SpdmReturn == LIBSPDM_STATUS_SUCCESS) {
       IsValidChallengeAuthSig = TRUE;
-    } else if (Status == LIBSPDM_STATUS_VERIF_FAIL) {
+    } else if (SpdmReturn == LIBSPDM_STATUS_VERIF_FAIL) {
       IsValidChallengeAuthSig = FALSE;
       AuthState               = TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_FAIL_INVALID;
-      ExtendCertificate (SpdmDeviceContext, AuthState, 0, NULL, NULL, 0);
+      Status                  = ExtendCertificate (SpdmDeviceContext, AuthState, 0, NULL, NULL, 0);
       return Status;
     } else {
-      return Status;
+      return EFI_DEVICE_ERROR;
     }
 
     if (IsValidCertChain && IsValidChallengeAuthSig && !RootCertMatch) {
       AuthState = TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_NO_AUTH;
-      ExtendCertificate (SpdmDeviceContext, AuthState, CertChainSize, CertChain, NULL, 0);
+      Status    = ExtendCertificate (SpdmDeviceContext, AuthState, CertChainSize, CertChain, NULL, 0);
       return Status;
     }
 
     if (IsValidCertChain && IsValidChallengeAuthSig && RootCertMatch) {
       AuthState = TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_SUCCESS;
-      ExtendCertificate (SpdmDeviceContext, AuthState, CertChainSize, CertChain, TrustAnchor, TrustAnchorSize);
+      Status    = ExtendCertificate (SpdmDeviceContext, AuthState, CertChainSize, CertChain, TrustAnchor, TrustAnchorSize);
     }
 
-    ExtendAuthentication (SpdmDeviceContext, AuthState, SPDM_CHALLENGE_REQUEST_TCB_COMPONENT_MEASUREMENT_HASH, MeasurementHash, RequesterNonce, ResponderNonce);
+    Status = ExtendAuthentication (SpdmDeviceContext, AuthState, SPDM_CHALLENGE_REQUEST_TCB_COMPONENT_MEASUREMENT_HASH, MeasurementHash, RequesterNonce, ResponderNonce);
   }
 
   return Status;

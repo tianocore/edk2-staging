@@ -76,7 +76,7 @@ SpdmIoReceiveMessage (
              mSpdmIoLastSpdmRequest
              );
   if (LIBSPDM_STATUS_IS_ERROR (Status)) {
-    DEBUG ((DEBUG_ERROR, "SpdmProcessRequest - %r\n", Status));
+    DEBUG ((DEBUG_ERROR, "SpdmProcessRequest - %p\n", Status));
     return Status;
   }
 
@@ -90,7 +90,7 @@ SpdmIoReceiveMessage (
   ZeroMem (*Message, *MessageSize);
   Status = SpdmBuildResponse (SpdmContext, SessionIdPtr, IsAppMessage, MessageSize, Message);
   if (LIBSPDM_STATUS_IS_ERROR (Status)) {
-    DEBUG ((DEBUG_ERROR, "SpdmBuildResponse - %r\n", Status));
+    DEBUG ((DEBUG_ERROR, "SpdmBuildResponse - %p\n", Status));
     return Status;
   }
 
@@ -186,14 +186,14 @@ MainEntryPoint (
   UINT8                TestConfig;
   UINTN                TestConfigSize;
 
-  TestConfigSize = sizeof(UINT8);
-  Status = gRT->GetVariable (
-                  L"SpdmTestConfig",
-                  &gEfiDeviceSecurityPkgTestConfig,
-                  NULL,
-                  &TestConfigSize,
-                  &TestConfig
-                  );
+  TestConfigSize = sizeof (UINT8);
+  Status         = gRT->GetVariable (
+                          L"SpdmTestConfig",
+                          &gEfiDeviceSecurityPkgTestConfig,
+                          NULL,
+                          &TestConfigSize,
+                          &TestConfig
+                          );
   if (EFI_ERROR (Status)) {
     return Status;
   }
