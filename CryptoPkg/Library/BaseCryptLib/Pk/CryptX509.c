@@ -1527,7 +1527,7 @@ _Exit:
 }
 
 /**
-  Format a DateTime object into DataTime Buffer
+  Format a DateTimeStr to DataTime object in DataTime Buffer
 
   If DateTimeStr is NULL, then return FALSE.
   If DateTimeSize is NULL, then return FALSE.
@@ -1536,7 +1536,7 @@ _Exit:
   @param[in]      DateTimeStr      DateTime string like YYYYMMDDhhmmssZ
                                    Ref: https://www.w3.org/TR/NOTE-datetime
                                    Z stand for UTC time
-  @param[in,out]  DateTime         Pointer to a DateTime object.
+  @param[out]     DateTime         Pointer to a DateTime object.
   @param[in,out]  DateTimeSize     DateTime object buffer size.
 
   @retval TRUE                     The DateTime object create successfully.
@@ -1551,10 +1551,10 @@ _Exit:
 **/
 BOOLEAN
 EFIAPI
-X509SetDateTime (
-  IN     CHAR8  *DateTimeStr,
-  OUT VOID      *DateTime,
-  IN OUT UINTN  *DateTimeSize
+X509FormatDateTime (
+  IN  CONST  CHAR8  *DateTimeStr,
+  OUT VOID          *DateTime,
+  IN OUT UINTN      *DateTimeSize
   )
 {
   BOOLEAN    Status;
@@ -1886,10 +1886,10 @@ X509GetCertFromCertChain (
 BOOLEAN
 EFIAPI
 Asn1GetTag (
-  IN OUT UINT8   **Ptr,
-  IN     UINT8   *End,
-  OUT UINTN      *Length,
-  IN     UINT32  Tag
+  IN OUT UINT8    **Ptr,
+  IN CONST UINT8  *End,
+  OUT UINTN       *Length,
+  IN     UINT32   Tag
   )
 {
   UINT8  *PtrOld;

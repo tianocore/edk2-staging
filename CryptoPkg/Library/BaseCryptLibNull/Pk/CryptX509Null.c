@@ -294,6 +294,34 @@ X509GetTBSCert (
 }
 
 /**
+  Retrieve the EC Public Key from one DER-encoded X509 certificate.
+
+  @param[in]  Cert         Pointer to the DER-encoded X509 certificate.
+  @param[in]  CertSize     Size of the X509 certificate in bytes.
+  @param[out] EcContext    Pointer to new-generated EC DSA context which contain the retrieved
+                           EC public key component. Use EcFree() function to free the
+                           resource.
+
+  If Cert is NULL, then return FALSE.
+  If EcContext is NULL, then return FALSE.
+
+  @retval  TRUE   EC Public Key was retrieved successfully.
+  @retval  FALSE  Fail to retrieve EC public key from X509 certificate.
+
+**/
+BOOLEAN
+EFIAPI
+EcGetPublicKeyFromX509 (
+  IN   CONST UINT8  *Cert,
+  IN   UINTN        CertSize,
+  OUT  VOID         **EcContext
+  )
+{
+  ASSERT (FALSE);
+  return FALSE;
+}
+
+/**
   Retrieve the version from one X.509 certificate.
 
   If Cert is NULL, then return FALSE.
@@ -522,7 +550,7 @@ X509GetValidity  (
 }
 
 /**
-  Format a DateTime object into DataTime Buffer
+  Format a DateTimeStr to DataTime object in DataTime Buffer
 
   If DateTimeStr is NULL, then return FALSE.
   If DateTimeSize is NULL, then return FALSE.
@@ -531,7 +559,7 @@ X509GetValidity  (
   @param[in]      DateTimeStr      DateTime string like YYYYMMDDhhmmssZ
                                    Ref: https://www.w3.org/TR/NOTE-datetime
                                    Z stand for UTC time
-  @param[in,out]  DateTime         Pointer to a DateTime object.
+  @param[out]     DateTime         Pointer to a DateTime object.
   @param[in,out]  DateTimeSize     DateTime object buffer size.
 
   @retval TRUE                     The DateTime object create successfully.
@@ -546,10 +574,10 @@ X509GetValidity  (
 **/
 BOOLEAN
 EFIAPI
-X509SetDateTime (
-  IN     CHAR8  *DateTimeStr,
-  OUT VOID      *DateTime,
-  IN OUT UINTN  *DateTimeSize
+X509FormatDateTime (
+  IN CONST CHAR8  *DateTimeStr,
+  OUT VOID        *DateTime,
+  IN OUT UINTN    *DateTimeSize
   )
 {
   ASSERT (FALSE);
@@ -681,10 +709,10 @@ X509GetCertFromCertChain (
 BOOLEAN
 EFIAPI
 Asn1GetTag (
-  IN OUT UINT8   **Ptr,
-  IN     UINT8   *End,
-  OUT UINTN      *Length,
-  IN     UINT32  Tag
+  IN OUT UINT8    **Ptr,
+  IN CONST UINT8  *End,
+  OUT UINTN       *Length,
+  IN     UINT32   Tag
   )
 {
   ASSERT (FALSE);
