@@ -524,7 +524,14 @@ libspdm_x509_get_common_name (
   size_t         *common_name_size
   )
 {
-  return X509GetCommonName (cert, cert_size, common_name, common_name_size);
+  EFI_STATUS  Status;
+
+  Status = X509GetCommonName (cert, cert_size, common_name, common_name_size);
+  if (EFI_ERROR (Status)) {
+    return false;
+  } else {
+    return true;
+  }
 }
 
 bool
@@ -535,7 +542,14 @@ libspdm_x509_get_organization_name (
   size_t         *name_buffer_size
   )
 {
-  return X509GetOrganizationName (cert, cert_size, name_buffer, name_buffer_size);
+  EFI_STATUS  Status;
+
+  Status = X509GetOrganizationName (cert, cert_size, name_buffer, name_buffer_size);
+  if (EFI_ERROR (Status)) {
+    return false;
+  } else {
+    return true;
+  }
 }
 
 bool
@@ -621,7 +635,7 @@ libspdm_x509_set_date_time (
   size_t      *date_time_size
   )
 {
-  return X509SetDateTime (date_time_str, date_time, date_time_size);
+  return X509FormatDateTime (date_time_str, date_time, date_time_size);
 }
 
 int32_t
