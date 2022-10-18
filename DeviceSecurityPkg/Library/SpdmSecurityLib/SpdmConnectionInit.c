@@ -69,6 +69,7 @@ CreateSpdmDeviceContext (
   VOID                 *ScratchBuffer;
   UINTN                ScratchBufferSize;
   EFI_STATUS           Status;
+  SPDM_RETURN          SpdmReturn;
   EFI_SIGNATURE_LIST   *SignatureList;
   UINTN                SignatureListSize;
   VOID                 *Data;
@@ -83,6 +84,7 @@ CreateSpdmDeviceContext (
     ASSERT (SpdmDeviceContext != NULL);
     return NULL;
   }
+
   SpdmDeviceContext->Signature = SPDM_DEVICE_CONTEXT_SIGNATURE;
   CopyMem (&SpdmDeviceContext->DeviceId, SpdmDeviceInfo->DeviceId, sizeof (EDKII_DEVICE_IDENTIFIER));
   SpdmDeviceContext->IsEmbeddedDevice = SpdmDeviceInfo->IsEmbeddedDevice;
@@ -222,9 +224,9 @@ CreateSpdmDeviceContext (
 
   SpdmSetData (SpdmContext, SpdmDataBaseHashAlgo, &Parameter, &Data32, sizeof (Data32));
 
-  Status = SpdmInitConnection (SpdmContext, FALSE);
-  if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_ERROR, "SpdmInitConnection - %r\n", Status));
+  SpdmReturn = SpdmInitConnection (SpdmContext, FALSE);
+  if (LIBSPDM_STATUS_IS_ERROR (SpdmReturn)) {
+    DEBUG ((DEBUG_ERROR, "SpdmInitConnection - %p\n", SpdmReturn));
     goto Error;
   }
 

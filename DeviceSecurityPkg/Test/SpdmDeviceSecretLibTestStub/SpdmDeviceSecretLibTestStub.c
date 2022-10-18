@@ -296,14 +296,14 @@ SpdmMeasurementCollectionFunc (
   UINT8                        TestConfig;
   UINTN                        TestConfigSize;
 
-  TestConfigSize = sizeof(UINT8);
-  Status = gRT->GetVariable (
-                  L"SpdmTestConfig",
-                  &gEfiDeviceSecurityPkgTestConfig,
-                  NULL,
-                  &TestConfigSize,
-                  &TestConfig
-                  );
+  TestConfigSize = sizeof (UINT8);
+  Status         = gRT->GetVariable (
+                          L"SpdmTestConfig",
+                          &gEfiDeviceSecurityPkgTestConfig,
+                          NULL,
+                          &TestConfigSize,
+                          &TestConfig
+                          );
   if (EFI_ERROR (Status)) {
     return LIBSPDM_STATUS_INVALID_PARAMETER;
   }
@@ -558,7 +558,7 @@ SpdmGenerateMeasurementSummaryHash (
                                   device_measurement,
                                   &device_measurement_size
                                   );
-      if (RETURN_ERROR (status)) {
+      if (LIBSPDM_STATUS_IS_ERROR (status)) {
         return false;
       }
 
@@ -736,14 +736,14 @@ SpdmResponderDataSignFunc (
     return FALSE;
   }
 
-  TestConfigSize = sizeof(UINT8);
-  Status = gRT->GetVariable (
-                  L"SpdmTestConfig",
-                  &gEfiDeviceSecurityPkgTestConfig,
-                  NULL,
-                  &TestConfigSize,
-                  &TestConfig
-                  );
+  TestConfigSize = sizeof (UINT8);
+  Status         = gRT->GetVariable (
+                          L"SpdmTestConfig",
+                          &gEfiDeviceSecurityPkgTestConfig,
+                          NULL,
+                          &TestConfigSize,
+                          &TestConfig
+                          );
   if (EFI_ERROR (Status)) {
     return FALSE;
   }

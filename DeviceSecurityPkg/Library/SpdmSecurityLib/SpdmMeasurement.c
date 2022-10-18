@@ -340,6 +340,7 @@ ExtendMeasurement (
         CopyMem (EventLogPtr, MeasurementRecord, MeasurementRecordLength);
         EventLogPtr += MeasurementRecordLength;
       }
+
  #endif
 
       if (DeviceContextSize != 0) {
@@ -501,6 +502,7 @@ DoDeviceMeasurement (
   )
 {
   EFI_STATUS                   Status;
+  SPDM_RETURN                  SpdmReturn;
   VOID                         *SpdmContext;
   UINT32                       CapabilityFlags;
   UINTN                        DataSize;
@@ -545,21 +547,21 @@ DoDeviceMeasurement (
   //
   // get all measurement once, with signature.
   //
-  Status = SpdmGetMeasurementEx (
-             SpdmContext,
-             NULL,
-             RequestAttribute,
-             SPDM_GET_MEASUREMENTS_REQUEST_MEASUREMENT_OPERATION_ALL_MEASUREMENTS,
-             0,
-             NULL,
-             &NumberOfBlocks,
-             &MeasurementRecordLength,
-             MeasurementRecord,
-             RequesterNonceIn,
-             RequesterNonce,
-             ResponderNonce
-             );
-  if (!EFI_ERROR (Status)) {
+  SpdmReturn = SpdmGetMeasurementEx (
+                 SpdmContext,
+                 NULL,
+                 RequestAttribute,
+                 SPDM_GET_MEASUREMENTS_REQUEST_MEASUREMENT_OPERATION_ALL_MEASUREMENTS,
+                 0,
+                 NULL,
+                 &NumberOfBlocks,
+                 &MeasurementRecordLength,
+                 MeasurementRecord,
+                 RequesterNonceIn,
+                 RequesterNonce,
+                 ResponderNonce
+                 );
+  if (LIBSPDM_STATUS_IS_SUCCESS (SpdmReturn)) {
     DEBUG ((DEBUG_INFO, "NumberOfBlocks %d\n", NumberOfBlocks));
 
     MeasurementBlock = (VOID *)MeasurementRecord;
@@ -582,9 +584,9 @@ DoDeviceMeasurement (
         return Status;
       }
     }
-  } else if (Status == LIBSPDM_STATUS_VERIF_FAIL) {
+  } else if (SpdmReturn == LIBSPDM_STATUS_VERIF_FAIL) {
     AuthState = TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_FAIL_INVALID;
-    ExtendMeasurement (SpdmDeviceContext, AuthState, 0, NULL, NULL, NULL);
+    Status    = ExtendMeasurement (SpdmDeviceContext, AuthState, 0, NULL, NULL, NULL);
     return Status;
   } else {
     RequestAttribute = 0;
@@ -592,19 +594,19 @@ DoDeviceMeasurement (
     //
     // 1. Query the total number of measurements available.
     //
-    Status = SpdmGetMeasurement (
-               SpdmContext,
-               NULL,
-               RequestAttribute,
-               SPDM_GET_MEASUREMENTS_REQUEST_MEASUREMENT_OPERATION_TOTAL_NUMBER_OF_MEASUREMENTS,
-               0,
-               NULL,
-               &NumberOfBlocks,
-               NULL,
-               NULL
-               );
-    if (EFI_ERROR (Status)) {
-      return Status;
+    SpdmReturn = SpdmGetMeasurement (
+                   SpdmContext,
+                   NULL,
+                   RequestAttribute,
+                   SPDM_GET_MEASUREMENTS_REQUEST_MEASUREMENT_OPERATION_TOTAL_NUMBER_OF_MEASUREMENTS,
+                   0,
+                   NULL,
+                   &NumberOfBlocks,
+                   NULL,
+                   NULL
+                   );
+    if (LIBSPDM_STATUS_IS_ERROR (SpdmReturn)) {
+      return EFI_DEVICE_ERROR;
     }
 
     DEBUG ((DEBUG_INFO, "NumberOfBlocks - 0x%x\n", NumberOfBlocks));
@@ -629,23 +631,23 @@ DoDeviceMeasurement (
       ZeroMem (RequesterNonceIn, sizeof (RequesterNonceIn));
       ZeroMem (RequesterNonce, sizeof (RequesterNonce));
       ZeroMem (ResponderNonce, sizeof (ResponderNonce));
-      Status = SpdmGetMeasurementEx (
-                 SpdmContext,
-                 NULL,
-                 RequestAttribute,
-                 Index,
-                 0,
-                 NULL,
-                 &NumberOfBlock,
-                 &MeasurementRecordLength,
-                 MeasurementRecord,
-                 RequesterNonceIn,
-                 RequesterNonce,
-                 ResponderNonce
-                 );
-      if (EFI_ERROR (Status)) {
+      SpdmReturn = SpdmGetMeasurementEx (
+                     SpdmContext,
+                     NULL,
+                     RequestAttribute,
+                     Index,
+                     0,
+                     NULL,
+                     &NumberOfBlock,
+                     &MeasurementRecordLength,
+                     MeasurementRecord,
+                     RequesterNonceIn,
+                     RequesterNonce,
+                     ResponderNonce
+                     );
+      if (LIBSPDM_STATUS_IS_ERROR (SpdmReturn)) {
         continue;
-      } else if (Status == LIBSPDM_STATUS_VERIF_FAIL) {
+      } else if (SpdmReturn == LIBSPDM_STATUS_VERIF_FAIL) {
         AuthState = TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_FAIL_INVALID;
         Status    = ExtendMeasurement (SpdmDeviceContext, AuthState, 0, NULL, NULL, NULL);
         continue;
