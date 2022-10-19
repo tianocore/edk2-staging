@@ -18,8 +18,8 @@ EFI_STATUS
 EFIAPI
 SpdmDeviceAuthenticationAndMeasurement (
   IN  EDKII_SPDM_DEVICE_INFO        *SpdmDeviceInfo,
-  IN  EDKII_DEVICE_SECURITY_POLICY  *SecuriryPolicy,
-  OUT EDKII_DEVICE_SECURITY_STATE   *SecuriryState
+  IN  EDKII_DEVICE_SECURITY_POLICY  *SecurityPolicy,
+  OUT EDKII_DEVICE_SECURITY_STATE   *SecurityState
   )
 {
   EFI_STATUS           Status;
@@ -32,7 +32,7 @@ SpdmDeviceAuthenticationAndMeasurement (
   }
 
   IsAuthenticated = FALSE;
-  if ((SecuriryPolicy->AuthenticationPolicy & EDKII_DEVICE_AUTHENTICATION_REQUIRED) != 0) {
+  if ((SecurityPolicy->AuthenticationPolicy & EDKII_DEVICE_AUTHENTICATION_REQUIRED) != 0) {
     Status = DoDeviceAuthentication (SpdmDeviceContext);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_ERROR, "DoDeviceAuthentication failed - %r\n", Status));
@@ -42,7 +42,7 @@ SpdmDeviceAuthenticationAndMeasurement (
     }
   }
 
-  if ((SecuriryPolicy->MeasurementPolicy & EDKII_DEVICE_MEASUREMENT_REQUIRED) != 0) {
+  if ((SecurityPolicy->MeasurementPolicy & EDKII_DEVICE_MEASUREMENT_REQUIRED) != 0) {
     Status = DoDeviceMeasurement (SpdmDeviceContext, IsAuthenticated);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_ERROR, "DoDeviceMeasurement failed - %r\n", Status));
