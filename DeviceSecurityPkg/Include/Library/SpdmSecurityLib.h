@@ -114,8 +114,8 @@ RETURN_STATUS
 EFIAPI
 SpdmDeviceAuthenticationAndMeasurement (
   IN  EDKII_SPDM_DEVICE_INFO        *SpdmDeviceInfo,
-  IN  EDKII_DEVICE_SECURITY_POLICY  *SecuriryPolicy,
-  OUT EDKII_DEVICE_SECURITY_STATE   *SecuriryState
+  IN  EDKII_DEVICE_SECURITY_POLICY  *SecurityPolicy,
+  OUT EDKII_DEVICE_SECURITY_STATE   *SecurityState
   );
 
 VOID *
