@@ -28,6 +28,7 @@
   libspdm/library/spdm_common_lib/libspdm_com_crypto_service_session.c
   libspdm/library/spdm_common_lib/libspdm_com_opaque_data.c
   libspdm/library/spdm_common_lib/libspdm_com_support.c
+  libspdm/library/spdm_common_lib/libspdm_com_msg_log.c
 
 [Packages]
   MdePkg/MdePkg.dec
