@@ -769,7 +769,7 @@ libspdm_ec_compute_key (
   size_t         *key_size
   )
 {
-  return EcComputeKey (ec_context, peer_public, peer_public_size, key, key_size);
+  return EcDhComputeKey (ec_context, peer_public, peer_public_size, NULL, key, key_size);
 }
 
 bool
