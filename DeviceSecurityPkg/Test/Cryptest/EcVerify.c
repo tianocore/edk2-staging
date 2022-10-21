@@ -87,14 +87,14 @@ ValidateCryptEc (
   }
 
   Print (L"Compute key1 ... ");
-  Status = EcComputeKey (Ec1, Public2, Public2Length, Key1, &Key1Length);
+  Status = EcDhComputeKey (Ec1, Public2, Public2Length, NULL, Key1, &Key1Length);
   if (!Status) {
     Print (L"[Fail]");
     return EFI_ABORTED;
   }
 
   Print (L"Compute key2 ... ");
-  Status = EcComputeKey (Ec2, Public1, Public1Length, Key2, &Key2Length);
+  Status = EcDhComputeKey (Ec2, Public1, Public1Length, NULL, Key2, &Key2Length);
   if (!Status) {
     Print (L"[Fail]");
     return EFI_ABORTED;
