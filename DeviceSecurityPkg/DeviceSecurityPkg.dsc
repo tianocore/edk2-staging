@@ -92,7 +92,10 @@ DEFINE CRYPT_LIB = OPENSSL
   VarCheckLib|MdeModulePkg/Library/VarCheckLib/VarCheckLib.inf
   FileExplorerLib|MdeModulePkg/Library/FileExplorerLib/FileExplorerLib.inf
   IntrinsicLib|CryptoPkg/Library/IntrinsicLib/IntrinsicLib.inf
-  OpensslLib|CryptoPkg/Library/OpensslLib/OpensslLib.inf
+  #
+  # Ec enabled in OpensslLibFull
+  #
+  OpensslLib|CryptoPkg/Library/OpensslLib/OpensslLibFull.inf
   RngLib|MdePkg/Library/BaseRngLib/BaseRngLib.inf
 
   RegisterFilterLib|MdePkg/Library/RegisterFilterLibNull/RegisterFilterLibNull.inf
@@ -218,7 +221,6 @@ DEFINE CRYPT_LIB = OPENSSL
   gEfiMdePkgTokenSpaceGuid.PcdDebugPrintErrorLevel|0x0
   gEfiMdePkgTokenSpaceGuid.PcdReportStatusCodePropertyMask|0x0
 !endif
-  gEfiCryptoPkgTokenSpaceGuid.PcdOpensslEcEnabled|TRUE
 
 ###################################################################################################
 #
