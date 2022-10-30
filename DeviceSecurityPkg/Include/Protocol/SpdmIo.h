@@ -11,7 +11,7 @@
 
 #include <Base.h>
 #include <industry_standard/spdm.h>
-#include <hal/library/SpdmLibStub.h>
+#include <SpdmLibStub.h>
 
 typedef struct _SPDM_IO_PROTOCOL SPDM_IO_PROTOCOL;
 

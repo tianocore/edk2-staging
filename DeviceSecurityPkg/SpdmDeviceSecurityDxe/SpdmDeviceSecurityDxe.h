@@ -10,8 +10,8 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #ifndef __SPDM_DEVICE_SECURTY_DXE_H__
 
 #include <Uefi.h>
-#include "hal/base.h"
-#include <hal/library/SpdmLibStub.h>
+#include <hal/base.h>
+#include <SpdmLibStub.h>
 #include <industry_standard/spdm.h>
 #include <industry_standard/spdm_secured_message.h>
 #include <IndustryStandard/Pci.h>

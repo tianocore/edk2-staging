@@ -14,16 +14,18 @@
 
 [Includes]
   Include
-  Include/SpdmLib
-  Library/SpdmLib/libspdm/include
+  Library/SpdmLib/Include
 
 [Includes.X64]
   Library/SpdmLib/libspdm/include/hal/x64
 
 [Includes.Common.Private]
+  Library/SpdmLib/libspdm/include
+  Include/Stub
   Include/PrivateTest
 
 [LibraryClasses]
+  SpdmMeasurementLib|Include/Library/SpdmSecurityLib.h
 
 [Guids]
   gEfiDeviceSecurityPkgTokenSpaceGuid      = { 0x506945e8, 0x7603, 0x49ee, { 0xbf, 0x36, 0x6c, 0x28, 0x74, 0xca, 0x26, 0xdc }}

@@ -41,6 +41,8 @@
   RngLib
   SpdmCryptLib
   SpdmDeviceSecretLib
+  SpdmRequesterLib
+  CryptlibWrapper
   TpmMeasurementLib
 
 [Guids]

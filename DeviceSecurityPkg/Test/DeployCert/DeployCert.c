@@ -20,7 +20,7 @@
 #include <Library/TpmMeasurementLib.h>
 #include <Guid/DeviceAuthentication.h>
 #include <Guid/ImageAuthentication.h>
-#include <hal/library/SpdmLibStub.h>
+#include <SpdmLibStub.h>
 #include <industry_standard/spdm.h>
 #include <IndustryStandard/TcgSpdm.h>
 #include <Library/Tpm2CommandLib.h>

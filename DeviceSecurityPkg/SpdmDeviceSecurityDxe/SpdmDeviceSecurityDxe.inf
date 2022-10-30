@@ -42,7 +42,6 @@
   RngLib
   BaseCryptLib
   SpdmRequesterLib
-  SpdmTransportMctpLib
   SpdmTransportPciDoeLib
   SpdmMeasurementLib
   CryptlibWrapper
