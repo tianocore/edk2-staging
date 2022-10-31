@@ -349,7 +349,6 @@ DoDeviceAuthentication (
   UINT8                MeasurementHash[LIBSPDM_MAX_HASH_SIZE];
   UINTN                CertChainSize;
   UINT8                CertChain[LIBSPDM_MAX_CERT_CHAIN_SIZE];
-  UINT8                RequesterNonceIn[SPDM_NONCE_SIZE];
   UINT8                RequesterNonce[SPDM_NONCE_SIZE];
   UINT8                ResponderNonce[SPDM_NONCE_SIZE];
   VOID                 *TrustAnchor;
@@ -419,8 +418,7 @@ DoDeviceAuthentication (
     ZeroMem (MeasurementHash, sizeof (MeasurementHash));
     ZeroMem (RequesterNonce, sizeof (RequesterNonce));
     ZeroMem (ResponderNonce, sizeof (ResponderNonce));
-    ZeroMem (RequesterNonceIn, sizeof (RequesterNonceIn));
-    SpdmReturn = SpdmChallengeEx (SpdmContext, 0, SPDM_CHALLENGE_REQUEST_TCB_COMPONENT_MEASUREMENT_HASH, MeasurementHash, NULL, RequesterNonceIn, RequesterNonce, ResponderNonce);
+    SpdmReturn = SpdmChallengeEx (SpdmContext, 0, SPDM_CHALLENGE_REQUEST_TCB_COMPONENT_MEASUREMENT_HASH, MeasurementHash, NULL, NULL, RequesterNonce, ResponderNonce);
     if (SpdmReturn == LIBSPDM_STATUS_SUCCESS) {
       IsValidChallengeAuthSig = TRUE;
     } else if (SpdmReturn == LIBSPDM_STATUS_VERIF_FAIL) {
