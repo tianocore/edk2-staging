@@ -20,7 +20,8 @@
 #include <Library/TpmMeasurementLib.h>
 #include <Guid/DeviceAuthentication.h>
 #include <Guid/ImageAuthentication.h>
-#include <hal/library/SpdmLibStub.h>
+#include <Stub/SpdmLibStub.h>
+#include <Library/SpdmReturnStatus.h>
 #include <industry_standard/spdm.h>
 #include <IndustryStandard/TcgSpdm.h>
 #include <Library/Tpm2CommandLib.h>
@@ -482,8 +483,8 @@ MainEntryPoint (
   ResponderCertChainSize = sizeof (SPDM_CERT_CHAIN) + HashSize + CertChainSize;
   ResponderCertChain     = AllocateZeroPool (ResponderCertChainSize);
   ASSERT (ResponderCertChain != NULL);
-  ResponderCertChain->length   = (UINT16)ResponderCertChainSize;
-  ResponderCertChain->reserved = 0;
+  ResponderCertChain->Length   = (UINT16)ResponderCertChainSize;
+  ResponderCertChain->Reserved = 0;
   if (TestConfig != TEST_CONFIG_INVALID_CERT_CHAIN) {
     if (TestConfig == TEST_CONFIG_NO_TRUST_ANCHOR) {
       ShaHashAll (TestRootCer2, TestRootCer2Size, (VOID *)(ResponderCertChain + 1));

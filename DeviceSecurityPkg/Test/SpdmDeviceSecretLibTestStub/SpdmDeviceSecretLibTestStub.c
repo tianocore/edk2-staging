@@ -23,7 +23,8 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Test/TestConfig.h>
 #include "library/spdm_crypt_lib.h"
 #include "hal/library/memlib.h"
-#include <hal/library/SpdmLibStub.h>
+#include <Stub/SpdmLibStub.h>
+#include <Library/SpdmReturnStatus.h>
 #include "library/spdm_device_secret_lib.h"
 
 #define LIBSPDM_MEASUREMENT_BLOCK_HASH_NUMBER  4
@@ -67,25 +68,25 @@ SpdmFillMeasurementImageHashBlock (
 
   hash_size = SpdmGetMeasurementHashSize (measurement_hash_algo);
 
-  measurement_block->measurement_block_common_header
-    .index = measurements_index;
-  measurement_block->measurement_block_common_header
-    .measurement_specification =
+  measurement_block->MeasurementBlockCommonHeader
+    .Index = measurements_index;
+  measurement_block->MeasurementBlockCommonHeader
+    .MeasurementSpecification =
     SPDM_MEASUREMENT_BLOCK_HEADER_SPECIFICATION_DMTF;
 
   SetMem (data, sizeof (data), (uint8_t)(measurements_index));
 
   if (!use_bit_stream) {
-    measurement_block->measurement_block_dmtf_header
-      .dmtf_spec_measurement_value_type =
+    measurement_block->MeasurementBlockDmtfHeader
+      .DMTFSpecMeasurementValueType =
       (measurements_index - 1);
-    measurement_block->measurement_block_dmtf_header
-      .dmtf_spec_measurement_value_size =
+    measurement_block->MeasurementBlockDmtfHeader
+      .DMTFSpecMeasurementValueSize =
       (uint16_t)hash_size;
 
-    measurement_block->measurement_block_common_header
-      .measurement_size =
-      (uint16_t)(sizeof (spdm_measurement_block_dmtf_header_t) +
+    measurement_block->MeasurementBlockCommonHeader
+      .MeasurementSize =
+      (uint16_t)(sizeof (SPDM_MEASUREMENT_BLOCK_DMTF_HEADER) +
                  (uint16_t)hash_size);
 
     result = SpdmMeasurementHashAll (
@@ -100,17 +101,17 @@ SpdmFillMeasurementImageHashBlock (
 
     return sizeof (spdm_measurement_block_dmtf_t) + hash_size;
   } else {
-    measurement_block->measurement_block_dmtf_header
-      .dmtf_spec_measurement_value_type =
+    measurement_block->MeasurementBlockDmtfHeader
+      .DMTFSpecMeasurementValueType =
       (measurements_index - 1) |
       SPDM_MEASUREMENT_BLOCK_MEASUREMENT_TYPE_RAW_BIT_STREAM;
-    measurement_block->measurement_block_dmtf_header
-      .dmtf_spec_measurement_value_size =
+    measurement_block->MeasurementBlockDmtfHeader
+      .DMTFSpecMeasurementValueSize =
       (uint16_t)sizeof (data);
 
-    measurement_block->measurement_block_common_header
-      .measurement_size =
-      (uint16_t)(sizeof (spdm_measurement_block_dmtf_header_t) +
+    measurement_block->MeasurementBlockCommonHeader
+      .MeasurementSize =
+      (uint16_t)(sizeof (SPDM_MEASUREMENT_BLOCK_DMTF_HEADER) +
                  (uint16_t)sizeof (data));
 
     CopyMem ((void *)(measurement_block + 1), data, sizeof (data));
@@ -131,25 +132,25 @@ SpdmFillMeasurementSvnBlock (
 {
   spdm_measurements_secure_version_number_t  svn;
 
-  measurement_block->measurement_block_common_header
-    .index = LIBSPDM_MEASUREMENT_INDEX_SVN;
-  measurement_block->measurement_block_common_header
-    .measurement_specification =
+  measurement_block->MeasurementBlockCommonHeader
+    .Index = LIBSPDM_MEASUREMENT_INDEX_SVN;
+  measurement_block->MeasurementBlockCommonHeader
+    .MeasurementSpecification =
     SPDM_MEASUREMENT_BLOCK_HEADER_SPECIFICATION_DMTF;
 
   svn = 0x7;
 
-  measurement_block->measurement_block_dmtf_header
-    .dmtf_spec_measurement_value_type =
+  measurement_block->MeasurementBlockDmtfHeader
+    .DMTFSpecMeasurementValueType =
     SPDM_MEASUREMENT_BLOCK_MEASUREMENT_TYPE_SECURE_VERSION_NUMBER |
     SPDM_MEASUREMENT_BLOCK_MEASUREMENT_TYPE_RAW_BIT_STREAM;
-  measurement_block->measurement_block_dmtf_header
-    .dmtf_spec_measurement_value_size =
+  measurement_block->MeasurementBlockDmtfHeader
+    .DMTFSpecMeasurementValueSize =
     (uint16_t)sizeof (svn);
 
-  measurement_block->measurement_block_common_header
-    .measurement_size =
-    (uint16_t)(sizeof (spdm_measurement_block_dmtf_header_t) +
+  measurement_block->MeasurementBlockCommonHeader
+    .MeasurementSize =
+    (uint16_t)(sizeof (SPDM_MEASUREMENT_BLOCK_DMTF_HEADER) +
                (uint16_t)sizeof (svn));
 
   CopyMem ((void *)(measurement_block + 1), (void *)&svn, sizeof (svn));
@@ -169,10 +170,10 @@ SpdmFillMeasurementManifestBlock (
 {
   UINT8  data[LIBSPDM_MEASUREMENT_MANIFEST_SIZE];
 
-  measurement_block->measurement_block_common_header
-    .index = SPDM_MEASUREMENT_BLOCK_MEASUREMENT_INDEX_MEASUREMENT_MANIFEST;
-  measurement_block->measurement_block_common_header
-    .measurement_specification =
+  measurement_block->MeasurementBlockCommonHeader
+    .Index = SPDM_MEASUREMENT_BLOCK_MEASUREMENT_INDEX_MEASUREMENT_MANIFEST;
+  measurement_block->MeasurementBlockCommonHeader
+    .MeasurementSpecification =
     SPDM_MEASUREMENT_BLOCK_HEADER_SPECIFICATION_DMTF;
 
   SetMem (
@@ -181,17 +182,17 @@ SpdmFillMeasurementManifestBlock (
     (uint8_t)SPDM_MEASUREMENT_BLOCK_MEASUREMENT_INDEX_MEASUREMENT_MANIFEST
     );
 
-  measurement_block->measurement_block_dmtf_header
-    .dmtf_spec_measurement_value_type =
+  measurement_block->MeasurementBlockDmtfHeader
+    .DMTFSpecMeasurementValueType =
     SPDM_MEASUREMENT_BLOCK_MEASUREMENT_TYPE_MEASUREMENT_MANIFEST |
     SPDM_MEASUREMENT_BLOCK_MEASUREMENT_TYPE_RAW_BIT_STREAM;
-  measurement_block->measurement_block_dmtf_header
-    .dmtf_spec_measurement_value_size =
+  measurement_block->MeasurementBlockDmtfHeader
+    .DMTFSpecMeasurementValueSize =
     (uint16_t)sizeof (data);
 
-  measurement_block->measurement_block_common_header
-    .measurement_size =
-    (uint16_t)(sizeof (spdm_measurement_block_dmtf_header_t) +
+  measurement_block->MeasurementBlockCommonHeader
+    .MeasurementSize =
+    (uint16_t)(sizeof (SPDM_MEASUREMENT_BLOCK_DMTF_HEADER) +
                (uint16_t)sizeof (data));
 
   CopyMem ((void *)(measurement_block + 1), data, sizeof (data));
@@ -211,10 +212,10 @@ SpdmFillMeasurementDeviceModeBlock (
 {
   spdm_measurements_device_mode_t  device_mode;
 
-  measurement_block->measurement_block_common_header
-    .index = SPDM_MEASUREMENT_BLOCK_MEASUREMENT_INDEX_DEVICE_MODE;
-  measurement_block->measurement_block_common_header
-    .measurement_specification =
+  measurement_block->MeasurementBlockCommonHeader
+    .Index = SPDM_MEASUREMENT_BLOCK_MEASUREMENT_INDEX_DEVICE_MODE;
+  measurement_block->MeasurementBlockCommonHeader
+    .MeasurementSpecification =
     SPDM_MEASUREMENT_BLOCK_HEADER_SPECIFICATION_DMTF;
 
   device_mode.operational_mode_capabilties =
@@ -236,17 +237,17 @@ SpdmFillMeasurementDeviceModeBlock (
     SPDM_MEASUREMENT_DEVICE_MODE_NON_INVASIVE_DEBUG_MODE_IS_ACTIVE |
     SPDM_MEASUREMENT_DEVICE_MODE_INVASIVE_DEBUG_MODE_HAS_BEEN_ACTIVE_AFTER_MFG;
 
-  measurement_block->measurement_block_dmtf_header
-    .dmtf_spec_measurement_value_type =
+  measurement_block->MeasurementBlockDmtfHeader
+    .DMTFSpecMeasurementValueType =
     SPDM_MEASUREMENT_BLOCK_MEASUREMENT_TYPE_DEVICE_MODE |
     SPDM_MEASUREMENT_BLOCK_MEASUREMENT_TYPE_RAW_BIT_STREAM;
-  measurement_block->measurement_block_dmtf_header
-    .dmtf_spec_measurement_value_size =
+  measurement_block->MeasurementBlockDmtfHeader
+    .DMTFSpecMeasurementValueSize =
     (uint16_t)sizeof (device_mode);
 
-  measurement_block->measurement_block_common_header
-    .measurement_size =
-    (uint16_t)(sizeof (spdm_measurement_block_dmtf_header_t) +
+  measurement_block->MeasurementBlockCommonHeader
+    .MeasurementSize =
+    (uint16_t)(sizeof (SPDM_MEASUREMENT_BLOCK_DMTF_HEADER) +
                (uint16_t)sizeof (device_mode));
 
   CopyMem (
@@ -572,23 +573,23 @@ SpdmGenerateMeasurementSummaryHash (
       cached_measurment_block = (void *)device_measurement;
       for (index = 0; index < device_measurement_count; index++) {
         measurment_block_size =
-          sizeof (spdm_measurement_block_common_header_t) +
+          sizeof (SPDM_MEASUREMENT_BLOCK_COMMON_HEADER) +
           cached_measurment_block
-            ->measurement_block_common_header
-            .measurement_size;
+            ->MeasurementBlockCommonHeader
+            .MeasurementSize;
         ASSERT (
           cached_measurment_block
-            ->measurement_block_common_header
-            .measurement_size ==
-          sizeof (spdm_measurement_block_dmtf_header_t) +
+            ->MeasurementBlockCommonHeader
+            .MeasurementSize ==
+          sizeof (SPDM_MEASUREMENT_BLOCK_DMTF_HEADER) +
           cached_measurment_block
-            ->measurement_block_dmtf_header
-            .dmtf_spec_measurement_value_size
+            ->MeasurementBlockDmtfHeader
+            .DMTFSpecMeasurementValueSize
           );
         measurment_data_size +=
           cached_measurment_block
-            ->measurement_block_common_header
-            .measurement_size;
+            ->MeasurementBlockCommonHeader
+            .MeasurementSize;
         cached_measurment_block =
           (void *)((UINTN)cached_measurment_block +
                    measurment_block_size);
@@ -604,21 +605,21 @@ SpdmGenerateMeasurementSummaryHash (
       measurment_data_size    = 0;
       for (index = 0; index < device_measurement_count; index++) {
         measurment_block_size =
-          sizeof (spdm_measurement_block_common_header_t) +
+          sizeof (SPDM_MEASUREMENT_BLOCK_COMMON_HEADER) +
           cached_measurment_block
-            ->measurement_block_common_header
-            .measurement_size;
+            ->MeasurementBlockCommonHeader
+            .MeasurementSize;
         /* filter unneeded data*/
         if (((measurement_summary_hash_type ==
               SPDM_CHALLENGE_REQUEST_ALL_MEASUREMENTS_HASH) &&
              ((cached_measurment_block
-                 ->measurement_block_dmtf_header
-                 .dmtf_spec_measurement_value_type &
+                 ->MeasurementBlockDmtfHeader
+                 .DMTFSpecMeasurementValueType &
                SPDM_MEASUREMENT_BLOCK_MEASUREMENT_TYPE_MASK) <
               SPDM_MEASUREMENT_BLOCK_MEASUREMENT_TYPE_MEASUREMENT_MANIFEST)) ||
             ((cached_measurment_block
-                ->measurement_block_dmtf_header
-                .dmtf_spec_measurement_value_type &
+                ->MeasurementBlockDmtfHeader
+                .DMTFSpecMeasurementValueType &
               SPDM_MEASUREMENT_BLOCK_MEASUREMENT_TYPE_MASK) ==
              SPDM_MEASUREMENT_BLOCK_MEASUREMENT_TYPE_IMMUTABLE_ROM))
         {
@@ -626,15 +627,15 @@ SpdmGenerateMeasurementSummaryHash (
             &measurement_data[measurment_data_size],
             sizeof (measurement_data)
             - (&measurement_data[measurment_data_size] - measurement_data),
-            &cached_measurment_block->measurement_block_dmtf_header,
-            cached_measurment_block->measurement_block_common_header
-              .measurement_size
+            &cached_measurment_block->MeasurementBlockDmtfHeader,
+            cached_measurment_block->MeasurementBlockCommonHeader
+              .MeasurementSize
             );
 
           measurment_data_size +=
             cached_measurment_block
-              ->measurement_block_common_header
-              .measurement_size;
+              ->MeasurementBlockCommonHeader
+              .MeasurementSize;
         }
 
         cached_measurment_block =
