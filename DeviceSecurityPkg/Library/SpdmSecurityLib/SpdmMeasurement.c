@@ -511,7 +511,6 @@ DoDeviceMeasurement (
   UINT32                       MeasurementRecordLength;
   UINT8                        MeasurementRecord[LIBSPDM_MAX_MEASUREMENT_RECORD_SIZE];
   UINT8                        Index;
-  UINT8                        RequesterNonceIn[SPDM_NONCE_SIZE];
   UINT8                        RequesterNonce[SPDM_NONCE_SIZE];
   UINT8                        ResponderNonce[SPDM_NONCE_SIZE];
   UINT8                        RequestAttribute;
@@ -540,7 +539,6 @@ DoDeviceMeasurement (
   }
 
   MeasurementRecordLength = sizeof (MeasurementRecord);
-  ZeroMem (RequesterNonceIn, sizeof (RequesterNonceIn));
   ZeroMem (RequesterNonce, sizeof (RequesterNonce));
   ZeroMem (ResponderNonce, sizeof (ResponderNonce));
 
@@ -557,7 +555,7 @@ DoDeviceMeasurement (
                  &NumberOfBlocks,
                  &MeasurementRecordLength,
                  MeasurementRecord,
-                 RequesterNonceIn,
+                 NULL,
                  RequesterNonce,
                  ResponderNonce
                  );
@@ -628,7 +626,6 @@ DoDeviceMeasurement (
       }
 
       MeasurementRecordLength = sizeof (MeasurementRecord);
-      ZeroMem (RequesterNonceIn, sizeof (RequesterNonceIn));
       ZeroMem (RequesterNonce, sizeof (RequesterNonce));
       ZeroMem (ResponderNonce, sizeof (ResponderNonce));
       SpdmReturn = SpdmGetMeasurementEx (
@@ -641,7 +638,7 @@ DoDeviceMeasurement (
                      &NumberOfBlock,
                      &MeasurementRecordLength,
                      MeasurementRecord,
-                     RequesterNonceIn,
+                     NULL,
                      RequesterNonce,
                      ResponderNonce
                      );
