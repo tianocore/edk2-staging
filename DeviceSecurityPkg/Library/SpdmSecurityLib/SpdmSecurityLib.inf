@@ -39,9 +39,9 @@
   DebugLib
   BaseCryptLib
   RngLib
-  SpdmCryptLib
-  SpdmDeviceSecretLib
   TpmMeasurementLib
+  SpdmRequesterLib
+  SpdmCommonLib
 
 [Guids]
   gEdkiiDeviceSignatureDatabaseGuid       ## CONSUMES

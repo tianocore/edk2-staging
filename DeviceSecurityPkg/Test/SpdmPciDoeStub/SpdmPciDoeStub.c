@@ -19,7 +19,8 @@
 #include <IndustryStandard/PcieDoeCapbility.h>
 #include <industry_standard/pcidoe.h>
 #include <SpdmPciDoeStub.h>
-#include <hal/library/SpdmLibStub.h>
+#include <Stub/SpdmLibStub.h>
+#include <Library/SpdmReturnStatus.h>
 
 #define SPDM_TIMEOUT  1000000   // 1 second
 
@@ -377,7 +378,7 @@ SpdmIoReceiveResponse (
       //
       PcieDoeReadMailboxWrite32 (SpdmPrivateData, &Data32);
 
-      DataObjectSize = DataObjectHeader->length * sizeof (UINT32);
+      DataObjectSize = DataObjectHeader->Length * sizeof (UINT32);
       DEBUG ((DEBUG_ERROR, "[SpdmIoReceiveResponse] DataObjectSize = 0x%x\n", DataObjectSize));
 
       if (DataObjectSize > *ResponseSize) {
