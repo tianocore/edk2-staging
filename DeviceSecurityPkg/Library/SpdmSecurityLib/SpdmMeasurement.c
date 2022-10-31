@@ -207,12 +207,12 @@ ExtendMeasurement (
     DigestSize                       = MeasurementRecordLength - sizeof (SPDM_MEASUREMENT_BLOCK_DMTF);
 
     DEBUG ((DEBUG_INFO, "SpdmMeasurementBlockCommonHeader\n"));
-    DEBUG ((DEBUG_INFO, "  Index                        - 0x%02x\n", SpdmMeasurementBlockCommonHeader->index));
-    DEBUG ((DEBUG_INFO, "  MeasurementSpecification     - 0x%02x\n", SpdmMeasurementBlockCommonHeader->measurement_specification));
-    DEBUG ((DEBUG_INFO, "  MeasurementSize              - 0x%04x\n", SpdmMeasurementBlockCommonHeader->measurement_size));
+    DEBUG ((DEBUG_INFO, "  Index                        - 0x%02x\n", SpdmMeasurementBlockCommonHeader->Index));
+    DEBUG ((DEBUG_INFO, "  MeasurementSpecification     - 0x%02x\n", SpdmMeasurementBlockCommonHeader->MeasurementSpecification));
+    DEBUG ((DEBUG_INFO, "  MeasurementSize              - 0x%04x\n", SpdmMeasurementBlockCommonHeader->MeasurementSize));
     DEBUG ((DEBUG_INFO, "SpdmMeasurementBlockDmtfHeader\n"));
-    DEBUG ((DEBUG_INFO, "  DMTFSpecMeasurementValueType - 0x%02x\n", SpdmMeasurementBlockDmtfHeader->dmtf_spec_measurement_value_type));
-    DEBUG ((DEBUG_INFO, "  DMTFSpecMeasurementValueSize - 0x%04x\n", SpdmMeasurementBlockDmtfHeader->dmtf_spec_measurement_value_size));
+    DEBUG ((DEBUG_INFO, "  DMTFSpecMeasurementValueType - 0x%02x\n", SpdmMeasurementBlockDmtfHeader->DMTFSpecMeasurementValueType));
+    DEBUG ((DEBUG_INFO, "  DMTFSpecMeasurementValueSize - 0x%04x\n", SpdmMeasurementBlockDmtfHeader->DMTFSpecMeasurementValueSize));
     DEBUG ((DEBUG_INFO, "Measurement - "));
     InternalDumpData (Digest, DigestSize);
     DEBUG ((DEBUG_INFO, "\n"));
@@ -220,22 +220,22 @@ ExtendMeasurement (
       return EFI_SECURITY_VIOLATION;
     }
 
-    if ((SpdmMeasurementBlockCommonHeader->measurement_specification & SPDM_MEASUREMENT_BLOCK_HEADER_SPECIFICATION_DMTF) == 0) {
+    if ((SpdmMeasurementBlockCommonHeader->MeasurementSpecification & SPDM_MEASUREMENT_BLOCK_HEADER_SPECIFICATION_DMTF) == 0) {
       return EFI_SECURITY_VIOLATION;
     }
 
-    if (SpdmMeasurementBlockCommonHeader->measurement_size != MeasurementRecordLength - sizeof (SPDM_MEASUREMENT_BLOCK_COMMON_HEADER)) {
+    if (SpdmMeasurementBlockCommonHeader->MeasurementSize != MeasurementRecordLength - sizeof (SPDM_MEASUREMENT_BLOCK_COMMON_HEADER)) {
       return EFI_SECURITY_VIOLATION;
     }
 
-    if (SpdmMeasurementBlockDmtfHeader->dmtf_spec_measurement_value_size != SpdmMeasurementBlockCommonHeader->measurement_size - sizeof (SPDM_MEASUREMENT_BLOCK_DMTF_HEADER)) {
+    if (SpdmMeasurementBlockDmtfHeader->DMTFSpecMeasurementValueSize != SpdmMeasurementBlockCommonHeader->MeasurementSize - sizeof (SPDM_MEASUREMENT_BLOCK_DMTF_HEADER)) {
       return EFI_SECURITY_VIOLATION;
     }
 
     //
     // Use PCR 2 for Firmware Blob code.
     //
-    switch (SpdmMeasurementBlockDmtfHeader->dmtf_spec_measurement_value_type & 0x7F) {
+    switch (SpdmMeasurementBlockDmtfHeader->DMTFSpecMeasurementValueType & 0x7F) {
       case SPDM_MEASUREMENT_BLOCK_MEASUREMENT_TYPE_IMMUTABLE_ROM:
       case SPDM_MEASUREMENT_BLOCK_MEASUREMENT_TYPE_MUTABLE_FIRMWARE:
       case SPDM_MEASUREMENT_BLOCK_MEASUREMENT_TYPE_VERSION:
@@ -567,10 +567,10 @@ DoDeviceMeasurement (
     MeasurementBlock = (VOID *)MeasurementRecord;
     for (Index = 0; Index < NumberOfBlocks; Index++) {
       MeasurementsBlockSize =
-        sizeof (spdm_measurement_block_dmtf_t) +
+        sizeof (SPDM_MEASUREMENT_BLOCK_DMTF) +
         MeasurementBlock
-          ->measurement_block_dmtf_header
-          .dmtf_spec_measurement_value_size;
+          ->MeasurementBlockDmtfHeader
+          .DMTFSpecMeasurementValueSize;
 
       AuthState = TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_SUCCESS;
       if (Index == NumberOfBlocks - 1) {

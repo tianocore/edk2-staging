@@ -11,7 +11,8 @@
 
 #include <Protocol/PciIo.h>
 #include <Protocol/SpdmIo.h>
-#include <hal/library/SpdmLibStub.h>
+#include <Stub/SpdmLibStub.h>
+#include <Library/SpdmReturnStatus.h>
 
 typedef struct {
   UINTN                  Signature;

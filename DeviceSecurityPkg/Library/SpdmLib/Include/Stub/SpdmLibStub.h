@@ -15,20 +15,66 @@
 #include <library/spdm_responder_lib.h>
 #include <library/spdm_transport_pcidoe_lib.h>
 
+#pragma pack(1)
+
 /*Interface of spdm.h*/
-#define        SPDM_MESSAGE_HEADER  spdm_message_header_t
-#define        SPDM_VERSION_NUMBER  spdm_version_number_t
-#define        SPDM_CERT_CHAIN      spdm_cert_chain_t
+/* SPDM message header*/
+typedef struct {
+    UINT8 SPDMVersion;
+    UINT8 RequestResponseCode;
+    UINT8 Param1;
+    UINT8 Param2;
+} SPDM_MESSAGE_HEADER;
 
-#define        SPDM_MEASUREMENT_BLOCK_COMMON_HEADER  spdm_measurement_block_common_header_t
-#define        SPDM_MEASUREMENT_BLOCK_DMTF_HEADER    spdm_measurement_block_dmtf_header_t
-#define        SPDM_MEASUREMENT_BLOCK_DMTF           spdm_measurement_block_dmtf_t
+/* SPDM VERSION structure
+ * Bit[15:12] MajorVersion
+ * Bit[11:8]  MinorVersion
+ * Bit[7:4]   UpdateVersionNumber
+ * Bit[3:0]   Alpha*/
+typedef UINT16 SPDM_VERSION_NUMBER;
 
-#define        SPDM_VENDOR_DEFINED_REQUEST_MSG   spdm_vendor_defined_request_msg_t
-#define        SPDM_VENDOR_DEFINED_RESPONSE_MSG  spdm_vendor_defined_response_msg_t
+typedef struct {
+    /* Total length of the certificate chain, in bytes,
+     * including all fields in this table.*/
 
-/*Interface of spdm_common_lib.h*/
-#define        SPDM_DATA_PARAMETER  libspdm_data_parameter_t
+    UINT16 Length;
+    UINT16 Reserved;
+
+    /* digest of the Root Certificate.
+     * Note that Root Certificate is ASN.1 DER-encoded for this digest.
+     * The hash size is determined by the SPDM device.*/
+
+    /*UINT8    RootHash[HashSize];*/
+
+    /* One or more ASN.1 DER-encoded X509v3 certificates where the first certificate is signed by the Root
+     * Certificate or is the Root Certificate itself and each subsequent certificate is signed by the preceding
+     * certificate. The last certificate is the Leaf Certificate.*/
+
+    /*UINT8    Certificates[length - 4 - HashSize];*/
+} SPDM_CERT_CHAIN;
+
+/* SPDM MEASUREMENTS block common header */
+typedef struct {
+    UINT8 Index;
+    UINT8 MeasurementSpecification;
+    UINT16 MeasurementSize;
+    /*UINT8                Measurement[MeasurementSize];*/
+} SPDM_MEASUREMENT_BLOCK_COMMON_HEADER;
+
+/* SPDM MEASUREMENTS block DMTF header */
+typedef struct {
+    UINT8 DMTFSpecMeasurementValueType;
+    UINT16 DMTFSpecMeasurementValueSize;
+    /*UINT8                DMTFSpecMeasurementValue[DMTFSpecMeasurementValueSize];*/
+} SPDM_MEASUREMENT_BLOCK_DMTF_HEADER;
+
+typedef struct {
+    SPDM_MEASUREMENT_BLOCK_COMMON_HEADER MeasurementBlockCommonHeader;
+    SPDM_MEASUREMENT_BLOCK_DMTF_HEADER MeasurementBlockDmtfHeader;
+    /*UINT8                                 HashValue[HashSize];*/
+} SPDM_MEASUREMENT_BLOCK_DMTF;
+
+#define  SPDM_DATA_PARAMETER  libspdm_data_parameter_t
 
 typedef enum {
   //
@@ -179,23 +225,20 @@ typedef enum {
   SpdmResponseStateMax,
 } SPDM_RESPONSE_STATE;
 
-/*Interface of spdm_secured_message_lib.h*/
+/* DOE header*/
 
-#define        SPDM_ERROR_STRUCT  libspdm_error_struct_t
-/*Interface of spdm_transport_mctp_lib.h*/
-/*Interface of spdm_transport_pcidoe_lib.h*/
-/*Interface of pldm.h*/
-#define     PLDM_MESSAGE_HEADER           pldm_message_header_t
-#define     PLDM_MESSAGE_RESPONSE_HEADER  pldm_message_response_header_t
-/*Interface of pcidoe.h*/
-#define     PCI_DOE_DATA_OBJECT_HEADER  pci_doe_data_object_header_t
-#define     PCI_DOE_DISCOVERY_REQUEST   pci_doe_discovery_request_t
-#define     PCI_DOE_DISCOVERY_RESPONSE  pci_doe_discovery_response_t
-/*Interface of mctp.h*/
-#define     MCTP_HEADER          mctp_header_t
-#define     MCTP_MESSAGE_HEADER  mctp_message_header_t
+typedef struct {
+    UINT16 VendorId;
+    UINT8 DataObjectType;
+    UINT8 Reserved;
+    /* length of the data object being transfered in number of DW, including the header (2 DW)
+     * It only includes bit[0~17], bit[18~31] are reserved.
+     * A value of 00000h indicate 2^18 DW == 2^20 byte.*/
+    UINT32 Length;
+    /*UINT32   DataObjectDw[Length];*/
+} PCI_DOE_DATA_OBJECT_HEADER;
 
-#define     SPDM_RETURN  libspdm_return_t
+#pragma pack()
 
 /* FUNCTION */
 #define SpdmSetData                         libspdm_set_data

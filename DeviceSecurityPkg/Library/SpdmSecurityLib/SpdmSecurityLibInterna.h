@@ -8,10 +8,12 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 **/
 
 #ifndef __SPDM_SECURITY_LIB_INTERNAL_H__
+#define __SPDM_SECURITY_LIB_INTERNAL_H__
+
 
 #include <Uefi.h>
-#include "hal/base.h"
-#include <hal/library/SpdmLibStub.h>
+#include <hal/base.h>
+#include <Stub/SpdmLibStub.h>
 #include <industry_standard/spdm.h>
 #include <industry_standard/spdm_secured_message.h>
 #include <IndustryStandard/Pci.h>
@@ -35,6 +37,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Guid/ImageAuthentication.h>
 
 #include <Protocol/PciIo.h>
+#include <Library/SpdmReturnStatus.h>
 #include <Library/SpdmSecurityLib.h>
 #include "library/spdm_crypt_lib.h"
 
