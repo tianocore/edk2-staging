@@ -264,6 +264,13 @@ ExtendMeasurement (
       default:
         return EFI_SUCCESS;
     }
+  } else {
+    if (SpdmDeviceContext->IsEmbeddedDevice) {
+      PcrIndex = 0;
+    } else {
+      PcrIndex = 2;
+    }
+    EventType = EV_EFI_SPDM_FIRMWARE_BLOB;
   }
 
   DeviceContextSize = GetDeviceMeasurementContextSize (SpdmDeviceContext);
