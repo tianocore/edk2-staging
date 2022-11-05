@@ -452,33 +452,35 @@ MainEntryPoint (
       break;
   }
 
-  SignatureHeaderSize = 0;
-  SignatureListSize   = sizeof (EFI_SIGNATURE_LIST) + SignatureHeaderSize + sizeof (EFI_GUID) + RootCertSize;
-  SignatureList       = AllocateZeroPool (SignatureListSize);
-  ASSERT (SignatureList != NULL);
-  CopyGuid (&SignatureList->SignatureType, &gEdkiiCertSpdmCertChainGuid);
-  SignatureList->SignatureListSize   = (UINT32)SignatureListSize;
-  SignatureList->SignatureHeaderSize = (UINT32)SignatureHeaderSize;
-  SignatureList->SignatureSize       = (UINT32)(sizeof (EFI_GUID) + RootCertSize);
-  SignatureData                      = (VOID *)((UINT8 *)SignatureList + sizeof (EFI_SIGNATURE_LIST));
-  CopyGuid (&SignatureData->SignatureOwner, &gEfiCallerIdGuid);
-  CopyMem (
-    (UINT8 *)SignatureList + sizeof (EFI_SIGNATURE_LIST) + SignatureHeaderSize + sizeof (EFI_GUID),
-    RootCert,
-    RootCertSize
-    );
+  if (TestConfig != TEST_CONFIG_NO_CHAL_CAP_NO_ROOT_CA) {
+    SignatureHeaderSize = 0;
+    SignatureListSize   = sizeof (EFI_SIGNATURE_LIST) + SignatureHeaderSize + sizeof (EFI_GUID) + RootCertSize;
+    SignatureList       = AllocateZeroPool (SignatureListSize);
+    ASSERT (SignatureList != NULL);
+    CopyGuid (&SignatureList->SignatureType, &gEdkiiCertSpdmCertChainGuid);
+    SignatureList->SignatureListSize   = (UINT32)SignatureListSize;
+    SignatureList->SignatureHeaderSize = (UINT32)SignatureHeaderSize;
+    SignatureList->SignatureSize       = (UINT32)(sizeof (EFI_GUID) + RootCertSize);
+    SignatureData                      = (VOID *)((UINT8 *)SignatureList + sizeof (EFI_SIGNATURE_LIST));
+    CopyGuid (&SignatureData->SignatureOwner, &gEfiCallerIdGuid);
+    CopyMem (
+      (UINT8 *)SignatureList + sizeof (EFI_SIGNATURE_LIST) + SignatureHeaderSize + sizeof (EFI_GUID),
+      RootCert,
+      RootCertSize
+      );
 
-  Status = gRT->SetVariable (
-                  EDKII_DEVICE_SECURITY_DATABASE,
-                  &gEdkiiDeviceSignatureDatabaseGuid,
-                  EFI_VARIABLE_NON_VOLATILE |
-                  EFI_VARIABLE_BOOTSERVICE_ACCESS |
-                  EFI_VARIABLE_RUNTIME_ACCESS,
-                  SignatureListSize,
-                  SignatureList
-                  );
-  ASSERT_EFI_ERROR (Status);
-  FreePool (SignatureList);
+    Status = gRT->SetVariable (
+                    EDKII_DEVICE_SECURITY_DATABASE,
+                    &gEdkiiDeviceSignatureDatabaseGuid,
+                    EFI_VARIABLE_NON_VOLATILE |
+                    EFI_VARIABLE_BOOTSERVICE_ACCESS |
+                    EFI_VARIABLE_RUNTIME_ACCESS,
+                    SignatureListSize,
+                    SignatureList
+                    );
+    ASSERT_EFI_ERROR (Status);
+    FreePool (SignatureList);
+  }
 
   ResponderCertChainSize = sizeof (SPDM_CERT_CHAIN) + HashSize + CertChainSize;
   ResponderCertChain     = AllocateZeroPool (ResponderCertChainSize);
