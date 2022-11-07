@@ -26,6 +26,7 @@ SpdmDeviceAuthenticationAndMeasurement (
   SPDM_DEVICE_CONTEXT  *SpdmDeviceContext;
   BOOLEAN              IsAuthenticated;
   UINT8                AuthState;
+  UINT8                SlotId;
 
   SpdmDeviceContext = CreateSpdmDeviceContext (SpdmDeviceInfo);
   if (SpdmDeviceContext == NULL) {
@@ -34,8 +35,9 @@ SpdmDeviceAuthenticationAndMeasurement (
 
   IsAuthenticated = FALSE;
   AuthState = TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_SUCCESS;
+  SlotId = 0;
   if ((SecurityPolicy->AuthenticationPolicy & EDKII_DEVICE_AUTHENTICATION_REQUIRED) != 0) {
-    Status = DoDeviceAuthentication (SpdmDeviceContext, &AuthState);
+    Status = DoDeviceAuthentication (SpdmDeviceContext, &AuthState, &SlotId);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_ERROR, "DoDeviceAuthentication failed - %r\n", Status));
       return Status;
@@ -49,7 +51,7 @@ SpdmDeviceAuthenticationAndMeasurement (
   }
 
   if ((SecurityPolicy->MeasurementPolicy & EDKII_DEVICE_MEASUREMENT_REQUIRED) != 0) {
-    Status = DoDeviceMeasurement (SpdmDeviceContext, IsAuthenticated);
+    Status = DoDeviceMeasurement (SpdmDeviceContext, IsAuthenticated, SlotId);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_ERROR, "DoDeviceMeasurement failed - %r\n", Status));
     }
