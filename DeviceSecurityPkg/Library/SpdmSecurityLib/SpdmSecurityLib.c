@@ -25,6 +25,7 @@ SpdmDeviceAuthenticationAndMeasurement (
   EFI_STATUS           Status;
   SPDM_DEVICE_CONTEXT  *SpdmDeviceContext;
   BOOLEAN              IsAuthenticated;
+  UINT8                AuthState;
 
   SpdmDeviceContext = CreateSpdmDeviceContext (SpdmDeviceInfo);
   if (SpdmDeviceContext == NULL) {
@@ -32,13 +33,18 @@ SpdmDeviceAuthenticationAndMeasurement (
   }
 
   IsAuthenticated = FALSE;
+  AuthState = TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_SUCCESS;
   if ((SecurityPolicy->AuthenticationPolicy & EDKII_DEVICE_AUTHENTICATION_REQUIRED) != 0) {
-    Status = DoDeviceAuthentication (SpdmDeviceContext);
+    Status = DoDeviceAuthentication (SpdmDeviceContext, &AuthState);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_ERROR, "DoDeviceAuthentication failed - %r\n", Status));
-      IsAuthenticated = FALSE;
+      return Status;
     } else {
-      IsAuthenticated = TRUE;
+      if (AuthState == TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_FAIL_NO_SIG) {
+        return Status;
+      } else {
+        IsAuthenticated = TRUE;
+      }
     }
   }
 

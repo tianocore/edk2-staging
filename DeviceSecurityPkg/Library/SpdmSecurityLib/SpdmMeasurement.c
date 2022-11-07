@@ -628,8 +628,9 @@ DoDeviceMeasurement (
       //    get signature in last message only.
       //
       if (ReceivedNumberOfBlock == NumberOfBlocks - 1) {
-        RequestAttribute = RequestAttribute |
-                           SPDM_GET_MEASUREMENTS_REQUEST_ATTRIBUTES_GENERATE_SIGNATURE;
+        if (IsAuthenticated) {
+          RequestAttribute |= SPDM_GET_MEASUREMENTS_REQUEST_ATTRIBUTES_GENERATE_SIGNATURE;
+        }
       }
 
       MeasurementRecordLength = sizeof (MeasurementRecord);

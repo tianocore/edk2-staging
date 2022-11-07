@@ -143,7 +143,8 @@ DoDeviceMeasurement (
 **/
 EFI_STATUS
 DoDeviceAuthentication (
-  IN  SPDM_DEVICE_CONTEXT  *SpdmDeviceContext
+  IN  SPDM_DEVICE_CONTEXT  *SpdmDeviceContext,
+  OUT UINT8                *AuthState
   );
 
 /**
