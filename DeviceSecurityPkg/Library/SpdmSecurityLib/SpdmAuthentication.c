@@ -336,7 +336,8 @@ ExtendAuthentication (
 EFI_STATUS
 DoDeviceAuthentication (
   IN  SPDM_DEVICE_CONTEXT  *SpdmDeviceContext,
-  OUT UINT8                *AuthState
+  OUT UINT8                *AuthState,
+  OUT UINT8                *ValidSlotId
   )
 {
   EFI_STATUS           Status;
@@ -357,6 +358,7 @@ DoDeviceAuthentication (
   BOOLEAN              IsValidCertChain;
   BOOLEAN              IsValidChallengeAuthSig;
   BOOLEAN              RootCertMatch;
+  UINT8                SlotId;
 
   SpdmContext = SpdmDeviceContext->SpdmContext;
 
@@ -390,20 +392,27 @@ DoDeviceAuthentication (
     ZeroMem (CertChain, sizeof (CertChain));
     TrustAnchor     = NULL;
     TrustAnchorSize = 0;
-    SpdmReturn      = SpdmGetCertificateEx (SpdmContext, 0, &CertChainSize, CertChain, (CONST VOID **)&TrustAnchor, &TrustAnchorSize);
-    if (LIBSPDM_STATUS_IS_SUCCESS (SpdmReturn)) {
-      IsValidCertChain = TRUE;
-    } else if (SpdmReturn == LIBSPDM_STATUS_VERIF_FAIL) {
-      IsValidCertChain = FALSE;
-      *AuthState        = TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_FAIL_INVALID;
-      Status           = ExtendCertificate (SpdmDeviceContext, *AuthState, 0, NULL, NULL, 0);
-      return Status;
-    } else {
+    for (SlotId = 0; SlotId < SPDM_MAX_SLOT_COUNT; SlotId ++) {
+      SpdmReturn      = SpdmGetCertificateEx (SpdmContext, SlotId, &CertChainSize, CertChain, (CONST VOID **)&TrustAnchor, &TrustAnchorSize);
+      if (LIBSPDM_STATUS_IS_SUCCESS (SpdmReturn)) {
+        IsValidCertChain = TRUE;
+        break;
+      } else if (SpdmReturn == LIBSPDM_STATUS_VERIF_FAIL) {
+        IsValidCertChain = FALSE;
+        *AuthState        = TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_FAIL_INVALID;
+        Status           = ExtendCertificate (SpdmDeviceContext, *AuthState, 0, NULL, NULL, 0);
+      }
+    }
+
+    if (SlotId >= SPDM_MAX_SLOT_COUNT) {
       return EFI_DEVICE_ERROR;
     }
 
     if (TrustAnchor != NULL) {
       RootCertMatch = TRUE;
+      *ValidSlotId = SlotId;
+    } else {
+      *ValidSlotId = 0;
     }
 
     DEBUG ((DEBUG_INFO, "SpdmGetCertificateEx - SpdmReturn %p, TrustAnchorSize 0x%x, RootCertMatch %d\n", SpdmReturn, TrustAnchorSize, RootCertMatch));
@@ -419,7 +428,7 @@ DoDeviceAuthentication (
     ZeroMem (MeasurementHash, sizeof (MeasurementHash));
     ZeroMem (RequesterNonce, sizeof (RequesterNonce));
     ZeroMem (ResponderNonce, sizeof (ResponderNonce));
-    SpdmReturn = SpdmChallengeEx (SpdmContext, 0, SPDM_CHALLENGE_REQUEST_TCB_COMPONENT_MEASUREMENT_HASH, MeasurementHash, NULL, NULL, RequesterNonce, ResponderNonce);
+    SpdmReturn = SpdmChallengeEx (SpdmContext, *ValidSlotId, SPDM_CHALLENGE_REQUEST_TCB_COMPONENT_MEASUREMENT_HASH, MeasurementHash, NULL, NULL, RequesterNonce, ResponderNonce);
     if (SpdmReturn == LIBSPDM_STATUS_SUCCESS) {
       IsValidChallengeAuthSig = TRUE;
     } else if (SpdmReturn == LIBSPDM_STATUS_VERIF_FAIL) {

@@ -133,7 +133,8 @@ CreateDeviceMeasurementContext (
 EFI_STATUS
 DoDeviceMeasurement (
   IN  SPDM_DEVICE_CONTEXT  *SpdmDeviceContext,
-  IN  BOOLEAN              IsAuthenticated
+  IN  BOOLEAN              IsAuthenticated,
+  IN  UINT8                SlotId
   );
 
 /**
@@ -144,7 +145,8 @@ DoDeviceMeasurement (
 EFI_STATUS
 DoDeviceAuthentication (
   IN  SPDM_DEVICE_CONTEXT  *SpdmDeviceContext,
-  OUT UINT8                *AuthState
+  OUT UINT8                *AuthState,
+  OUT UINT8                *ValidSlotId
   );
 
 /**
