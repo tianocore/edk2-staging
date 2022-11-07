@@ -505,7 +505,8 @@ ExtendMeasurement (
 EFI_STATUS
 DoDeviceMeasurement (
   IN  SPDM_DEVICE_CONTEXT  *SpdmDeviceContext,
-  IN  BOOLEAN              IsAuthenticated
+  IN  BOOLEAN              IsAuthenticated,
+  IN  UINT8                SlotId
   )
 {
   EFI_STATUS                   Status;
@@ -557,7 +558,7 @@ DoDeviceMeasurement (
                  NULL,
                  RequestAttribute,
                  SPDM_GET_MEASUREMENTS_REQUEST_MEASUREMENT_OPERATION_ALL_MEASUREMENTS,
-                 0,
+                 SlotId,
                  NULL,
                  &NumberOfBlocks,
                  &MeasurementRecordLength,
@@ -604,7 +605,7 @@ DoDeviceMeasurement (
                    NULL,
                    RequestAttribute,
                    SPDM_GET_MEASUREMENTS_REQUEST_MEASUREMENT_OPERATION_TOTAL_NUMBER_OF_MEASUREMENTS,
-                   0,
+                   SlotId,
                    NULL,
                    &NumberOfBlocks,
                    NULL,
@@ -641,7 +642,7 @@ DoDeviceMeasurement (
                      NULL,
                      RequestAttribute,
                      Index,
-                     0,
+                     SlotId,
                      NULL,
                      &NumberOfBlock,
                      &MeasurementRecordLength,
