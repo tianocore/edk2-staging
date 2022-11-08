@@ -250,6 +250,25 @@ MainEntryPoint (
     HasRspPubCert = FALSE;
   }
 
+  // Change the PublicCertChain in slot_0, keep the above original PublicCertChain in slot_1.
+  if (TestConfig == TEST_CONFIG_DIFF_CERT_IN_DIFF_SLOT) {
+    Status = GetVariable2 (
+              L"ProvisionSpdmCertChain_2",
+              &gEfiDeviceSecurityPkgTestConfig,
+              &CertChain,
+              &CertChainSize
+              );
+    if (!EFI_ERROR (Status)) {
+      HasRspPubCert = TRUE;
+      Parameter.additional_data[0] = 0;
+      SpdmSetData (SpdmContext, SpdmDataLocalPublicCertChain, &Parameter, CertChain, CertChainSize);
+
+      // do not free it
+    } else {
+      HasRspPubCert = FALSE;
+    }
+  }
+
   HasRspPrivKey = TRUE;
 
   Data32 = SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_CERT_CAP |
