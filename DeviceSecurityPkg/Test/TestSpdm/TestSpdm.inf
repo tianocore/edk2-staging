@@ -40,3 +40,6 @@
   gSpdmProtocolGuid             ## CONSUME
   gSpdmTestProtocolGuid         ## CONSUME
   gEdkiiDeviceSecurityProtocolGuid   ## CONSUME
+
+[Guids]
+  gEfiDeviceSecurityPkgTestConfig    ## CONSUMES
