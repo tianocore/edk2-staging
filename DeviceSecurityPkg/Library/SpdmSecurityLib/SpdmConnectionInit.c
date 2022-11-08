@@ -71,7 +71,13 @@ CreateSpdmDeviceContext (
   EFI_STATUS           Status;
   SPDM_RETURN          SpdmReturn;
   EFI_SIGNATURE_LIST   *SignatureList;
+  EFI_SIGNATURE_LIST   *DbList;
   UINTN                SignatureListSize;
+  EFI_SIGNATURE_DATA   *Cert;
+  UINTN                CertCount;
+  UINTN                Index;
+  UINTN                SiglistHeaderSize;
+  UINTN                DbSize;
   VOID                 *Data;
   UINTN                DataSize;
   SPDM_DATA_PARAMETER  Parameter;
@@ -174,22 +180,33 @@ CreateSpdmDeviceContext (
              &SignatureListSize
              );
   if ((!EFI_ERROR (Status)) && (SignatureList != NULL)) {
-    // BUGBUG: Assume only 1 SPDM cert.
-    ASSERT (CompareGuid (&SignatureList->SignatureType, &gEdkiiCertSpdmCertChainGuid));
-    ASSERT (SignatureList->SignatureListSize == SignatureList->SignatureListSize);
-    ASSERT (SignatureList->SignatureHeaderSize == 0);
-    ASSERT (SignatureList->SignatureSize == SignatureList->SignatureListSize - (sizeof (EFI_SIGNATURE_LIST) + SignatureList->SignatureHeaderSize));
+    DbList = SignatureList;
+    DbSize = SignatureListSize;
+    while ((DbSize > 0) && (SignatureListSize >= DbList->SignatureListSize)) {
+      if (!CompareGuid (&DbList->SignatureType, &gEfiCertX509Guid)) {
+        DbSize -= DbList->SignatureListSize;
+        DbList  = (EFI_SIGNATURE_LIST *)((UINT8 *)DbList + DbList->SignatureListSize);
+        continue;
+      }
+      ASSERT (DbList->SignatureHeaderSize == 0);
+      SiglistHeaderSize = sizeof (EFI_SIGNATURE_LIST) + DbList->SignatureHeaderSize;
+      Cert = (EFI_SIGNATURE_DATA *)((UINT8 *)DbList + SiglistHeaderSize);
+      CertCount = (DbList->SignatureListSize - SiglistHeaderSize) / DbList->SignatureSize;
 
-    Data = (VOID *)((UINT8 *)SignatureList +
-                    sizeof (EFI_SIGNATURE_LIST) +
-                    SignatureList->SignatureHeaderSize +
-                    sizeof (EFI_GUID));
-    DataSize = SignatureList->SignatureSize - sizeof (EFI_GUID);
+      for (Index = 0; Index < CertCount; Index ++) {
+        Data = Cert->SignatureData;
+        DataSize = DbList->SignatureSize - sizeof (EFI_GUID);
 
-    ZeroMem (&Parameter, sizeof (Parameter));
-    Parameter.location = SpdmDataLocationLocal;
-    SpdmSetData (SpdmContext, SpdmDataPeerPublicRootCert, &Parameter, Data, DataSize);
-    // Do not free it.
+        ZeroMem (&Parameter, sizeof (Parameter));
+        Parameter.location = SpdmDataLocationLocal;
+        SpdmSetData (SpdmContext, SpdmDataPeerPublicRootCert, &Parameter, Data, DataSize);
+
+        Cert = (EFI_SIGNATURE_DATA *)((UINT8 *)Cert + DbList->SignatureSize);
+      }
+
+      DbSize -= DbList->SignatureListSize;
+      DbList  = (EFI_SIGNATURE_LIST *)((UINT8 *)DbList + DbList->SignatureListSize);
+    }
   }
 
   Data8 = 0;

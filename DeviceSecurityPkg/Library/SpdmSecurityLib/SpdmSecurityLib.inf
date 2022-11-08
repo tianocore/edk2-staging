@@ -45,4 +45,4 @@
 
 [Guids]
   gEdkiiDeviceSignatureDatabaseGuid       ## CONSUMES
-  gEdkiiCertSpdmCertChainGuid             ## CONSUMES
+  gEfiCertX509Guid                        ## CONSUMES
