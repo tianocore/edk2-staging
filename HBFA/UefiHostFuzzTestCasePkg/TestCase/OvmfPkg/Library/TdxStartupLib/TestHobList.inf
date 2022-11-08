@@ -39,4 +39,4 @@
   MemoryAllocationLib
   ToolChainHarnessLib
   PcdLib
-  TdxStartupLib
+  PeilessStartupLib

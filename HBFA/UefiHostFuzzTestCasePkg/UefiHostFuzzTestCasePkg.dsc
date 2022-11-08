@@ -147,6 +147,7 @@
     NULL|UefiHostTestPkg/Library/BaseLibNullCpuid/BaseLibNullCpuid.inf
     AuthVariableLib|MdeModulePkg/Library/AuthVariableLibNull/AuthVariableLibNull.inf
     VarCheckLib|UefiHostTestPkg/Library/VarCheckLibNull/VarCheckLibNull.inf
+    VariableFlashInfoLib|MdeModulePkg/Library/BaseVariableFlashInfoLib/BaseVariableFlashInfoLib.inf
   }
 
   UefiHostFuzzTestCasePkg/TestCase/SecurityPkg/Library/Tpm2CommandLib/TestTpm2CommandLib.inf {
@@ -204,20 +205,27 @@
       LockBoxLib|MdeModulePkg/Library/LockBoxNullLib/LockBoxNullLib.inf
       PeiServicesTablePointerLib|MdePkg/Library/PeiServicesTablePointerLib/PeiServicesTablePointerLib.inf
       TdxLib|MdePkg/Library/TdxLib/TdxLib.inf 
-      TdxProbeLib|MdePkg/Library/TdxProbeLib/TdxProbeLib.inf
+     CcProbeLib|OvmfPkg/Library/CcProbeLib/DxeCcProbeLib.inf
+	    RegisterFilterLib|MdePkg/Library/RegisterFilterLibNull/RegisterFilterLibNull.inf 
   }
 
   UefiHostFuzzTestCasePkg/TestCase/OvmfPkg/Library/TdxStartupLib/TestHobList.inf {
   <LibraryClasses>
-   TdxStartupLib|OvmfPkg/Library/TdxStartupLib/TdxStartupLib.inf
+   LocalApicLib|UefiCpuPkg/Library/BaseXApicX2ApicLib/BaseXApicX2ApicLib.inf
+   QemuFwCfgSimpleParserLib|OvmfPkg/Library/QemuFwCfgSimpleParserLib/QemuFwCfgSimpleParserLib.inf
+   MtrrLib|UefiCpuPkg/Library/MtrrLib/MtrrLib.inf
+   PeiHardwareInfoLib|OvmfPkg/Library/HardwareInfoLib/PeiHardwareInfoLib.inf
+   PrePiHobListPointerLib|OvmfPkg/IntelTdx/PrePiHobListPointerLibTdx/PrePiHobListPointerLibTdx.inf
+   PlatformInitLib|OvmfPkg/Library/PlatformInitLib/PlatformInitLib.inf
+   PeilessStartupLib|OvmfPkg/Library/PeilessStartupLib/PeilessStartupLib.inf
+   RegisterFilterLib|MdePkg/Library/RegisterFilterLibNull/RegisterFilterLibNull.inf
    UefiCpuLib|UefiCpuPkg/Library/BaseUefiCpuLib/BaseUefiCpuLib.inf
    IoLib|MdePkg/Library/BaseIoLibIntrinsic/BaseIoLibIntrinsicSev.inf
-   LocalApicLib|UefiCpuPkg/Library/BaseXApicX2ApicLib/BaseXApicX2ApicLibSec.inf
+   #LocalApicLib|UefiCpuPkg/Library/BaseXApicX2ApicLib/BaseXApicX2ApicLibSec.inf
    CpuExceptionHandlerLib|UefiCpuPkg/Library/CpuExceptionHandlerLib/DxeCpuExceptionHandlerLib.inf
    TdxLib|MdePkg/Library/TdxLib/TdxLib.inf
-   TdvfPlatformLib|OvmfPkg/Library/TdvfPlatformLibQemu/TdvfPlatformLibQemuSec.inf
-   PrePiLib|OvmfPkg/Library/PrePiLibTdx/PrePiLibTdx.inf
-   HashLib|SecurityPkg/Library/HashLibBaseCryptoRouterTdx/HashLibBaseCryptoRouter.inf
+   PrePiLib|EmbeddedPkg/Library/PrePiLib/PrePiLib.inf
+   HashLib|SecurityPkg/Library/HashLibTdx/HashLibTdx.inf 
    UefiDecompressLib|MdePkg/Library/BaseUefiDecompressLib/BaseUefiDecompressLib.inf
    PeCoffLib|MdePkg/Library/BasePeCoffLib/BasePeCoffLib.inf
    ExtractGuidedSectionLib|MdePkg/Library/BaseExtractGuidedSectionLib/BaseExtractGuidedSectionLib.inf
@@ -231,11 +239,10 @@
    VmgExitLib|OvmfPkg/Library/VmgExitLib/VmgExitLib.inf
    BaseCryptLib|CryptoPkg/Library/BaseCryptLib/BaseCryptLib.inf
    VmgExitLib|OvmfPkg/Library/VmgExitLib/VmgExitLib.inf
-   VmTdExitLib|OvmfPkg/Library/VmTdExitLib/VmTdExitLib.inf
-   TdxProbeLib|MdePkg/Library/TdxProbeLib/TdxProbeLib.inf
-   TdxMpLib|OvmfPkg/Library/TdxMpLib/TdxMpLib.inf
+   CcProbeLib|OvmfPkg/Library/CcProbeLib/DxeCcProbeLib.inf
+   TdxMailboxLib|OvmfPkg/Library/TdxMailboxLib/TdxMailboxLib.inf
    TpmMeasurementLib|SecurityPkg/Library/DxeTpmMeasurementLib/DxeTpmMeasurementLib.inf
-   HobLib|MdePkg/Library/SecHobLib/SecHobLib.inf
+   HobLib|EmbeddedPkg/Library/PrePiHobLib/PrePiHobLib.inf
    BaseLib|MdePkg/Library/BaseLib/BaseLib.inf
   } 
     UefiHostFuzzTestCasePkg/TestCase/SecurityPkg/Library/DxeTpm2MeasureBootLib/TestTcg2MeasureGptTable.inf{
@@ -249,7 +256,7 @@
    OpensslLib|CryptoPkg/Library/OpensslLib/OpensslLib.inf
    IntrinsicLib|CryptoPkg/Library/IntrinsicLib/IntrinsicLib.inf
    RngLib|MdePkg/Library/BaseRngLibTimerLib/BaseRngLibTimerLib.inf
-   TdxProbeLib|MdePkg/Library/TdxProbeLib/TdxProbeLib.inf
+   CcProbeLib|OvmfPkg/Library/CcProbeLib/DxeCcProbeLib.inf
   }
  
   UefiHostFuzzTestCasePkg/TestCase/SecurityPkg/Library/DxeTpm2MeasureBootLib/TestTcg2MeasurePeImage.inf{
@@ -263,15 +270,33 @@
    OpensslLib|CryptoPkg/Library/OpensslLib/OpensslLib.inf
    IntrinsicLib|CryptoPkg/Library/IntrinsicLib/IntrinsicLib.inf
    RngLib|MdePkg/Library/BaseRngLibTimerLib/BaseRngLibTimerLib.inf
-   TdxProbeLib|MdePkg/Library/TdxProbeLib/TdxProbeLib.inf
+   CcProbeLib|OvmfPkg/Library/CcProbeLib/DxeCcProbeLib.inf
   }
  UefiHostFuzzTestCasePkg/TestCase/OvmfPkg/EmuVariableFvbRuntimeDxe/TestValidateTdxCfv.inf{
   <LibraryClasses>
    NULL|OvmfPkg/EmuVariableFvbRuntimeDxe/Fvb.inf
    UefiRuntimeLib|MdePkg/Library/UefiRuntimeLib/UefiRuntimeLib.inf
    PlatformFvbLib|OvmfPkg/Library/EmuVariableFvbLib/EmuVariableFvbLib.inf
-   TdxProbeLib|MdePkg/Library/TdxProbeLib/TdxProbeLib.inf
+   CcProbeLib|OvmfPkg/Library/CcProbeLib/DxeCcProbeLib.inf
    PcdLib|MdePkg/Library/DxePcdLib/DxePcdLib.inf
+   BaseLib|MdePkg/Library/BaseLib/BaseLib.inf
+   PeiHardwareInfoLib|OvmfPkg/Library/HardwareInfoLib/PeiHardwareInfoLib.inf
+   RegisterFilterLib|MdePkg/Library/RegisterFilterLibNull/RegisterFilterLibNull.inf
+   UefiCpuLib|UefiCpuPkg/Library/BaseUefiCpuLib/BaseUefiCpuLib.inf
+   LocalApicLib|UefiCpuPkg/Library/BaseXApicX2ApicLib/BaseXApicX2ApicLib.inf
+   VmgExitLib|OvmfPkg/Library/VmgExitLib/VmgExitLib.inf
+   MemEncryptTdxLib|OvmfPkg/Library/BaseMemEncryptTdxLib/BaseMemEncryptTdxLib.inf
+   MemEncryptSevLib|OvmfPkg/Library/BaseMemEncryptSevLib/DxeMemEncryptSevLib.inf
+   CpuLib|MdePkg/Library/BaseCpuLib/BaseCpuLib.inf
+   PciExpressLib|MdePkg/Library/BasePciExpressLib/BasePciExpressLib.inf  
+   PciCf8Lib|MdePkg/Library/BasePciCf8Lib/BasePciCf8Lib.inf
+   TdxLib|MdePkg/Library/TdxLib/TdxLib.inf
+   PciLib|OvmfPkg/Library/DxePciLibI440FxQ35/DxePciLibI440FxQ35.inf
+   MtrrLib|UefiCpuPkg/Library/MtrrLib/MtrrLib.inf
+   QemuFwCfgSimpleParserLib|OvmfPkg/Library/QemuFwCfgSimpleParserLib/QemuFwCfgSimpleParserLib.inf
+   QemuFwCfgLib|OvmfPkg/Library/QemuFwCfgLib/QemuFwCfgDxeLib.inf
+   IoLib|MdePkg/Library/BaseIoLibIntrinsic/BaseIoLibIntrinsicSev.inf
+   PlatformInitLib|OvmfPkg/Library/PlatformInitLib/PlatformInitLib.inf
   }
 
  UefiHostFuzzTestCasePkg/TestCase/OvmfPkg/VirtioPciDeviceDxe/TestVirtioPciDevice.inf{

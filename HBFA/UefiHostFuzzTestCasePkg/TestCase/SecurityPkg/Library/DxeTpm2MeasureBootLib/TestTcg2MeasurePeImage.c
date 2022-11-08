@@ -14,6 +14,7 @@
 #include <Uefi.h>
 #include <Protocol/BlockIo.h>
 #include <Protocol/DiskIo.h>
+#include <Protocol/CcMeasurement.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/BaseLib.h>
 #include <Library/DebugLib.h>

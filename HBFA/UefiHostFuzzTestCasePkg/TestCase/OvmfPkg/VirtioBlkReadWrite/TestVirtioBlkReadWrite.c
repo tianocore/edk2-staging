@@ -58,7 +58,6 @@ RunTestHarness(
       VblkDev->Signature = VBLK_SIG;
       VblkDev->VirtIo = &VirtioDev->VirtioDevice;
       Status = VirtioBlkInit (VblkDev);
-
       if (!EFI_ERROR(Status)) {
         VblkDev->BlockIo.WriteBlocks(&VblkDev->BlockIo, 0, 0, TestBufferSize, TestBuffer);
         VblkDev->BlockIo.ReadBlocks(&VblkDev->BlockIo, 0, 0, TestBufferSize, TestBuffer);

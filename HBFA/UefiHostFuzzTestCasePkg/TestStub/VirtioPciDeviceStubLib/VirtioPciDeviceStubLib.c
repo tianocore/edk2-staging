@@ -290,7 +290,7 @@ InitVirtioPciDev (
   PciCfg = (PCI_CFG_SPACE *) ConfigRegion;
   
   // Hardcode need to resolve
-  FILE *f = fopen("/home/tiano/VirtioBlkFuzzSeed0.9.5.bin", "rb");
+  FILE *f = fopen("/home/huang/rui/workspace/edk2-staging/HBFA/UefiHostFuzzTestCasePkg/Seed/Blk/VirtioBlkFuzzSeed0.9.5.bin", "rb");
   if (f==NULL) {
     fputs ("File error",stderr);
     goto FreeDevice;

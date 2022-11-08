@@ -20,7 +20,7 @@
 #include <Library/BaseMemoryLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/PcdLib.h>
-#include <Library/TdxStartupLib.h>
+#include <Library/PeilessStartupLib.h>
 #include <Library/HobLib.h>
 #include <IndustryStandard/Tdx.h>
 

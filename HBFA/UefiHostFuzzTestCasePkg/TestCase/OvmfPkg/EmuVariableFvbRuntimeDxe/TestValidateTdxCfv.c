@@ -18,6 +18,7 @@
 #include <Library/DebugLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/MemoryAllocationLib.h>
+#include <Library/PlatformInitLib.h>
 
 #define TOTAL_SIZE   (1024* 1024)
 #define BLOCK_SIZE   (512)
@@ -25,7 +26,7 @@
 
 
 BOOLEAN
-ValidateTdxCfv (
+PlatformValidateNvVarStore (
   IN UINT8    *TdvfCfvBase,
   IN UINT32    TdvfCfvSize
   ); 
@@ -62,6 +63,6 @@ RunTestHarness(
   // 
   // try to separate EFI lib, use stdlib function.
   // no asm code.
-  ValidateTdxCfv (TestBuffer, (UINT32)TestBufferSize);
+  PlatformValidateNvVarStore (TestBuffer, (UINT32)TestBufferSize);
 
 }

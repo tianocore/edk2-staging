@@ -43,3 +43,4 @@ gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageFtwSpareSize|0x40000
   UefiDriverEntryPoint
   UefiLib
   ToolChainHarnessLib
+  PlatformInitLib
