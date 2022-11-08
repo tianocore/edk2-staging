@@ -19,6 +19,8 @@
 #include <Protocol/Spdm.h>
 #include <Protocol/SpdmTest.h>
 #include <Protocol/DeviceSecurity.h>
+#include <Library/UefiRuntimeServicesTableLib.h>
+#include <Test/TestConfig.h>
 
 #define USE_PSK  0
 
@@ -258,6 +260,21 @@ TestSpdm (
   UINT32              SessionId;
   UINT8               HeartbeatPeriod;
   UINT8               MeasurementHash[64];
+  UINT8               SlotId;
+  UINT8               TestConfig;
+  UINTN               TestConfigSize;
+
+  TestConfigSize = sizeof(UINT8);
+  Status = gRT->GetVariable (
+                  L"SpdmTestConfig",
+                  &gEfiDeviceSecurityPkgTestConfig,
+                  NULL,
+                  &TestConfigSize,
+                  &TestConfig
+                  );
+  if (EFI_ERROR (Status)) {
+    return;
+  }
 
   Status = gBS->LocateProtocol (&gSpdmProtocolGuid, NULL, (VOID **)&SpdmProtocol);
   ASSERT_EFI_ERROR (Status);
@@ -275,11 +292,16 @@ TestSpdm (
 
   HeartbeatPeriod = 0;
   ZeroMem (MeasurementHash, sizeof (MeasurementHash));
+  SlotId = 0;
+  if (TestConfig == TEST_CONFIG_DIFF_CERT_IN_DIFF_SLOT) {
+    //The valid certificate chain with trust anchor is in slot_1 of responder.
+    SlotId = 1;
+  }
   Status = SpdmProtocol->StartSession (
                            SpdmProtocol,
                            USE_PSK,
                            SPDM_CHALLENGE_REQUEST_TCB_COMPONENT_MEASUREMENT_HASH,
-                           0,
+                           SlotId,
                            &SessionId,
                            &HeartbeatPeriod,
                            MeasurementHash
