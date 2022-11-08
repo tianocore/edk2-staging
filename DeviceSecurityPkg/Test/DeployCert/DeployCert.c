@@ -566,6 +566,31 @@ MainEntryPoint (
   ASSERT_EFI_ERROR (Status);
   FreePool (ResponderCertChain);
 
+  // Provision the second Spdm CertChain, a valid certificate chain,
+  // but its trust anchor does not match the UEFI device signature variable.
+  ResponderCertChainSize = sizeof (SPDM_CERT_CHAIN) + SHA256_HASH_SIZE + TestCertChain2Size;
+  ResponderCertChain     = AllocateZeroPool (ResponderCertChainSize);
+  ASSERT (ResponderCertChain != NULL);
+  ResponderCertChain->Length   = (UINT16)ResponderCertChainSize;
+  ResponderCertChain->Reserved = 0;
+  Sha256HashAll (TestRootCer2, TestRootCer2Size, (VOID *)(ResponderCertChain + 1));
+
+  CopyMem (
+    (UINT8 *)ResponderCertChain + sizeof (SPDM_CERT_CHAIN) + SHA256_HASH_SIZE,
+    TestCertChain2,
+    TestCertChain2Size
+    );
+
+  Status = gRT->SetVariable (
+                  L"ProvisionSpdmCertChain_2",
+                  &gEfiDeviceSecurityPkgTestConfig,
+                  EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_BOOTSERVICE_ACCESS,
+                  ResponderCertChainSize,
+                  ResponderCertChain
+                  );
+  ASSERT_EFI_ERROR (Status);
+  FreePool (ResponderCertChain);
+
   {
     //
     // TBD - we need only include the root-cert, instead of the CertChain

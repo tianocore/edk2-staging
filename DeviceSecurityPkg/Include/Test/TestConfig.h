@@ -30,5 +30,6 @@
 #define TEST_CONFIG_SECP_521_R1_CHACHA20_POLY1305     19
 #define TEST_CONFIG_NO_CHAL_CAP_NO_ROOT_CA            20
 #define TEST_CONFIG_MULTIPLE_CERT_IN_DB               21
+#define TEST_CONFIG_DIFF_CERT_IN_DIFF_SLOT            22
 
 #endif
