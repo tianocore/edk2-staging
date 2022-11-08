@@ -29,5 +29,6 @@
 #define TEST_CONFIG_SECP_256_R1_AES_256_GCM           18
 #define TEST_CONFIG_SECP_521_R1_CHACHA20_POLY1305     19
 #define TEST_CONFIG_NO_CHAL_CAP_NO_ROOT_CA            20
+#define TEST_CONFIG_MULTIPLE_CERT_IN_DB               21
 
 #endif

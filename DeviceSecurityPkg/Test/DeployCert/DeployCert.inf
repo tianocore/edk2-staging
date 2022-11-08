@@ -45,7 +45,6 @@
 
 [Guids]
   gEdkiiDeviceSignatureDatabaseGuid       ## PRODUCE
-  gEdkiiCertSpdmCertChainGuid             ## CONSUME
   gEfiCertX509Guid
   gEfiDeviceSecurityPkgTestConfig         ## PRODUCE
 
