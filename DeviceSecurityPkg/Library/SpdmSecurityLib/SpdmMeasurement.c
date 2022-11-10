@@ -527,6 +527,8 @@ DoDeviceMeasurement (
   UINT8                        NumberOfBlock;
   UINT8                        ReceivedNumberOfBlock;
   UINT8                        AuthState;
+  UINT8                        ContentChanged;
+  UINT8                        ContentChangedCount;
 
   SpdmContext = SpdmDeviceContext->SpdmContext;
 
@@ -595,7 +597,11 @@ DoDeviceMeasurement (
     Status    = ExtendMeasurement (SpdmDeviceContext, AuthState, 0, NULL, NULL, NULL);
     return Status;
   } else {
+    ContentChangedCount = 0;
+ContentChangedFlag:
     RequestAttribute = 0;
+    ContentChanged = SPDM_MEASUREMENTS_RESPONSE_CONTENT_NO_CHANGE_DETECTED;
+    ReceivedNumberOfBlock = 0;
 
     //
     // 1. Query the total number of measurements available.
@@ -643,7 +649,7 @@ DoDeviceMeasurement (
                      RequestAttribute,
                      Index,
                      SlotId,
-                     NULL,
+                     &ContentChanged,
                      &NumberOfBlock,
                      &MeasurementRecordLength,
                      MeasurementRecord,
@@ -659,6 +665,17 @@ DoDeviceMeasurement (
         continue;
       }
 
+      if ((ReceivedNumberOfBlock == NumberOfBlocks - 1)
+           && (ContentChanged == SPDM_MEASUREMENTS_RESPONSE_CONTENT_CHANGE_DETECTED)){
+        if (ContentChangedCount == 0) {
+          ContentChangedCount ++;
+          goto ContentChangedFlag;
+        } else {
+          AuthState = TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_FAIL_INVALID;
+          Status    = ExtendMeasurement (SpdmDeviceContext, AuthState, 0, NULL, NULL, NULL);
+          return Status;
+        }
+      }
       ReceivedNumberOfBlock += 1;
       DEBUG ((DEBUG_INFO, "ExtendMeasurement...\n"));
       AuthState = TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_SUCCESS;
