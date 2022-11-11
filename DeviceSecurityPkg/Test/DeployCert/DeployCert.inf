@@ -47,4 +47,4 @@
   gEdkiiDeviceSignatureDatabaseGuid       ## PRODUCE
   gEfiCertX509Guid
   gEfiDeviceSecurityPkgTestConfig         ## PRODUCE
-
+  gEfiCertSha256Guid

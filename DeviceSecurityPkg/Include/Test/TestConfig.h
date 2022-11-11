@@ -31,5 +31,6 @@
 #define TEST_CONFIG_NO_CHAL_CAP_NO_ROOT_CA            20
 #define TEST_CONFIG_MULTIPLE_CERT_IN_DB               21
 #define TEST_CONFIG_DIFF_CERT_IN_DIFF_SLOT            22
+#define TEST_CONFIG_NO_EFI_CERT_X509_GUID_IN_DB       23
 
 #endif
