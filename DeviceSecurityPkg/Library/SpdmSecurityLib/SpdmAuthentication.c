@@ -77,7 +77,8 @@ ExtendCertificate (
   IN UINTN                 CertChainSize,
   IN UINT8                 *CertChain,
   IN VOID                  *TrustAnchor,
-  IN UINTN                 TrustAnchorSize
+  IN UINTN                 TrustAnchorSize,
+  IN UINT8                 SlotId
   )
 {
   VOID                                                       *EventLog;
@@ -152,7 +153,7 @@ ExtendCertificate (
 
       TcgSpdmCertChain               = (VOID *)EventLogPtr;
       TcgSpdmCertChain->SpdmVersion  = SpdmDeviceContext->SpdmVersion;
-      TcgSpdmCertChain->SpdmSlotId   = 0; // TBD - hardcode
+      TcgSpdmCertChain->SpdmSlotId   = SlotId;
       TcgSpdmCertChain->Reserved     = 0;
       TcgSpdmCertChain->SpdmHashAlgo = BaseHashAlgo;
       EventLogPtr                   += sizeof (TCG_DEVICE_SECURITY_EVENT_DATA_SUB_HEADER_SPDM_CERT_CHAIN);
@@ -180,6 +181,69 @@ ExtendCertificate (
 
       break;
     case TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_FAIL_INVALID:
+      EventLogSize = (UINT32)(sizeof (TCG_NV_INDEX_INSTANCE_EVENT_LOG_STRUCT) +
+                              sizeof (TCG_DEVICE_SECURITY_EVENT_DATA_HEADER2) +
+                              sizeof (UINT64) + DevicePathSize +
+                              sizeof (TCG_DEVICE_SECURITY_EVENT_DATA_SUB_HEADER_SPDM_CERT_CHAIN) +
+                              DeviceContextSize);
+      EventLog = AllocatePool (EventLogSize);
+      if (EventLog == NULL) {
+        return EFI_OUT_OF_RESOURCES;
+      }
+
+      EventLogPtr = EventLog;
+
+      NvIndexInstance = (VOID *)EventLogPtr;
+      CopyMem (NvIndexInstance->Signature, TCG_NV_EXTEND_INDEX_FOR_INSTANCE_SIGNATURE, sizeof (TCG_NV_EXTEND_INDEX_FOR_INSTANCE_SIGNATURE));
+      NvIndexInstance->Version = TCG_NV_INDEX_INSTANCE_EVENT_LOG_STRUCT_VERSION;
+      ZeroMem (NvIndexInstance->Reserved, sizeof (NvIndexInstance->Reserved));
+      EventLogPtr += sizeof (TCG_NV_INDEX_INSTANCE_EVENT_LOG_STRUCT);
+
+      EventData2 = (VOID *)EventLogPtr;
+      CopyMem (EventData2->Signature, TCG_DEVICE_SECURITY_EVENT_DATA_SIGNATURE_2, sizeof (EventData2->Signature));
+      EventData2->Version    = TCG_DEVICE_SECURITY_EVENT_DATA_VERSION_2;
+      EventData2->AuthState  = AuthState;
+      EventData2->Reserved   = 0;
+      EventData2->Length     = (UINT32)EventLogSize;
+      EventData2->DeviceType = GetSpdmDeviceType (SpdmDeviceContext);
+
+      EventData2->SubHeaderType   = TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_SUB_HEADER_TYPE_SPDM_CERT_CHAIN;
+      EventData2->SubHeaderLength = sizeof (TCG_DEVICE_SECURITY_EVENT_DATA_SUB_HEADER_SPDM_CERT_CHAIN);
+      EventData2->SubHeaderUID    = SpdmDeviceContext->DeviceUID;
+
+      EventLogPtr = (VOID *)(EventData2 + 1);
+
+      *(UINT64 *)EventLogPtr = (UINT64)DevicePathSize;
+      EventLogPtr           += sizeof (UINT64);
+      CopyMem (EventLogPtr, SpdmDeviceContext->DevicePath, DevicePathSize);
+      EventLogPtr += DevicePathSize;
+
+      TcgSpdmCertChain               = (VOID *)EventLogPtr;
+      TcgSpdmCertChain->SpdmVersion  = SpdmDeviceContext->SpdmVersion;
+      TcgSpdmCertChain->SpdmSlotId   = SlotId;
+      TcgSpdmCertChain->Reserved     = 0;
+      TcgSpdmCertChain->SpdmHashAlgo = BaseHashAlgo;
+      EventLogPtr                   += sizeof (TCG_DEVICE_SECURITY_EVENT_DATA_SUB_HEADER_SPDM_CERT_CHAIN);
+
+      if (DeviceContextSize != 0) {
+        DeviceContext = (VOID *)EventLogPtr;
+        Status        = CreateDeviceMeasurementContext (SpdmDeviceContext, DeviceContext, DeviceContextSize);
+        if (Status != EFI_SUCCESS) {
+          return EFI_DEVICE_ERROR;
+        }
+      }
+
+      Status = TpmMeasureAndLogData (
+                 TCG_NV_EXTEND_INDEX_FOR_INSTANCE,
+                 EV_NO_ACTION,
+                 EventLog,
+                 EventLogSize,
+                 EventLog,
+                 EventLogSize
+                 );
+      DEBUG ((DEBUG_INFO, "TpmMeasureAndLogData (Instance) - %r\n", Status));
+
+      return Status;
     case TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_FAIL_NO_SIG:
     case TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_NO_SPDM:
       EventLogSize = (UINT32)(sizeof (TCG_NV_INDEX_INSTANCE_EVENT_LOG_STRUCT) +
@@ -377,7 +441,7 @@ DoDeviceAuthentication (
   if (((CapabilityFlags & SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_CERT_CAP) == 0) ||
       ((CapabilityFlags & SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_MEAS_CAP_SIG) == 0)){
     *AuthState = TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_FAIL_NO_SIG;
-    Status = ExtendCertificate (SpdmDeviceContext, *AuthState, 0, NULL, NULL, 0);
+    Status = ExtendCertificate (SpdmDeviceContext, *AuthState, 0, NULL, NULL, 0, 0);
     return Status;
   }
 
@@ -400,7 +464,7 @@ DoDeviceAuthentication (
       } else if (SpdmReturn == LIBSPDM_STATUS_VERIF_FAIL) {
         IsValidCertChain = FALSE;
         *AuthState        = TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_FAIL_INVALID;
-        Status           = ExtendCertificate (SpdmDeviceContext, *AuthState, 0, NULL, NULL, 0);
+        Status           = ExtendCertificate (SpdmDeviceContext, *AuthState, 0, NULL, NULL, 0, SlotId);
       }
     }
 
@@ -420,7 +484,7 @@ DoDeviceAuthentication (
 
   if ((CapabilityFlags & SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_CHAL_CAP) == 0) {
     *AuthState = TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_NO_BINDING;
-    Status = ExtendCertificate (SpdmDeviceContext, *AuthState, CertChainSize, CertChain, TrustAnchor, TrustAnchorSize);
+    Status = ExtendCertificate (SpdmDeviceContext, *AuthState, CertChainSize, CertChain, TrustAnchor, TrustAnchorSize, *ValidSlotId);
     return Status;
   }
 
@@ -434,7 +498,7 @@ DoDeviceAuthentication (
     } else if (SpdmReturn == LIBSPDM_STATUS_VERIF_FAIL) {
       IsValidChallengeAuthSig = FALSE;
       *AuthState               = TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_FAIL_INVALID;
-      Status                  = ExtendCertificate (SpdmDeviceContext, *AuthState, 0, NULL, NULL, 0);
+      Status                  = ExtendCertificate (SpdmDeviceContext, *AuthState, 0, NULL, NULL, 0, *ValidSlotId);
       return Status;
     } else {
       return EFI_DEVICE_ERROR;
@@ -442,13 +506,13 @@ DoDeviceAuthentication (
 
     if (IsValidCertChain && IsValidChallengeAuthSig && !RootCertMatch) {
       *AuthState = TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_NO_AUTH;
-      Status    = ExtendCertificate (SpdmDeviceContext, *AuthState, CertChainSize, CertChain, NULL, 0);
+      Status    = ExtendCertificate (SpdmDeviceContext, *AuthState, CertChainSize, CertChain, NULL, 0, *ValidSlotId);
       return Status;
     }
 
     if (IsValidCertChain && IsValidChallengeAuthSig && RootCertMatch) {
       *AuthState = TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_SUCCESS;
-      Status    = ExtendCertificate (SpdmDeviceContext, *AuthState, CertChainSize, CertChain, TrustAnchor, TrustAnchorSize);
+      Status    = ExtendCertificate (SpdmDeviceContext, *AuthState, CertChainSize, CertChain, TrustAnchor, TrustAnchorSize, *ValidSlotId);
     }
 
     Status = ExtendAuthentication (SpdmDeviceContext, *AuthState, SPDM_CHALLENGE_REQUEST_TCB_COMPONENT_MEASUREMENT_HASH, MeasurementHash, RequesterNonce, ResponderNonce);

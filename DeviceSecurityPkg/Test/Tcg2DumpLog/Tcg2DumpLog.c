@@ -551,6 +551,12 @@ DumpTcgDeviceSecurityEventStruct (
         Print (L"        SpdmSlotId    - 0x%02x\n", TcgSpdmCertChain->SpdmSlotId);
         Print (L"        SpdmHashAlgo  - 0x%08x\n", TcgSpdmCertChain->SpdmHashAlgo);
 
+        if (EventDataHeader->Version < TCG_DEVICE_SECURITY_EVENT_DATA_VERSION_2) {
+        } else {
+          if (EventDataHeader2->AuthState == TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_FAIL_INVALID) {
+            break;
+          }
+        }
         Print (L"        SpdmCertChain:\n");
         SpdmCertChain = (VOID *)(TcgSpdmCertChain + 1);
         Print (L"          Length      - 0x%04x\n", SpdmCertChain->Length);
