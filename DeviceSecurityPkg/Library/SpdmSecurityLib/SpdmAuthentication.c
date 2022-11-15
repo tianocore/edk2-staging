@@ -78,7 +78,8 @@ ExtendCertificate (
   IN UINT8                 *CertChain,
   IN VOID                  *TrustAnchor,
   IN UINTN                 TrustAnchorSize,
-  IN UINT8                 SlotId
+  IN UINT8                 SlotId,
+  OUT EDKII_DEVICE_SECURITY_STATE   *SecurityState
   )
 {
   VOID                                                       *EventLog;
@@ -121,6 +122,7 @@ ExtendCertificate (
                               DeviceContextSize);
       EventLog = AllocatePool (EventLogSize);
       if (EventLog == NULL) {
+        SecurityState->AuthenticationState = EDKII_DEVICE_SECURITY_STATE_ERROR_UEFI_OUT_OF_RESOURCE;
         return EFI_OUT_OF_RESOURCES;
       }
 
@@ -165,6 +167,7 @@ ExtendCertificate (
         DeviceContext = (VOID *)EventLogPtr;
         Status        = CreateDeviceMeasurementContext (SpdmDeviceContext, DeviceContext, DeviceContextSize);
         if (Status != EFI_SUCCESS) {
+          SecurityState->AuthenticationState = EDKII_DEVICE_SECURITY_STATE_ERROR_DEVICE_ERROR;
           return EFI_DEVICE_ERROR;
         }
       }
@@ -177,6 +180,9 @@ ExtendCertificate (
                  EventLog,
                  EventLogSize
                  );
+      if (EFI_ERROR(Status)) {
+        SecurityState->AuthenticationState = EDKII_DEVICE_SECURITY_STATE_ERROR_TCG_EXTEND_TPM_PCR;
+      }
       DEBUG ((DEBUG_INFO, "TpmMeasureAndLogData (Instance) - %r\n", Status));
 
       break;
@@ -188,6 +194,7 @@ ExtendCertificate (
                               DeviceContextSize);
       EventLog = AllocatePool (EventLogSize);
       if (EventLog == NULL) {
+        SecurityState->AuthenticationState = EDKII_DEVICE_SECURITY_STATE_ERROR_UEFI_OUT_OF_RESOURCE;
         return EFI_OUT_OF_RESOURCES;
       }
 
@@ -229,6 +236,7 @@ ExtendCertificate (
         DeviceContext = (VOID *)EventLogPtr;
         Status        = CreateDeviceMeasurementContext (SpdmDeviceContext, DeviceContext, DeviceContextSize);
         if (Status != EFI_SUCCESS) {
+          SecurityState->AuthenticationState = EDKII_DEVICE_SECURITY_STATE_ERROR_DEVICE_ERROR;
           return EFI_DEVICE_ERROR;
         }
       }
@@ -241,6 +249,9 @@ ExtendCertificate (
                  EventLog,
                  EventLogSize
                  );
+      if (EFI_ERROR(Status)) {
+        SecurityState->AuthenticationState = EDKII_DEVICE_SECURITY_STATE_ERROR_TCG_EXTEND_TPM_PCR;
+      }
       DEBUG ((DEBUG_INFO, "TpmMeasureAndLogData (Instance) - %r\n", Status));
 
       return Status;
@@ -252,6 +263,7 @@ ExtendCertificate (
                               DeviceContextSize);
       EventLog = AllocatePool (EventLogSize);
       if (EventLog == NULL) {
+        SecurityState->AuthenticationState = EDKII_DEVICE_SECURITY_STATE_ERROR_UEFI_OUT_OF_RESOURCE;
         return EFI_OUT_OF_RESOURCES;
       }
 
@@ -286,6 +298,7 @@ ExtendCertificate (
         DeviceContext = (VOID *)EventLogPtr;
         Status        = CreateDeviceMeasurementContext (SpdmDeviceContext, DeviceContext, DeviceContextSize);
         if (Status != EFI_SUCCESS) {
+          SecurityState->AuthenticationState = EDKII_DEVICE_SECURITY_STATE_ERROR_DEVICE_ERROR;
           return EFI_DEVICE_ERROR;
         }
       }
@@ -298,10 +311,14 @@ ExtendCertificate (
                  EventLog,
                  EventLogSize
                  );
+      if (EFI_ERROR(Status)) {
+        SecurityState->AuthenticationState = EDKII_DEVICE_SECURITY_STATE_ERROR_TCG_EXTEND_TPM_PCR;
+      }
       DEBUG ((DEBUG_INFO, "TpmMeasureAndLogData (Instance) - %r\n", Status));
 
       return Status;
     default:
+      SecurityState->AuthenticationState = EDKII_DEVICE_SECURITY_STATE_ERROR_UEFI_UNSUPPORTED;
       return EFI_UNSUPPORTED;
   }
 
@@ -310,6 +327,7 @@ ExtendCertificate (
     SignatureData     = AllocateZeroPool (SignatureDataSize);
     if (SignatureData == NULL) {
       ASSERT (SignatureData != NULL);
+      SecurityState->AuthenticationState = EDKII_DEVICE_SECURITY_STATE_ERROR_UEFI_OUT_OF_RESOURCE;
       return EFI_OUT_OF_RESOURCES;
     }
 
@@ -338,10 +356,10 @@ EFI_STATUS
 ExtendAuthentication (
   IN  SPDM_DEVICE_CONTEXT  *SpdmDeviceContext,
   IN UINT8                 AuthState,
-  IN UINT8                 MeasurementSummaryHashType,
   IN UINT8                 *MeasurementHash,
   IN UINT8                 *RequesterNonce,
-  IN UINT8                 *ResponderNonce
+  IN UINT8                 *ResponderNonce,
+  OUT EDKII_DEVICE_SECURITY_STATE   *SecurityState
   )
 {
   EFI_STATUS  Status;
@@ -367,6 +385,9 @@ ExtendAuthentication (
                &DynamicEventLogSpdmChallengeEvent,
                sizeof (DynamicEventLogSpdmChallengeEvent)
                );
+    if (EFI_ERROR(Status)) {
+      SecurityState->AuthenticationState = EDKII_DEVICE_SECURITY_STATE_ERROR_TCG_EXTEND_TPM_PCR;
+    }
     DEBUG ((DEBUG_INFO, "TpmMeasureAndLogData (Dynamic) - %r\n", Status));
 
     CopyMem (DynamicEventLogSpdmChallengeAuthEvent.Header.Signature, TCG_NV_EXTEND_INDEX_FOR_DYNAMIC_SIGNATURE, sizeof (TCG_NV_EXTEND_INDEX_FOR_DYNAMIC_SIGNATURE));
@@ -386,6 +407,9 @@ ExtendAuthentication (
                &DynamicEventLogSpdmChallengeAuthEvent,
                sizeof (DynamicEventLogSpdmChallengeAuthEvent)
                );
+    if (EFI_ERROR(Status)) {
+      SecurityState->AuthenticationState = EDKII_DEVICE_SECURITY_STATE_ERROR_TCG_EXTEND_TPM_PCR;
+    }
     DEBUG ((DEBUG_INFO, "TpmMeasureAndLogData (Dynamic) - %r\n", Status));
   }
 
@@ -401,7 +425,8 @@ EFI_STATUS
 DoDeviceAuthentication (
   IN  SPDM_DEVICE_CONTEXT  *SpdmDeviceContext,
   OUT UINT8                *AuthState,
-  OUT UINT8                *ValidSlotId
+  OUT UINT8                *ValidSlotId,
+  OUT EDKII_DEVICE_SECURITY_STATE   *SecurityState
   )
 {
   EFI_STATUS           Status;
@@ -431,6 +456,7 @@ DoDeviceAuthentication (
   DataSize           = sizeof (CapabilityFlags);
   SpdmReturn         = SpdmGetData (SpdmContext, SpdmDataCapabilityFlags, &Parameter, &CapabilityFlags, &DataSize);
   if (LIBSPDM_STATUS_IS_ERROR (SpdmReturn)) {
+    SecurityState->AuthenticationState = EDKII_DEVICE_SECURITY_STATE_ERROR_DEVICE_ERROR;
     return EFI_DEVICE_ERROR;
   }
 
@@ -441,7 +467,8 @@ DoDeviceAuthentication (
   if (((CapabilityFlags & SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_CERT_CAP) == 0) ||
       ((CapabilityFlags & SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_MEAS_CAP_SIG) == 0)){
     *AuthState = TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_FAIL_NO_SIG;
-    Status = ExtendCertificate (SpdmDeviceContext, *AuthState, 0, NULL, NULL, 0, 0);
+    SecurityState->AuthenticationState = EDKII_DEVICE_SECURITY_STATE_ERROR_DEVICE_NO_CAPABILITIES;
+    Status = ExtendCertificate (SpdmDeviceContext, *AuthState, 0, NULL, NULL, 0, 0, SecurityState);
     return Status;
   }
 
@@ -449,6 +476,7 @@ DoDeviceAuthentication (
     ZeroMem (TotalDigestBuffer, sizeof (TotalDigestBuffer));
     SpdmReturn = SpdmGetDigest (SpdmContext, &SlotMask, TotalDigestBuffer);
     if (LIBSPDM_STATUS_IS_ERROR (SpdmReturn)) {
+      SecurityState->AuthenticationState = EDKII_DEVICE_SECURITY_STATE_ERROR_DEVICE_ERROR;
       return EFI_DEVICE_ERROR;
     }
 
@@ -464,11 +492,13 @@ DoDeviceAuthentication (
       } else if (SpdmReturn == LIBSPDM_STATUS_VERIF_FAIL) {
         IsValidCertChain = FALSE;
         *AuthState        = TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_FAIL_INVALID;
-        Status           = ExtendCertificate (SpdmDeviceContext, *AuthState, 0, NULL, NULL, 0, SlotId);
+        SecurityState->AuthenticationState = EDKII_DEVICE_SECURITY_STATE_ERROR_CERTIFIACTE_FAILURE;
+        Status           = ExtendCertificate (SpdmDeviceContext, *AuthState, 0, NULL, NULL, 0, SlotId, SecurityState);
       }
     }
 
     if (SlotId >= SPDM_MAX_SLOT_COUNT) {
+      SecurityState->AuthenticationState = EDKII_DEVICE_SECURITY_STATE_ERROR_DEVICE_ERROR;
       return EFI_DEVICE_ERROR;
     }
 
@@ -484,7 +514,8 @@ DoDeviceAuthentication (
 
   if ((CapabilityFlags & SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_CHAL_CAP) == 0) {
     *AuthState = TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_NO_BINDING;
-    Status = ExtendCertificate (SpdmDeviceContext, *AuthState, CertChainSize, CertChain, TrustAnchor, TrustAnchorSize, *ValidSlotId);
+    SecurityState->AuthenticationState = EDKII_DEVICE_SECURITY_STATE_ERROR_DEVICE_NO_CAPABILITIES;
+    Status = ExtendCertificate (SpdmDeviceContext, *AuthState, CertChainSize, CertChain, TrustAnchor, TrustAnchorSize, *ValidSlotId, SecurityState);
     return Status;
   }
 
@@ -498,7 +529,8 @@ DoDeviceAuthentication (
     } else if (SpdmReturn == LIBSPDM_STATUS_VERIF_FAIL) {
       IsValidChallengeAuthSig = FALSE;
       *AuthState               = TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_FAIL_INVALID;
-      Status                  = ExtendCertificate (SpdmDeviceContext, *AuthState, 0, NULL, NULL, 0, *ValidSlotId);
+      SecurityState->AuthenticationState = EDKII_DEVICE_SECURITY_STATE_ERROR_CHALLENGE_FAILURE;
+      Status                  = ExtendCertificate (SpdmDeviceContext, *AuthState, 0, NULL, NULL, 0, *ValidSlotId, SecurityState);
       return Status;
     } else {
       return EFI_DEVICE_ERROR;
@@ -506,16 +538,18 @@ DoDeviceAuthentication (
 
     if (IsValidCertChain && IsValidChallengeAuthSig && !RootCertMatch) {
       *AuthState = TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_NO_AUTH;
-      Status    = ExtendCertificate (SpdmDeviceContext, *AuthState, CertChainSize, CertChain, NULL, 0, *ValidSlotId);
+      SecurityState->AuthenticationState = EDKII_DEVICE_SECURITY_STATE_ERROR_NO_CERT_PROVISION;
+      Status    = ExtendCertificate (SpdmDeviceContext, *AuthState, CertChainSize, CertChain, NULL, 0, *ValidSlotId, SecurityState);
       return Status;
     }
 
     if (IsValidCertChain && IsValidChallengeAuthSig && RootCertMatch) {
       *AuthState = TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_SUCCESS;
-      Status    = ExtendCertificate (SpdmDeviceContext, *AuthState, CertChainSize, CertChain, TrustAnchor, TrustAnchorSize, *ValidSlotId);
+      SecurityState->AuthenticationState = EDKII_DEVICE_SECURITY_STATE_SUCCESS;
+      Status    = ExtendCertificate (SpdmDeviceContext, *AuthState, CertChainSize, CertChain, TrustAnchor, TrustAnchorSize, *ValidSlotId, SecurityState);
     }
 
-    Status = ExtendAuthentication (SpdmDeviceContext, *AuthState, SPDM_CHALLENGE_REQUEST_TCB_COMPONENT_MEASUREMENT_HASH, MeasurementHash, RequesterNonce, ResponderNonce);
+    Status = ExtendAuthentication (SpdmDeviceContext, *AuthState, MeasurementHash, RequesterNonce, ResponderNonce, SecurityState);
   }
 
   return Status;

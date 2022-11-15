@@ -164,7 +164,8 @@ ExtendMeasurement (
   IN UINT32                MeasurementRecordLength,
   IN UINT8                 *MeasurementRecord,
   IN UINT8                 *RequesterNonce,
-  IN UINT8                 *ResponderNonce
+  IN UINT8                 *ResponderNonce,
+  OUT EDKII_DEVICE_SECURITY_STATE   *SecurityState
   )
 {
   UINT32  PcrIndex;
@@ -217,18 +218,22 @@ ExtendMeasurement (
     InternalDumpData (Digest, DigestSize);
     DEBUG ((DEBUG_INFO, "\n"));
     if (MeasurementRecordLength <= sizeof (SPDM_MEASUREMENT_BLOCK_COMMON_HEADER) + sizeof (SPDM_MEASUREMENT_BLOCK_DMTF_HEADER)) {
+      SecurityState->MeasurementState = EDKII_DEVICE_SECURITY_STATE_ERROR_MEASUREMENT_AUTH_FAILURE;
       return EFI_SECURITY_VIOLATION;
     }
 
     if ((SpdmMeasurementBlockCommonHeader->MeasurementSpecification & SPDM_MEASUREMENT_BLOCK_HEADER_SPECIFICATION_DMTF) == 0) {
+      SecurityState->MeasurementState = EDKII_DEVICE_SECURITY_STATE_ERROR_MEASUREMENT_AUTH_FAILURE;
       return EFI_SECURITY_VIOLATION;
     }
 
     if (SpdmMeasurementBlockCommonHeader->MeasurementSize != MeasurementRecordLength - sizeof (SPDM_MEASUREMENT_BLOCK_COMMON_HEADER)) {
+      SecurityState->MeasurementState = EDKII_DEVICE_SECURITY_STATE_ERROR_MEASUREMENT_AUTH_FAILURE;
       return EFI_SECURITY_VIOLATION;
     }
 
     if (SpdmMeasurementBlockDmtfHeader->DMTFSpecMeasurementValueSize != SpdmMeasurementBlockCommonHeader->MeasurementSize - sizeof (SPDM_MEASUREMENT_BLOCK_DMTF_HEADER)) {
+      SecurityState->MeasurementState = EDKII_DEVICE_SECURITY_STATE_ERROR_MEASUREMENT_AUTH_FAILURE;
       return EFI_SECURITY_VIOLATION;
     }
 
@@ -292,6 +297,7 @@ ExtendMeasurement (
  #endif
       EventLog = AllocatePool (EventLogSize);
       if (EventLog == NULL) {
+        SecurityState->MeasurementState = EDKII_DEVICE_SECURITY_STATE_ERROR_UEFI_OUT_OF_RESOURCE;
         return EFI_OUT_OF_RESOURCES;
       }
 
@@ -354,6 +360,7 @@ ExtendMeasurement (
         DeviceContext = (VOID *)EventLogPtr;
         Status        = CreateDeviceMeasurementContext (SpdmDeviceContext, DeviceContext, DeviceContextSize);
         if (Status != EFI_SUCCESS) {
+          SecurityState->MeasurementState = EDKII_DEVICE_SECURITY_STATE_ERROR_DEVICE_ERROR;
           return EFI_DEVICE_ERROR;
         }
       }
@@ -366,6 +373,9 @@ ExtendMeasurement (
                  EventLog,
                  EventLogSize
                  );
+      if (EFI_ERROR(Status)) {
+        SecurityState->MeasurementState = EDKII_DEVICE_SECURITY_STATE_ERROR_TCG_EXTEND_TPM_PCR;
+      }
       DEBUG ((DEBUG_INFO, "TpmMeasureAndLogData (Measurement) - %r\n", Status));
       break;
     case TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_FAIL_INVALID:
@@ -380,6 +390,7 @@ ExtendMeasurement (
  #endif
       EventLog = AllocatePool (EventLogSize);
       if (EventLog == NULL) {
+        SecurityState->MeasurementState = EDKII_DEVICE_SECURITY_STATE_ERROR_UEFI_OUT_OF_RESOURCE;
         return EFI_OUT_OF_RESOURCES;
       }
 
@@ -430,6 +441,7 @@ ExtendMeasurement (
         DeviceContext = (VOID *)EventLogPtr;
         Status        = CreateDeviceMeasurementContext (SpdmDeviceContext, DeviceContext, DeviceContextSize);
         if (Status != EFI_SUCCESS) {
+          SecurityState->MeasurementState = EDKII_DEVICE_SECURITY_STATE_ERROR_DEVICE_ERROR;
           return EFI_DEVICE_ERROR;
         }
       }
@@ -442,9 +454,13 @@ ExtendMeasurement (
                  EventLog,
                  EventLogSize
                  );
+      if (EFI_ERROR(Status)) {
+        SecurityState->MeasurementState = EDKII_DEVICE_SECURITY_STATE_ERROR_TCG_EXTEND_TPM_PCR;
+      }
       DEBUG ((DEBUG_INFO, "TpmMeasureAndLogData (Measurement) - %r\n", Status));
       return Status;
     default:
+      SecurityState->MeasurementState = EDKII_DEVICE_SECURITY_STATE_ERROR_UEFI_UNSUPPORTED;
       return EFI_UNSUPPORTED;
   }
 
@@ -470,6 +486,9 @@ ExtendMeasurement (
                &DynamicEventLogSpdmGetMeasurementsEvent,
                sizeof (DynamicEventLogSpdmGetMeasurementsEvent)
                );
+    if (EFI_ERROR(Status)) {
+      SecurityState->MeasurementState = EDKII_DEVICE_SECURITY_STATE_ERROR_TCG_EXTEND_TPM_PCR;
+    }
     DEBUG ((DEBUG_INFO, "TpmMeasureAndLogData (Dynamic) - %r\n", Status));
 
     CopyMem (DynamicEventLogSpdmMeasurementsEvent.Header.Signature, TCG_NV_EXTEND_INDEX_FOR_DYNAMIC_SIGNATURE, sizeof (TCG_NV_EXTEND_INDEX_FOR_DYNAMIC_SIGNATURE));
@@ -489,6 +508,9 @@ ExtendMeasurement (
                &DynamicEventLogSpdmMeasurementsEvent,
                sizeof (DynamicEventLogSpdmMeasurementsEvent)
                );
+    if (EFI_ERROR(Status)) {
+      SecurityState->MeasurementState = EDKII_DEVICE_SECURITY_STATE_ERROR_TCG_EXTEND_TPM_PCR;
+    }
     DEBUG ((DEBUG_INFO, "TpmMeasureAndLogData (Dynamic) - %r\n", Status));
   }
 
@@ -506,7 +528,8 @@ EFI_STATUS
 DoDeviceMeasurement (
   IN  SPDM_DEVICE_CONTEXT  *SpdmDeviceContext,
   IN  BOOLEAN              IsAuthenticated,
-  IN  UINT8                SlotId
+  IN  UINT8                SlotId,
+  OUT EDKII_DEVICE_SECURITY_STATE   *SecurityState
   )
 {
   EFI_STATUS                   Status;
@@ -539,7 +562,8 @@ DoDeviceMeasurement (
 
   if ((CapabilityFlags & SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_MEAS_CAP) == 0) {
     AuthState = TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_FAIL_NO_SIG;
-    Status    = ExtendMeasurement (SpdmDeviceContext, AuthState, 0, NULL, NULL, NULL);
+    Status    = ExtendMeasurement (SpdmDeviceContext, AuthState, 0, NULL, NULL, NULL, SecurityState);
+    SecurityState->MeasurementState = EDKII_DEVICE_SECURITY_STATE_ERROR_DEVICE_NO_CAPABILITIES;
     return EFI_UNSUPPORTED;
   }
 
@@ -581,10 +605,11 @@ DoDeviceMeasurement (
           .DMTFSpecMeasurementValueSize;
 
       AuthState = TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_SUCCESS;
+      SecurityState->MeasurementState = EDKII_DEVICE_SECURITY_STATE_SUCCESS;
       if (Index == NumberOfBlocks - 1) {
-        Status = ExtendMeasurement (SpdmDeviceContext, AuthState, MeasurementsBlockSize, (UINT8 *)MeasurementBlock, RequesterNonce, ResponderNonce);
+        Status = ExtendMeasurement (SpdmDeviceContext, AuthState, MeasurementsBlockSize, (UINT8 *)MeasurementBlock, RequesterNonce, ResponderNonce, SecurityState);
       } else {
-        Status = ExtendMeasurement (SpdmDeviceContext, AuthState, MeasurementsBlockSize, (UINT8 *)MeasurementBlock, NULL, NULL);
+        Status = ExtendMeasurement (SpdmDeviceContext, AuthState, MeasurementsBlockSize, (UINT8 *)MeasurementBlock, NULL, NULL, SecurityState);
       }
 
       MeasurementBlock = (VOID *)((size_t)MeasurementBlock + MeasurementsBlockSize);
@@ -594,7 +619,8 @@ DoDeviceMeasurement (
     }
   } else if (SpdmReturn == LIBSPDM_STATUS_VERIF_FAIL) {
     AuthState = TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_FAIL_INVALID;
-    Status    = ExtendMeasurement (SpdmDeviceContext, AuthState, 0, NULL, NULL, NULL);
+    SecurityState->MeasurementState = EDKII_DEVICE_SECURITY_STATE_ERROR_MEASUREMENT_AUTH_FAILURE;
+    Status    = ExtendMeasurement (SpdmDeviceContext, AuthState, 0, NULL, NULL, NULL, SecurityState);
     return Status;
   } else {
     ContentChangedCount = 0;
@@ -618,6 +644,7 @@ ContentChangedFlag:
                    NULL
                    );
     if (LIBSPDM_STATUS_IS_ERROR (SpdmReturn)) {
+      SecurityState->MeasurementState = EDKII_DEVICE_SECURITY_STATE_ERROR_DEVICE_ERROR;
       return EFI_DEVICE_ERROR;
     }
 
@@ -661,7 +688,8 @@ ContentChangedFlag:
         continue;
       } else if (SpdmReturn == LIBSPDM_STATUS_VERIF_FAIL) {
         AuthState = TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_FAIL_INVALID;
-        Status    = ExtendMeasurement (SpdmDeviceContext, AuthState, 0, NULL, NULL, NULL);
+        SecurityState->MeasurementState = EDKII_DEVICE_SECURITY_STATE_ERROR_DEVICE_ERROR;
+        Status    = ExtendMeasurement (SpdmDeviceContext, AuthState, 0, NULL, NULL, NULL, SecurityState);
         continue;
       }
 
@@ -672,17 +700,19 @@ ContentChangedFlag:
           goto ContentChangedFlag;
         } else {
           AuthState = TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_FAIL_INVALID;
-          Status    = ExtendMeasurement (SpdmDeviceContext, AuthState, 0, NULL, NULL, NULL);
+          SecurityState->MeasurementState = EDKII_DEVICE_SECURITY_STATE_ERROR_DEVICE_ERROR;
+          Status    = ExtendMeasurement (SpdmDeviceContext, AuthState, 0, NULL, NULL, NULL, SecurityState);
           return Status;
         }
       }
       ReceivedNumberOfBlock += 1;
       DEBUG ((DEBUG_INFO, "ExtendMeasurement...\n"));
       AuthState = TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_SUCCESS;
+      SecurityState->MeasurementState = EDKII_DEVICE_SECURITY_STATE_SUCCESS;
       if (ReceivedNumberOfBlock == NumberOfBlocks - 1) {
-        Status = ExtendMeasurement (SpdmDeviceContext, AuthState, MeasurementRecordLength, MeasurementRecord, RequesterNonce, ResponderNonce);
+        Status = ExtendMeasurement (SpdmDeviceContext, AuthState, MeasurementRecordLength, MeasurementRecord, RequesterNonce, ResponderNonce, SecurityState);
       } else {
-        Status = ExtendMeasurement (SpdmDeviceContext, AuthState, MeasurementRecordLength, MeasurementRecord, NULL, NULL);
+        Status = ExtendMeasurement (SpdmDeviceContext, AuthState, MeasurementRecordLength, MeasurementRecord, NULL, NULL, SecurityState);
       }
 
       if (Status != EFI_SUCCESS) {
@@ -691,6 +721,7 @@ ContentChangedFlag:
     }
 
     if (ReceivedNumberOfBlock != NumberOfBlocks) {
+      SecurityState->MeasurementState = EDKII_DEVICE_SECURITY_STATE_ERROR_MEASUREMENT_AUTH_FAILURE;
       return EFI_DEVICE_ERROR;
     }
   }
