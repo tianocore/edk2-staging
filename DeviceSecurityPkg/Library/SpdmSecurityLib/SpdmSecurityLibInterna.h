@@ -134,7 +134,8 @@ EFI_STATUS
 DoDeviceMeasurement (
   IN  SPDM_DEVICE_CONTEXT  *SpdmDeviceContext,
   IN  BOOLEAN              IsAuthenticated,
-  IN  UINT8                SlotId
+  IN  UINT8                SlotId,
+  OUT EDKII_DEVICE_SECURITY_STATE   *SecurityState
   );
 
 /**
@@ -146,7 +147,8 @@ EFI_STATUS
 DoDeviceAuthentication (
   IN  SPDM_DEVICE_CONTEXT  *SpdmDeviceContext,
   OUT UINT8                *AuthState,
-  OUT UINT8                *ValidSlotId
+  OUT UINT8                *ValidSlotId,
+  OUT EDKII_DEVICE_SECURITY_STATE   *SecurityState
   );
 
 /**
