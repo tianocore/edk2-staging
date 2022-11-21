@@ -11,6 +11,8 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 LIST_ENTRY  mSpdmDeviceContextList = INITIALIZE_LIST_HEAD_VARIABLE (mSpdmDeviceContextList);
 
+UINT64 mSpdmUid = 1;
+
 VOID
 RecordSpdmDeviceContextInList (
   IN SPDM_DEVICE_CONTEXT  *SpdmDeviceContext
@@ -168,8 +170,7 @@ CreateSpdmDeviceContext (
     }
   }
 
-  #define SPDM_UID  1// TBD - hardcoded
-  SpdmDeviceContext->DeviceUID = SPDM_UID;
+  SpdmDeviceContext->DeviceUID = mSpdmUid ++;
 
   RecordSpdmDeviceContextInList (SpdmDeviceContext);
 
