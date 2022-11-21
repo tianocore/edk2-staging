@@ -105,7 +105,10 @@ CreateSpdmDeviceContext (
   ScratchBuffer     = AllocateZeroPool (ScratchBufferSize);
   ASSERT (ScratchBuffer != NULL);
 
-  SpdmInitContext (SpdmContext);
+  SpdmReturn = SpdmInitContext (SpdmContext);
+  if (LIBSPDM_STATUS_IS_ERROR(SpdmReturn)) {
+    goto Error;
+  }
   SpdmRegisterDeviceIoFunc (
     SpdmContext,
     SpdmDeviceInfo->SendMessage,
@@ -200,8 +203,10 @@ CreateSpdmDeviceContext (
 
         ZeroMem (&Parameter, sizeof (Parameter));
         Parameter.location = SpdmDataLocationLocal;
-        SpdmSetData (SpdmContext, SpdmDataPeerPublicRootCert, &Parameter, Data, DataSize);
-
+        SpdmReturn = SpdmSetData (SpdmContext, SpdmDataPeerPublicRootCert, &Parameter, Data, DataSize);
+        if (LIBSPDM_STATUS_IS_ERROR(SpdmReturn)) {
+          goto Error;
+        }
         Cert = (EFI_SIGNATURE_DATA *)((UINT8 *)Cert + DbList->SignatureSize);
       }
 
@@ -213,13 +218,23 @@ CreateSpdmDeviceContext (
   Data8 = 0;
   ZeroMem (&Parameter, sizeof (Parameter));
   Parameter.location = SpdmDataLocationLocal;
-  SpdmSetData (SpdmContext, SpdmDataCapabilityCTExponent, &Parameter, &Data8, sizeof (Data8));
+  SpdmReturn = SpdmSetData (SpdmContext, SpdmDataCapabilityCTExponent, &Parameter, &Data8, sizeof (Data8));
+  if (LIBSPDM_STATUS_IS_ERROR(SpdmReturn)) {
+    goto Error;
+  }
 
   Data32 = 0;
-  SpdmSetData (SpdmContext, SpdmDataCapabilityFlags, &Parameter, &Data32, sizeof (Data32));
+  SpdmReturn = SpdmSetData (SpdmContext, SpdmDataCapabilityFlags, &Parameter, &Data32, sizeof (Data32));
+  if (LIBSPDM_STATUS_IS_ERROR(SpdmReturn)) {
+    goto Error;
+  }
 
   Data8 = SPDM_MEASUREMENT_BLOCK_HEADER_SPECIFICATION_DMTF;
-  SpdmSetData (SpdmContext, SpdmDataMeasurementSpec, &Parameter, &Data8, sizeof (Data8));
+  SpdmReturn = SpdmSetData (SpdmContext, SpdmDataMeasurementSpec, &Parameter, &Data8, sizeof (Data8));
+  if (LIBSPDM_STATUS_IS_ERROR(SpdmReturn)) {
+    goto Error;
+  }
+
   if (SpdmDeviceInfo->BaseAsymAlgo != 0) {
     Data32 = SpdmDeviceInfo->BaseAsymAlgo;
   } else {
@@ -231,7 +246,11 @@ CreateSpdmDeviceContext (
              SPDM_ALGORITHMS_BASE_ASYM_ALGO_TPM_ALG_ECDSA_ECC_NIST_P521;
   }
 
-  SpdmSetData (SpdmContext, SpdmDataBaseAsymAlgo, &Parameter, &Data32, sizeof (Data32));
+  SpdmReturn = SpdmSetData (SpdmContext, SpdmDataBaseAsymAlgo, &Parameter, &Data32, sizeof (Data32));
+  if (LIBSPDM_STATUS_IS_ERROR(SpdmReturn)) {
+    goto Error;
+  }
+
   if (SpdmDeviceInfo->BaseHashAlgo != 0) {
     Data32 = SpdmDeviceInfo->BaseHashAlgo;
   } else {
@@ -240,7 +259,10 @@ CreateSpdmDeviceContext (
              SPDM_ALGORITHMS_BASE_HASH_ALGO_TPM_ALG_SHA_512;
   }
 
-  SpdmSetData (SpdmContext, SpdmDataBaseHashAlgo, &Parameter, &Data32, sizeof (Data32));
+  SpdmReturn = SpdmSetData (SpdmContext, SpdmDataBaseHashAlgo, &Parameter, &Data32, sizeof (Data32));
+  if (LIBSPDM_STATUS_IS_ERROR(SpdmReturn)) {
+    goto Error;
+  }
 
   SpdmReturn = SpdmInitConnection (SpdmContext, FALSE);
   if (LIBSPDM_STATUS_IS_ERROR (SpdmReturn)) {
@@ -251,7 +273,12 @@ CreateSpdmDeviceContext (
   ZeroMem (&Parameter, sizeof (Parameter));
   Parameter.location = SpdmDataLocationConnection;
   DataSize           = sizeof (Data16);
-  SpdmGetData (SpdmContext, SpdmDataSpdmVersion, &Parameter, &Data16, &DataSize);
+  SpdmReturn = SpdmGetData (SpdmContext, SpdmDataSpdmVersion, &Parameter, &Data16, &DataSize);
+  if (LIBSPDM_STATUS_IS_ERROR (SpdmReturn)) {
+    DEBUG ((DEBUG_ERROR, "SpdmInitConnection - %p\n", SpdmReturn));
+    goto Error;
+  }
+
   SpdmDeviceContext->SpdmVersion = (Data16 >> 8);
 
   return SpdmDeviceContext;
