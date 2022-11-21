@@ -429,12 +429,6 @@ ExtendMeasurement (
       EventLogPtr           += sizeof (UINT64);
       CopyMem (EventLogPtr, SpdmDeviceContext->DevicePath, DevicePathSize);
       EventLogPtr += DevicePathSize;
-
-      TcgSpdmMeasurementBlock                            = (VOID *)EventLogPtr;
-      TcgSpdmMeasurementBlock->SpdmVersion               = SpdmDeviceContext->SpdmVersion;
-      TcgSpdmMeasurementBlock->SpdmMeasurementBlockCount = 1;
-      TcgSpdmMeasurementBlock->Reserved                  = 0;
-      TcgSpdmMeasurementBlock->SpdmMeasurementHashAlgo   = MeasurementHashAlgo;
  #endif
 
       if (DeviceContextSize != 0) {

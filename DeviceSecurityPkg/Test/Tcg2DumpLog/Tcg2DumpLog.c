@@ -515,6 +515,10 @@ DumpTcgDeviceSecurityEventStruct (
 
     switch (EventDataHeader2->SubHeaderType) {
       case TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_SUB_HEADER_TYPE_SPDM_MEASUREMENT_BLOCK:
+        if (EventDataHeader2->SubHeaderLength == 0) {
+          break;
+        }
+
         TcgSpdmMeasurementBlock = DeviceContext;
         Print (L"      SpdmMeasurementBlockSubHeader:\n");
         Print (L"        SpdmVersion                      - 0x%04x\n", TcgSpdmMeasurementBlock->SpdmVersion);
