@@ -40,9 +40,6 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Protocol/DeviceSecurity.h>
 #include <Protocol/DeviceSecurityPolicy.h>
 
-// #define TCG_DEVICE_SECURITY_EVENT_DATA_VERSION_SELECTION TCG_DEVICE_SECURITY_EVENT_DATA_VERSION_1
-#define TCG_DEVICE_SECURITY_EVENT_DATA_VERSION_SELECTION  TCG_DEVICE_SECURITY_EVENT_DATA_VERSION_2
-
 typedef struct {
   UINTN                       Signature;
   EDKII_DEVICE_IDENTIFIER     DeviceId;

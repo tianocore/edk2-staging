@@ -9,9 +9,6 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 #include "SpdmSecurityLibInterna.h"
 
-// #define TCG_DEVICE_SECURITY_EVENT_DATA_VERSION_SELECTION TCG_DEVICE_SECURITY_EVENT_DATA_VERSION_1
-#define TCG_DEVICE_SECURITY_EVENT_DATA_VERSION_SELECTION  TCG_DEVICE_SECURITY_EVENT_DATA_VERSION_2
-
 /**
   This function returns the SPDM device type for TCG SPDM event.
 
@@ -174,12 +171,8 @@ ExtendMeasurement (
   UINT32  EventLogSize;
   UINT8   *EventLogPtr;
 
- #if (TCG_DEVICE_SECURITY_EVENT_DATA_VERSION_SELECTION == TCG_DEVICE_SECURITY_EVENT_DATA_VERSION_1)
-  TCG_DEVICE_SECURITY_EVENT_DATA_HEADER  *EventData;
- #else
   TCG_DEVICE_SECURITY_EVENT_DATA_HEADER2                            *EventData2;
   TCG_DEVICE_SECURITY_EVENT_DATA_SUB_HEADER_SPDM_MEASUREMENT_BLOCK  *TcgSpdmMeasurementBlock;
- #endif
   VOID                                  *DeviceContext;
   UINTN                                 DeviceContextSize;
   EFI_STATUS                            Status;
@@ -283,18 +276,11 @@ ExtendMeasurement (
 
   switch (AuthState) {
     case TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_SUCCESS:
- #if (TCG_DEVICE_SECURITY_EVENT_DATA_VERSION_SELECTION == TCG_DEVICE_SECURITY_EVENT_DATA_VERSION_1)
-      EventLogSize = (UINT32)(sizeof (TCG_DEVICE_SECURITY_EVENT_DATA_HEADER) +
-                              MeasurementRecordLength +
-                              sizeof (UINT64) + DevicePathSize +
-                              DeviceContextSize);
- #else
       EventLogSize = (UINT32)(sizeof (TCG_DEVICE_SECURITY_EVENT_DATA_HEADER2) +
                               sizeof (UINT64) + DevicePathSize +
                               sizeof (TCG_DEVICE_SECURITY_EVENT_DATA_SUB_HEADER_SPDM_MEASUREMENT_BLOCK) +
                               MeasurementRecordLength +
                               DeviceContextSize);
- #endif
       EventLog = AllocatePool (EventLogSize);
       if (EventLog == NULL) {
         SecurityState->MeasurementState = EDKII_DEVICE_SECURITY_STATE_ERROR_UEFI_OUT_OF_RESOURCE;
@@ -303,26 +289,6 @@ ExtendMeasurement (
 
       EventLogPtr = EventLog;
 
- #if (TCG_DEVICE_SECURITY_EVENT_DATA_VERSION_SELECTION == TCG_DEVICE_SECURITY_EVENT_DATA_VERSION_1)
-      EventData = (VOID *)EventLogPtr;
-      CopyMem (EventData->Signature, TCG_DEVICE_SECURITY_EVENT_DATA_SIGNATURE, sizeof (EventData->Signature));
-      EventData->Version      = TCG_DEVICE_SECURITY_EVENT_DATA_VERSION_1;
-      EventData->Length       = (UINT16)EventLogSize;
-      EventData->SpdmHashAlgo = MeasurementHashAlgo;
-      EventData->DeviceType   = GetSpdmDeviceType (SpdmDeviceContext);
-
-      EventLogPtr = (VOID *)(EventData + 1);
-
-      if ((MeasurementRecord != NULL) && (MeasurementRecordLength != 0)) {
-        CopyMem (EventLogPtr, MeasurementRecord, MeasurementRecordLength);
-        EventLogPtr += MeasurementRecordLength;
-      }
-
-      *(UINT64 *)EventLogPtr = (UINT64)DevicePathSize;
-      EventLogPtr           += sizeof (UINT64);
-      CopyMem (EventLogPtr, SpdmDeviceContext->DevicePath, DevicePathSize);
-      EventLogPtr += DevicePathSize;
- #else
       EventData2 = (VOID *)EventLogPtr;
       CopyMem (EventData2->Signature, TCG_DEVICE_SECURITY_EVENT_DATA_SIGNATURE_2, sizeof (EventData2->Signature));
       EventData2->Version    = TCG_DEVICE_SECURITY_EVENT_DATA_VERSION_2;
@@ -354,8 +320,6 @@ ExtendMeasurement (
         EventLogPtr += MeasurementRecordLength;
       }
 
- #endif
-
       if (DeviceContextSize != 0) {
         DeviceContext = (VOID *)EventLogPtr;
         Status        = CreateDeviceMeasurementContext (SpdmDeviceContext, DeviceContext, DeviceContextSize);
@@ -379,15 +343,9 @@ ExtendMeasurement (
       DEBUG ((DEBUG_INFO, "TpmMeasureAndLogData (Measurement) - %r\n", Status));
       break;
     case TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_FAIL_INVALID:
- #if (TCG_DEVICE_SECURITY_EVENT_DATA_VERSION_SELECTION == TCG_DEVICE_SECURITY_EVENT_DATA_VERSION_1)
-      EventLogSize = (UINT32)(sizeof (TCG_DEVICE_SECURITY_EVENT_DATA_HEADER) +
-                              sizeof (UINT64) + DevicePathSize +
-                              DeviceContextSize);
- #else
       EventLogSize = (UINT32)(sizeof (TCG_DEVICE_SECURITY_EVENT_DATA_HEADER2) +
                               sizeof (UINT64) + DevicePathSize +
                               DeviceContextSize);
- #endif
       EventLog = AllocatePool (EventLogSize);
       if (EventLog == NULL) {
         SecurityState->MeasurementState = EDKII_DEVICE_SECURITY_STATE_ERROR_UEFI_OUT_OF_RESOURCE;
@@ -396,21 +354,6 @@ ExtendMeasurement (
 
       EventLogPtr = EventLog;
 
- #if (TCG_DEVICE_SECURITY_EVENT_DATA_VERSION_SELECTION == TCG_DEVICE_SECURITY_EVENT_DATA_VERSION_1)
-      EventData = (VOID *)EventLogPtr;
-      CopyMem (EventData->Signature, TCG_DEVICE_SECURITY_EVENT_DATA_SIGNATURE, sizeof (EventData->Signature));
-      EventData->Version      = TCG_DEVICE_SECURITY_EVENT_DATA_VERSION_1;
-      EventData->Length       = (UINT16)EventLogSize;
-      EventData->SpdmHashAlgo = MeasurementHashAlgo;
-      EventData->DeviceType   = GetSpdmDeviceType (SpdmDeviceContext);
-
-      EventLogPtr = (VOID *)(EventData + 1);
-
-      *(UINT64 *)EventLogPtr = (UINT64)DevicePathSize;
-      EventLogPtr           += sizeof (UINT64);
-      CopyMem (EventLogPtr, SpdmDeviceContext->DevicePath, DevicePathSize);
-      EventLogPtr += DevicePathSize;
- #else
       EventData2 = (VOID *)EventLogPtr;
       CopyMem (EventData2->Signature, TCG_DEVICE_SECURITY_EVENT_DATA_SIGNATURE_2, sizeof (EventData2->Signature));
       EventData2->Version    = TCG_DEVICE_SECURITY_EVENT_DATA_VERSION_2;
@@ -429,7 +372,6 @@ ExtendMeasurement (
       EventLogPtr           += sizeof (UINT64);
       CopyMem (EventLogPtr, SpdmDeviceContext->DevicePath, DevicePathSize);
       EventLogPtr += DevicePathSize;
- #endif
 
       if (DeviceContextSize != 0) {
         DeviceContext = (VOID *)EventLogPtr;
@@ -458,7 +400,6 @@ ExtendMeasurement (
       return EFI_UNSUPPORTED;
   }
 
- #if (TCG_DEVICE_SECURITY_EVENT_DATA_VERSION_SELECTION > TCG_DEVICE_SECURITY_EVENT_DATA_VERSION_1)
   if ((RequesterNonce != NULL) && (ResponderNonce != NULL)) {
     TCG_NV_INDEX_DYNAMIC_EVENT_LOG_STRUCT_SPDM_GET_MEASUREMENTS  DynamicEventLogSpdmGetMeasurementsEvent;
     TCG_NV_INDEX_DYNAMIC_EVENT_LOG_STRUCT_SPDM_MEASUREMENTS      DynamicEventLogSpdmMeasurementsEvent;
@@ -507,8 +448,6 @@ ExtendMeasurement (
     }
     DEBUG ((DEBUG_INFO, "TpmMeasureAndLogData (Dynamic) - %r\n", Status));
   }
-
- #endif
 
   return Status;
 }
