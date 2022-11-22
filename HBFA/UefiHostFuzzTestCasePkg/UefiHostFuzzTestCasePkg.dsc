@@ -236,9 +236,9 @@
    MemEncryptSevLib|OvmfPkg/Library/BaseMemEncryptSevLib/DxeMemEncryptSevLib.inf
    CpuLib|MdePkg/Library/BaseCpuLib/BaseCpuLib.inf
    PciCf8Lib|MdePkg/Library/BasePciCf8Lib/BasePciCf8Lib.inf
-   VmgExitLib|OvmfPkg/Library/VmgExitLib/VmgExitLib.inf
+   CcExitLib|OvmfPkg/Library/CcExitLib/CcExitLib.inf
    BaseCryptLib|CryptoPkg/Library/BaseCryptLib/BaseCryptLib.inf
-   VmgExitLib|OvmfPkg/Library/VmgExitLib/VmgExitLib.inf
+   CcExitLib|OvmfPkg/Library/CcExitLib/CcExitLib.inf
    CcProbeLib|OvmfPkg/Library/CcProbeLib/DxeCcProbeLib.inf
    TdxMailboxLib|OvmfPkg/Library/TdxMailboxLib/TdxMailboxLib.inf
    TpmMeasurementLib|SecurityPkg/Library/DxeTpmMeasurementLib/DxeTpmMeasurementLib.inf
@@ -284,7 +284,7 @@
    RegisterFilterLib|MdePkg/Library/RegisterFilterLibNull/RegisterFilterLibNull.inf
    UefiCpuLib|UefiCpuPkg/Library/BaseUefiCpuLib/BaseUefiCpuLib.inf
    LocalApicLib|UefiCpuPkg/Library/BaseXApicX2ApicLib/BaseXApicX2ApicLib.inf
-   VmgExitLib|OvmfPkg/Library/VmgExitLib/VmgExitLib.inf
+   CcExitLib|OvmfPkg/Library/CcExitLib/CcExitLib.inf
    MemEncryptTdxLib|OvmfPkg/Library/BaseMemEncryptTdxLib/BaseMemEncryptTdxLib.inf
    MemEncryptSevLib|OvmfPkg/Library/BaseMemEncryptSevLib/DxeMemEncryptSevLib.inf
    CpuLib|MdePkg/Library/BaseCpuLib/BaseCpuLib.inf
