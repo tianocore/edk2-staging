@@ -26,6 +26,7 @@
 
 
 BOOLEAN
+EFIAPI
 PlatformValidateNvVarStore (
   IN UINT8    *TdvfCfvBase,
   IN UINT32    TdvfCfvSize
