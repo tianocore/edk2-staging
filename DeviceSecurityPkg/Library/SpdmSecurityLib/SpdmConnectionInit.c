@@ -12,6 +12,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 LIST_ENTRY  mSpdmDeviceContextList = INITIALIZE_LIST_HEAD_VARIABLE (mSpdmDeviceContextList);
 
 #define CONNECTUIN_FAILURE_GET_SPDM_UID_FAILED          "Fail to get Spdm Uid"
+#define CONNECTUIN_FAILURE_STGNATURE_DB_FUL_STRING      "The Signature database devdb is full"
 
 VOID
 RecordSpdmDeviceContextInList (
@@ -271,6 +272,15 @@ CreateSpdmDeviceContext (
         Parameter.location = SpdmDataLocationLocal;
         SpdmReturn = SpdmSetData (SpdmContext, SpdmDataPeerPublicRootCert, &Parameter, Data, DataSize);
         if (LIBSPDM_STATUS_IS_ERROR(SpdmReturn)) {
+          if (SpdmReturn == LIBSPDM_STATUS_BUFFER_FULL) {
+            Status = RecordConnectionFailureStatus
+                       (CONNECTUIN_FAILURE_STGNATURE_DB_FUL_STRING,
+                        sizeof (CONNECTUIN_FAILURE_STGNATURE_DB_FUL_STRING));
+            if (EFI_ERROR(Status)) {
+              goto Error;
+            }
+            ASSERT (FALSE);
+          }
           goto Error;
         }
         Cert = (EFI_SIGNATURE_DATA *)((UINT8 *)Cert + DbList->SignatureSize);
