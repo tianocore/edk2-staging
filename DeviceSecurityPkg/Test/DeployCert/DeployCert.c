@@ -632,7 +632,7 @@ MainEntryPoint (
       );
 
     MeasureVariable (
-      7,
+      PCR_INDEX_FOR_SIGNATURE_DB,
       EV_EFI_SPDM_DEVICE_POLICY,
       EDKII_DEVICE_SECURITY_DATABASE,
       &gEdkiiDeviceSignatureDatabaseGuid,
