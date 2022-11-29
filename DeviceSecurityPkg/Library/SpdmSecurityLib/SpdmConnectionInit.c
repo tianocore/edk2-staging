@@ -11,7 +11,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 LIST_ENTRY  mSpdmDeviceContextList = INITIALIZE_LIST_HEAD_VARIABLE (mSpdmDeviceContextList);
 
-UINT64 mSpdmUid = 1;
+#define CONNECTUIN_FAILURE_GET_SPDM_UID_FAILED          "Fail to get Spdm Uid"
 
 VOID
 RecordSpdmDeviceContextInList (
@@ -58,6 +58,61 @@ GetSpdmIoProtocolViaSpdmContext (
   }
 
   return NULL;
+}
+
+EFI_STATUS
+GetSpdmUid (
+  UINT64 *SpdmUid
+  )
+{
+  EFI_STATUS          Status;
+  UINTN               VarSize;
+  UINT64              Uid;
+
+  VarSize = sizeof (*SpdmUid);
+  Status = gRT->GetVariable (
+                  L"SpdmUid",
+                  &gEfiDeviceSecuritySpdmUidGuid,
+                  NULL,
+                  &VarSize,
+                  &Uid
+                  );
+  if (Status == EFI_NOT_FOUND) {
+    Uid = 0;
+  } else if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  *SpdmUid = Uid ++;
+  Status = gRT->SetVariable (
+                  L"SpdmUid",
+                  &gEfiDeviceSecuritySpdmUidGuid,
+                  EFI_VARIABLE_BOOTSERVICE_ACCESS,
+                  sizeof (Uid),
+                  &Uid
+                  );
+
+  return Status;
+}
+
+EFI_STATUS
+RecordConnectionFailureStatus (
+  IN CHAR8 *FailureString,
+  IN UINT32 StringLen
+  )
+{
+  EFI_STATUS             Status;
+
+  Status = TpmMeasureAndLogData (
+             1,
+             EV_PLATFORM_CONFIG_FLAGS,
+             FailureString,
+             StringLen,
+             FailureString,
+             StringLen
+             );
+  DEBUG ((DEBUG_INFO, "RecordConnectionFailureStatus  %r\n", Status));
+  return Status;
 }
 
 SPDM_DEVICE_CONTEXT *
@@ -173,7 +228,18 @@ CreateSpdmDeviceContext (
     }
   }
 
-  SpdmDeviceContext->DeviceUID = mSpdmUid ++;
+  Status = GetSpdmUid (&SpdmDeviceContext->DeviceUID);
+  if (EFI_ERROR (Status)) {
+    Status = RecordConnectionFailureStatus
+               (CONNECTUIN_FAILURE_GET_SPDM_UID_FAILED,
+                sizeof (CONNECTUIN_FAILURE_GET_SPDM_UID_FAILED));
+    if (EFI_ERROR(Status)) {
+      goto Error;
+    }
+    ASSERT (FALSE);
+    DEBUG ((DEBUG_ERROR, "Fail to get UID - %r\n", Status));
+    goto Error;
+  }
 
   RecordSpdmDeviceContextInList (SpdmDeviceContext);
 
