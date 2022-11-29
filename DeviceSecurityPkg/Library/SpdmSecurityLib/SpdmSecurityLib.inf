@@ -46,3 +46,4 @@
 [Guids]
   gEdkiiDeviceSignatureDatabaseGuid       ## CONSUMES
   gEfiCertX509Guid                        ## CONSUMES
+  gEfiDeviceSecuritySpdmUidGuid           ## PRODUCES AND CONSUMES
