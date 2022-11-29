@@ -1,0 +1,51 @@
+<SoftwareIdentity
+	xmlns="http://standards.iso.org/iso/19770/-2/2015/schema.xsd"
+	xmlns:n8060="http://csrc.nist.gov/ns/swid/2015-extensions/1.0"
+	name="device_software_name_AAA"
+	version="device_firmware_version_01"
+	tagId="C43C3BDB-74E6-4336-8676-79B3D405FAEA"
+	tagVersion="0"
+	corpus="false"
+	patch="false"
+	supplemental="false">
+	<Entity
+		name="device_entity_name_AAA"
+		role="softwareCreator tagCreator"
+		regid="http://www.intel.com"
+		thumbprint="1234567812345678123456781234567812345678123456781234567812345678"
+	/>
+	<Link
+		href="https://github.com/device_vendor/device_AAA"
+		rel="installationmedia"
+	/>
+	<Meta
+		xmlns:rim="https://trustedcomputinggroup.org/wp-content/uploads/TCG_RIM_Model"
+		colloquialVersion="device_colloquial_version_1.0"
+		edition="device_edition_1.0"
+		product="device_product_AAA"
+		revision="device_revision_3.7.6"
+		rim:PayloadType="Direct"
+		rim:PlatformManufacturerStr="device_vendor"
+		rim:PlatformManufacturerId="343"
+		rim:PlatformModel="device_model_AAA"
+		rim:PlatformVersion="device_platform_version_3.7.6"
+		rim:FirmwareManufacturerStr="device_vendor"
+		rim:FirmwareManufacturerId="343"
+		rim:FirmwareVersion="device_firmware_version_3.7.6"
+		rim:BindingSpec="RIMIM"
+		rim:BindingSpecVersion="01"
+		rim:RIMLinkHash="1234567812345678123456781234567812345678123456781234567812345678"
+	/>
+	<Payload
+		xmlns:SHA256="http://www.w3.org/2001/04/xmlenc#sha256"
+		n8060:envVarPrefix="$"
+		n8060:envVarSuffix=""
+		n8060:pathSeparator="/">
+		<Directory name="Device_FS" location="DeviceBin">
+			<File name="Rom.bin" size="65536" SHA256:hash="C8BED0AF5473E956F38C0DEF7C0B5047FF756A6A7E666F5F3FB956C5C1652B1E"/>
+			<File name="Firmware.bin" size="65536" SHA256:hash="C6F392711FFFABBEA5986F8E2CEF7F6BAD3BC4BDA1664259406E4675FC66ED8E"/>
+			<File name="HwConfig.bin" size="4096" SHA256:hash="C3BE3AAD7A60E53C9BAA8F52219CEF642C32085AD8D42FB42C62D6CF7875D441"/>
+			<File name="FwConfig.bin" size="4096" SHA256:hash="946901532CEC8B44733B6BE24618C3BAF940E3EC23191693FA1932AC2E6241C5"/>
+		</Directory>
+	</Payload>
+</SoftwareIdentity>

@@ -1,0 +1,39 @@
+## @file
+#  EDKII PciIo Stub
+#
+# Copyright (c) 2020, Intel Corporation. All rights reserved.<BR>
+# SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = PciIoStub
+  FILE_GUID                      = 458C071F-2229-4BEF-887A-95222470D45D
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = MainEntryPoint
+
+[Sources]
+  PciIoStub.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+
+[LibraryClasses]
+  UefiRuntimeServicesTableLib
+  UefiBootServicesTableLib
+  UefiDriverEntryPoint
+  MemoryAllocationLib
+  DevicePathLib
+  BaseMemoryLib
+  PrintLib
+  DebugLib
+
+[Protocols]
+  gEdkiiDeviceIdentifierTypePciGuid  ## PRODUCES
+  gEfiDevicePathProtocolGuid         ## PRODUCES
+
+[Depex]
+  TRUE
