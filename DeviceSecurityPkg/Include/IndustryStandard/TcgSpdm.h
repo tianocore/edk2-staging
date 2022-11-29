@@ -42,6 +42,11 @@
 #define TCG_DEVICE_SECURITY_EVENT_DATA_VERSION_2   2
 #define TCG_DEVICE_SECURITY_EVENT_DATA_SIGNATURE_2 "SPDM Device Sec2"
 
+//
+// current spec is using PCR 7, but it will cause bitlocker fail. As such, we use PCR 1.
+//
+#define PCR_INDEX_FOR_SIGNATURE_DB                 1
+
 typedef struct {
   UINT8                          Signature[16];
   UINT16                         Version;
