@@ -21,6 +21,15 @@
 
 [Includes]
   Include
+  DeviceSecurity/Include
+
+[Includes.Common.Private]
+  Library/DeviceSecurityLib/SpdmLib/Include
+  Library/DeviceSecurityLib/SpdmLib/libspdm/include
+  DeviceSecurity/Include/PrivateTest
+
+[Includes.X64.Private]
+  Library/DeviceSecurityLib/SpdmLib/libspdm/include/hal/x64
 
 [LibraryClasses]
   ##  @libraryclass  Provides hash interfaces from different implementations.
@@ -103,6 +112,10 @@
   ## @libraryclass  Provides support to manage variable 'PK' related protections.
   #
   PlatformPKProtectionLib|Include/Library/PlatformPKProtectionLib.h
+
+  ##  @libraryclass Perform SPDM (following SPDM spec) and measure data to TPM (following TCG PFP spec).
+  ##
+  SpdmMeasurementLib|Include/Library/SpdmSecurityLib.h
 
 [Guids]
   ## Security package token space guid.
@@ -225,6 +238,28 @@
 
   ## GUID used to specify section with default dbt content
   gDefaultdbtFileGuid                = { 0x36c513ee, 0xa338, 0x4976, { 0xa0, 0xfb, 0x6d, 0xdb, 0xa3, 0xda, 0xfe, 0x87 } }
+
+  gEfiDeviceSecurityPkgTokenSpaceGuid  = { 0x506945e8, 0x7603, 0x49ee, { 0xbf, 0x36, 0x6c, 0x28, 0x74, 0xca, 0x26, 0xdc }}
+
+  ## Include/Guid/DeviceSecurity.h
+  gEdkiiDeviceSignatureDatabaseGuid    = {0xb9c2b4f4, 0xbf5f, 0x462d, {0x8a, 0xdf, 0xc5, 0xc7, 0xa, 0xc3, 0x5d, 0xad}}
+
+  gEfiDeviceSecurityPkgTestConfig      = { 0x6761aa6c, 0x41bf, 0x4a38, { 0x84, 0x93, 0x26, 0x6b, 0x11, 0x98, 0x44, 0xfc }}
+
+  gEfiDeviceSecuritySpdmUidGuid        = {0xe37b5665, 0x5ef9, 0x4e7e, {0xb4, 0x91, 0xd6, 0x78, 0xab, 0xff, 0xfb, 0xcb }}
+
+[Protocols]
+  ## Include/Protocol/DeviceSecurityPolicy.h
+  gEdkiiDeviceSecurityPolicyProtocolGuid   = {0x9e15104a, 0x9e7c, 0x437d, {0xb1, 0xf0, 0x6c, 0xbb, 0xfb, 0x75, 0xdc, 0x87}}
+
+  ## Include/Protocol/SpdmIo.h
+  gSpdmIoProtocolGuid                 = {0x78cad8aa, 0x7f4, 0x4c9b, {0x95, 0x5e, 0x85, 0x73, 0x2e, 0x37, 0x21, 0x96}}
+
+  ## Include/Protocol/Spdm.h
+  gSpdmProtocolGuid            = {0x4f96162, 0x9ed8, 0x4499, {0x96, 0xd8, 0x58, 0x8c, 0x6d, 0xc6, 0x11, 0x5d}}
+
+  ## Include/PrivateTest/Protocol/SpdmTest.h
+  gSpdmTestProtocolGuid        = {0xcbd8291b, 0x824a, 0x4b28, {0xad, 0x1f, 0x71, 0x1e, 0xc5, 0x4d, 0x13, 0x31}}
 
 [Ppis]
   ## The PPI GUID for that TPM physical presence should be locked.
