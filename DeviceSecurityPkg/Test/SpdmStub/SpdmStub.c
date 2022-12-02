@@ -185,6 +185,7 @@ MainEntryPoint (
   UINTN                ScratchBufferSize;
   UINT8                TestConfig;
   UINTN                TestConfigSize;
+  SPDM_VERSION_NUMBER  SpdmVersion;
 
   TestConfigSize = sizeof (UINT8);
   Status         = gRT->GetVariable (
@@ -201,6 +202,13 @@ MainEntryPoint (
   SpdmContext = AllocateZeroPool (SpdmGetContextSize ());
   ASSERT (SpdmContext != NULL);
   SpdmInitContext (SpdmContext);
+
+  if (TestConfig == TEST_CONFIG_SPDM_MESSAGE_VERSION_11) {
+    ZeroMem (&Parameter, sizeof (Parameter));
+    Parameter.location = SpdmDataLocationLocal;
+    SpdmVersion  = SPDM_MESSAGE_VERSION_11 << SPDM_VERSION_NUMBER_SHIFT_BIT;
+    SpdmSetData (SpdmContext, SpdmDataSpdmVersion, &Parameter, &SpdmVersion, sizeof (SpdmVersion));
+  }
 
   ScratchBufferSize = SpdmGetSizeofRequiredScratchBuffer (SpdmContext);
   mScratchBuffer    = AllocateZeroPool (ScratchBufferSize);
