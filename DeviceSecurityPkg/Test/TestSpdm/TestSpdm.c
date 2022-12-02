@@ -276,6 +276,11 @@ TestSpdm (
     return;
   }
 
+  if (TestConfig == TEST_CONFIG_SPDM_MESSAGE_VERSION_10) {
+    //SPDM 1.0 does not support KEY_EXCHANGE or PSK_EXCHANGE, so skip.
+    return;
+  }
+
   Status = gBS->LocateProtocol (&gSpdmProtocolGuid, NULL, (VOID **)&SpdmProtocol);
   ASSERT_EFI_ERROR (Status);
 
