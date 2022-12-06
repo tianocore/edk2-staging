@@ -20,6 +20,7 @@
 [Packages]
   MdePkg/MdePkg.dec
   MdeModulePkg/MdeModulePkg.dec
+  SecurityPkg/SecurityPkg.dec
   DeviceSecurityPkg/DeviceSecurityPkg.dec
 
 [LibraryClasses]
