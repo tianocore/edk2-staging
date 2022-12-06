@@ -100,19 +100,20 @@ DEFINE CRYPT_LIB = OPENSSL
 
   RegisterFilterLib|MdePkg/Library/RegisterFilterLibNull/RegisterFilterLibNull.inf
 
-  SpdmDeviceSecretLib|DeviceSecurityPkg/Library/SpdmLib/SpdmDeviceSecretLibNull.inf
-  SpdmCryptLib|DeviceSecurityPkg/Library/SpdmLib/SpdmCryptLib.inf
-  SpdmCommonLib|DeviceSecurityPkg/Library/SpdmLib/SpdmCommonLib.inf
-  SpdmRequesterLib|DeviceSecurityPkg/Library/SpdmLib/SpdmRequesterLib.inf
-  SpdmResponderLib|DeviceSecurityPkg/Library/SpdmLib/SpdmResponderLib.inf
-  SpdmSecuredMessageLib|DeviceSecurityPkg/Library/SpdmLib/SpdmSecuredMessageLib.inf
-  SpdmTransportMctpLib|DeviceSecurityPkg/Library/SpdmLib/SpdmTransportMctpLib.inf
-  SpdmTransportPciDoeLib|DeviceSecurityPkg/Library/SpdmLib/SpdmTransportPciDoeLib.inf
-  SpdmMeasurementLib|DeviceSecurityPkg/Library/SpdmSecurityLib/SpdmSecurityLib.inf
+  SpdmDeviceSecretLib|SecurityPkg/DeviceSecurity/SpdmLib/SpdmDeviceSecretLibNull.inf
+  SpdmCryptLib|SecurityPkg/DeviceSecurity/SpdmLib/SpdmCryptLib.inf
+  SpdmCommonLib|SecurityPkg/DeviceSecurity/SpdmLib/SpdmCommonLib.inf
+  SpdmRequesterLib|SecurityPkg/DeviceSecurity/SpdmLib/SpdmRequesterLib.inf
+  SpdmResponderLib|SecurityPkg/DeviceSecurity/SpdmLib/SpdmResponderLib.inf
+  SpdmSecuredMessageLib|SecurityPkg/DeviceSecurity/SpdmLib/SpdmSecuredMessageLib.inf
+  SpdmTransportMctpLib|SecurityPkg/DeviceSecurity/SpdmLib/SpdmTransportMctpLib.inf
+  SpdmTransportPciDoeLib|SecurityPkg/DeviceSecurity/SpdmLib/SpdmTransportPciDoeLib.inf
+  SpdmMeasurementLib|SecurityPkg/DeviceSecurity/SpdmSecurityLib/SpdmSecurityLib.inf
 
-  CryptlibWrapper|DeviceSecurityPkg/Library/OsStub/CryptlibWrapper/CryptlibWrapper.inf
-  PlatformLibWrapper|DeviceSecurityPkg/Library/OsStub/PlatformLibWrapper/PlatformLibWrapper.inf
-  MemLibWrapper|DeviceSecurityPkg/Library/OsStub/MemLibWrapper/MemLibWrapper.inf
+  CryptlibWrapper|SecurityPkg/DeviceSecurity/OsStub/CryptlibWrapper/CryptlibWrapper.inf
+  PlatformLibWrapper|SecurityPkg/DeviceSecurity/OsStub/PlatformLibWrapper/PlatformLibWrapper.inf
+  MemLibWrapper|SecurityPkg/DeviceSecurity/OsStub/MemLibWrapper/MemLibWrapper.inf
+
 [LibraryClasses.ARM]
   ArmSoftFloatLib|ArmPkg/Library/ArmSoftFloatLib/ArmSoftFloatLib.inf
 

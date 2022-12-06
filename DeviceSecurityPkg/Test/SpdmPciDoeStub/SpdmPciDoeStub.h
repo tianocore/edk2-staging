@@ -12,7 +12,7 @@
 #include <Protocol/PciIo.h>
 #include <Protocol/SpdmIo.h>
 #include <Stub/SpdmLibStub.h>
-#include <Library/SpdmReturnStatus.h>
+#include <SpdmReturnStatus.h>
 
 typedef struct {
   UINTN                  Signature;
