@@ -9,7 +9,6 @@
 #include <Uefi.h>
 #include <hal/base.h>
 #include <IndustryStandard/UefiTcgPlatform.h>
-#include <IndustryStandard/TcgSpdm.h>
 #include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
 #include <Library/BaseMemoryLib.h>
@@ -21,9 +20,8 @@
 #include <Guid/DeviceAuthentication.h>
 #include <Guid/ImageAuthentication.h>
 #include <Stub/SpdmLibStub.h>
-#include <Library/SpdmReturnStatus.h>
+#include <SpdmReturnStatus.h>
 #include <industry_standard/spdm.h>
-#include <IndustryStandard/TcgSpdm.h>
 #include <Library/Tpm2CommandLib.h>
 #include <Library/ShellLib.h>
 #include <Library/UefiLib.h>

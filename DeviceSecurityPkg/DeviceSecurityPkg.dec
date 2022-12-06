@@ -14,19 +14,21 @@
 
 [Includes]
   Include
+  ../SecurityPkg/DeviceSecurity/SpdmLib/Include
+  ../SecurityPkg/DeviceSecurity/SpdmLib/libspdm/include
 
 [Includes.Common.Private]
-  Library/SpdmLib/Include
-  Library/SpdmLib/libspdm/include
+  #Library/SpdmLib/Include
+  #Library/SpdmLib/libspdm/include
   Include/PrivateTest
 
-[Includes.X64.Private]
-  Library/SpdmLib/libspdm/include/hal/x64
+[Includes.X64]
+  ../SecurityPkg/DeviceSecurity/SpdmLib/libspdm/include/hal/x64
 
 [LibraryClasses]
   ##  @libraryclass Perform SPDM (following SPDM spec) and measure data to TPM (following TCG PFP spec).
   ##
-  SpdmMeasurementLib|Include/Library/SpdmSecurityLib.h
+  #SpdmMeasurementLib|Include/Library/SpdmSecurityLib.h
 
 [Guids]
   gEfiDeviceSecurityPkgTokenSpaceGuid      = { 0x506945e8, 0x7603, 0x49ee, { 0xbf, 0x36, 0x6c, 0x28, 0x74, 0xca, 0x26, 0xdc }}

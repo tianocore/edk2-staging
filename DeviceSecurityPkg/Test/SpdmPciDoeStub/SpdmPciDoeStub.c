@@ -20,7 +20,7 @@
 #include <industry_standard/pcidoe.h>
 #include <SpdmPciDoeStub.h>
 #include <Stub/SpdmLibStub.h>
-#include <Library/SpdmReturnStatus.h>
+#include <SpdmReturnStatus.h>
 
 #define SPDM_TIMEOUT  1000000   // 1 second
 

@@ -31,8 +31,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <IndustryStandard/Tpm2Acpi.h>
 #include <IndustryStandard/Spdm.h>
 #include <Guid/ImageAuthentication.h>
-
-#include <IndustryStandard/TcgSpdm.h>
 #include <Guid/DeviceAuthentication.h>
 
 #define EV_NO_ACTION  ((TCG_EVENTTYPE) 0x00000003)
