@@ -1,0 +1,48 @@
+## @file
+#  EDKII TestSpdm
+#
+# Copyright (c) 2020, Intel Corporation. All rights reserved.<BR>
+# SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = TestSpdmPei
+  FILE_GUID                      = 24567D1D-EB55-4EEE-A6BB-1FE538CE547A
+  MODULE_TYPE                    = PEIM
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = MainEntryPoint
+
+[Sources]
+  TestSpdmPei.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  CryptoPkg/CryptoPkg.dec
+  DeviceSecurityTestPkg/DeviceSecurityTestPkg.dec
+
+[LibraryClasses]
+  PeiServicesLib
+  PeiServicesTablePointerLib
+  PeimEntryPoint
+  MemoryAllocationLib
+  BaseMemoryLib
+  PrintLib
+  DebugLib
+
+[Guids]
+  gEfiDeviceSignatureDatabaseGuid       ## CONSUMES
+
+[Ppis]
+  gSpdmPpiGuid                       ## CONSUME
+  gSpdmTestPpiGuid                   ## CONSUME
+  gEdkiiDeviceSecurityPpiGuid        ## CONSUME
+  gEfiPeiReadOnlyVariable2PpiGuid    ## CONSUME
+
+[Protocols]
+  gEdkiiDeviceIdentifierTypePciGuid  ## CONSUME
+
+[Depex]
+  gEdkiiDeviceSecurityPpiGuid

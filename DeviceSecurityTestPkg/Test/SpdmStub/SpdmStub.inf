@@ -1,0 +1,56 @@
+## @file
+#  EDKII SpdmIo Stub
+#
+# Copyright (c) 2020, Intel Corporation. All rights reserved.<BR>
+# SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = SpdmStub
+  FILE_GUID                      = 29B847DF-E042-4CE1-8BE3-A90B3EEC33AD
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = MainEntryPoint
+
+[Sources]
+  SpdmStub.c
+  SpdmStub.h
+  SpdmStubTest.c
+  SpdmDeviceIo.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  CryptoPkg/CryptoPkg.dec
+  SecurityPkg/SecurityPkg.dec
+  DeviceSecurityTestPkg/DeviceSecurityTestPkg.dec
+
+[LibraryClasses]
+  UefiRuntimeServicesTableLib
+  UefiBootServicesTableLib
+  UefiDriverEntryPoint
+  MemoryAllocationLib
+  DevicePathLib
+  BaseMemoryLib
+  PrintLib
+  DebugLib
+  UefiLib
+  RngLib
+  BaseCryptLib
+  SpdmResponderLib
+  SpdmTransportMctpLib
+  SpdmTransportPciDoeLib
+  CryptlibWrapper
+  
+[Guids]
+  gEfiDeviceSignatureDatabaseGuid  ## CONSUMES
+  gEfiDeviceSecurityPkgTestConfig    ## CONSUMES
+
+[Protocols]
+  gSpdmIoProtocolGuid   ## PRODUCES
+  gSpdmTestProtocolGuid ## PRODUCES
+
+[Depex]
+  TRUE

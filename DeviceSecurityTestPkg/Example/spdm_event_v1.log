@@ -1,0 +1,174 @@
+Parameter -I: PcrIndex = 0xFFFFFFFF
+Parameter -L: LogFormat = 0xFFFFFFFF
+Parameter -E: CalculateExpected = 0
+Parameter -BIN: BinayFileName = <null string>
+ERROR: Tcg2Protocol->GetEventLog(0x1) - Invalid Parameter
+EventLogFormat: (0x2)
+EventLogLocation: (0x1CD39D33000)
+Tcg2Event:
+  Event:
+    PCRIndex  - 0
+    EventType - 0x00000003
+    Digest    - 0000000000000000000000000000000000000000
+    EventSize - 0x00000021
+0000: 53706563204944204576656E743033000000000000020002010000000C003000
+0020: 00
+    EventData - Type: EV_NO_ACTION
+  Unknown EV_NO_ACTION
+  TCG_EfiSpecIDEventStruct:
+    signature          - 'Spec ID Event03 '
+    platformClass      - 0x00000000
+    specVersion        - 2.0.0
+    uintnSize          - 0x02
+    numberOfAlgorithms - 0x00000001
+    digest(0)
+      algorithmId      - 0x000C
+      digestSize       - 0x0030
+    vendorInfoSize     - 0x00
+    vendorInfo         - 
+  Event:
+    PCRIndex  - 2
+    EventType - 0x800000E1
+    DigestCount: 0x00000001
+    HashAlgo : 0x000C
+    Digest(0): 82B096EA8A595240F38E2621A9C1ED48303225B93DF5CC9751E052020072A5B3F607EBBF09ABA41467948B5D8CA86326
+    EventSize - 0x00000071
+0000: 5350444D20446576696365205365630000007100020000000100000001012300
+0020: 0020007EB24A18990EE4C958C89773DA6CC9FBC5C278357762D02EC6AB947EB2
+0040: 8726FF160000000000000002010C00D041030A000000000101060000007FFF04
+0060: 00000010008680600B0002080186800000
+    EventData - Type: EV_EFI_SPDM_FIRMWARE_BLOB
+      Signature         - 'SPDM Device Sec '
+      Version           - 0x0000
+      Length            - 0x0071
+      SpdmHashAlgo      - 0x00000002
+      DeviceType        - 0x00000001
+      SpdmMeasurementBlock:
+        Index             - 0x01
+        MeasurementSpec   - 0x01
+        MeasurementSize   - 0x0023
+        Measurement:
+          DMTFSpecMeasurementValueType - 0x00
+          DMTFSpecMeasurementValueSize - 0x0020
+          DMTFSpecMeasurementValue     - 7EB24A18990EE4C958C89773DA6CC9FBC5C278357762D02EC6AB947EB28726FF
+      DevicePathLength  - 0x0000000000000016
+      DevicePath        - PciRoot(0x0)/Pci(0x0,0x0)
+      DeviceSecurityEventData - PCI Context
+        Version           - 0x0000
+        Length            - 0x0010
+        VendorId          - 0x8086
+        DeviceId          - 0x0B60
+        RevisionID        - 0x00
+        ClassCode         - 0x010802
+        SubsystemVendorID - 0x8086
+        SubsystemID       - 0x0000
+  Event:
+    PCRIndex  - 2
+    EventType - 0x800000E1
+    DigestCount: 0x00000001
+    HashAlgo : 0x000C
+    Digest(0): 5DED1B92195CB96962F34498F762CDBC29859671AD811A58678E62B6290826938F2404BA4FFFF1718A65ABF8EAB9A1D6
+    EventSize - 0x00000071
+0000: 5350444D20446576696365205365630000007100020000000100000001012300
+0020: 0120009E50F90FD035924A202C1F5C5246ACC40AB0C3211366E89F0C5D9CF42A
+0040: 6A8D78160000000000000002010C00D041030A000000000101060000007FFF04
+0060: 00000010008680600B0002080186800000
+    EventData - Type: EV_EFI_SPDM_FIRMWARE_BLOB
+      Signature         - 'SPDM Device Sec '
+      Version           - 0x0000
+      Length            - 0x0071
+      SpdmHashAlgo      - 0x00000002
+      DeviceType        - 0x00000001
+      SpdmMeasurementBlock:
+        Index             - 0x01
+        MeasurementSpec   - 0x01
+        MeasurementSize   - 0x0023
+        Measurement:
+          DMTFSpecMeasurementValueType - 0x01
+          DMTFSpecMeasurementValueSize - 0x0020
+          DMTFSpecMeasurementValue     - 9E50F90FD035924A202C1F5C5246ACC40AB0C3211366E89F0C5D9CF42A6A8D78
+      DevicePathLength  - 0x0000000000000016
+      DevicePath        - PciRoot(0x0)/Pci(0x0,0x0)
+      DeviceSecurityEventData - PCI Context
+        Version           - 0x0000
+        Length            - 0x0010
+        VendorId          - 0x8086
+        DeviceId          - 0x0B60
+        RevisionID        - 0x00
+        ClassCode         - 0x010802
+        SubsystemVendorID - 0x8086
+        SubsystemID       - 0x0000
+  Event:
+    PCRIndex  - 3
+    EventType - 0x800000E2
+    DigestCount: 0x00000001
+    HashAlgo : 0x000C
+    Digest(0): 92ABD029F8F665B7E76EF7367A1115A00C50994C482058413C239EA39403A5FD9B88B678F5C0DAADC641D3A0DB7ED557
+    EventSize - 0x00000071
+0000: 5350444D20446576696365205365630000007100020000000100000001012300
+0020: 022000262CAFD9AEC68ED56EA179EC74E067D73711E60DE530D50AA0F3D6087B
+0040: AD0677160000000000000002010C00D041030A000000000101060000007FFF04
+0060: 00000010008680600B0002080186800000
+    EventData - Type: EV_EFI_SPDM_FIRMWARE_CONFIG
+      Signature         - 'SPDM Device Sec '
+      Version           - 0x0000
+      Length            - 0x0071
+      SpdmHashAlgo      - 0x00000002
+      DeviceType        - 0x00000001
+      SpdmMeasurementBlock:
+        Index             - 0x01
+        MeasurementSpec   - 0x01
+        MeasurementSize   - 0x0023
+        Measurement:
+          DMTFSpecMeasurementValueType - 0x02
+          DMTFSpecMeasurementValueSize - 0x0020
+          DMTFSpecMeasurementValue     - 262CAFD9AEC68ED56EA179EC74E067D73711E60DE530D50AA0F3D6087BAD0677
+      DevicePathLength  - 0x0000000000000016
+      DevicePath        - PciRoot(0x0)/Pci(0x0,0x0)
+      DeviceSecurityEventData - PCI Context
+        Version           - 0x0000
+        Length            - 0x0010
+        VendorId          - 0x8086
+        DeviceId          - 0x0B60
+        RevisionID        - 0x00
+        ClassCode         - 0x010802
+        SubsystemVendorID - 0x8086
+        SubsystemID       - 0x0000
+  Event:
+    PCRIndex  - 3
+    EventType - 0x800000E2
+    DigestCount: 0x00000001
+    HashAlgo : 0x000C
+    Digest(0): 297CA75B7CC29D526A3881A02401DC7550C260A13943C3AF20E186EA889E732CB5C98F2E8400727CD13A20553B73342D
+    EventSize - 0x00000071
+0000: 5350444D20446576696365205365630000007100020000000100000001012300
+0020: 0320003C902E18125F2DA0E87B76F334A19335925453713E04E52A6606244BFF
+0040: 74F4CA160000000000000002010C00D041030A000000000101060000007FFF04
+0060: 00000010008680600B0002080186800000
+    EventData - Type: EV_EFI_SPDM_FIRMWARE_CONFIG
+      Signature         - 'SPDM Device Sec '
+      Version           - 0x0000
+      Length            - 0x0071
+      SpdmHashAlgo      - 0x00000002
+      DeviceType        - 0x00000001
+      SpdmMeasurementBlock:
+        Index             - 0x01
+        MeasurementSpec   - 0x01
+        MeasurementSize   - 0x0023
+        Measurement:
+          DMTFSpecMeasurementValueType - 0x03
+          DMTFSpecMeasurementValueSize - 0x0020
+          DMTFSpecMeasurementValue     - 3C902E18125F2DA0E87B76F334A19335925453713E04E52A6606244BFF74F4CA
+      DevicePathLength  - 0x0000000000000016
+      DevicePath        - PciRoot(0x0)/Pci(0x0,0x0)
+      DeviceSecurityEventData - PCI Context
+        Version           - 0x0000
+        Length            - 0x0010
+        VendorId          - 0x8086
+        DeviceId          - 0x0B60
+        RevisionID        - 0x00
+        ClassCode         - 0x010802
+        SubsystemVendorID - 0x8086
+        SubsystemID       - 0x0000
+FinalEventsTable: NOT FOUND
+Tcg2Event end
