@@ -1,0 +1,43 @@
+## @file
+#  EDKII SpdmIo Stub for PCIe DOE Capability test
+#
+# Copyright (c) 2020, Intel Corporation. All rights reserved.<BR>
+# SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = SpdmPciDoeStub
+  FILE_GUID                      = F716975E-D48B-4D11-B928-ED7A03E20A3C
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = MainEntryPoint
+
+[Sources]
+  SpdmPciDoeStub.c
+  SpdmPciDoeStub.h
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  CryptoPkg/CryptoPkg.dec
+  SecurityPkg/SecurityPkg.dec
+  DeviceSecurityTestPkg/DeviceSecurityTestPkg.dec
+
+[LibraryClasses]
+  UefiRuntimeServicesTableLib
+  UefiBootServicesTableLib
+  UefiDriverEntryPoint
+  MemoryAllocationLib
+  DevicePathLib
+  BaseMemoryLib
+  PrintLib
+  DebugLib
+  
+[Protocols]
+  gSpdmIoProtocolGuid               ## PRODUCES
+  gEdkiiDeviceIdentifierTypePciGuid ## COMSUMES
+
+[Depex]
+  TRUE
