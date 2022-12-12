@@ -1,0 +1,71 @@
+## @file
+#  EDKII Device Security library for SPDM device.
+#  It follows the SPDM Specification.
+#
+# Copyright (c) 2020, Intel Corporation. All rights reserved.<BR>
+# SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = SpdmDeviceSecurityDxe
+  FILE_GUID                      = AA1A0732-8AFD-4632-962D-FF855626F501
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = MainEntryPoint
+
+[Sources]
+  SpdmDeviceSecurityDxe.h
+  SpdmDeviceSecurityDxe.c
+  SpdmCommunication.c
+  SpdmDeviceIo.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  CryptoPkg/CryptoPkg.dec
+  SecurityPkg/SecurityPkg.dec
+  DeviceSecurityTestPkg/DeviceSecurityTestPkg.dec
+
+[LibraryClasses]
+  UefiRuntimeServicesTableLib
+  UefiBootServicesTableLib
+  UefiDriverEntryPoint
+  MemoryAllocationLib
+  DevicePathLib
+  BaseMemoryLib
+  PrintLib
+  DebugLib
+  UefiLib
+  PcdLib
+  TpmMeasurementLib
+  RngLib
+  BaseCryptLib
+  SpdmRequesterLib
+  SpdmTransportMctpLib
+  SpdmTransportPciDoeLib
+  SpdmSecurityLib
+  CryptlibWrapper
+
+[Guids]
+  gEfiDeviceSignatureDatabaseGuid       ## CONSUMES
+  gEfiDeviceSecurityPkgTestConfig         ## CONSUMES
+
+[Protocols]
+  gEdkiiDeviceSecurityProtocolGuid        ## PRODUCES
+  gSpdmProtocolGuid                  ## PRODUCES
+  gEdkiiDeviceSecurityPolicyProtocolGuid  ## CONSUMES
+  gSpdmIoProtocolGuid                ## CONSUMES
+  gEdkiiDeviceIdentifierTypePciGuid       ## COMSUMES
+  gEdkiiDeviceIdentifierTypeUsbGuid       ## COMSUMES
+
+[Pcd]
+  gEfiDeviceSecurityPkgTokenSpaceGuid.PcdSpdmBaseAsymAlgo     ## COMSUMES
+  gEfiDeviceSecurityPkgTokenSpaceGuid.PcdSpdmBaseHashAlgo     ## COMSUMES
+  gEfiDeviceSecurityPkgTokenSpaceGuid.PcdSpdmDHENamedGroup    ## COMSUMES
+  gEfiDeviceSecurityPkgTokenSpaceGuid.PcdSpdmAEADCipherSuite  ## COMSUMES
+  gEfiDeviceSecurityPkgTokenSpaceGuid.PcdSpdmKeySchedule      ## COMSUMES
+
+[Depex]
+  gEdkiiDeviceSecurityPolicyProtocolGuid
