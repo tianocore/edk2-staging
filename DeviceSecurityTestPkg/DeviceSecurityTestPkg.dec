@@ -1,0 +1,87 @@
+## @file
+# This package provides EDKII Device Security related support.
+#
+# Copyright (c) 2019, Intel Corporation. All rights reserved.<BR>
+# SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+##
+
+[Defines]
+  DEC_SPECIFICATION              = 0x00010005
+  PACKAGE_NAME                   = DeviceSecurityTestPkg
+  PACKAGE_GUID                   = 575E6A14-ACD5-4101-A74C-747D49D17AC9
+  PACKAGE_VERSION                = 0.1
+
+[Includes]
+  Include
+  ../SecurityPkg/DeviceSecurity/SpdmLib/Include
+  ../SecurityPkg/DeviceSecurity/SpdmLib/libspdm/include
+
+[Includes.Common.Private]
+  #Library/SpdmLib/Include
+  #Library/SpdmLib/libspdm/include
+  Include/PrivateTest
+
+[LibraryClasses]
+  ##  @libraryclass Perform SPDM (following SPDM spec) and measure data to TPM (following TCG PFP spec).
+  ##
+  #SpdmSecurityLib|Include/Library/SpdmSecurityLib.h
+
+[Guids]
+  gEfiDeviceSecurityPkgTokenSpaceGuid      = { 0x506945e8, 0x7603, 0x49ee, { 0xbf, 0x36, 0x6c, 0x28, 0x74, 0xca, 0x26, 0xdc }}
+
+  gEfiDeviceSecurityPkgTestConfig      = { 0x6761aa6c, 0x41bf, 0x4a38, { 0x84, 0x93, 0x26, 0x6b, 0x11, 0x98, 0x44, 0xfc }}
+
+  gEfiDeviceSecuritySpdmUidGuid = {0xe37b5665, 0x5ef9, 0x4e7e, {0xb4, 0x91, 0xd6, 0x78, 0xab, 0xff, 0xfb, 0xcb }}
+
+[Ppis]
+
+  ## Include/Ppi/DeviceSecurity.h
+  gEdkiiDeviceSecurityPpiGuid = {0x4b05faa, 0x7f36, 0x4dc5, {0xbf, 0xb3, 0x42, 0xde, 0x30, 0xbc, 0x3d, 0x80}}
+
+
+  ## Include/Ppi/DeviceSecurityPolicy.h
+  gEdkiiDeviceSecurityPolicyPpiGuid   = {0x5b7b8831, 0xb15b, 0x4e39, {0xad, 0xfc, 0x88, 0x4d, 0x5a, 0x89, 0xf7, 0x4a}}
+
+  ## Include/Ppi/SpdmIo.h
+  gSpdmIoPpiGuid                 = {0x02320bff, 0x6b67, 0x4acc, {0x8b, 0x37, 0x45, 0xf4, 0x20, 0xfa, 0x9f, 0x98}}
+
+  ## Include/Ppi/Spdm.h
+  gSpdmPpiGuid            = {0x0a1227b3, 0x0f30, 0x4639, {0xbe, 0xb3, 0xb4, 0x60, 0x77, 0x35, 0xee, 0x89}}
+
+  ## Include/PrivateTest/Ppi/SpdmTest.h
+  gSpdmTestPpiGuid        = {0x9580d073, 0x5c95, 0x469f, {0x9a, 0xbe, 0xd4, 0xbc, 0xb7, 0x5f, 0xbf, 0x5c}}
+
+[Protocols]
+  ## Include/Protocol/DeviceSecurityPolicy.h
+  gEdkiiDeviceSecurityPolicyProtocolGuid   = {0x9e15104a, 0x9e7c, 0x437d, {0xb1, 0xf0, 0x6c, 0xbb, 0xfb, 0x75, 0xdc, 0x87}}
+
+  ## Include/Protocol/SpdmIo.h
+  gSpdmIoProtocolGuid                 = {0x78cad8aa, 0x7f4, 0x4c9b, {0x95, 0x5e, 0x85, 0x73, 0x2e, 0x37, 0x21, 0x96}}
+  
+  ## Include/Protocol/Spdm.h
+  gSpdmProtocolGuid            = {0x4f96162, 0x9ed8, 0x4499, {0x96, 0xd8, 0x58, 0x8c, 0x6d, 0xc6, 0x11, 0x5d}}
+
+  ## Include/PrivateTest/Protocol/SpdmTest.h
+  gSpdmTestProtocolGuid        = {0xcbd8291b, 0x824a, 0x4b28, {0xad, 0x1f, 0x71, 0x1e, 0xc5, 0x4d, 0x13, 0x31}}
+
+[PcdsFixedAtBuild, PcdsPatchableInModule]
+  ## PCD to indicate the BaseAsymAlgo in negotiate algorithm message.
+  # Please refer to MdePkg\Include\IndustryStandard\Spdm.h, SPDM_ALGORITHMS_BASE_ASYM_ALGO_TPM_ALG_xxx.
+  gEfiDeviceSecurityPkgTokenSpaceGuid.PcdSpdmBaseAsymAlgo|0x01|UINT32|0x00000001
+
+  ## PCD to indicate the BaseHashAlgo in negotiate algorithm message.
+  # Please refer to MdePkg\Include\IndustryStandard\Spdm.h, SPDM_ALGORITHMS_BASE_HASH_ALGO_TPM_ALG_xxx.
+  gEfiDeviceSecurityPkgTokenSpaceGuid.PcdSpdmBaseHashAlgo|0x01|UINT32|0x00000002
+
+  ## PCD to indicate the DHENamedGroup in negotiate algorithm message.
+  # Please refer to MdePkg\Include\IndustryStandard\Spdm.h, SPDM_ALGORITHMS_DHE_NAMED_GROUP_xxx.
+  gEfiDeviceSecurityPkgTokenSpaceGuid.PcdSpdmDHENamedGroup|0x01|UINT16|0x00000003
+
+  ## PCD to indicate the AEADCipherSuite in negotiate algorithm message.
+  # Please refer to MdePkg\Include\IndustryStandard\Spdm.h, SPDM_ALGORITHMS_AEAD_CIPHER_SUITE_xxx.
+  gEfiDeviceSecurityPkgTokenSpaceGuid.PcdSpdmAEADCipherSuite|0x01|UINT16|0x00000004
+
+  ## PCD to indicate the KeySchedule in negotiate algorithm message.
+  # Please refer to MdePkg\Include\IndustryStandard\Spdm.h, SPDM_ALGORITHMS_KEY_SCHEDULE_xxx.
+  gEfiDeviceSecurityPkgTokenSpaceGuid.PcdSpdmKeySchedule|0x01|UINT16|0x00000005

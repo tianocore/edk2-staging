@@ -1,0 +1,72 @@
+## @file
+#  EDKII Device Security library for SPDM device.
+#  It follows the SPDM Specification.
+#
+# Copyright (c) 2020, Intel Corporation. All rights reserved.<BR>
+# SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = SpdmDeviceSecurityPei
+  FILE_GUID                      = B46EBE29-69BB-4811-A9E0-DCD2D94A43CD
+  MODULE_TYPE                    = PEIM
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = MainEntryPoint
+
+[Sources]
+  SpdmDeviceSecurityPei.h
+  SpdmDeviceSecurityPei.c
+  SpdmDeviceMeasurement.c
+  SpdmDeviceAuthentication.c
+  SpdmCommunication.c
+  SpdmDeviceIo.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  CryptoPkg/CryptoPkg.dec
+  DeviceSecurityTestPkg/DeviceSecurityTestPkg.dec
+  SecurityPkg/SecurityPkg.dec
+
+[LibraryClasses]
+  PeiServicesLib
+  PeiServicesTablePointerLib
+  PeimEntryPoint
+  MemoryAllocationLib
+  BaseMemoryLib
+  PrintLib
+  DebugLib
+  PcdLib
+  RngLib
+  BaseCryptLib
+  SpdmRequesterLib
+  SpdmTransportMctpLib
+  SpdmTransportPciDoeLib
+
+[Ppis]
+  gEdkiiDeviceSecurityPpiGuid             ## PRODUCES
+  gEdkiiDeviceSecurityPolicyPpiGuid       ## CONSUMES
+  gSpdmIoPpiGuid                          ## CONSUMES
+  gSpdmPpiGuid                            ## PRODUCES
+  gEfiPeiReadOnlyVariable2PpiGuid         ## CONSUMES
+
+[Guids]
+  gEfiDeviceSignatureDatabaseGuid       ## CONSUMES
+  gEdkiiCertSpdmCertChainGuid             ## CONSUMES
+
+[Protocols]
+  gEdkiiDeviceIdentifierTypePciGuid       ## COMSUMES
+  gEdkiiDeviceIdentifierTypeUsbGuid       ## COMSUMES
+
+[Pcd]
+  gEfiDeviceSecurityPkgTokenSpaceGuid.PcdSpdmBaseAsymAlgo     ## COMSUMES
+  gEfiDeviceSecurityPkgTokenSpaceGuid.PcdSpdmBaseHashAlgo     ## COMSUMES
+  gEfiDeviceSecurityPkgTokenSpaceGuid.PcdSpdmDHENamedGroup    ## COMSUMES
+  gEfiDeviceSecurityPkgTokenSpaceGuid.PcdSpdmAEADCipherSuite  ## COMSUMES
+  gEfiDeviceSecurityPkgTokenSpaceGuid.PcdSpdmKeySchedule      ## COMSUMES
+
+[Depex]
+  gEdkiiDeviceSecurityPolicyPpiGuid AND
+  gSpdmIoPpiGuid

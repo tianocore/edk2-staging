@@ -1,0 +1,86 @@
+{
+  "corim": { // #6.501 (unsigned-corim-map)
+    "corim.id": "6F8FE7AF-57A0-4087-83DB-D9D95AB237D4", // 0
+    "corim.tags": [
+      { // 1: #6.505 (concise-coswid-tag)
+        "tag-id": "C43C3BDB-74E6-4336-8676-79B3D405FAEA",   // 0
+        "tag-version": 0,   // 12
+        "software-name": "device_software_name_AAA",   // 1
+        "software-version": "device_firmware_version_01",   // 13
+        "corpus": false,   // 8
+        "patch": false,   // 9
+        "supplemental": false,   // 11
+        "software-meta": [   // 5
+          {
+            "colloquial-version": "device_colloquial_version_1.0",   // 45
+            "edition": "device_edition_1.0",   // 47
+            "product": "device_product_AAA",   // 52
+            "revision": "device_revision_3.7.6"   // 54
+          }
+        ],
+        "entity": [   // 2
+          {
+            "entity-name": "device_entity_name_AAA",   // 31
+            "role": [ // 33
+              "softwareCreator", // 2
+              "tagCreator"  // 1
+            ],
+            "thumbprint": [   // 34 
+              "SHA_256", // 1
+              "1234567812345678123456781234567812345678123456781234567812345678"
+            ],
+            "reg-id": "http://www.device_vendor.com"   // 32
+          }
+        ],
+        "link": [   // 4
+          {
+            "href": "https://github.com/device_vendor/device_AAA",   // 38
+            "rel": 4   // 40
+          }
+        ],
+        "payload": {   // 6
+          "directory": {   // 16
+            "fs-name": "Device_FS",   // 24
+            "location": "DeviceBin",   // 23
+            "path-elements": {   // 26
+              "file": [   // 17
+                {
+                  "fs-name": "Rom.bin",   // 24
+                  "size": 65536,   // 20
+                  "hash": [   // 7
+                    "SHA_256", // 1
+                    "C8BED0AF5473E956F38C0DEF7C0B5047FF756A6A7E666F5F3FB956C5C1652B1E"
+                  ]
+                },
+                {
+                  "fs-name": "Firmware.bin",   // 24
+                  "size": 65536,   // 20
+                  "hash": [   // 7
+                    "SHA_256", // 1
+                    "C6F392711FFFABBEA5986F8E2CEF7F6BAD3BC4BDA1664259406E4675FC66ED8E"
+                  ]
+                },
+                {
+                  "fs-name": "HwConfig.bin",   // 24
+                  "size": 4096,   // 20
+                  "hash": [   // 7
+                    "SHA_256", // 1
+                    "C3BE3AAD7A60E53C9BAA8F52219CEF642C32085AD8D42FB42C62D6CF7875D441"
+                  ]
+                },
+                {
+                  "fs-name": "FwConfig.bin",   // 24
+                  "size": 4096,   // 20
+                  "hash": [   // 7
+                    "SHA_256", // 1
+                    "946901532CEC8B44733B6BE24618C3BAF940E3EC23191693FA1932AC2E6241C5"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      }
+    ]
+  }
+}
