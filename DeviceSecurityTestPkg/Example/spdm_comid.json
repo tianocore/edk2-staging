@@ -1,0 +1,125 @@
+{
+  "corim": { // #6.501 (unsigned-corim-map)
+    "corim.id": "d0c996b044a6a4ce43e5541800123f0a", // 0
+    "corim.tags": [
+      { // 1: #6.506 (concise-mid-tag)
+        "comid.tag-identity": { // 1
+          "comid.tag-id": "3f06af63a93c11e4979700505690773f", // 0
+          "comid.tag-version": 0 // 1
+        },
+        "comid.entity": { // 2
+          "comid.entity-name": "device_entity_name_AAA", // 0
+          "comid.reg-id": "http://www.device_vendor.com", // 1
+          "comid.role": [ // 2
+            "comid.tag-creator", // 0
+            "comid.creator" // 1
+          ]
+        },
+        "comid.triples": { // 4
+          "comid.reference-triples": [ // 0
+            [
+              {
+                "comid.class": { // 0
+                  "comid.class-id": "67b28b6c34cc40a19117ab5b05911e37", // 0
+                  "comid.vendor": "device_vendor", // 1
+                  "comid.model": "device_model_AAA", // 2
+                  "comid.layer": 1, // 3
+                  "comid.index": 1 // 4
+                }
+              },
+              {
+                "comid.mval": { // 1
+                  "comid.digests": [ // 2
+                    [
+                      "SHA_256", // 1
+                      "C8BED0AF5473E956F38C0DEF7C0B5047FF756A6A7E666F5F3FB956C5C1652B1E"
+                    ]
+                  ]
+                }
+              }
+            ],
+            [
+              {
+                "comid.class": { // 0
+                  "comid.class-id": "67b28b6c34cc40a19117ab5b05911e37", // 0
+                  "comid.vendor": "device_vendor", // 1
+                  "comid.model": "device_model_AAA", // 2
+                  "comid.layer": 1, // 3
+                  "comid.index": 2 // 4
+                }
+              },
+              {
+                "comid.mval": { // 1
+                  "comid.digests": [ // 2
+                    [
+                      "SHA_256", // 1
+                      "C6F392711FFFABBEA5986F8E2CEF7F6BAD3BC4BDA1664259406E4675FC66ED8E"
+                    ]
+                  ]
+                }
+              }
+            ],
+            [
+              {
+                "comid.class": { // 0
+                  "comid.class-id": "67b28b6c34cc40a19117ab5b05911e37", // 0
+                  "comid.vendor": "device_vendor", // 1
+                  "comid.model": "device_model_AAA", // 2
+                  "comid.layer": 1, // 3
+                  "comid.index": 3 // 4
+                }
+              },
+              {
+                "comid.mval": { // 1
+                  "comid.digests": [ // 2
+                    [
+                      "SHA_256", // 1
+                      "C3BE3AAD7A60E53C9BAA8F52219CEF642C32085AD8D42FB42C62D6CF7875D441"
+                    ]
+                  ]
+                }
+              }
+            ],
+            [
+              {
+                "comid.class": { // 0
+                  "comid.class-id": "67b28b6c34cc40a19117ab5b05911e37", // 0
+                  "comid.vendor": "device_vendor", // 1
+                  "comid.model": "device_model_AAA", // 2
+                  "comid.layer": 1, // 3
+                  "comid.index": 4 // 4
+                }
+              },
+              {
+                "comid.mval": { // 1
+                  "comid.digests": [ // 2
+                    [
+                      "SHA_256", // 1
+                      "946901532CEC8B44733B6BE24618C3BAF940E3EC23191693FA1932AC2E6241C5"
+                    ]
+                  ]
+                }
+              }
+            ],
+            [
+              {
+                "comid.class": { // 0
+                  "comid.class-id": "67b28b6c34cc40a19117ab5b05911e37", // 0
+                  "comid.vendor": "device_vendor", // 1
+                  "comid.model": "device_model_AAA", // 2
+                  "comid.layer": 1, // 3
+                  "comid.index": 16 // 4
+                }
+              },
+              {
+                "comid.mval": {
+                  "comid.svn": 7 // 1 : #6.552 (tagged-svn)
+                }
+              }
+            ]
+          ]
+        }
+      }
+    ]
+  }
+}
