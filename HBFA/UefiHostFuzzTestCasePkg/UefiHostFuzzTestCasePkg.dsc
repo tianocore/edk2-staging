@@ -343,6 +343,20 @@
    OrderedCollectionLib|MdePkg/Library/BaseOrderedCollectionRedBlackTreeLib/BaseOrderedCollectionRedBlackTreeLib.inf
   }
 
+  UefiHostFuzzTestCasePkg/TestCase/OvmfPkg/Library/CcExitLib/TestParseMmioExitInstructions.inf{
+  <LibraryClasses>
+   CcExitLib|OvmfPkg/Library/CcExitLib/CcExitLib.inf
+   LocalApicLib|UefiCpuPkg/Library/BaseXApicX2ApicLib/BaseXApicX2ApicLib.inf
+   MemEncryptSevLib|OvmfPkg/Library/BaseMemEncryptSevLib/SecMemEncryptSevLib.inf
+   CpuLib|MdePkg/Library/BaseCpuLib/BaseCpuLib.inf
+   IoLib|MdePkg/Library/BaseIoLibIntrinsic/BaseIoLibIntrinsicSev.inf
+   UefiCpuLib|UefiCpuPkg/Library/BaseUefiCpuLib/BaseUefiCpuLib.inf
+   RegisterFilterLib|MdePkg/Library/RegisterFilterLibNull/RegisterFilterLibNull.inf
+   CcProbeLib|OvmfPkg/Library/CcProbeLib/SecPeiCcProbeLib.inf
+   TdxLib|MdePkg/Library/TdxLib/TdxLib.inf  
+   PlatformInitLib|OvmfPkg/Library/PlatformInitLib/PlatformInitLib.inf
+  }
+
   [PcdsDynamicDefault]
     gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageVariableBase64|0
     gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageFtwWorkingBase|0
