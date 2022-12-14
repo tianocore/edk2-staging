@@ -303,13 +303,17 @@ CreateSpdmDeviceContext (
     DbList = SignatureList;
     DbSize = SignatureListSize;
     while ((DbSize > 0) && (SignatureListSize >= DbList->SignatureListSize)) {
-      if (!CompareGuid (&DbList->SignatureType, &gEfiCertX509Guid)) {
+      if (DbList->SignatureListSize == 0) {
+        break;
+      }
+      if ((!CompareGuid (&DbList->SignatureType, &gEfiCertX509Guid))
+           || (DbList->SignatureHeaderSize != 0)
+           || (DbList->SignatureSize < sizeof (EFI_SIGNATURE_DATA))) {
         DbSize -= DbList->SignatureListSize;
         DbList  = (EFI_SIGNATURE_LIST *)((UINT8 *)DbList + DbList->SignatureListSize);
         continue;
       }
 
-      ASSERT (DbList->SignatureHeaderSize == 0);
       SiglistHeaderSize = sizeof (EFI_SIGNATURE_LIST) + DbList->SignatureHeaderSize;
       Cert              = (EFI_SIGNATURE_DATA *)((UINT8 *)DbList + SiglistHeaderSize);
       CertCount         = (DbList->SignatureListSize - SiglistHeaderSize) / DbList->SignatureSize;
