@@ -56,6 +56,8 @@ typedef struct {
   VOID                        *ScratchBuffer;
   UINT8                       SpdmVersion;
   VOID                        *SpdmIoProtocol;
+  EFI_SIGNATURE_LIST          *SignatureList;
+  UINTN                       SignatureListSize;
 } SPDM_DEVICE_CONTEXT;
 
 typedef struct {
