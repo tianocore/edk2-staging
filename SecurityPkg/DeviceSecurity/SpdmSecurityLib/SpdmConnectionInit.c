@@ -174,9 +174,7 @@ CreateSpdmDeviceContext (
   UINTN                ScratchBufferSize;
   EFI_STATUS           Status;
   SPDM_RETURN          SpdmReturn;
-  EFI_SIGNATURE_LIST   *SignatureList;
   EFI_SIGNATURE_LIST   *DbList;
-  UINTN                SignatureListSize;
   EFI_SIGNATURE_DATA   *Cert;
   UINTN                CertCount;
   UINTN                Index;
@@ -201,11 +199,17 @@ CreateSpdmDeviceContext (
 
   SpdmContextSize = SpdmGetContextSize ();
   SpdmContext     = AllocateZeroPool (SpdmContextSize);
-  ASSERT (SpdmContext != NULL);
+  if (SpdmContext == NULL) {
+    ASSERT (SpdmContext != NULL);
+    goto Error;
+  }
 
   ScratchBufferSize = SpdmGetSizeofRequiredScratchBuffer (SpdmContext);
   ScratchBuffer     = AllocateZeroPool (ScratchBufferSize);
-  ASSERT (ScratchBuffer != NULL);
+  if (ScratchBuffer == NULL) {
+    ASSERT (ScratchBuffer != NULL);
+    goto Error;
+  }
 
   SpdmReturn = SpdmInitContext (SpdmContext);
   if (LIBSPDM_STATUS_IS_ERROR (SpdmReturn)) {
@@ -296,13 +300,13 @@ CreateSpdmDeviceContext (
   Status = GetVariable2 (
              EDKII_DEVICE_SECURITY_DATABASE,
              &gEdkiiDeviceSignatureDatabaseGuid,
-             (VOID **)&SignatureList,
-             &SignatureListSize
+             (VOID **)&SpdmDeviceContext->SignatureList,
+             &SpdmDeviceContext->SignatureListSize
              );
-  if ((!EFI_ERROR (Status)) && (SignatureList != NULL)) {
-    DbList = SignatureList;
-    DbSize = SignatureListSize;
-    while ((DbSize > 0) && (SignatureListSize >= DbList->SignatureListSize)) {
+  if ((!EFI_ERROR (Status)) && (SpdmDeviceContext->SignatureList != NULL)) {
+    DbList = SpdmDeviceContext->SignatureList;
+    DbSize = SpdmDeviceContext->SignatureListSize;
+    while ((DbSize > 0) && (SpdmDeviceContext->SignatureListSize >= DbList->SignatureListSize)) {
       if (DbList->SignatureListSize == 0) {
         break;
       }
@@ -413,11 +417,11 @@ CreateSpdmDeviceContext (
     goto Error;
   }
 
-  SpdmDeviceContext->SpdmVersion = (Data16 >> 8);
+  SpdmDeviceContext->SpdmVersion = (Data16 >> SPDM_VERSION_NUMBER_SHIFT_BIT);
 
   return SpdmDeviceContext;
 Error:
-  FreePool (SpdmDeviceContext);
+  DestroySpdmDeviceContext (SpdmDeviceContext);
   return NULL;
 }
 
@@ -434,11 +438,20 @@ DestroySpdmDeviceContext (
   )
 {
   // need zero memory in case of secret in memory.
-  ZeroMem (SpdmDeviceContext->SpdmContext, SpdmDeviceContext->SpdmContextSize);
-  FreePool (SpdmDeviceContext->SpdmContext);
+  if (SpdmDeviceContext->SpdmContext != NULL) {
+    ZeroMem (SpdmDeviceContext->SpdmContext, SpdmDeviceContext->SpdmContextSize);
+    FreePool (SpdmDeviceContext->SpdmContext);
+  }
 
-  ZeroMem (SpdmDeviceContext->ScratchBuffer, SpdmDeviceContext->ScratchBufferSize);
-  FreePool (SpdmDeviceContext->ScratchBuffer);
+  if (SpdmDeviceContext->ScratchBuffer != NULL) {
+    ZeroMem (SpdmDeviceContext->ScratchBuffer, SpdmDeviceContext->ScratchBufferSize);
+    FreePool (SpdmDeviceContext->ScratchBuffer);
+  }
+
+  if (SpdmDeviceContext->SignatureList != NULL) {
+    ZeroMem (SpdmDeviceContext->SignatureList, SpdmDeviceContext->SignatureListSize);
+    FreePool (SpdmDeviceContext->SignatureList);
+  }
 
   FreePool (SpdmDeviceContext);
 }

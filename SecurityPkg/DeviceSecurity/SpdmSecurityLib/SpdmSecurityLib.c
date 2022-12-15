@@ -39,6 +39,7 @@ SpdmDeviceAuthenticationAndMeasurement (
     return EFI_UNSUPPORTED;
   }
 
+  Status = EFI_SUCCESS;
   IsAuthenticated = FALSE;
   AuthState       = TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_SUCCESS;
   SlotId          = 0;
@@ -46,10 +47,10 @@ SpdmDeviceAuthenticationAndMeasurement (
     Status = DoDeviceAuthentication (SpdmDeviceContext, &AuthState, &SlotId, SecurityState);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_ERROR, "DoDeviceAuthentication failed - %r\n", Status));
-      return Status;
+      goto Ret;
     } else {
       if (AuthState == TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_FAIL_NO_SIG) {
-        return Status;
+        goto Ret;
       } else {
         IsAuthenticated = TRUE;
       }
@@ -63,9 +64,10 @@ SpdmDeviceAuthenticationAndMeasurement (
     }
   }
 
+Ret:
   DestroySpdmDeviceContext (SpdmDeviceContext);
 
-  return EFI_SUCCESS;
+  return Status;
 }
 
 /**
