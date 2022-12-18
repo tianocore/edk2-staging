@@ -603,10 +603,7 @@ DoDeviceAuthentication (
       *AuthState                         = TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_NO_AUTH;
       SecurityState->AuthenticationState = EDKII_DEVICE_SECURITY_STATE_ERROR_NO_CERT_PROVISION;
       Status                             = ExtendCertificate (SpdmDeviceContext, *AuthState, CertChainSize, CertChain, NULL, 0, *ValidSlotId, SecurityState);
-      return Status;
-    }
-
-    if (IsValidCertChain && IsValidChallengeAuthSig && RootCertMatch) {
+    } else if (IsValidCertChain && IsValidChallengeAuthSig && RootCertMatch) {
       *AuthState                         = TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_SUCCESS;
       SecurityState->AuthenticationState = EDKII_DEVICE_SECURITY_STATE_SUCCESS;
       Status                             = ExtendCertificate (SpdmDeviceContext, *AuthState, CertChainSize, CertChain, TrustAnchor, TrustAnchorSize, *ValidSlotId, SecurityState);
