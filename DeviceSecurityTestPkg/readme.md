@@ -8,9 +8,9 @@ This branch owner: Jiewen Yao <jiewen.yao@intel.com>, Qi Zhang <qi.zhang@intel.c
 
 ## Feature
 
-1) A generic [SpdmSecurityLib](Include/Library/SpdmSecurityLib.h) for device authentication and measurement.
+1) A generic [SpdmSecurityLib](../SecurityPkg/DeviceSecurity/SpdmSecurityLib/SpdmSecurityLibInternal.h) for device authentication and measurement.
 
-   The implemenation is at [SpdmSecurityLib](Library/SpdmSecurityLib).
+   The implemenation is at [SpdmSecurityLib](../SecurityPkg/DeviceSecurity/SpdmSecurityLib).
 
    Any driver can link this library to perform SPDM (following SPDM spec) and measure data to TPM (following TCG PFP spec).
 
@@ -24,13 +24,13 @@ This branch owner: Jiewen Yao <jiewen.yao@intel.com>, Qi Zhang <qi.zhang@intel.c
 
 This repo uses below submodules:
 
-  DeviceSecurityPkg/Library/SpdmLib/libspdm
+  [libspdm](../SecurityPkg/DeviceSecurity/SpdmLib/libspdm).
 
 Build:
-  Follow standard EDKII build process for DeviceSecurityPkg.
+  Follow standard EDKII build process for DeviceSecurityTestPkg.
 
 Run :
-  Copy all *.efi in Build\DeviceSecurityPkg\<TARGET>_<TOOLCHAIN>\<ARCH>\*.efi to Build\EmulationPkg\<TARGET>_<TOOLCHAIN>\<ARCH>\.
+  Copy all *.efi in Build\DeviceSecurityTestPkg\<TARGET>_<TOOLCHAIN>\<ARCH>\*.efi to Build\EmulatorPkg\<TARGET>_<TOOLCHAIN>\<ARCH>\.
 
   Boot to UEFI shell and run below command:
 
@@ -58,7 +58,7 @@ Run :
     TestSpdm.efi
   ```
 
-  In EmulationPkg, the PEI SPDM module can only be launched in second boot, after DeployCert.efi in UEFI shell.
+  In EmulatorPkg, the PEI SPDM module can only be launched in second boot, after DeployCert.efi in UEFI shell.
 
 ## TCG SPDM Event Log
 
