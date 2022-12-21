@@ -407,7 +407,6 @@ EFI_STATUS
 ExtendAuthentication (
   IN  SPDM_DEVICE_CONTEXT          *SpdmDeviceContext,
   IN UINT8                         AuthState,
-  IN UINT8                         *MeasurementHash,
   IN UINT8                         *RequesterNonce,
   IN UINT8                         *ResponderNonce,
   OUT EDKII_DEVICE_SECURITY_STATE  *SecurityState
@@ -499,7 +498,6 @@ DoDeviceAuthentication (
   SPDM_DATA_PARAMETER  Parameter;
   UINT8                SlotMask;
   UINT8                TotalDigestBuffer[LIBSPDM_MAX_HASH_SIZE * SPDM_MAX_SLOT_COUNT];
-  UINT8                MeasurementHash[LIBSPDM_MAX_HASH_SIZE];
   UINTN                CertChainSize;
   UINT8                CertChain[LIBSPDM_MAX_CERT_CHAIN_SIZE];
   UINT8                RequesterNonce[SPDM_NONCE_SIZE];
@@ -583,10 +581,9 @@ DoDeviceAuthentication (
   }
 
   if ((CapabilityFlags & SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_CHAL_CAP) != 0) {
-    ZeroMem (MeasurementHash, sizeof (MeasurementHash));
     ZeroMem (RequesterNonce, sizeof (RequesterNonce));
     ZeroMem (ResponderNonce, sizeof (ResponderNonce));
-    SpdmReturn = SpdmChallengeEx (SpdmContext, *ValidSlotId, SPDM_CHALLENGE_REQUEST_TCB_COMPONENT_MEASUREMENT_HASH, MeasurementHash, NULL, NULL, RequesterNonce, ResponderNonce);
+    SpdmReturn = SpdmChallengeEx (SpdmContext, *ValidSlotId, SPDM_CHALLENGE_REQUEST_NO_MEASUREMENT_SUMMARY_HASH, NULL, NULL, NULL, RequesterNonce, ResponderNonce);
     if (SpdmReturn == LIBSPDM_STATUS_SUCCESS) {
       IsValidChallengeAuthSig = TRUE;
     } else if (SpdmReturn == LIBSPDM_STATUS_VERIF_FAIL) {
@@ -609,7 +606,7 @@ DoDeviceAuthentication (
       Status                             = ExtendCertificate (SpdmDeviceContext, *AuthState, CertChainSize, CertChain, TrustAnchor, TrustAnchorSize, *ValidSlotId, SecurityState);
     }
 
-    Status = ExtendAuthentication (SpdmDeviceContext, *AuthState, MeasurementHash, RequesterNonce, ResponderNonce, SecurityState);
+    Status = ExtendAuthentication (SpdmDeviceContext, *AuthState, RequesterNonce, ResponderNonce, SecurityState);
   }
 
   return Status;
