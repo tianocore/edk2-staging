@@ -22,9 +22,6 @@
   #Library/SpdmLib/libspdm/include
   Include/PrivateTest
 
-[Includes.X64]
-  ../SecurityPkg/DeviceSecurity/SpdmLib/libspdm/include/hal/x64
-
 [LibraryClasses]
   ##  @libraryclass Perform SPDM (following SPDM spec) and measure data to TPM (following TCG PFP spec).
   ##

@@ -70,6 +70,7 @@ RETURN_STATUS
   IN OUT UINTN                     *DataSize
   );
 
+#if (LIBSPDM_ENABLE_CAPABILITY_KEY_EX_CAP) || (LIBSPDM_ENABLE_CAPABILITY_PSK_EX_CAP)
 /**
   Start a SPDM Session.
 
@@ -103,6 +104,7 @@ RETURN_STATUS
   IN     UINT32               SessionId,
   IN     UINT8                EndSessionAttributes
   );
+#endif
 
 /*
   Call GetVersion, GetCapabilities, NegotiateAlgorithms
@@ -190,8 +192,10 @@ struct _SPDM_PROTOCOL {
   SPDM_GET_CERTIFICATE_FUNC      GetCertificate;
   SPDM_CHALLENGE_FUNC            Challenge;
   SPDM_GET_MEASUREMENT_FUNC      GetMeasurement;
+#if (LIBSPDM_ENABLE_CAPABILITY_KEY_EX_CAP) || (LIBSPDM_ENABLE_CAPABILITY_PSK_EX_CAP)
   SPDM_START_SESSION_FUNC        StartSession;
   SPDM_STOP_SESSION_FUNC         StopSession;
+#endif
   SPDM_SEND_RECEIVE_DATA_FUNC    SendReceiveData;
 };
 
