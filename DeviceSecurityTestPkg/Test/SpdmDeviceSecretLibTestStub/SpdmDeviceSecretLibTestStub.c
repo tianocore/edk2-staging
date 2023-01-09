@@ -26,6 +26,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Stub/SpdmLibStub.h>
 #include <SpdmReturnStatus.h>
 #include "library/spdm_device_secret_lib.h"
+#include "spdm_crypt_ext_lib.h"
 
 #define LIBSPDM_MEASUREMENT_BLOCK_HASH_NUMBER  4
 #define LIBSPDM_MEASUREMENT_BLOCK_NUMBER       (LIBSPDM_MEASUREMENT_BLOCK_HASH_NUMBER /*Index - 1~4*/ +\
@@ -562,11 +563,6 @@ SpdmGenerateMeasurementSummaryHash (
       if (LIBSPDM_STATUS_IS_ERROR (status)) {
         return false;
       }
-
-      ASSERT (
-        device_measurement_count <=
-        LIBSPDM_MAX_MEASUREMENT_BLOCK_COUNT
-        );
 
       /* double confirm that MeasurmentData internal size is correct*/
       measurment_data_size    = 0;
