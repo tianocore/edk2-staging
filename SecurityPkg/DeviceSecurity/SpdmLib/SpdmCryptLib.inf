@@ -22,7 +22,14 @@
 #
 
 [Sources]
-  libspdm/library/spdm_crypt_lib/libspdm_crypt_crypt.c
+  libspdm/library/spdm_crypt_lib/libspdm_crypt_aead.c
+  libspdm/library/spdm_crypt_lib/libspdm_crypt_asym.c
+  libspdm/library/spdm_crypt_lib/libspdm_crypt_cert.c
+  libspdm/library/spdm_crypt_lib/libspdm_crypt_dhe.c
+  libspdm/library/spdm_crypt_lib/libspdm_crypt_hash.c
+  libspdm/library/spdm_crypt_lib/libspdm_crypt_hkdf.c
+  libspdm/library/spdm_crypt_lib/libspdm_crypt_hmac.c
+  libspdm/library/spdm_crypt_lib/libspdm_crypt_rng.c
 
 [Packages]
   MdePkg/MdePkg.dec

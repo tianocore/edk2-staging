@@ -23,6 +23,7 @@
 
 [Sources]
   libspdm/library/spdm_requester_lib/libspdm_req_challenge.c
+  libspdm/library/spdm_requester_lib/libspdm_req_common.c
   libspdm/library/spdm_requester_lib/libspdm_req_communication.c
   libspdm/library/spdm_requester_lib/libspdm_req_encap_certificate.c
   libspdm/library/spdm_requester_lib/libspdm_req_encap_challenge_auth.c

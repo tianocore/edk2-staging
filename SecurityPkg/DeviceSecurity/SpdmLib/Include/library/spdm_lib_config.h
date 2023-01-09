@@ -7,6 +7,17 @@
 #ifndef SPDM_LIB_CONFIG_H
 #define SPDM_LIB_CONFIG_H
 
+/* Enables assertions and debug printing. When `LIBSPDM_DEBUG_ENABLE` is defined it overrides or
+ * sets the values of `LIBSPDM_DEBUG_PRINT_ENABLE`, `LIBSPDM_DEBUG_ASSERT_ENABLE`, and
+ * `LIBSPDM_BLOCK_ENABLE` to the value of `LIBSPDM_DEBUG_ENABLE`.
+ *
+ * Note that if this file is used with CMake and `DTARGET=Release` is defined, then all debugging
+ * is disabled.
+ */
+#ifndef LIBSPDM_DEBUG_ENABLE
+#define LIBSPDM_DEBUG_ENABLE 1
+#endif
+
 /* The SPDM specification allows a Responder to return up to 256 version entries in the `VERSION`
  * response to the Requester, including duplicate entries. For a Requester this value specifies the
  * maximum number of entries that libspdm will tolerate in a `VERSION` response before returning an
@@ -35,10 +46,6 @@
  */
 #ifndef LIBSPDM_MAX_ROOT_CERT_SUPPORT
 #define LIBSPDM_MAX_ROOT_CERT_SUPPORT  10
-#endif
-
-#ifndef LIBSPDM_MAX_MEASUREMENT_BLOCK_COUNT
-#define LIBSPDM_MAX_MEASUREMENT_BLOCK_COUNT  8
 #endif
 
 /* If the Responder supports it a Requester is allowed to establish multiple secure sessions with
@@ -89,6 +96,9 @@
 #endif
 #ifndef LIBSPDM_MAX_CONNECTION_STATE_CALLBACK_NUM
 #define LIBSPDM_MAX_CONNECTION_STATE_CALLBACK_NUM  4
+#endif
+#ifndef LIBSPDM_MAX_KEY_UPDATE_CALLBACK_NUM
+#define LIBSPDM_MAX_KEY_UPDATE_CALLBACK_NUM 4
 #endif
 
 #ifndef LIBSPDM_MAX_CSR_SIZE
@@ -189,6 +199,9 @@
 /* LIBSPDM_ENABLE_CAPABILITY_KEY_EX_CAP - Enable/Disable single Key Exchange capability.
  * LIBSPDM_ENABLE_CAPABILITY_PSK_EX_CAP - Enable/Disable PSK_EX and PSK_FINISH.*/
 
+/* LIBSPDM_ENABLE_CAPABILITY_MUT_AUTH_CAP - Enable/Disable mutual authentication.
+* LIBSPDM_ENABLE_CAPABILITY_ENCAP_CAP    - Enable/Disable encapsulated message.*/
+
 /* LIBSPDM_ENABLE_CAPABILITY_GET_CSR_CAP - Enable/Disable get csr capability.
  * LIBSPDM_ENABLE_CAPABILITY_SET_CERTIFICATE_CAP - Enable/Disable set certificate capability. */
 
@@ -203,29 +216,34 @@
 #endif
 
 #ifndef LIBSPDM_ENABLE_CAPABILITY_KEY_EX_CAP
-#define LIBSPDM_ENABLE_CAPABILITY_KEY_EX_CAP  1
+#define LIBSPDM_ENABLE_CAPABILITY_KEY_EX_CAP  0
 #endif
 #ifndef LIBSPDM_ENABLE_CAPABILITY_PSK_EX_CAP
-#define LIBSPDM_ENABLE_CAPABILITY_PSK_EX_CAP  1
+#define LIBSPDM_ENABLE_CAPABILITY_PSK_EX_CAP  0
+#endif
+
+#ifndef LIBSPDM_ENABLE_CAPABILITY_HBEAT_CAP
+#define LIBSPDM_ENABLE_CAPABILITY_HBEAT_CAP 0
+#endif
+
+#ifndef LIBSPDM_ENABLE_CAPABILITY_MUT_AUTH_CAP
+#define LIBSPDM_ENABLE_CAPABILITY_MUT_AUTH_CAP 0
+#endif
+
+#ifndef LIBSPDM_ENABLE_CAPABILITY_ENCAP_CAP
+#define LIBSPDM_ENABLE_CAPABILITY_ENCAP_CAP 0
 #endif
 
 #ifndef LIBSPDM_ENABLE_CAPABILITY_GET_CSR_CAP
-#define LIBSPDM_ENABLE_CAPABILITY_GET_CSR_CAP  0
-#endif
-#ifndef LIBSPDM_ENABLE_CAPABILITY_SET_CERTIFICATE_CAP
-#define LIBSPDM_ENABLE_CAPABILITY_SET_CERTIFICATE_CAP  0
+#define LIBSPDM_ENABLE_CAPABILITY_GET_CSR_CAP 0
 #endif
 
-#ifndef LIBSPDM_ENABLE_SET_CERTIFICATE_CAP
-#define LIBSPDM_ENABLE_SET_CERTIFICATE_CAP  0
+#ifndef LIBSPDM_ENABLE_CAPABILITY_SET_CERTIFICATE_CAP
+#define LIBSPDM_ENABLE_CAPABILITY_SET_CERTIFICATE_CAP 0
 #endif
 
 #ifndef LIBSPDM_ENABLE_CAPABILITY_CHUNK_CAP
-#define LIBSPDM_ENABLE_CAPABILITY_CHUNK_CAP  0
-#endif
-
-#ifndef LIBSPDM_ENABLE_CHUNK_CAP
-#define LIBSPDM_ENABLE_CHUNK_CAP  0
+#define LIBSPDM_ENABLE_CAPABILITY_CHUNK_CAP 0
 #endif
 
 /*
@@ -379,8 +397,16 @@
 #define LIBSPDM_SCRATCH_BUFFER_SIZE  (LIBSPDM_SENDER_RECEIVE_BUFFER_SIZE)
 #endif
 
+/* Enable message logging.
+ * See https://github.com/DMTF/libspdm/blob/main/doc/user_guide.md#message-logging
+ * for more information */
 #ifndef LIBSPDM_ENABLE_MSG_LOG
 #define LIBSPDM_ENABLE_MSG_LOG  1
+#endif
+
+/* Enable macro checking during compilation. */
+#ifndef LIBSPDM_CHECK_MACRO
+#define LIBSPDM_CHECK_MACRO 0
 #endif
 
 #endif /* SPDM_LIB_CONFIG_H */
