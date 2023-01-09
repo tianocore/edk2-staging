@@ -26,15 +26,6 @@
   DeviceSecurity/SpdmLib/Include
   DeviceSecurity/SpdmLib/libspdm/include
 
-[Includes.X64.Private]
-  DeviceSecurity/SpdmLib/libspdm/include/hal/x64
-
-[Includes.IA32.Private]
-  DeviceSecurity/SpdmLib/libspdm/include/hal/ia32
-
-[Includes.AARCH64.Private]
-  DeviceSecurity/SpdmLib/libspdm/include/hal/aarch64
-
 [LibraryClasses]
   ##  @libraryclass  Provides hash interfaces from different implementations.
   #
