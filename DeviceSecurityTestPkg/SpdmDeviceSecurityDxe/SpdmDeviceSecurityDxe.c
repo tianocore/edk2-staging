@@ -436,17 +436,19 @@ CreateSpdmDriverContext (
   SpdmSetData (SpdmContext, SpdmDataCapabilityCTExponent, &Parameter, &Data8, sizeof (Data8));
 
   Data32 = 0 |
-           //           SPDM_GET_CAPABILITIES_REQUEST_FLAGS_CERT_CAP |
+           SPDM_GET_CAPABILITIES_REQUEST_FLAGS_CERT_CAP |
            //           SPDM_GET_CAPABILITIES_REQUEST_FLAGS_CHAL_CAP |
            SPDM_GET_CAPABILITIES_REQUEST_FLAGS_ENCRYPT_CAP |
            SPDM_GET_CAPABILITIES_REQUEST_FLAGS_MAC_CAP |
            //           SPDM_GET_CAPABILITIES_REQUEST_FLAGS_MUT_AUTH_CAP |
+#if (LIBSPDM_ENABLE_CAPABILITY_KEY_EX_CAP) || (LIBSPDM_ENABLE_CAPABILITY_PSK_EX_CAP)
            SPDM_GET_CAPABILITIES_REQUEST_FLAGS_KEY_EX_CAP |
-           SPDM_GET_CAPABILITIES_REQUEST_FLAGS_PSK_CAP_REQUESTER |
+#endif
+           //           SPDM_GET_CAPABILITIES_REQUEST_FLAGS_PSK_CAP_REQUESTER |
            //           SPDM_GET_CAPABILITIES_REQUEST_FLAGS_ENCAP_CAP |
            SPDM_GET_CAPABILITIES_REQUEST_FLAGS_HBEAT_CAP |
-           SPDM_GET_CAPABILITIES_REQUEST_FLAGS_KEY_UPD_CAP |
-           SPDM_GET_CAPABILITIES_REQUEST_FLAGS_HANDSHAKE_IN_THE_CLEAR_CAP |
+           //           SPDM_GET_CAPABILITIES_REQUEST_FLAGS_KEY_UPD_CAP |
+           //           SPDM_GET_CAPABILITIES_REQUEST_FLAGS_HANDSHAKE_IN_THE_CLEAR_CAP |
            //           SPDM_GET_CAPABILITIES_REQUEST_FLAGS_PUB_KEY_ID_CAP |
            0;
   if (!HasRspPubCert) {
@@ -579,7 +581,9 @@ DeviceAuthentication (
 {
   EDKII_DEVICE_SECURITY_POLICY  DeviceSecurityPolicy;
   EDKII_DEVICE_SECURITY_STATE   DeviceSecurityState;
+#if (LIBSPDM_ENABLE_CAPABILITY_KEY_EX_CAP) || (LIBSPDM_ENABLE_CAPABILITY_PSK_EX_CAP)
   SPDM_DRIVER_DEVICE_CONTEXT    *SpdmDriverContext;
+#endif
   EFI_STATUS                    Status;
   EDKII_SPDM_DEVICE_INFO        SpdmDeviceInfo;
 
@@ -620,6 +624,7 @@ DeviceAuthentication (
     DEBUG ((DEBUG_ERROR, "mDeviceSecurityPolicy->NotifyDeviceState - %r\n", Status));
   }
 
+#if (LIBSPDM_ENABLE_CAPABILITY_KEY_EX_CAP) || (LIBSPDM_ENABLE_CAPABILITY_PSK_EX_CAP)
   SpdmDriverContext = GetSpdmDriverContextViaDeviceId (DeviceId);
   if (SpdmDriverContext == NULL) {
     SpdmDriverContext = CreateSpdmDriverContext (DeviceId);
@@ -628,6 +633,7 @@ DeviceAuthentication (
   if (SpdmDriverContext == NULL) {
     return EFI_UNSUPPORTED;
   }
+#endif
 
   if ((DeviceSecurityState.MeasurementState == 0) &&
       (DeviceSecurityState.AuthenticationState == 0))

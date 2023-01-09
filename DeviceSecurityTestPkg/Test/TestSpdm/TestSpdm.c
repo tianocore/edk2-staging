@@ -249,6 +249,7 @@ TestSpdmApplication (
   ASSERT (CompareMem (Response.VendorDefinedPayload, TEST_PAYLOAD_SERVER, TEST_PAYLOAD_LEN) == 0);
 }
 
+#if (LIBSPDM_ENABLE_CAPABILITY_KEY_EX_CAP) || (LIBSPDM_ENABLE_CAPABILITY_PSK_EX_CAP)
 VOID
 TestSpdm (
   VOID
@@ -324,6 +325,7 @@ TestSpdm (
     return;
   }
 }
+#endif
 
 EFI_STATUS
 EFIAPI
@@ -335,6 +337,8 @@ MainEntryPoint (
   // CpuBreakpoint();
   TestPci ();
 
+#if (LIBSPDM_ENABLE_CAPABILITY_KEY_EX_CAP) || (LIBSPDM_ENABLE_CAPABILITY_PSK_EX_CAP)
   TestSpdm ();
+#endif
   return EFI_SUCCESS;
 }

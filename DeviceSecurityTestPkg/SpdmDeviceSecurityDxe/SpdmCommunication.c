@@ -301,6 +301,7 @@ SpdmProtocolSendReceiveData (
   }
 }
 
+#if (LIBSPDM_ENABLE_CAPABILITY_KEY_EX_CAP) || (LIBSPDM_ENABLE_CAPABILITY_PSK_EX_CAP)
 /**
   Start a SPDM Session.
 
@@ -383,6 +384,7 @@ SpdmProtocolStopSession (
     return EFI_DEVICE_ERROR;
   }
 }
+#endif
 
 SPDM_PROTOCOL  mSpdmProtocol = {
   SpdmProtocolSetData,
@@ -392,8 +394,10 @@ SPDM_PROTOCOL  mSpdmProtocol = {
   SpdmProtocolGetCertificate,
   SpdmProtocolChallenge,
   SpdmProtocolGetMeasurement,
+#if (LIBSPDM_ENABLE_CAPABILITY_KEY_EX_CAP) || (LIBSPDM_ENABLE_CAPABILITY_PSK_EX_CAP)
   SpdmProtocolStartSession,
   SpdmProtocolStopSession,
+#endif
   SpdmProtocolSendReceiveData,
 };
 
