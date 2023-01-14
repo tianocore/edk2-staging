@@ -828,7 +828,7 @@ UINT8  mPciConfigTemplate[] = {
 
 EFI_HANDLE  mPciIoHandle;
 
-libspdm_return_t
+SPDM_RETURN
 SpdmDeviceAcquireSenderBuffer (
   VOID   *Context,
   UINTN  *MaxMsgSize,
@@ -857,7 +857,7 @@ SpdmDeviceReleaseSenderBuffer (
   return;
 }
 
-libspdm_return_t
+SPDM_RETURN
 SpdmDeviceAcquireReceiverBuffer (
   VOID   *Context,
   UINTN  *MaxMsgSize,
@@ -1027,16 +1027,20 @@ MainEntryPoint (
            SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_CHAL_CAP |
            //           SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_MEAS_CAP_NO_SIG |
            SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_MEAS_CAP_SIG |
+#if (LIBSPDM_ENABLE_CAPABILITY_KEY_EX_CAP) || (LIBSPDM_ENABLE_CAPABILITY_PSK_EX_CAP)
            SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_ENCRYPT_CAP |
            SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_MAC_CAP |
            //           SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_MUT_AUTH_CAP |
            SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_KEY_EX_CAP |
+#endif
            //           SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_PSK_CAP_RESPONDER |
-           SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_PSK_CAP_RESPONDER_WITH_CONTEXT |
-           SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_ENCAP_CAP |
-           SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_HBEAT_CAP |
-           SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_KEY_UPD_CAP |
+           //           SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_PSK_CAP_RESPONDER_WITH_CONTEXT |
+           //           SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_ENCAP_CAP |
+           //           SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_HBEAT_CAP |
+           //           SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_KEY_UPD_CAP |
+#if (LIBSPDM_ENABLE_CAPABILITY_KEY_EX_CAP) || (LIBSPDM_ENABLE_CAPABILITY_PSK_EX_CAP)
            SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_HANDSHAKE_IN_THE_CLEAR_CAP |
+#endif
            //           SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_PUB_KEY_ID_CAP |
            0;
   if (!HasRspPubCert) {
@@ -1056,7 +1060,10 @@ MainEntryPoint (
   }
 
   if (TestConfig == TEST_CONFIG_NO_CERT_CAP) {
+    // If certificates or public keys are not enabled then these capabilities cannot be enabled.
     Data32 &= ~SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_CERT_CAP;
+    Data32 &= ~SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_CHAL_CAP;
+    Data32 &= ~SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_MEAS_CAP;
   } else if ((TestConfig == TEST_CONFIG_NO_CHAL_CAP) || (TestConfig == TEST_CONFIG_NO_CHAL_CAP_NO_ROOT_CA)) {
     Data32 &= ~SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_CHAL_CAP;
   } else if (TestConfig == TEST_CONFIG_MEAS_CAP_NO_SIG) {
@@ -1069,14 +1076,14 @@ MainEntryPoint (
 
   SpdmSetData (SpdmContext, SpdmDataCapabilityFlags, &Parameter, &Data32, sizeof (Data32));
 
-  if (TestConfig == TEST_CONFIG_NO_MEAS_CAP) {
+  if ((TestConfig == TEST_CONFIG_NO_MEAS_CAP) || (TestConfig == TEST_CONFIG_NO_CERT_CAP)) {
     Data8 = 0;
   } else {
     Data8 = SPDM_MEASUREMENT_BLOCK_HEADER_SPECIFICATION_DMTF;
   }
 
   SpdmSetData (SpdmContext, SpdmDataMeasurementSpec, &Parameter, &Data8, sizeof (Data8));
-  if (TestConfig == TEST_CONFIG_NO_MEAS_CAP) {
+  if ((TestConfig == TEST_CONFIG_NO_MEAS_CAP) || (TestConfig == TEST_CONFIG_NO_CERT_CAP)) {
     Data32 = 0;
   } else {
     Data32 = SPDM_ALGORITHMS_MEASUREMENT_HASH_ALGO_TPM_ALG_SHA_256;

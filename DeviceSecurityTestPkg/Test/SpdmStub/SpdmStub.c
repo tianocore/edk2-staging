@@ -321,7 +321,10 @@ MainEntryPoint (
   }
 
   if (TestConfig == TEST_CONFIG_NO_CERT_CAP) {
+    // If certificates or public keys are not enabled then these capabilities cannot be enabled.
     Data32 &= ~SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_CERT_CAP;
+    Data32 &= ~SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_CHAL_CAP;
+    Data32 &= ~SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_MEAS_CAP;
   } else if ((TestConfig == TEST_CONFIG_NO_CHAL_CAP) || (TestConfig == TEST_CONFIG_NO_CHAL_CAP_NO_ROOT_CA)) {
     Data32 &= ~SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_CHAL_CAP;
   } else if (TestConfig == TEST_CONFIG_MEAS_CAP_NO_SIG) {
@@ -334,14 +337,14 @@ MainEntryPoint (
 
   SpdmSetData (SpdmContext, SpdmDataCapabilityFlags, &Parameter, &Data32, sizeof (Data32));
 
-  if (TestConfig == TEST_CONFIG_NO_MEAS_CAP) {
+  if ((TestConfig == TEST_CONFIG_NO_MEAS_CAP) || (TestConfig == TEST_CONFIG_NO_CERT_CAP)) {
     Data8 = 0;
   } else {
     Data8 = SPDM_MEASUREMENT_BLOCK_HEADER_SPECIFICATION_DMTF;
   }
 
   SpdmSetData (SpdmContext, SpdmDataMeasurementSpec, &Parameter, &Data8, sizeof (Data8));
-  if (TestConfig == TEST_CONFIG_NO_MEAS_CAP) {
+  if ((TestConfig == TEST_CONFIG_NO_MEAS_CAP) || (TestConfig == TEST_CONFIG_NO_CERT_CAP)) {
     Data32 = 0;
   } else {
     Data32 = SPDM_ALGORITHMS_MEASUREMENT_HASH_ALGO_TPM_ALG_SHA_256;
