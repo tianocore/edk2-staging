@@ -204,6 +204,7 @@ Sha1HashAll (
   OUT  UINT8       *HashValue
   )
 {
+  SHA_CTX Sha1Context;
   //
   // Check input parameters.
   //
@@ -218,11 +219,13 @@ Sha1HashAll (
   //
   // OpenSSL SHA-1 Hash Computation.
   //
-  if (SHA1 (Data, DataSize, HashValue) == NULL) {
+  if (SHA1_Init (&Sha1Context) != 1 ||
+      SHA1_Update (&Sha1Context, Data, DataSize) != 1 ||
+      SHA1_Final (HashValue, &Sha1Context) != 1) {
     return FALSE;
-  } else {
-    return TRUE;
   }
+
+  return TRUE;
 }
 
 #endif

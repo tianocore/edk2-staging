@@ -204,6 +204,7 @@ Sha384HashAll (
   OUT  UINT8       *HashValue
   )
 {
+  SHA512_CTX Sha384Context;
   //
   // Check input parameters.
   //
@@ -215,14 +216,13 @@ Sha384HashAll (
     return FALSE;
   }
 
-  //
-  // OpenSSL SHA-384 Hash Computation.
-  //
-  if (SHA384 (Data, DataSize, HashValue) == NULL) {
+  if (SHA384_Init (&Sha384Context) != 1 ||
+      SHA384_Update (&Sha384Context, Data, DataSize) != 1 ||
+      SHA384_Final (HashValue, &Sha384Context) != 1) {
     return FALSE;
-  } else {
-    return TRUE;
   }
+
+  return TRUE;
 }
 
 /**
@@ -420,6 +420,7 @@ Sha512HashAll (
   OUT  UINT8       *HashValue
   )
 {
+  SHA512_CTX Sha512Context;
   //
   // Check input parameters.
   //
@@ -431,12 +432,11 @@ Sha512HashAll (
     return FALSE;
   }
 
-  //
-  // OpenSSL SHA-512 Hash Computation.
-  //
-  if (SHA512 (Data, DataSize, HashValue) == NULL) {
+  if (SHA512_Init (&Sha512Context) != 1 ||
+      SHA512_Update (&Sha512Context, Data, DataSize) != 1 ||
+      SHA512_Final (HashValue, &Sha512Context) != 1) {
     return FALSE;
-  } else {
-    return TRUE;
   }
+
+  return TRUE;
 }
