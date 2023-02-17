@@ -252,6 +252,7 @@ BEGIN {
                 "no-shared",
                 "no-siphash",
                 "no-siv",
+                "no-sm2",
                 "no-sm4",
                 "no-sock",
                 "no-srp",
@@ -326,7 +327,6 @@ foreach my $product (@openssl_poducts) {
             if ($s =~ "/ec/" || $s =~ "/sm2/" ||
                 $s =~ "/evp/ec_support.c" ||
                 $s =~ "/evp/ec_ctrl.c" ||
-                $s =~ "/signature/sm2_sig.c" ||
                 $s =~ "/signature/eddsa_sig.c" ||
                 $s =~ "/signature/ecdsa_sig.c" ||
                 $s =~ "/keymgmt/ecx_kmgmt.c" ||
@@ -334,9 +334,6 @@ foreach my $product (@openssl_poducts) {
                 $s =~ "/exchange/ecx_exch.c" ||
                 $s =~ "/exchange/ecdh_exch.c" ||
                 $s =~ "/encode_decode/encode_key2blob.c" ||
-                $s =~ "/asymciphers/sm2_enc.c" ||
-                $s =~ "/der/der_sm2_sig.c" ||
-                $s =~ "/der/der_sm2_key.c" ||
                 $s =~ "/der/der_ecx_key.c" ||
                 $s =~ "/der/der_ec_sig.c" ||
                 $s =~ "/der/der_ec_key.c") {
@@ -377,7 +374,7 @@ foreach (@headers){
     push @sslfilelist, '  $(OPENSSL_PATH)/' . $_ . "\r\n";
     next;
   }
-  if ($_ =~ "/ec/" || $_ =~ "/sm2/") {
+  if ($_ =~ "/ec/") {
     push @ecfilelist, '  $(OPENSSL_PATH)/' . $_ . "\r\n";
     next;
   }
