@@ -547,7 +547,7 @@ print "Done!";
 #
 for my $file (map { s/\.in//; $_ } glob($OPENSSL_PATH . "/include/*/*.h.in")) {
     my $dest = $file;
-    $dest =~ s|.*/include/|../Include/|;
+    $dest =~ s|.*/include/|./OpensslGen/|;
     print "\n--> Duplicating $file into $dest ... ";
     system("perl -pe 's/\\n/\\r\\n/' < $file > $dest") == 0
         or die "Cannot copy $file !";
@@ -558,7 +558,16 @@ push @hdrs, glob($OPENSSL_PATH . "/providers/common/include/prov/[a-z]*.h");
 push @hdrs, glob($OPENSSL_PATH . "/providers/implementations/include/prov/[a-z]*.h");
 for my $file (@hdrs) {
     my $dest = $file;
-    $dest =~ s|.*/include/|../Include/|;
+    $dest =~ s|.*/include/|./OpensslGen/|;
+    print "\n--> Duplicating $file into $dest ... ";
+    system("perl -pe 's/\\n/\\r\\n/' < $file > $dest") == 0
+        or die "Cannot copy $file !";
+}
+
+for my $file (map { s/\.in//; $_ } glob($OPENSSL_PATH . "/providers/common/der/*.c.in")) {
+    next unless -f $file;
+    my $dest = $file;
+    $dest =~ s|.*/|./OpensslGen/|;
     print "\n--> Duplicating $file into $dest ... ";
     system("perl -pe 's/\\n/\\r\\n/' < $file > $dest") == 0
         or die "Cannot copy $file !";
