@@ -295,9 +295,9 @@ use configdata qw/%target/;
 my @cryptofilelist = ();
 my @sslfilelist = ();
 my @ecfilelist = ();
+my @openssl_poducts = ("providers/libcommon.a", "libcrypto", "libssl");
 
-foreach my $product ((@{$unified_info{libraries}},
-                      @{$unified_info{engines}})) {
+foreach my $product (@openssl_poducts) {
     my @objs = @{$unified_info{sources}->{$product}};
     while (my $o = pop @objs) {
         if ($o =~ m/\.a$/) {
@@ -316,6 +316,11 @@ foreach my $product ((@{$unified_info{libraries}},
             # Will use UEFI own provider.
             next if $s =~ "crypto/provider_predefined.c";
             next if $s =~ "providers/defltprov.c";
+
+            # Skip all generated source files
+            if ($unified_info{generate}->{$s}) {
+                next;
+            }
 
             #Filter out all EC related files.
             if ($s =~ "/ec/" || $s =~ "/sm2/" ||
