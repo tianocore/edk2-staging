@@ -39,30 +39,24 @@ my $comment_character;
 #
 sub copy_license_header
 {
-    my @args = split / /, shift;    #Separate args by spaces
-    my $source = $args[1];          #Source file is second (after "perl")
-    my $target = pop @args;         #Target file is always last
-    chop ($target);                 #Remove newline char
+    my $source = $_[1];          #Source file is second (after "perl")
+    my $target = $_[0];          #Target file is always last
 
     my $temp_file_name = "license.tmp";
-    open (my $source_file, "<" . $source) || die $source;
     open (my $target_file, "<" . $target) || die $target;
     open (my $temp_file, ">" . $temp_file_name) || die $temp_file_name;
 
     #Add "generated file" warning
-    $source =~ s/^..//;             #Remove leading "./"
     print ($temp_file "$comment_character WARNING: do not edit!\r\n");
     print ($temp_file "$comment_character Generated from $source\r\n");
     print ($temp_file "$comment_character\r\n");
+    print ($temp_file "$comment_character Copyright 2004-2022 The OpenSSL Project Authors. All Rights Reserved.\r\n");
+    print ($temp_file "$comment_character\r\n");
+    print ($temp_file "$comment_character Licensed under the Apache License 2.0 (the \"License\").  You may not use\r\n");
+    print ($temp_file "$comment_character this file except in compliance with the License.  You can obtain a copy\r\n");
+    print ($temp_file "$comment_character in the file LICENSE in the source distribution or at\r\n");
+    print ($temp_file "$comment_character https://www.openssl.org/source/license.html\r\n");
 
-    #Copy source file header to temp file
-    while (my $line = <$source_file>) {
-        next if ($line =~ /#!/);    #Ignore shebang line
-        $line =~ s/#/$comment_character/;            #Fix comment character for assembly
-        $line =~ s/\s+$/\r\n/;      #Trim trailing whitepsace, fixup line endings
-        print ($temp_file $line);
-        last if ($line =~ /http/);  #Last line of copyright header contains a web link
-    }
     print ($temp_file "\r\n");
     #Retrieve generated assembly contents
     while (my $line = <$target_file>) {
@@ -70,7 +64,6 @@ sub copy_license_header
         print ($temp_file expand ($line));  #expand() replaces tabs with spaces
     }
 
-    close ($source_file);
     close ($target_file);
     close ($temp_file);
 
@@ -91,6 +84,7 @@ my $extension;
 my $compile;
 my $arch;
 my @inf;
+my @asmfilelist;
 
 BEGIN {
     $inf_file = "OpensslLib.inf";
@@ -104,24 +98,44 @@ BEGIN {
             $extension = "nasm";
             $compile = "MSFT";
             $comment_character = ";";
+            @asmfilelist = ("x86_64cpuid.s",
+                            "aes/vpaes-x86_64.s", "aes/aesni-x86_64.s", "aes/aesni-sha1-x86_64.s ", "aes/aesni-sha256-x86_64.s", "aes/aesni-mb-x86_64.s",
+                            "sha/sha1-x86_64.s", "sha/sha256-x86_64.s", "sha/sha512-x86_64.s", "sha/sha1-mb-x86_64.s", "sha/sha256-mb-x86_64.s",
+                            "modes/ghash-x86_64.s", "modes/aesni-gcm-x86_64.s"
+                            );
         } elsif (uc ($arch) eq "X64GCC") {
             $arch = "X64Gcc";
             $uefi_config = "UEFI-x86_64-GCC";
             $extension = "S";
             $compile = "GCC";
             $comment_character = "#";
+            @asmfilelist = ("x86_64cpuid.s",
+                            "aes/vpaes-x86_64.s", "aes/aesni-x86_64.s", "aes/aesni-sha1-x86_64.s", "aes/aesni-sha256-x86_64.s", "aes/aesni-mb-x86_64.s",
+                            "sha/sha1-x86_64.s", "sha/sha256-x86_64.s", "sha/sha512-x86_64.s", "sha/sha1-mb-x86_64.s", "sha/sha256-mb-x86_64.s",
+                            "modes/ghash-x86_64.s", "modes/aesni-gcm-x86_64.s"
+                            );
         } elsif (uc ($arch) eq "IA32") {
             $arch = "IA32";
             $uefi_config = "UEFI-x86";
             $extension = "nasm";
             $compile = "MSFT";
             $comment_character = ";";
+            @asmfilelist = ("x86cpuid.S",
+                            "aes/vpaes-x86.S", "aes/aesni-x86.S",
+                            "sha/sha1-586.S", "sha/sha256-586.S", "sha/sha512-586.S",
+                            "modes/ghash-x86.S"
+                            );
         } elsif (uc ($arch) eq "IA32GCC") {
             $arch = "IA32Gcc";
             $uefi_config = "UEFI-x86-GCC";
             $extension = "S";
             $compile = "GCC";
             $comment_character = "#";
+            @asmfilelist = ("x86cpuid.S",
+                            "aes/vpaes-x86.S", "aes/aesni-x86.S",
+                            "sha/sha1-586.S", "sha/sha256-586.S", "sha/sha512-586.S",
+                            "modes/ghash-x86.S"
+                            );
         } else {
             die "Unsupported architecture \"" . $arch . "\"!";
         }
@@ -150,6 +164,14 @@ BEGIN {
             mkdir $arch ||
                 die "Cannot create assembly folder \"" . $arch . "\"!";
         }
+        mkdir $arch."/crypto" ||
+            die "Cannot create assembly folder \"" . $arch."/crypto" . "\"!";
+        mkdir $arch."/crypto/aes" ||
+            die "Cannot create assembly folder \"" . $arch."/crypto/aes" . "\"!";
+        mkdir $arch."/crypto/modes" ||
+            die "Cannot create assembly folder \"" . $arch."/crypto/modes" . "\"!";
+        mkdir $arch."/crypto/sha" ||
+            die "Cannot create assembly folder \"" . $arch."/crypto/sha" . "\"!";
     }
 
     # Read the contents of the inf file
@@ -270,19 +292,10 @@ use configdata qw/%unified_info/;
 use configdata qw/%config/;
 use configdata qw/%target/;
 
-#
-# Collect build flags from configdata
-#
-my $flags = "";
-foreach my $f (@{$config{lib_defines}}) {
-    $flags .= " -D$f";
-}
-
 my @cryptofilelist = ();
 my @sslfilelist = ();
 my @ecfilelist = ();
-my @asmfilelist = ();
-my @asmbuild = ();
+
 foreach my $product ((@{$unified_info{libraries}},
                       @{$unified_info{engines}})) {
     my @objs = @{$unified_info{sources}->{$product}};
@@ -304,26 +317,6 @@ foreach my $product ((@{$unified_info{libraries}},
             next if $s =~ "crypto/provider_predefined.c";
             next if $s =~ "providers/defltprov.c";
 
-            if ($unified_info{generate}->{$s}) {
-                if (defined $arch) {
-                    my $buildstring = "perl";
-                    foreach my $arg (@{$unified_info{generate}->{$s}}) {
-                        if ($arg =~ ".pl") {
-                            $buildstring .= " ./openssl/$arg";
-                        } elsif ($arg =~ "PERLASM_SCHEME") {
-                            $buildstring .= " $target{perlasm_scheme}";
-                        } elsif ($arg =~ "LIB_CFLAGS") {
-                            $buildstring .= "$flags";
-                        }
-                    }
-                    ($s, my $path, undef) = fileparse($s, qr/\.[^.]*/);
-                    $buildstring .= " ./$arch/$path$s.$extension";
-                    make_path ("./$arch/$path");
-                    push @asmbuild, "$buildstring\n";
-                    push @asmfilelist, "  $arch/$path$s.$extension  |$compile\r\n";
-                }
-                next;
-            }
             #Filter out all EC related files.
             if ($s =~ "/ec/" || $s =~ "/sm2/" ||
                 $s =~ "/evp/ec_support.c" ||
@@ -386,19 +379,6 @@ foreach (@headers){
   push @cryptofilelist, '  $(OPENSSL_PATH)/' . $_ . "\r\n";
 }
 
-
-#
-# Generate assembly files
-#
-if (@asmbuild) {
-    print "\n--> Generating assembly files ... ";
-    foreach my $buildstring (@asmbuild) {
-        system ("$buildstring");
-        copy_license_header ($buildstring);
-    }
-    print "Done!";
-}
-
 #
 # Update OpensslLib.inf with autogenerated file list
 #
@@ -406,19 +386,29 @@ my @new_inf = ();
 my $subbing = 0;
 print "\n--> Updating $inf_file ... ";
 foreach (@inf) {
-    if ($_ =~ "DEFINE OPENSSL_FLAGS_CONFIG") {
-        push @new_inf, "  DEFINE OPENSSL_FLAGS_CONFIG    =" . $flags . "\r\n";
-        next;
-    }
     if ( $_ =~ "# Autogenerated files list starts here" ) {
         push @new_inf, $_, @cryptofilelist, @sslfilelist;
         $subbing = 1;
+        if (defined $arch) {
+            #3.0 can not push aes_core.c aes_cbc.c to src list auto, dont know why...
+            push @new_inf, '  $(OPENSSL_PATH)/crypto/aes/aes_core.c' . "\r\n";
+            push @new_inf, '  $(OPENSSL_PATH)/crypto/aes/aes_cbc.c' . "\r\n";
+        }
         next;
     }
     if (defined $arch) {
         my $arch_asmfile_flag = "# Autogenerated " . $arch . " files list starts here";
         if ($_ =~ $arch_asmfile_flag) {
-            push @new_inf, $_, @asmfilelist;
+            push @new_inf, $_;
+            for my $s (@asmfilelist) {
+                my $file = $s;
+                if ($extension =~ "nasm") {
+                    $file =~ s|\.S|.nasm|i;
+                } else {
+                    $file =~ s|\.s|.S|;
+                }
+                push @new_inf, "  $arch/crypto/$file  |$compile\r\n";
+            }
             $subbing = 1;
             next;
         }
@@ -510,13 +500,27 @@ print "\n--> Updating $inf_file ... ";
 foreach (@inf) {
     if ( $_ =~ "# Autogenerated files list starts here" ) {
         push @new_inf, $_, @cryptofilelist, @sslfilelist, @ecfilelist;
+        if (defined $arch) {
+            #3.0 can not push aes_core.c aes_cbc.c to src list auto, dont know why...
+            push @new_inf, '  $(OPENSSL_PATH)/crypto/aes/aes_core.c' . "\r\n";
+            push @new_inf, '  $(OPENSSL_PATH)/crypto/aes/aes_cbc.c' . "\r\n";
+        }
         $subbing = 1;
         next;
     }
     if (defined $arch) {
         my $arch_asmfile_flag = "# Autogenerated " . $arch . " files list starts here";
         if ($_ =~ $arch_asmfile_flag) {
-            push @new_inf, $_, @asmfilelist;
+            push @new_inf, $_;
+            for my $s (@asmfilelist) {
+                my $file = $s;
+                if ($extension =~ "nasm") {
+                    $file =~ s|\.S|.nasm|i;
+                } else {
+                    $file =~ s|\.s|.S|;
+                }
+                push @new_inf, "  $arch/crypto/$file  |$compile\r\n";
+            }
             $subbing = 1;
             next;
         }
@@ -570,6 +574,22 @@ for my $file (map { s/\.in//; $_ } glob($OPENSSL_PATH . "/providers/common/der/*
     $dest =~ s|.*/|./OpensslGen/|;
     print "\n--> Duplicating $file into $dest ... ";
     system("perl -pe 's/\\n/\\r\\n/' < $file > $dest") == 0
+        or die "Cannot copy $file !";
+}
+
+for my $file (@asmfilelist) {
+    my $dest = "./".$arch."/crypto/".$file;
+    my $source = $file;
+    $source =~ s|.*/||g;
+    $source =~ s|\.S|.pl|i;
+    copy_license_header("./openssl/crypto/".$file, $source);
+    if ($extension =~ "nasm") {
+        $dest =~ s|\.S|.nasm|i;
+    } else {
+        $dest =~ s|\.s|.S|;
+    }
+    print "\n--> Duplicating $file into $dest ... ";
+    system("perl -pe 's///' < './openssl/crypto/'$file > $dest") == 0
         or die "Cannot copy $file !";
 }
 
