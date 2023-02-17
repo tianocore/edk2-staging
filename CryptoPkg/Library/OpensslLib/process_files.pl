@@ -187,6 +187,7 @@ BEGIN {
                 "no-cast",
                 "no-chacha",
                 "no-cmac",
+                "no-cmp",
                 "no-cms",
                 "no-ct",
                 "no-deprecated",
@@ -194,6 +195,9 @@ BEGIN {
                 "no-dgram",
                 "no-dsa",
                 "no-dso",
+                "no-dtls",
+                "no-dtls1-method",
+                "no-dtls1_2-method",
                 "no-dynamic-engine",
                 "no-ec2m",
                 "no-engine",
@@ -202,11 +206,18 @@ BEGIN {
                 "no-gost",
                 "no-hw",
                 "no-idea",
+                "no-ktls",
+                "no-makedepend",
+                "no-module",
                 "no-md4",
                 "no-mdc2",
+                "no-multiblock",
+                "no-nextprotoneg",
                 "no-pic",
+                "no-psk",
                 "no-ocb",
                 "no-ocsp",
+                "no-padlockeng",
                 "no-poly1305",
                 "no-posix-io",
                 "no-rc2",
@@ -216,6 +227,7 @@ BEGIN {
                 "no-rmd160",
                 "no-scrypt",
                 "no-seed",
+                "no-shared",
                 "no-siphash",
                 "no-siv",
                 "no-sm4",
@@ -223,6 +235,9 @@ BEGIN {
                 "no-srp",
                 "no-srtp",
                 "no-ssl",
+                "no-ssl3-method",
+                "no-ssl-trace",
+                "no-static-engine",
                 "no-stdio",
                 "no-threads",
                 "no-ts",
@@ -285,6 +300,9 @@ foreach my $product ((@{$unified_info{libraries}},
             next if $s =~ "crypto/aes/aes_ecb.c";
             next if $s =~ "providers/implementations/storemgmt/";
             next if $s =~ "ssl/ssl_txt.c";
+            # Will use UEFI own provider.
+            next if $s =~ "crypto/provider_predefined.c";
+            next if $s =~ "providers/defltprov.c";
 
             if ($unified_info{generate}->{$s}) {
                 if (defined $arch) {
@@ -306,7 +324,24 @@ foreach my $product ((@{$unified_info{libraries}},
                 }
                 next;
             }
-            if ($s =~ "/ec/" || $s =~ "/sm2/") {
+            #Filter out all EC related files.
+            if ($s =~ "/ec/" || $s =~ "/sm2/" ||
+                $s =~ "/evp/ec_support.c" ||
+                $s =~ "/evp/ec_ctrl.c" ||
+                $s =~ "/signature/sm2_sig.c" ||
+                $s =~ "/signature/eddsa_sig.c" ||
+                $s =~ "/signature/ecdsa_sig.c" ||
+                $s =~ "/keymgmt/ecx_kmgmt.c" ||
+                $s =~ "/keymgmt/ec_kmgmt.c" ||
+                $s =~ "/exchange/ecx_exch.c" ||
+                $s =~ "/exchange/ecdh_exch.c" ||
+                $s =~ "/encode_decode/encode_key2blob.c" ||
+                $s =~ "/asymciphers/sm2_enc.c" ||
+                $s =~ "/der/der_sm2_sig.c" ||
+                $s =~ "/der/der_sm2_key.c" ||
+                $s =~ "/der/der_ecx_key.c" ||
+                $s =~ "/der/der_ec_sig.c" ||
+                $s =~ "/der/der_ec_key.c") {
                 push @ecfilelist, '  $(OPENSSL_PATH)/' . $s . "\r\n";
                 next;
             }
