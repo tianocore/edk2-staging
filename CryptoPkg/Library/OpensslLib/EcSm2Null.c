@@ -300,9 +300,9 @@ ECDH_compute_key (
   return 0;
 }
 
-struct ec_key_st *
+const struct ec_key_st *
 EVP_PKEY_get0_EC_KEY (
-  EVP_PKEY  *pkey
+  const EVP_PKEY  *pkey
   )
 {
   ASSERT (FALSE);
