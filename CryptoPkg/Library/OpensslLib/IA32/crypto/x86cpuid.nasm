@@ -1,9 +1,9 @@
 ; WARNING: do not edit!
-; Generated from openssl/crypto/x86cpuid.pl
+; Generated from x86cpuid.pl
 ;
-; Copyright 2004-2020 The OpenSSL Project Authors. All Rights Reserved.
+; Copyright 2004-2022 The OpenSSL Project Authors. All Rights Reserved.
 ;
-; Licensed under the OpenSSL license (the "License").  You may not use
+; Licensed under the Apache License 2.0 (the "License").  You may not use
 ; this file except in compliance with the License.  You can obtain a copy
 ; in the file LICENSE in the source distribution or at
 ; https://www.openssl.org/source/license.html
@@ -233,6 +233,18 @@ L$_OPENSSL_wipe_cpu_begin:
         mov     ecx,DWORD [ecx]
         bt      DWORD [ecx],1
         jnc     NEAR L$013no_x87
+        and     ecx,83886080
+        cmp     ecx,83886080
+        jne     NEAR L$014no_sse2
+        pxor    xmm0,xmm0
+        pxor    xmm1,xmm1
+        pxor    xmm2,xmm2
+        pxor    xmm3,xmm3
+        pxor    xmm4,xmm4
+        pxor    xmm5,xmm5
+        pxor    xmm6,xmm6
+        pxor    xmm7,xmm7
+L$014no_sse2:
 dd      4007259865,4007259865,4007259865,4007259865,2430851995
 L$013no_x87:
         lea     eax,[4+esp]
@@ -246,11 +258,11 @@ L$_OPENSSL_atomic_add_begin:
         push    ebx
         nop
         mov     eax,DWORD [edx]
-L$014spin:
+L$015spin:
         lea     ebx,[ecx*1+eax]
         nop
 dd      447811568
-        jne     NEAR L$014spin
+        jne     NEAR L$015spin
         mov     eax,ebx
         pop     ebx
         ret
@@ -262,32 +274,32 @@ L$_OPENSSL_cleanse_begin:
         mov     ecx,DWORD [8+esp]
         xor     eax,eax
         cmp     ecx,7
-        jae     NEAR L$015lot
+        jae     NEAR L$016lot
         cmp     ecx,0
-        je      NEAR L$016ret
-L$017little:
+        je      NEAR L$017ret
+L$018little:
         mov     BYTE [edx],al
         sub     ecx,1
         lea     edx,[1+edx]
-        jnz     NEAR L$017little
-L$016ret:
+        jnz     NEAR L$018little
+L$017ret:
         ret
 align   16
-L$015lot:
+L$016lot:
         test    edx,3
-        jz      NEAR L$018aligned
+        jz      NEAR L$019aligned
         mov     BYTE [edx],al
         lea     ecx,[ecx-1]
         lea     edx,[1+edx]
-        jmp     NEAR L$015lot
-L$018aligned:
+        jmp     NEAR L$016lot
+L$019aligned:
         mov     DWORD [edx],eax
         lea     ecx,[ecx-4]
         test    ecx,-4
         lea     edx,[4+edx]
-        jnz     NEAR L$018aligned
+        jnz     NEAR L$019aligned
         cmp     ecx,0
-        jne     NEAR L$017little
+        jne     NEAR L$018little
         ret
 global  _CRYPTO_memcmp
 align   16
@@ -301,18 +313,18 @@ L$_CRYPTO_memcmp_begin:
         xor     eax,eax
         xor     edx,edx
         cmp     ecx,0
-        je      NEAR L$019no_data
-L$020loop:
+        je      NEAR L$020no_data
+L$021loop:
         mov     dl,BYTE [esi]
         lea     esi,[1+esi]
         xor     dl,BYTE [edi]
         lea     edi,[1+edi]
         or      al,dl
         dec     ecx
-        jnz     NEAR L$020loop
+        jnz     NEAR L$021loop
         neg     eax
         shr     eax,31
-L$019no_data:
+L$020no_data:
         pop     edi
         pop     esi
         ret
@@ -325,6 +337,35 @@ L$_OPENSSL_instrument_bus_begin:
         push    esi
         push    edi
         mov     eax,0
+        lea     edx,[_OPENSSL_ia32cap_P]
+        bt      DWORD [edx],4
+        jnc     NEAR L$022nogo
+        bt      DWORD [edx],19
+        jnc     NEAR L$022nogo
+        mov     edi,DWORD [20+esp]
+        mov     ecx,DWORD [24+esp]
+        rdtsc
+        mov     esi,eax
+        mov     ebx,0
+        clflush [edi]
+db      240
+        add     DWORD [edi],ebx
+        jmp     NEAR L$023loop
+align   16
+L$023loop:
+        rdtsc
+        mov     edx,eax
+        sub     eax,esi
+        mov     esi,edx
+        mov     ebx,eax
+        clflush [edi]
+db      240
+        add     DWORD [edi],eax
+        lea     edi,[4+edi]
+        sub     ecx,1
+        jnz     NEAR L$023loop
+        mov     eax,DWORD [24+esp]
+L$022nogo:
         pop     edi
         pop     esi
         pop     ebx
@@ -339,6 +380,48 @@ L$_OPENSSL_instrument_bus2_begin:
         push    esi
         push    edi
         mov     eax,0
+        lea     edx,[_OPENSSL_ia32cap_P]
+        bt      DWORD [edx],4
+        jnc     NEAR L$024nogo
+        bt      DWORD [edx],19
+        jnc     NEAR L$024nogo
+        mov     edi,DWORD [20+esp]
+        mov     ecx,DWORD [24+esp]
+        mov     ebp,DWORD [28+esp]
+        rdtsc
+        mov     esi,eax
+        mov     ebx,0
+        clflush [edi]
+db      240
+        add     DWORD [edi],ebx
+        rdtsc
+        mov     edx,eax
+        sub     eax,esi
+        mov     esi,edx
+        mov     ebx,eax
+        jmp     NEAR L$025loop2
+align   16
+L$025loop2:
+        clflush [edi]
+db      240
+        add     DWORD [edi],eax
+        sub     ebp,1
+        jz      NEAR L$026done2
+        rdtsc
+        mov     edx,eax
+        sub     eax,esi
+        mov     esi,edx
+        cmp     eax,ebx
+        mov     ebx,eax
+        mov     edx,0
+        setne   dl
+        sub     ecx,edx
+        lea     edi,[edx*4+edi]
+        jnz     NEAR L$025loop2
+L$026done2:
+        mov     eax,DWORD [24+esp]
+        sub     eax,ecx
+L$024nogo:
         pop     edi
         pop     esi
         pop     ebx
@@ -354,33 +437,33 @@ L$_OPENSSL_ia32_rdrand_bytes_begin:
         mov     edi,DWORD [12+esp]
         mov     ebx,DWORD [16+esp]
         cmp     ebx,0
-        je      NEAR L$021done
+        je      NEAR L$027done
         mov     ecx,8
-L$022loop:
+L$028loop:
 db      15,199,242
-        jc      NEAR L$023break
-        loop    L$022loop
-        jmp     NEAR L$021done
+        jc      NEAR L$029break
+        loop    L$028loop
+        jmp     NEAR L$027done
 align   16
-L$023break:
+L$029break:
         cmp     ebx,4
-        jb      NEAR L$024tail
+        jb      NEAR L$030tail
         mov     DWORD [edi],edx
         lea     edi,[4+edi]
         add     eax,4
         sub     ebx,4
-        jz      NEAR L$021done
+        jz      NEAR L$027done
         mov     ecx,8
-        jmp     NEAR L$022loop
+        jmp     NEAR L$028loop
 align   16
-L$024tail:
+L$030tail:
         mov     BYTE [edi],dl
         lea     edi,[1+edi]
         inc     eax
         shr     edx,8
         dec     ebx
-        jnz     NEAR L$024tail
-L$021done:
+        jnz     NEAR L$030tail
+L$027done:
         xor     edx,edx
         pop     ebx
         pop     edi
@@ -395,33 +478,33 @@ L$_OPENSSL_ia32_rdseed_bytes_begin:
         mov     edi,DWORD [12+esp]
         mov     ebx,DWORD [16+esp]
         cmp     ebx,0
-        je      NEAR L$025done
+        je      NEAR L$031done
         mov     ecx,8
-L$026loop:
+L$032loop:
 db      15,199,250
-        jc      NEAR L$027break
-        loop    L$026loop
-        jmp     NEAR L$025done
+        jc      NEAR L$033break
+        loop    L$032loop
+        jmp     NEAR L$031done
 align   16
-L$027break:
+L$033break:
         cmp     ebx,4
-        jb      NEAR L$028tail
+        jb      NEAR L$034tail
         mov     DWORD [edi],edx
         lea     edi,[4+edi]
         add     eax,4
         sub     ebx,4
-        jz      NEAR L$025done
+        jz      NEAR L$031done
         mov     ecx,8
-        jmp     NEAR L$026loop
+        jmp     NEAR L$032loop
 align   16
-L$028tail:
+L$034tail:
         mov     BYTE [edi],dl
         lea     edi,[1+edi]
         inc     eax
         shr     edx,8
         dec     ebx
-        jnz     NEAR L$028tail
-L$025done:
+        jnz     NEAR L$034tail
+L$031done:
         xor     edx,edx
         pop     ebx
         pop     edi
