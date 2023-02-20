@@ -636,6 +636,7 @@
   rand_pool.c
 #  SslNull.c
 #  EcSm2Null.c
+  OpensslProv/uefiprov.c
 
 [Packages]
   MdePkg/MdePkg.dec
