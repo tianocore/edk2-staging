@@ -80,10 +80,10 @@ SSL_CTX_new (
   return NULL;
 }
 
-unsigned long
+UINT64
 SSL_CTX_set_options (
   SSL_CTX        *ctx,
-  unsigned long  op
+  UINT64  op
   )
 {
   ASSERT (FALSE);
