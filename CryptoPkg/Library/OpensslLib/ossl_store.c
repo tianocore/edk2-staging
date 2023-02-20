@@ -155,3 +155,19 @@ OSSL_STORE_SEARCH_free (
   )
 {
 }
+
+int
+ossl_store_loader_store_remove_all_provided (
+  const OSSL_PROVIDER *prov
+  )
+{
+  return -1;
+}
+
+int
+ossl_store_loader_store_cache_flush (
+  OSSL_LIB_CTX *libctx
+  )
+{
+  return -1;
+}
