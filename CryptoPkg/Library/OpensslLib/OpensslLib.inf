@@ -581,7 +581,7 @@
   rand_pool.c
 #  SslNull.c
   EcSm2Null.c
-  OpensslProv/uefiprov.c
+  OpensslStub/uefiprov.c
   OpensslGen/der_digests_gen.c
   OpensslGen/der_rsa_gen.c
   OpensslGen/der_wrap_gen.c
