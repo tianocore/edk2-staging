@@ -809,9 +809,9 @@ Pkcs7Verify (
   //
   // Register & Initialize necessary digest algorithms for PKCS#7 Handling
   //
-  if (EVP_add_digest (EVP_md5 ()) == 0) {
-    return FALSE;
-  }
+  // if (EVP_add_digest (EVP_md5 ()) == 0) {
+  //   return FALSE;
+  // }
 
   if (EVP_add_digest (EVP_sha1 ()) == 0) {
     return FALSE;
