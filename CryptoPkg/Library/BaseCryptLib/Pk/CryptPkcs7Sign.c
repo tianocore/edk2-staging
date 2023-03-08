@@ -92,9 +92,9 @@ Pkcs7Sign (
   //
   // Register & Initialize necessary digest algorithms and PRNG for PKCS#7 Handling
   //
-  if (EVP_add_digest (EVP_md5 ()) == 0) {
-    goto _Exit;
-  }
+  // if (EVP_add_digest (EVP_md5 ()) == 0) {
+  //   goto _Exit;
+  // }
 
   if (EVP_add_digest (EVP_sha1 ()) == 0) {
     goto _Exit;
