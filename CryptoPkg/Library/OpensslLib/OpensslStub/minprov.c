@@ -180,13 +180,6 @@ static const OSSL_ALGORITHM deflt_keymgmt[] = {
     { NULL, NULL, NULL }
 };
 
-static const OSSL_ALGORITHM deflt_decoder[] = {
-#define DECODER_PROVIDER "default"
-#include "decoders.inc"
-    { NULL, NULL, NULL }
-#undef DECODER_PROVIDER
-};
-
 static const OSSL_ALGORITHM *deflt_query(void *provctx, int operation_id,
                                          int *no_cache)
 {
