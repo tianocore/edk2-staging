@@ -1,0 +1,74 @@
+## @file
+#  Cryptographic Library Instance for Common module.
+#
+#  Caution: This module requires additional review when modified.
+#  This library will have external input - signature.
+#  This external input must be validated carefully to avoid security issues such as
+#  buffer overflow or integer overflow.
+#
+#  Copyright (c) 2010 - 2020, Intel Corporation. All rights reserved.<BR>
+#  SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = CommonCryptLib
+  MODULE_UNI_FILE                = CommonCryptLib.uni
+  FILE_GUID                      = 028080a3-8958-4a62-a1a8-0fa1da162007
+  MODULE_TYPE                    = BASE
+  VERSION_STRING                 = 1.0
+  PI_SPECIFICATION_VERSION       = 0x0001000A
+  LIBRARY_CLASS                  = BaseCryptLib
+
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = IA32 X64 ARM AARCH64
+#
+
+[Sources]
+  InternalCryptLib.h
+  Cipher/CryptAeadAesCcm.c
+  Cipher/CryptAeadAesGcm.c
+  Cipher/CryptAeadChaCha20Poly1305.c
+  Cipher/CryptAeadSm4Gcm.c
+  Hash/CryptSha256.c
+  Hash/CryptSha512.c
+  Hash/CryptSha3.c
+  Hash/CryptSm3.c
+  Hmac/CryptHmac.c
+  Kdf/CryptHkdf.c
+  Pem/CryptPem.c
+  Pk/CryptDh.c
+  Pk/CryptEc.c
+
+  Pk/CryptRsaBasic.c
+  Pk/CryptRsaExt.c
+  Pk/CryptX509.c
+  Rand/CryptRand.c
+
+  SysCall/CrtWrapper.c
+  SysCall/ConstantTimeClock.c
+  SysCall/BaseMemAllocation.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  CryptoPkg/CryptoPkg.dec
+
+[LibraryClasses]
+  BaseLib
+  IoLib
+  BaseMemoryLib
+  MemoryAllocationLib
+  DebugLib
+  MbedTlsLib
+  PrintLib
+  IntrinsicLib
+  RngLib
+
+#
+# Remove these [BuildOptions] after this library is cleaned up
+#
+[BuildOptions]
+  *_*_*_CC_FLAGS = /GL-
