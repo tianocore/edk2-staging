@@ -25,6 +25,9 @@
   Library/OpensslLib/OpensslStub
   Library/OpensslLib/openssl/include
   Library/OpensslLib/OpensslGen
+  Library/MbedTlsLib/Include
+  Library/MbedTlsLib/mbedtls/include
+  Library/MbedTlsLib/mbedtls/include/mbedtls
 
 [LibraryClasses]
   ##  @libraryclass  Provides basic library functions for cryptographic primitives.
