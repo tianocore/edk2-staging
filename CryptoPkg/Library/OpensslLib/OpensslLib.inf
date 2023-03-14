@@ -116,7 +116,7 @@
   $(OPENSSL_PATH)/providers/common/provider_seeding.c
   $(OPENSSL_PATH)/providers/common/digest_to_nid.c
   $(OPENSSL_PATH)/providers/common/capabilities.c
-  $(OPENSSL_PATH)/providers/common/bio_prov.c
+  # $(OPENSSL_PATH)/providers/common/bio_prov.c
   $(OPENSSL_PATH)/providers/common/der/der_rsa_sig.c
   $(OPENSSL_PATH)/providers/prov_running.c
   $(OPENSSL_PATH)/providers/nullprov.c

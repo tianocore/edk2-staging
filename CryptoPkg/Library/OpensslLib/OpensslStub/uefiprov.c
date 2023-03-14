@@ -266,10 +266,8 @@ int ossl_uefi_provider_init(const OSSL_CORE_HANDLE *handle,
                                void **provctx)
 {
     OSSL_FUNC_core_get_libctx_fn *c_get_libctx = NULL;
-    BIO_METHOD *corebiometh;
 
-    if (!ossl_prov_bio_from_dispatch(in)
-            || !ossl_prov_seeding_from_dispatch(in))
+    if (!ossl_prov_seeding_from_dispatch(in))
         return 0;
     for (; in->function_id != 0; in++) {
         switch (in->function_id) {
@@ -299,8 +297,7 @@ int ossl_uefi_provider_init(const OSSL_CORE_HANDLE *handle,
      * This only works for built-in providers.  Most providers should
      * create their own library context.
      */
-    if ((*provctx = ossl_prov_ctx_new()) == NULL
-            || (corebiometh = ossl_bio_prov_init_bio_method()) == NULL) {
+    if ((*provctx = ossl_prov_ctx_new()) == NULL) {
         ossl_prov_ctx_free(*provctx);
         *provctx = NULL;
         return 0;
@@ -308,7 +305,6 @@ int ossl_uefi_provider_init(const OSSL_CORE_HANDLE *handle,
     ossl_prov_ctx_set0_libctx(*provctx,
                                        (OSSL_LIB_CTX *)c_get_libctx(handle));
     ossl_prov_ctx_set0_handle(*provctx, handle);
-    ossl_prov_ctx_set0_core_bio_method(*provctx, corebiometh);
 
     *out = deflt_dispatch_table;
     ossl_prov_cache_exported_algorithms(deflt_ciphers, exported_ciphers);
