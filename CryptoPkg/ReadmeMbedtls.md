@@ -1,21 +1,18 @@
 # CryptoMbedTlsPkg(enable mbedtls for EDKII POC)
 
-## background
+## Overview
 This POC is to explore mbedtls as a smaller alternative to OpenSSL.
 
-## MbedTLS version
-Depend on Mbedtls 3.3.0.
+### MbedTLS and OpenSSL CryptoPkg size compare
 
-## MbedTLS and OpenSSL CryptoPkg size compare
+|  Driver  | OpenSSL  |  MbedTLS |
+|  ----  | ----  | ----  |
+|  PEI  | 387Kb  | 162Kb |
+|  PeiPreMem  | 31Kb  | 58Kb |
+|  DXE  | 804Kb  | 457Kb  |
+|  SMM  | 558Kb  | 444Kb  |
 
-|  Driver  | OpenSSL  | OpenSSL(no SM3 and Pkcs7) | MbedTLS |
-|  ----  | ----  | ----  | ----  |
-|  PEI  | 387Kb  | 387kb  | 162kb |
-|  PeiPreMem  | 31Kb  | WIP  | WIP |
-|  DXE  | 804Kb  | WIP  | WIP |
-|  SMM  | 558Kb  | WIP  | WIP |
-
-## Current enabling status
+### Current enabling status
 
 |  FILE  | Build Pass  | Test Pass |
 |  ----  | ----  | ----  |
@@ -33,20 +30,19 @@ Depend on Mbedtls 3.3.0.
 | Pem/CryptPem.c  | YES | YES |
 | Pk/CryptAuthenticode.c  | WIP | WIP |
 | Pk/CryptDh.c  | YES | YES |
-| Pk/CryptEc.c  | WIP | WIP |
+| Pk/CryptEc.c  | YES | YES |
 | Pk/CryptPkcs1Oaep.c  | YES | YES |
 | Pk/CryptPkcs5Pbkdf2.c  | YES | YES |
 | Pk/CryptPkcs7Sign.c  | YES | YES |
-| Pk/CryptPkcs7VerifyBase.c  | YES | WIP |
-| Pk/CryptPkcs7VerifyCommon.c  | YES | WIP |
+| Pk/CryptPkcs7VerifyBase.c  | YES | YES |
+| Pk/CryptPkcs7VerifyCommon.c  | YES | YES |
 | Pk/CryptPkcs7VerifyEku.c  | YES | WIP |
 | Pk/CryptPkcs7VerifyEkuRuntime.c  | YES | YES |
 | Pk/CryptPkcs7VerifyRuntime.c  | YES | YES |
 | Pk/CryptRsaBasic.c  | YES | YES |
 | Pk/CryptRsaExt.c  | YES | YES |
-| Pk/CryptTs.c  | YES | YES |
-| Pk/CryptX509.c  | WIP | WIP |
-
+| Pk/CryptTs.c  | YES | WIP |
+| Pk/CryptX509.c  | YES | YES |
 
 ## Build command
 
@@ -54,3 +50,24 @@ Depend on Mbedtls 3.3.0.
    edksetup.bat Rebuild VS2019
    build -a X64 -p CryptoPkg/CryptoPkgMbedTls.dsc -DCRYPTO_IMG_TYPE=PEI_DEFAULT -t VS2019
    ```
+## Risk
+
+|  Risk  | Soluton  | Time required |
+|  ----  | ----  | ----  |
+| SM3 and SHA3 are missing in Mbedtls  | Wait Mbedtls enable SM3 and SHA3 | Unkown |
+| Following API implementation is WIP  | Implement API | 2 weeks |
+
+### API need to complete
+|  API  | Time required |
+|  ----  | ----  |
+| VerifyEKUsInPkcs7Signature  | 3 days |
+| AuthenticodeVerify  | 3 days |
+| EcPointSetCompressedCoordinates  | 2 days |
+| ImageTimestampVerify  | 3 days |
+
+## Timeline
+Target for 2023 Q1
+## Owner
+The branch owner: Wenxing Hou <wenxing.hou@intel.com>  
+## MbedTls Version
+Depend on Mbedtls 3.3.0.
