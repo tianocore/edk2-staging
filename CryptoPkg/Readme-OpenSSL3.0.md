@@ -21,14 +21,14 @@ Will update latest result here (Build based on Intel platform).
 |-----------------|------------|------------|------------|  
 |CryptoPei        |   386      |    398     |    3.1%    |  
 |CryptoPeiPreMem  |   31       |    31      |    0%      |  
-|CryptoDxe        |   804      |    917     |    14%     |  
-|CryptoSmm        |   558      |    636     |    14%     |  
+|CryptoDxe        |   804      |    886     |    10.1%   |  
+|CryptoSmm        |   558      |    604     |    8.2%    |  
 
 | LZMA Compressed |   1.1.1    |    3.0     |   percent  |  
 |-----------------|------------|------------|------------|  
-|CryptoDxe        |   311      |    360     |    15%     |  
-|CryptoSmm        |   211      |    248     |    17%     |  
-|FV (Dxe+Smm)     |   357      |    423     |    18%     |  
+|CryptoDxe        |   311      |    350     |    12.2%   |  
+|CryptoSmm        |   211      |    238     |    12.8%   |  
+|FV (Dxe+Smm)     |   357      |    412     |    15.4%   |  
 
 ## Limitation
 
@@ -64,11 +64,10 @@ MD5 --> PEM --> CryptoPem(Ec\RsaGetPrivateKeyFromPem): used in Pkcs7Sign and Uni
 
 ### 3.Disable algorithm auto init
 Add -DOPENSSL_NO_AUTOALGINIT will disable OpenSsl from adding all digests and ciphers at initialization time.  
-Can reduce the size by ~20KB.  
+Can reduce the size by 27KB.  
 #### Risk:
 OPENSSL_NO_AUTOALGINIT Will break PKCS7, Authenticode and Ts due to OpenSsl bug:  
 https://github.com/openssl/openssl/issues/20221  
-Currently only available when compiling PEI.  
 
 ### 4.Cut Name/NID mapping
 There are some unreasonably huge arrays(~110KB) in the obj_dat.h and obj_xref.h, like:  
@@ -79,6 +78,7 @@ Removing unnecessary data can reduce the size by ~50KB.
 1. DXE and SMM use more functions than PEI, so can only reduce fewer size.  
 2. Need a detailed script or readme. The best way is to automatically cut through openssl config, raised issue in community:  
 https://github.com/openssl/openssl/issues/20260  
+3. Will break Authticode API if applied to DXE SMM.  
 
 ### 5.Hash API downgrade (for PeiPreMem)
 High level API (EVP) will introduce provider and NID mapping which can increase size extremely.  
@@ -97,8 +97,10 @@ This will become workaround if openssl doesn't accept such changes.
 https://github.com/liyi77/openssl/commits/openssl-3.0-POC  
 Such as:  
 remove x509 print function - 7KB  
-remove unused ras ameth - 7KB  
+remove unused rsa ameth - 7KB  
 remove unused x509 extentions - 19KB  
+remove unused bio enc - 3KB  
+remove unused bio prov - 4KB  
 ...
 #### Risk:
 This is workaround.
