@@ -12,13 +12,6 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <mbedtls/dhm.h>
 #include <mbedtls/bignum.h>
 
-static const unsigned char mffehde2048_P[] = MBEDTLS_DHM_RFC7919_FFDHE2048_P_BIN;
-static const unsigned char mffehde3072_P[] = MBEDTLS_DHM_RFC7919_FFDHE3072_P_BIN;
-static const unsigned char mffehde4096_P[] = MBEDTLS_DHM_RFC7919_FFDHE4096_P_BIN;
-static const unsigned char mffehde2048_G[] = MBEDTLS_DHM_RFC7919_FFDHE2048_G_BIN;
-static const unsigned char mffehde3072_G[] = MBEDTLS_DHM_RFC7919_FFDHE3072_G_BIN;
-static const unsigned char mffehde4096_G[] = MBEDTLS_DHM_RFC7919_FFDHE4096_G_BIN;
-
 /**
   Allocates and Initializes one Diffie-Hellman Context for subsequent use.
 
@@ -42,72 +35,6 @@ DhNew (
   mbedtls_dhm_init (ctx);
 
   return ctx;
-}
-
-/**
-  Allocates and Initializes one Diffie-Hellman Context for subsequent use
-  with the NID.
-
-  @param Nid cipher NID
-
-  @return  Pointer to the Diffie-Hellman Context that has been initialized.
-           If the allocations fails, DhNew() returns NULL.
-
-**/
-VOID *
-EFIAPI
-DhNewByNid (
-  IN UINTN  Nid
-  )
-{
-  mbedtls_dhm_context *ctx;
-  INT32               Ret;
-
-  ctx = AllocateZeroPool (sizeof(mbedtls_dhm_context));
-  if (ctx == NULL) {
-    return NULL;
-  }
-
-  mbedtls_dhm_init (ctx);
-
-  switch (Nid) {
-  case CRYPTO_NID_FFDHE2048:
-    Ret = mbedtls_mpi_read_binary (&ctx->P, mffehde2048_P, sizeof(mffehde2048_P));
-    if (Ret != 0) {
-      goto Error;
-    }
-    Ret = mbedtls_mpi_read_binary (&ctx->G, mffehde2048_G, sizeof(mffehde2048_G));
-    if (Ret != 0) {
-      goto Error;
-    }
-    break;
-  case CRYPTO_NID_FFDHE3072:
-    Ret = mbedtls_mpi_read_binary (&ctx->P, mffehde3072_P, sizeof(mffehde3072_P));
-    if (Ret != 0) {
-      goto Error;
-    }
-    Ret = mbedtls_mpi_read_binary (&ctx->G, mffehde3072_G, sizeof(mffehde3072_G));
-    if (Ret != 0) {
-      goto Error;
-    }
-    break;
-  case CRYPTO_NID_FFDHE4096:
-    Ret = mbedtls_mpi_read_binary (&ctx->P, mffehde4096_P, sizeof(mffehde4096_P));
-    if (Ret != 0) {
-      goto Error;
-    }
-    Ret = mbedtls_mpi_read_binary (&ctx->G, mffehde4096_G, sizeof(mffehde4096_G));
-    if (Ret != 0) {
-      goto Error;
-    }
-    break;
-  default:
-    goto Error;
-  }
-  return ctx;
-Error:
-  FreePool (ctx);
-  return NULL;
 }
 
 /**
