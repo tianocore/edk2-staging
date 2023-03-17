@@ -6,9 +6,9 @@ Need to upgrade OpenSsl to 3.0.X before 1.1.1 support stopping.
 Initial build with OpenSSL 3.0.X showed significant size increase versus OpenSSL 1.1.1, details as (Build based on Intel platform):  
 |Driver           |   1.1.1    |    3.0     |   percent  |  
 |-----------------|------------|------------|------------|
-|CryptoDxeFull    |   1014     |    1578    |     57%    |  
 |CryptoPei        |   386      |    794     |    106%    |  
 |CryptoPeiPreMem  |   31       |    417     |    1245%   |  
+|CryptoDxeFull    |   1014     |    1578    |     57%    |  
 |CryptoDxe        |   804      |    1278    |     59%    |  
 |CryptoSmm        |   558      |    986     |     77%    |  
 
@@ -21,6 +21,7 @@ Will update latest result here (Build based on Intel platform).
 |-----------------|------------|------------|------------|  
 |CryptoPei        |   386      |    398     |    3.1%    |  
 |CryptoPeiPreMem  |   31       |    31      |    0%      |  
+|CryptoDxeFull    |   1014     |    1031    |    1.7%    |  
 |CryptoDxe        |   804      |    886     |    10.1%   |  
 |CryptoSmm        |   558      |    604     |    8.2%    |  
 
@@ -34,7 +35,7 @@ Will update latest result here (Build based on Intel platform).
 
 1. This package is only the sample code to show the concept. It does not have a full validation and meet the production quality yet.  
 Any codes including the API definition, the library and the drivers are subject to change.  
-2. Only OpensslLib.inf(For DXE SMM) and OpensslLibMin.inf(For PEI) passed Crypto Unit Test, no other tests.  
+2. Only passed Crypto Unit Test, no other tests.  
 3. There are some changes that require a more elegant implementation or upstream to openssl.  
 For convenience, openssl submodule currently uses Owner's private branch:  
 https://github.com/liyi77/openssl/tree/openssl-3.0-POC  
@@ -78,7 +79,6 @@ Removing unnecessary data can reduce the size by ~50KB.
 1. DXE and SMM use more functions than PEI, so can only reduce fewer size.  
 2. Need a detailed script or readme. The best way is to automatically cut through openssl config, raised issue in community:  
 https://github.com/openssl/openssl/issues/20260  
-3. Will break Authticode API if applied to DXE SMM.  
 
 ### 5.Hash API downgrade (for PeiPreMem)
 High level API (EVP) will introduce provider and NID mapping which can increase size extremely.  
