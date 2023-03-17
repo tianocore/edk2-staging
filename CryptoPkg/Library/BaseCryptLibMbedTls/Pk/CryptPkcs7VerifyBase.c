@@ -7,6 +7,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 **/
 
 #include "InternalCryptLib.h"
+#include <mbedtls/pkcs7.h>
 
 /**
   Extracts the attached content from a PKCS#7 signed data if existed. The input signed
@@ -38,12 +39,13 @@ Pkcs7GetAttachedContent (
   )
 {
   BOOLEAN            Status;
-  PKCS7              *Pkcs7;
   UINT8              *SignedData;
   UINTN              SignedDataSize;
   BOOLEAN            Wrapped;
-  CONST UINT8        *Temp;
-  ASN1_OCTET_STRING  *OctStr;
+  INTN               Ret;
+  mbedtls_pkcs7      Pkcs7;
+
+  mbedtls_pkcs7_init(&Pkcs7);
 
   //
   // Check input parameter.
@@ -53,9 +55,7 @@ Pkcs7GetAttachedContent (
   }
 
   *Content   = NULL;
-  Pkcs7      = NULL;
   SignedData = NULL;
-  OctStr     = NULL;
 
   Status = WrapPkcs7Data (P7Data, P7Length, &Wrapped, &SignedData, &SignedDataSize);
   if (!Status || (SignedDataSize > INT_MAX)) {
@@ -64,26 +64,23 @@ Pkcs7GetAttachedContent (
 
   Status = FALSE;
 
-  //
-  // Decoding PKCS#7 SignedData
-  //
-  Temp  = SignedData;
-  Pkcs7 = d2i_PKCS7 (NULL, (const unsigned char **)&Temp, (int)SignedDataSize);
-  if (Pkcs7 == NULL) {
-    goto _Exit;
-  }
+  Ret = mbedtls_pkcs7_parse_der(&Pkcs7, SignedData, (INT32)SignedDataSize);
 
   //
   // The type of Pkcs7 must be signedData
   //
-  if (!PKCS7_type_is_signed (Pkcs7)) {
+  if (Ret != MBEDTLS_PKCS7_SIGNED_DATA) {
     goto _Exit;
   }
 
   //
   // Check for detached or attached content
   //
-  if (PKCS7_get_detached (Pkcs7)) {
+
+  mbedtls_pkcs7_data *MbedtlsContent;
+  MbedtlsContent = &(Pkcs7.signed_data.content);
+
+  if (MbedtlsContent == NULL) {
     //
     // No Content supplied for PKCS7 detached signedData
     //
@@ -93,15 +90,14 @@ Pkcs7GetAttachedContent (
     //
     // Retrieve the attached content in PKCS7 signedData
     //
-    OctStr = Pkcs7->d.sign->contents->d.data;
-    if ((OctStr->length > 0) && (OctStr->data != NULL)) {
-      *ContentSize = OctStr->length;
+    if ((MbedtlsContent->data.len > 0) && (MbedtlsContent->data.p != NULL)) {
+      *ContentSize = MbedtlsContent->data.len;
       *Content     = AllocatePool (*ContentSize);
       if (*Content == NULL) {
         *ContentSize = 0;
         goto _Exit;
       }
-      CopyMem (*Content, OctStr->data, *ContentSize);
+      CopyMem (*Content, MbedtlsContent->data.p, *ContentSize);
     }
   }
   Status = TRUE;
@@ -110,11 +106,7 @@ _Exit:
   //
   // Release Resources
   //
-  PKCS7_free (Pkcs7);
-
-  if (!Wrapped) {
-    OPENSSL_free (SignedData);
-  }
+  mbedtls_pkcs7_free (&Pkcs7);
 
   return Status;
 }

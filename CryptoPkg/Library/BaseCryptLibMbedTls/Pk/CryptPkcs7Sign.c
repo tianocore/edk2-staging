@@ -388,7 +388,8 @@ Pkcs7Sign (
   mbedtls_pk_init (&Pkey);
   Ret = mbedtls_pk_parse_key (
     &Pkey, NewPrivateKey, PrivateKeySize,
-    KeyPassword, KeyPassword == NULL ? 0 : AsciiStrLen (KeyPassword)
+    KeyPassword, KeyPassword == NULL ? 0 : AsciiStrLen (KeyPassword),
+    NULL, NULL
   );
   if (Ret != 0) {
     Status = FALSE;
@@ -406,7 +407,7 @@ Pkcs7Sign (
   ZeroMem (Signature, MAX_SIGNATURE_SIZE);
   Ret = mbedtls_pk_sign (
     &Pkey, MBEDTLS_MD_SHA256, HashValue, SHA256_DIGEST_SIZE,
-    Signature, &SignatureLen, myrand, NULL);
+    Signature, MAX_SIGNATURE_SIZE, &SignatureLen, myrand, NULL);
   if (Ret != 0) {
     Status = FALSE;
     goto Cleanup;

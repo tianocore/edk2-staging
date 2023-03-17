@@ -656,7 +656,7 @@ Pkcs7Verify (
 
   Status = WrapPkcs7Data (P7Data, P7Length, &Wrapped, &WrapData, &WrapDataSize);
 
-  if (Status) {
+  if (!Status) {
     Ret = 0;
     Status = FALSE;
   } else {
@@ -741,5 +741,339 @@ Pkcs7GetSigners (
   OUT UINTN        *CertLength
   )
 {
-return FALSE;
+  BOOLEAN      Status;
+  UINT8        *SignedData;
+  UINTN        SignedDataSize;
+  BOOLEAN      Wrapped;
+  INTN               Ret;
+  mbedtls_pkcs7      Pkcs7;
+  mbedtls_x509_crt   *Cert;
+  UINT8  Index;
+  UINT8  *CertBuf;
+  UINT8  *OldBuf;
+  UINTN  BufferSize;
+  UINTN  OldSize;
+  UINT8  *SingleCert;
+  UINTN  SingleCertSize;
+
+
+  mbedtls_pkcs7_init(&Pkcs7);
+
+  //
+  // Check input parameter.
+  //
+  if ((P7Data == NULL) || (CertStack == NULL) || (StackLength == NULL) ||
+      (TrustedCert == NULL) || (CertLength == NULL) || (P7Length > INT_MAX))
+  {
+    return FALSE;
+  }
+
+  SignedData = NULL;
+
+  Status = WrapPkcs7Data (P7Data, P7Length, &Wrapped, &SignedData, &SignedDataSize);
+  if (!Status || (SignedDataSize > INT_MAX)) {
+    goto _Exit;
+  }
+
+  Status = FALSE;
+
+  //
+  // Retrieve PKCS#7 Data (DER encoding)
+  //
+  if (SignedDataSize > INT_MAX) {
+    goto _Exit;
+  }
+
+  Ret = mbedtls_pkcs7_parse_der(&Pkcs7, SignedData, (INT32)SignedDataSize);
+
+  //
+  // The type of Pkcs7 must be signedData
+  //
+  if (Ret != MBEDTLS_PKCS7_SIGNED_DATA) {
+    goto _Exit;
+  }
+
+
+  Cert      = NULL;
+  CertBuf    = NULL;
+  OldBuf     = NULL;
+  SingleCert = NULL;
+
+
+  Cert = &Pkcs7.signed_data.certs;
+  if (Cert == NULL) {
+    goto _Exit;
+  }
+
+  //
+  // Convert CertStack to buffer in following format:
+  // UINT8  CertNumber;
+  // UINT32 Cert1Length;
+  // UINT8  Cert1[];
+  // UINT32 Cert2Length;
+  // UINT8  Cert2[];
+  // ...
+  // UINT32 CertnLength;
+  // UINT8  Certn[];
+  //
+  BufferSize = sizeof (UINT8);
+  OldSize    = BufferSize;
+
+  for (Index = 0; ; Index++) {
+
+    SingleCertSize = Cert->raw.len;
+
+    OldSize    = BufferSize;
+    OldBuf     = CertBuf;
+    BufferSize = OldSize + SingleCertSize + sizeof (UINT32);
+    CertBuf    = AllocateZeroPool (BufferSize);
+
+    if (CertBuf == NULL) {
+      goto _Exit;
+    }
+
+    if (OldBuf != NULL) {
+      CopyMem (CertBuf, OldBuf, OldSize);
+      FreePool (OldBuf);
+      OldBuf = NULL;
+    }
+
+    WriteUnaligned32 ((UINT32 *)(CertBuf + OldSize), (UINT32)SingleCertSize);
+    CopyMem (CertBuf + OldSize + sizeof (UINT32), SingleCert, SingleCertSize);
+
+    FreePool (SingleCert);
+    SingleCert = NULL;
+
+    if (Cert->next == NULL) {
+      break;
+    }
+  }
+
+  if (CertBuf != NULL) {
+    //
+    // Update CertNumber.
+    //
+    CertBuf[0] = Index;
+
+    *CertLength  = BufferSize - OldSize - sizeof (UINT32);
+    *TrustedCert = AllocateZeroPool (*CertLength);
+    if (*TrustedCert == NULL) {
+      goto _Exit;
+    }
+
+    CopyMem (*TrustedCert, CertBuf + OldSize + sizeof (UINT32), *CertLength);
+    *CertStack   = CertBuf;
+    *StackLength = BufferSize;
+    Status       = TRUE;
+  }
+
+_Exit:
+  //
+  // Release Resources
+  //
+  if (!Wrapped) {
+    FreePool (SignedData);
+  }
+
+  mbedtls_pkcs7_free (&Pkcs7);
+
+  if (SingleCert !=  NULL) {
+    FreePool (SingleCert);
+  }
+
+  if (!Status && (CertBuf != NULL)) {
+    FreePool (CertBuf);
+    *CertStack = NULL;
+  }
+
+  if (OldBuf != NULL) {
+    FreePool (OldBuf);
+  }
+
+  return Status;
+}
+
+/**
+  Retrieves all embedded certificates from PKCS#7 signed data as described in "PKCS #7:
+  Cryptographic Message Syntax Standard", and outputs two certificate lists chained and
+  unchained to the signer's certificates.
+  The input signed data could be wrapped in a ContentInfo structure.
+
+  @param[in]  P7Data            Pointer to the PKCS#7 message.
+  @param[in]  P7Length          Length of the PKCS#7 message in bytes.
+  @param[out] SignerChainCerts  Pointer to the certificates list chained to signer's
+                                certificate. It's caller's responsibility to free the buffer
+                                with Pkcs7FreeSigners().
+                                This data structure is EFI_CERT_STACK type.
+  @param[out] ChainLength       Length of the chained certificates list buffer in bytes.
+  @param[out] UnchainCerts      Pointer to the unchained certificates lists. It's caller's
+                                responsibility to free the buffer with Pkcs7FreeSigners().
+                                This data structure is EFI_CERT_STACK type.
+  @param[out] UnchainLength     Length of the unchained certificates list buffer in bytes.
+
+  @retval  TRUE         The operation is finished successfully.
+  @retval  FALSE        Error occurs during the operation.
+
+**/
+BOOLEAN
+EFIAPI
+Pkcs7GetCertificatesList (
+  IN  CONST UINT8  *P7Data,
+  IN  UINTN        P7Length,
+  OUT UINT8        **SignerChainCerts,
+  OUT UINTN        *ChainLength,
+  OUT UINT8        **UnchainCerts,
+  OUT UINTN        *UnchainLength
+  )
+{
+  BOOLEAN      Status;
+  UINT8        *SignedData;
+  UINTN        SignedDataSize;
+  BOOLEAN      Wrapped;
+  INTN               Ret;
+  mbedtls_pkcs7      Pkcs7;
+  mbedtls_x509_crt   *Cert;
+  UINT8  Index;
+  UINT8  *CertBuf;
+  UINT8  *OldBuf;
+  UINTN  BufferSize;
+  UINTN  OldSize;
+  UINT8  *SingleCert;
+  UINTN  SingleCertSize;
+
+
+  mbedtls_pkcs7_init(&Pkcs7);
+
+  //
+  // Check input parameter.
+  //
+  if ((P7Data == NULL) || (SignerChainCerts == NULL) || (ChainLength == NULL) ||
+      (UnchainCerts == NULL) || (UnchainLength == NULL) || (P7Length > INT_MAX))
+  {
+    return FALSE;
+  }
+
+  SignedData = NULL;
+
+  Status = WrapPkcs7Data (P7Data, P7Length, &Wrapped, &SignedData, &SignedDataSize);
+  if (!Status || (SignedDataSize > INT_MAX)) {
+    goto _Exit;
+  }
+
+  Status = FALSE;
+
+  //
+  // Retrieve PKCS#7 Data (DER encoding)
+  //
+  if (SignedDataSize > INT_MAX) {
+    goto _Exit;
+  }
+
+  Ret = mbedtls_pkcs7_parse_der(&Pkcs7, SignedData, (INT32)SignedDataSize);
+
+  //
+  // The type of Pkcs7 must be signedData
+  //
+  if (Ret != MBEDTLS_PKCS7_SIGNED_DATA) {
+    goto _Exit;
+  }
+
+
+  Cert      = NULL;
+  CertBuf    = NULL;
+  OldBuf     = NULL;
+  SingleCert = NULL;
+
+
+  Cert = &Pkcs7.signed_data.certs;
+  if (Cert == NULL) {
+    goto _Exit;
+  }
+
+  //
+  // Converts Chained and Untrusted Certificate to Certificate Buffer in following format:
+  //      UINT8  CertNumber;
+  //      UINT32 Cert1Length;
+  //      UINT8  Cert1[];
+  //      UINT32 Cert2Length;
+  //      UINT8  Cert2[];
+  //      ...
+  //      UINT32 CertnLength;
+  //      UINT8  Certn[];
+  //
+  BufferSize = sizeof (UINT8);
+  OldSize    = BufferSize;
+
+  for (Index = 0; ; Index++) {
+
+    SingleCertSize = Cert->raw.len;
+
+    OldSize    = BufferSize;
+    OldBuf     = CertBuf;
+    BufferSize = OldSize + SingleCertSize + sizeof (UINT32);
+    CertBuf    = AllocateZeroPool (BufferSize);
+
+    if (CertBuf == NULL) {
+      goto _Exit;
+    }
+
+    if (OldBuf != NULL) {
+      CopyMem (CertBuf, OldBuf, OldSize);
+      FreePool (OldBuf);
+      OldBuf = NULL;
+    }
+
+    WriteUnaligned32 ((UINT32 *)(CertBuf + OldSize), (UINT32)SingleCertSize);
+    CopyMem (CertBuf + OldSize + sizeof (UINT32), SingleCert, SingleCertSize);
+
+    FreePool (SingleCert);
+    SingleCert = NULL;
+
+    if (Cert->next == NULL) {
+      break;
+    }
+  }
+
+  if (CertBuf != NULL) {
+    //
+    // Update CertNumber.
+    //
+    CertBuf[0] = Index;
+
+    *UnchainLength  = BufferSize - OldSize - sizeof (UINT32);
+    *UnchainCerts = AllocateZeroPool (*UnchainLength);
+    if (*UnchainCerts == NULL) {
+      goto _Exit;
+    }
+
+    CopyMem (*UnchainCerts, CertBuf + OldSize + sizeof (UINT32), *UnchainLength);
+    *SignerChainCerts   = CertBuf;
+    *ChainLength = BufferSize;
+    Status       = TRUE;
+  }
+
+_Exit:
+  //
+  // Release Resources
+  //
+  if (!Wrapped) {
+    FreePool (SignedData);
+  }
+
+  mbedtls_pkcs7_free (&Pkcs7);
+
+  if (SingleCert !=  NULL) {
+    FreePool (SingleCert);
+  }
+
+  if (!Status && (CertBuf != NULL)) {
+    FreePool (CertBuf);
+    *SignerChainCerts = NULL;
+  }
+
+  if (OldBuf != NULL) {
+    FreePool (OldBuf);
+  }
+
+  return Status;
 }
