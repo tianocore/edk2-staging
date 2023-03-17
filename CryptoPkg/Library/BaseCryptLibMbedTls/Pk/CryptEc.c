@@ -15,6 +15,532 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <mbedtls/ecdsa.h>
 #include <mbedtls/bignum.h>
 
+// =====================================================================================
+//    Basic Elliptic Curve Primitives
+// =====================================================================================
+
+/**
+  Return the Nid of certain ECC curve.
+
+  @param[in]  CryptoNid   Identifying number for the ECC curve (Defined in
+                          BaseCryptLib.h).
+
+  @retval !=-1    On success.
+  @retval -1      ECC curve not supported.
+**/
+STATIC
+INT32
+CryptoNidToMbedtlsNid (
+  IN UINTN  CryptoNid
+  )
+{
+  INT32  Nid;
+
+  switch (CryptoNid) {
+    case CRYPTO_NID_SECP256R1:
+      Nid = MBEDTLS_ECP_DP_SECP256R1;
+      break;
+    case CRYPTO_NID_SECP384R1:
+      Nid = MBEDTLS_ECP_DP_SECP384R1;
+      break;
+    case CRYPTO_NID_SECP521R1:
+      Nid = MBEDTLS_ECP_DP_SECP521R1;
+      break;
+    default:
+      return -1;
+  }
+
+  return Nid;
+}
+
+/**
+  Initialize new opaque EcGroup object. This object represents an EC curve and
+  and is used for calculation within this group. This object should be freed
+  using EcGroupFree() function.
+
+  @param[in]  CryptoNid   Identifying number for the ECC curve (Defined in
+                          BaseCryptLib.h).
+
+  @retval EcGroup object  On success.
+  @retval NULL            On failure.
+**/
+VOID *
+EFIAPI
+EcGroupInit (
+  IN UINTN  CryptoNid
+  )
+{
+  INT32  Nid;
+  mbedtls_ecp_group *grp;
+
+  Nid = CryptoNidToMbedtlsNid (CryptoNid);
+
+  if (Nid < 0) {
+    return NULL;
+  }
+
+  grp = AllocateZeroPool (sizeof(mbedtls_ecp_group));
+  if (grp == NULL) {
+    return NULL;
+  }
+
+  mbedtls_ecp_group_init(grp);
+
+  mbedtls_ecp_group_load(grp, Nid);
+
+  return grp;
+}
+
+/**
+  Get EC curve parameters. While elliptic curve equation is Y^2 mod P = (X^3 + AX + B) Mod P.
+  This function will set the provided Big Number objects  to the corresponding
+  values. The caller needs to make sure all the "out" BigNumber parameters
+  are properly initialized.
+
+  @param[in]  EcGroup    EC group object.
+  @param[out] BnPrime    Group prime number.
+  @param[out] BnA        A coefficient.
+  @param[out] BnB        B coefficient..
+  @param[in]  BnCtx      BN context.
+
+  @retval TRUE          On success.
+  @retval FALSE         Otherwise.
+**/
+BOOLEAN
+EFIAPI
+EcGroupGetCurve (
+  IN CONST VOID  *EcGroup,
+  OUT VOID       *BnPrime,
+  OUT VOID       *BnA,
+  OUT VOID       *BnB,
+  IN VOID        *BnCtx
+  )
+{
+  mbedtls_ecp_group *grp;
+
+  grp = ( mbedtls_ecp_group *)EcGroup;
+
+  if (mbedtls_mpi_copy((mbedtls_mpi *)BnPrime, &grp->P) != 0) {
+    return FALSE;
+  }
+
+  if (BnA != NULL) {
+    if (mbedtls_mpi_copy((mbedtls_mpi *)BnA, &grp->A) != 0) {
+      return FALSE;
+    }
+  }
+
+  if (BnB != NULL) {
+    if (mbedtls_mpi_copy((mbedtls_mpi *)BnB, &grp->B) != 0) {
+      return FALSE;
+    }
+  }
+
+  return TRUE;
+}
+
+/**
+  Get EC group order.
+  This function will set the provided Big Number object to the corresponding
+  value. The caller needs to make sure that the "out" BigNumber parameter
+  is properly initialized.
+
+  @param[in]  EcGroup   EC group object.
+  @param[out] BnOrder   Group prime number.
+
+  @retval TRUE          On success.
+  @retval FALSE         Otherwise.
+**/
+BOOLEAN
+EFIAPI
+EcGroupGetOrder (
+  IN VOID   *EcGroup,
+  OUT VOID  *BnOrder
+  )
+{
+  mbedtls_ecp_group *grp;
+
+  grp = ( mbedtls_ecp_group *)EcGroup;
+
+  if (mbedtls_mpi_copy((mbedtls_mpi *)BnOrder, &grp->N) != 0) {
+    return FALSE;
+  }
+
+  return TRUE;
+}
+
+/**
+  Free previously allocated EC group object using EcGroupInit().
+
+  @param[in]  EcGroup   EC group object to free.
+**/
+VOID
+EFIAPI
+EcGroupFree (
+  IN VOID  *EcGroup
+  )
+{
+  mbedtls_ecp_group_free(EcGroup);
+}
+
+/**
+  Initialize new opaque EC Point object. This object represents an EC point
+  within the given EC group (curve).
+
+  @param[in]  EC Group, properly initialized using EcGroupInit().
+
+  @retval EC Point object  On success.
+  @retval NULL             On failure.
+**/
+VOID *
+EFIAPI
+EcPointInit (
+  IN CONST VOID  *EcGroup
+  )
+{
+  mbedtls_ecp_point *pt;
+
+  pt = AllocateZeroPool (sizeof(mbedtls_ecp_point));
+  if (pt == NULL) {
+    return NULL;
+  }
+
+  mbedtls_ecp_point_init (pt);
+
+  return pt;
+}
+
+/**
+  Free previously allocated EC Point object using EcPointInit().
+
+  @param[in]  EcPoint   EC Point to free.
+  @param[in]  Clear     TRUE iff the memory should be cleared.
+**/
+VOID
+EFIAPI
+EcPointDeInit (
+  IN VOID     *EcPoint,
+  IN BOOLEAN  Clear
+  )
+{
+  mbedtls_ecp_point_free(EcPoint);
+}
+
+/**
+  Get EC point affine (x,y) coordinates.
+  This function will set the provided Big Number objects to the corresponding
+  values. The caller needs to make sure all the "out" BigNumber parameters
+  are properly initialized.
+
+  @param[in]  EcGroup    EC group object.
+  @param[in]  EcPoint    EC point object.
+  @param[out] BnX        X coordinate.
+  @param[out] BnY        Y coordinate.
+  @param[in]  BnCtx      BN context, created with BigNumNewContext().
+
+  @retval TRUE          On success.
+  @retval FALSE         Otherwise.
+**/
+BOOLEAN
+EFIAPI
+EcPointGetAffineCoordinates (
+  IN CONST VOID  *EcGroup,
+  IN CONST VOID  *EcPoint,
+  OUT VOID       *BnX,
+  OUT VOID       *BnY,
+  IN VOID        *BnCtx
+  )
+{
+  mbedtls_ecp_point *pt;
+
+  pt = ( mbedtls_ecp_point *)EcPoint;
+
+  if (mbedtls_mpi_copy((mbedtls_mpi *)BnX, &pt->X) != 0) {
+    return FALSE;
+  }
+
+  if (mbedtls_mpi_copy((mbedtls_mpi *)BnY, &pt->Y) != 0) {
+    return FALSE;
+  }
+
+  return TRUE;
+}
+
+/**
+  Set EC point affine (x,y) coordinates.
+
+  @param[in]  EcGroup    EC group object.
+  @param[in]  EcPoint    EC point object.
+  @param[in]  BnX        X coordinate.
+  @param[in]  BnY        Y coordinate.
+  @param[in]  BnCtx      BN context, created with BigNumNewContext().
+
+  @retval TRUE          On success.
+  @retval FALSE         Otherwise.
+**/
+BOOLEAN
+EFIAPI
+EcPointSetAffineCoordinates (
+  IN CONST VOID  *EcGroup,
+  IN VOID        *EcPoint,
+  IN CONST VOID  *BnX,
+  IN CONST VOID  *BnY,
+  IN VOID        *BnCtx
+  )
+{
+  mbedtls_ecp_point *pt;
+
+  pt = ( mbedtls_ecp_point *)EcPoint;
+
+  if (mbedtls_mpi_copy(&pt->X, (mbedtls_mpi *)BnX) != 0) {
+    return FALSE;
+  }
+
+  if (mbedtls_mpi_copy(&pt->Y, (mbedtls_mpi *)BnY) != 0) {
+    return FALSE;
+  }
+
+  mbedtls_mpi_lset( &pt->Z , 1);
+
+  return TRUE;
+}
+
+/**
+  EC Point addition. EcPointResult = EcPointA + EcPointB.
+
+  @param[in]  EcGroup          EC group object.
+  @param[out] EcPointResult    EC point to hold the result. The point should
+                               be properly initialized.
+  @param[in]  EcPointA         EC Point.
+  @param[in]  EcPointB         EC Point.
+  @param[in]  BnCtx            BN context, created with BigNumNewContext().
+
+  @retval TRUE          On success.
+  @retval FALSE         Otherwise.
+**/
+BOOLEAN
+EFIAPI
+EcPointAdd (
+  IN CONST VOID  *EcGroup,
+  OUT VOID       *EcPointResult,
+  IN CONST VOID  *EcPointA,
+  IN CONST VOID  *EcPointB,
+  IN VOID        *BnCtx
+  )
+{
+  mbedtls_mpi *m;
+  mbedtls_mpi *n;
+
+  m = AllocateZeroPool(sizeof(mbedtls_mpi));
+  n = AllocateZeroPool(sizeof(mbedtls_mpi));
+
+  if(mbedtls_mpi_lset(m, 1) != 0 ) {
+    FreePool(m);
+    FreePool(n);
+     return FALSE;
+  }
+  if(mbedtls_mpi_lset(n, 1) != 0 ) {
+    FreePool(m);
+    FreePool(n);
+   return FALSE;
+  }
+
+  if (mbedtls_ecp_muladd((mbedtls_ecp_group *)EcGroup, (mbedtls_ecp_point *)EcPointResult, (const mbedtls_mpi *)m,
+      (const mbedtls_ecp_point *)EcPointA, (const mbedtls_mpi *)n, (const mbedtls_ecp_point *)EcPointB) != 0) {
+    return FALSE;
+  }
+
+  FreePool(m);
+  FreePool(n);
+
+  return TRUE;
+}
+
+/**
+  Variable EC point multiplication. EcPointResult = EcPoint * BnPScalar.
+
+  @param[in]  EcGroup          EC group object.
+  @param[out] EcPointResult    EC point to hold the result. The point should
+                               be properly initialized.
+  @param[in]  EcPoint          EC Point.
+  @param[in]  BnPScalar        P Scalar.
+  @param[in]  BnCtx            BN context, created with BigNumNewContext().
+
+  @retval TRUE          On success.
+  @retval FALSE         Otherwise.
+**/
+BOOLEAN
+EFIAPI
+EcPointMul (
+  IN CONST VOID  *EcGroup,
+  OUT VOID       *EcPointResult,
+  IN CONST VOID  *EcPoint,
+  IN CONST VOID  *BnPScalar,
+  IN VOID        *BnCtx
+  )
+{
+  return (mbedtls_ecp_mul((mbedtls_ecp_group *)EcGroup, EcPointResult, BnPScalar, EcPoint, myrand, NULL) == 0);
+}
+
+/**
+  Calculate the inverse of the supplied EC point.
+
+  @param[in]     EcGroup   EC group object.
+  @param[in,out] EcPoint   EC point to invert.
+  @param[in]     BnCtx     BN context, created with BigNumNewContext().
+
+  @retval TRUE          On success.
+  @retval FALSE         Otherwise.
+**/
+BOOLEAN
+EFIAPI
+EcPointInvert (
+  IN CONST VOID  *EcGroup,
+  IN OUT VOID    *EcPoint,
+  IN VOID        *BnCtx
+  )
+{
+  mbedtls_ecp_point *pt;
+  mbedtls_ecp_group *grp;
+  mbedtls_mpi InvBnY;
+
+  mbedtls_mpi_init(&InvBnY);
+
+  pt = ( mbedtls_ecp_point *)EcPoint;
+  grp = ( mbedtls_ecp_group *)EcGroup;
+
+  if (mbedtls_mpi_copy(&InvBnY, &pt->Y) != 0) {
+    mbedtls_mpi_free(&InvBnY);
+    return FALSE;
+  }
+
+  mbedtls_mpi P;
+
+  mbedtls_mpi_init(&P);
+
+  if (mbedtls_mpi_copy(&P, &grp->P) != 0) {
+    mbedtls_mpi_free(&P);
+    return FALSE;
+  }
+
+
+  InvBnY.s = 0 - InvBnY.s;
+
+  if (mbedtls_mpi_mod_mpi(&InvBnY, &InvBnY, &P) != 0) {
+    mbedtls_mpi_free(&InvBnY);
+    return FALSE;
+  }
+
+  if (mbedtls_mpi_copy(&pt->Y, &InvBnY) != 0) {
+    mbedtls_mpi_free(&InvBnY);
+    return FALSE;
+  }
+
+  mbedtls_mpi_free(&InvBnY);
+  return TRUE;
+}
+
+/**
+  Check if the supplied point is on EC curve.
+
+  @param[in]  EcGroup   EC group object.
+  @param[in]  EcPoint   EC point to check.
+  @param[in]  BnCtx     BN context, created with BigNumNewContext().
+
+  @retval TRUE          On curve.
+  @retval FALSE         Otherwise.
+**/
+BOOLEAN
+EFIAPI
+EcPointIsOnCurve (
+  IN CONST VOID  *EcGroup,
+  IN CONST VOID  *EcPoint,
+  IN VOID        *BnCtx
+  )
+{
+  return (mbedtls_ecp_check_pubkey(EcGroup, EcPoint) == 0);
+}
+
+/**
+  Check if the supplied point is at infinity.
+
+  @param[in]  EcGroup   EC group object.
+  @param[in]  EcPoint   EC point to check.
+
+  @retval TRUE          At infinity.
+  @retval FALSE         Otherwise.
+**/
+BOOLEAN
+EFIAPI
+EcPointIsAtInfinity (
+  IN CONST VOID  *EcGroup,
+  IN CONST VOID  *EcPoint
+  )
+{
+  mbedtls_ecp_point *pt;
+
+  pt = ( mbedtls_ecp_point *)EcPoint;
+
+  return (mbedtls_ecp_is_zero(pt) == 1);
+}
+
+/**
+  Check if EC points are equal.
+
+  @param[in]  EcGroup   EC group object.
+  @param[in]  EcPointA  EC point A.
+  @param[in]  EcPointB  EC point B.
+  @param[in]  BnCtx     BN context, created with BigNumNewContext().
+
+  @retval TRUE          A == B.
+  @retval FALSE         Otherwise.
+**/
+BOOLEAN
+EFIAPI
+EcPointEqual (
+  IN CONST VOID  *EcGroup,
+  IN CONST VOID  *EcPointA,
+  IN CONST VOID  *EcPointB,
+  IN VOID        *BnCtx
+  )
+{
+  return mbedtls_ecp_point_cmp (EcPointA, EcPointB) == 0;
+}
+
+/**
+  Set EC point compressed coordinates. Points can be described in terms of
+  their compressed coordinates. For a point (x, y), for any given value for x
+  such that the point is on the curve there will only ever be two possible
+  values for y. Therefore, a point can be set using this function where BnX is
+  the x coordinate and YBit is a value 0 or 1 to identify which of the two
+  possible values for y should be used.
+
+  @param[in]  EcGroup    EC group object.
+  @param[in]  EcPoint    EC Point.
+  @param[in]  BnX        X coordinate.
+  @param[in]  YBit       0 or 1 to identify which Y value is used.
+  @param[in]  BnCtx      BN context, created with BigNumNewContext().
+
+  @retval TRUE          On success.
+  @retval FALSE         Otherwise.
+**/
+BOOLEAN
+EFIAPI
+EcPointSetCompressedCoordinates (
+  IN CONST VOID  *EcGroup,
+  IN VOID        *EcPoint,
+  IN CONST VOID  *BnX,
+  IN UINT8       YBit,
+  IN VOID        *BnCtx
+  )
+{
+  return FALSE;
+}
+
+// =====================================================================================
+//    Elliptic Curve Diffie Hellman Primitives
+// =====================================================================================
+
 /**
   Allocates and Initializes one Elliptic Curve Context for subsequent use
   with the NID.
@@ -220,26 +746,108 @@ EcGetPubKey (
 }
 
 /**
-  Validates key components of EC context.
-  NOTE: This function performs integrity checks on all the EC key material, so
-        the EC key structure must contain all the private key data.
-
+  Computes exchanged common key.
+  Given peer's public key (X, Y), this function computes the exchanged common key,
+  based on its own context including value of curve parameter and random secret.
+  X is the first half of PeerPublic with size being PeerPublicSize / 2,
+  Y is the second half of PeerPublic with size being PeerPublicSize / 2.
+  If public key is compressed, the PeerPublic will only contain half key (X).
   If EcContext is NULL, then return FALSE.
-
-  @param[in]  EcContext  Pointer to EC context to check.
-
-  @retval  TRUE   EC key components are valid.
-  @retval  FALSE  EC key components are not valid.
-
+  If PeerPublic is NULL, then return FALSE.
+  If PeerPublicSize is 0, then return FALSE.
+  If Key is NULL, then return FALSE.
+  If KeySize is not large enough, then return FALSE.
+  For P-256, the PeerPublicSize is 64. First 32-byte is X, Second 32-byte is Y.
+  For P-384, the PeerPublicSize is 96. First 48-byte is X, Second 48-byte is Y.
+  For P-521, the PeerPublicSize is 132. First 66-byte is X, Second 66-byte is Y.
+  @param[in, out]  EcContext          Pointer to the EC context.
+  @param[in]       PeerPublic         Pointer to the peer's public X,Y.
+  @param[in]       PeerPublicSize     Size of peer's public X,Y in bytes.
+  @param[in]       CompressFlag       Flag of PeerPublic is compressed or not.
+  @param[out]      Key                Pointer to the buffer to receive generated key.
+  @param[in, out]  KeySize            On input, the size of Key buffer in bytes.
+                                      On output, the size of data returned in Key buffer in bytes.
+  @retval TRUE   EC exchanged key generation succeeded.
+  @retval FALSE  EC exchanged key generation failed.
+  @retval FALSE  KeySize is not large enough.
 **/
 BOOLEAN
 EFIAPI
-EcCheckKey (
-  IN  VOID  *EcContext
+EcDhComputeKey (
+  IN OUT  VOID         *EcContext,
+  IN      CONST UINT8  *PeerPublic,
+  IN      UINTN        PeerPublicSize,
+  IN      CONST INT32  *CompressFlag,
+  OUT     UINT8        *Key,
+  IN OUT  UINTN        *KeySize
   )
 {
-  // TBD
+  UINTN           HalfSize;
+  mbedtls_ecdh_context *EcdCtx;
+  INT32             Ret;
+
+  if ((EcContext == NULL) || (PeerPublic == NULL) || (KeySize == NULL)) {
+    return FALSE;
+  }
+
+  if ((Key == NULL) && (*KeySize != 0)) {
+    return FALSE;
+  }
+
+  if (PeerPublicSize > INT_MAX) {
+    return FALSE;
+  }
+
+  EcdCtx = EcContext;
+  switch (EcdCtx->grp.id) {
+  case MBEDTLS_ECP_DP_SECP256R1:
+      HalfSize = 32;
+      break;
+  case MBEDTLS_ECP_DP_SECP384R1:
+      HalfSize = 48;
+      break;
+  case MBEDTLS_ECP_DP_SECP521R1:
+      HalfSize = 66;
+      break;
+  default:
+      return FALSE;
+  }
+  if (PeerPublicSize != HalfSize * 2) {
+      return FALSE;
+  }
+
+  Ret = mbedtls_mpi_read_binary(&EcdCtx->Qp.X, PeerPublic, HalfSize);
+  if (Ret != 0) {
+      return FALSE;
+  }
+  Ret = mbedtls_mpi_read_binary(&EcdCtx->Qp.Y, PeerPublic + HalfSize,
+                                HalfSize);
+  if (Ret != 0) {
+      return FALSE;
+  }
+  Ret = mbedtls_mpi_lset(&EcdCtx->Qp.Z, 1);
+  if (Ret != 0) {
+      return FALSE;
+  }
+
+  Ret = mbedtls_ecdh_compute_shared(&EcdCtx->grp, &EcdCtx->z, &EcdCtx->Qp, &EcdCtx->d,
+                                    myrand, NULL);
+  if (Ret != 0) {
+      return FALSE;
+  }
+
+  if (mbedtls_mpi_size(&EcdCtx->z) > *KeySize) {
+      return FALSE;
+  }
+
+  *KeySize = EcdCtx->grp.pbits / 8 + ((EcdCtx->grp.pbits % 8) != 0);
+  Ret = mbedtls_mpi_write_binary(&EcdCtx->z, Key, *KeySize);
+  if (Ret != 0) {
+      return FALSE;
+  }
+
   return TRUE;
+
 }
 
 /**
