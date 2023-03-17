@@ -46,11 +46,13 @@
   Pk/CryptRsaExt.c
   Pk/CryptPkcs1Oaep.c
   Pk/CryptPkcs5Pbkdf2.c
+  Pk/CryptPkcs7VerifyBase.c
+  Pk/CryptPkcs7Sign.c
+  Pk/CryptPkcs7VerifyCommon.c
   Pk/CryptX509.c
   Rand/CryptRand.c
   SysCall/BaseMemAllocation.c
   SysCall/CrtWrapper.c
-  SysCall/TimerWrapper.c
 
 [Packages]
   MdePkg/MdePkg.dec

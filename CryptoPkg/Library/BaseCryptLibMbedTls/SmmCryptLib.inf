@@ -41,9 +41,9 @@
   Hash/CryptSha3.c
   Hash/CryptXkcp.c
   # Hash/CryptCShake256.c
-  # Hash/CryptParallelHash.c
+  Hash/CryptParallelHashNull.c
   # Hash/CryptDispatchApMm.c
-  # Hmac/CryptHmac.c
+  Hmac/CryptHmac.c
   Kdf/CryptHkdf.c
   Cipher/CryptAes.c
   Cipher/CryptAeadAesGcmNull.c

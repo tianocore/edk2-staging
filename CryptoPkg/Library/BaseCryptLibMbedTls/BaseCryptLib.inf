@@ -32,6 +32,7 @@
   Cipher/CryptAes.c
   Hash/CryptSha256.c
   Hash/CryptSha512.c
+  Hash/CryptParallelHashNull.c
   Hash/CryptSha3.c
   Hash/CryptSm3.c
   Hash/CryptMd5.c
@@ -46,7 +47,14 @@
   Pk/CryptRsaExt.c
   Pk/CryptPkcs1Oaep.c
   Pk/CryptPkcs5Pbkdf2.c
+  Pk/CryptPkcs7Sign.c
+  Pk/CryptPkcs7VerifyCommon.c
+  Pk/CryptPkcs7VerifyBase.c
+  Pk/CryptPkcs7VerifyEku.c
+  Pk/CryptDh.c
   Pk/CryptX509.c
+  Pk/CryptAuthenticode.c
+  Pk/CryptTs.c
   Rand/CryptRand.c
   SysCall/BaseMemAllocation.c
   SysCall/CrtWrapper.c
