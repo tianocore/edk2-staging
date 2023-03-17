@@ -26,6 +26,9 @@ STATIC CONST UINT8 OID_organizationName[] = {
 STATIC CONST UINT8 OID_extKeyUsage[] = {
   0x55, 0x1D, 0x25
 };
+STATIC CONST UINT8 OID_BasicConstraints[] = {
+  0x55, 0x1D, 0x13
+};
 
 /**
   Construct a X509 object from DER-encoded certificate data.
@@ -857,9 +860,61 @@ X509GetTBSCert (
   OUT UINTN        *TBSCertSize
   )
 {
-  return FALSE;
-}
+  UINTN        Length;
+  UINTN        Ret;
+  UINT8        *Ptr;
+  CONST UINT8        *Temp;
+  CONST UINT8        *End;
 
+  //
+  // Check input parameters.
+  //
+  if ((Cert == NULL) || (TBSCert == NULL) ||
+      (TBSCertSize == NULL) || (CertSize > INT_MAX))
+  {
+    return FALSE;
+  }
+
+  //
+  // An X.509 Certificate is: (defined in RFC3280)
+  //   Certificate  ::=  SEQUENCE  {
+  //     tbsCertificate       TBSCertificate,
+  //     signatureAlgorithm   AlgorithmIdentifier,
+  //     signature            BIT STRING }
+  //
+  // and
+  //
+  //  TBSCertificate  ::=  SEQUENCE  {
+  //    version         [0]  Version DEFAULT v1,
+  //    ...
+  //    }
+  //
+  // So we can just ASN1-parse the x.509 DER-encoded data. If we strip
+  // the first SEQUENCE, the second SEQUENCE is the TBSCertificate.
+  //
+
+  Length = 0;
+
+  Ptr = (UINT8 *)Cert;
+  End = Cert + CertSize;
+
+  Ret = mbedtls_asn1_get_tag(&Ptr, End, &Length, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE);
+  if (Ret != 0) {
+    return FALSE;
+  }
+
+  Temp = Ptr;
+  End = Ptr + Length;
+  Ret = mbedtls_asn1_get_tag(&Ptr, End, &Length, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE);
+  if (Ret != 0) {
+    return FALSE;
+  }
+
+  *TBSCert = (UINT8 *)Temp;
+  *TBSCertSize = Length + (Ptr - Temp);
+
+  return TRUE;
+}
 
 /**
   Retrieve the version from one X.509 certificate.
@@ -1665,4 +1720,108 @@ X509CompareDateTime (
   } else {
     return 1;
   }
+}
+
+/**
+  Retrieve the basic constraints from one X.509 certificate.
+
+  @param[in]      Cert                     Pointer to the DER-encoded X509 certificate.
+  @param[in]      CertSize                 size of the X509 certificate in bytes.
+  @param[out]     BasicConstraints         basic constraints bytes.
+  @param[in, out] BasicConstraintsSize     basic constraints buffer sizs in bytes.
+
+  @retval TRUE                     The basic constraints retrieve successfully.
+  @retval FALSE                    If cert is NULL.
+                                   If cert_size is NULL.
+                                   If basic_constraints is not NULL and *basic_constraints_size is 0.
+                                   If cert is invalid.
+  @retval FALSE                    The required buffer size is small.
+                                   The return buffer size is basic_constraints_size parameter.
+  @retval FALSE                    If no Extension entry match oid.
+  @retval FALSE                    The operation is not supported.
+ **/
+BOOLEAN
+EFIAPI
+X509GetExtendedBasicConstraints(
+  CONST UINT8  *Cert,
+  UINTN        CertSize,
+  UINT8        *BasicConstraints,
+  UINTN        *BasicConstraintsSize
+  )
+{
+  BOOLEAN  Status;
+
+  if ((Cert == NULL) || (CertSize == 0) || (BasicConstraintsSize == NULL)) {
+    return FALSE;
+  }
+
+  Status = X509GetExtensionData (
+             (UINT8 *)Cert,
+             CertSize,
+             OID_BasicConstraints,
+             sizeof (OID_BasicConstraints),
+             BasicConstraints,
+             BasicConstraintsSize
+             );
+
+  return Status;
+}
+
+/**
+  Format a DateTimeStr to DataTime object in DataTime Buffer
+
+  If DateTimeStr is NULL, then return FALSE.
+  If DateTimeSize is NULL, then return FALSE.
+  If this interface is not supported, then return FALSE.
+
+  @param[in]      DateTimeStr      DateTime string like YYYYMMDDhhmmssZ
+                                   Ref: https://www.w3.org/TR/NOTE-datetime
+                                   Z stand for UTC time
+  @param[out]     DateTime         Pointer to a DateTime object.
+  @param[in,out]  DateTimeSize     DateTime object buffer size.
+
+  @retval TRUE                     The DateTime object create successfully.
+  @retval FALSE                    If DateTimeStr is NULL.
+                                   If DateTimeSize is NULL.
+                                   If DateTime is not NULL and *DateTimeSize is 0.
+                                   If Year Month Day Hour Minute Second combination is invalid datetime.
+  @retval FALSE                    If the DateTime is NULL. The required buffer size
+                                   (including the final null) is returned in the
+                                   DateTimeSize parameter.
+  @retval FALSE                    The operation is not supported.
+**/
+BOOLEAN
+EFIAPI
+X509FormatDateTime (
+  IN  CONST  CHAR8  *DateTimeStr,
+  OUT VOID          *DateTime,
+  IN OUT UINTN      *DateTimeSize
+  )
+{
+  mbedtls_x509_time *tm;
+
+  if (*DateTimeSize < sizeof(mbedtls_x509_time)){
+    return FALSE;
+  }
+
+  if (DateTime == NULL) {
+    return FALSE;
+  }
+
+  tm = (mbedtls_x509_time *)DateTime;
+
+  tm->year = (DateTimeStr[0] + '0') * 1000 + (DateTimeStr[1] + '0') * 100 +
+    (DateTimeStr[2] + '0') * 10 + (DateTimeStr[3] + '0') * 1;
+
+  tm->mon = (DateTimeStr[4] + '0') * 10 + (DateTimeStr[5] + '0') * 1;
+
+  tm->day = (DateTimeStr[6] + '0') * 10 + (DateTimeStr[7] + '0') * 1;
+
+  tm->hour = (DateTimeStr[8] + '0') * 10 + (DateTimeStr[9] + '0') * 1;
+
+  tm->min = (DateTimeStr[10] + '0') * 10 + (DateTimeStr[11] + '0') * 1;
+
+  tm->sec = (DateTimeStr[12] + '0') * 10 + (DateTimeStr[13] + '0') * 1;
+
+  return TRUE;
 }
