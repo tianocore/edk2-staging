@@ -59,17 +59,3 @@ struct tm * gmtime (const time_t *timer)
 time_t _time64 (time_t* t) {
   return time (t);
 }
-
-struct tm *mbedtls_platform_gmtime_r( const time_t *tt,
-                                      struct tm *tm_buf )
-{
-  struct tm * lt;
-
-  lt = gmtime (tt);
-
-  if (lt != NULL) {
-    CopyMem (tm_buf, lt, sizeof(struct tm));
-  }
-
-  return ((lt == NULL) ? NULL : tm_buf);
-}

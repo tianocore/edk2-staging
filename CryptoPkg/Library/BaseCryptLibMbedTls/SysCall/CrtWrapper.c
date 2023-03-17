@@ -31,11 +31,6 @@ int mbedtls_vsnprintf(char *str, size_t size, const char *format, ...)
   return 0;
 }
 
-void mbedtls_platform_zeroize( void *buf, unsigned int len )
-{
-    ZeroMem (buf, len);
-}
-
 int rand ()
 {
   // TBD

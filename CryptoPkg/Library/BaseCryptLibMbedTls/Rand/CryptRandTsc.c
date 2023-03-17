@@ -59,3 +59,10 @@ RandomBytes (
 
   return TRUE;
 }
+
+int myrand( void *rng_state, unsigned char *output, size_t len )
+{
+  RandomBytes (output, len);
+
+  return 0;
+}
