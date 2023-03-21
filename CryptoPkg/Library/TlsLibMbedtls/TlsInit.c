@@ -74,9 +74,9 @@ TlsCtxNew (
 
   ProtoVersion = (MajorVer << 8) | MinorVer;
 
-  if (ProtoVersion == 0x0301) {
+  if (ProtoVersion == 0x0304) {
     ssl_version = MBEDTLS_SSL_VERSION_TLS1_3;
-  } else if (ProtoVersion == 0x0302) {
+  } else if (ProtoVersion == 0x0303) {
     ssl_version = MBEDTLS_SSL_VERSION_TLS1_2;
   } else {
     return NULL;
