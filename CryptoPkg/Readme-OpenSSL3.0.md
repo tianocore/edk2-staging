@@ -17,19 +17,26 @@ The branch owner: Li Yi <yi1.li@intel.com>
 
 ## Latest update
 Will update latest result here (Build based on Intel platform).  
+Binaries mode (use crypto drivers)  
 |     Driver      |   1.1.1    |    3.0     |   percent  |  
 |-----------------|------------|------------|------------|  
 |CryptoPei        |   386      |    398     |    3.1%    |  
 |CryptoPeiPreMem  |   31       |    31      |    0%      |  
-|CryptoDxeFull    |   1014     |    1031    |    1.7%    |  
-|CryptoDxe        |   804      |    886     |    10.1%   |  
-|CryptoSmm        |   558      |    604     |    8.2%    |  
-
+|CryptoDxeFull    |   1014     |    997     |    -1.6%   |  
+|CryptoDxe        |   804      |    871     |    8.3%    |  
+|CryptoSmm        |   558      |    581     |    4.1%    |  
+  
 | LZMA Compressed |   1.1.1    |    3.0     |   percent  |  
 |-----------------|------------|------------|------------|  
-|CryptoDxe        |   311      |    350     |    12.2%   |  
-|CryptoSmm        |   211      |    238     |    12.8%   |  
-|FV (Dxe+Smm)     |   357      |    412     |    15.4%   |  
+|CryptoDxe        |   311      |    346     |    11.2%   |  
+|CryptoSmm        |   211      |    233     |    10.4%   |  
+|FV (Dxe+Smm)     |   357      |    406     |    13.7%   |  
+
+Library mode (use crypto library)  
+|     Driver         |   1.1.1    |    3.0     |    delta   |  
+|--------------------|------------|------------|------------|  
+|      FV            |   2377     |    2639    |     262    |  
+|SecurityStubDxe.efi |   562      |    605     |     43     |  
 
 ## Limitation
 
@@ -49,7 +56,7 @@ More complex API: There will be two code paths supporting 1.1.1 legacy and 3.0 p
 ### 1.Cut Provider
 As CryptoPkg\Library\OpensslLib\OpensslStub\uefiprov.c
 
-### Remove unnecessary module 
+### 2.Remove unnecessary module 
 SM2,  
 SM3 - 12KB,  
 MD5 - 8KB,  
@@ -105,5 +112,47 @@ remove unused bio prov - 4KB
 #### Risk:
 This is workaround.
 
+## Openssl code change summary
+### Level 1: Reasonable changes to reduce size
+1. Add macro such like OPENSSL_NO_ECX OPENSSL_NO_ECD to remove ecx and ecd feature,  
+will reduce size about 104KB.  
+(commit: ec: disable ecx and ecd)  
+https://github.com/liyi77/openssl/commit/2b0a888c3623e1dc0637fbe0c5dcc1211b4d0545  
+  
+2. Avoid build error when sm3 disabled.  
+(commit: sm3: avoid build error after sm3 disabled)  
+https://github.com/liyi77/openssl/commit/df92e440e45667da6ca1f9013f015e6d18981f2e  
+
+### Level 2: A bit like workaround, with possibility of upstream to openssl
+1. Enable the legacy path for X509 pubkey decode and pmeth initialization,  
+The purpose is to avoid the use of EN/DECODE and Signature provider, will reduce size about 90KB.  
+(commit: x509: enable legacy path in pub decode)  
+https://github.com/liyi77/openssl/commit/8780956da77c949ca42f6c4c3fd6ef7045646ef0  
+(commit: evp: enable legacy pmeth)  
+https://github.com/liyi77/openssl/commit/a2232b35aa308198b61c5734c1bfe1d0263f074b  
+  
+2. Add 'type' field back to enable OPENSSL_NO_AUTOALGINIT,  will reduce size about 27KB.  
+issue: https://github.com/openssl/openssl/issues/20221  
+(commit: evp: add type filed back)  
+https://github.com/liyi77/openssl/commit/9c68a18a3a1967baf8d93eacadac9f0e14523715  
+
+### Level 3: Totally workaround and hard to upstream to openssl, may need scripts to apply them inside EDK2
+1. Provider cut.  
+(commit: CryptoPkg: add own openssl provider)  
+https://github.com/liyi77/edk2-staging/commit/c3a5b69d8a3465259cfdca8f38b0dc7683b3690e  
+  
+2. Cut Name/NID mapping, will reduce size about 70KB.  
+(commit: CryptoPkg: trim obj_dat.h)  
+https://github.com/liyi77/edk2-staging/commit/6874485ebf89959953f7094990c7123e19748527  
+
+3. Cut unnecessary API in structure.  
+(commit: evp: cut bio_enc func 3KB)  
+https://github.com/liyi77/openssl/commit/3a2331133c2e3bda3e9bdb861ea97e5d3969fb2d  
+(commit: x509: remove print function 7KB)  
+https://github.com/liyi77/openssl/commit/faa5d6781c3af601bcbc11ff199e2955d7ff4306  
+(commit: rsa: remove unused rsa ameth 7KB)  
+https://github.com/liyi77/openssl/commit/8488c75701cdd5e626785e6d9d002f6fb30ae0ff  
+(commit: x509: remove unused extentions 19KB)  
+https://github.com/liyi77/openssl/commit/c27b3428708eb240b626946ce10d4219806d8adf  
 ## Timeline
 Target for 2023 Q1
