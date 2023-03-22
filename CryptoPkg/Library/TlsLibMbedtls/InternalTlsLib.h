@@ -37,6 +37,11 @@ typedef struct {
   // Memory BIO for the TLS/SSL Writing operations.
   //
   mbedtls_net_context    *fd;
+
+  //
+  // SSL/TLS configuration to be shared between mbedtls_ssl_context structures.
+  //
+  mbedtls_ssl_config  *Conf;
 } TLS_CONNECTION;
 
 
