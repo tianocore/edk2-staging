@@ -161,9 +161,6 @@ static const OSSL_ALGORITHM deflt_keyexch[] = {
 #ifndef OPENSSL_NO_DH
     { PROV_NAMES_DH, "provider=default", ossl_dh_keyexch_functions },
 #endif
-#ifndef OPENSSL_NO_EC
-    { PROV_NAMES_ECDH, "provider=default", ossl_ecdh_keyexch_functions },
-#endif
     { PROV_NAMES_TLS1_PRF, "provider=default", ossl_kdf_tls1_prf_keyexch_functions },
     { PROV_NAMES_HKDF, "provider=default", ossl_kdf_hkdf_keyexch_functions },
     { NULL, NULL, NULL }
@@ -172,15 +169,6 @@ static const OSSL_ALGORITHM deflt_keyexch[] = {
 static const OSSL_ALGORITHM deflt_rands[] = {
     { PROV_NAMES_CTR_DRBG, "provider=default", ossl_drbg_ctr_functions },
     { PROV_NAMES_HASH_DRBG, "provider=default", ossl_drbg_hash_functions },
-    { NULL, NULL, NULL }
-};
-
-static const OSSL_ALGORITHM deflt_signature[] = {
-    { PROV_NAMES_RSA, "provider=default", ossl_rsa_signature_functions },
-#ifndef OPENSSL_NO_EC
-    { PROV_NAMES_ECDSA, "provider=default", ossl_ecdsa_signature_functions },
-#endif
-
     { NULL, NULL, NULL }
 };
 
@@ -195,15 +183,6 @@ static const OSSL_ALGORITHM deflt_keymgmt[] = {
       PROV_DESCS_DH },
     { PROV_NAMES_DHX, "provider=default", ossl_dhx_keymgmt_functions,
       PROV_DESCS_DHX },
-#endif
-
-    { PROV_NAMES_RSA, "provider=default", ossl_rsa_keymgmt_functions,
-      PROV_DESCS_RSA },
-    { PROV_NAMES_RSA_PSS, "provider=default", ossl_rsapss_keymgmt_functions,
-      PROV_DESCS_RSA_PSS },
-#ifndef OPENSSL_NO_EC
-    { PROV_NAMES_EC, "provider=default", ossl_ec_keymgmt_functions,
-      PROV_DESCS_EC },
 #endif
     { PROV_NAMES_TLS1_PRF, "provider=default", ossl_kdf_keymgmt_functions,
       PROV_DESCS_TLS1_PRF_SIGN },
@@ -232,8 +211,6 @@ static const OSSL_ALGORITHM *deflt_query(void *provctx, int operation_id,
         return deflt_keymgmt;
     case OSSL_OP_KEYEXCH:
         return deflt_keyexch;
-    case OSSL_OP_SIGNATURE:
-        return deflt_signature;
     case OSSL_OP_ASYM_CIPHER:
         return deflt_asym_cipher;
     }
