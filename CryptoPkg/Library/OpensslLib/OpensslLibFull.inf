@@ -1,8 +1,8 @@
 ## @file
-#  This module provides OpenSSL Library implementation.
+#  This module provides OpenSSL Library implementation with ECC feature.
 #
-#  Copyright (c) 2010 - 2020, Intel Corporation. All rights reserved.<BR>
-#  (C) Copyright 2020 Hewlett Packard Enterprise Development LP<BR>
+#  Copyright (c) 2023, Intel Corporation. All rights reserved.<BR>
+#  (C) Copyright 2023 Hewlett Packard Enterprise Development LP<BR>
 #  SPDX-License-Identifier: BSD-2-Clause-Patent
 #
 ##
@@ -11,12 +11,12 @@
   INF_VERSION                    = 0x00010005
   BASE_NAME                      = OpensslLib
   MODULE_UNI_FILE                = OpensslLib.uni
-  FILE_GUID                      = C873A7D0-9824-409f-9B42-2C158B992E69
+  FILE_GUID                      = 00EA10C4-CB1F-4BCE-A8BA-DE21CD4EF540
   MODULE_TYPE                    = BASE
   VERSION_STRING                 = 1.0
   LIBRARY_CLASS                  = OpensslLib
   DEFINE OPENSSL_PATH            = openssl
-  DEFINE OPENSSL_FLAGS           = -DL_ENDIAN -DOPENSSL_SMALL_FOOTPRINT -D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE -DOPENSSL_NO_ASM -DOPENSSL_NO_EC
+  DEFINE OPENSSL_FLAGS           = -DL_ENDIAN -DOPENSSL_SMALL_FOOTPRINT -D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE -DOPENSSL_NO_ASM
 
 #
 #  VALID_ARCHITECTURES           = IA32 X64 ARM AARCH64
@@ -200,6 +200,43 @@
   $(OPENSSL_PATH)/crypto/dso/dso_vms.c
   $(OPENSSL_PATH)/crypto/dso/dso_win32.c
   $(OPENSSL_PATH)/crypto/ebcdic.c
+  $(OPENSSL_PATH)/crypto/ec/curve25519.c
+  $(OPENSSL_PATH)/crypto/ec/curve448/arch_32/f_impl.c
+  $(OPENSSL_PATH)/crypto/ec/curve448/curve448.c
+  $(OPENSSL_PATH)/crypto/ec/curve448/curve448_tables.c
+  $(OPENSSL_PATH)/crypto/ec/curve448/eddsa.c
+  $(OPENSSL_PATH)/crypto/ec/curve448/f_generic.c
+  $(OPENSSL_PATH)/crypto/ec/curve448/scalar.c
+  $(OPENSSL_PATH)/crypto/ec/ec2_oct.c
+  $(OPENSSL_PATH)/crypto/ec/ec2_smpl.c
+  $(OPENSSL_PATH)/crypto/ec/ec_ameth.c
+  $(OPENSSL_PATH)/crypto/ec/ec_asn1.c
+  $(OPENSSL_PATH)/crypto/ec/ec_check.c
+  $(OPENSSL_PATH)/crypto/ec/ec_curve.c
+  $(OPENSSL_PATH)/crypto/ec/ec_cvt.c
+  $(OPENSSL_PATH)/crypto/ec/ec_err.c
+  $(OPENSSL_PATH)/crypto/ec/ec_key.c
+  $(OPENSSL_PATH)/crypto/ec/ec_kmeth.c
+  $(OPENSSL_PATH)/crypto/ec/ec_lib.c
+  $(OPENSSL_PATH)/crypto/ec/ec_mult.c
+  $(OPENSSL_PATH)/crypto/ec/ec_oct.c
+  $(OPENSSL_PATH)/crypto/ec/ec_pmeth.c
+  $(OPENSSL_PATH)/crypto/ec/ec_print.c
+  $(OPENSSL_PATH)/crypto/ec/ecdh_kdf.c
+  $(OPENSSL_PATH)/crypto/ec/ecdh_ossl.c
+  $(OPENSSL_PATH)/crypto/ec/ecdsa_ossl.c
+  $(OPENSSL_PATH)/crypto/ec/ecdsa_sign.c
+  $(OPENSSL_PATH)/crypto/ec/ecdsa_vrf.c
+  $(OPENSSL_PATH)/crypto/ec/eck_prn.c
+  $(OPENSSL_PATH)/crypto/ec/ecp_mont.c
+  $(OPENSSL_PATH)/crypto/ec/ecp_nist.c
+  $(OPENSSL_PATH)/crypto/ec/ecp_nistp224.c
+  $(OPENSSL_PATH)/crypto/ec/ecp_nistp256.c
+  $(OPENSSL_PATH)/crypto/ec/ecp_nistp521.c
+  $(OPENSSL_PATH)/crypto/ec/ecp_nistputil.c
+  $(OPENSSL_PATH)/crypto/ec/ecp_oct.c
+  $(OPENSSL_PATH)/crypto/ec/ecp_smpl.c
+  $(OPENSSL_PATH)/crypto/ec/ecx_meth.c
   $(OPENSSL_PATH)/crypto/err/err.c
   $(OPENSSL_PATH)/crypto/err/err_prn.c
   $(OPENSSL_PATH)/crypto/evp/bio_b64.c
@@ -497,6 +534,15 @@
   $(OPENSSL_PATH)/crypto/conf/conf_local.h
   $(OPENSSL_PATH)/crypto/dh/dh_local.h
   $(OPENSSL_PATH)/crypto/dso/dso_local.h
+  $(OPENSSL_PATH)/crypto/ec/ec_local.h
+  $(OPENSSL_PATH)/crypto/ec/curve448/curve448_local.h
+  $(OPENSSL_PATH)/crypto/ec/curve448/curve448utils.h
+  $(OPENSSL_PATH)/crypto/ec/curve448/ed448.h
+  $(OPENSSL_PATH)/crypto/ec/curve448/field.h
+  $(OPENSSL_PATH)/crypto/ec/curve448/point_448.h
+  $(OPENSSL_PATH)/crypto/ec/curve448/word.h
+  $(OPENSSL_PATH)/crypto/ec/curve448/arch_32/arch_intrinsics.h
+  $(OPENSSL_PATH)/crypto/ec/curve448/arch_32/f_impl.h
   $(OPENSSL_PATH)/crypto/evp/evp_local.h
   $(OPENSSL_PATH)/crypto/hmac/hmac_local.h
   $(OPENSSL_PATH)/crypto/lhash/lhash_local.h
@@ -574,7 +620,6 @@
   buildinf.h
   ossl_store.c
   rand_pool.c
-  EcSm2Null.c
 
 [Packages]
   MdePkg/MdePkg.dec
