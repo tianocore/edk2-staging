@@ -14,6 +14,7 @@ This POC is to explore mbedtls as a smaller alternative to OpenSSL.
 
 ### Current enabling status
 
+For BaseCryptLibMbedTls:
 |  FILE  | Build Pass  | Test Pass |
 |  ----  | ----  | ----  |
 | Bn/CryptBn.c  | YES | YES |
@@ -44,6 +45,13 @@ This POC is to explore mbedtls as a smaller alternative to OpenSSL.
 | Pk/CryptTs.c  | YES | WIP |
 | Pk/CryptX509.c  | YES | YES |
 
+For TlsLibMbedtls:
+|  FILE  | Build Pass  | Test Pass |
+|  ----  | ----  | ----  |
+| TlsInit.c  | YES | NA |
+| TlsProcess.c  | YES | NA |
+| TlsConfig.c  | YES | NA |
+
 ## Build command
 
    ```
@@ -55,15 +63,19 @@ This POC is to explore mbedtls as a smaller alternative to OpenSSL.
 |  Risk  | Soluton  | Time required |
 |  ----  | ----  | ----  |
 | SM3 and SHA3 are missing in Mbedtls  | Wait Mbedtls enable SM3 and SHA3 | Unkown |
-| Following API implementation is WIP  | Implement API | 2 weeks |
+| Following API implementation is WIP  | Implement API | 1.5 weeks |
 
 ### API need to complete
 |  API  | Time required |
 |  ----  | ----  |
-| VerifyEKUsInPkcs7Signature  | 3 days |
-| AuthenticodeVerify  | 3 days |
-| EcPointSetCompressedCoordinates  | 2 days |
-| ImageTimestampVerify  | 3 days |
+| AuthenticodeVerify  | 2 days |
+| ImageTimestampVerify  | 2 days |
+
+
+|  API  | Need to implement |
+|  ----  | ----  |
+| EcPointSetCompressedCoordinates  | ? |
+| VerifyEKUsInPkcs7Signature  | ? |
 
 ## Timeline
 Target for 2023 Q1
