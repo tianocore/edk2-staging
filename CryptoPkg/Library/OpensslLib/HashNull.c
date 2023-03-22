@@ -8,6 +8,7 @@
 
 #include "openssl/types.h"
 
+#ifdef OPENSSL_NO_MD5
 #include "openssl/x509.h"
 const EVP_MD *EVP_md5(void) {
     return NULL;
@@ -29,3 +30,4 @@ int ssl3_cbc_digest_record(const EVP_MD *md,
                            size_t mac_secret_length, char is_sslv3) {
                             return -1;
                            }
+#endif
