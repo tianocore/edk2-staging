@@ -8,7 +8,7 @@ This POC is to explore mbedtls as a smaller alternative to OpenSSL.
 |  Driver  | OpenSSL  |  MbedTLS |
 |  ----  | ----  | ----  |
 |  PEI  | 387Kb  | 162Kb |
-|  PeiPreMem  | 31Kb  | 58Kb |
+|  PeiPreMem  | 31Kb  | 58Kb(WIP) |
 |  DXE  | 804Kb  | 457Kb  |
 |  SMM  | 558Kb  | 444Kb  |
 
@@ -48,9 +48,9 @@ For BaseCryptLibMbedTls:
 For TlsLibMbedtls:
 |  FILE  | Build Pass  | Test Pass |
 |  ----  | ----  | ----  |
-| TlsInit.c  | YES | NA |
-| TlsProcess.c  | YES | NA |
-| TlsConfig.c  | YES | NA |
+| TlsInit.c  | YES | WIP |
+| TlsProcess.c  | YES | WIP |
+| TlsConfig.c  | YES | WIP |
 
 ## Build command
 
@@ -58,11 +58,18 @@ For TlsLibMbedtls:
    edksetup.bat Rebuild VS2019
    build -a X64 -p CryptoPkg/CryptoPkgMbedTls.dsc -DCRYPTO_IMG_TYPE=PEI_DEFAULT -t VS2019
    ```
+
+## Unsupported Features
+
+|  Feature  | Reference  | Enable Feature for Mbedtls Time required |
+|  ----  | ----  | ----  |
+| SM3 | https://github.com/Mbed-TLS/mbedtls/pull/5822 | Unkown |
+| SHA3  | https://github.com/Mbed-TLS/mbedtls/pull/4492 | Unkown |
+
 ## Risk
 
-|  Risk  | Soluton  | Time required |
+|  Risk  | Solution  | Time required |
 |  ----  | ----  | ----  |
-| SM3 and SHA3 are missing in Mbedtls  | Wait Mbedtls enable SM3 and SHA3 | Unkown |
 | Following API implementation is WIP  | Implement API | 1.5 weeks |
 
 ### API need to complete
@@ -70,12 +77,8 @@ For TlsLibMbedtls:
 |  ----  | ----  |
 | AuthenticodeVerify  | 2 days |
 | ImageTimestampVerify  | 2 days |
-
-
-|  API  | Need to implement |
-|  ----  | ----  |
-| EcPointSetCompressedCoordinates  | ? |
-| VerifyEKUsInPkcs7Signature  | ? |
+| EcPointSetCompressedCoordinates  | 2 days |
+| VerifyEKUsInPkcs7Signature  | 2 days |
 
 ## Timeline
 Target for 2023 Q1
