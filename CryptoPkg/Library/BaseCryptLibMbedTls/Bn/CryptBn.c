@@ -561,8 +561,19 @@ BigNumSqrMod (
   OUT VOID       *BnRes
   )
 {
-  ASSERT (FALSE);
-  return FALSE;
+  if ((BnA == NULL) || (BnM == NULL) || (BnRes == NULL)) {
+    return FALSE;
+  }
+
+  if (mbedtls_mpi_mul_mpi(BnRes, BnA, BnA) != 0) {
+    return FALSE;
+  }
+
+  if (mbedtls_mpi_mod_mpi(BnRes, BnRes, BnM) == 0) {
+    return TRUE;
+  } else {
+    return FALSE;
+  }
 }
 
 /**
