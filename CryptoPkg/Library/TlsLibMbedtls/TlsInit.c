@@ -84,7 +84,7 @@ TlsCtxNew (
 
   Ssl = AllocateZeroPool(sizeof(mbedtls_ssl_context));
 
-  mbedtls_ssl_init(&Ssl);
+  mbedtls_ssl_init(Ssl);
 
   Ssl->tls_version = ssl_version;
 

@@ -447,7 +447,7 @@ TlsSetCipherList (
   //
   // Sets the ciphers for use by the Tls object.
   //
-  mbedtls_ssl_conf_ciphersuites (TlsConn->Conf, CipherString);
+  mbedtls_ssl_conf_ciphersuites (TlsConn->Conf, (const int*)CipherString);
 
   Status = EFI_SUCCESS;
 
@@ -569,7 +569,7 @@ TlsSetSessionId (
   TlsConn = (TLS_CONNECTION *)Tls;
   Session = NULL;
 
-  if ((TlsConn == NULL) || (TlsConn->Ssl == NULL) || (SessionId == NULL) || (SessionIdLen == NULL)) {
+  if ((TlsConn == NULL) || (TlsConn->Ssl == NULL) || (SessionId == NULL) || (SessionIdLen == 0)) {
     return EFI_INVALID_PARAMETER;
   }
 
@@ -577,8 +577,8 @@ TlsSetSessionId (
     return EFI_UNSUPPORTED;
   }
 
-   Session->id = *SessionId;
-   Session->id_len = SessionIdLen;
+  CopyMem(Session->id, SessionId, SessionIdLen);
+  Session->id_len = SessionIdLen;
 
   return EFI_SUCCESS;
 }
@@ -720,7 +720,7 @@ TlsSetHostPrivateKeyEx (
   mbedtls_rsa_context *rsa;
   uint8_t *pem_data;
   uint8_t *new_pem_data;
-  size_t password_len;
+  UINTN password_len;
 
   TlsConn = (TLS_CONNECTION *)Tls;
 
@@ -745,13 +745,14 @@ TlsSetHostPrivateKeyEx (
   mbedtls_pk_init(&pk);
 
   if (Password != NULL) {
-      password_len = ascii_str_len(Password);
+      password_len = AsciiStrLen(Password);
   } else {
       password_len = 0;
   }
 
   ret = mbedtls_pk_parse_key(&pk, pem_data, DataSize,
-                              (const uint8_t *)Password, password_len);
+                             (const uint8_t *)Password, password_len,
+                             NULL, NULL);
   if (new_pem_data != NULL) {
       FreePool(new_pem_data);
       new_pem_data = NULL;
@@ -917,7 +918,7 @@ TlsSetSignatureAlgoList (
 
   *(Pos - 1) = '\0';
 
-  mbedtls_ssl_conf_sig_algs(TlsConn->Conf, SignAlgoStr);
+  mbedtls_ssl_conf_sig_algs(TlsConn->Conf, (const uint16_t*)SignAlgoStr);
 
   Status = EFI_SUCCESS;
 
@@ -975,7 +976,7 @@ TlsSetEcCurve (
       return EFI_UNSUPPORTED;
   }
 
-  mbedtls_ssl_conf_curves(TlsConn->Conf, grp_id);
+  mbedtls_ssl_conf_curves(TlsConn->Conf, &grp_id);
 
   return EFI_SUCCESS;
 }
@@ -1005,7 +1006,7 @@ TlsGetVersion (
 
   ASSERT (TlsConn != NULL);
 
-  return (UINT16)(mbedtls_ssl_get_version (TlsConn->Ssl));
+  return (UINT16)*(mbedtls_ssl_get_version (TlsConn->Ssl));
 }
 
 /**
@@ -1067,7 +1068,7 @@ TlsGetCurrentCipher (
     return EFI_INVALID_PARAMETER;
   }
 
-  *CipherId = mbedtls_ssl_get_ciphersuite_id_from_ssl(TlsConn->Ssl);
+  *CipherId = (UINT16)mbedtls_ssl_get_ciphersuite_id_from_ssl(TlsConn->Ssl);
 
   return EFI_SUCCESS;
 }
@@ -1117,7 +1118,13 @@ TlsGetVerify (
   IN     VOID  *Tls
   )
 {
-  return EFI_UNSUPPORTED;
+  TLS_CONNECTION  *TlsConn;
+
+  TlsConn = (TLS_CONNECTION *)Tls;
+
+  ASSERT (TlsConn != NULL);
+
+  return (UINT32)(TlsConn->Conf->authmode);
 }
 
 /**
@@ -1157,8 +1164,8 @@ TlsGetSessionId (
     return EFI_UNSUPPORTED;
   }
 
-  *SessionId = Session->id;
-  *SessionIdLen = Session->id_len;
+  CopyMem(SessionId, Session->id, Session->id_len);
+  *SessionIdLen = (UINT16)Session->id_len;
 
   return EFI_SUCCESS;
 }
@@ -1181,7 +1188,6 @@ TlsGetClientRandom (
   IN OUT UINT8  *ClientRandom
   )
 {
-  return EFI_UNSUPPORTED;
 }
 
 /**
@@ -1202,7 +1208,6 @@ TlsGetServerRandom (
   IN OUT UINT8  *ServerRandom
   )
 {
-  return EFI_UNSUPPORTED;
 }
 
 /**

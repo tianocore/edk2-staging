@@ -114,7 +114,7 @@ TlsDoHandshake (
       }
   }
 
-  mbedtls_net_recv (TlsConn->fd, BufferOut, (UINT32)BufferOutSize);
+  mbedtls_net_recv (TlsConn->fd, BufferOut, (UINT32)*BufferOutSize);
   return EFI_SUCCESS;
 }
 
@@ -178,7 +178,7 @@ TlsHandleAlert (
     return EFI_INVALID_PARAMETER;
   }
 
-  mbedtls_net_recv (TlsConn->fd, BufferOut, (UINT32)BufferOutSize);
+  mbedtls_net_recv (TlsConn->fd, BufferOut, (UINT32)*BufferOutSize);
   return EFI_SUCCESS;
 
 }
@@ -227,7 +227,7 @@ TlsCloseNotify (
     return EFI_INVALID_PARAMETER;
   } 
   
-  mbedtls_net_recv (TlsConn->fd, Buffer, (UINT32)BufferSize);
+  mbedtls_net_recv (TlsConn->fd, Buffer, (UINT32)*BufferSize);
   return EFI_SUCCESS;
 
 }
