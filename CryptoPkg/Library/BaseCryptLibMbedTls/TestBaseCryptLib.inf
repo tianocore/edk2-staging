@@ -49,6 +49,7 @@
   Pk/CryptPkcs7VerifyBase.c
   Pk/CryptPkcs7Sign.c
   Pk/CryptPkcs7VerifyCommon.c
+  Pk/CryptPkcs7VerifyEku.c
   Pk/CryptX509.c
   Rand/CryptRand.c
   SysCall/BaseMemAllocation.c
