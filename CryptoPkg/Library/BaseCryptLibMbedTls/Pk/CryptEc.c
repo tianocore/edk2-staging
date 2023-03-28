@@ -14,6 +14,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <mbedtls/ecdh.h>
 #include <mbedtls/ecdsa.h>
 #include <mbedtls/bignum.h>
+#include <library/bignum_core.h>
 
 // =====================================================================================
 //    Basic Elliptic Curve Primitives
@@ -534,7 +535,64 @@ EcPointSetCompressedCoordinates (
   IN VOID        *BnCtx
   )
 {
-  return FALSE;
+  UINT8 *buf;
+  UINT8 *Newbuf;
+  BOOLEAN Status;
+  mbedtls_ecp_group *grp;
+  UINT16 PubkeyXszie;
+  UINTN XSize;
+
+  buf = NULL;
+  Newbuf = NULL;
+
+  grp = ( mbedtls_ecp_group *)EcGroup;
+
+  switch(grp->id) {
+    case MBEDTLS_ECP_DP_SECP256R1:
+          PubkeyXszie = 32;
+      break;
+    case MBEDTLS_ECP_DP_SECP384R1:
+          PubkeyXszie = 48;
+      break;
+    case MBEDTLS_ECP_DP_SECP521R1:
+          PubkeyXszie = 66;
+      break;
+    default :
+      return FALSE;
+  }
+
+  buf = AllocateZeroPool(PubkeyXszie);
+  Newbuf = AllocateZeroPool(PubkeyXszie + 1);
+
+  XSize = mbedtls_mpi_size (BnX);
+  if( mbedtls_mpi_write_binary(BnX, &buf[0 + PubkeyXszie - XSize], XSize) != 0) {
+    Status = FALSE;
+    goto Exit;
+  }
+
+  CopyMem (Newbuf + 1, &buf[0 + PubkeyXszie - XSize], XSize);
+
+  if (YBit ==  0) {
+    Newbuf[0] = 0x02;
+  } else {
+    Newbuf[0] = 0x03;
+  }
+
+  if (mbedtls_ecp_tls_read_point((const mbedtls_ecp_group *)EcGroup,
+                                 (mbedtls_ecp_point *)EcPoint,
+                                 &Newbuf, XSize + 1) != 0) {
+    Status = FALSE;
+    goto Exit;
+  }
+
+  Status = TRUE;
+
+Exit:
+  if(buf != NULL) {
+    FreePool(buf);
+  }
+
+  return Status;
 }
 
 // =====================================================================================
