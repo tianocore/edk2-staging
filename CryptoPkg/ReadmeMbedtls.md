@@ -5,12 +5,15 @@ This POC is to explore mbedtls as a smaller alternative to OpenSSL.
 
 ### MbedTLS and OpenSSL CryptoPkg size compare
 
-|  Driver  | OpenSSL  |  MbedTLS |
+|  Driver  | OpenSSL 1.1  |  MbedTLS 3.0 |
 |  ----  | ----  | ----  |
-|  PEI  | 387Kb  | 162Kb |
-|  PeiPreMem  | 31Kb  | 58Kb(WIP) |
-|  DXE  | 804Kb  | 457Kb  |
-|  SMM  | 558Kb  | 444Kb  |
+|  PEI  | 387Kb  | 142Kb |
+|  PeiPreMem  | 31Kb  | 58Kb |
+|  DXE  | 804Kb  | 336Kb  |
+|  DXEFULL  | 1014Kb  | 447Kb  |
+|  SMM  | 558Kb  | 324Kb  |
+
+Note: DXE doesn't include ECC; DXEFULL includes ECC.
 
 ### Current enabling status
 
@@ -29,7 +32,7 @@ For BaseCryptLibMbedTls:
 | Hmac/CryptHmac.c  | YES | YES |
 | Kdf/CryptHkdf.c  | YES | YES |
 | Pem/CryptPem.c  | YES | YES |
-| Pk/CryptAuthenticode.c  | WIP | WIP |
+| Pk/CryptAuthenticode.c  | YES | WIP |
 | Pk/CryptDh.c  | YES | YES |
 | Pk/CryptEc.c  | YES | YES |
 | Pk/CryptPkcs1Oaep.c  | YES | YES |
@@ -48,9 +51,9 @@ For BaseCryptLibMbedTls:
 For TlsLibMbedtls:
 |  FILE  | Build Pass  | Test Pass |
 |  ----  | ----  | ----  |
-| TlsInit.c  | YES | WIP |
+| TlsInit.c  | YES | YES |
 | TlsProcess.c  | YES | WIP |
-| TlsConfig.c  | YES | WIP |
+| TlsConfig.c  | YES | YES |
 
 ## Build command
 
@@ -68,17 +71,13 @@ For TlsLibMbedtls:
 
 ## Risk
 
-|  Risk  | Solution  | Time required |
-|  ----  | ----  | ----  |
-| Following API implementation is WIP  | Implement API | 1.5 weeks |
+Following API Test is WIP
 
-### API need to complete
-|  API  | Time required |
-|  ----  | ----  |
-| AuthenticodeVerify  | 2 days |
-| ImageTimestampVerify  | 2 days |
-| EcPointSetCompressedCoordinates  | 2 days |
-| VerifyEKUsInPkcs7Signature  | 2 days |
+|  API  |
+|  ----  |
+| AuthenticodeVerify  |
+| ImageTimestampVerify  |
+| VerifyEKUsInPkcs7Signature  |
 
 ## Timeline
 Target for 2023 Q1
