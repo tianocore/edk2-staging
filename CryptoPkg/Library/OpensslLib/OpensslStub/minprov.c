@@ -1,7 +1,5 @@
 /** @file
-  Minimal UEFI Openssl provider implementation, only support PEI crypto feature
-  without PKCS7.
-
+  Minimal UEFI Openssl provider implementation, only support PEI crypto feature.
   Copyright (c) 2022, Intel Corporation. All rights reserved.<BR>
   SPDX-License-Identifier: BSD-2-Clause-Patent
 
@@ -122,7 +120,6 @@ static const OSSL_ALGORITHM deflt_digests[] = {
     // { PROV_NAMES_MD5_SHA1, "provider=default", ossl_md5_sha1_functions },
 #endif /* OPENSSL_NO_MD5 */
 
-
     { PROV_NAMES_NULL, "provider=default", ossl_nullmd_functions },
     { NULL, NULL, NULL }
 };
@@ -165,16 +162,7 @@ static const OSSL_ALGORITHM deflt_rands[] = {
     { NULL, NULL, NULL }
 };
 
-static const OSSL_ALGORITHM deflt_signature[] = {
-    { PROV_NAMES_RSA, "provider=default", ossl_rsa_signature_functions },
-    { NULL, NULL, NULL }
-};
-
 static const OSSL_ALGORITHM deflt_keymgmt[] = {
-    { PROV_NAMES_RSA, "provider=default", ossl_rsa_keymgmt_functions,
-      PROV_DESCS_RSA },
-    { PROV_NAMES_RSA_PSS, "provider=default", ossl_rsapss_keymgmt_functions,
-      PROV_DESCS_RSA_PSS },
     { PROV_NAMES_HKDF, "provider=default", ossl_kdf_keymgmt_functions,
       PROV_DESCS_HKDF_SIGN },
     { NULL, NULL, NULL }
@@ -189,16 +177,16 @@ static const OSSL_ALGORITHM *deflt_query(void *provctx, int operation_id,
         return deflt_digests;
     case OSSL_OP_CIPHER:
         return exported_ciphers;
-    case OSSL_OP_RAND:
-        return deflt_rands;
     case OSSL_OP_MAC:
         return deflt_macs;
     case OSSL_OP_KDF:
         return deflt_kdfs;
-    case OSSL_OP_KEYEXCH:
-        return deflt_keyexch;
+    case OSSL_OP_RAND:
+        return deflt_rands;
     case OSSL_OP_KEYMGMT:
         return deflt_keymgmt;
+    case OSSL_OP_KEYEXCH:
+        return deflt_keyexch;
     }
     return NULL;
 }
@@ -229,10 +217,8 @@ int ossl_uefi_provider_init(const OSSL_CORE_HANDLE *handle,
                                void **provctx)
 {
     OSSL_FUNC_core_get_libctx_fn *c_get_libctx = NULL;
-    BIO_METHOD *corebiometh;
 
-    if (!ossl_prov_bio_from_dispatch(in)
-            || !ossl_prov_seeding_from_dispatch(in))
+    if (!ossl_prov_seeding_from_dispatch(in))
         return 0;
     for (; in->function_id != 0; in++) {
         switch (in->function_id) {
@@ -262,8 +248,7 @@ int ossl_uefi_provider_init(const OSSL_CORE_HANDLE *handle,
      * This only works for built-in providers.  Most providers should
      * create their own library context.
      */
-    if ((*provctx = ossl_prov_ctx_new()) == NULL
-            || (corebiometh = ossl_bio_prov_init_bio_method()) == NULL) {
+    if ((*provctx = ossl_prov_ctx_new()) == NULL) {
         ossl_prov_ctx_free(*provctx);
         *provctx = NULL;
         return 0;
@@ -271,7 +256,6 @@ int ossl_uefi_provider_init(const OSSL_CORE_HANDLE *handle,
     ossl_prov_ctx_set0_libctx(*provctx,
                                        (OSSL_LIB_CTX *)c_get_libctx(handle));
     ossl_prov_ctx_set0_handle(*provctx, handle);
-    ossl_prov_ctx_set0_core_bio_method(*provctx, corebiometh);
 
     *out = deflt_dispatch_table;
     ossl_prov_cache_exported_algorithms(deflt_ciphers, exported_ciphers);
