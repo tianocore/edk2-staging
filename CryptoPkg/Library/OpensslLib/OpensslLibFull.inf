@@ -705,12 +705,12 @@
   $(OPENSSL_PATH)/providers/implementations/kdfs/pbkdf2.h
   $(OPENSSL_PATH)/providers/implementations/rands/drbg_local.h
   $(OPENSSL_PATH)/providers/implementations/storemgmt/file_store_local.h
-  $(OPENSSL_PATH)/ssl/statem/statem_srvr.c
+  # $(OPENSSL_PATH)/ssl/statem/statem_srvr.c
   $(OPENSSL_PATH)/ssl/statem/statem_lib.c
   $(OPENSSL_PATH)/ssl/statem/statem_dtls.c
   $(OPENSSL_PATH)/ssl/statem/statem_clnt.c
   $(OPENSSL_PATH)/ssl/statem/statem.c
-  $(OPENSSL_PATH)/ssl/statem/extensions_srvr.c
+  # $(OPENSSL_PATH)/ssl/statem/extensions_srvr.c
   $(OPENSSL_PATH)/ssl/statem/extensions_cust.c
   $(OPENSSL_PATH)/ssl/statem/extensions_clnt.c
   $(OPENSSL_PATH)/ssl/statem/extensions.c
@@ -824,6 +824,8 @@
   ossl_store.c
   rand_pool.c
 #  SslNull.c
+  SslStatServNull.c
+  SslExtServNull.c
 #  EcSm2Null.c
   DhNull.c
   EncoderNull.c
