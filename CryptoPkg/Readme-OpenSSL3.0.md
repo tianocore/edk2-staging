@@ -20,17 +20,17 @@ Will update latest result here (Build based on Intel platform).
 Binaries mode (use crypto drivers)  
 |     Driver      |   1.1.1    |    3.0     |   percent  |  
 |-----------------|------------|------------|------------|  
-|CryptoPei        |   386      |    398     |    3.1%    |  
+|CryptoPei        |   386      |    400     |    3.6%    |  
 |CryptoPeiPreMem  |   31       |    31      |    0%      |  
-|CryptoDxeFull    |   1014     |    997     |    -1.6%   |  
-|CryptoDxe        |   804      |    871     |    8.3%    |  
-|CryptoSmm        |   558      |    581     |    4.1%    |  
+|CryptoDxeFull    |   1014     |    935     |    -7.7%   |  
+|CryptoDxe        |   804      |    813     |    1.2%    |  
+|CryptoSmm        |   558      |    587     |    5.2%    |  
   
 | LZMA Compressed |   1.1.1    |    3.0     |   percent  |  
 |-----------------|------------|------------|------------|  
-|CryptoDxe        |   311      |    346     |    11.2%   |  
+|CryptoDxe        |   311      |    321     |    3.3%    |  
 |CryptoSmm        |   211      |    233     |    10.4%   |  
-|FV (Dxe+Smm)     |   357      |    406     |    13.7%   |  
+|FV (Dxe+Smm)     |   357      |    381     |    6.8%    |  
 
 Library mode (use crypto library)  
 |     Driver         |   1.1.1    |    3.0     |    delta   |  
@@ -61,6 +61,7 @@ SM2,
 SM3 - 12KB,  
 MD5 - 8KB,  
 PEM - 19KB,  
+TlsServer - 51KB (Only for DXE),
 ...  
 #### Risk:
 1. SM3  
@@ -154,5 +155,8 @@ https://github.com/liyi77/openssl/commit/faa5d6781c3af601bcbc11ff199e2955d7ff430
 https://github.com/liyi77/openssl/commit/8488c75701cdd5e626785e6d9d002f6fb30ae0ff  
 (commit: x509: remove unused extentions 19KB)  
 https://github.com/liyi77/openssl/commit/c27b3428708eb240b626946ce10d4219806d8adf  
+(commit: ssl: block out dtls code when OPENSSL_NO_DTLS defined 7KB)  
+https://github.com/liyi77/openssl/commit/a92f19cb85232a153f20303d7c9035b2b614fdb3  
+
 ## Timeline
 Target for 2023 Q1
