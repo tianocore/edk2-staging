@@ -45,8 +45,8 @@
   mbedtls/library/ecjpake.c
   mbedtls/library/ecp.c
   mbedtls/library/ecp_curves.c
-  mbedtls/library/entropy.c
-#  mbedtls/library/entropy_poll.c
+  # mbedtls/library/entropy.c
+  # mbedtls/library/entropy_poll.c
   mbedtls/library/error.c
   mbedtls/library/gcm.c
   mbedtls/library/hkdf.c
