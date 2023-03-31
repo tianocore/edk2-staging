@@ -535,64 +535,87 @@ EcPointSetCompressedCoordinates (
   IN VOID        *BnCtx
   )
 {
-  UINT8 *buf;
-  UINT8 *Newbuf;
   BOOLEAN Status;
+  mbedtls_mpi r;
+  mbedtls_mpi n;
+  mbedtls_ecp_point *pt;
   mbedtls_ecp_group *grp;
-  UINT16 PubkeyXszie;
-  UINTN XSize;
 
-  buf = NULL;
-  Newbuf = NULL;
-
+  pt = ( mbedtls_ecp_point *)EcPoint;
   grp = ( mbedtls_ecp_group *)EcGroup;
 
-  switch(grp->id) {
-    case MBEDTLS_ECP_DP_SECP256R1:
-          PubkeyXszie = 32;
-      break;
-    case MBEDTLS_ECP_DP_SECP384R1:
-          PubkeyXszie = 48;
-      break;
-    case MBEDTLS_ECP_DP_SECP521R1:
-          PubkeyXszie = 66;
-      break;
-    default :
-      return FALSE;
-  }
+  mbedtls_mpi_init(&r);
+  mbedtls_mpi_init(&n);
 
-  buf = AllocateZeroPool(PubkeyXszie);
-  Newbuf = AllocateZeroPool(PubkeyXszie + 1);
 
-  XSize = mbedtls_mpi_size (BnX);
-  if( mbedtls_mpi_write_binary(BnX, &buf[0 + PubkeyXszie - XSize], XSize) != 0) {
+  // r = x^2
+  if(mbedtls_mpi_mul_mpi(&r, BnX, BnX) != 0) {
     Status = FALSE;
-    goto Exit;
+    goto Clean;
   }
 
-  CopyMem (Newbuf + 1, &buf[0 + PubkeyXszie - XSize], XSize);
-
-  if (YBit ==  0) {
-    Newbuf[0] = 0x02;
-  } else {
-    Newbuf[0] = 0x03;
-  }
-
-  if (mbedtls_ecp_tls_read_point((const mbedtls_ecp_group *)EcGroup,
-                                 (mbedtls_ecp_point *)EcPoint,
-                                 &Newbuf, XSize + 1) != 0) {
+  // r = x^2 + a
+  if(mbedtls_mpi_add_mpi(&r, &r, &grp->A) != 0) {
     Status = FALSE;
-    goto Exit;
+    goto Clean;
   }
 
-  Status = TRUE;
-
-Exit:
-  if(buf != NULL) {
-    FreePool(buf);
+  // r = x^3 + ax
+  if (mbedtls_mpi_mul_mpi(&r, &r, BnX) != 0) {
+    Status = FALSE;
+    goto Clean;
   }
 
-  return Status;
+  // r = x^3 + ax + b
+  if (mbedtls_mpi_add_mpi(&r, &r, &grp->B) != 0) {
+    Status = FALSE;
+    goto Clean;
+  }
+
+  // Calculate square root of r over finite field P:
+  //   r = sqrt(x^3 + ax + b) = (x^3 + ax + b) ^ ((P + 1) / 4) (mod P)
+
+  // n = P + 1
+  if (mbedtls_mpi_add_int(&n, &grp->P, 1) != 0) {
+    Status = FALSE;
+    goto Clean;
+  }
+
+  // n = (P + 1) / 4
+  if(mbedtls_mpi_shift_r(&n, 2) != 0) {
+    Status = FALSE;
+    goto Clean;
+  }
+
+  // r ^ ((P + 1) / 4) (mod p)
+  if (mbedtls_mpi_exp_mod(&r, &r, &n, &grp->P, NULL) != 0) {
+    Status = FALSE;
+    goto Clean;
+  }
+
+  // Select solution that has the correct "sign" (equals odd/even solution in finite group)
+  if (YBit == 0) {
+      // r = p - r
+      if (mbedtls_mpi_sub_mpi(&r, &grp->P, &r) != 0) {
+          Status = FALSE;
+          goto Clean;
+      }
+  }
+
+  if (mbedtls_mpi_copy(&pt->X, (mbedtls_mpi *)BnX) != 0) {
+    return FALSE;
+  }
+
+  if (mbedtls_mpi_copy(&pt->Y, &r) != 0) {
+    return FALSE;
+  }
+
+  mbedtls_mpi_lset( &pt->Z , 1);
+
+Clean:
+  mbedtls_mpi_free(&r);
+  mbedtls_mpi_free(&n);
+  return TRUE;
 }
 
 // =====================================================================================
