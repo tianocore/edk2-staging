@@ -8,7 +8,7 @@ This POC is to explore mbedtls as a smaller alternative to OpenSSL.
 |  Driver  | OpenSSL 1.1  |  MbedTLS 3.0 |
 |  ----  | ----  | ----  |
 |  PEI  | 387Kb  | 142Kb |
-|  PeiPreMem  | 31Kb  | 58Kb |
+|  PeiPreMem  | 31Kb  | 32Kb |
 |  DXE  | 804Kb  | 336Kb  |
 |  DXEFULL  | 1014Kb  | 447Kb  |
 |  SMM  | 558Kb  | 324Kb  |

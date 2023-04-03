@@ -1296,7 +1296,7 @@
  *
  * Uncomment to enable the smaller implementation of SHA256.
  */
-//#define MBEDTLS_SHA256_SMALLER
+#define MBEDTLS_SHA256_SMALLER
 
 /**
  * \def MBEDTLS_SHA512_SMALLER
@@ -1306,7 +1306,7 @@
  *
  * Uncomment to enable the smaller implementation of SHA512.
  */
-//#define MBEDTLS_SHA512_SMALLER
+#define MBEDTLS_SHA512_SMALLER
 
 /**
  * \def MBEDTLS_SSL_ALL_ALERT_MESSAGES
