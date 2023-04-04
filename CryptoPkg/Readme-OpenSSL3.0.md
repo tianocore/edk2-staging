@@ -16,7 +16,18 @@ This branch is for investigating how to reduce the size increase.
 The branch owner: Li Yi <yi1.li@intel.com>  
 
 ## Latest update
-Will update latest result here (Build based on Intel platform).  
+The goal of POC has been reached, next step:
+1.  Optimize code quality  
+2.  Upstream OpenSsl code change  
+3.  Fully validation  
+  
+Risk:  
+1.  Upstream the openssl code is a long process. if all goes well, it can be completed before the next openssl stable release (July 2023).  
+	If missed, the next stable release will be in September 2023.  
+2.  If bugs are found during validation, some size optimization work will have to be discarded.   
+	This will result in that size increase greater than the current result.  
+
+## POC result
 Binaries mode (use crypto drivers)  
 |     Driver      |   1.1.1    |    3.0     |   percent  |  
 |-----------------|------------|------------|------------|  
@@ -35,7 +46,8 @@ Binaries mode (use crypto drivers)
 Library mode (use crypto library)  
 |     Driver         |   1.1.1    |    3.0     |    delta   |  
 |--------------------|------------|------------|------------|  
-|      FV            |   2377     |    2639    |     262    |  
+|      FV            |   2377     |    2636    |     262    |  
+|      FV (LZMA)     |   459      |    539     |     80     |  
 |SecurityStubDxe.efi |   562      |    605     |     43     |  
 
 ## Limitation
