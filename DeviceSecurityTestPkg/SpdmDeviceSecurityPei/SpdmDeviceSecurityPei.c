@@ -252,6 +252,7 @@ CreateSpdmDriverContext (
   BOOLEAN                           HasRspPubCert;
   EFI_PEI_READ_ONLY_VARIABLE2_PPI   *VariablePpi;
   UINTN                             SpdmContextSize;
+  BOOLEAN                           IsRequrester;
 
   SpdmDriverContext = AllocateZeroPool (sizeof(*SpdmDriverContext));
   ASSERT(SpdmDriverContext != NULL);
@@ -401,7 +402,11 @@ CreateSpdmDriverContext (
   SpdmSetData (SpdmContext, SpdmDataAEADCipherSuite, &Parameter, &Data16, sizeof(Data16));
   Data16 = SPDM_ALGORITHMS_KEY_SCHEDULE_HMAC_HASH;
   SpdmSetData (SpdmContext, SpdmDataKeySchedule, &Parameter, &Data16, sizeof(Data16));
-
+  IsRequrester = TRUE;
+  SpdmReturn = SpdmSetData (SpdmContext, LIBSPDM_DATA_IS_REQUESTER, &Parameter, &IsRequrester, sizeof (IsRequrester));
+  if (LIBSPDM_STATUS_IS_ERROR (SpdmReturn)) {
+    goto Error;
+  }
   Status = SpdmInitConnection (SpdmContext, FALSE);
   if (EFI_ERROR(Status)) {
     DEBUG ((DEBUG_ERROR, "SpdmInitConnection - %r\n", Status));

@@ -535,7 +535,7 @@ DoDeviceAuthentication (
 
   if ((CapabilityFlags & SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_CERT_CAP) != 0) {
     ZeroMem (TotalDigestBuffer, sizeof (TotalDigestBuffer));
-    SpdmReturn = SpdmGetDigest (SpdmContext, &SlotMask, TotalDigestBuffer);
+    SpdmReturn = SpdmGetDigest (SpdmContext, NULL, &SlotMask, TotalDigestBuffer);
     if (LIBSPDM_STATUS_IS_ERROR (SpdmReturn)) {
       SecurityState->AuthenticationState = EDKII_DEVICE_SECURITY_STATE_ERROR_DEVICE_ERROR;
       return EFI_DEVICE_ERROR;
@@ -546,7 +546,7 @@ DoDeviceAuthentication (
     TrustAnchor     = NULL;
     TrustAnchorSize = 0;
     for (SlotId = 0; SlotId < SPDM_MAX_SLOT_COUNT; SlotId++) {
-      SpdmReturn = SpdmGetCertificateEx (SpdmContext, SlotId, &CertChainSize, CertChain, (CONST VOID **)&TrustAnchor, &TrustAnchorSize);
+      SpdmReturn = SpdmGetCertificateEx (SpdmContext, NULL, SlotId, &CertChainSize, CertChain, (CONST VOID **)&TrustAnchor, &TrustAnchorSize);
       if (LIBSPDM_STATUS_IS_SUCCESS (SpdmReturn)) {
         IsValidCertChain = TRUE;
         break;
@@ -583,7 +583,7 @@ DoDeviceAuthentication (
   if ((CapabilityFlags & SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_CHAL_CAP) != 0) {
     ZeroMem (RequesterNonce, sizeof (RequesterNonce));
     ZeroMem (ResponderNonce, sizeof (ResponderNonce));
-    SpdmReturn = SpdmChallengeEx (SpdmContext, *ValidSlotId, SPDM_CHALLENGE_REQUEST_NO_MEASUREMENT_SUMMARY_HASH, NULL, NULL, NULL, RequesterNonce, ResponderNonce);
+    SpdmReturn = SpdmChallengeEx (SpdmContext, NULL, *ValidSlotId, SPDM_CHALLENGE_REQUEST_NO_MEASUREMENT_SUMMARY_HASH, NULL, NULL, NULL, RequesterNonce, ResponderNonce);
     if (SpdmReturn == LIBSPDM_STATUS_SUCCESS) {
       IsValidChallengeAuthSig = TRUE;
     } else if (SpdmReturn == LIBSPDM_STATUS_VERIF_FAIL) {

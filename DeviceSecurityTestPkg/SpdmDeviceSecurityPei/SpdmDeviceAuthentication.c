@@ -41,7 +41,7 @@ DoAuthenticationViaSpdm (
 
   if ((CapabilityFlags & SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_CERT_CAP) != 0) {
     ZeroMem (TotalDigestBuffer, sizeof(TotalDigestBuffer));
-    Status = SpdmGetDigest (SpdmContext, &SlotMask, TotalDigestBuffer);
+    Status = SpdmGetDigest (SpdmContext, NULL, &SlotMask, TotalDigestBuffer);
     DeviceSecurityState->AuthenticationState = SpdmGetLastError (SpdmContext);
     if (DeviceSecurityState->AuthenticationState != EDKII_DEVICE_SECURITY_STATE_SUCCESS) {
       return EFI_DEVICE_ERROR;
@@ -49,7 +49,7 @@ DoAuthenticationViaSpdm (
 
     CertChainSize = sizeof(CertChain);
     ZeroMem (CertChain, sizeof(CertChain));
-    Status = SpdmGetCertificate (SpdmContext, 0, &CertChainSize, CertChain);
+    Status = SpdmGetCertificate (SpdmContext, NULL, 0, &CertChainSize, CertChain);
     DeviceSecurityState->AuthenticationState = SpdmGetLastError (SpdmContext);
     if (DeviceSecurityState->AuthenticationState != EDKII_DEVICE_SECURITY_STATE_SUCCESS) {
       return EFI_DEVICE_ERROR;
@@ -57,7 +57,7 @@ DoAuthenticationViaSpdm (
   }
   
   ZeroMem (MeasurementHash, sizeof(MeasurementHash));
-  Status = SpdmChallenge (SpdmContext, 0, SPDM_CHALLENGE_REQUEST_NO_MEASUREMENT_SUMMARY_HASH, MeasurementHash);
+  Status = SpdmChallenge (SpdmContext, NULL, 0, SPDM_CHALLENGE_REQUEST_NO_MEASUREMENT_SUMMARY_HASH, MeasurementHash);
   DeviceSecurityState->AuthenticationState = SpdmGetLastError (SpdmContext);
   if (EFI_ERROR(Status)) {
     return Status;
