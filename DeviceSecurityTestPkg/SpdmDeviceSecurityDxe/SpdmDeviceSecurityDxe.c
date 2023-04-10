@@ -315,6 +315,7 @@ CreateSpdmDriverContext (
   UINT32                      Data32;
   BOOLEAN                     HasRspPubCert;
   UINTN                       ScratchBufferSize;
+  BOOLEAN                     IsRequrester;
 
   SpdmDriverContext = AllocateZeroPool (sizeof (*SpdmDriverContext));
   if (SpdmDriverContext == NULL) {
@@ -484,6 +485,11 @@ CreateSpdmDriverContext (
   SpdmSetData (SpdmContext, SpdmDataKeySchedule, &Parameter, &Data16, sizeof (Data16));
   Data8 = SPDM_ALGORITHMS_OPAQUE_DATA_FORMAT_1;
   SpdmSetData (SpdmContext, SpdmDataOtherParamsSsupport, &Parameter, &Data8, sizeof (Data8));
+  IsRequrester = TRUE;
+  SpdmReturn = SpdmSetData (SpdmContext, LIBSPDM_DATA_IS_REQUESTER, &Parameter, &IsRequrester, sizeof (IsRequrester));
+  if (LIBSPDM_STATUS_IS_ERROR (SpdmReturn)) {
+    goto Error;
+  }
 
   SpdmReturn = SpdmInitConnection (SpdmContext, FALSE);
   if (LIBSPDM_STATUS_IS_ERROR (SpdmReturn)) {

@@ -168,12 +168,16 @@ libspdm_zero_mem (
  * @retval Non-zero          There is mismatched between source_buffer and destination_buffer.
  *
  **/
-int32_t
-libspdm_const_compare_mem (
+bool
+libspdm_consttime_is_mem_equal (
   const void  *destination_buffer,
   const void  *source_buffer,
   size_t      length
   )
 {
-  return (int32_t)CompareMem (destination_buffer, source_buffer, length);
+  if (CompareMem (destination_buffer, source_buffer, length) == 0) {
+    return true;
+  } else {
+    return false;
+  }
 }
