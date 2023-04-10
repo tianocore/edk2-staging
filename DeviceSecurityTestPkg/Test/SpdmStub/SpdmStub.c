@@ -186,6 +186,7 @@ MainEntryPoint (
   UINT8                TestConfig;
   UINTN                TestConfigSize;
   SPDM_VERSION_NUMBER  SpdmVersion;
+  BOOLEAN              IsRequrester;
 
   TestConfigSize = sizeof (UINT8);
   Status         = gRT->GetVariable (
@@ -403,6 +404,8 @@ MainEntryPoint (
   SpdmSetData (SpdmContext, SpdmDataKeySchedule, &Parameter, &Data16, sizeof (Data16));
   Data8 = SPDM_ALGORITHMS_OPAQUE_DATA_FORMAT_1;
   SpdmSetData (SpdmContext, SpdmDataOtherParamsSsupport, &Parameter, &Data8, sizeof (Data8));
+  IsRequrester = FALSE;
+  SpdmSetData (SpdmContext, LIBSPDM_DATA_IS_REQUESTER, &Parameter, &IsRequrester, sizeof (IsRequrester));
 
   Status = gBS->InstallProtocolInterface (
                   &mSpdmTestDeviceContext.SpdmHandle,

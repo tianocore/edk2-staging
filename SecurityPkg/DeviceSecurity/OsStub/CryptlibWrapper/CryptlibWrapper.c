@@ -473,6 +473,20 @@ libspdm_rsa_get_public_key_from_x509 (
   return RsaGetPublicKeyFromX509 (cert, cert_size, rsa_context);
 }
 
+bool libspdm_ec_get_public_key_from_der(const uint8_t *der_data,
+                                        size_t der_size,
+                                        void **ec_context)
+{
+  return false;
+}
+
+bool libspdm_rsa_get_public_key_from_der(const uint8_t *der_data,
+                                         size_t der_size,
+                                         void **rsa_context)
+{
+  return false;
+}
+
 bool
 libspdm_ec_get_private_key_from_pem (
   const uint8_t  *pem_data,

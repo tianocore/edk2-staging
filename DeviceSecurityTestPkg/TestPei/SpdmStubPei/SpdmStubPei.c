@@ -102,6 +102,7 @@ MainEntryPoint (
   BOOLEAN                           HasRspPrivKey;
   EFI_PEI_READ_ONLY_VARIABLE2_PPI   *VariablePpi;
   UINTN                             SpdmContextSize;
+  BOOLEAN                           IsRequrester;
 
   SpdmContextSize = SpdmGetContextSize();
   DEBUG ((DEBUG_INFO, "SpdmContextSize - 0x%x\n", SpdmContextSize));
@@ -202,6 +203,8 @@ MainEntryPoint (
   SpdmSetData (SpdmContext, SpdmDataAEADCipherSuite, &Parameter, &Data16, sizeof(Data16));
   Data16 = SPDM_ALGORITHMS_KEY_SCHEDULE_HMAC_HASH;
   SpdmSetData (SpdmContext, SpdmDataKeySchedule, &Parameter, &Data16, sizeof(Data16));
+  IsRequrester = FALSE;
+  SpdmSetData (SpdmContext, LIBSPDM_DATA_IS_REQUESTER, &Parameter, &IsRequrester, sizeof (IsRequrester));
 
   Status = PeiServicesInstallPpi (&mSpdmIoPpiList);
   ASSERT_EFI_ERROR (Status);
