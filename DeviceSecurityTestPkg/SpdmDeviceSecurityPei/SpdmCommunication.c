@@ -136,7 +136,7 @@ SpdmPpiGetDigest (
   }
   SpdmContext = SpdmDriverDeviceContext->SpdmContext;
   
-  return SpdmGetDigest (SpdmContext, SlotMask, TotalDigestBuffer);
+  return SpdmGetDigest (SpdmContext, NULL, SlotMask, TotalDigestBuffer);
 }
 
 /*
@@ -160,7 +160,7 @@ SpdmPpiGetCertificate (
   }
   SpdmContext = SpdmDriverDeviceContext->SpdmContext;
   
-  return SpdmGetCertificate (SpdmContext, SlotNum, CertChainSize, CertChain);
+  return SpdmGetCertificate (SpdmContext, NULL, SlotNum, CertChainSize, CertChain);
 }
 
 /*
@@ -184,7 +184,7 @@ SpdmPpiChallenge (
   }
   SpdmContext = SpdmDriverDeviceContext->SpdmContext;
   
-  return SpdmChallenge (SpdmContext, SlotNum, MeasurementHashType, MeasurementHash);
+  return SpdmChallenge (SpdmContext, NULL, SlotNum, MeasurementHashType, MeasurementHash);
 }
 
 /*

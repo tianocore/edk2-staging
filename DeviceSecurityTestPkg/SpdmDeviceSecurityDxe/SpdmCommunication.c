@@ -153,7 +153,7 @@ SpdmProtocolGetDigest (
 
   SpdmContext = SpdmDriverDeviceContext->SpdmContext;
 
-  SpdmReturn = SpdmGetDigest (SpdmContext, SlotMask, TotalDigestBuffer);
+  SpdmReturn = SpdmGetDigest (SpdmContext, NULL, SlotMask, TotalDigestBuffer);
   if (LIBSPDM_STATUS_IS_SUCCESS (SpdmReturn)) {
     return EFI_SUCCESS;
   } else {
@@ -184,7 +184,7 @@ SpdmProtocolGetCertificate (
 
   SpdmContext = SpdmDriverDeviceContext->SpdmContext;
 
-  SpdmReturn = SpdmGetCertificate (SpdmContext, SlotNum, CertChainSize, CertChain);
+  SpdmReturn = SpdmGetCertificate (SpdmContext, NULL, SlotNum, CertChainSize, CertChain);
   if (LIBSPDM_STATUS_IS_SUCCESS (SpdmReturn)) {
     return EFI_SUCCESS;
   } else {
@@ -215,7 +215,7 @@ SpdmProtocolChallenge (
 
   SpdmContext = SpdmDriverDeviceContext->SpdmContext;
 
-  SpdmReturn = SpdmChallenge (SpdmContext, SlotNum, MeasurementHashType, MeasurementHash, NULL);
+  SpdmReturn = SpdmChallenge (SpdmContext, NULL, SlotNum, MeasurementHashType, MeasurementHash, NULL);
   if (LIBSPDM_STATUS_IS_SUCCESS (SpdmReturn)) {
     return EFI_SUCCESS;
   } else {
