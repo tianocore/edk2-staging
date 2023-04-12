@@ -545,6 +545,12 @@ DoDeviceAuthentication (
     ZeroMem (CertChain, sizeof (CertChain));
     TrustAnchor     = NULL;
     TrustAnchorSize = 0;
+
+    //
+    // Init *ValidSlotId to invalid slot_id
+    //
+    *ValidSlotId  = SPDM_MAX_SLOT_COUNT;
+
     for (SlotId = 0; SlotId < SPDM_MAX_SLOT_COUNT; SlotId++) {
       SpdmReturn = SpdmGetCertificateEx (SpdmContext, NULL, SlotId, &CertChainSize, CertChain, (CONST VOID **)&TrustAnchor, &TrustAnchorSize);
       if (LIBSPDM_STATUS_IS_SUCCESS (SpdmReturn)) {
@@ -555,10 +561,15 @@ DoDeviceAuthentication (
         *AuthState                         = TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_FAIL_INVALID;
         SecurityState->AuthenticationState = EDKII_DEVICE_SECURITY_STATE_ERROR_CERTIFIACTE_FAILURE;
         Status                             = ExtendCertificate (SpdmDeviceContext, *AuthState, 0, NULL, NULL, 0, SlotId, SecurityState);
+      } else if (SpdmReturn == LIBSPDM_STATUS_VERIF_NO_AUTHORITY) {
+        IsValidCertChain                   = TRUE;
+        *AuthState                         = TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_NO_AUTH;
+        SecurityState->AuthenticationState = EDKII_DEVICE_SECURITY_STATE_ERROR_CERTIFIACTE_FAILURE;
+        *ValidSlotId = SlotId;
       }
     }
 
-    if (SlotId >= SPDM_MAX_SLOT_COUNT) {
+    if ((SlotId >= SPDM_MAX_SLOT_COUNT) && (*ValidSlotId == SPDM_MAX_SLOT_COUNT)) {
       SecurityState->AuthenticationState = EDKII_DEVICE_SECURITY_STATE_ERROR_DEVICE_ERROR;
       return EFI_DEVICE_ERROR;
     }
