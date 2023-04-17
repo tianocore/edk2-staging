@@ -344,6 +344,7 @@ MainEntryPoint (
   ShaHashAllFunc      ShaHashAll;
   UINT8               *RootKey;
   UINTN               RootKeySize;
+  UINTN               CertCount;
 
   Status = ShellCommandLineParse (mParamList, &ParamPackage, NULL, TRUE);
   if (EFI_ERROR (Status)) {
@@ -522,6 +523,19 @@ MainEntryPoint (
         RootCert,
         RootCertSize
         );
+    } else if (TestConfig == TEST_CONFIG_MAX_ROOT_CERT_SUPPORT_IN_DB) {
+      // The total number of RootCert in database exceed the LIBSPDM_MAX_ROOT_CERT_SUPPORT.
+      CertCount = LIBSPDM_MAX_ROOT_CERT_SUPPORT + 1;
+      SignatureHeaderSize = 0;
+      DbSize   = sizeof (EFI_SIGNATURE_LIST) + SignatureHeaderSize + CertCount * sizeof(EFI_SIGNATURE_DATA);
+      DbList   = AllocateZeroPool (DbSize);
+      SignatureList = DbList;
+      SignatureListSize = DbSize;
+      ASSERT (SignatureList != NULL);
+      CopyGuid (&SignatureList->SignatureType, &gEfiCertX509Guid);
+      SignatureList->SignatureListSize   = (UINT32)SignatureListSize;
+      SignatureList->SignatureHeaderSize = (UINT32)SignatureHeaderSize;
+      SignatureList->SignatureSize       = (UINT32)(sizeof(EFI_SIGNATURE_DATA));
     } else {
       SignatureHeaderSize = 0;
       DbSize   = sizeof (EFI_SIGNATURE_LIST) + SignatureHeaderSize + sizeof (EFI_GUID) + RootCertSize;
