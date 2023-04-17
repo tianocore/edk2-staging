@@ -577,8 +577,6 @@ DoDeviceAuthentication (
     if (TrustAnchor != NULL) {
       RootCertMatch = TRUE;
       *ValidSlotId  = SlotId;
-    } else {
-      *ValidSlotId = 0;
     }
 
     DEBUG ((DEBUG_INFO, "SpdmGetCertificateEx - SpdmReturn %p, TrustAnchorSize 0x%x, RootCertMatch %d\n", SpdmReturn, TrustAnchorSize, RootCertMatch));
