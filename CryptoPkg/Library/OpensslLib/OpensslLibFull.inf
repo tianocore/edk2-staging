@@ -83,7 +83,7 @@
   $(OPENSSL_PATH)/providers/implementations/kdfs/hkdf.c
   $(OPENSSL_PATH)/providers/implementations/exchange/kdf_exch.c
   # $(OPENSSL_PATH)/providers/implementations/exchange/dh_exch.c
-  # $(OPENSSL_PATH)/providers/implementations/encode_decode/endecoder_common.c
+  $(OPENSSL_PATH)/providers/implementations/encode_decode/endecoder_common.c
   # $(OPENSSL_PATH)/providers/implementations/encode_decode/encode_key2text.c
   # $(OPENSSL_PATH)/providers/implementations/encode_decode/encode_key2ms.c
   # $(OPENSSL_PATH)/providers/implementations/encode_decode/encode_key2any.c
