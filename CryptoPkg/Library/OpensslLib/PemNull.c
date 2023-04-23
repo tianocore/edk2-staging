@@ -66,3 +66,33 @@ EC_KEY *PEM_read_bio_ECPrivateKey(BIO *bp, EC_KEY **key, pem_password_cb *cb,
                                     return NULL;
                                   }
 #endif
+
+RSA *ossl_b2i_RSA_after_header(const unsigned char **in, unsigned int bitlen,
+                               int ispub) {
+                                return NULL;
+                               }
+
+int ossl_do_blob_header(const unsigned char **in, unsigned int length,
+                        unsigned int *pmagic, unsigned int *pbitlen,
+                        int *pisdss, int *pispub) {
+                            return -1;
+                        }
+unsigned int ossl_blob_length(unsigned bitlen, int isdss, int ispub) {
+    return 0;
+}
+
+RSA *b2i_RSA_PVK_bio_ex(BIO *in, pem_password_cb *cb, void *u,
+                        OSSL_LIB_CTX *libctx, const char *propq)
+{
+    return NULL;
+}
+
+int PEM_get_EVP_CIPHER_INFO(char *header, EVP_CIPHER_INFO *cipher) {
+    return -1;
+}
+
+int PEM_do_header(EVP_CIPHER_INFO *cipher, unsigned char *data, long *plen,
+                  pem_password_cb *callback, void *u)
+                  {
+                    return -1;
+                  }

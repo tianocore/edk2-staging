@@ -213,6 +213,13 @@ static const OSSL_ALGORITHM deflt_keymgmt[] = {
     { NULL, NULL, NULL }
 };
 
+static const OSSL_ALGORITHM deflt_decoder[] = {
+#define DECODER_PROVIDER "default"
+#include "decoders.inc"
+    { NULL, NULL, NULL }
+#undef DECODER_PROVIDER
+};
+
 static const OSSL_ALGORITHM *deflt_query(void *provctx, int operation_id,
                                          int *no_cache)
 {
@@ -236,6 +243,8 @@ static const OSSL_ALGORITHM *deflt_query(void *provctx, int operation_id,
         return deflt_signature;
     case OSSL_OP_ASYM_CIPHER:
         return deflt_asym_cipher;
+    case OSSL_OP_DECODER:
+        return deflt_decoder;
     }
     return NULL;
 }
