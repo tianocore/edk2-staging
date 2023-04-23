@@ -70,15 +70,12 @@ As CryptoPkg\Library\OpensslLib\OpensslStub\uefiprov.c
 
 ### 2.Remove unnecessary module 
 SM2,  
-SM3 - 12KB,  
 MD5 - 8KB,  
 PEM - 19KB,  
 TlsServer - 51KB (Only for DXE),
 ...  
 #### Risk:
-1. SM3  
-Supported in TCG2(MdePkg\Include\Protocol\Tcg2Protocol.h) and TPM20(MdePkg\Include\IndustryStandard\Tpm20.h)  
-2. MD5  
+1. MD5  
 Dependency as:  
 MD5 --> PEM --> CryptoPem(Ec\RsaGetPrivateKeyFromPem): used in Pkcs7Sign and Unit test  
          |----> Pkcs7Sign(the priv key of input is PEM encoded): Just used in Unit test
@@ -132,10 +129,6 @@ will reduce size about 104KB.
 (commit: ec: disable ecx and ecd)  
 https://github.com/liyi77/openssl/commit/2b0a888c3623e1dc0637fbe0c5dcc1211b4d0545  
   
-2. Avoid build error when sm3 disabled.  
-(commit: sm3: avoid build error after sm3 disabled)  
-https://github.com/liyi77/openssl/commit/df92e440e45667da6ca1f9013f015e6d18981f2e  
-
 ### Level 2: A bit like workaround, with possibility of upstream to openssl
 1. Enable the legacy path for X509 pubkey decode and pmeth initialization,  
 The purpose is to avoid the use of EN/DECODE and Signature provider, will reduce size about 90KB.  
