@@ -19,7 +19,7 @@
   CONSTRUCTOR                    = OpensslLibConstructor
 
   DEFINE OPENSSL_PATH            = openssl
-  DEFINE OPENSSL_FLAGS           = -DL_ENDIAN -DOPENSSL_SMALL_FOOTPRINT -D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE -DOPENSSL_NO_EC -DOPENSSL_NO_ECDH -DOPENSSL_NO_ECDSA -DOPENSSL_NO_TLS1_3 -DOPENSSL_NO_ASM -DOPENSSL_NO_DH -DOPENSSL_NO_MD5
+  DEFINE OPENSSL_FLAGS           = -DL_ENDIAN -DOPENSSL_SMALL_FOOTPRINT -D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE -DOPENSSL_NO_EC -DOPENSSL_NO_ECDH -DOPENSSL_NO_ECDSA -DOPENSSL_NO_TLS1_3 -DOPENSSL_NO_ASM -DOPENSSL_NO_DH
   DEFINE OPENSSL_FLAGS_CONFIG    =
 
 #
@@ -43,7 +43,7 @@
   $(OPENSSL_PATH)/providers/common/provider_err.c
   $(OPENSSL_PATH)/providers/common/provider_ctx.c
   $(OPENSSL_PATH)/providers/common/der/der_rsa_key.c
-  # $(OPENSSL_PATH)/ssl/s3_cbc.c
+  $(OPENSSL_PATH)/ssl/s3_cbc.c
   $(OPENSSL_PATH)/providers/implementations/signature/rsa_sig.c
   $(OPENSSL_PATH)/providers/implementations/signature/mac_legacy_sig.c
   $(OPENSSL_PATH)/providers/implementations/rands/seeding/rand_win.c
@@ -92,8 +92,8 @@
   $(OPENSSL_PATH)/providers/implementations/digests/sha3_prov.c
   $(OPENSSL_PATH)/providers/implementations/digests/sha2_prov.c
   $(OPENSSL_PATH)/providers/implementations/digests/null_prov.c
-  # $(OPENSSL_PATH)/providers/implementations/digests/md5_sha1_prov.c
-  # $(OPENSSL_PATH)/providers/implementations/digests/md5_prov.c
+  $(OPENSSL_PATH)/providers/implementations/digests/md5_sha1_prov.c
+  $(OPENSSL_PATH)/providers/implementations/digests/md5_prov.c
   $(OPENSSL_PATH)/providers/implementations/ciphers/cipher_null.c
   $(OPENSSL_PATH)/providers/implementations/ciphers/cipher_cts.c
   $(OPENSSL_PATH)/providers/implementations/ciphers/cipher_aes_xts_hw.c
@@ -300,9 +300,9 @@
   $(OPENSSL_PATH)/crypto/modes/cfb128.c
   $(OPENSSL_PATH)/crypto/modes/ccm128.c
   $(OPENSSL_PATH)/crypto/modes/cbc128.c
-  # $(OPENSSL_PATH)/crypto/md5/md5_sha1.c
-  # $(OPENSSL_PATH)/crypto/md5/md5_one.c
-  # $(OPENSSL_PATH)/crypto/md5/md5_dgst.c
+  $(OPENSSL_PATH)/crypto/md5/md5_sha1.c
+  $(OPENSSL_PATH)/crypto/md5/md5_one.c
+  $(OPENSSL_PATH)/crypto/md5/md5_dgst.c
   $(OPENSSL_PATH)/crypto/uid.c
   $(OPENSSL_PATH)/crypto/trace.c
   $(OPENSSL_PATH)/crypto/threads_win.c
@@ -384,8 +384,8 @@
   $(OPENSSL_PATH)/crypto/evp/m_sigver.c
   $(OPENSSL_PATH)/crypto/evp/m_null.c
   $(OPENSSL_PATH)/crypto/evp/legacy_sha.c
-  # $(OPENSSL_PATH)/crypto/evp/legacy_md5_sha1.c
-  # $(OPENSSL_PATH)/crypto/evp/legacy_md5.c
+  $(OPENSSL_PATH)/crypto/evp/legacy_md5_sha1.c
+  $(OPENSSL_PATH)/crypto/evp/legacy_md5.c
   $(OPENSSL_PATH)/crypto/evp/keymgmt_meth.c
   $(OPENSSL_PATH)/crypto/evp/keymgmt_lib.c
   $(OPENSSL_PATH)/crypto/evp/kem.c
