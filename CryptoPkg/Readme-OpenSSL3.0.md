@@ -163,5 +163,19 @@ https://github.com/liyi77/openssl/commit/c27b3428708eb240b626946ce10d4219806d8ad
 (commit: ssl: block out dtls code when OPENSSL_NO_DTLS defined 7KB)  
 https://github.com/liyi77/openssl/commit/a92f19cb85232a153f20303d7c9035b2b614fdb3  
 
+## Openssl code upstream status
+1. Add macro such like OPENSSL_NO_ECX OPENSSL_NO_ECD to remove ecx and ecd feature,  
+will reduce size about 104KB.  
+Submitted and got feedback from openssl community.  
+https://github.com/openssl/openssl/pull/20781  
+  
+2. Enable the legacy path for X509 pubkey decode and pmeth, will reduce size about 150KB.  
+Rejected.  
+https://github.com/openssl/openssl/pull/20777  
+  
+3. Add 'type' field back to enable OPENSSL_NO_AUTOALGINIT, will reduce size about 27KB.  
+Openssl community will help to root cause this issue:  
+https://github.com/openssl/openssl/issues/20221#issuecomment-1515749910  
+
 ## Timeline
 Target for 2023 Q1
