@@ -52,6 +52,7 @@
   Pk/CryptPkcs7VerifyEku.c
   Pk/CryptAuthenticode.c
   Pk/CryptX509.c
+  Pk/CryptTs.c
   Rand/CryptRand.c
   SysCall/BaseMemAllocation.c
   SysCall/CrtWrapper.c

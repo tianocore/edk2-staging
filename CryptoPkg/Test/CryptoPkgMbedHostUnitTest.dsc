@@ -35,7 +35,7 @@
   #
   CryptoPkg/Test/UnitTest/Library/BaseCryptLib/TestBaseCryptLibHost.inf {
     <LibraryClasses>
-      MbedTlsLib|CryptoPkg/Library/MbedTlsLib/MbedTlsLib.inf
+      MbedTlsLib|CryptoPkg/Library/MbedTlsLib/MbedTlsLibFull.inf
   }
 
 [BuildOptions]

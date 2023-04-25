@@ -46,13 +46,12 @@
   mbedtls/library/debug.c
   mbedtls/library/des.c
   mbedtls/library/dhm.c
-  # mbedtls/library/ecdh.c
-  # mbedtls/library/ecdsa.c
-  # mbedtls/library/ecjpake.c
-  # mbedtls/library/ecp.c
-  # mbedtls/library/ecp_curves.c
-  EcSm2Null.c
-  # mbedtls/library/entropy.c
+  mbedtls/library/ecdh.c
+  mbedtls/library/ecdsa.c
+  mbedtls/library/ecjpake.c
+  mbedtls/library/ecp.c
+  mbedtls/library/ecp_curves.c
+  mbedtls/library/entropy.c
   # mbedtls/library/entropy_poll.c
   mbedtls/library/error.c
   mbedtls/library/gcm.c
