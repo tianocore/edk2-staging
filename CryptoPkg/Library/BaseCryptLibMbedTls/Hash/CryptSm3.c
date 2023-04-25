@@ -7,6 +7,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 **/
 
 #include "InternalCryptLib.h"
+#include "internal/sm3.h"
 
 /**
   Retrieves the size, in bytes, of the context buffer required for SM3 hash operations.
@@ -20,7 +21,10 @@ Sm3GetContextSize (
   VOID
   )
 {
-  return 0;
+  //
+  // Retrieves Openssl SM3 Context Size
+  //
+  return (UINTN)(sizeof (SM3_CTX));
 }
 
 /**
@@ -41,7 +45,18 @@ Sm3Init (
   OUT  VOID  *Sm3Context
   )
 {
-  return FALSE;
+  //
+  // Check input parameters.
+  //
+  if (Sm3Context == NULL) {
+    return FALSE;
+  }
+
+  //
+  // Openssl SM3 Context Initialization
+  //
+  ossl_sm3_init ((SM3_CTX *)Sm3Context);
+  return TRUE;
 }
 
 /**
@@ -66,7 +81,16 @@ Sm3Duplicate (
   OUT  VOID        *NewSm3Context
   )
 {
-  return FALSE;
+  //
+  // Check input parameters.
+  //
+  if ((Sm3Context == NULL) || (NewSm3Context == NULL)) {
+    return FALSE;
+  }
+
+  CopyMem (NewSm3Context, Sm3Context, sizeof (SM3_CTX));
+
+  return TRUE;
 }
 
 /**
@@ -95,7 +119,26 @@ Sm3Update (
   IN      UINTN       DataSize
   )
 {
-  return FALSE;
+  //
+  // Check input parameters.
+  //
+  if (Sm3Context == NULL) {
+    return FALSE;
+  }
+
+  //
+  // Check invalid parameters, in case that only DataLength was checked in Openssl
+  //
+  if ((Data == NULL) && (DataSize != 0)) {
+    return FALSE;
+  }
+
+  //
+  // Openssl SM3 Hash Update
+  //
+  ossl_sm3_update ((SM3_CTX *)Sm3Context, Data, DataSize);
+
+  return TRUE;
 }
 
 /**
@@ -125,7 +168,19 @@ Sm3Final (
   OUT     UINT8  *HashValue
   )
 {
-  return FALSE;
+  //
+  // Check input parameters.
+  //
+  if ((Sm3Context == NULL) || (HashValue == NULL)) {
+    return FALSE;
+  }
+
+  //
+  // Openssl SM3 Hash Finalization
+  //
+  ossl_sm3_final (HashValue, (SM3_CTX *)Sm3Context);
+
+  return TRUE;
 }
 
 /**
@@ -154,5 +209,27 @@ Sm3HashAll (
   OUT  UINT8       *HashValue
   )
 {
-  return FALSE;
+  SM3_CTX  Ctx;
+
+  //
+  // Check input parameters.
+  //
+  if (HashValue == NULL) {
+    return FALSE;
+  }
+
+  if ((Data == NULL) && (DataSize != 0)) {
+    return FALSE;
+  }
+
+  //
+  // SM3 Hash Computation.
+  //
+  ossl_sm3_init (&Ctx);
+
+  ossl_sm3_update (&Ctx, Data, DataSize);
+
+  ossl_sm3_final (HashValue, &Ctx);
+
+  return TRUE;
 }
