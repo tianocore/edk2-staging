@@ -38,10 +38,17 @@
   }
   CryptoPkg/Test/UnitTest/Library/BaseCryptLib/TestBaseCryptLibHost.inf {
     <Defines>
-      FILE_GUID = 3604CCB8-138C-488F-8045-18704F73E734
+      FILE_GUID = 9604CCB8-138C-488F-8045-18704F73E739
     <LibraryClasses>
-      OpensslLib|CryptoPkg/Library/OpensslLib/OpensslLibFullAccel.inf
+      BaseCryptLib|CryptoPkg/Library/BaseCryptLib/UnitTestHostBaseCryptLibSha3Sm3.inf
+      OpensslLib|CryptoPkg/Library/OpensslLib/OpensslLibSha3Sm3.inf
   }
+  # CryptoPkg/Test/UnitTest/Library/BaseCryptLib/TestBaseCryptLibHost.inf {
+  #   <Defines>
+  #     FILE_GUID = 3604CCB8-138C-488F-8045-18704F73E734
+  #   <LibraryClasses>
+  #     OpensslLib|CryptoPkg/Library/OpensslLib/OpensslLibFullAccel.inf
+  # }
 
 [BuildOptions]
   *_*_*_CC_FLAGS = -D DISABLE_NEW_DEPRECATED_INTERFACES
