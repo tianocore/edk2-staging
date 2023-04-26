@@ -54,14 +54,12 @@ AuthenticodeVerify (
   UINT8        Asn1Byte;
   UINTN        ContentSize;
   CONST UINT8  *SpcIndirectDataOid;
+  UINT8 *Ptr;
+  UINT8 *End;
+  INT32 Len;
+  UINTN ObjLen;
 
-  UINT8              *SignedData;
-  UINTN              SignedDataSize;
-  BOOLEAN            Wrapped;
-  mbedtls_pkcs7      Pkcs7;
-  INTN               Ret;
-
-  mbedtls_pkcs7_init(&Pkcs7);
+  OrigAuthData = AuthData;
 
   //
   // Check input parameters.
@@ -74,31 +72,55 @@ AuthenticodeVerify (
     return FALSE;
   }
 
-  Status       = FALSE;
-  OrigAuthData = AuthData;
+  Ptr = (UINT8*)(UINTN)AuthData;
+  Len = (UINT32)DataSize;
+  End = Ptr + Len;
 
-  Status = WrapPkcs7Data (AuthData, DataSize, &Wrapped, &SignedData, &SignedDataSize);
-  if (!Status || (SignedDataSize > INT_MAX)) {
-    goto _Exit;
+  //ContentInfo
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x30) != 0) {
+    return FALSE;
+  }
+  //ContentType
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x06) != 0) {
+    return FALSE;
+  }
+
+  Ptr += ObjLen;
+  //content
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0xA0) != 0) {
+    return FALSE;
+  }
+
+  End = Ptr + ObjLen;
+  //signedData
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x30) != 0) {
+    return FALSE;
+  }
+  //version
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x02) != 0) {
+    return FALSE;
+  }
+  Ptr += ObjLen;
+  //digestAlgo
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x31) != 0) {
+    return FALSE;
+  }
+  Ptr += ObjLen;
+
+  //encapContentInfo
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x30) != 0) {
+    return FALSE;
+  }
+  End = Ptr + ObjLen;
+  //eContentType
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x06) != 0) {
+    return FALSE;
   }
 
   Status = FALSE;
 
-  Ret = mbedtls_pkcs7_parse_der(&Pkcs7, SignedData, (INT32)SignedDataSize);
-
-  //
-  // The type of Pkcs7 must be signedData
-  //
-  if (Ret != MBEDTLS_PKCS7_SIGNED_DATA) {
-    goto _Exit;
-  }
-
-
-  //    Use opaque ASN.1 string to retrieve
-  //    PKCS#7 ContentInfo here.
-  //
-  SpcIndirectDataOid = Pkcs7.signed_data.content.oid.p;
-  if ((Pkcs7.signed_data.content.oid.len != sizeof (mSpcIndirectOidValue)) ||
+  SpcIndirectDataOid = Ptr;
+  if ((ObjLen != sizeof (mSpcIndirectOidValue)) ||
       (CompareMem (
          SpcIndirectDataOid,
          mSpcIndirectOidValue,
@@ -111,7 +133,13 @@ AuthenticodeVerify (
     goto _Exit;
   }
 
-  SpcIndirectDataContent = (UINT8 *)(Pkcs7.signed_data.content.data.p);
+  Ptr += ObjLen;
+  //eContent
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0xA0) != 0) {
+    return FALSE;
+  }
+
+ SpcIndirectDataContent = Ptr;
 
   //
   // Retrieve the SEQUENCE data size from ASN.1-encoded SpcIndirectDataContent.
@@ -168,10 +196,6 @@ AuthenticodeVerify (
   Status = (BOOLEAN)Pkcs7Verify (OrigAuthData, DataSize, TrustedCert, CertSize, SpcIndirectDataContent, ContentSize);
 
 _Exit:
-  //
-  // Release Resources
-  //
-  mbedtls_pkcs7_free (&Pkcs7);
 
   return Status;
 }
