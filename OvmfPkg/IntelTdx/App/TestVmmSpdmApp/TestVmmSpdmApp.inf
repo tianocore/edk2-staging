@@ -1,0 +1,45 @@
+## @file
+#  This is the shell application
+#
+#  Copyright (c) 2009 - 2018, Intel Corporation. All rights reserved.<BR>
+#
+#  SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010006
+  BASE_NAME                      = TestVmmSpdmApp
+  FILE_GUID                      = 1662ef73-ddd3-457a-8b54-c3ca73fc3613
+  MODULE_TYPE                    = UEFI_APPLICATION
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = ShellCEntryLib
+
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = X64
+#
+
+[Sources]
+  CalcExecutionInfo.c
+  TestVmmSpdm.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  ShellPkg/ShellPkg.dec
+  SecurityPkg/SecurityPkg.dec
+  OvmfPkg/OvmfPkg.dec
+  CryptoPkg/CryptoPkg.dec
+
+[LibraryClasses]
+  PciExpressLib
+  PciLib
+  ShellCEntryLib
+  ShellLib
+  UefiLib
+  PcdLib
+
+[Protocols]
+  gEdkiiVmmSpdmTunnelProtocolGuid    ## CONSUMES
