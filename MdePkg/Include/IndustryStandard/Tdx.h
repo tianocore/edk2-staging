@@ -102,6 +102,7 @@
 #define TDVMCALL_GET_QUOTE           0x10002
 #define TDVMCALL_REPORT_FATAL_ERR    0x10003
 #define TDVMCALL_SETUP_EVENT_NOTIFY  0x10004
+#define TDVMCALL_SERVICE             0x10005
 
 #pragma pack(1)
 typedef struct {
