@@ -1,0 +1,58 @@
+## @file
+#
+#
+#
+# Copyright (c) 2020 - 2022, Intel Corporation. All rights reserved.<BR>
+# SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = VmmSpdmTunnelDxe
+  FILE_GUID                      = 9e5f08bb-1a29-4d29-90b0-a9b9932999d3
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = VmmSpdmTunnelDxeDriverEntry
+
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = X64
+#
+
+[Sources]
+  VmmSpdmTunnelDxe.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  SecurityPkg/SecurityPkg.dec
+  OvmfPkg/OvmfPkg.dec
+
+[LibraryClasses]
+  MemoryAllocationLib
+  BaseLib
+  UefiBootServicesTableLib
+  UefiDriverEntryPoint
+  BaseMemoryLib
+  DebugLib
+  PrintLib
+  UefiLib
+  MemEncryptTdxLib
+  MemoryAllocationLib
+  VmmSpdmVTpmCommunicatorLib
+
+[Guids]
+  gEfiTpmDeviceInstanceNoneGuid                      ## SOMETIMES_CONSUMES  ## GUID       # TPM device identifier
+  gEfiTpmDeviceInstanceTpm12Guid                     ## SOMETIMES_CONSUMES  ## GUID       # TPM device identifier
+
+[Protocols]
+  gEdkiiVmmSpdmTunnelProtocolGuid                      ## PRODUCES
+
+[Pcd]
+  gEfiSecurityPkgTokenSpaceGuid.PcdTpmInstanceGuid                          ## CONSUMES
+  gUefiOvmfPkgTokenSpaceGuid.PcdVtpmSecureSessionInfoTableAddr
+  gUefiOvmfPkgTokenSpaceGuid.PcdVtpmSecureSessionInfoTableSize
+
+[Depex]
+  TRUE
