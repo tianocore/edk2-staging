@@ -104,3 +104,42 @@ TdVCpuNum (
 {
   return 0;
 }
+
+/**
+ * Call TDCALL to get TD_REPORT
+ *
+ * @param  Report         Pointer to the buffer which will hold the TDREPORT data.
+ *                        It should be 1024-B aligned.
+ * @param  ReportSize     Size of the buffer of TDREPORT. It must be 1024 at least.
+ * @param  AdditionalData AdditionalData which is provided by td guest.
+ *                        It should be 64-B aligned.
+ * @param  AdditionalDataSize  Size of AdditionalData. It must be 64.
+*/
+EFI_STATUS
+EFIAPI
+TdGetReport (
+  IN  UINT8   *Report,
+  IN  UINT32  ReportSize,
+  IN  UINT8   *AdditionalData,
+  IN  UINT32  AdditionalDataSize
+  )
+{
+  return EFI_UNSUPPORTED;
+}
+
+/**
+ * Call TDCALL to verify TD_REPORT
+ *
+ * @param  ReportMac      Pointer to the REPORTMACSTRUCT.
+ *                        It should be 256-B aligned.
+ * @param  ReportMacSize  Size of the REPORTMACSTRUCT. It must be 256.
+*/
+EFI_STATUS
+EFIAPI
+TdVerifyReport (
+  IN  UINT8   *ReportMac,
+  IN  UINT32  ReportMacSize
+  )
+{
+  return EFI_UNSUPPORTED;
+}
