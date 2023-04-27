@@ -27,6 +27,7 @@
   AcceptPages.c
   Rtmr.c
   TdInfo.c
+  TdReport.c
 
 [Packages]
   MdePkg/MdePkg.dec
