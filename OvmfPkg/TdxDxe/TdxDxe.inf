@@ -45,6 +45,7 @@
 
 [Guids]
   gUefiOvmfPkgPlatformInfoGuid                      ## CONSUMES
+  gEdkiiVTpmSecureSpdmSessionInfoHobGuid
 
 [Protocols]
   gQemuAcpiTableNotifyProtocolGuid                 ## CONSUMES
@@ -71,3 +72,10 @@
   gEfiMdeModulePkgTokenSpaceGuid.PcdSetNxForStack
   gEfiMdeModulePkgTokenSpaceGuid.PcdEmuVariableNvStoreReserved
   gUefiOvmfPkgTokenSpaceGuid.PcdTdxAcceptPageSize
+  gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiDefaultOemId                        ## CONSUMES
+  gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiDefaultOemTableId                   ## CONSUMES
+  gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiDefaultOemRevision                  ## CONSUMES
+  gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiDefaultCreatorId                    ## CONSUMES
+  gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiDefaultCreatorRevision              ## CONSUMES
+  gUefiOvmfPkgTokenSpaceGuid.PcdVtpmSecureSessionInfoTableAddr
+  gUefiOvmfPkgTokenSpaceGuid.PcdVtpmSecureSessionInfoTableSize

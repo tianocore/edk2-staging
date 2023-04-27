@@ -27,6 +27,27 @@
 #include <Protocol/Cpu.h>
 #include <Uefi.h>
 #include <TdxAcpiTable.h>
+#include <IndustryStandard/VTpmTd.h>
+
+EDKII_TDTK_ACPI_TABLE  mTdtkAcpiTemplate = {
+  {
+    EDKII_TDTK_ACPI_TABLE_SIGNATURE,
+    sizeof (mTdtkAcpiTemplate),
+    EDKII_TDTK_ACPI_TABLE_REVISION,
+    //
+    // Compiler initializes the remaining bytes to 0
+    // These fields should be filled in production
+    //
+  },
+  0,  // rsvd
+  {   // VTPM_SECURE_SESSION_INFO_TABLE_HEADER
+    EDKII_TDTK_SECURE_SESSION_TABLE_REVISION, // version
+    EDKII_VTPM_SECURE_SESSION_PROTOCOL_SPDM,  // protocol
+    0,                                        // rsvd
+    0,                                        // length
+    0,                                        // address
+  }
+};
 
 /**
   At the beginning of system boot, a 4K-aligned, 4K-size memory (Td mailbox) is
@@ -210,4 +231,64 @@ AlterAcpiTable (
   if (NewMadtTable != NULL) {
     FreePool (NewMadtTable);
   }
+}
+
+/**
+  Install TDTK table when ACPI Table protocol is ready.
+
+  @param[in]  Event     Event whose notification function is being invoked
+  @param[in]  Context   Pointer to the notification function's context
+**/
+VOID
+EFIAPI
+InstallTdtkAcpiTable (
+  IN EFI_EVENT  Event,
+  IN VOID       *Context
+  )
+{
+  EFI_STATUS               Status;
+  UINT32                   TotalSize;
+  UINT8                    *TdtkTable;
+  UINTN                    TableKey;
+  UINT64                   OemTableId;
+  UINT32                   SecureSessionInfoTableSize;
+  EFI_ACPI_TABLE_PROTOCOL  *AcpiTable;
+
+  Status = gBS->LocateProtocol (&gEfiAcpiTableProtocolGuid, NULL, (VOID **)&AcpiTable);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "%a: AcpiTableProtocol is not installed. %r\n", __FUNCTION__, Status));
+    ASSERT (FALSE);
+    return;
+  }
+
+  TotalSize = sizeof (EDKII_TDTK_ACPI_TABLE);
+  TdtkTable = AllocatePool (TotalSize);
+
+  mTdtkAcpiTemplate.Header.Length = TotalSize;
+  CopyMem (mTdtkAcpiTemplate.Header.OemId, PcdGetPtr (PcdAcpiDefaultOemId), sizeof (mTdtkAcpiTemplate.Header.OemId));
+  OemTableId = PcdGet64 (PcdAcpiDefaultOemTableId);
+  CopyMem (&mTdtkAcpiTemplate.Header.OemTableId, &OemTableId, sizeof (UINT64));
+  mTdtkAcpiTemplate.Header.OemRevision     = PcdGet32 (PcdAcpiDefaultOemRevision);
+  mTdtkAcpiTemplate.Header.CreatorId       = PcdGet32 (PcdAcpiDefaultCreatorId);
+  mTdtkAcpiTemplate.Header.CreatorRevision = PcdGet32 (PcdAcpiDefaultCreatorRevision);
+
+  SecureSessionInfoTableSize = VTPM_SECURE_SESSION_INFO_TABLE_SIZE;
+  mTdtkAcpiTemplate.SecureSessionTableHeader.Length = SecureSessionInfoTableSize;
+  mTdtkAcpiTemplate.SecureSessionTableHeader.Address = PcdGet64 (PcdVtpmSecureSessionInfoTableAddr);
+
+  CopyMem (TdtkTable, (UINT8 *)&mTdtkAcpiTemplate, sizeof (EDKII_TDTK_ACPI_TABLE));
+
+  //
+  // Construct ACPI Table
+  //
+  Status = AcpiTable->InstallAcpiTable (
+                                        AcpiTable,
+                                        TdtkTable,
+                                        TotalSize,
+                                        &TableKey
+                                        );
+  ASSERT_EFI_ERROR (Status);
+
+  DEBUG ((DEBUG_INFO, "TDTK ACPI Table is installed. TotalSize=%d, SecureSessionTableSize=%d\n", TotalSize, SecureSessionInfoTableSize));
+  return;
 }

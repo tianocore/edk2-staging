@@ -57,4 +57,16 @@ AlterAcpiTable (
   IN VOID       *Context
   );
 
+/**
+  Install TDTK table when ACPI Table protocol is ready.
+
+  @param[in]  Event     Event whose notification function is being invoked
+  @param[in]  Context   Pointer to the notification function's context
+**/
+VOID
+EFIAPI
+InstallTdtkAcpiTable (
+  IN EFI_EVENT  Event,
+  IN VOID       *Context
+  );
 #endif

@@ -32,6 +32,7 @@
 #include <Library/TdxLib.h>
 #include <TdxAcpiTable.h>
 #include <Library/MemEncryptTdxLib.h>
+#include <IndustryStandard/VTpmTd.h>
 
 #define ALIGNED_2MB_MASK  0x1fffff
 EFI_HANDLE  mTdxDxeHandle = NULL;
@@ -301,6 +302,88 @@ SetMmioSharedBit (
   return EFI_SUCCESS;
 }
 
+STATIC
+VTPM_SECURE_SESSION_INFO_TABLE *
+GetSpdmSecuredSessionInfo (
+  VOID
+  )
+{
+  EFI_PEI_HOB_POINTERS            GuidHob;
+  UINT16                          HobLength;
+
+  GuidHob.Guid = GetFirstGuidHob (&gEdkiiVTpmSecureSpdmSessionInfoHobGuid);
+  if (GuidHob.Guid == NULL) {
+    return NULL;
+  }
+
+  HobLength = sizeof (EFI_HOB_GUID_TYPE) + VTPM_SECURE_SESSION_INFO_TABLE_SIZE;
+
+  if (GuidHob.Guid->Header.HobLength != HobLength) {
+    ASSERT (FALSE);
+    return NULL;
+  }
+
+  return (VTPM_SECURE_SESSION_INFO_TABLE *)(GuidHob.Guid + 1);
+}
+
+STATIC
+EFI_STATUS
+PrepareForVtpm (
+  VOID
+  )
+{
+  EFI_STATUS            Status;
+  EFI_PHYSICAL_ADDRESS  Address;
+  VOID                  *Registration;
+  EFI_EVENT             AcpiTableEvent;
+  VTPM_SECURE_SESSION_INFO_TABLE *InfoTable;
+
+  // Check if SecuredSpdmSession is established
+  InfoTable = GetSpdmSecuredSessionInfo ();
+  if (InfoTable == NULL || InfoTable->SessionId == 0) {
+    DEBUG ((DEBUG_INFO, "SecuredSpdmSession is not established.\n"));
+    return EFI_NOT_STARTED;
+  }
+
+  Status = gBS->AllocatePages (
+                               AllocateAnyPages,
+                               EfiACPIMemoryNVS,
+                               1,
+                               &Address
+                               );
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  ZeroMem ((VOID *)(UINTN)Address, EFI_PAGES_TO_SIZE (1));
+  CopyMem ((VOID *)(UINTN)Address, InfoTable, VTPM_SECURE_SESSION_INFO_TABLE_SIZE);
+
+  PcdSet64S (PcdVtpmSecureSessionInfoTableAddr, Address);
+  PcdSet64S (PcdVtpmSecureSessionInfoTableSize, EFI_PAGES_TO_SIZE (1));
+
+  //
+  // If VTPM is enabled then create event callback to install TDTK ACPI Table
+  //
+  Status = gBS->CreateEventEx (
+                               EVT_NOTIFY_SIGNAL,
+                               TPL_CALLBACK,
+                               InstallTdtkAcpiTable,
+                               NULL,
+                               &gEfiAcpiTableProtocolGuid,
+                               &AcpiTableEvent
+                               );
+  ASSERT (!EFI_ERROR (Status));
+
+  Status = gBS->RegisterProtocolNotify (
+                                        &gEfiAcpiTableProtocolGuid,
+                                        AcpiTableEvent,
+                                        &Registration
+                                        );
+  ASSERT (!EFI_ERROR (Status));
+
+  return EFI_SUCCESS;
+}
+
 EFI_STATUS
 EFIAPI
 TdxDxeEntryPoint (
@@ -417,6 +500,8 @@ TdxDxeEntryPoint (
                   QemuAcpiTableEvent,
                   &Registration
                   );
+
+  PrepareForVtpm ();
 
   #define INIT_PCDSET(NAME, RES)  do {\
   PcdStatus = PcdSet64S (NAME##Base, (RES)->PhysicalStart); \
