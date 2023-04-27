@@ -1065,6 +1065,11 @@
       VmmSpdmVTpmCommunicatorLib|OvmfPkg/Library/VmmSpdmVTpm/VmmSpdmVTpmCommunicatorLibDxe.inf
   }
 
+  OvmfPkg/IntelTdx/App/TestVmmSpdmApp/TestVmmSpdmApp.inf {
+    <LibraryClasses>
+      !include VmmSpdmLibs.dsc.inc
+  }
+
 !endif
 !endif
 

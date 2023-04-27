@@ -346,6 +346,7 @@ INF OvmfPkg/TdxDxe/TdxDxe.inf
 !if $(TPM2_ENABLE) == TRUE
 !if $(VTPM_ENABLE) == TRUE
   INF OvmfPkg/Tcg/VmmSpdmTunnel/VmmSpdmTunnelDxe.inf
+  INF OvmfPkg/IntelTdx/App/TestVmmSpdmApp/TestVmmSpdmApp.inf
 !endif
 !endif
 
