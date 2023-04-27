@@ -282,6 +282,9 @@ typedef struct {
 #define SpdmTransportPciDoeDecodeMessage  libspdm_transport_pci_doe_decode_message
 #define SpdmTransportPciDoeGetHeaderSize  libspdm_transport_pci_doe_get_header_size
 
+#define SpdmGetSecuredMessageContextViaSessionId  libspdm_get_secured_message_context_via_session_id
+#define SpdmSecuredMessageExportSessionKeys       libspdm_secured_message_export_session_keys
+
 #define SpdmMeasurementCollectionFunc         libspdm_measurement_collection
 #define SpdmRequesterDataSignFunc             libspdm_requester_data_sign
 #define SpdmResponderDataSignFunc             libspdm_responder_data_sign
@@ -289,4 +292,11 @@ typedef struct {
 #define SpdmPskMasterSecretHkdfExpandFunc     libspdm_psk_master_secret_hkdf_expand
 #define SpdmPskHandshakeSecretHkdfExpandFunc  libspdm_psk_handshake_secret_hkdf_expand
 
+#define SpdmAeadDecryption                    libspdm_aead_decryption
+#define SpdmAeadEncryption                    libspdm_aead_encryption
+#define SpdmGetRandomNumber                   libspdm_get_random_number
+#define SpdmEncodeSecuredMessage              libspdm_encode_secured_message
+#define SpdmSetLastSpdmErrorStruct            libspdm_set_last_spdm_error_struct
+#define SpdmDecodeSecuredMessage              libspdm_decode_secured_message
+#define SpdmSecuredMessageGetLastErrorStruct  libspdm_secured_message_get_last_spdm_error_struct
 #endif
