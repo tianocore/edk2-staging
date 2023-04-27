@@ -97,11 +97,13 @@ gUefiOvmfPkgTokenSpaceGuid.PcdOvmfCpuidBase|gUefiOvmfPkgTokenSpaceGuid.PcdOvmfCp
 0x010000|0x010000
 gUefiOvmfPkgTokenSpaceGuid.PcdOvmfSecPeiTempRamBase|gUefiOvmfPkgTokenSpaceGuid.PcdOvmfSecPeiTempRamSize
 
-0x020000|0x0E0000
+#0x020000|0x0E0000
+0x020000|0x2E0000
 gUefiOvmfPkgTokenSpaceGuid.PcdOvmfPeiMemFvBase|gUefiOvmfPkgTokenSpaceGuid.PcdOvmfPeiMemFvSize
 FV = PEIFV
 
-0x100000|0xD00000
+#0x180000|0xC00000
+0x300000|0xA00000
 gUefiOvmfPkgTokenSpaceGuid.PcdOvmfDxeMemFvBase|gUefiOvmfPkgTokenSpaceGuid.PcdOvmfDxeMemFvSize
 FV = DXEFV
 
@@ -223,6 +225,11 @@ APRIORI DXE {
   # encrypted region (Since the range has not been marked shared/unencrypted).
   INF  OvmfPkg/AmdSevDxe/AmdSevDxe.inf
   INF  OvmfPkg/TdxDxe/TdxDxe.inf
+!if $(TPM2_ENABLE) == TRUE
+!if $(VTPM_ENABLE) == TRUE
+  INF  OvmfPkg/Tcg/VmmSpdmTunnel/VmmSpdmTunnelDxe.inf
+!endif
+!endif
 !if $(SMM_REQUIRE) == FALSE
   INF  OvmfPkg/QemuFlashFvbServicesRuntimeDxe/FvbServicesRuntimeDxe.inf
 !endif
@@ -336,6 +343,11 @@ INF  ShellPkg/Application/Shell/Shell.inf
 INF MdeModulePkg/Logo/LogoDxe.inf
 
 INF OvmfPkg/TdxDxe/TdxDxe.inf
+!if $(TPM2_ENABLE) == TRUE
+!if $(VTPM_ENABLE) == TRUE
+  INF OvmfPkg/Tcg/VmmSpdmTunnel/VmmSpdmTunnelDxe.inf
+!endif
+!endif
 
 #
 # Network modules

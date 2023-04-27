@@ -18,6 +18,8 @@
 [Includes]
   Include
   Csm/Include
+  ../SecurityPkg/DeviceSecurity/SpdmLib/Include
+  ../SecurityPkg/DeviceSecurity/SpdmLib/libspdm/include
 
 [LibraryClasses]
   ##  @libraryclass  Access bhyve's firmware control interface.
