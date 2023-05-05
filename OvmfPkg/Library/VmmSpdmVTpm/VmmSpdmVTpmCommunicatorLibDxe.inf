@@ -1,0 +1,48 @@
+## @file
+#
+# Copyright (c) 2022 - 2023, Intel Corporation. All rights reserved.<BR>
+# SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = VmmSpdmVTpmCommunicatorDxeLib
+  FILE_GUID                      = 28a12f11-4ee3-4057-942c-b5f07d6bca6a
+  MODULE_TYPE                    = BASE
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = VmmSpdmVTpmCommunicatorLib|DXE_DRIVER DXE_RUNTIME_DRIVER DXE_SMM_DRIVER UEFI_APPLICATION UEFI_DRIVER
+
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = X64
+#
+
+[Sources]
+  SpdmEncodeDecode.c
+  Vmm.c
+  VmmSpdmVTpmCommunicatorDxe.c
+  VTpmCommunicate.c
+  VTpmTransport.c
+
+[Packages]
+  CryptoPkg/CryptoPkg.dec
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  OvmfPkg/OvmfPkg.dec
+  SecurityPkg/SecurityPkg.dec
+
+[Pcd]
+  gUefiOvmfPkgTokenSpaceGuid.PcdVtpmSecureSessionInfoTableAddr
+  gUefiOvmfPkgTokenSpaceGuid.PcdVtpmSecureSessionInfoTableSize
+
+[LibraryClasses]
+  BaseLib
+  BaseMemoryLib
+  DebugLib
+  MemEncryptTdxLib
+  PcdLib
+  SpdmRequesterLib
+  SpdmCommonLib
+  TdxLib

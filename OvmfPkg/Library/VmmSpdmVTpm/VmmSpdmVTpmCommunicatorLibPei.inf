@@ -1,0 +1,53 @@
+## @file
+#
+# Copyright (c) 2022 - 2023, Intel Corporation. All rights reserved.<BR>
+# SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = VmmSpdmVTpmCommunicatorPeiLib
+  FILE_GUID                      = c2663a26-0806-4859-b386-936569315246
+  MODULE_TYPE                    = BASE
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = VmmSpdmVTpmCommunicatorLib|PEIM
+
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = X64
+#
+
+[Sources]
+  SpdmEncodeDecode.c
+  SpdmConnect.c
+  Vmm.c
+  VmmSpdmVTpmCommunicatorPei.c
+  VTpmCommunicate.c
+  VTpmTransport.c
+
+[Packages]
+  CryptoPkg/CryptoPkg.dec
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  OvmfPkg/OvmfPkg.dec
+  SecurityPkg/SecurityPkg.dec
+
+[Pcd]
+  # gUefiOvmfPkgTokenSpaceGuid.PcdVtpmSecureSessionInfoTableAddr
+  # gUefiOvmfPkgTokenSpaceGuid.PcdVtpmSecureSessionInfoTableSize
+
+[Guids]
+  gEdkiiVTpmSecureSpdmSessionInfoHobGuid
+
+[LibraryClasses]
+  BaseLib
+  BaseMemoryLib
+  DebugLib
+  HobLib
+  MemEncryptTdxLib
+  PcdLib
+  SpdmRequesterLib
+  SpdmCommonLib
+  TdxLib
