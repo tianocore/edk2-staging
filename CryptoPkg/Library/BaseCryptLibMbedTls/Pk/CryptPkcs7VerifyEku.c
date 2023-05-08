@@ -121,58 +121,54 @@ BOOLEAN GetExtensionData(const mbedtls_x509_crt  *cert,
                                      uint8_t *extension_data,
                                      size_t *extension_data_size)
 {
-    const mbedtls_x509_crt *crt;
-    int32_t ret;
-    BOOLEAN status;
-    uint8_t *ptr;
-    uint8_t *end;
-    size_t obj_len;
+  const mbedtls_x509_crt *crt;
+  int32_t ret;
+  BOOLEAN status;
+  uint8_t *ptr;
+  uint8_t *end;
+  size_t obj_len;
 
-    ptr = NULL;
-    end = NULL;
-    obj_len = 0;
+  ptr = NULL;
+  end = NULL;
+  obj_len = 0;
 
-    if (cert == NULL || oid == NULL || oid_size == 0 ||
-        extension_data_size == NULL) {
-        return FALSE;
-    }
+  if (cert == NULL || oid == NULL || oid_size == 0 ||
+      extension_data_size == NULL) {
+      return FALSE;
+  }
 
-    status = FALSE;
+  status = FALSE;
 
    crt = cert;
 
-    ptr = crt->v3_ext.p;
-    end = crt->v3_ext.p + crt->v3_ext.len;
-    ret = mbedtls_asn1_get_tag(&ptr, end, &obj_len,
-                                MBEDTLS_ASN1_CONSTRUCTED |
-                                MBEDTLS_ASN1_SEQUENCE);
+  ptr = crt->v3_ext.p;
+  end = crt->v3_ext.p + crt->v3_ext.len;
+  ret = mbedtls_asn1_get_tag(&ptr, end, &obj_len,
+                              MBEDTLS_ASN1_CONSTRUCTED |
+                              MBEDTLS_ASN1_SEQUENCE);
 
-    if (ret == 0) {
-        status = InternalX509FindExtensionData(
-            ptr, end, oid, oid_size, &ptr, &obj_len);
-    }
+  if (ret == 0) {
+      status = InternalX509FindExtensionData(
+          ptr, end, oid, oid_size, &ptr, &obj_len);
+  }
 
-    if (status) {
-        if (*extension_data_size < obj_len) {
-            *extension_data_size = obj_len;
-            status = FALSE;
-            goto cleanup;
-        }
-        if (oid != NULL) {
-            CopyMem(extension_data, ptr, obj_len);
-        }
-        *extension_data_size = obj_len;
-    } else {
-        *extension_data_size = 0;
-    }
+  if (status) {
+      if (*extension_data_size < obj_len) {
+          *extension_data_size = obj_len;
+          status = FALSE;
+          goto cleanup;
+      }
+      if (oid != NULL) {
+          CopyMem(extension_data, ptr, obj_len);
+      }
+      *extension_data_size = obj_len;
+  } else {
+      *extension_data_size = 0;
+  }
 
 cleanup:
-    mbedtls_x509_crt_free((mbedtls_x509_crt *)crt);
-
     return status;
 }
-
-
 
 /**
   Determines if the specified EKU represented in ASN1 form is present
@@ -202,7 +198,6 @@ IsEkuInCertificate (
   size_t index;
   size_t len;
 
-
   uint8_t EkuOID[] = { 0x55, 0x1D, 0x25 };
 
   if ((Cert == NULL) || (EKU == NULL)) {
@@ -213,10 +208,10 @@ IsEkuInCertificate (
   len = sizeof(Buffer);
 
   Ret = GetExtensionData(Cert,
-                            (const uint8_t *)EkuOID,
-                            sizeof(EkuOID),
-                            Buffer,
-                            &len);
+                         (const uint8_t *)EkuOID,
+                         sizeof(EkuOID),
+                         Buffer,
+                         &len);
 
     if ((len == 0) || (!Ret)) {
       Status = EFI_NOT_FOUND;
@@ -227,8 +222,17 @@ IsEkuInCertificate (
   /*find the spdm hardware identity OID*/
   for(index = 0; index <= len - EkuLen; index++) {
       if (!CompareMem(Buffer + index, EKU, EkuLen)) {
+        //check sub EKU
+        if (index == len - EkuLen) {
           Status = EFI_SUCCESS;
           break;
+        //Ensure that the OID is complete
+        } else if (Buffer[index + EkuLen] == 0x06) {
+          Status = EFI_SUCCESS;
+          break;
+        } else {
+          break;
+        }
       }
   }
 
@@ -237,6 +241,124 @@ Exit:
   return Status;
 }
 
+
+//Get OID from txt
+void GetOidFromTxt(
+  IN CONST CHAR8   *RequiredEKUs,
+  IN UINTN  RequiredEKUsSize,
+  IN OUT UINT8 *CheckOid,
+  OUT UINT8 *OidLen
+) {
+  UINT8 *Ptr;
+  UINT16 Index;
+  UINT32 Data;
+  UINT8 OidIndex;
+  UINTN EKUsSize;
+
+  EKUsSize = RequiredEKUsSize;
+  //https://learn.microsoft.com/en-us/windows/win32/seccertenroll/about-object-identifier?redirectedfrom=MSDN
+  CheckOid[0] = (UINT8)((RequiredEKUs[0] - '0') * 40 + (RequiredEKUs[2] - '0'));
+
+  EKUsSize = EKUsSize - 4;
+  Ptr = (UINT8 *)(RequiredEKUs + 4);
+
+  OidIndex = 1;
+
+  while(EKUsSize) {
+    Index = 0;
+    Data = 0;
+
+    while((*Ptr != '.') && (*Ptr != '\0')) {
+      Index++;
+      Ptr++;
+      EKUsSize--;
+    }
+
+    while(Index) {
+      Data = 10 * Data + (*(Ptr - Index) - '0');
+      Index--;
+    }
+
+    if (EKUsSize != 0) {
+      Ptr++;
+      EKUsSize--;
+    }
+
+    if(Data < 128) {
+      CheckOid[OidIndex] = (UINT8)Data;
+      OidIndex++;
+    } else {
+      // while(1);
+      CheckOid[OidIndex + 1] = (UINT8)(Data & 0xFF);
+      CheckOid[OidIndex] = (UINT8)(((((Data & 0xFF00) << 1) | 0x8000) >> 8) & 0xFF);
+      OidIndex = OidIndex + 2;
+    }
+  }
+
+  *OidLen = OidIndex;
+}
+
+/**
+ * Verify leaf cert basic_constraints CA is false
+ *
+ * @param[in]  cert                  Pointer to the DER-encoded certificate data.
+ *
+ * @retval  true   verify pass,two case: 1.basic constraints is not present in cert;
+ *                                       2. cert basic_constraints CA is false;
+ * @retval  false  verify fail
+ **/
+static BOOLEAN IsCertSignerCert(uint8_t *Start, uint8_t *End)
+{
+  BOOLEAN status;
+  /*leaf cert basic_constraints case1: CA: false and CA object is excluded */
+  uint8_t basic_constraints_case1[] = {0x30, 0x00};
+
+  /*leaf cert basic_constraints case2: CA: false */
+  uint8_t basic_constraints_case2[] = {0x30, 0x06, 0x01, 0x01, 0xFF, 0x02, 0x01, 0x00};
+
+  uint8_t Buffer[1024];
+  size_t len;
+  mbedtls_x509_crt   Cert;
+  UINTN ObjLen;
+
+  mbedtls_x509_crt_init(&Cert);
+
+  ObjLen = End- Start;
+
+  if (mbedtls_x509_crt_parse_der(&Cert, Start, ObjLen) != 0) {
+    return FALSE;
+  }
+
+  uint8_t m_libspdm_oid_basic_constraints[] = { 0x55, 0x1D, 0x13 };
+
+  len = sizeof(Buffer);
+
+  status = GetExtensionData(&Cert,
+                            (const uint8_t *)m_libspdm_oid_basic_constraints,
+                            sizeof(m_libspdm_oid_basic_constraints),
+                            Buffer,
+                            &len);
+
+  if (len == 0) {
+      /* basic constraints is not present in cert */
+      return TRUE;
+  } else if (!status ) {
+      return FALSE;
+  }
+
+  if ((len == sizeof(basic_constraints_case1)) &&
+      (!CompareMem(Buffer, basic_constraints_case1, sizeof(basic_constraints_case1)))) {
+      return TRUE;
+  }
+
+  if ((len == sizeof(basic_constraints_case2)) &&
+      (!CompareMem(Buffer, basic_constraints_case2, sizeof(basic_constraints_case2)))) {
+      return TRUE;
+  }
+
+  mbedtls_x509_crt_free(&Cert);
+  return FALSE;
+}
 
 
 /**
@@ -264,23 +386,10 @@ CheckEKUs (
   EFI_STATUS   Status;
   UINT32       NumEkusFound;
   UINT32       Index;
-
-  UINT8               *Buffer;
-  INTN                BufferSize;
-  UINT8               *P;
-
   UINT8 *EKU;
   UINTN EkuLen;
-  UINT8         *Old_end;
-
-
-  BufferSize = 1024;
-
-  Buffer = AllocateZeroPool (BufferSize);
-  if (Buffer == NULL) {
-    goto Exit;
-  }
-  P = Buffer + BufferSize;
+  UINT8 CheckOid[20];
+  UINT8 OidLen;
 
   Status       = EFI_SUCCESS;
   NumEkusFound = 0;
@@ -294,18 +403,10 @@ CheckEKUs (
     //
     // Finding required EKU in cert.
     //
+    GetOidFromTxt(RequiredEKUs[Index],  strlen(RequiredEKUs[Index]), CheckOid, &OidLen);
 
-  P = Buffer + BufferSize;
-  Old_end = P;
-  ZeroMem(Buffer, BufferSize);
-
-  if (mbedtls_asn1_write_oid(&P, Buffer, RequiredEKUs[Index],  sizeof(RequiredEKUs[Index])) <= 0) {
-    goto Exit;
-  }
-
-  EKU = P;
-  EkuLen = Old_end -P;
-
+    EKU = CheckOid;
+    EkuLen = OidLen;
 
     Status = IsEkuInCertificate (SignerCert, EKU, EkuLen);
     if (Status == EFI_SUCCESS) {
@@ -324,8 +425,6 @@ CheckEKUs (
   }
 
 Exit:
-
-
   if (RequireAllPresent &&
       (NumEkusFound == RequiredEKUsSize))
   {
@@ -337,8 +436,6 @@ Exit:
 
   return Status;
 }
-
-
 
 /**
   This function receives a PKCS#7 formatted signature blob,
@@ -381,87 +478,102 @@ VerifyEKUsInPkcs7Signature (
   )
 {
   EFI_STATUS      Status;
-  UINT8        *SignedData;
-  UINTN        SignedDataSize;
-  BOOLEAN      Wrapped;
-  INTN               Ret;
-  mbedtls_pkcs7      Pkcs7;
-  mbedtls_x509_crt   *Cert;
-  UINT8  *SingleCert;
-
-  mbedtls_pkcs7_init(&Pkcs7);
+  mbedtls_x509_crt   Cert;
+  UINT8 *Ptr;
+  UINT8 *End;
+  INT32 Len;
+  UINTN ObjLen;
+  UINT8 *OldEnd;
 
   //
   // Check input parameter.
   //
-  if ((RequiredEKUs == NULL) || (Pkcs7Signature == NULL))
-  {
+  if ((RequiredEKUs == NULL) || (Pkcs7Signature == NULL)) {
+    Status = EFI_INVALID_PARAMETER;
+    return Status;
+  }
+
+  mbedtls_x509_crt_init(&Cert);
+
+  Ptr = (UINT8*)(UINTN)Pkcs7Signature;
+  Len = (UINT32)SignatureSize;
+  End = Ptr + Len;
+
+  //cert
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x30) != 0) {
+    return FALSE;
+  }
+  //tbscert
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x02) != 0) {
     return FALSE;
   }
 
-  SignedData = NULL;
-
-  Status = WrapPkcs7Data (Pkcs7Signature, SignatureSize, &Wrapped, &SignedData, &SignedDataSize);
-  if (!Status || (SignedDataSize > INT_MAX)) {
-    goto _Exit;
+  Ptr += ObjLen;
+  //signature algo
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x31) != 0) {
+    return FALSE;
   }
 
-  Status = FALSE;
-
-  //
-  // Retrieve PKCS#7 Data (DER encoding)
-  //
-  if (SignedDataSize > INT_MAX) {
-    goto _Exit;
+  Ptr += ObjLen;
+  //signature
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x30) != 0) {
+    return FALSE;
   }
 
-  Ret = mbedtls_pkcs7_parse_der(&Pkcs7, SignedData, (INT32)SignedDataSize);
-
-  //
-  // The type of Pkcs7 must be signedData
-  //
-  if (Ret != MBEDTLS_PKCS7_SIGNED_DATA) {
-    goto _Exit;
+  Ptr += ObjLen;
+  OldEnd = Ptr;
+  //cert
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0xA0) != 0) {
+    return FALSE;
   }
 
+  End = Ptr + ObjLen;
 
-  Cert      = NULL;
-  SingleCert = NULL;
+  //leaf cert
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x30) != 0) {
+    return FALSE;
+  }
+  Ptr += ObjLen;
 
+  while((Ptr != End) && (Ptr < End)) {
+    if (IsCertSignerCert(OldEnd, Ptr)) {
+      break;
+    }
+    OldEnd = Ptr;
+    if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x30) != 0) {
+      return FALSE;
+    }
 
-  Cert = &Pkcs7.signed_data.certs;
-  if (Cert == NULL) {
-    goto _Exit;
+    Ptr += ObjLen;
+
   }
 
-  //
-  // Get the leaf signer.
-  //
-  while (Cert->next != NULL)
-  {
-    Cert = Cert->next;
+  if (Ptr != End) {
+    return FALSE;
+  } else {
+    Ptr = End - ObjLen;
   }
 
-  Status = CheckEKUs (Cert, RequiredEKUs, RequiredEKUsSize, RequireAllPresent);
+  //leaf cert
+  ObjLen += Ptr - OldEnd;
+  Ptr = OldEnd;
+
+  mbedtls_x509_crt_init(&Cert);
+
+  if (mbedtls_x509_crt_parse_der(&Cert, Ptr, ObjLen) != 0) {
+    return FALSE;
+  }
+
+  Status = CheckEKUs (&Cert, RequiredEKUs, RequiredEKUsSize, RequireAllPresent);
   if (Status != EFI_SUCCESS) {
-    goto _Exit;
+    goto Exit;
   }
 
-
-_Exit:
-
+Exit:
   //
   // Release Resources
   //
-  // If the signature was not wrapped, then the call to WrapData() will allocate
-  // the data and add a header to it
-  //
-  if (!Wrapped && SignedData) {
-    FreePool (SignedData);
-  }
-
-  mbedtls_pkcs7_free (&Pkcs7);
+  mbedtls_x509_crt_free(&Cert);
 
   return Status;
 }
-
