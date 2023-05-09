@@ -51,3 +51,4 @@
   SpdmRequesterLib
   SpdmCommonLib
   TdxLib
+  BaseCryptLib

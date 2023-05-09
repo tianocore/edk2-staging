@@ -19,6 +19,11 @@
 #include <IndustryStandard/VTpmTd.h>
 #include <Library/VmmSpdmVTpmCommunicatorLib.h>
 #include "VmmSpdmInternal.h"
+#include <Library/TdxLib.h>
+#include <Library/BaseCryptLib.h>
+#include <IndustryStandard/Tdx.h>
+
+#define VTPM_RTMR_INDEX  0x03
 
 /**
  * Calculate the buffers' size of a VmmSpdmContext.
@@ -258,6 +263,141 @@ VmmSpdmVTpmIsConnected (
 }
 
 /**
+ * Call the TDCALL to get TD_REPORT and then check the RTMR[3]
+ *
+ * @return EFI_SUCCESS    The RTMR[3] is zero.
+ * @return Others         The RTMR[3] is non-zero.
+*/
+STATIC
+EFI_STATUS
+CheckRtmr3WithTdReport (
+  VOID
+  )
+{
+  EFI_STATUS       Status;
+  TDREPORT_STRUCT  *TdReport;
+  UINT8            *Report;
+  UINT8            *AdditionalData;
+  UINT8            *Rtmr3;
+  UINTN            Index;
+  UINTN            Pages;
+
+  TdReport       = NULL;
+  Report         = NULL;
+  AdditionalData = NULL;
+  Rtmr3          = NULL;
+  Index          = 0;
+
+  Pages = EFI_SIZE_TO_PAGES (sizeof (TDREPORT_STRUCT));
+
+  // The Report buffer must be 1024-B aligned
+  Report = (UINT8 *)AllocatePages (Pages);
+  if ((Report == NULL)) {
+    Status = EFI_OUT_OF_RESOURCES;
+    goto QuitCheckRTMRForVTPM;
+  }
+
+  ZeroMem (Report, EFI_PAGES_TO_SIZE(Pages));
+
+  AdditionalData = Report + sizeof (TDREPORT_STRUCT);
+
+  Status = TdGetReport (
+                        Report,
+                        sizeof (TDREPORT_STRUCT),
+                        AdditionalData,
+                        TDREPORT_ADDITIONAL_DATA_SIZE
+                        );
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "%a: TdGetReport failed with %r\n", __FUNCTION__, Status));
+    goto QuitCheckRTMRForVTPM;
+  }
+
+  // Check RTMR[3]
+  TdReport = (TDREPORT_STRUCT *)Report;
+  Rtmr3    = TdReport->Tdinfo.Rtmrs[VTPM_RTMR_INDEX];
+  while (Index < SHA384_DIGEST_SIZE) {
+    if (Rtmr3[Index] != 0) {
+      DEBUG ((DEBUG_ERROR, "%a: RTMR[3] is non-zero\n", __FUNCTION__));
+      Status = EFI_ABORTED;
+      goto QuitCheckRTMRForVTPM;
+    }
+
+    Index++;
+  }
+
+  DEBUG ((DEBUG_INFO, "%a: RTMR[3] is zero\n", __FUNCTION__));
+  Status = EFI_SUCCESS;
+
+QuitCheckRTMRForVTPM:
+  if (Report) {
+    FreePages (Report, Pages);
+  }
+
+  return Status;
+}
+
+/**
+ * Get SecuredSpdmSessionInfo with the GUID
+ * Then extend the session info to RTMR[3].
+ *
+ * @return EFI_SUCCESS     The vtpm info is extend successfully
+ * @return Other           Some error occurs when executing this extend.
+ */
+STATIC
+EFI_STATUS
+ExtendVtpmSpdmSessionInfoToRtmr3 (
+  VOID
+  )
+{
+  EFI_STATUS                      Status;
+  UINT8                           Digest[SHA384_DIGEST_SIZE];
+  EFI_PEI_HOB_POINTERS            GuidHob;
+  UINT16                          HobLength;
+  VTPM_SECURE_SESSION_INFO_TABLE  *InfoTable;
+
+  // Find gEdkiiVTpmSecureSpdmSessionInfoHobGuid
+  GuidHob.Guid = GetFirstGuidHob (&gEdkiiVTpmSecureSpdmSessionInfoHobGuid);
+  DEBUG ((DEBUG_INFO, ">> GuidHob.Guid = %p\n", GuidHob.Guid));
+  if (GuidHob.Guid == NULL) {
+    return EFI_NOT_FOUND;
+  }
+
+  HobLength = sizeof (EFI_HOB_GUID_TYPE) + VTPM_SECURE_SESSION_INFO_TABLE_SIZE;
+
+  if (GuidHob.Guid->Header.HobLength != HobLength) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  InfoTable = (VTPM_SECURE_SESSION_INFO_TABLE *)(GuidHob.Guid + 1);
+  if (InfoTable->SessionId == 0) {
+    return EFI_NOT_STARTED;
+  }
+
+  //
+  // Calculate the sha384 of the data
+  //
+  if (!Sha384HashAll (InfoTable, VTPM_SECURE_SESSION_INFO_TABLE_SIZE, Digest)) {
+    DEBUG ((DEBUG_ERROR, "Sha384HashAll failed \n"));
+    return EFI_ABORTED;
+  }
+
+  //
+  // Extend to RTMR[3]
+  //
+  Status = TdExtendRtmr (
+                         (UINT32 *)Digest,
+                         SHA384_DIGEST_SIZE,
+                         VTPM_RTMR_INDEX
+                         );
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "TdExtendRtmr failed with %r\n", Status));
+    return EFI_ABORTED;
+  }
+
+  return EFI_SUCCESS;
+}
+
+/**
  * Connect to VmmSpdm responder.
  * After connection, the SecuredSpdmSession is exported and saved in a GuidHob.
  */
@@ -271,6 +411,13 @@ VmmSpdmVTpmConnect (
   UINT32            Pages;
   EFI_STATUS        Status;
   SPDM_RETURN       SpdmStatus;
+
+  // If RTMR[3] is non-zero, the VTPM Spdm session had already been started.
+  Status = CheckRtmr3WithTdReport ();
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "Check RTMR[3] failed with %r \n", Status));
+    return Status;
+  }
 
   Status = VmmSpdmVTpmIsConnected ();
   if (!EFI_ERROR (Status)) {
@@ -313,6 +460,15 @@ VmmSpdmVTpmConnect (
   Status = ExportSecureSpdmSessionInfos (Context);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "ExportSecureSpdmSessionInfos failed with %r \n", Status));
+    Status = EFI_ABORTED;
+    goto CleanContext;
+  }
+
+  // The first event in RTMT[3] is the VTPM Spdm session info.
+  // Following a successful connection, the tdvf must extend the session information to RTMR[3].
+  Status = ExtendVtpmSpdmSessionInfoToRtmr3 ();
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "ExtendVtpmSpdmSessionInfoToRtmr3 failed with %r \n", Status));
     Status = EFI_ABORTED;
   }
 
