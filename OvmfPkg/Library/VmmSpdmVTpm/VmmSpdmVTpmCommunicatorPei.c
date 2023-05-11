@@ -412,6 +412,14 @@ VmmSpdmVTpmConnect (
   EFI_STATUS        Status;
   SPDM_RETURN       SpdmStatus;
 
+  // If VMCALL_SERVICE_VTPM_GUID is not supported, VMM will not 
+  // allow tdvf to send and receive VTPM messages over an spdm session.
+  Status = TdQueryServiceForVtpm ();
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "TdQueryServiceForVtpm failed with %r \n", Status));
+    return Status;
+  }
+
   // If RTMR[3] is non-zero, the VTPM Spdm session had already been started.
   Status = CheckRtmr3WithTdReport ();
   if (EFI_ERROR (Status)) {

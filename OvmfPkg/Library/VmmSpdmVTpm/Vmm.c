@@ -71,6 +71,22 @@ typedef struct {
   // UINT8   SecureTpmMessage[];
 } RECEIVE_MESSAGE_RESPONSE_HEADER;
 
+// Refer to the spec Intel TDX GHCI v1.5 3.14.1
+typedef struct {
+  UINT8       Version;
+  UINT8       Command;
+  UINT16      Reserved;
+  EFI_GUID    ServiceGuid;
+} TDVMCALL_SERVICE_QUERY_COMMAND_STRUCT;
+
+typedef struct {
+  UINT8       Version;
+  UINT8       Command;
+  UINT8       Status;
+  UINT8       Reserved;
+  EFI_GUID    ServiceGuid;
+} TDVMCALL_SERVICE_QUERY_RESPONSE_STRUCT;
+
 #pragma pack()
 
 TDVMCALL_SERVICE_COMMAND_HEADER  mTdvmcallServiceCommandHeaderTemplate = {
@@ -109,6 +125,30 @@ RECEIVE_MESSAGE_RESPONSE_HEADER  mReceiveMessageResponseHeaderTemplate = {
   SERVICE_VTPM_RECEIVE_MESSAGE,
   0,
   0
+};
+
+#define VMCALL_SERVICE_COMMON_GUID \
+  { 0xe1, 0xc5, 0x6f, 0xfb, 0x78, 0x33, 0xcb, 0x4a, 0x89, 0x64, 0xfa, 0x5e, 0xe4, 0x3b, 0x9c, 0x8a }
+
+#define VMCALL_SERVICE_VTPM_GUID \
+  {0x64590793, 0x7852, 0x4e52, {0xbe, 0x45, 0xcd, 0xbb, 0x11, 0x6f, 0x20, 0xf3}}
+
+TDVMCALL_SERVICE_COMMAND_HEADER   mTdVmCallServiceCommandHeaderForQuery = {
+  VMCALL_SERVICE_COMMON_GUID,   // Guid
+  0,                            // Length
+  0                             // Status
+};
+TDVMCALL_SERVICE_RESPONSE_HEADER  mTdVmCallServiceRespondsHeaderForQuery = {
+  VMCALL_SERVICE_COMMON_GUID,   // Guid
+  0,                            // Length
+  0                             // Status
+};
+
+TDVMCALL_SERVICE_QUERY_COMMAND_STRUCT  mTdVmCallServiceQueryCommandStruct = {
+  0,                         // Version, 0: for this data struct
+  0,                         // Command, 0: Query
+  0,                         // Reserved
+  VMCALL_SERVICE_VTPM_GUID   // Service Guid to Query
 };
 
 /**
@@ -451,6 +491,172 @@ QuitVTPMContextRead:
 
   if (RspBuffer) {
     FreeSharedBuffer (RspBuffer, VTPM_DEFAULT_ALLOCATION_PAGE);
+  }
+
+  return Status;
+}
+
+/**
+ * Call the TDVMCALL_SERVICE.Query to check if the VMCALL_SERVICE_VTPM_GUID is supported.
+ *
+ * QueryCommandBuffer layout  : TDVMCALL_SERVICE_COMMAND_HEADER + TDVMCALL_SERVICE_QUERY_COMMAND_STRUCT
+ * QueryResponseBuffer layout : TDVMCALL_SERVICE_RESPONSE_HEADER + TDVMCALL_SERVICE_QUERY_RESPONSE_STRUCT
+ *
+ * @return EFI_SUCCESS  the VMCALL_SERVICE_VTPM_GUID is support
+ * @return Others       the VMCALL_SERVICE_VTPM_GUID is not support
+*/
+EFI_STATUS
+TdQueryServiceForVtpm (
+  VOID
+  )
+{
+  EFI_STATUS  Status;
+  UINT64      TdVmCallRetCode;
+  UINT64      RetValue;
+  UINT64      TdxSharedBit;
+  UINT8       *Data;
+  UINT8       *CommandBuffer;
+  UINTN       CommandBufferSize;
+  UINT8       *ResponseBuffer;
+  UINTN       ResponseBufferSize;
+
+  TDVMCALL_SERVICE_RESPONSE_HEADER        *TdVmCallRspHeader;
+  TDVMCALL_SERVICE_QUERY_RESPONSE_STRUCT  *QueryRspStruct;
+
+  Data              = NULL;
+  CommandBuffer     = NULL;
+  ResponseBuffer    = NULL;
+  TdVmCallRspHeader = NULL;
+  QueryRspStruct    = NULL;
+
+  CommandBuffer = (UINT8 *)AllocateSharedBuffer (VTPM_DEFAULT_ALLOCATION_PAGE);
+  if (CommandBuffer == NULL) {
+    Status = EFI_OUT_OF_RESOURCES;
+    goto QuitCheckVmCallService;
+  }
+
+  ResponseBuffer = (UINT8 *)AllocateSharedBuffer (VTPM_DEFAULT_ALLOCATION_PAGE);
+  if (ResponseBuffer == NULL) {
+    Status = EFI_OUT_OF_RESOURCES;
+    goto QuitCheckVmCallService;
+  }
+
+  // build the tdvmcall-service-command-header packet
+  CopyMem (CommandBuffer, &mTdVmCallServiceCommandHeaderForQuery, sizeof (TDVMCALL_SERVICE_COMMAND_HEADER));
+
+  // build the tdvmcall-service-query-data packet
+  Data = CommandBuffer + sizeof (TDVMCALL_SERVICE_COMMAND_HEADER);
+  CopyMem (Data, &mTdVmCallServiceQueryCommandStruct, sizeof (TDVMCALL_SERVICE_QUERY_COMMAND_STRUCT));
+  CommandBufferSize = sizeof (TDVMCALL_SERVICE_COMMAND_HEADER) + sizeof (TDVMCALL_SERVICE_QUERY_COMMAND_STRUCT);
+
+  ((TDVMCALL_SERVICE_COMMAND_HEADER *)CommandBuffer)->Length = CommandBufferSize;
+
+  // build the tdvmcall-service-reponse-head packet
+  CopyMem (ResponseBuffer, &mTdVmCallServiceRespondsHeaderForQuery, sizeof (TDVMCALL_SERVICE_RESPONSE_HEADER));
+  Data = ResponseBuffer + sizeof (TDVMCALL_SERVICE_RESPONSE_HEADER);
+  ZeroMem (Data, sizeof (TDVMCALL_SERVICE_QUERY_RESPONSE_STRUCT));
+  ResponseBufferSize = EFI_PAGES_TO_SIZE(VTPM_DEFAULT_ALLOCATION_PAGE);
+
+  ((TDVMCALL_SERVICE_RESPONSE_HEADER *)ResponseBuffer)->Length = ResponseBufferSize;
+
+  TdxSharedBit = TdSharedPageMask ();
+  if (TdxSharedBit == 0) {
+    DEBUG ((DEBUG_ERROR, "%a: Failed with TdxSharedBit %llx\n", __FUNCTION__, TdxSharedBit));
+    Status = EFI_ABORTED;
+    goto QuitCheckVmCallService;
+  }
+
+  DEBUG ((DEBUG_INFO, "%a: Query Service Guid: %g\n", __FUNCTION__, mTdVmCallServiceQueryCommandStruct.ServiceGuid));
+
+  TdVmCallRetCode = TdVmCall (
+                              TDVMCALL_SERVICE,
+                              (UINT64)CommandBuffer | TdxSharedBit,
+                              (UINT64)ResponseBuffer | TdxSharedBit,
+                              0,
+                              VMM_SPDM_TIMEOUT,
+                              &RetValue
+                              );
+
+  if ((TdVmCallRetCode != 0) || (RetValue != 0)) {
+    Status = EFI_DEVICE_ERROR;
+    DEBUG (
+           (
+            DEBUG_ERROR,
+            "%a: TdvmCall failed with Status Code %llx , RetValue %llx \n",
+            __FUNCTION__,
+            TdVmCallRetCode,
+            RetValue
+           )
+           );
+    goto QuitCheckVmCallService;
+  }
+
+  // Prase the TDVMCALL_SERVICE response
+  TdVmCallRspHeader = (TDVMCALL_SERVICE_RESPONSE_HEADER *)ResponseBuffer;
+  if (TdVmCallRspHeader->Status != 0) {
+    Status = EFI_UNSUPPORTED;
+    DEBUG (
+           (
+            DEBUG_ERROR,
+            "%a: Failed with TdVmCallRsp status: %x\n",
+            __FUNCTION__,
+            TdVmCallRspHeader->Status
+           )
+           );
+    goto QuitCheckVmCallService;
+  }
+
+  // Parse the TDVMCALL_SREVICE.Query response
+  QueryRspStruct =  (TDVMCALL_SERVICE_QUERY_RESPONSE_STRUCT *)(TdVmCallRspHeader + 1);
+  if ((QueryRspStruct->Version != 0) || (QueryRspStruct->Command != 0)) {
+    Status = EFI_UNSUPPORTED;
+    DEBUG (
+           (
+            DEBUG_ERROR,
+            "%a: Failed with QueryRspStruct Command: %x or Version: %x\n",
+            __FUNCTION__,
+            QueryRspStruct->Command,
+            QueryRspStruct->Version
+           )
+           );
+    goto QuitCheckVmCallService;
+  }
+
+  if (!CompareGuid (&(mTdVmCallServiceQueryCommandStruct.ServiceGuid), &(QueryRspStruct->ServiceGuid))) {
+    Status = EFI_UNSUPPORTED;
+    DEBUG (
+           (
+            DEBUG_ERROR,
+            "%a: QueryResponse ServiceGuid is not equal to the QueryCommand's ServiceGuid %g vs %g\n",
+            __FUNCTION__,
+            mTdVmCallServiceQueryCommandStruct.ServiceGuid,
+            QueryRspStruct->ServiceGuid
+           )
+           );
+    goto QuitCheckVmCallService;
+  }
+
+  if (QueryRspStruct->Status != 0) {
+    Status = EFI_UNSUPPORTED;
+    DEBUG (
+           (
+            DEBUG_ERROR,
+            "%a: Failed with QueryRspStruct status: %x\n",
+            __FUNCTION__,
+            QueryRspStruct->Status)
+           );
+    goto QuitCheckVmCallService;
+  }
+
+  Status = EFI_SUCCESS;
+
+QuitCheckVmCallService:
+  if (CommandBuffer) {
+    FreeSharedBuffer (CommandBuffer, VTPM_DEFAULT_ALLOCATION_PAGE);
+  }
+
+  if (ResponseBuffer) {
+    FreeSharedBuffer (ResponseBuffer, VTPM_DEFAULT_ALLOCATION_PAGE);
   }
 
   return Status;

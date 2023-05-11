@@ -166,4 +166,9 @@ VmmSpdmVTpmInitSpdmContext (
   VMM_SPDM_CONTEXT  *Context
   );
 
+EFI_STATUS
+TdQueryServiceForVtpm (
+  VOID
+  );
+
 #endif
