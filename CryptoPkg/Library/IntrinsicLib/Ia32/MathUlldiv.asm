@@ -36,10 +36,9 @@
 ;
 ;*******************************************************************************
 _aulldiv        PROC NEAR
-.FPO (2, 4, 0, 0, 0, 0)
 
 HIWORD  EQU     [4]             ;
-LOWORD   EQU     [0]
+LOWORD  EQU     [0]
 
         push    ebx
         push    esi

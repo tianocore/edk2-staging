@@ -34,6 +34,7 @@
   Ia32/MathLlshr.asm        | MSFT
   Ia32/MathUlldiv.asm       | MSFT
   Ia32/MathUlldvrm.asm      | MSFT
+  Ia32/MathLldiv.asm        | MSFT
 
   Ia32/MathLShiftS64.c      | INTEL
   Ia32/MathRShiftU64.c      | INTEL
