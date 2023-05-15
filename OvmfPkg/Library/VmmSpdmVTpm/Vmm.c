@@ -211,50 +211,6 @@ VmmSpdmVTpmDumpHex (
   }
 }
 
-STATIC
-VOID *
-AllocateSharedBuffer (
-  UINT32  Pages
-  )
-{
-  EFI_STATUS  Status;
-  VOID        *Buffer;
-
-  Buffer = AllocatePages (Pages);
-  if (Buffer == NULL) {
-    return NULL;
-  }
-
-  Status = MemEncryptTdxSetPageSharedBit (0, (PHYSICAL_ADDRESS)Buffer, Pages);
-  if (EFI_ERROR (Status)) {
-    FreePages (Buffer, Pages);
-    Buffer = NULL;
-  }
-
-  return Buffer;
-}
-
-STATIC
-EFI_STATUS
-FreeSharedBuffer (
-  UINT8   *Buffer,
-  UINT32  Pages
-  )
-{
-  EFI_STATUS  Status;
-
-  if ((Buffer == NULL) || (Pages == 0)) {
-    return EFI_INVALID_PARAMETER;
-  }
-
-  Status = MemEncryptTdxSetPageSharedBit (1, (PHYSICAL_ADDRESS)Buffer, Pages);
-  if (!EFI_ERROR (Status)) {
-    FreePages (Buffer, Pages);
-  }
-
-  return Status;
-}
-
 EFI_STATUS
 VTpmContextWrite (
   IN UINTN       RequestSize,
@@ -278,17 +234,17 @@ VTpmContextWrite (
   CmdBuffer = NULL;
   RspBuffer = NULL;
 
-  CmdBuffer = (UINT8 *)AllocateSharedBuffer (VTPM_DEFAULT_ALLOCATION_PAGE);
-  if (CmdBuffer == NULL) {
-    Status = EFI_UNSUPPORTED;
-    goto QuitVTPMContextWrite;
+  Status = VtpmAllocateSharedBuffer (&CmdBuffer, VTPM_DEFAULT_ALLOCATION_PAGE * 2);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "VtpmAllocateSharedBuffer failed with %r\n", Status));
+    return Status;
   }
 
-  RspBuffer = (UINT8 *)AllocateSharedBuffer (VTPM_DEFAULT_ALLOCATION_PAGE);
-  if (RspBuffer == NULL) {
-    Status = EFI_UNSUPPORTED;
-    goto QuitVTPMContextWrite;
+  if (CmdBuffer == NULL) {
+    return EFI_UNSUPPORTED;
   }
+
+  RspBuffer = CmdBuffer +  EFI_PAGES_TO_SIZE (VTPM_DEFAULT_ALLOCATION_PAGE);
 
   // Build send_message cmd packet
   Ptr = CmdBuffer + sizeof (TDVMCALL_SERVICE_COMMAND_HEADER);
@@ -318,8 +274,7 @@ VTpmContextWrite (
   TdxSharedBit = TdSharedPageMask ();
   if (TdxSharedBit == 0) {
     DEBUG ((DEBUG_ERROR, "%a: Failed with TdxSharedBit %llx\n", __FUNCTION__, TdxSharedBit));
-    Status = EFI_ABORTED;
-    goto QuitVTPMContextWrite;
+    return EFI_ABORTED;
   }
 
   RetCode = TdVmCall (
@@ -333,38 +288,24 @@ VTpmContextWrite (
 
   if ((RetCode != 0) || (RetValue != 0)) {
     DEBUG ((DEBUG_ERROR, "%a: Failed with RetCode %llx, RetValue %llx\n", __FUNCTION__, RetCode, RetValue));
-    Status = EFI_ABORTED;
-    goto QuitVTPMContextWrite;
+    return EFI_ABORTED;
   }
 
   // Check the status in TDVMCALL_SERVICE
   TdvmcallRspHeader = (TDVMCALL_SERVICE_RESPONSE_HEADER *)RspBuffer;
   if (TdvmcallRspHeader->Status != 0) {
     DEBUG ((DEBUG_ERROR, "%a: Failed with TdvmcallRsp status: %x\n", __FUNCTION__, TdvmcallRspHeader->Status));
-    Status = EFI_ABORTED;
-    goto QuitVTPMContextWrite;
+    return EFI_ABORTED;
   }
 
   // Check the status in SEND_MESSAGE_RESPONSE
   SendMessageRspHeader = (SEND_MESSAGE_RESPONSE_HEADER *)(RspBuffer + sizeof (TDVMCALL_SERVICE_RESPONSE_HEADER));
   if (SendMessageRspHeader->Status != 0) {
     DEBUG ((DEBUG_ERROR, "%a: Failed with SendMessageRsp status: %x\n", __FUNCTION__, SendMessageRspHeader->Status));
-    Status = EFI_ABORTED;
-    goto QuitVTPMContextWrite;
+    return EFI_ABORTED;
   }
 
-  Status = EFI_SUCCESS;
-
-QuitVTPMContextWrite:
-  if (CmdBuffer) {
-    FreeSharedBuffer (CmdBuffer, VTPM_DEFAULT_ALLOCATION_PAGE);
-  }
-
-  if (RspBuffer) {
-    FreeSharedBuffer (RspBuffer, VTPM_DEFAULT_ALLOCATION_PAGE);
-  }
-
-  return Status;
+  return EFI_SUCCESS;
 }
 
 /**
@@ -396,17 +337,17 @@ VTpmContextRead (
   RspBuffer  = NULL;
   BufferSize = EFI_PAGES_TO_SIZE (VTPM_DEFAULT_ALLOCATION_PAGE);
 
-  CmdBuffer = (UINT8 *)AllocateSharedBuffer (VTPM_DEFAULT_ALLOCATION_PAGE);
-  if (CmdBuffer == NULL) {
-    Status = EFI_UNSUPPORTED;
-    goto QuitVTPMContextRead;
+  Status = VtpmAllocateSharedBuffer (&CmdBuffer, VTPM_DEFAULT_ALLOCATION_PAGE * 2);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "VtpmAllocateSharedBuffer failed with %r\n", Status));
+    return Status;
   }
 
-  RspBuffer = (UINT8 *)AllocateSharedBuffer (VTPM_DEFAULT_ALLOCATION_PAGE);
-  if (RspBuffer == NULL) {
-    Status = EFI_UNSUPPORTED;
-    goto QuitVTPMContextRead;
+  if (CmdBuffer == NULL) {
+    return EFI_UNSUPPORTED;
   }
+
+  RspBuffer = CmdBuffer +  EFI_PAGES_TO_SIZE (VTPM_DEFAULT_ALLOCATION_PAGE);
 
   // Build send_message cmd packet
   Ptr = CmdBuffer + sizeof (TDVMCALL_SERVICE_COMMAND_HEADER);
@@ -433,8 +374,7 @@ VTpmContextRead (
   TdxSharedBit = TdSharedPageMask ();
   if (TdxSharedBit == 0) {
     DEBUG ((DEBUG_ERROR, "%a: Failed with TdxSharedBit %llx\n", __FUNCTION__, TdxSharedBit));
-    Status = EFI_ABORTED;
-    goto QuitVTPMContextRead;
+    return EFI_ABORTED;
   }
 
   RetCode = TdVmCall (
@@ -448,24 +388,21 @@ VTpmContextRead (
 
   if ((RetCode != 0) || (RetValue != 0)) {
     DEBUG ((DEBUG_ERROR, "%a: Failed with RetCode %llx, RetValue %llx\n", __FUNCTION__, RetCode, RetValue));
-    Status = EFI_ABORTED;
-    goto QuitVTPMContextRead;
+    return EFI_ABORTED;
   }
 
   // Check the status in TDVMCALL_SERVICE
   TdvmcallRspHeader = (TDVMCALL_SERVICE_RESPONSE_HEADER *)RspBuffer;
   if (TdvmcallRspHeader->Status != 0) {
     DEBUG ((DEBUG_ERROR, "%a: Failed with TdvmcallRsp status: %x\n", __FUNCTION__, TdvmcallRspHeader->Status));
-    Status = EFI_ABORTED;
-    goto QuitVTPMContextRead;
+    return EFI_ABORTED;
   }
 
   // Check the status in RECEIVE_MESSAGE_RESPONSE
   ReceiveMessageRspHeader = (RECEIVE_MESSAGE_RESPONSE_HEADER *)(RspBuffer + sizeof (TDVMCALL_SERVICE_RESPONSE_HEADER));
   if (ReceiveMessageRspHeader->Status != 0) {
     DEBUG ((DEBUG_ERROR, "%a: Failed with SendMessageRsp status: %x\n", __FUNCTION__, ReceiveMessageRspHeader->Status));
-    Status = EFI_ABORTED;
-    goto QuitVTPMContextRead;
+    return EFI_ABORTED;
   }
 
   // Process the data received
@@ -474,26 +411,14 @@ VTpmContextRead (
   if (DataLen > *ResponseSize) {
     DEBUG ((DEBUG_ERROR, "%a: Failed with DataLen too small\n", __FUNCTION__));
     *ResponseSize = DataLen;
-    Status        = EFI_BUFFER_TOO_SMALL;
-    goto QuitVTPMContextRead;
+    return EFI_BUFFER_TOO_SMALL;
   }
 
   *ResponseSize = DataLen;
   Ptr           = RspBuffer + HeaderLen;
   CopyMem (Response, Ptr, DataLen);
 
-  Status = EFI_SUCCESS;
-
-QuitVTPMContextRead:
-  if (CmdBuffer) {
-    FreeSharedBuffer (CmdBuffer, VTPM_DEFAULT_ALLOCATION_PAGE);
-  }
-
-  if (RspBuffer) {
-    FreeSharedBuffer (RspBuffer, VTPM_DEFAULT_ALLOCATION_PAGE);
-  }
-
-  return Status;
+  return EFI_SUCCESS;
 }
 
 /**
@@ -529,17 +454,17 @@ TdQueryServiceForVtpm (
   TdVmCallRspHeader = NULL;
   QueryRspStruct    = NULL;
 
-  CommandBuffer = (UINT8 *)AllocateSharedBuffer (VTPM_DEFAULT_ALLOCATION_PAGE);
-  if (CommandBuffer == NULL) {
-    Status = EFI_OUT_OF_RESOURCES;
-    goto QuitCheckVmCallService;
+  Status = VtpmAllocateSharedBuffer (&CommandBuffer, VTPM_DEFAULT_ALLOCATION_PAGE * 2);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "VtpmAllocateSharedBuffer failed with %r\n", Status));
+    return Status;
   }
 
-  ResponseBuffer = (UINT8 *)AllocateSharedBuffer (VTPM_DEFAULT_ALLOCATION_PAGE);
-  if (ResponseBuffer == NULL) {
-    Status = EFI_OUT_OF_RESOURCES;
-    goto QuitCheckVmCallService;
+  if (CommandBuffer == NULL) {
+    return EFI_UNSUPPORTED;
   }
+
+  ResponseBuffer = CommandBuffer + EFI_PAGES_TO_SIZE (VTPM_DEFAULT_ALLOCATION_PAGE);
 
   // build the tdvmcall-service-command-header packet
   CopyMem (CommandBuffer, &mTdVmCallServiceCommandHeaderForQuery, sizeof (TDVMCALL_SERVICE_COMMAND_HEADER));
@@ -562,8 +487,7 @@ TdQueryServiceForVtpm (
   TdxSharedBit = TdSharedPageMask ();
   if (TdxSharedBit == 0) {
     DEBUG ((DEBUG_ERROR, "%a: Failed with TdxSharedBit %llx\n", __FUNCTION__, TdxSharedBit));
-    Status = EFI_ABORTED;
-    goto QuitCheckVmCallService;
+    return EFI_ABORTED;
   }
 
   DEBUG ((DEBUG_INFO, "%a: Query Service Guid: %g\n", __FUNCTION__, mTdVmCallServiceQueryCommandStruct.ServiceGuid));
@@ -578,7 +502,6 @@ TdQueryServiceForVtpm (
                               );
 
   if ((TdVmCallRetCode != 0) || (RetValue != 0)) {
-    Status = EFI_DEVICE_ERROR;
     DEBUG (
            (
             DEBUG_ERROR,
@@ -588,13 +511,12 @@ TdQueryServiceForVtpm (
             RetValue
            )
            );
-    goto QuitCheckVmCallService;
+    return EFI_DEVICE_ERROR;
   }
 
   // Prase the TDVMCALL_SERVICE response
   TdVmCallRspHeader = (TDVMCALL_SERVICE_RESPONSE_HEADER *)ResponseBuffer;
   if (TdVmCallRspHeader->Status != 0) {
-    Status = EFI_UNSUPPORTED;
     DEBUG (
            (
             DEBUG_ERROR,
@@ -603,13 +525,12 @@ TdQueryServiceForVtpm (
             TdVmCallRspHeader->Status
            )
            );
-    goto QuitCheckVmCallService;
+    return EFI_UNSUPPORTED;
   }
 
   // Parse the TDVMCALL_SREVICE.Query response
   QueryRspStruct =  (TDVMCALL_SERVICE_QUERY_RESPONSE_STRUCT *)(TdVmCallRspHeader + 1);
   if ((QueryRspStruct->Version != 0) || (QueryRspStruct->Command != 0)) {
-    Status = EFI_UNSUPPORTED;
     DEBUG (
            (
             DEBUG_ERROR,
@@ -619,11 +540,10 @@ TdQueryServiceForVtpm (
             QueryRspStruct->Version
            )
            );
-    goto QuitCheckVmCallService;
+    return EFI_UNSUPPORTED;
   }
 
   if (!CompareGuid (&(mTdVmCallServiceQueryCommandStruct.ServiceGuid), &(QueryRspStruct->ServiceGuid))) {
-    Status = EFI_UNSUPPORTED;
     DEBUG (
            (
             DEBUG_ERROR,
@@ -633,11 +553,10 @@ TdQueryServiceForVtpm (
             QueryRspStruct->ServiceGuid
            )
            );
-    goto QuitCheckVmCallService;
+    return EFI_UNSUPPORTED;
   }
 
   if (QueryRspStruct->Status != 0) {
-    Status = EFI_UNSUPPORTED;
     DEBUG (
            (
             DEBUG_ERROR,
@@ -645,19 +564,8 @@ TdQueryServiceForVtpm (
             __FUNCTION__,
             QueryRspStruct->Status)
            );
-    goto QuitCheckVmCallService;
+    return EFI_UNSUPPORTED;
   }
 
-  Status = EFI_SUCCESS;
-
-QuitCheckVmCallService:
-  if (CommandBuffer) {
-    FreeSharedBuffer (CommandBuffer, VTPM_DEFAULT_ALLOCATION_PAGE);
-  }
-
-  if (ResponseBuffer) {
-    FreeSharedBuffer (ResponseBuffer, VTPM_DEFAULT_ALLOCATION_PAGE);
-  }
-
-  return Status;
+  return EFI_SUCCESS;
 }

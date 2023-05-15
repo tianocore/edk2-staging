@@ -81,6 +81,11 @@ typedef struct {
   UINTN    SendReceiveBufferSize;
 } VMM_SPDM_CONTEXT_BUFFERS_SIZE;
 
+typedef struct{
+  UINT64 BufferAddress;
+  UINT64 BufferSize;
+}VTPM_SHARED_BUFFER_INFO_STRUCT;
+
 #pragma pack()
 
 SPDM_RETURN
@@ -170,5 +175,11 @@ EFI_STATUS
 TdQueryServiceForVtpm (
   VOID
   );
+
+EFI_STATUS
+VtpmAllocateSharedBuffer(
+  IN OUT UINT8   **SharedBuffer,
+  IN UINT32      Pages
+);
 
 #endif

@@ -92,6 +92,11 @@ typedef struct {
 #define EDKII_VTPM_SECURE_SPDM_SESSION_INFO_HOB_GUID \
   { 0xe60eb26d, 0x8132, 0x4f8b, { 0xb8, 0x9e, 0x4a, 0xf3, 0x87, 0xf1, 0x24, 0x1d } };
 
+#define EDKII_VTPM_SHARED_BUFFER_INFO_HOB_GUID \
+  { 0x7ef71f3b, 0xe9c5, 0x4568, { 0xef, 0xba, 0xeb, 0x17, 0x6d, 0xcd, 0x73, 0xfa } };
+
 extern EFI_GUID  gEdkiiVTpmSecureSpdmSessionInfoHobGuid;
+extern EFI_GUID  gEdkiiVTpmSharedBufferInfoHobGuid;
+
 
 #endif

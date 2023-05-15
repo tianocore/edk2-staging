@@ -15,6 +15,13 @@
 #include <Library/VmmSpdmVTpmCommunicatorLib.h>
 #include <IndustryStandard/VTpmTd.h>
 #include "VmmSpdmInternal.h"
+#include <Library/HobLib.h>
+#include <Library/MemEncryptTdxLib.h>
+
+VTPM_SHARED_BUFFER_INFO_STRUCT  mVtpmSharedBufferInfo = {
+  0,
+  0
+};
 
 /**
  * Send/Receive data with VTpm-TD.
@@ -118,4 +125,42 @@ VmmSpdmVTpmSendReceive (
   }
 
   return DoVmmSpdmSendReceive (Request, RequestSize, Response, ResponseSize, InfoTable);
+}
+
+/**
+ * TDVF needs the shared buffer with 4kb aligned to call the VMCALL_SERVICE.
+ *
+ * @param SharedBuffer   The pointer of the buffer   
+ * @param Pages          The number of 4 KB pages to allocate
+ * 
+ * @return EFI_SUCCESS   The shared buffer is allocated successfully.
+ * @return Others        Some error occurs when allocated.
+*/
+EFI_STATUS
+VtpmAllocateSharedBuffer (
+  IN OUT UINT8  **SharedBuffer,
+  IN UINT32     Pages
+  )
+{
+  EFI_STATUS  Status;
+  UINT8       *Buffer;
+
+  if ((mVtpmSharedBufferInfo.BufferAddress == 0) || (mVtpmSharedBufferInfo.BufferSize == 0)) {
+    Buffer = (UINT8 *)AllocatePages (Pages);
+    if (Buffer == NULL) {
+      return EFI_OUT_OF_RESOURCES;
+    }
+
+    Status = MemEncryptTdxSetPageSharedBit (0, (PHYSICAL_ADDRESS)Buffer, Pages);
+    if (EFI_ERROR (Status)) {
+      FreePages (Buffer, Pages);
+      return EFI_OUT_OF_RESOURCES;
+    }
+
+    mVtpmSharedBufferInfo.BufferAddress = (UINT64)Buffer;
+    mVtpmSharedBufferInfo.BufferSize    = (UINT64)EFI_PAGES_TO_SIZE (Pages);
+  }
+
+  *SharedBuffer = (UINT8 *)(UINTN)mVtpmSharedBufferInfo.BufferAddress;
+  return EFI_SUCCESS;
 }

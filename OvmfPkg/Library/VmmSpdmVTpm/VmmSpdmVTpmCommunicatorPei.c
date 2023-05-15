@@ -22,6 +22,7 @@
 #include <Library/TdxLib.h>
 #include <Library/BaseCryptLib.h>
 #include <IndustryStandard/Tdx.h>
+#include <Library/MemEncryptTdxLib.h>
 
 #define VTPM_RTMR_INDEX  0x03
 
@@ -543,4 +544,78 @@ VmmSpdmVTpmSendReceive (
   }
 
   return DoVmmSpdmSendReceive (Request, RequestSize, Response, ResponseSize, InfoTable);
+}
+
+/**
+ * TDVF needs the shared buffer with 4kb aligned to call the VMCALL_SERVICE
+ *
+ * @param SharedBuffer   The pointer of the buffer   
+ * @param Pages          The number of 4 KB pages to allocate
+ * 
+ * @return EFI_SUCCESS   The shared buffer is allocated successfully.
+ * @return Others        Some error occurs when allocated 
+*/
+EFI_STATUS
+VtpmAllocateSharedBuffer (
+  IN OUT UINT8  **SharedBuffer,
+  IN UINT32     Pages
+  )
+{
+  EFI_STATUS  Status;
+  UINT8       *Buffer;
+  UINTN       DataLength;
+  VOID        *GuidHobRawData;
+
+  EFI_PEI_HOB_POINTERS  GuidHob;
+  UINT16                HobLength;
+
+  VTPM_SHARED_BUFFER_INFO_STRUCT  *VtpmSharedBufferInfo;
+
+  GuidHob.Guid = GetFirstGuidHob (&gEdkiiVTpmSharedBufferInfoHobGuid);
+  DEBUG ((DEBUG_INFO, "%a: GuidHob.Guid %p \n", __FUNCTION__ , GuidHob.Guid));
+  if (GuidHob.Guid == NULL) {
+    Buffer = (UINT8 *)AllocatePages (Pages);
+    if (Buffer == NULL) {
+      return EFI_OUT_OF_RESOURCES;
+    }
+
+    Status = MemEncryptTdxSetPageSharedBit (0, (PHYSICAL_ADDRESS)Buffer, Pages);
+    if (EFI_ERROR (Status)) {
+      FreePages (Buffer, Pages);
+      return EFI_OUT_OF_RESOURCES;
+    }
+
+    //
+    // Create a Guid hob to save the VtpmSharedBufferInfoStruct
+    //
+    DataLength = sizeof (VTPM_SHARED_BUFFER_INFO_STRUCT);
+
+    GuidHobRawData = BuildGuidHob (
+                                   &gEdkiiVTpmSharedBufferInfoHobGuid,
+                                   DataLength
+                                   );
+
+    if (GuidHobRawData == NULL) {
+      DEBUG ((DEBUG_ERROR, "%a : BuildGuidHob failed \n", __FUNCTION__));
+      return EFI_OUT_OF_RESOURCES;
+    }
+
+    VtpmSharedBufferInfo                = GuidHobRawData;
+    VtpmSharedBufferInfo->BufferAddress = (UINT64)Buffer;
+    VtpmSharedBufferInfo->BufferSize    = (UINT64)EFI_PAGES_TO_SIZE (Pages);  
+
+    *SharedBuffer = Buffer;
+    return EFI_SUCCESS;
+  }
+
+  HobLength = sizeof (EFI_HOB_GUID_TYPE) + sizeof (VTPM_SHARED_BUFFER_INFO_STRUCT);
+  if (GuidHob.Guid->Header.HobLength != HobLength) {
+    DEBUG ((DEBUG_ERROR, "%a: The GuidHob.Guid->Header.HobLength is not equal HobLength, %x vs %x \n", __FUNCTION__, GuidHob.Guid->Header.HobLength, HobLength));
+    return EFI_INVALID_PARAMETER;
+  }
+
+  VtpmSharedBufferInfo = (VTPM_SHARED_BUFFER_INFO_STRUCT *)(GuidHob.Guid + 1);
+
+  *SharedBuffer = (UINT8 *)(UINTN)(VtpmSharedBufferInfo->BufferAddress);
+  return EFI_SUCCESS;
 }
