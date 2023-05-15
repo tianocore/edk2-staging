@@ -32,7 +32,7 @@ For BaseCryptLibMbedTls:
 | Hmac/CryptHmac.c  | YES | YES |
 | Kdf/CryptHkdf.c  | YES | YES |
 | Pem/CryptPem.c  | YES | YES |
-| Pk/CryptAuthenticode.c  | YES | WIP |
+| Pk/CryptAuthenticode.c  | YES | YES |
 | Pk/CryptDh.c  | YES | YES |
 | Pk/CryptEc.c  | YES | YES |
 | Pk/CryptPkcs1Oaep.c  | YES | YES |
@@ -40,12 +40,12 @@ For BaseCryptLibMbedTls:
 | Pk/CryptPkcs7Sign.c  | YES | YES |
 | Pk/CryptPkcs7VerifyBase.c  | YES | YES |
 | Pk/CryptPkcs7VerifyCommon.c  | YES | YES |
-| Pk/CryptPkcs7VerifyEku.c  | YES | WIP |
+| Pk/CryptPkcs7VerifyEku.c  | YES | YES |
 | Pk/CryptPkcs7VerifyEkuRuntime.c  | YES | YES |
 | Pk/CryptPkcs7VerifyRuntime.c  | YES | YES |
 | Pk/CryptRsaBasic.c  | YES | YES |
 | Pk/CryptRsaExt.c  | YES | YES |
-| Pk/CryptTs.c  | YES | WIP |
+| Pk/CryptTs.c  | YES | YES |
 | Pk/CryptX509.c  | YES | YES |
 
 For TlsLibMbedtls:
@@ -68,16 +68,6 @@ For TlsLibMbedtls:
 |  ----  | ----  | ----  |
 | SM3 | https://github.com/Mbed-TLS/mbedtls/pull/5822 | Unkown |
 | SHA3  | https://github.com/Mbed-TLS/mbedtls/pull/4492 | Unkown |
-
-## Risk
-
-Following API Test is WIP
-
-|  API  |
-|  ----  |
-| AuthenticodeVerify  |
-| ImageTimestampVerify  |
-| VerifyEKUsInPkcs7Signature  |
 
 ## Timeline
 Target for 2023 Q1
