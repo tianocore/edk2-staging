@@ -66,6 +66,7 @@
   Bn/CryptBnNull.c
 
   SysCall/CrtWrapper.c
+  SysCall/DummyOpensslSupport.c
   SysCall/ConstantTimeClock.c
   SysCall/BaseMemAllocation.c
 
@@ -87,7 +88,10 @@
   MbedTlsLib
   IntrinsicLib
   RngLib
+  SynchronizationLib
 
+[Ppis]
+  gEfiPeiMpServicesPpiGuid
 [FixedPcd]
 
 #

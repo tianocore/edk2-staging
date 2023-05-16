@@ -63,6 +63,7 @@
   Bn/CryptBnNull.c
 
   SysCall/CrtWrapper.c
+  SysCall/DummyOpensslSupport.c
   SysCall/TimerWrapper.c
   SysCall/RuntimeMemAllocation.c
 
