@@ -69,6 +69,37 @@ For TlsLibMbedtls:
 | SM3 | https://github.com/Mbed-TLS/mbedtls/pull/5822 | Unkown |
 | SHA3  | https://github.com/Mbed-TLS/mbedtls/pull/4492 | Unkown |
 
+Now, the unsupported features SM3 and SHA3 in CryptoPkg are supported by adding Openssl library.
+
+## Enable CryptoMbedTlsPkg for Platform step
+
+Note: The sequence of steps 3 to 8 cannot be changed;
+1. Download the platform source code;
+2. Download the edk-staging OpenSSL11_EOL as stanalone folder;
+3. Replace the platform source code from `CryptoPkg/Library/BaseCryptLib` to `CryptoPkg/Library/BaseCryptLibMbedTls`;
+4. Replace the platform source code from `OpensslLib|CryptoPkg/Library/OpensslLib/OpensslLib.inf` to
+```
+OpensslLib|CryptoPkg/Library/OpensslLib/OpensslLib.inf
+  MbedTlsLib|CryptoPkg/Library/MbedTlsLib/MbedTlsLib.inf
+```
+5. Replace the platform source code from `OpensslLib|CryptoPkg/Library/OpensslLib/OpensslLibCrypto.inf` to
+```
+OpensslLib|CryptoPkg/Library/OpensslLib/OpensslLibCrypto.inf
+  MbedTlsLib|CryptoPkg/Library/MbedTlsLib/MbedTlsLib.inf
+```
+6. Replace the platform source code from `OpensslLib|CryptoPkg/Library/OpensslLib/OpensslLibFull.inf` to
+```
+OpensslLib|CryptoPkg/Library/OpensslLib/OpensslLibFull.inf
+  MbedTlsLib|CryptoPkg/Library/MbedTlsLib/MbedTlsLibFull.inf
+```
+7. Relace the platform EDK2/CryptoPkg folder using the edk2-staging/CryptoPkg folder;
+8. checkout the IntrinsicLib by using:
+```
+$ git checkout CryptoPkg/Library/IntrinsicLib
+$ git clean -fd CryptoPkg/Library/IntrinsicLib
+```
+9. build
+
 ## Timeline
 Target for 2023 Q1
 ## Owner
