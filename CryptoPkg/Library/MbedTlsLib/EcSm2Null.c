@@ -248,4 +248,83 @@ void mbedtls_ecdh_enable_restart( mbedtls_ecdh_context *ctx )
   ASSERT (FALSE);
 }
 
+void mbedtls_ecp_point_init( mbedtls_ecp_point *pt )
+{
+  ASSERT (FALSE);
+}
+
+void mbedtls_ecp_group_init( mbedtls_ecp_group *grp )
+{
+  ASSERT (FALSE);
+}
+
+void mbedtls_ecp_point_free( mbedtls_ecp_point *pt )
+{
+  ASSERT (FALSE);
+}
+
+void mbedtls_ecp_group_free( mbedtls_ecp_group *grp )
+{
+  ASSERT (FALSE);
+}
+
+int mbedtls_ecp_is_zero( mbedtls_ecp_point *pt )
+{
+  ASSERT (FALSE);
+  return -1;
+}
+
+int mbedtls_ecp_point_cmp( const mbedtls_ecp_point *P,
+                           const mbedtls_ecp_point *Q )
+{
+  ASSERT (FALSE);
+  return -1;
+}
+
+int mbedtls_ecp_muladd( mbedtls_ecp_group *grp, mbedtls_ecp_point *R,
+             const mbedtls_mpi *m, const mbedtls_ecp_point *P,
+             const mbedtls_mpi *n, const mbedtls_ecp_point *Q )
+{
+  ASSERT (FALSE);
+  return -1;
+}
+
+int mbedtls_ecdh_gen_public( mbedtls_ecp_group *grp, mbedtls_mpi *d, mbedtls_ecp_point *Q,
+                     int (*f_rng)(void *, unsigned char *, size_t),
+                     void *p_rng )
+{
+  ASSERT (FALSE);
+  return -1;
+}
+
+int mbedtls_ecdh_compute_shared( mbedtls_ecp_group *grp, mbedtls_mpi *z,
+                         const mbedtls_ecp_point *Q, const mbedtls_mpi *d,
+                         int (*f_rng)(void *, unsigned char *, size_t),
+                         void *p_rng )
+{
+  ASSERT (FALSE);
+  return -1;
+}
+
+int mbedtls_ecdsa_verify( mbedtls_ecp_group *grp,
+                          const unsigned char *buf, size_t blen,
+                          const mbedtls_ecp_point *Q,
+                          const mbedtls_mpi *r,
+                          const mbedtls_mpi *s)
+{
+  ASSERT (FALSE);
+  return -1;
+}
+
+/*
+ * Compute ECDSA signature of a hashed message
+ */
+int mbedtls_ecdsa_sign( mbedtls_ecp_group *grp, mbedtls_mpi *r, mbedtls_mpi *s,
+                const mbedtls_mpi *d, const unsigned char *buf, size_t blen,
+                int (*f_rng)(void *, unsigned char *, size_t), void *p_rng )
+{
+  ASSERT (FALSE);
+  return -1;
+}
+
 
