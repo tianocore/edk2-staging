@@ -338,46 +338,80 @@ QuitCheckRTMRForVTPM:
 }
 
 /**
- * Get SecuredSpdmSessionInfo with the GUID
- * Then extend the session info to RTMR[3].
+ * If the VTPM spdm session is established, tdvf will get 
+ * SecuredSpdmSessionInfo with the GUID and extend the session info to RTMR[3].
+ * If the session is failed to establish, 
+ * TDVF shall extend a random once value to RTMR[3].
  *
- * @return EFI_SUCCESS     The vtpm info is extend successfully
- * @return Other           Some error occurs when executing this extend.
+ * 
+ * @param  IsSessionFailed  The status of the session.
+ *
+ * @return EFI_SUCCESS      The data extend successfully
+ * @return Other            Some error occurs when executing this extend.
  */
 STATIC
 EFI_STATUS
-ExtendVtpmSpdmSessionInfoToRtmr3 (
-  VOID
+ExtendVtpmToRtmr3 (
+  IN BOOLEAN IsSessionFailed
   )
 {
   EFI_STATUS                      Status;
   UINT8                           Digest[SHA384_DIGEST_SIZE];
+  VOID                           *DataToHash;
+  UINTN                           DataLength;
+  UINT32                          RandomValue;
   EFI_PEI_HOB_POINTERS            GuidHob;
   UINT16                          HobLength;
   VTPM_SECURE_SESSION_INFO_TABLE  *InfoTable;
 
-  // Find gEdkiiVTpmSecureSpdmSessionInfoHobGuid
-  GuidHob.Guid = GetFirstGuidHob (&gEdkiiVTpmSecureSpdmSessionInfoHobGuid);
-  DEBUG ((DEBUG_INFO, ">> GuidHob.Guid = %p\n", GuidHob.Guid));
-  if (GuidHob.Guid == NULL) {
-    return EFI_NOT_FOUND;
-  }
+  DataToHash  = NULL;
+  InfoTable   = NULL;
+  DataLength  = 0;
+  RandomValue = 0;
 
-  HobLength = sizeof (EFI_HOB_GUID_TYPE) + VTPM_SECURE_SESSION_INFO_TABLE_SIZE;
+  DEBUG(
+        (
+         DEBUG_INFO, 
+         IsSessionFailed ? "%a: Session Setup Failed\n" : "%a: Session Setup Successful\n", 
+         __FUNCTION__
+        )
+        );
 
-  if (GuidHob.Guid->Header.HobLength != HobLength) {
-    return EFI_INVALID_PARAMETER;
-  }
+  if (IsSessionFailed == FALSE){
+    // Find gEdkiiVTpmSecureSpdmSessionInfoHobGuid
+    GuidHob.Guid = GetFirstGuidHob (&gEdkiiVTpmSecureSpdmSessionInfoHobGuid);
+    DEBUG ((DEBUG_INFO, "%a GuidHob.Guid = %p\n", __FUNCTION__ , GuidHob.Guid));
+    if (GuidHob.Guid == NULL) {
+      return EFI_NOT_FOUND;
+    }
 
-  InfoTable = (VTPM_SECURE_SESSION_INFO_TABLE *)(GuidHob.Guid + 1);
-  if (InfoTable->SessionId == 0) {
-    return EFI_NOT_STARTED;
+    HobLength = sizeof (EFI_HOB_GUID_TYPE) + VTPM_SECURE_SESSION_INFO_TABLE_SIZE;
+
+    if (GuidHob.Guid->Header.HobLength != HobLength) {
+      return EFI_INVALID_PARAMETER;
+    }
+
+    InfoTable = (VTPM_SECURE_SESSION_INFO_TABLE *)(GuidHob.Guid + 1);
+    if (InfoTable->SessionId == 0) {
+      return EFI_NOT_STARTED;
+    }
+
+    DataToHash = InfoTable;
+    DataLength = VTPM_SECURE_SESSION_INFO_TABLE_SIZE;
+  }else{
+
+    if (SpdmGetRandomNumber (sizeof(UINT32), (UINT8 *)&RandomValue) == FALSE){
+      DEBUG ((DEBUG_ERROR, "SpdmGetRandomNumber failed\n"));
+    }
+
+    DataToHash = &RandomValue;
+    DataLength = sizeof(UINT32);
   }
 
   //
   // Calculate the sha384 of the data
   //
-  if (!Sha384HashAll (InfoTable, VTPM_SECURE_SESSION_INFO_TABLE_SIZE, Digest)) {
+  if (!Sha384HashAll (DataToHash, DataLength, Digest)) {
     DEBUG ((DEBUG_ERROR, "Sha384HashAll failed \n"));
     return EFI_ABORTED;
   }
@@ -412,6 +446,9 @@ VmmSpdmVTpmConnect (
   UINT32            Pages;
   EFI_STATUS        Status;
   SPDM_RETURN       SpdmStatus;
+  BOOLEAN           IsSessionFailed;
+
+  IsSessionFailed   = FALSE;
 
   // If VMCALL_SERVICE_VTPM_GUID is not supported, VMM will not 
   // allow tdvf to send and receive VTPM messages over an spdm session.
@@ -473,16 +510,21 @@ VmmSpdmVTpmConnect (
     goto CleanContext;
   }
 
-  // The first event in RTMT[3] is the VTPM Spdm session info.
-  // Following a successful connection, the tdvf must extend the session information to RTMR[3].
-  Status = ExtendVtpmSpdmSessionInfoToRtmr3 ();
-  if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_ERROR, "ExtendVtpmSpdmSessionInfoToRtmr3 failed with %r \n", Status));
-    Status = EFI_ABORTED;
-  }
-
 CleanContext:
   FreeMemoryForVmmSpdmContext (Context, Pages);
+  if (EFI_ERROR (Status)){
+    IsSessionFailed = TRUE;
+  }
+  
+  // The first event in RTMT[3] is the VTPM Spdm session info.
+  // Following a successful connection, the tdvf must extend the session information to RTMR[3].
+  // Even if the session is failed to establish, the tdvf shall extend a value to RTMR[3]
+  // to indicate that it tried and failed.
+  Status = ExtendVtpmToRtmr3 (IsSessionFailed);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "ExtendVtpmToRtmr3 failed with %r \n", Status));
+    Status = EFI_ABORTED;
+  }
 
   return Status;
 }
