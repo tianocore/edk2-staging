@@ -140,11 +140,12 @@ VmmSpdmTunnelPeimEntryPoint (
   }
 
   if (EFI_ERROR (Status)) {
-    Status = PeiServicesInstallPpi (&mVmmSpdmTunnlPpiListNull);  
+    Status = PeiServicesInstallPpi (&mVmmSpdmTunnlPpiListNull);
+    DEBUG((DEBUG_INFO, "PeiServicesInstallPpi with mVmmSpdmTunnelPpiListNull is %r\n",Status));
   } else {
     Status = PeiServicesInstallPpi (&mVmmSpdmTunnlPpiList);
-    ASSERT_EFI_ERROR (Status);
+    DEBUG((DEBUG_INFO, "PeiServicesInstallPpi with mVmmSpdmTunnelPpiList is %r\n", Status));
   }
 
-  return EFI_SUCCESS;
+  return Status;
 }
