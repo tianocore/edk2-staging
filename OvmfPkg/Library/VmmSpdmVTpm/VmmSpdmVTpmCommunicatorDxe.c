@@ -35,7 +35,6 @@ DoVmmSpdmSendReceive (
   VTPM_SECURE_SESSION_INFO_TABLE *InfoTable
   );
 
-STATIC
 VTPM_SECURE_SESSION_INFO_TABLE *
 GetSpdmSecuredSessionInfo (
   VOID

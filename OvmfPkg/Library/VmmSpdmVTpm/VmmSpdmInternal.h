@@ -182,4 +182,9 @@ VtpmAllocateSharedBuffer(
   IN UINT32      Pages
 );
 
+VTPM_SECURE_SESSION_INFO_TABLE *
+GetSpdmSecuredSessionInfo (
+  VOID
+  );
+
 #endif
