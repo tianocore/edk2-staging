@@ -17,7 +17,10 @@
 #include <Library/HobLib.h>
 #include "VmmSpdmInternal.h"
 
-#define VTPM_RTMR_INDEX  0x03
+#define RTMR_INDEX_RTMR0  0
+#define RTMR_INDEX_RTMR1  1
+#define RTMR_INDEX_RTMR2  2
+#define RTMR_INDEX_RTMR3  3
 
 /**
  * Call the TDCALL to get TD_REPORT and then check the RTMR[3]
@@ -70,7 +73,7 @@ CheckRtmr3WithTdReport (
 
   // Check RTMR[3]
   TdReport = (TDREPORT_STRUCT *)Report;
-  Rtmr3    = TdReport->Tdinfo.Rtmrs[VTPM_RTMR_INDEX];
+  Rtmr3    = TdReport->Tdinfo.Rtmrs[RTMR_INDEX_RTMR3];
   while (Index < SHA384_DIGEST_SIZE) {
     if (Rtmr3[Index] != 0) {
       DEBUG ((DEBUG_ERROR, "%a: RTMR[3] is non-zero\n", __FUNCTION__));
@@ -176,7 +179,7 @@ ExtendVtpmToRtmr3 (
   Status = TdExtendRtmr (
                          (UINT32 *)Digest,
                          SHA384_DIGEST_SIZE,
-                         VTPM_RTMR_INDEX
+                         RTMR_INDEX_RTMR3
                          );
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "TdExtendRtmr failed with %r\n", Status));
