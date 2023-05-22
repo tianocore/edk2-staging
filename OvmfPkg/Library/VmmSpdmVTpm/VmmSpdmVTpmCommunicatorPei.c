@@ -314,7 +314,7 @@ VmmSpdmVTpmConnect (
 
   SpdmStatus = DoAuthentication (Context->SpdmContext, Context->SlotId, Context->UseMeasurementHashType);
   if (!LIBSPDM_STATUS_IS_SUCCESS (SpdmStatus)) {
-    DEBUG ((DEBUG_ERROR, "VmmSpdmVTpmInitSpdmContext failed with %lx \n", SpdmStatus));
+    DEBUG ((DEBUG_ERROR, "DoAuthentication failed with %lx \n", SpdmStatus));
     Status = EFI_ABORTED;
     goto CleanContext;
   }

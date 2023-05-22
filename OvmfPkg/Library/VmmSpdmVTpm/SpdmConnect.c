@@ -739,9 +739,6 @@ DoAuthentication (
   UINT8        MeasurementHash[LIBSPDM_MAX_HASH_SIZE];
   UINTN        CertChainSize;
   UINT8        CertChain[LIBSPDM_MAX_CERT_CHAIN_SIZE];
-  UINTN        CertChainBufferSize;
-
-  SlotId = 0;
 
   ZeroMem (TotalDigestBuffer, sizeof (TotalDigestBuffer));
   CertChainSize = sizeof (CertChain);
@@ -760,24 +757,10 @@ DoAuthentication (
   }
 
   // get certs
-  CertChainBufferSize = CertChainSize;
-  Status              = SpdmGetCertificate (
-                                            SpdmContext,
-                                            NULL,
-                                            0,
-                                            &CertChainSize,
-                                            CertChain
-                                            );
-  if (LIBSPDM_STATUS_IS_ERROR (Status)) {
-    return Status;
-  }
-
-  CertChainSize = CertChainBufferSize;
-  ZeroMem (CertChain, CertChainBufferSize);
   Status = SpdmGetCertificate (
                                SpdmContext,
                                NULL,
-                               1,
+                               0,
                                &CertChainSize,
                                CertChain
                                );
@@ -793,39 +776,6 @@ DoAuthentication (
                           UseMeasurementHashType,
                           MeasurementHash,
                           NULL
-                          );
-  if (LIBSPDM_STATUS_IS_ERROR (Status)) {
-    return Status;
-  }
-
-  // get digest
-  Status = SpdmGetDigest (
-                          SpdmContext,
-                          NULL,
-                          &SlotMask,
-                          TotalDigestBuffer
-                          );
-  if (LIBSPDM_STATUS_IS_ERROR (Status)) {
-    return Status;
-  }
-
-  // get cert
-  Status = SpdmGetCertificate (
-                               SpdmContext,
-                               NULL,
-                               SlotId,
-                               &CertChainSize,
-                               CertChain
-                               );
-  if (LIBSPDM_STATUS_IS_ERROR (Status)) {
-    return Status;
-  }
-
-  Status = SpdmGetDigest (
-                          SpdmContext,
-                          NULL,
-                          &SlotMask,
-                          TotalDigestBuffer
                           );
   if (LIBSPDM_STATUS_IS_ERROR (Status)) {
     return Status;
