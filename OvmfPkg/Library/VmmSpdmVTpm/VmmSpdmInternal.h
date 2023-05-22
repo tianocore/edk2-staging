@@ -187,4 +187,14 @@ GetSpdmSecuredSessionInfo (
   VOID
   );
 
+EFI_STATUS
+CheckRtmr3WithTdReport (
+  VOID
+  );
+
+EFI_STATUS
+ExtendVtpmToRtmr3 (
+  IN BOOLEAN IsSessionFailed
+  );
+
 #endif

@@ -269,7 +269,6 @@ VmmSpdmVTpmIsConnected (
  * @return EFI_SUCCESS    The RTMR[3] is zero.
  * @return Others         The RTMR[3] is non-zero.
 */
-STATIC
 EFI_STATUS
 CheckRtmr3WithTdReport (
   VOID
@@ -349,7 +348,6 @@ QuitCheckRTMRForVTPM:
  * @return EFI_SUCCESS      The data extend successfully
  * @return Other            Some error occurs when executing this extend.
  */
-STATIC
 EFI_STATUS
 ExtendVtpmToRtmr3 (
   IN BOOLEAN IsSessionFailed
