@@ -26,6 +26,7 @@
   VmmSpdmVTpmCommunicatorPei.c
   VTpmCommunicate.c
   VTpmTransport.c
+  VTpmRtmr.c
 
 [Packages]
   CryptoPkg/CryptoPkg.dec
