@@ -197,4 +197,9 @@ ExtendVtpmToAllRtmrs (
   IN BOOLEAN IsSessionFailed
   );
 
+EFI_STATUS
+DoEndSession (
+  VMM_SPDM_CONTEXT  *Context
+  );
+
 #endif

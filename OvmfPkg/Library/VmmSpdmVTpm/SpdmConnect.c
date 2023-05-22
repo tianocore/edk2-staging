@@ -829,3 +829,42 @@ DoStartSession (
 
   return Status;
 }
+
+/**
+ * End the session after a failed connection to SPDM.
+ *
+ * @param  Context        A pointer to the spdm messages 
+ *
+ * @return EFI_SUCCESS    The session was successfully destroyed.
+ * @return Others         Some error occurs when destroying.
+*/
+EFI_STATUS
+DoEndSession (
+  VMM_SPDM_CONTEXT  *Context
+  )
+{
+  SPDM_RETURN  Status;
+
+  if (Context == NULL) {
+    DEBUG ((DEBUG_ERROR, "%a: Context is NULL\n", __FUNCTION__));
+    return EFI_INVALID_PARAMETER;
+  }
+
+  if (!Context->Initialized) {
+    return EFI_SUCCESS;
+  }
+
+  Status = SpdmStopSession (
+                            Context->SpdmContext,
+                            Context->SessionId,
+                            SPDM_END_SESSION_REQUEST_ATTRIBUTES_PRESERVE_NEGOTIATED_STATE_CLEAR
+                            );
+  if (LIBSPDM_STATUS_IS_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "SpdmStopSession is failed with %lx\n", Status));
+    return EFI_DEVICE_ERROR;
+  }
+
+  DEBUG ((DEBUG_INFO, "%a: Session is destroyed\n", __FUNCTION__));
+
+  return EFI_SUCCESS;
+}

@@ -276,8 +276,10 @@ VmmSpdmVTpmConnect (
   EFI_STATUS        Status;
   SPDM_RETURN       SpdmStatus;
   BOOLEAN           SessionSuccess;
+  BOOLEAN           DestorySession;
 
   SessionSuccess   = FALSE;
+  DestorySession   = FALSE;
 
   // If VMCALL_SERVICE_VTPM_GUID is not supported, VMM will not 
   // allow tdvf to send and receive VTPM messages over an spdm session.
@@ -316,6 +318,7 @@ VmmSpdmVTpmConnect (
   if (!LIBSPDM_STATUS_IS_SUCCESS (SpdmStatus)) {
     DEBUG ((DEBUG_ERROR, "DoAuthentication failed with %lx \n", SpdmStatus));
     Status = EFI_ABORTED;
+    DestorySession = TRUE;
     goto CleanContext;
   }
 
@@ -329,6 +332,7 @@ VmmSpdmVTpmConnect (
   if (!LIBSPDM_STATUS_IS_SUCCESS (SpdmStatus)) {
     DEBUG ((DEBUG_ERROR, "DoStartSession failed with %lx \n", SpdmStatus));
     Status = EFI_ABORTED;
+    DestorySession = TRUE;
     goto CleanContext;
   }
 
@@ -336,11 +340,11 @@ VmmSpdmVTpmConnect (
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "ExportSecureSpdmSessionInfos failed with %r \n", Status));
     Status = EFI_ABORTED;
+    DestorySession = TRUE;
     goto CleanContext;
   }
 
 CleanContext:
-  FreeMemoryForVmmSpdmContext (Context, Pages);
   if (Status == EFI_SUCCESS){
     SessionSuccess = TRUE;
   }
@@ -354,6 +358,20 @@ CleanContext:
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "ExtendVtpmToAllRtmrs failed with %r \n", Status));
     Status = EFI_ABORTED;
+    DestorySession = TRUE;
+  }
+
+  if (DestorySession){
+    Status = DoEndSession (Context);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_ERROR, "DoEndSession failed with %r \n", Status));
+      Status = EFI_ABORTED;
+    }
+  }
+
+  FreeMemoryForVmmSpdmContext (Context, Pages);
+  if ((SessionSuccess == FALSE) || DestorySession){
+    return EFI_ABORTED;
   }
 
   return Status;
