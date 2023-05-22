@@ -95,74 +95,26 @@ QuitCheckRTMRForVTPM:
   return Status;
 }
 
-/**
- * If the VTPM spdm session is established, tdvf will get 
- * SecuredSpdmSessionInfo with the GUID and extend the session info to RTMR[3].
- * If the session is failed to establish, 
- * TDVF shall extend a random once value to RTMR[3].
- *
- * 
- * @param  IsSessionFailed  The status of the session.
- *
- * @return EFI_SUCCESS      The data extend successfully
- * @return Other            Some error occurs when executing this extend.
- */
 EFI_STATUS
-ExtendVtpmToRtmr3 (
-  IN BOOLEAN IsSessionFailed
-  )
+HashAndExtendToRtmr(
+   IN UINTN  RtmrIndex,
+   IN VOID  *DataToHash,
+   IN UINTN  DataLength
+   )
 {
-  EFI_STATUS                      Status;
-  UINT8                           Digest[SHA384_DIGEST_SIZE];
-  VOID                           *DataToHash;
-  UINTN                           DataLength;
-  UINT32                          RandomValue;
-  EFI_PEI_HOB_POINTERS            GuidHob;
-  UINT16                          HobLength;
-  VTPM_SECURE_SESSION_INFO_TABLE  *InfoTable;
+  EFI_STATUS  Status;
+  UINT8       Digest[SHA384_DIGEST_SIZE];
 
-  DataToHash  = NULL;
-  InfoTable   = NULL;
-  DataLength  = 0;
-  RandomValue = 0;
+  ZeroMem(Digest,SHA384_DIGEST_SIZE);
 
-  DEBUG(
-        (
-         DEBUG_INFO, 
-         IsSessionFailed ? "%a: Session Setup Failed\n" : "%a: Session Setup Successful\n", 
-         __FUNCTION__
-        )
-        );
+  if (DataToHash == NULL ){
+    DEBUG ((DEBUG_ERROR, "%a: DataToHash is NULL\n", __FUNCTION__));
+    return EFI_INVALID_PARAMETER;
+  }
 
-  if (IsSessionFailed == FALSE){
-    // Find gEdkiiVTpmSecureSpdmSessionInfoHobGuid
-    GuidHob.Guid = GetFirstGuidHob (&gEdkiiVTpmSecureSpdmSessionInfoHobGuid);
-    DEBUG ((DEBUG_INFO, "%a GuidHob.Guid = %p\n", __FUNCTION__ , GuidHob.Guid));
-    if (GuidHob.Guid == NULL) {
-      return EFI_NOT_FOUND;
-    }
-
-    HobLength = sizeof (EFI_HOB_GUID_TYPE) + VTPM_SECURE_SESSION_INFO_TABLE_SIZE;
-
-    if (GuidHob.Guid->Header.HobLength != HobLength) {
-      return EFI_INVALID_PARAMETER;
-    }
-
-    InfoTable = (VTPM_SECURE_SESSION_INFO_TABLE *)(GuidHob.Guid + 1);
-    if (InfoTable->SessionId == 0) {
-      return EFI_NOT_STARTED;
-    }
-
-    DataToHash = InfoTable;
-    DataLength = VTPM_SECURE_SESSION_INFO_TABLE_SIZE;
-  }else{
-
-    if (SpdmGetRandomNumber (sizeof(UINT32), (UINT8 *)&RandomValue) == FALSE){
-      DEBUG ((DEBUG_ERROR, "SpdmGetRandomNumber failed\n"));
-    }
-
-    DataToHash = &RandomValue;
-    DataLength = sizeof(UINT32);
+  if (RtmrIndex > RTMR_INDEX_RTMR3){
+    DEBUG ((DEBUG_ERROR, "%a: RtmrIndex should be 0~3\n", __FUNCTION__));
+    return EFI_INVALID_PARAMETER;
   }
 
   //
@@ -173,17 +125,93 @@ ExtendVtpmToRtmr3 (
     return EFI_ABORTED;
   }
 
-  //
-  // Extend to RTMR[3]
-  //
   Status = TdExtendRtmr (
                          (UINT32 *)Digest,
                          SHA384_DIGEST_SIZE,
-                         RTMR_INDEX_RTMR3
+                         RtmrIndex
                          );
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_ERROR, "TdExtendRtmr failed with %r\n", Status));
+    DEBUG ((DEBUG_ERROR, "TdExtendRtmr[%d] failed with %r\n", RtmrIndex, Status));
     return EFI_ABORTED;
+  }
+
+  return EFI_SUCCESS;
+}
+
+/**
+ * If the VTPM spdm session is established, tdvf will get 
+ * SecuredSpdmSessionInfo with the GUID and extend the session info to RTMR[3].
+ * If the session is failed to establish, 
+ * TDVF shall extend a random once value to RTMR[3].
+ *
+ * 
+ * @param  SessionSuccess   The status of the session.
+ *
+ * @return EFI_SUCCESS      The data extend successfully
+ * @return Other            Some error occurs when executing this extend.
+ */
+EFI_STATUS
+ExtendVtpmToRtmr3 (
+  IN BOOLEAN SessionSuccess  
+  )
+{
+  EFI_STATUS                      Status;
+  VOID                           *DataToHash;
+  UINTN                           DataLength;
+  UINT32                          RandomValue;
+  VTPM_SECURE_SESSION_INFO_TABLE  *InfoTable;
+
+  DataToHash  = NULL;
+  InfoTable   = NULL;
+  DataLength  = 0;
+  RandomValue = 0;
+
+  DEBUG(
+        (
+         DEBUG_INFO, 
+         SessionSuccess ? "%a: Session Setup Successful\n" : "%a: Session Setup Failed\n", 
+         __FUNCTION__
+        )
+        );
+
+  if (SessionSuccess){
+
+    InfoTable = GetSpdmSecuredSessionInfo();
+    if (InfoTable == NULL){
+        DEBUG((DEBUG_ERROR, "%a: SecuredSessionInfo is not found\n", __FUNCTION__));
+        return EFI_NOT_STARTED;
+    }
+    
+    if (InfoTable->SessionId == 0) {
+      return EFI_NOT_STARTED;
+    }
+
+    DataToHash = InfoTable;
+    DataLength = VTPM_SECURE_SESSION_INFO_TABLE_SIZE;
+    //
+    // Extend the session info to RTMR[3]
+    //
+    Status = HashAndExtendToRtmr(RTMR_INDEX_RTMR3,DataToHash,DataLength);
+    if (EFI_ERROR(Status)){
+        return EFI_ABORTED;
+    }
+
+  }else{
+
+    if (SpdmGetRandomNumber (sizeof(UINT32), (UINT8 *)&RandomValue) == FALSE){
+      DEBUG ((DEBUG_ERROR, "SpdmGetRandomNumber failed\n"));
+    }
+
+    DataToHash = &RandomValue;
+    DataLength = sizeof(UINT32);
+    //
+    // Extend the raondom nonce value to RTMR[3]
+    //
+    Status = HashAndExtendToRtmr(RTMR_INDEX_RTMR3,DataToHash,DataLength);
+    if (EFI_ERROR(Status)){
+        return EFI_ABORTED;
+    }
+
   }
 
   return EFI_SUCCESS;

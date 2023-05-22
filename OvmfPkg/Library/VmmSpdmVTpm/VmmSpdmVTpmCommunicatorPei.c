@@ -275,9 +275,9 @@ VmmSpdmVTpmConnect (
   UINT32            Pages;
   EFI_STATUS        Status;
   SPDM_RETURN       SpdmStatus;
-  BOOLEAN           IsSessionFailed;
+  BOOLEAN           SessionSuccess;
 
-  IsSessionFailed   = FALSE;
+  SessionSuccess   = FALSE;
 
   // If VMCALL_SERVICE_VTPM_GUID is not supported, VMM will not 
   // allow tdvf to send and receive VTPM messages over an spdm session.
@@ -341,15 +341,15 @@ VmmSpdmVTpmConnect (
 
 CleanContext:
   FreeMemoryForVmmSpdmContext (Context, Pages);
-  if (EFI_ERROR (Status)){
-    IsSessionFailed = TRUE;
+  if (Status == EFI_SUCCESS){
+    SessionSuccess = TRUE;
   }
   
   // The first event in RTMT[3] is the VTPM Spdm session info.
   // Following a successful connection, the tdvf must extend the session information to RTMR[3].
   // Even if the session is failed to establish, the tdvf shall extend a value to RTMR[3]
   // to indicate that it tried and failed.
-  Status = ExtendVtpmToRtmr3 (IsSessionFailed);
+  Status = ExtendVtpmToRtmr3 (SessionSuccess);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "ExtendVtpmToRtmr3 failed with %r \n", Status));
     Status = EFI_ABORTED;
