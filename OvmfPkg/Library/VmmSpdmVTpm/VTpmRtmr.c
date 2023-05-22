@@ -22,6 +22,8 @@
 #define RTMR_INDEX_RTMR2  2
 #define RTMR_INDEX_RTMR3  3
 
+#define VTPM_SIGNATURE  SIGNATURE_32('v', 'T', 'P', 'M')
+
 /**
  * Call the TDCALL to get TD_REPORT and then check the RTMR[3]
  *
@@ -139,8 +141,9 @@ HashAndExtendToRtmr(
 }
 
 /**
- * If the VTPM spdm session is established, tdvf will get 
- * SecuredSpdmSessionInfo with the GUID and extend the session info to RTMR[3].
+ * If the VTPM spdm session is established, tdvf will  
+ * extend the secuerd session info to RTMR[3] and extend
+ * the VTPM to RTMR[0] RTMR[1] RTMR[2].
  * If the session is failed to establish, 
  * TDVF shall extend a random once value to RTMR[3].
  *
@@ -151,7 +154,7 @@ HashAndExtendToRtmr(
  * @return Other            Some error occurs when executing this extend.
  */
 EFI_STATUS
-ExtendVtpmToRtmr3 (
+ExtendVtpmToAllRtmrs (
   IN BOOLEAN SessionSuccess  
   )
 {
@@ -160,11 +163,15 @@ ExtendVtpmToRtmr3 (
   UINTN                           DataLength;
   UINT32                          RandomValue;
   VTPM_SECURE_SESSION_INFO_TABLE  *InfoTable;
+  UINTN                           RtmrIndex;
+  UINT32                          VtpmSignature;
 
   DataToHash  = NULL;
   InfoTable   = NULL;
   DataLength  = 0;
   RandomValue = 0;
+
+  VtpmSignature = VTPM_SIGNATURE;
 
   DEBUG(
         (
@@ -175,6 +182,19 @@ ExtendVtpmToRtmr3 (
         );
 
   if (SessionSuccess){
+
+    DataToHash = &VtpmSignature;
+    ZeroMem(DataToHash + sizeof(UINT32),SHA384_DIGEST_SIZE - sizeof(UINT32));
+    DataLength = SHA384_DIGEST_SIZE;
+    //
+    // Extend vTPM to RTMR[0], RTMR[1] and RTMR[2]
+    // 
+    for (RtmrIndex = 0; RtmrIndex < RTMR_INDEX_RTMR3; RtmrIndex++){
+        Status = HashAndExtendToRtmr(RtmrIndex,DataToHash,DataLength);
+        if (EFI_ERROR(Status)){
+            return EFI_ABORTED;
+        }
+    }
 
     InfoTable = GetSpdmSecuredSessionInfo();
     if (InfoTable == NULL){

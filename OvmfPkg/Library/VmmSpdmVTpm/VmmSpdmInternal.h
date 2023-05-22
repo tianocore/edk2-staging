@@ -193,7 +193,7 @@ CheckRtmr3WithTdReport (
   );
 
 EFI_STATUS
-ExtendVtpmToRtmr3 (
+ExtendVtpmToAllRtmrs (
   IN BOOLEAN IsSessionFailed
   );
 

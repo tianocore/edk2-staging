@@ -346,12 +346,13 @@ CleanContext:
   }
   
   // The first event in RTMT[3] is the VTPM Spdm session info.
-  // Following a successful connection, the tdvf must extend the session information to RTMR[3].
+  // Following a successful connection, the tdvf must extend the session information to RTMR[3]
+  // and extend the vTPM to RTMR[0] RTMR[1] RTMR[2].
   // Even if the session is failed to establish, the tdvf shall extend a value to RTMR[3]
   // to indicate that it tried and failed.
-  Status = ExtendVtpmToRtmr3 (SessionSuccess);
+  Status = ExtendVtpmToAllRtmrs (SessionSuccess);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_ERROR, "ExtendVtpmToRtmr3 failed with %r \n", Status));
+    DEBUG ((DEBUG_ERROR, "ExtendVtpmToAllRtmrs failed with %r \n", Status));
     Status = EFI_ABORTED;
   }
 
