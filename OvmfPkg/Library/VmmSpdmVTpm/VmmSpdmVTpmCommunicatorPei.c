@@ -425,6 +425,7 @@ VmmSpdmVTpmSendReceive (
   UINTN   *ResponseSize
   )
 {
+  EFI_STATUS                      Status; 
   VTPM_SECURE_SESSION_INFO_TABLE  *InfoTable;
 
   InfoTable = GetSpdmSecuredSessionInfo ();
@@ -432,7 +433,14 @@ VmmSpdmVTpmSendReceive (
     return EFI_NOT_STARTED;
   }
 
-  return DoVmmSpdmSendReceive (Request, RequestSize, Response, ResponseSize, InfoTable);
+  Status = DoVmmSpdmSendReceive (Request, RequestSize, Response, ResponseSize, InfoTable);
+  if (EFI_ERROR(Status)){
+    DEBUG((DEBUG_ERROR, "DoVmmSpdmSendReceive failed with %r\n", Status));
+    //Destroy the session after send-receive failed
+    InfoTable->SessionId = 0;
+  }
+
+  return Status;
 }
 
 /**
