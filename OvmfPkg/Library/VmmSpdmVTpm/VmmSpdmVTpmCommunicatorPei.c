@@ -351,7 +351,7 @@ CleanContext:
   
   // The first event in RTMT[3] is the VTPM Spdm session info.
   // Following a successful connection, the tdvf must extend the session information to RTMR[3]
-  // and extend the vTPM to RTMR[0] RTMR[1] RTMR[2].
+  // and extend the hash(vTPM) to RTMR[0] RTMR[1] RTMR[2] RTMR[3].
   // Even if the session is failed to establish, the tdvf shall extend a value to RTMR[3]
   // to indicate that it tried and failed.
   Status = ExtendVtpmToAllRtmrs (SessionSuccess);

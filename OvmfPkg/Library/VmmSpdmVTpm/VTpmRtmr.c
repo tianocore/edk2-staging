@@ -143,7 +143,7 @@ HashAndExtendToRtmr(
 /**
  * If the VTPM spdm session is established, tdvf will  
  * extend the secuerd session info to RTMR[3] and extend
- * the VTPM to RTMR[0] RTMR[1] RTMR[2].
+ * the hash(vTPM) to RTMR[0] RTMR[1] RTMR[2] RTMR[3].
  * If the session is failed to establish, 
  * TDVF shall extend a random once value to RTMR[3].
  *
@@ -182,20 +182,6 @@ ExtendVtpmToAllRtmrs (
         );
 
   if (SessionSuccess){
-
-    DataToHash = &VtpmSignature;
-    ZeroMem(DataToHash + sizeof(UINT32),SHA384_DIGEST_SIZE - sizeof(UINT32));
-    DataLength = SHA384_DIGEST_SIZE;
-    //
-    // Extend vTPM to RTMR[0], RTMR[1] and RTMR[2]
-    // 
-    for (RtmrIndex = 0; RtmrIndex < RTMR_INDEX_RTMR3; RtmrIndex++){
-        Status = HashAndExtendToRtmr(RtmrIndex,DataToHash,DataLength);
-        if (EFI_ERROR(Status)){
-            return EFI_ABORTED;
-        }
-    }
-
     InfoTable = GetSpdmSecuredSessionInfo();
     if (InfoTable == NULL){
         DEBUG((DEBUG_ERROR, "%a: SecuredSessionInfo is not found\n", __FUNCTION__));
@@ -214,6 +200,19 @@ ExtendVtpmToAllRtmrs (
     Status = HashAndExtendToRtmr(RTMR_INDEX_RTMR3,DataToHash,DataLength);
     if (EFI_ERROR(Status)){
         return EFI_ABORTED;
+    }
+
+    DataToHash = &VtpmSignature;
+    ZeroMem(DataToHash + sizeof(UINT32),SHA384_DIGEST_SIZE - sizeof(UINT32));
+    DataLength = SHA384_DIGEST_SIZE;
+    //
+    // Extend hash(vTPM) to RTMR[0] RTMR[1] RTMR[2] RTMR[3]
+    // 
+    for (RtmrIndex = 0; RtmrIndex <= RTMR_INDEX_RTMR3; RtmrIndex++){
+        Status = HashAndExtendToRtmr(RtmrIndex,DataToHash,DataLength);
+        if (EFI_ERROR(Status)){
+            return EFI_ABORTED;
+        }
     }
 
   }else{
