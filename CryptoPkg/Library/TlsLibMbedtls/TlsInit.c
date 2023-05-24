@@ -143,6 +143,9 @@ TlsNew (
   )
 {
   TLS_CONNECTION  *TlsConn;
+  mbedtls_ssl_config conf;
+
+  mbedtls_ssl_config_init(&conf);
   TlsConn = NULL;
 
   //
@@ -155,15 +158,20 @@ TlsNew (
 
   TlsConn->Ssl = (mbedtls_ssl_context *)TlsCtx;
 
-  TlsConn->fd = AllocateZeroPool(sizeof(mbedtls_net_context));
-  mbedtls_net_init(TlsConn->fd);
+
+  if (mbedtls_ssl_setup(&TlsConn->Ssl, &conf) != 0) {
+    return NULL;
+  }
+
+  // TlsConn->fd = AllocateZeroPool(sizeof(mbedtls_net_context));
+  // mbedtls_net_init(TlsConn->fd);
 
 
-  TlsConn->Conf = AllocateZeroPool(sizeof( mbedtls_ssl_config));
-  mbedtls_ssl_config_init(TlsConn->Conf);
+  // TlsConn->Conf = AllocateZeroPool(sizeof( mbedtls_ssl_config));
+  // mbedtls_ssl_config_init(TlsConn->Conf);
 
-  mbedtls_ssl_set_bio(TlsConn->Ssl, TlsConn->fd,
-                      mbedtls_net_send, mbedtls_net_recv, mbedtls_net_recv_timeout);
+  // mbedtls_ssl_set_bio(TlsConn->Ssl, TlsConn->fd,
+  //                     mbedtls_net_send, mbedtls_net_recv, mbedtls_net_recv_timeout);
 
   return (VOID *)TlsConn;
 }

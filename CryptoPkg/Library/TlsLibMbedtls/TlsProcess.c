@@ -40,9 +40,10 @@ TlsInHandshake (
   //
   // Return the status which indicates if the TLS handshake was done.
   //
-  state = TlsConn->Ssl->state;
 
-  if (state >= MBEDTLS_SSL_HANDSHAKE_OVER) {
+  state = mbedtls_ssl_is_handshake_over(TlsConn->Ssl);
+
+  if (state == 1) {
     return FALSE;
   } else {
     return TRUE;
@@ -114,7 +115,6 @@ TlsDoHandshake (
       }
   }
 
-  mbedtls_net_recv (TlsConn->fd, BufferOut, (UINT32)*BufferOutSize);
   return EFI_SUCCESS;
 }
 
@@ -178,7 +178,7 @@ TlsHandleAlert (
     return EFI_INVALID_PARAMETER;
   }
 
-  mbedtls_net_recv (TlsConn->fd, BufferOut, (UINT32)*BufferOutSize);
+  // mbedtls_net_recv (TlsConn->fd, BufferOut, (UINT32)*BufferOutSize);
   return EFI_SUCCESS;
 
 }
@@ -227,7 +227,7 @@ TlsCloseNotify (
     return EFI_INVALID_PARAMETER;
   } 
   
-  mbedtls_net_recv (TlsConn->fd, Buffer, (UINT32)*BufferSize);
+  // mbedtls_net_recv (TlsConn->fd, Buffer, (UINT32)*BufferSize);
   return EFI_SUCCESS;
 
 }
@@ -256,7 +256,6 @@ TlsCtrlTrafficOut (
   )
 {
   TLS_CONNECTION  *TlsConn;
-  INTN Ret;
 
   TlsConn = (TLS_CONNECTION *)Tls;
   if ((TlsConn == NULL) || (TlsConn->fd == NULL)) {
@@ -266,7 +265,8 @@ TlsCtrlTrafficOut (
   //
   // Read and return the amount of data from the BIO.
   //
-  return mbedtls_net_recv (TlsConn->fd, Buffer, (UINT32)BufferSize);
+  // return mbedtls_net_recv (TlsConn->fd, Buffer, (UINT32)BufferSize);
+  return -1;
 }
 
 /**
@@ -301,7 +301,8 @@ TlsCtrlTrafficIn (
   //
   // Write and return the amount of data to the BIO.
   //
-  return mbedtls_net_send (TlsConn->fd, Buffer, (UINT32)BufferSize);
+  // return mbedtls_net_send (TlsConn->fd, Buffer, (UINT32)BufferSize);
+  return -1;
 }
 
 /**

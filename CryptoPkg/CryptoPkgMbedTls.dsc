@@ -135,7 +135,7 @@
 [LibraryClasses.common.DXE_DRIVER]
   ReportStatusCodeLib|MdeModulePkg/Library/DxeReportStatusCodeLib/DxeReportStatusCodeLib.inf
   BaseCryptLib|CryptoPkg/Library/BaseCryptLibMbedTls/BaseCryptLib.inf
-  TlsLib|CryptoPkg/Library/TlsLib/TlsLib.inf
+  TlsLib|CryptoPkg/Library/TlsLibMbedtls/TlsLib.inf
 
 [LibraryClasses.common.DXE_SMM_DRIVER]
   ReportStatusCodeLib|MdeModulePkg/Library/SmmReportStatusCodeLib/SmmReportStatusCodeLib.inf

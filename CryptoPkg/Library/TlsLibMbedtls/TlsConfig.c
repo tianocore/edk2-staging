@@ -41,26 +41,14 @@ typedef struct {
 STATIC CONST TLS_CIPHER_MAPPING  TlsCipherMappingTable[] = {
   MAP (0x0001, "NULL-MD5"),                         /// TLS_RSA_WITH_NULL_MD5
   MAP (0x0002, "NULL-SHA"),                         /// TLS_RSA_WITH_NULL_SHA
-  MAP (0x0004, "RC4-MD5"),                          /// TLS_RSA_WITH_RC4_128_MD5
-  MAP (0x0005, "RC4-SHA"),                          /// TLS_RSA_WITH_RC4_128_SHA
-  MAP (0x000A, "DES-CBC3-SHA"),                     /// TLS_RSA_WITH_3DES_EDE_CBC_SHA, mandatory TLS 1.1
-  MAP (0x0016, "DHE-RSA-DES-CBC3-SHA"),             /// TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA
   MAP (0x002F, "AES128-SHA"),                       /// TLS_RSA_WITH_AES_128_CBC_SHA, mandatory TLS 1.2
-  MAP (0x0030, "DH-DSS-AES128-SHA"),                /// TLS_DH_DSS_WITH_AES_128_CBC_SHA
-  MAP (0x0031, "DH-RSA-AES128-SHA"),                /// TLS_DH_RSA_WITH_AES_128_CBC_SHA
   MAP (0x0033, "DHE-RSA-AES128-SHA"),               /// TLS_DHE_RSA_WITH_AES_128_CBC_SHA
   MAP (0x0035, "AES256-SHA"),                       /// TLS_RSA_WITH_AES_256_CBC_SHA
-  MAP (0x0036, "DH-DSS-AES256-SHA"),                /// TLS_DH_DSS_WITH_AES_256_CBC_SHA
-  MAP (0x0037, "DH-RSA-AES256-SHA"),                /// TLS_DH_RSA_WITH_AES_256_CBC_SHA
   MAP (0x0039, "DHE-RSA-AES256-SHA"),               /// TLS_DHE_RSA_WITH_AES_256_CBC_SHA
   MAP (0x003B, "NULL-SHA256"),                      /// TLS_RSA_WITH_NULL_SHA256
   MAP (0x003C, "AES128-SHA256"),                    /// TLS_RSA_WITH_AES_128_CBC_SHA256
   MAP (0x003D, "AES256-SHA256"),                    /// TLS_RSA_WITH_AES_256_CBC_SHA256
-  MAP (0x003E, "DH-DSS-AES128-SHA256"),             /// TLS_DH_DSS_WITH_AES_128_CBC_SHA256
-  MAP (0x003F, "DH-RSA-AES128-SHA256"),             /// TLS_DH_RSA_WITH_AES_128_CBC_SHA256
   MAP (0x0067, "DHE-RSA-AES128-SHA256"),            /// TLS_DHE_RSA_WITH_AES_128_CBC_SHA256
-  MAP (0x0068, "DH-DSS-AES256-SHA256"),             /// TLS_DH_DSS_WITH_AES_256_CBC_SHA256
-  MAP (0x0069, "DH-RSA-AES256-SHA256"),             /// TLS_DH_RSA_WITH_AES_256_CBC_SHA256
   MAP (0x006B, "DHE-RSA-AES256-SHA256"),            /// TLS_DHE_RSA_WITH_AES_256_CBC_SHA256
   MAP (0x009F, "DHE-RSA-AES256-GCM-SHA384"),        /// TLS_DHE_RSA_WITH_AES_256_GCM_SHA384
   MAP (0xC02B, "ECDHE-ECDSA-AES128-GCM-SHA256"),    /// TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
@@ -158,6 +146,8 @@ TlsGetCipherMapping (
   @retval  EFI_UNSUPPORTED       Unsupported TLS/SSL method.
 
 **/
+# define TLS1_2_VERSION                  0x0303
+# define TLS1_3_VERSION                  0x0304
 EFI_STATUS
 EFIAPI
 TlsSetVersion (
@@ -168,7 +158,6 @@ TlsSetVersion (
 {
   TLS_CONNECTION  *TlsConn;
   UINT16          ProtoVersion;
-  mbedtls_ssl_protocol_version ssl_version;
 
   TlsConn = (TLS_CONNECTION *)Tls;
   if ((TlsConn == NULL) || (TlsConn->Ssl == NULL)) {
@@ -177,16 +166,30 @@ TlsSetVersion (
 
   ProtoVersion = (MajorVer << 8) | MinorVer;
 
-
-  if (ProtoVersion == 0x0301) {
-    ssl_version = MBEDTLS_SSL_VERSION_TLS1_3;
-  } else if (ProtoVersion == 0x0302) {
-    ssl_version = MBEDTLS_SSL_VERSION_TLS1_2;
-  } else {
-    return EFI_UNSUPPORTED;
+  //
+  // Bound TLS method to the particular specified version.
+  //
+  switch (ProtoVersion) {
+    case TLS1_2_VERSION:
+      //
+      // TLS 1.2
+      //
+      mbedtls_ssl_conf_min_tls_version ((mbedtls_ssl_config *)TlsConn->Ssl->conf, MBEDTLS_SSL_VERSION_TLS1_2);
+      mbedtls_ssl_conf_max_tls_version ((mbedtls_ssl_config *)TlsConn->Ssl->conf, MBEDTLS_SSL_VERSION_TLS1_2);
+      break;
+    case TLS1_3_VERSION:
+      //
+      // TLS 1.3
+      //
+      mbedtls_ssl_conf_min_tls_version ((mbedtls_ssl_config *)TlsConn->Ssl->conf, MBEDTLS_SSL_VERSION_TLS1_3);
+      mbedtls_ssl_conf_max_tls_version ((mbedtls_ssl_config *)TlsConn->Ssl->conf, MBEDTLS_SSL_VERSION_TLS1_3);
+      break;
+    default:
+      //
+      // Unsupported Protocol Version
+      //
+      return EFI_UNSUPPORTED;
   }
-
-  TlsConn->Ssl->tls_version = ssl_version;
 
   return EFI_SUCCESS;
 }
@@ -214,7 +217,7 @@ TlsSetConnectionEnd (
   TLS_CONNECTION  *TlsConn;
 
   TlsConn = (TLS_CONNECTION *)Tls;
-  if ((TlsConn == NULL) || (TlsConn->Conf == NULL)) {
+  if ((TlsConn == NULL) || (TlsConn->Ssl == NULL)) {
     return EFI_INVALID_PARAMETER;
   }
 
@@ -222,13 +225,13 @@ TlsSetConnectionEnd (
     //
     // Set TLS to work in Client mode.
     //
-    mbedtls_ssl_conf_endpoint(TlsConn->Conf, MBEDTLS_SSL_IS_CLIENT);
+    mbedtls_ssl_conf_endpoint((mbedtls_ssl_config *)TlsConn->Ssl->conf, MBEDTLS_SSL_IS_CLIENT);
   } else {
     //
     // Set TLS to work in Server mode.
     // It is unsupported for UEFI version currently.
     //
-    // SSL_set_accept_state (TlsConn->Ssl);
+    // mbedtls_ssl_conf_endpoint(TlsConn->Ssl.conf, MBEDTLS_SSL_IS_SERVER);
     return EFI_UNSUPPORTED;
   }
 
@@ -273,7 +276,7 @@ TlsSetCipherList (
   CHAR8                     *CipherStringPosition;
 
   TlsConn = (TLS_CONNECTION *)Tls;
-  if ((TlsConn == NULL) || (TlsConn->Conf == NULL) || (CipherId == NULL)) {
+  if ((TlsConn == NULL) || (TlsConn->Ssl == NULL) || (CipherId == NULL)) {
     return EFI_INVALID_PARAMETER;
   }
 
@@ -447,11 +450,10 @@ TlsSetCipherList (
   //
   // Sets the ciphers for use by the Tls object.
   //
-  mbedtls_ssl_conf_ciphersuites (TlsConn->Conf, (const int*)CipherString);
+  mbedtls_ssl_conf_ciphersuites ((mbedtls_ssl_config *)TlsConn->Ssl->conf, (const int*)CipherString);
 
   Status = EFI_SUCCESS;
 
-FreeCipherString:
   FreePool (CipherString);
 
 FreeMappedCipher:
@@ -500,14 +502,28 @@ TlsSetVerify (
   TLS_CONNECTION  *TlsConn;
 
   TlsConn = (TLS_CONNECTION *)Tls;
-  if ((TlsConn == NULL) || (TlsConn->Conf == NULL)) {
+  if ((TlsConn == NULL) || (TlsConn->Ssl == NULL)) {
+    return;
+  }
+
+  switch (VerifyMode)
+  {
+  case EFI_TLS_VERIFY_NONE:
+    VerifyMode = MBEDTLS_SSL_VERIFY_NONE;
+    break;
+
+  case EFI_TLS_VERIFY_PEER:
+    VerifyMode = MBEDTLS_SSL_VERIFY_REQUIRED;
+    break;
+
+  default:
     return;
   }
 
   //
   // Set peer certificate verification parameters with NULL callback.
   //
-  mbedtls_ssl_conf_authmode (TlsConn->Conf, VerifyMode);
+  mbedtls_ssl_conf_authmode ((mbedtls_ssl_config *)TlsConn->Ssl->conf, VerifyMode);
 }
 
 /**
@@ -564,21 +580,15 @@ TlsSetSessionId (
   )
 {
   TLS_CONNECTION  *TlsConn;
-  mbedtls_ssl_session *Session;
 
   TlsConn = (TLS_CONNECTION *)Tls;
-  Session = NULL;
 
   if ((TlsConn == NULL) || (TlsConn->Ssl == NULL) || (SessionId == NULL) || (SessionIdLen == 0)) {
     return EFI_INVALID_PARAMETER;
   }
 
-  if (mbedtls_ssl_get_session(TlsConn->Ssl, Session) != 0) {
-    return EFI_UNSUPPORTED;
-  }
-
-  CopyMem(Session->id, SessionId, SessionIdLen);
-  Session->id_len = SessionIdLen;
+  CopyMem(TlsConn->Ssl->session->id, SessionId, SessionIdLen);
+  TlsConn->Ssl->session->id_len = SessionIdLen;
 
   return EFI_SUCCESS;
 }
@@ -627,10 +637,10 @@ TlsSetCaCertificate (
   Ret = mbedtls_x509_crt_parse_der(&Crt, Data, DataSize);
 
   if (Ret == 0) {
-    mbedtls_ssl_set_hs_ca_chain(TlsConn->Ssl, &Crt, NULL);
+    mbedtls_ssl_conf_ca_chain((mbedtls_ssl_config *)TlsConn->Ssl->conf, &Crt, NULL);
+    mbedtls_x509_crt_free(&Crt);
   }
 
-  mbedtls_x509_crt_free(&Crt);
   return (Ret == 0) ? EFI_SUCCESS : EFI_ABORTED;
 }
 
@@ -678,12 +688,11 @@ TlsSetHostPublicCert (
   Ret = mbedtls_x509_crt_parse_der(&Crt, Data, DataSize);
 
   if (Ret == 0) {
-    if (mbedtls_ssl_set_hs_own_cert(TlsConn->Ssl, &Crt, NULL) != 0) {
-      Ret = 1;
-    }
+    Ret = mbedtls_ssl_conf_own_cert((mbedtls_ssl_config *)TlsConn->Ssl->conf, &Crt, NULL);
   }
 
   mbedtls_x509_crt_free(&Crt);
+
   return (Ret == 0) ? EFI_SUCCESS : EFI_ABORTED;
 }
 
@@ -717,7 +726,6 @@ TlsSetHostPrivateKeyEx (
   TLS_CONNECTION  *TlsConn;
   int32_t ret;
   mbedtls_pk_context pk;
-  mbedtls_rsa_context *rsa;
   uint8_t *pem_data;
   uint8_t *new_pem_data;
   UINTN password_len;
@@ -758,14 +766,14 @@ TlsSetHostPrivateKeyEx (
       new_pem_data = NULL;
   }
 
-  if (mbedtls_ssl_set_hs_own_cert(TlsConn->Ssl, NULL, &pk) != 0) {
+  if (mbedtls_ssl_conf_own_cert((mbedtls_ssl_config *)TlsConn->Ssl->conf, NULL, &pk) != 0) {
     ret = 1;
   }
 
-    if (ret != 0) {
-        mbedtls_pk_free(&pk);
-        return EFI_ABORTED;
-    }
+  if (ret != 0) {
+      mbedtls_pk_free(&pk);
+      return EFI_ABORTED;
+  }
 
   return EFI_SUCCESS;
 }
@@ -856,7 +864,7 @@ TlsSetSignatureAlgoList (
 
   TlsConn = (TLS_CONNECTION *)Tls;
 
-  if ((TlsConn == NULL) || (TlsConn->Conf == NULL) || (Data == NULL) || (DataSize < 3) ||
+  if ((TlsConn == NULL) || (TlsConn->Ssl == NULL) || (Data == NULL) || (DataSize < 3) ||
       ((DataSize % 2) == 0) || (Data[0] != DataSize - 1))
   {
     return EFI_INVALID_PARAMETER;
@@ -918,7 +926,7 @@ TlsSetSignatureAlgoList (
 
   *(Pos - 1) = '\0';
 
-  mbedtls_ssl_conf_sig_algs(TlsConn->Conf, (const uint16_t*)SignAlgoStr);
+  mbedtls_ssl_conf_sig_algs((mbedtls_ssl_config *)TlsConn->Ssl->conf, (const uint16_t*)SignAlgoStr);
 
   Status = EFI_SUCCESS;
 
@@ -953,7 +961,7 @@ TlsSetEcCurve (
 
   TlsConn = (TLS_CONNECTION *)Tls;
 
-  if ((TlsConn == NULL) || (TlsConn->Conf == NULL) || (Data == NULL) || (DataSize != sizeof (UINT32))) {
+  if ((TlsConn == NULL) || (TlsConn->Ssl == NULL) || (Data == NULL) || (DataSize != sizeof (UINT32))) {
     return EFI_INVALID_PARAMETER;
   }
 
@@ -976,7 +984,7 @@ TlsSetEcCurve (
       return EFI_UNSUPPORTED;
   }
 
-  mbedtls_ssl_conf_curves(TlsConn->Conf, &grp_id);
+  mbedtls_ssl_conf_curves((mbedtls_ssl_config *)TlsConn->Ssl->conf, &grp_id);
 
   return EFI_SUCCESS;
 }
@@ -1034,9 +1042,7 @@ TlsGetConnectionEnd (
 
   ASSERT (TlsConn != NULL);
 
-  return (UINT8)(TlsConn->Conf->endpoint);
-
-  return EFI_SUCCESS;
+  return (UINT8)(TlsConn->Ssl->conf->endpoint);
 }
 
 /**
@@ -1124,7 +1130,7 @@ TlsGetVerify (
 
   ASSERT (TlsConn != NULL);
 
-  return (UINT32)(TlsConn->Conf->authmode);
+  return (UINT32)(TlsConn->Ssl->conf->authmode);
 }
 
 /**

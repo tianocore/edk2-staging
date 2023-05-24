@@ -9,9 +9,6 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #ifndef __INTERNAL_TLS_LIB_H__
 #define __INTERNAL_TLS_LIB_H__
 
-#undef _WIN32
-#undef _WIN64
-
 #include <Library/BaseCryptLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
@@ -25,6 +22,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <mbedtls/net_sockets.h>
 #include <mbedtls/ctr_drbg.h>
 #include <mbedtls/ssl_cache.h>
+#include <library/ssl_misc.h>
 
 
 typedef struct {
@@ -38,10 +36,10 @@ typedef struct {
   //
   mbedtls_net_context    *fd;
 
-  //
-  // SSL/TLS configuration to be shared between mbedtls_ssl_context structures.
-  //
-  mbedtls_ssl_config  *Conf;
+  // //
+  // // SSL/TLS configuration to be shared between mbedtls_ssl_context structures.
+  // //
+  // mbedtls_ssl_config  *Conf;
 } TLS_CONNECTION;
 
 
