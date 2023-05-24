@@ -5,13 +5,14 @@ This POC is to explore mbedtls as a smaller alternative to OpenSSL.
 
 ### MbedTLS and OpenSSL CryptoPkg size compare
 
-|  Driver  | OpenSSL 1.1  |  MbedTLS 3.0 |
-|  ----  | ----  | ----  |
-|  PEI  | 387Kb  | 142Kb |
-|  PeiPreMem  | 31Kb  | 32Kb |
-|  DXE  | 804Kb  | 336Kb  |
-|  DXEFULL  | 1014Kb  | 447Kb  |
-|  SMM  | 558Kb  | 324Kb  |
+(debug build with VS2019)
+|  Driver  | OpenSSL 1.1  |  MbedTLS 3.0 |  MbedTLS 3.0 + SM3/SHA3|
+|  ----  | ----  | ----  | ----  |
+|  PEI  | 387Kb  | 142Kb | 162Kb |
+|  PeiPreMem  | 31Kb  | 32Kb | 33Kb |
+|  DXE  | 804Kb  | 336Kb  | 393Kb |
+|  DXEFULL  | 1014Kb  | 447Kb  | 480Kb |
+|  SMM  | 558Kb  | 324Kb  | 271Kb |
 
 Note: DXE doesn't include ECC; DXEFULL includes ECC.
 
@@ -73,10 +74,14 @@ Now, the unsupported features SM3 and SHA3 in CryptoPkg are supported by adding 
 
 ## Enable CryptoMbedTlsPkg for Platform step
 
-Note: The sequence of steps 3 to 8 cannot be changed;
+There are two options to enable CryptoMbedTlsPkg for Platform.
+
+Option1: 
+Note: The sequence of steps 3 to 9 cannot be changed;
 1. Download the platform source code;
-2. Download the edk-staging OpenSSL11_EOL as stanalone folder;
+2. Download the edk-staging OpenSSL11_EOL as stanalone folder then use `git submodule update --init`;
 3. Replace the platform source code from `CryptoPkg/Library/BaseCryptLib` to `CryptoPkg/Library/BaseCryptLibMbedTls`;
+   please select "Match Whole Word";
 4. Replace the platform source code from `OpensslLib|CryptoPkg/Library/OpensslLib/OpensslLib.inf` to
 ```
 OpensslLib|CryptoPkg/Library/OpensslLib/OpensslLib.inf
@@ -92,13 +97,39 @@ OpensslLib|CryptoPkg/Library/OpensslLib/OpensslLibCrypto.inf
 OpensslLib|CryptoPkg/Library/OpensslLib/OpensslLibFull.inf
   MbedTlsLib|CryptoPkg/Library/MbedTlsLib/MbedTlsLibFull.inf
 ```
-7. Relace the platform EDK2/CryptoPkg folder using the edk2-staging/CryptoPkg folder;
-8. checkout the IntrinsicLib by using:
+7. Replace the platform source code from `TlsLib|CryptoPkg/Library/TlsLib/TlsLib.inf` to `TlsLib|CryptoPkg/Library/TlsLibMbedtls/TlsLib.inf`
+8. Relace the platform EDK2/CryptoPkg folder using the edk2-staging/CryptoPkg folder;
+9. checkout the IntrinsicLib by using:
 ```
 $ git checkout CryptoPkg/Library/IntrinsicLib
 $ git clean -fd CryptoPkg/Library/IntrinsicLib
 ```
-9. build
+10. build
+
+
+Option2:
+1. Download the platform source code;
+2. git cherry-pick from the dfd43eb21953409edd7969fa38b03117e648f7b7 to the last commit in edk2-staging OpenSSL11_EOL;
+3. `git submodule update --init`in EDK2 folder;
+4. Replace the platform source code from `CryptoPkg/Library/BaseCryptLib` to `CryptoPkg/Library/BaseCryptLibMbedTls`;
+   please select "Match Whole Word";
+5. Replace the platform source code from `OpensslLib|CryptoPkg/Library/OpensslLib/OpensslLib.inf` to
+```
+OpensslLib|CryptoPkg/Library/OpensslLib/OpensslLib.inf
+  MbedTlsLib|CryptoPkg/Library/MbedTlsLib/MbedTlsLib.inf
+```
+6. Replace the platform source code from `OpensslLib|CryptoPkg/Library/OpensslLib/OpensslLibCrypto.inf` to
+```
+OpensslLib|CryptoPkg/Library/OpensslLib/OpensslLibCrypto.inf
+  MbedTlsLib|CryptoPkg/Library/MbedTlsLib/MbedTlsLib.inf
+```
+7. Replace the platform source code from `OpensslLib|CryptoPkg/Library/OpensslLib/OpensslLibFull.inf` to
+```
+OpensslLib|CryptoPkg/Library/OpensslLib/OpensslLibFull.inf
+  MbedTlsLib|CryptoPkg/Library/MbedTlsLib/MbedTlsLibFull.inf
+```
+8. Replace the platform source code from `TlsLib|CryptoPkg/Library/TlsLib/TlsLib.inf` to `TlsLib|CryptoPkg/Library/TlsLibMbedtls/TlsLib.inf`
+9. build;
 
 ## Timeline
 Target for 2023 Q1
