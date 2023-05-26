@@ -519,98 +519,138 @@ VmmSpdmVTpmInitSpdmContext (
   ZeroMem (&Parameter, sizeof (Parameter));
   Parameter.location = LIBSPDM_DATA_LOCATION_LOCAL;
 
-  Data8 = 0;
-  SpdmSetData (
-               SpdmContext,
-               LIBSPDM_DATA_CAPABILITY_CT_EXPONENT,
-               &Parameter,
-               &Data8,
-               sizeof (Data8)
-               );
+  Data8      = 0;
+  SpdmStatus = SpdmSetData (
+                            SpdmContext,
+                            LIBSPDM_DATA_CAPABILITY_CT_EXPONENT,
+                            &Parameter,
+                            &Data8,
+                            sizeof (Data8)
+                            );
+  if (LIBSPDM_STATUS_IS_ERROR (SpdmStatus)) {
+    DEBUG ((DEBUG_ERROR, "SpdmSetData with %x failed - %lx\n", SpdmStatus, LIBSPDM_DATA_CAPABILITY_CT_EXPONENT));
+    return EFI_ABORTED;
+  }
 
-  Data32 = mUseRequesterCapabilityFlags;
-  SpdmSetData (
-               SpdmContext,
-               LIBSPDM_DATA_CAPABILITY_FLAGS,
-               &Parameter,
-               &Data32,
-               sizeof (Data32)
-               );
+  Data32     = mUseRequesterCapabilityFlags;
+  SpdmStatus = SpdmSetData (
+                            SpdmContext,
+                            LIBSPDM_DATA_CAPABILITY_FLAGS,
+                            &Parameter,
+                            &Data32,
+                            sizeof (Data32)
+                            );
+  if (LIBSPDM_STATUS_IS_ERROR (SpdmStatus)) {
+    DEBUG ((DEBUG_ERROR, "SpdmSetData with %x failed - %lx\n", SpdmStatus, LIBSPDM_DATA_CAPABILITY_FLAGS));
+    return EFI_ABORTED;
+  }
 
-  Data8 = SPDM_MEASUREMENT_BLOCK_HEADER_SPECIFICATION_DMTF;
-  SpdmSetData (
-               SpdmContext,
-               LIBSPDM_DATA_MEASUREMENT_SPEC,
-               &Parameter,
-               &Data8,
-               sizeof (Data8)
-               );
+  Data8      = SPDM_MEASUREMENT_BLOCK_HEADER_SPECIFICATION_DMTF;
+  SpdmStatus = SpdmSetData (
+                            SpdmContext,
+                            LIBSPDM_DATA_MEASUREMENT_SPEC,
+                            &Parameter,
+                            &Data8,
+                            sizeof (Data8)
+                            );
+  if (LIBSPDM_STATUS_IS_ERROR (SpdmStatus)) {
+    DEBUG ((DEBUG_ERROR, "SpdmSetData with %x failed - %lx\n", SpdmStatus, LIBSPDM_DATA_MEASUREMENT_SPEC));
+    return EFI_ABORTED;
+  }
 
-  Data32 = SPDM_ALGORITHMS_BASE_ASYM_ALGO_TPM_ALG_ECDSA_ECC_NIST_P384;
-  SpdmSetData (
-               SpdmContext,
-               LIBSPDM_DATA_BASE_ASYM_ALGO,
-               &Parameter,
-               &Data32,
-               sizeof (Data32)
-               );
+  Data32     = SPDM_ALGORITHMS_BASE_ASYM_ALGO_TPM_ALG_ECDSA_ECC_NIST_P384;
+  SpdmStatus = SpdmSetData (
+                            SpdmContext,
+                            LIBSPDM_DATA_BASE_ASYM_ALGO,
+                            &Parameter,
+                            &Data32,
+                            sizeof (Data32)
+                            );
+  if (LIBSPDM_STATUS_IS_ERROR (SpdmStatus)) {
+    DEBUG ((DEBUG_ERROR, "SpdmSetData with %x failed - %lx\n", SpdmStatus, LIBSPDM_DATA_BASE_ASYM_ALGO));
+    return EFI_ABORTED;
+  }
 
-  Data32 = SPDM_ALGORITHMS_BASE_HASH_ALGO_TPM_ALG_SHA_384;
-  SpdmSetData (
-               SpdmContext,
-               LIBSPDM_DATA_BASE_HASH_ALGO,
-               &Parameter,
-               &Data32,
-               sizeof (Data32)
-               );
+  Data32     = SPDM_ALGORITHMS_BASE_HASH_ALGO_TPM_ALG_SHA_384;
+  SpdmStatus = SpdmSetData (
+                            SpdmContext,
+                            LIBSPDM_DATA_BASE_HASH_ALGO,
+                            &Parameter,
+                            &Data32,
+                            sizeof (Data32)
+                            );
+  if (LIBSPDM_STATUS_IS_ERROR (SpdmStatus)) {
+    DEBUG ((DEBUG_ERROR, "SpdmSetData with %x failed - %lx\n", SpdmStatus, LIBSPDM_DATA_BASE_HASH_ALGO));
+    return EFI_ABORTED;
+  }
 
-  Data16 = SPDM_ALGORITHMS_DHE_NAMED_GROUP_SECP_384_R1;
-  SpdmSetData (
-               SpdmContext,
-               LIBSPDM_DATA_DHE_NAME_GROUP,
-               &Parameter,
-               &Data16,
-               sizeof (Data16)
-               );
+  Data16     = SPDM_ALGORITHMS_DHE_NAMED_GROUP_SECP_384_R1;
+  SpdmStatus = SpdmSetData (
+                            SpdmContext,
+                            LIBSPDM_DATA_DHE_NAME_GROUP,
+                            &Parameter,
+                            &Data16,
+                            sizeof (Data16)
+                            );
+  if (LIBSPDM_STATUS_IS_ERROR (SpdmStatus)) {
+    DEBUG ((DEBUG_ERROR, "SpdmSetData with %x failed - %lx\n", SpdmStatus, LIBSPDM_DATA_DHE_NAME_GROUP));
+    return EFI_ABORTED;
+  }
 
-  Data16 = SPDM_ALGORITHMS_AEAD_CIPHER_SUITE_AES_256_GCM;
-  SpdmSetData (
-               SpdmContext,
-               LIBSPDM_DATA_AEAD_CIPHER_SUITE,
-               &Parameter,
-               &Data16,
-               sizeof (Data16)
-               );
+  Data16     = SPDM_ALGORITHMS_AEAD_CIPHER_SUITE_AES_256_GCM;
+  SpdmStatus = SpdmSetData (
+                            SpdmContext,
+                            LIBSPDM_DATA_AEAD_CIPHER_SUITE,
+                            &Parameter,
+                            &Data16,
+                            sizeof (Data16)
+                            );
+  if (LIBSPDM_STATUS_IS_ERROR (SpdmStatus)) {
+    DEBUG ((DEBUG_ERROR, "SpdmSetData with %x failed - %lx\n", SpdmStatus, LIBSPDM_DATA_AEAD_CIPHER_SUITE));
+    return EFI_ABORTED;
+  }
 
   Data16 = SPDM_ALGORITHMS_BASE_ASYM_ALGO_TPM_ALG_RSAPSS_3072 |
            SPDM_ALGORITHMS_BASE_ASYM_ALGO_TPM_ALG_RSAPSS_2048 |
            SPDM_ALGORITHMS_BASE_ASYM_ALGO_TPM_ALG_RSASSA_3072 |
            SPDM_ALGORITHMS_BASE_ASYM_ALGO_TPM_ALG_RSASSA_2048;
-  SpdmSetData (
-               SpdmContext,
-               LIBSPDM_DATA_REQ_BASE_ASYM_ALG,
-               &Parameter,
-               &Data16,
-               sizeof (Data16)
-               );
+  SpdmStatus = SpdmSetData (
+                            SpdmContext,
+                            LIBSPDM_DATA_REQ_BASE_ASYM_ALG,
+                            &Parameter,
+                            &Data16,
+                            sizeof (Data16)
+                            );
+  if (LIBSPDM_STATUS_IS_ERROR (SpdmStatus)) {
+    DEBUG ((DEBUG_ERROR, "SpdmSetData with %x failed - %lx\n", SpdmStatus, LIBSPDM_DATA_REQ_BASE_ASYM_ALG));
+    return EFI_ABORTED;
+  }
 
-  Data16 = SPDM_ALGORITHMS_KEY_SCHEDULE_HMAC_HASH;
-  SpdmSetData (
-               SpdmContext,
-               LIBSPDM_DATA_KEY_SCHEDULE,
-               &Parameter,
-               &Data16,
-               sizeof (Data16)
-               );
+  Data16     = SPDM_ALGORITHMS_KEY_SCHEDULE_HMAC_HASH;
+  SpdmStatus = SpdmSetData (
+                            SpdmContext,
+                            LIBSPDM_DATA_KEY_SCHEDULE,
+                            &Parameter,
+                            &Data16,
+                            sizeof (Data16)
+                            );
+  if (LIBSPDM_STATUS_IS_ERROR (SpdmStatus)) {
+    DEBUG ((DEBUG_ERROR, "SpdmSetData with %x failed - %lx\n", SpdmStatus, LIBSPDM_DATA_KEY_SCHEDULE));
+    return EFI_ABORTED;
+  }
 
-  Data8 = SPDM_ALGORITHMS_OPAQUE_DATA_FORMAT_1;
-  SpdmSetData (
-               SpdmContext,
-               LIBSPDM_DATA_OTHER_PARAMS_SUPPORT,
-               &Parameter,
-               &Data8,
-               sizeof (Data8)
-               );
+  Data8      = SPDM_ALGORITHMS_OPAQUE_DATA_FORMAT_1;
+  SpdmStatus = SpdmSetData (
+                            SpdmContext,
+                            LIBSPDM_DATA_OTHER_PARAMS_SUPPORT,
+                            &Parameter,
+                            &Data8,
+                            sizeof (Data8)
+                            );
+  if (LIBSPDM_STATUS_IS_ERROR (SpdmStatus)) {
+    DEBUG ((DEBUG_ERROR, "SpdmSetData with %x failed - %lx\n", SpdmStatus, LIBSPDM_DATA_OTHER_PARAMS_SUPPORT));
+    return EFI_ABORTED;
+  }
 
   Context->Valid = TRUE;
 
@@ -623,88 +663,128 @@ VmmSpdmVTpmInitSpdmContext (
   ZeroMem (&Parameter, sizeof (Parameter));
   Parameter.location = LIBSPDM_DATA_LOCATION_CONNECTION;
   DataSize           = sizeof (SpdmVersion);
-  SpdmGetData (
-               SpdmContext,
-               LIBSPDM_DATA_SPDM_VERSION,
-               &Parameter,
-               &SpdmVersion,
-               &DataSize
-               );
+  SpdmStatus         = SpdmGetData (
+                                    SpdmContext,
+                                    LIBSPDM_DATA_SPDM_VERSION,
+                                    &Parameter,
+                                    &SpdmVersion,
+                                    &DataSize
+                                    );
+  if (LIBSPDM_STATUS_IS_ERROR (SpdmStatus)) {
+    DEBUG ((DEBUG_ERROR, "SpdmGetData with %x failed - %lx\n", SpdmStatus, LIBSPDM_DATA_SPDM_VERSION));
+    return EFI_ABORTED;
+  }
+
   Context->UseSpdmVersion = (UINT8)(SpdmVersion >> SPDM_VERSION_NUMBER_SHIFT_BIT);
 
   ZeroMem (&Parameter, sizeof (Parameter));
   Parameter.location = LIBSPDM_DATA_LOCATION_LOCAL;
   DataSize           = sizeof (Data32);
-  SpdmGetData (
-               SpdmContext,
-               LIBSPDM_DATA_CAPABILITY_FLAGS,
-               &Parameter,
-               &Data32,
-               &DataSize
-               );
+  SpdmStatus         = SpdmGetData (
+                                    SpdmContext,
+                                    LIBSPDM_DATA_CAPABILITY_FLAGS,
+                                    &Parameter,
+                                    &Data32,
+                                    &DataSize
+                                    );
+  if (LIBSPDM_STATUS_IS_ERROR (SpdmStatus)) {
+    DEBUG ((DEBUG_ERROR, "SpdmGetData with %x failed - %lx\n", SpdmStatus, LIBSPDM_DATA_CAPABILITY_FLAGS));
+    return EFI_ABORTED;
+  }
+
   Context->RequesterCapabilitiesFlag = Data32;
 
   /*get responder_capabilities_flag*/
   ZeroMem (&Parameter, sizeof (Parameter));
   Parameter.location = LIBSPDM_DATA_LOCATION_CONNECTION;
   DataSize           = sizeof (Data32);
-  SpdmGetData (
-               SpdmContext,
-               LIBSPDM_DATA_CAPABILITY_FLAGS,
-               &Parameter,
-               &Data32,
-               &DataSize
-               );
+  SpdmStatus         = SpdmGetData (
+                                    SpdmContext,
+                                    LIBSPDM_DATA_CAPABILITY_FLAGS,
+                                    &Parameter,
+                                    &Data32,
+                                    &DataSize
+                                    );
+  if (LIBSPDM_STATUS_IS_ERROR (SpdmStatus)) {
+    DEBUG ((DEBUG_ERROR, "SpdmGetData with %x failed - %lx\n", SpdmStatus, LIBSPDM_DATA_CAPABILITY_FLAGS));
+    return EFI_ABORTED;
+  }
+
   Context->ResponderCapabilitiesFlag = Data32;
 
-  DataSize = sizeof (Data32);
-  SpdmGetData (
-               SpdmContext,
-               LIBSPDM_DATA_CONNECTION_STATE,
-               &Parameter,
-               &Data32,
-               &DataSize
-               );
+  DataSize   = sizeof (Data32);
+  SpdmStatus = SpdmGetData (
+                            SpdmContext,
+                            LIBSPDM_DATA_CONNECTION_STATE,
+                            &Parameter,
+                            &Data32,
+                            &DataSize
+                            );
+  if (LIBSPDM_STATUS_IS_ERROR (SpdmStatus)) {
+    DEBUG ((DEBUG_ERROR, "SpdmGetData with %x failed - %lx\n", SpdmStatus, LIBSPDM_DATA_CONNECTION_STATE));
+    return EFI_ABORTED;
+  }
+
   if (Data32 != LIBSPDM_CONNECTION_STATE_NEGOTIATED) {
     DEBUG ((DEBUG_ERROR, "The Data32 %x should be equal to %x,\n", Data32, LIBSPDM_CONNECTION_STATE_NEGOTIATED));
     return EFI_UNSUPPORTED;
   }
 
-  DataSize = sizeof (Data32);
-  SpdmGetData (
-               SpdmContext,
-               LIBSPDM_DATA_MEASUREMENT_HASH_ALGO,
-               &Parameter,
-               &Data32,
-               &DataSize
-               );
+  DataSize   = sizeof (Data32);
+  SpdmStatus = SpdmGetData (
+                            SpdmContext,
+                            LIBSPDM_DATA_MEASUREMENT_HASH_ALGO,
+                            &Parameter,
+                            &Data32,
+                            &DataSize
+                            );
+  if (LIBSPDM_STATUS_IS_ERROR (SpdmStatus)) {
+    DEBUG ((DEBUG_ERROR, "SpdmGetData with %x failed - %lx\n", SpdmStatus, LIBSPDM_DATA_MEASUREMENT_HASH_ALGO));
+    return EFI_ABORTED;
+  }
+
   Context->UseMeasurementHashAlgo = Data32;
   DataSize                        = sizeof (Data32);
-  SpdmGetData (
-               SpdmContext,
-               LIBSPDM_DATA_BASE_ASYM_ALGO,
-               &Parameter,
-               &Data32,
-               &DataSize
-               );
+  SpdmStatus                      = SpdmGetData (
+                                                 SpdmContext,
+                                                 LIBSPDM_DATA_BASE_ASYM_ALGO,
+                                                 &Parameter,
+                                                 &Data32,
+                                                 &DataSize
+                                                 );
+  if (LIBSPDM_STATUS_IS_ERROR (SpdmStatus)) {
+    DEBUG ((DEBUG_ERROR, "SpdmGetData with %x failed - %lx\n", SpdmStatus, LIBSPDM_DATA_BASE_ASYM_ALGO));
+    return EFI_ABORTED;
+  }
+
   Context->UseAsymAlgo = Data32;
   DataSize             = sizeof (Data32);
-  SpdmGetData (
-               SpdmContext,
-               LIBSPDM_DATA_BASE_HASH_ALGO,
-               &Parameter,
-               &Data32,
-               &DataSize
-               );
+  SpdmStatus           = SpdmGetData (
+                                      SpdmContext,
+                                      LIBSPDM_DATA_BASE_HASH_ALGO,
+                                      &Parameter,
+                                      &Data32,
+                                      &DataSize
+                                      );
+  if (LIBSPDM_STATUS_IS_ERROR (SpdmStatus)) {
+    DEBUG ((DEBUG_ERROR, "SpdmGetData with %x failed - %lx\n", SpdmStatus, LIBSPDM_DATA_BASE_HASH_ALGO));
+    return EFI_ABORTED;
+  }
+
   Context->UseHashAlgo = Data32;
   DataSize             = sizeof (Data16);
-  SpdmGetData (
-               SpdmContext,
-               LIBSPDM_DATA_REQ_BASE_ASYM_ALG,
-               &Parameter,
-               &Data16,
-               &DataSize
-               );
+  SpdmStatus           = SpdmGetData (
+                                      SpdmContext,
+                                      LIBSPDM_DATA_REQ_BASE_ASYM_ALG,
+                                      &Parameter,
+                                      &Data16,
+                                      &DataSize
+                                      );
+  if (LIBSPDM_STATUS_IS_ERROR (SpdmStatus)) {
+    DEBUG ((DEBUG_ERROR, "SpdmGetData with %x failed - %lx\n", SpdmStatus, LIBSPDM_DATA_REQ_BASE_ASYM_ALG));
+    return EFI_ABORTED;
+  }
+
   Context->UseReqAsymAlgo = Data16;
 
   Context->UseMeasurementHashType = SPDM_CHALLENGE_REQUEST_ALL_MEASUREMENTS_HASH;
