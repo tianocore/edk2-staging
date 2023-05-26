@@ -159,7 +159,7 @@ TlsNew (
   TlsConn->Ssl = (mbedtls_ssl_context *)TlsCtx;
 
 
-  if (mbedtls_ssl_setup(&TlsConn->Ssl, &conf) != 0) {
+  if (mbedtls_ssl_setup(TlsConn->Ssl, &conf) != 0) {
     return NULL;
   }
 
