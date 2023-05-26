@@ -903,10 +903,6 @@ DoStartSession (
                              MeasurementHash
                              );
 
-  if (LIBSPDM_STATUS_IS_ERROR (Status)) {
-    return Status;
-  }
-
   return Status;
 }
 
