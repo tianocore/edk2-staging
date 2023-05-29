@@ -33,7 +33,7 @@
   !if $(VTPM_ENABLE) == FALSE
     Tpm2DeviceLib|SecurityPkg/Library/Tpm2DeviceLibDTpm/Tpm2DeviceLibDTpm.inf
   !else
-    Tpm2DeviceLib|OvmfPkg/Tcg/Tpm2DeviceLibVTpm/Tpm2DeviceLibVTpm.inf
+    Tpm2DeviceLib|OvmfPkg/Tcg/Tpm2DeviceLibVTpmTd/Tpm2DeviceLibVTpmTd.inf
   !endif
 !endif
 

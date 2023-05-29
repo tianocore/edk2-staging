@@ -33,7 +33,7 @@
 #
 
 [Sources]
-  Tpm2DeviceLibVTpm.c
+  Tpm2DeviceLibVTpmTd.c
 
 [Packages]
   MdePkg/MdePkg.dec

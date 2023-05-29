@@ -9,7 +9,7 @@
       !if $(VTPM_ENABLE) == FALSE
         NULL|SecurityPkg/Library/Tpm2DeviceLibDTpm/Tpm2InstanceLibDTpm.inf
       !else
-        NULL|OvmfPkg/Tcg/Tpm2DeviceLibVTpm/Tpm2InstanceLibVTpm.inf
+        NULL|OvmfPkg/Tcg/Tpm2DeviceLibVTpmTd/Tpm2InstanceLibVTpmTd.inf
         !include VmmSpdmLibs.dsc.inc
       !endif
       HashLib|SecurityPkg/Library/HashLibBaseCryptoRouter/HashLibBaseCryptoRouterDxe.inf
