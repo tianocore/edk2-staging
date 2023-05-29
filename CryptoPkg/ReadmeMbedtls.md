@@ -53,7 +53,7 @@ For TlsLibMbedtls:
 |  FILE  | Build Pass  | Test Pass |
 |  ----  | ----  | ----  |
 | TlsInit.c  | YES | YES |
-| TlsProcess.c  | YES | WIP |
+| TlsProcess.c  | YES | YES |
 | TlsConfig.c  | YES | YES |
 
 ## Build command
