@@ -14,3 +14,64 @@ This file will introduce HOW-TO implement current optimization.
 a. Run python object_trim.py.
 b. Replace $(OPENSSL_PATH)/crypto/objects/obj_dat.c with OpensslStub/crypto/objects/obj_dat.c 
 in all OpensslLib*.inf files.
+
+=============================================================================
+2. Enable legacy code path
+=============================================================================
+We can remove some providers if enabled legacy code path.
+a. Copy openssl\crypto\x509\x_pubkey.c to OpensslStub\crypto\x509\x_pubkey.c, and apply below change:
+(L404, static int x509_pubkey_decode())
+>>>>>>>>>>>>>>>before>>>>>>>>>>>>>>>>
+    if (!key->flag_force_legacy) {
+#ifndef OPENSSL_NO_ENGINE
+        ENGINE *e = NULL;
+
+        e = ENGINE_get_pkey_meth_engine(nid);
+        if (e == NULL)
+            return 0;
+        ENGINE_finish(e);
+#else
+        return 0;
+#endif
+    }
+>>>>>>>>>>>>>>>after>>>>>>>>>>>>>>>>
+#ifndef OPENSSL_NO_ENGINE
+    if (!key->flag_force_legacy) {
+        ENGINE *e = NULL;
+
+        e = ENGINE_get_pkey_meth_engine(nid);
+        if (e == NULL)
+            return 0;
+        ENGINE_finish(e);
+    }
+#endif
+
+b. Copy openssl\crypto\evp\pmeth_lib.c to OpensslStub\crypto\evp\pmeth_lib.c, and apply below change:
+(L275, static EVP_PKEY_CTX *int_ctx_new())
+>>>>>>>>>>>>>>>before>>>>>>>>>>>>>>>>
+        app_pmeth = pmeth = evp_pkey_meth_find_added_by_application(id);
+    }
+>>>>>>>>>>>>>>>after>>>>>>>>>>>>>>>>
+# ifdef OPENSSL_SYS_UEFI
+        switch (id) {
+        case EVP_PKEY_RSA:
+        case EVP_PKEY_RSA_PSS:
+#  ifndef OPENSSL_NO_DH
+        case EVP_PKEY_DH:
+        case EVP_PKEY_DHX:
+#  endif
+#  ifndef OPENSSL_NO_DSA
+        case EVP_PKEY_DSA:
+#  endif
+#  ifndef OPENSSL_NO_EC
+        case EVP_PKEY_EC:
+#  endif
+            app_pmeth = pmeth = EVP_PKEY_meth_find(id);
+            break;
+        default: /* Other meth doesn't have legacy pmeth, skip here. */
+            app_pmeth = pmeth = evp_pkey_meth_find_added_by_application(id);
+            break;
+        }
+# else
+        app_pmeth = pmeth = evp_pkey_meth_find_added_by_application(id);
+# endif
