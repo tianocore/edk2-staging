@@ -4,7 +4,7 @@
 #include <Protocol/PciIo.h>
 #include <RegisterSpaceMock.h>
 
-#define MOCK_PCI_LIB_MAX_SUPPORTED_BARS 5
+#define MOCK_PCI_LIB_MAX_SUPPORTED_BARS 6
 
 typedef struct {
   REGISTER_SPACE_MOCK  *ConfigSpace;

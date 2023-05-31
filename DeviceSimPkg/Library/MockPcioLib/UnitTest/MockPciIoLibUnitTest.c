@@ -20,6 +20,7 @@
 #define TEST_PCI_DEVICE_BAR_RESULT_REG 8
 #define TEST_PCI_DEVICE_BAR_DMA_ADDR_REG 12
 #define TEST_PCI_DEVICE_BAR_DMA_CTRL_REG 16
+#define TEST_PCI_DEVICE_BAR_POLL_REGISTER 20
 #define TEST_PCI_DEVICE_BAR_DMA_CTRL_START_BIT BIT0
 #define TEST_PCI_DEVICE_BAR_DMA_CTRL_READ_BIT BIT1
 
@@ -28,6 +29,7 @@
 #define TEST_PCI_DEVICE_IO_BAR_ADDEND1_REG 0
 #define TEST_PCI_DEVICE_IO_BAR_ADDEND2_REG 4
 #define TEST_PCI_DEVICE_IO_BAR_RESULT_REG  8
+#define TEST_PCI_DEVICE_IO_BAR_POLL_REG  12
 
 GLOBAL_REMOVE_IF_UNREFERENCED UINT8 gPciTestBlock[TEST_PCI_DEVICE_BLOCK_SIZE] = {
   0xAA, 0xBA, 0xBC, 0x18, 0x11, 0x02, 0xDF, 0x98, 0x12, 0x54, 0x88, 0xA1
@@ -50,6 +52,7 @@ typedef struct {
   UINT32  Result;
   UINT32  DmaAddress;
   UINT32  DmaControl;
+  UINT32  PollRegisterCount;
   UINT8   MemoryBlock[512];
   //
   // IO BAR
@@ -57,6 +60,7 @@ typedef struct {
   UINT32  IoAddend1;
   UINT32  IoAddend2;
   UINT32  IoResult;
+  UINT32  PollIoRegisterCount;
 } TEST_PCI_DEVICE_CONTEXT;
 
 VOID
@@ -146,6 +150,14 @@ TestPciDeviceBarRead (
     case TEST_PCI_DEVICE_BAR_RESULT_REG:
       *Value = Device->Result;
       break;
+    case TEST_PCI_DEVICE_BAR_POLL_REGISTER:
+      if (Device->PollRegisterCount == 0) {
+        *Value = 1;
+      } else {
+        *Value = 0;
+        Device->PollRegisterCount--;
+      }
+      break;
     default:
       *Value = 0xFFFFFFFF;
       break;
@@ -226,6 +238,14 @@ TestPciDeviceIoBarRead (
       break;
     case TEST_PCI_DEVICE_IO_BAR_RESULT_REG:
       *Value = Device->IoResult;
+      break;
+    case TEST_PCI_DEVICE_IO_BAR_POLL_REG:
+      if (Device->PollIoRegisterCount == 0) {
+        *Value = 0x1;
+      } else {
+        *Value = 0;
+        Device->PollIoRegisterCount--;
+      }
       break;
     default:
       *Value = 0xFFFFFFFF;
@@ -595,6 +615,48 @@ MockPciIoDmaTest (
   return UNIT_TEST_PASSED;
 }
 
+UNIT_TEST_STATUS
+EFIAPI
+MockPciIoPollTest (
+  IN UNIT_TEST_CONTEXT  Context
+  )
+{
+  EFI_STATUS           Status;
+  MOCK_PCI_DEVICE      *MockPciDev;
+  EFI_PCI_IO_PROTOCOL  *PciIo;
+  TEST_PCI_DEVICE_CONTEXT  DevContext;
+  UINT64                   Result;
+
+  Status = CreateTestPciDevice (&MockPciDev, &DevContext);
+  if (EFI_ERROR (Status)) {
+    return UNIT_TEST_ERROR_PREREQUISITE_NOT_MET;
+  }
+
+  Status = MockPciIoCreate (MockPciDev, &PciIo);
+  if (EFI_ERROR (Status)) {
+    return UNIT_TEST_ERROR_PREREQUISITE_NOT_MET;
+  }
+
+  Status = PciIo->PollMem (PciIo, EfiPciIoWidthUint32, 0, TEST_PCI_DEVICE_BAR_POLL_REGISTER, 0xFF, 0x1, 0, &Result);
+  UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
+
+  DevContext.PollRegisterCount = 2;
+  Status = PciIo->PollMem (PciIo, EfiPciIoWidthUint32, 0, TEST_PCI_DEVICE_BAR_POLL_REGISTER, 0xFF, 0x1, 4 * 100, &Result);
+  UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
+  UT_ASSERT_EQUAL (Result, 0x1);
+
+  DevContext.PollRegisterCount = 5;
+  Status = PciIo->PollMem (PciIo, EfiPciIoWidthUint32, 0, TEST_PCI_DEVICE_BAR_POLL_REGISTER, 0xFF, 0x1, 4 * 100, &Result);
+  UT_ASSERT_EQUAL (Status, EFI_TIMEOUT);
+
+  DevContext.PollIoRegisterCount = 2;
+  Status = PciIo->PollIo (PciIo, EfiPciIoWidthUint32, 1, TEST_PCI_DEVICE_IO_BAR_POLL_REG, 0xFF, 0x1, 4 * 100, &Result);
+  UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
+  UT_ASSERT_EQUAL (Result, 0x1);
+
+  return UNIT_TEST_PASSED;
+}
+
 EFI_STATUS
 EFIAPI
 UefiTestMain (
@@ -626,6 +688,7 @@ UefiTestMain (
   AddTestCase (MockPciLibTest, "MockPciIoBarRwTest", "MockPciIoBarRwTest", MockPciIoBarRwTest, NULL, NULL, NULL);
   AddTestCase (MockPciLibTest, "MockPciIoIoBarRwTest", "MockPciIoIoBarRwTest", MockPciIoIoBarRwTest, NULL, NULL, NULL);
   AddTestCase (MockPciLibTest, "MockPciIoDmaTest", "MockPciIoDmaTest", MockPciIoDmaTest, NULL, NULL, NULL);
+  AddTestCase (MockPciLibTest, "MockPciIoPollTest", "MockPciIoPollTest", MockPciIoPollTest, NULL, NULL, NULL);
 
   Status = RunAllTestSuites (Framework);
   if (Framework) {

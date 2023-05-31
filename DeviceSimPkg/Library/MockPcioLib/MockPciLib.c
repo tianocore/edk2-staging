@@ -18,7 +18,41 @@ MockPciIoPollMem (
   OUT UINT64                       *Result
   )
 {
-  return EFI_UNSUPPORTED;
+  EFI_STATUS Status;
+
+  if (This == NULL || Result == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  Status = This->Mem.Read (This, Width, BarIndex, Offset, 1, Result);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  if (((*Result & Mask) == Value) || (Delay == 0)) {
+    return EFI_SUCCESS;
+  }
+ 
+  //
+  // On simulation any update to registers should be instantainous but keep it
+  // implemented similar to HW implementation anyway. Might be useful if in the
+  // future simulation runs on a separate thread.
+  //
+  do {
+    Status = This->Mem.Read (This, Width, BarIndex, Offset, 1, Result);
+    if (EFI_ERROR (Status)) {
+      return Status;
+    }
+
+    if ((*Result & Mask) == Value) {
+      return EFI_SUCCESS;
+    }
+
+    if (Delay <= 100) {
+      return EFI_TIMEOUT;
+    }
+    Delay -= 100;
+  } while (TRUE);
 }
 
 EFI_STATUS
@@ -34,7 +68,7 @@ MockPciIoPollIo (
   OUT UINT64                       *Result
   )
 {
-  return EFI_UNSUPPORTED;
+  return This->PollMem (This, Width, BarIndex, Offset, Mask, Value, Delay, Result);
 }
 
 EFI_STATUS
@@ -60,12 +94,12 @@ MockPciIoReadMem (
   PciIo = (MOCK_PCI_IO*) This;
   PciDev = PciIo->MockPci;
 
-  if (BarIndex > 4) {
+  if (BarIndex > MOCK_PCI_LIB_MAX_SUPPORTED_BARS) {
     return EFI_UNSUPPORTED;
   }
 
   if (PciDev->Bar[BarIndex] == NULL) {
-    DEBUG ((DEBUG_INFO, "NULL Bar\n"));
+    DEBUG ((DEBUG_ERROR, "BAR is NULL\n"));
     return EFI_UNSUPPORTED;
   }
 
@@ -138,7 +172,7 @@ MockPciIoWriteMem (
   PciIo = (MOCK_PCI_IO*) This;
   PciDev = PciIo->MockPci;
 
-  if (BarIndex > 4) {
+  if (BarIndex > MOCK_PCI_LIB_MAX_SUPPORTED_BARS) {
     return EFI_UNSUPPORTED;
   }
 
@@ -570,7 +604,7 @@ MockPciDeviceRegisterBar (
   IN UINT32           BarIndex
   )
 {
-  if (PciDev == NULL || BarIndex > 4) {
+  if (PciDev == NULL || BarIndex > MOCK_PCI_LIB_MAX_SUPPORTED_BARS) {
     return EFI_INVALID_PARAMETER;
   }
   PciDev->Bar[BarIndex] = BarRegisterSpace;
