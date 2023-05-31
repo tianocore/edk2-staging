@@ -35,7 +35,7 @@
   Hash/CryptSha256Null.c
   Hash/CryptSm3Null.c
   Hash/CryptParallelHashNull.c
-  # Hmac/CryptHmacNull.c
+  Hmac/CryptHmacNull.c
   Kdf/CryptHkdfNull.c
   Cipher/CryptAesNull.c
   Cipher/CryptAeadAesGcmNull.c
@@ -52,6 +52,8 @@
   Pk/CryptTsNull.c
   Pem/CryptPemNull.c
   Rand/CryptRandNull.c
+  Pk/CryptRsaPssNull.c
+  Pk/CryptRsaPssSignNull.c
   Pk/CryptEcNull.c
   Bn/CryptBnNull.c
 

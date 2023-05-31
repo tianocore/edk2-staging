@@ -54,12 +54,15 @@
   Pk/CryptPkcs1OaepNull.c
   Pk/CryptPkcs5Pbkdf2Null.c
   Pk/CryptPkcs7SignNull.c
-  Pk/CryptPkcs7VerifyNull.c
-  Pk/CryptPkcs7VerifyEkuNull.c
+  Pk/CryptPkcs7VerifyCommon.c
+  Pk/CryptPkcs7VerifyBase.c
+  Pk/CryptPkcs7VerifyEku.c
   Pk/CryptDhNull.c
   Pk/CryptX509Null.c
   Pk/CryptAuthenticodeNull.c
   Pk/CryptTsNull.c
+  Pk/CryptRsaPss.c
+  Pk/CryptRsaPssSignNull.c
   Pk/CryptEcNull.c
   Pem/CryptPemNull.c
   Rand/CryptRandNull.c
@@ -69,12 +72,6 @@
   SysCall/DummyOpensslSupport.c
   SysCall/ConstantTimeClock.c
   SysCall/BaseMemAllocation.c
-
-[Sources.Ia32]
-  # Rand/CryptRandTsc.c
-
-[Sources.X64]
-  # Rand/CryptRandTsc.c
 
 [Packages]
   MdePkg/MdePkg.dec
@@ -87,13 +84,13 @@
   DebugLib
   MbedTlsLib
   IntrinsicLib
-  RngLib
+  PrintLib
+  PeiServicesTablePointerLib
+  PeiServicesLib
   SynchronizationLib
 
 [Ppis]
   gEfiPeiMpServicesPpiGuid
-[FixedPcd]
-
 #
 # Remove these [BuildOptions] after this library is cleaned up
 #

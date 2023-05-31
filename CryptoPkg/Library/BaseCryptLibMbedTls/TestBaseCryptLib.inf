@@ -53,6 +53,8 @@
   Pk/CryptAuthenticode.c
   Pk/CryptX509.c
   Pk/CryptTs.c
+  Pk/CryptRsaPss.c
+  Pk/CryptRsaPssSign.c
   Rand/CryptRand.c
   SysCall/BaseMemAllocation.c
   SysCall/CrtWrapper.c
