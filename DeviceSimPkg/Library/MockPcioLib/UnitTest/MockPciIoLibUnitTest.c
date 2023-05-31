@@ -75,26 +75,7 @@ TestPciDeviceConfigRead (
     return;
   }
 
-  switch(ByteEnable) {
-    case 0x1:
-      ByteMask = 0xFF;
-      break;
-    case 0x2:
-      ByteMask = 0xFF00;
-      break;
-    case 0x3:
-      ByteMask = 0xFFFF;
-      break;
-    case 0x7:
-      ByteMask = 0xFFFFFF;
-      break;
-    case 0xC:
-      ByteMask = 0xFFFF0000;
-      break;
-    case 0xF:
-    default:
-      ByteMask = 0xFFFFFFFF;
-  }
+  ByteMask = ByteEnableToBitMask (ByteEnable);
 
   switch (Address) {
     case PCI_VENDOR_ID_OFFSET:
@@ -127,26 +108,7 @@ TestPciDeviceConfigWrite (
     return;
   }
 
-  switch(ByteEnable) {
-    case 0x1:
-      ByteMask = 0xFF;
-      break;
-    case 0x2:
-      ByteMask = 0xFF00;
-      break;
-    case 0x3:
-      ByteMask = 0xFFFF;
-      break;
-    case 0x7:
-      ByteMask = 0xFFFFFF;
-      break;
-    case 0xC:
-      ByteMask = 0xFFFF0000;
-      break;
-    case 0xF:
-    default:
-      ByteMask = 0xFFFFFFFF;
-  }
+  ByteMask = ByteEnableToBitMask (ByteEnable);
 
   switch (Address) {
     case PCI_COMMAND_OFFSET:
