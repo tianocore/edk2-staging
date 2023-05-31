@@ -332,4 +332,21 @@ typedef struct tdEFI_TCG2_FINAL_EVENTS_TABLE {
 
 #define EFI_TCG2_FINAL_EVENTS_TABLE_VERSION  1
 
+#define EDKII_VTPM_TD_PRESENT_PROTOCOL_GUID \
+  {0xc0fe0dd6, 0xfdec, 0x11ed, { 0x95, 0xef, 0x98, 0x4f, 0xee, 0x00, 0x15, 0xd5 }}
+
+typedef struct tdEDKII_VTPM_TD_PRESENT_PROTOCOL EDKII_VTPM_TD_PRESENT_PROTOCOL;
+
+
+typedef
+VOID
+(EFIAPI *EDKII_VTPM_SET_ABSENT)(
+  IN  EDKII_VTPM_TD_PRESENT_PROTOCOL  *This
+  );
+struct tdEDKII_VTPM_TD_PRESENT_PROTOCOL {
+  EDKII_VTPM_SET_ABSENT   VtpmTdSetAbsent;
+};
+
+extern EFI_GUID  gEdkiiVtpmTdPresentProtocolGuid;
+
 #endif
