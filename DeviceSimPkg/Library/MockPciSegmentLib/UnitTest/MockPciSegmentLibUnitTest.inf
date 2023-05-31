@@ -1,0 +1,34 @@
+## @file
+#
+# Copyright (c) 2023, Intel Corporation. All rights reserved.<BR>
+# SPDX-License-Identifier: BSD-2-Clause-Patent
+##
+
+[Defines]
+  INF_VERSION     = 0x00010005
+  BASE_NAME       = MockPciSegmentLibUnitTest
+  FILE_GUID       = 9BE8D4B2-A5C1-40B6-ACF6-070A9515A63D
+  MODULE_TYPE     = HOST_APPLICATION
+  VERSION_STRING  = 1.0
+
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = IA32 X64
+#
+
+[Sources]
+  MockPciSegmentLibUnitTest.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  UnitTestFrameworkPkg/UnitTestFrameworkPkg.dec
+  DeviceSimPkg/DeviceSimPkg.dec
+
+[LibraryClasses]
+  BaseLib
+  DebugLib
+  UnitTestLib
+  LocalMockRegisterSpaceLib
+  PciSegmentLib

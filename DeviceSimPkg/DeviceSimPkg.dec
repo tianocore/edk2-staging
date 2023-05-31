@@ -1,0 +1,18 @@
+## @file
+# This Package provides all definitions (including functions, MACROs,
+# structures library classes, and PCDs) and libraries instances, which are used
+# to support unit testing and interface testing.
+#
+# Copyright (c) Intel Corporation.<BR>
+# SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+##
+
+[Defines]
+  DEC_SPECIFICATION = 0x00010005
+  PACKAGE_NAME      = DeviceSimPkg
+  PACKAGE_GUID      = 6BE97B49-D86B-4F60-B669-AE46B2BE5334
+  PACKAGE_VERSION   = 0.1
+
+[Includes]
+  Include
