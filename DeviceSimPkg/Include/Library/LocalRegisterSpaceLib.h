@@ -47,7 +47,7 @@ LocalRegisterSpaceDestroy (
 
 UINT32
 ByteEnableToBitMask (
-  IN UINT8  ByteEnable
+  IN UINT32  ByteEnable
   );
 
 #endif

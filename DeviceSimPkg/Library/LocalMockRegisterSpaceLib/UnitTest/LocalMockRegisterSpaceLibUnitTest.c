@@ -68,20 +68,7 @@ TestDeviceRegisterRead (
     return;
   }
 
-  switch(ByteEnable) {
-    case 0x1:
-      ByteMask = 0xFF;
-      break;
-    case 0x3:
-      ByteMask = 0xFFFF;
-      break;
-    case 0x7:
-      ByteMask = 0xFFFFFF;
-      break;
-    case 0xF:
-    default:
-      ByteMask = 0xFFFFFFFF;
-  }
+  ByteMask = ByteEnableToBitMask (ByteEnable);
 
   *Value = (DeviceContext->Regs[RegisterIndex] & ByteMask);
 
@@ -128,20 +115,7 @@ TestDeviceRegisterWrite (
     return;
   }
 
-  switch(ByteEnable) {
-    case 0x1:
-      ByteMask = 0xFF;
-      break;
-    case 0x3:
-      ByteMask = 0xFFFF;
-      break;
-    case 0x7:
-      ByteMask = 0xFFFFFF;
-      break;
-    case 0xF:
-    default:
-      ByteMask = 0xFFFFFFFF;
-  }
+  ByteMask = ByteEnableToBitMask (ByteEnable);
 
   DeviceContext->Regs[RegisterIndex] &= ~ByteMask;
   DeviceContext->Regs[RegisterIndex] |= (Value & ByteMask);
