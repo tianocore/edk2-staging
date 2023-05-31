@@ -318,7 +318,6 @@ VmmSpdmVTpmConnect (
   if (!LIBSPDM_STATUS_IS_SUCCESS (SpdmStatus)) {
     DEBUG ((DEBUG_ERROR, "DoAuthentication failed with %lx \n", SpdmStatus));
     Status = EFI_ABORTED;
-    DestroySession = TRUE;
     goto CleanContext;
   }
 
