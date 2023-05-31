@@ -10,6 +10,8 @@
 #include <Library/TimerLib.h>
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
+#include <Library/TdxLib.h>
+#include <Library/BaseCryptLib.h>
 #include <IndustryStandard/Tdx.h>
 #include <IndustryStandard/Acpi.h>
 #include <Guid/EventGroup.h>
@@ -796,6 +798,91 @@ VmmSpdmVTpmInitSpdmContext (
   return EFI_SUCCESS;
 }
 
+
+// 4  : spdm_cert_chain_t_size
+// 48 : sha384-digest-size
+#define SPDM_CERT_CHAIN_HEADER_SIZE (4+48)
+
+/**
+ * Verfiy the peer cert.
+ *
+ * @param CertChain            A pointer to the cert chain.
+ * @param CertChainSize        The size of the cert chain.
+ *
+ * @retval EFI_SUCCESS         Verified successfully.
+ * @retval Others              Some errors occurred when verifying
+ **/
+STATIC
+EFI_STATUS
+VerifyPeerCert (
+  UINT8   *CertChain,
+  UINTN   CertChainSize
+  )
+{
+  EFI_STATUS  Status;
+  BOOLEAN     Result;
+  UINT8       *ReportMac;
+  UINTN       ExtensionLen;
+  UINT8       TdReportExtension[sizeof (TDREPORT_STRUCT)];
+  UINT8       TdReportOidExtension[] = EXTNID_VTPMTD_REPORT;
+  UINT8       *Cert;
+  UINTN       CertSize;
+
+  TDREPORT_STRUCT *TdReport;
+
+  if (CertChain == NULL){
+    return EFI_INVALID_PARAMETER;
+  }
+  Result       = TRUE;
+  ReportMac    = NULL;
+  TdReport     = NULL;
+  ExtensionLen = sizeof (TDREPORT_STRUCT);
+  Cert         = NULL;
+  CertSize     = 0;
+
+  DEBUG((DEBUG_INFO, "VerifyPeerCert ...\n"));
+  // get the Cert from CertChain
+  Result = X509GetCertFromCertChain (
+                                      CertChain + SPDM_CERT_CHAIN_HEADER_SIZE,
+                                      CertChainSize - SPDM_CERT_CHAIN_HEADER_SIZE,
+                                      0,
+                                      (const uint8_t**)&Cert,
+                                      &CertSize);
+  if (Result == FALSE) {
+    DEBUG ((DEBUG_ERROR, "Cannot get Cert from CertChain.\n"));
+    return EFI_ABORTED;
+  }
+
+  // get the TD_REPORT from Cert
+  Result = X509GetExtensionData (
+                                 Cert, 
+                                 CertSize,
+                                 (const uint8_t *)TdReportOidExtension,
+                                 sizeof(TdReportOidExtension),
+                                 TdReportExtension,
+                                 &ExtensionLen);
+
+  if((ExtensionLen == 0) || (Result == FALSE)) {
+    DEBUG ((DEBUG_ERROR, "Cannot get TDREPORT from Cert.\n"));
+    return EFI_ABORTED;
+  }
+
+  TdReport = (TDREPORT_STRUCT *)TdReportExtension;
+
+  //ReportMac should be 256-B aligned
+  ReportMac = AllocatePages(1);
+  CopyMem(ReportMac, &(TdReport->ReportMacStruct), sizeof(REPORTMACSTRUCT));
+
+  // Verify TD_REPORT
+  Status = TdVerifyReport(ReportMac, sizeof(REPORTMACSTRUCT));
+
+  DEBUG((DEBUG_INFO, "VerifyPeerCert is %r\n", Status));
+
+  FreePages(ReportMac, 1);
+
+  return Status;
+}
+
 /**
  * Do authentication for  an Spdm messages.
  *
@@ -846,6 +933,10 @@ DoAuthentication (
                                );
   if (LIBSPDM_STATUS_IS_ERROR (Status)) {
     return Status;
+  }
+  // Verify the peer cert
+  if (EFI_ERROR(VerifyPeerCert (CertChain, CertChainSize))) {
+    return LIBSPDM_STATUS_ERROR_PEER;
   }
 
   // get challenge
