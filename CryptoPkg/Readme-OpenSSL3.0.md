@@ -41,20 +41,15 @@ Risk:
 	If missed, the next stable release will be in September 2023.  
 2.  If bugs are found during validation, some size optimization work will have to be discarded.   
 	This will result in that size increase greater than the current result.  
-3.  Upstream:  
-https://github.com/tianocore/edk2/pull/4391/  
-Platform_CI OVMF_IA32X64_FULL_NOOPT failed  
-the required fv image size 0xdb1940 exceeds the set fv image size 0xd00000  
 
 ## OpenSSL upstream status
 |   openssl change   |   status   |    backup     |    tips   |  
 |--------------------|------------|---------------|------------|  
 | [Disable ECX][ecxcommit] | [WIP][ecxpr] | | |  
-| [Enable the legacy path][legacycommit] | Reject | Enable in Edk2 code | |  
-| [Cut unnecessary API][unusedcommit] | Drop | | Hard to maintain and test |  
+| [Enable the legacy path][legacycommit] | Reject | [Enable in Edk2 code][legacybackup] | |  
 | Drop float for UEFI | [Done][floatpr] | | Bug fix |  
 | Param buffer overflow | [Done][ecpararm] | | Bug fix |  
-| Enable alg auto init | [WIP][legacypr] | | Bug fix |  
+| Enable alg auto init | [WIP][legacypr] | [Enable in Edk2 code][autoinitbackup] | Bug fix |  
   
 ## POC result
 Binaries mode (use crypto drivers)  
@@ -138,18 +133,7 @@ This needs to change the openssl code, such as:
 https://github.com/liyi77/openssl/commit/d1b07663c40c5fccfa60fcd2fea9620819e8e5d5
 #### Risk:
 This will become workaround if openssl doesn't accept such changes.  
-
-### 7.Cut unnecessary API in OpenSsl
-Such as:  
-remove x509 print function - 7KB  
-remove unused rsa ameth - 7KB  
-remove unused x509 extentions - 19KB  
-remove unused bio enc - 3KB  
-remove unused bio prov - 4KB  
-...
-#### Risk:
-This is workaround.
-
+  
 ## Openssl code change summary
 ### Level 1: Reasonable changes to reduce size
 1. Add macro such like OPENSSL_NO_ECX OPENSSL_NO_ECD to remove ecx and ecd feature,  
@@ -179,17 +163,6 @@ https://github.com/tianocore/edk2-staging/commit/c3a5b69d8a3465259cfdca8f38b0dc7
 (commit: CryptoPkg: trim obj_dat.h)  
 https://github.com/tianocore/edk2-staging/commit/6874485ebf89959953f7094990c7123e19748527  
   
-3. Cut unnecessary API in structure.  
-(commit: evp: cut bio_enc func 3KB)  
-https://github.com/tianocore/openssl/commit/839c9fc7175a1dcf24cb7eb70f9a0a7d815c47b6  
-(commit: x509: remove print function 7KB)  
-https://github.com/tianocore/openssl/commit/f80ece5971a1dbbe227618c38ee5df2be89613db  
-(commit: rsa: remove unused rsa ameth 7KB)  
-https://github.com/tianocore/openssl/commit/e20da1b442c46f25ba385020449f23c9ebebb684  
-(commit: x509: remove unused extentions 19KB)  
-https://github.com/tianocore/openssl/commit/b911ddac1957024c87dda3d4e517be2b0fef2cbe  
-(commit: ssl: block out dtls code when OPENSSL_NO_DTLS defined 7KB)  
-https://github.com/tianocore/openssl/commit/ae343b49b17eec83d1a34bf630f3587d76d242ca  
 
 ## Timeline
 Target for 2023 Q1
@@ -201,3 +174,5 @@ Target for 2023 Q1
 [floatpr]: https://github.com/openssl/openssl/pull/20992
 [unusedcommit]: https://github.com/tianocore/openssl/commit/e20da1b442c46f25ba385020449f23c9ebebb684
 [ecpararm]: https://github.com/openssl/openssl/pull/20890
+[legacybackup]: https://github.com/tianocore/edk2/pull/4452/commits/076490698f399b45d72366f60284fab02ed4a1fd
+[autoinitbackup]: https://github.com/tianocore/edk2/pull/4452/commits/384187f66352e0507e06b0ff196ffb940822306d
