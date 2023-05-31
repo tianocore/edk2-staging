@@ -19,3 +19,10 @@ int my_snprintf(char *str, size_t size, const char *format, ...)
   ASSERT(FALSE);
   return 0;
 }
+
+/*work around to support OpenSSL dummy API*/
+int EC_KEY_set_public_key(void *key, const void *pub)
+{
+  ASSERT (FALSE);
+  return 0;
+}
