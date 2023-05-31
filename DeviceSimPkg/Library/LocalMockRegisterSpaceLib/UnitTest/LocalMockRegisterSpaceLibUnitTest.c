@@ -518,6 +518,35 @@ LocalMockRegisterSpaceUnalignedBoundaryCrossingQwordAccessTest (
   return UNIT_TEST_PASSED;
 }
 
+UNIT_TEST_STATUS
+EFIAPI
+ByteEnableToBitMaskTest (
+  IN UNIT_TEST_CONTEXT  Context
+  )
+{
+  //
+  // Standard byte enables for different r/w widths
+  //
+  UT_ASSERT_EQUAL (ByteEnableToBitMask (0), 0);
+  UT_ASSERT_EQUAL (ByteEnableToBitMask (0x1), 0xFF);
+  UT_ASSERT_EQUAL (ByteEnableToBitMask (0x3), 0xFFFF);
+  UT_ASSERT_EQUAL (ByteEnableToBitMask (0xF), 0xFFFFFFFF);
+
+  //
+  // Standard byte enables for unaligned accesses
+  //
+  UT_ASSERT_EQUAL (ByteEnableToBitMask (0x2), 0xFF00);
+  UT_ASSERT_EQUAL (ByteEnableToBitMask (0x6), 0xFFFF00);
+
+  //
+  // Weird byte enables shouldn't be seen normally
+  //
+  UT_ASSERT_EQUAL (ByteEnableToBitMask (0x9), 0xFF0000FF);
+  UT_ASSERT_EQUAL (ByteEnableToBitMask (0x5), 0x00FF00FF);
+
+  return UNIT_TEST_PASSED;
+}
+
 EFI_STATUS
 EFIAPI
 UefiTestMain (
@@ -568,6 +597,11 @@ UefiTestMain (
   AddTestCase (LocalMockRegisterSpaceTest, "LocalMockRegisterSpaceUnalignedBoundaryCrossingWordAccessTest", "LocalMockRegisterSpaceUnalignedBoundaryCrossingWordAccessTest", LocalMockRegisterSpaceUnalignedBoundaryCrossingWordAccessTest, NULL, NULL, (UNIT_TEST_CONTEXT)DeviceContext);
   AddTestCase (LocalMockRegisterSpaceTest, "LocalMockRegisterSpaceUnalignedBoundaryCrossingDwordAccessTest", "LocalMockRegisterSpaceUnalignedBoundaryCrossingDwordAccessTest", LocalMockRegisterSpaceUnalignedBoundaryCrossingDwordAccessTest, NULL, NULL, (UNIT_TEST_CONTEXT)DeviceContext);
   AddTestCase (LocalMockRegisterSpaceTest, "LocalMockRegisterSpaceUnalignedBoundaryCrossingQwordAccessTest", "LocalMockRegisterSpaceUnalignedBoundaryCrossingQwordAccessTest", LocalMockRegisterSpaceUnalignedBoundaryCrossingQwordAccessTest, NULL, NULL, (UNIT_TEST_CONTEXT)DeviceContext);
+
+  //
+  // ByteEnable conversions test
+  //
+  AddTestCase (LocalMockRegisterSpaceTest, "ByteEnableToBitMaskTest", "ByteEnableToBitMaskTest", ByteEnableToBitMaskTest, NULL, NULL, NULL);
   
   Status = RunAllTestSuites (Framework);
   if (Framework) {
