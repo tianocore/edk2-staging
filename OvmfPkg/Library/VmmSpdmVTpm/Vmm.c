@@ -219,7 +219,6 @@ VTpmContextWrite (
   )
 {
   UINT64      RetCode;
-  UINT64      RetValue;
   UINT32      DataLen;
   UINT64      TdxSharedBit;
   UINT8       *Ptr;
@@ -283,11 +282,11 @@ VTpmContextWrite (
                       (UINT64)RspBuffer | TdxSharedBit,
                       0,
                       VMM_SPDM_TIMEOUT,
-                      &RetValue
+                      NULL
                       );
 
-  if ((RetCode != 0) || (RetValue != 0)) {
-    DEBUG ((DEBUG_ERROR, "%a: Failed with RetCode %llx, RetValue %llx\n", __FUNCTION__, RetCode, RetValue));
+  if (RetCode != 0) {
+    DEBUG ((DEBUG_ERROR, "%a: Failed with RetCode %llx\n", __FUNCTION__, RetCode));
     return EFI_ABORTED;
   }
 
@@ -319,7 +318,6 @@ VTpmContextRead (
   )
 {
   UINT64      RetCode;
-  UINT64      RetValue;
   UINT8       *Ptr;
   UINT32      DataLen;
   UINT32      HeaderLen;
@@ -383,11 +381,11 @@ VTpmContextRead (
                       (UINT64)RspBuffer | TdxSharedBit,
                       0,
                       VMM_SPDM_TIMEOUT,
-                      &RetValue
+                      NULL
                       );
 
-  if ((RetCode != 0) || (RetValue != 0)) {
-    DEBUG ((DEBUG_ERROR, "%a: Failed with RetCode %llx, RetValue %llx\n", __FUNCTION__, RetCode, RetValue));
+  if (RetCode != 0) {
+    DEBUG ((DEBUG_ERROR, "%a: Failed with RetCode %llx\n", __FUNCTION__, RetCode));
     return EFI_ABORTED;
   }
 
@@ -437,7 +435,6 @@ TdQueryServiceForVtpm (
 {
   EFI_STATUS  Status;
   UINT64      TdVmCallRetCode;
-  UINT64      RetValue;
   UINT64      TdxSharedBit;
   UINT8       *Data;
   UINT8       *CommandBuffer;
@@ -498,17 +495,16 @@ TdQueryServiceForVtpm (
                               (UINT64)ResponseBuffer | TdxSharedBit,
                               0,
                               VMM_SPDM_TIMEOUT,
-                              &RetValue
+                              NULL
                               );
 
-  if ((TdVmCallRetCode != 0) || (RetValue != 0)) {
+  if (TdVmCallRetCode != 0) {
     DEBUG (
            (
             DEBUG_ERROR,
-            "%a: TdvmCall failed with Status Code %llx , RetValue %llx \n",
+            "%a: TdvmCall failed with Status Code %llx\n",
             __FUNCTION__,
-            TdVmCallRetCode,
-            RetValue
+            TdVmCallRetCode
            )
            );
     return EFI_DEVICE_ERROR;
