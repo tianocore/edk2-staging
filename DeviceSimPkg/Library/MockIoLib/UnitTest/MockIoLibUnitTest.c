@@ -40,26 +40,7 @@ TestMockIoDeviceRead (
 {
   UINT32  ByteMask;
 
-  switch(ByteEnable) {
-    case 0x1:
-      ByteMask = 0xFF;
-      break;
-    case 0x2:
-      ByteMask = 0xFF00;
-      break;
-    case 0x3:
-      ByteMask = 0xFFFF;
-      break;
-    case 0x7:
-      ByteMask = 0xFFFFFF;
-      break;
-    case 0xC:
-      ByteMask = 0xFFFF0000;
-      break;
-    case 0xF:
-    default:
-      ByteMask = 0xFFFFFFFF;
-  }
+  ByteMask = ByteEnableToBitMask (ByteEnable);
 
   switch (Address) {
     case MOCK_IO_LIB_TEST_DEVICE_REG0_ADDRESS:
@@ -84,26 +65,7 @@ TestMockIoDeviceWrite (
 
   Device = (MOCK_IO_TEST_DEVICE_CONTEXT*) Context;
 
-  switch(ByteEnable) {
-    case 0x1:
-      ByteMask = 0xFF;
-      break;
-    case 0x2:
-      ByteMask = 0xFF00;
-      break;
-    case 0x3:
-      ByteMask = 0xFFFF;
-      break;
-    case 0x7:
-      ByteMask = 0xFFFFFF;
-      break;
-    case 0xC:
-      ByteMask = 0xFFFF0000;
-      break;
-    case 0xF:
-    default:
-      ByteMask = 0xFFFFFFFF;
-  }
+  ByteMask = ByteEnableToBitMask (ByteEnable);
 
   switch (Address) {
     case MOCK_IO_LIB_TEST_DEVICE_REG1_ADDRESS:
