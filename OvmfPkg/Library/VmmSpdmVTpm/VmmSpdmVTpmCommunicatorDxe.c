@@ -17,6 +17,7 @@
 #include "VmmSpdmInternal.h"
 #include <Library/HobLib.h>
 #include <Library/MemEncryptTdxLib.h>
+#include <Protocol/Tcg2Protocol.h>
 
 VTPM_SHARED_BUFFER_INFO_STRUCT  mVtpmSharedBufferInfo = {
   0,
@@ -104,6 +105,29 @@ VmmSpdmVTpmIsConnected (
   return InfoTable->SessionId != 0 ? EFI_SUCCESS : EFI_NOT_STARTED;
 }
 
+STATIC
+EFI_STATUS
+VmmSetVTpmTdAbsent(
+  VOID
+  )
+{
+ EFI_STATUS  Status;
+ EDKII_VTPM_TD_PRESENT_PROTOCOL *VtpmTdPresentProtocol;
+
+ Status = gBS->LocateProtocol(&gEdkiiVtpmTdPresentProtocolGuid, NULL, (VOID **)&VtpmTdPresentProtocol);
+ if (EFI_ERROR(Status)) {
+   DEBUG((DEBUG_ERROR, "Locate VtpmTdPresentProtocol failed with %r\n", Status));
+   return Status;
+ }
+
+ VtpmTdPresentProtocol->VtpmTdSetAbsent(VtpmTdPresentProtocol);
+
+ DEBUG((DEBUG_INFO, "VmmSetVTpmTdAbsent is %r\n", Status));
+
+ return EFI_SUCCESS;
+}
+
+
 /**
  * Send/Receive data with VTpm-TD.
 */
@@ -129,6 +153,11 @@ VmmSpdmVTpmSendReceive (
     DEBUG((DEBUG_ERROR, "DoVmmSpdmSendReceive failed with %r\n", Status));
     //Destroy the session after send-receive failed
     InfoTable->SessionId = 0;
+    //TDVF should mark VTPM unusable after send-receive failed.
+    if (EFI_ERROR(VmmSetVTpmTdAbsent())) {     
+       Status = EFI_ABORTED;
+    }
+
   }
 
   return Status;

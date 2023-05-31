@@ -46,3 +46,6 @@
   SpdmRequesterLib
   SpdmCommonLib
   TdxLib
+
+[Protocols]
+  gEdkiiVtpmTdPresentProtocolGuid
