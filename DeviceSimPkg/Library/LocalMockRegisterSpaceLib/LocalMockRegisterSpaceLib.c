@@ -164,3 +164,21 @@ LocalRegisterSpaceDestroy (
   FreePool (RegisterSpace);
   return EFI_SUCCESS;
 }
+
+UINT32
+ByteEnableToBitMask (
+  IN UINT8  ByteEnable
+  )
+{
+  UINT8  Byte;
+  UINT32  BitMask;
+
+  BitMask = 0;
+  for (Byte = 0; Byte < 4; Byte++) {
+    if (ByteEnable & (0x1 << Byte)) {
+      BitMask |= (0xFF << (Byte * 8));
+    }
+  }
+
+  return BitMask;
+}

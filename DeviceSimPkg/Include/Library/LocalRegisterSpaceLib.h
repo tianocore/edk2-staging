@@ -45,4 +45,9 @@ LocalRegisterSpaceDestroy (
   IN REGISTER_SPACE_MOCK  *RegisterSpace
   );
 
+UINT32
+ByteEnableToBitMask (
+  IN UINT8  ByteEnable
+  );
+
 #endif
