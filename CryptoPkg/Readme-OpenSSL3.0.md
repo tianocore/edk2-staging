@@ -31,7 +31,15 @@ Risk:
 	If missed, the next stable release will be in September 2023.  
 2.  If bugs are found during validation, some size optimization work will have to be discarded.   
 	This will result in that size increase greater than the current result.  
-
+3.  Upstream:  
+https://github.com/tianocore/edk2/pull/4391/  
+a.  Platform_CI OVMF_IA32X64_FULL_NOOPT failed  
+the required fv image size 0xdb1940 exceeds the set fv image size 0xd00000  
+b.  GCC ASM test  
+https://github.com/liyi77/edk2/commit/ecb0ee1d3cd9d8a87f4b956dea3703fb8ae5d1a4  
+Debugging...
+c.  Generated files format error: format of newline, trailing spaces, tabs...  
+  
 ## POC result
 Binaries mode (use crypto drivers)  
 |     Driver      |   1.1.1    |    3.0     |   percent  |  
