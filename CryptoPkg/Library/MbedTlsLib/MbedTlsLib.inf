@@ -29,13 +29,13 @@
 # Openssl files list ends here
   Include/mbedtls/mbedtls_config.h
   mbedtls/library/aes.c
-  mbedtls/library/aesni.c
-  mbedtls/library/aria.c
+  # mbedtls/library/aesni.c
+  # mbedtls/library/aria.c
   mbedtls/library/asn1parse.c
   mbedtls/library/asn1write.c
   mbedtls/library/base64.c
   mbedtls/library/bignum.c
-  mbedtls/library/camellia.c
+  # mbedtls/library/camellia.c
   mbedtls/library/ccm.c
   mbedtls/library/chacha20.c
   mbedtls/library/chachapoly.c
