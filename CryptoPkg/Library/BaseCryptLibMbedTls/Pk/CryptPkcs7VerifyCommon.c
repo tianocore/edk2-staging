@@ -664,18 +664,23 @@ Pkcs7Verify (
   }
 
   MbedTlsPkcs7Init (&Pkcs7);
+  mbedtls_x509_crt_init (&Crt);
 
   if (Ret == 0) {
     Ret = MbedtlsPkcs7ParseDer (WrapData, (INT32)WrapDataSize, &Pkcs7);
   }
 
   if (Ret == 0) {
-    mbedtls_x509_crt_init (&Crt);
     Ret = mbedtls_x509_crt_parse_der (&Crt, TrustedCert, CertLength);
   }
 
   if (Ret == 0) {
     Status = MbedTlsPkcs7SignedDataVerify (&Pkcs7, &Crt, InData, (INT32)DataLength);
+  }
+
+
+  if (&Crt != NULL) {
+    mbedtls_x509_crt_free(&Crt);
   }
 
   return Status;

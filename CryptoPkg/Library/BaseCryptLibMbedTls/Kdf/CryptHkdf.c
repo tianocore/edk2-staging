@@ -28,6 +28,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
   @retval FALSE  Hkdf generation failed.
 
 **/
+STATIC
 BOOLEAN
 HkdfMdExtractAndExpand (
   IN   mbedtls_md_type_t MdType,
@@ -75,6 +76,7 @@ HkdfMdExtractAndExpand (
   @retval FALSE  Hkdf generation failed.
 
 **/
+STATIC
 BOOLEAN
 HkdfMdExtract (
   IN   mbedtls_md_type_t MdType,
@@ -139,6 +141,7 @@ HkdfMdExtract (
   @retval FALSE  Hkdf generation failed.
 
 **/
+STATIC
 BOOLEAN
 HkdfMdExpand (
   IN   mbedtls_md_type_t MdType,

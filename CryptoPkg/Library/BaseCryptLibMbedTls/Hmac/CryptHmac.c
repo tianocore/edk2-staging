@@ -16,6 +16,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
            If the allocations fails, HmacShaMdNew() returns NULL.
 
 **/
+STATIC
 VOID *
 HmacMdNew (
   VOID
@@ -60,6 +61,7 @@ HmacMdFree (
   @retval FALSE  The Key is set unsuccessfully.
 
 **/
+STATIC
 BOOLEAN
 HmacMdSetKey (
   IN   mbedtls_md_type_t MdType,
@@ -106,6 +108,7 @@ HmacMdSetKey (
   @retval FALSE  HMAC-MD context copy failed.
 
 **/
+STATIC
 BOOLEAN
 HmacMdDuplicate (
   IN   CONST VOID  *HmacMdContext,
@@ -143,6 +146,7 @@ HmacMdDuplicate (
   @retval FALSE  HMAC-MD data digest failed.
 
 **/
+STATIC
 BOOLEAN
 HmacMdUpdate (
   IN OUT  VOID        *HmacMdContext,
@@ -190,6 +194,7 @@ HmacMdUpdate (
   @retval FALSE  HMAC-MD digest computation failed.
 
 **/
+STATIC
 BOOLEAN
 HmacMdFinal (
   IN OUT  VOID   *HmacMdContext,
@@ -231,6 +236,7 @@ HmacMdFinal (
   @retval FALSE  This interface is not supported.
 
 **/
+STATIC
 BOOLEAN
 HmacMdAll (
   IN   mbedtls_md_type_t MdType,

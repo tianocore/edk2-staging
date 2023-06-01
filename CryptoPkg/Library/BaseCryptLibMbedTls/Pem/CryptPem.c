@@ -89,6 +89,7 @@ RsaGetPrivateKeyFromPem (
 
   rsa = RsaNew ();
   if (rsa == NULL) {
+    mbedtls_pk_free (&pk);
     return FALSE;
   }
   Ret = mbedtls_rsa_copy (rsa, mbedtls_pk_rsa(pk));

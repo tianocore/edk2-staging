@@ -467,7 +467,9 @@ Pkcs7Sign (
   Status = TRUE;
 
 Cleanup:
-  mbedtls_pk_free (&Pkey);
+  if (&Pkey != NULL) {
+    mbedtls_pk_free (&Pkey);
+  }
 
   if (NewPrivateKey != NULL) {
     FreePool (NewPrivateKey);

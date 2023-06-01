@@ -266,7 +266,7 @@ TlsCtrlTrafficOut (
   // Read and return the amount of data from the BIO.
   //
   // return mbedtls_net_recv (TlsConn->fd, Buffer, (UINT32)BufferSize);
-  return -1;
+  return BufferSize;
 }
 
 /**
@@ -302,7 +302,7 @@ TlsCtrlTrafficIn (
   // Write and return the amount of data to the BIO.
   //
   // return mbedtls_net_send (TlsConn->fd, Buffer, (UINT32)BufferSize);
-  return -1;
+  return BufferSize;
 }
 
 /**

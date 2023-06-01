@@ -173,7 +173,9 @@ RsaSetKey (
     Ret = -1;
     break;
   }
+
   mbedtls_rsa_complete(RsaKey);
+  mbedtls_mpi_free(&Value);
   return Ret == 0;
 }
 

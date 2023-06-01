@@ -288,7 +288,6 @@ void GetOidFromTxt(
       CheckOid[OidIndex] = (UINT8)Data;
       OidIndex++;
     } else {
-      // while(1);
       CheckOid[OidIndex + 1] = (UINT8)(Data & 0xFF);
       CheckOid[OidIndex] = (UINT8)(((((Data & 0xFF00) << 1) | 0x8000) >> 8) & 0xFF);
       OidIndex = OidIndex + 2;
@@ -557,8 +556,6 @@ VerifyEKUsInPkcs7Signature (
   //leaf cert
   ObjLen += Ptr - OldEnd;
   Ptr = OldEnd;
-
-  mbedtls_x509_crt_init(&Cert);
 
   if (mbedtls_x509_crt_parse_der(&Cert, Ptr, ObjLen) != 0) {
     return FALSE;

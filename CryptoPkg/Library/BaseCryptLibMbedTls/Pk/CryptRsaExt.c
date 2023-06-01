@@ -201,6 +201,7 @@ RsaGenerateKey (
     );
   }
 
+  mbedtls_mpi_free(&E);
   return Ret == 0;
 }
 

@@ -416,28 +416,36 @@ BigNumIsOdd (
 {
   mbedtls_mpi X;
   mbedtls_mpi TemBn;
+  BOOLEAN Result;
 
   mbedtls_mpi_init(&X);
   mbedtls_mpi_init(&TemBn);
 
   if (mbedtls_mpi_copy(&TemBn, Bn) != 0) {
-    return FALSE;
+    Result =  FALSE;
+    goto Done;
   }
 
   if (mbedtls_mpi_lset(&X, 2) != 0){
-    return FALSE;
+    Result =  FALSE;
+    goto Done;
   }
 
   if (mbedtls_mpi_mod_mpi(&TemBn, &TemBn, &X) != 0) {
-    return FALSE;
+    Result =  FALSE;
+    goto Done;
   }
 
   if (mbedtls_mpi_cmp_int(&TemBn, 1) == 0) {
-    return TRUE;
+    Result =  TRUE;
   } else {
-    return FALSE;
+    Result =  FALSE;
   }
 
+Done:
+  mbedtls_mpi_free(&X);
+  mbedtls_mpi_free(&TemBn);
+  return Result;
 }
 
 /**
@@ -512,17 +520,21 @@ BigNumRShift (
   mbedtls_mpi_init(&TempBn);
 
   if (mbedtls_mpi_copy(&TempBn, Bn) != 0) {
+    mbedtls_mpi_free(&TempBn);
     return FALSE;
   }
   if (mbedtls_mpi_shift_r(&TempBn, N) != 0) {
+    mbedtls_mpi_free(&TempBn);
     return FALSE;
   }
 
   if (mbedtls_mpi_copy(BnRes, &TempBn) != 0) {
+    mbedtls_mpi_free(&TempBn);
     return FALSE;
   }
-  return TRUE;
 
+  mbedtls_mpi_free(&TempBn);
+  return TRUE;
 }
 
 /**

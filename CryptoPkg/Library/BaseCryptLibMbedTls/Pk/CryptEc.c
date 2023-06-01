@@ -404,39 +404,41 @@ EcPointInvert (
   mbedtls_ecp_point *pt;
   mbedtls_ecp_group *grp;
   mbedtls_mpi InvBnY;
+  mbedtls_mpi P;
 
   mbedtls_mpi_init(&InvBnY);
+  mbedtls_mpi_init(&P);
 
   pt = ( mbedtls_ecp_point *)EcPoint;
   grp = ( mbedtls_ecp_group *)EcGroup;
 
   if (mbedtls_mpi_copy(&InvBnY, &pt->Y) != 0) {
+    mbedtls_mpi_free(&P);
     mbedtls_mpi_free(&InvBnY);
     return FALSE;
   }
 
-  mbedtls_mpi P;
-
-  mbedtls_mpi_init(&P);
-
   if (mbedtls_mpi_copy(&P, &grp->P) != 0) {
     mbedtls_mpi_free(&P);
+    mbedtls_mpi_free(&InvBnY);
     return FALSE;
   }
-
 
   InvBnY.s = 0 - InvBnY.s;
 
   if (mbedtls_mpi_mod_mpi(&InvBnY, &InvBnY, &P) != 0) {
+    mbedtls_mpi_free(&P);
     mbedtls_mpi_free(&InvBnY);
     return FALSE;
   }
 
   if (mbedtls_mpi_copy(&pt->Y, &InvBnY) != 0) {
+    mbedtls_mpi_free(&P);
     mbedtls_mpi_free(&InvBnY);
     return FALSE;
   }
 
+  mbedtls_mpi_free(&P);
   mbedtls_mpi_free(&InvBnY);
   return TRUE;
 }
@@ -603,11 +605,13 @@ EcPointSetCompressedCoordinates (
   }
 
   if (mbedtls_mpi_copy(&pt->X, (mbedtls_mpi *)BnX) != 0) {
-    return FALSE;
+    Status = FALSE;
+    goto Clean;
   }
 
   if (mbedtls_mpi_copy(&pt->Y, &r) != 0) {
-    return FALSE;
+    Status = FALSE;
+    goto Clean;
   }
 
   mbedtls_mpi_lset( &pt->Z , 1);
@@ -615,7 +619,7 @@ EcPointSetCompressedCoordinates (
 Clean:
   mbedtls_mpi_free(&r);
   mbedtls_mpi_free(&n);
-  return TRUE;
+  return Status;
 }
 
 // =====================================================================================
