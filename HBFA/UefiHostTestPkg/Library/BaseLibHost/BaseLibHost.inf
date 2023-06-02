@@ -63,6 +63,7 @@
   X86SegmentNull.c
   X86DisablePaging64Null.c
   SwitchStackNull.c
+  QuickSort.c
 
 [Sources.Ia32]
   Ia32/RdRand.nasm
