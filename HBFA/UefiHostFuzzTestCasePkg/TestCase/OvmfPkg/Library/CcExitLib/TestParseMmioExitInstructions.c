@@ -21,6 +21,7 @@
 #include <Library/MemoryAllocationLib.h>
 #include <Library/PcdLib.h>
 #include <Library/CcExitLib.h>
+#include <Library/CcExitLib/CcExitVeHandler.c>  // TODO: temporary hack for static functions
 
 #define GET_GPAW_INIT_STATE(INFO)  ((UINT8) ((INFO) & 0x3f))
 
@@ -79,6 +80,26 @@ GetMaxBufferSize (
 //   UINT64                  *Register;
 //   UINT32                  ReadOrWrite;
 // } MMIO_EXIT_PARSED_INSTRUCTION;
+
+extern struct MMIO_EXIT_PARSED_INSTRUCTION;
+
+/**
+ * Parse the MMIO instructions.
+ *
+ * @param Regs              Pointer to the EFI_SYSTEM_CONTEXT_X64 which includes the instructions
+ * @param InstructionData   Pointer to the CC_INSTRUCTION_DATA
+ * @param ParsedInstruction Pointer to the parsed instruction data
+ *
+ * @retval EFI_SUCCESS      Successfully parsed the instructions
+ * @retval Others           Other error as indicated
+ */
+extern
+EFI_STATUS
+ParseMmioExitInstructions (
+  IN OUT EFI_SYSTEM_CONTEXT_X64     *Regs,
+  IN OUT CC_INSTRUCTION_DATA        *InstructionData,
+  OUT MMIO_EXIT_PARSED_INSTRUCTION  *ParsedInstruction
+  );
 
 VOID
 EFIAPI
