@@ -50,6 +50,17 @@ extern EFI_GUID  gTpmErrorHobGuid;
 extern EFI_GUID  gTpm2StartupLocalityHobGuid;
 
 ///
+/// The Global ID of a GUIDed HOB used to record H-CRTM Component Event.
+/// HOB payload is the whole TCG_HCRTMComponentEvent according to H-CRTM Component Event.
+///
+#define EDKII_HCRTM_COMPONENT_EVENT_HOB_GUID \
+  { \
+    0x7d6515ee, 0x0128, 0x11ee, { 0xa3, 0x1a, 0x98, 0x4f, 0xee, 0x01, 0x46, 0xbf } \
+  }
+
+extern EFI_GUID  gEdkiiHCRTMComponentEventHobGuid;
+
+///
 /// The Global ID of a GUIDed HOB used to record TCG 800-155 PlatformId Event.
 /// HOB payload is the whole TCG_Sp800_155_PlatformId_Event2 according to TCG 800-155 PlatformId Event.
 ///
