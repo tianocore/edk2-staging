@@ -499,6 +499,30 @@ typedef struct tdTCG_EfiStartupLocalityEvent {
   UINT8    StartupLocality;
 } TCG_EfiStartupLocalityEvent;
 
+#define TCG_HCRTMCOMPONENTEVENT_SIGNATURE  "H-CRTM CompMeas"
+
+//
+// H-CRTM Component Event
+//
+typedef struct tdTCG_HCRTMComponentEvent {
+  UINT8      Signature[16];
+  //Description data
+  //Measurement data
+} TCG_HCRTMComponentEvent;
+
+typedef struct tdTCG_HCRTMComponentDescription {
+  UINT8     DescriptionSize;
+  // The array of the Description 
+  // UINT8     Description[DescriptionSize]; 
+}TCG_HCRTMComponentDescription;
+
+typedef struct tdTCG_HCRTMComponentMeasurement {
+  UINT8     MeasurementFormatType;
+  UINT16    MeasurementSize;
+  // The array of the Measurement
+  // UINT8     Measurement[MeasurementSize];
+}TCG_HCRTMComponentMeasurement;
+
 //
 // Restore original structure alignment
 //
