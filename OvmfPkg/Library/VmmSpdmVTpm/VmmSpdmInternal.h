@@ -202,4 +202,9 @@ DoEndSession (
   VMM_SPDM_CONTEXT  *Context
   );
 
+EFI_STATUS
+CreateVtpmTdInitialEvents(
+ VOID
+ );
+
 #endif

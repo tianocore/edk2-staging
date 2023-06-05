@@ -343,6 +343,12 @@ VmmSpdmVTpmConnect (
     goto CleanContext;
   }
 
+  Status = CreateVtpmTdInitialEvents ();
+  if (EFI_ERROR (Status)) {
+    Status = EFI_ABORTED;
+    DestroySession = TRUE;
+  } 
+
 CleanContext:
   if (Status == EFI_SUCCESS){
     SessionSuccess = TRUE;
