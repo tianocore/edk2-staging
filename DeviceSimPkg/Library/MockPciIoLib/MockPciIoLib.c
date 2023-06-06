@@ -2,8 +2,44 @@
 #include <Library/UefiLib.h>
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
+#include <Library/MockPciSegmentLib.h>
 #include <Library/MockPciLib.h>
 
+//
+// Lookup table for increment values based on transfer widths
+//
+UINT8  mInStride[] = {
+  1, // EfiPciWidthUint8
+  2, // EfiPciWidthUint16
+  4, // EfiPciWidthUint32
+  8, // EfiPciWidthUint64
+  0, // EfiPciWidthFifoUint8
+  0, // EfiPciWidthFifoUint16
+  0, // EfiPciWidthFifoUint32
+  0, // EfiPciWidthFifoUint64
+  1, // EfiPciWidthFillUint8
+  2, // EfiPciWidthFillUint16
+  4, // EfiPciWidthFillUint32
+  8  // EfiPciWidthFillUint64
+};
+
+//
+// Lookup table for increment values based on transfer widths
+//
+UINT8  mOutStride[] = {
+  1, // EfiPciWidthUint8
+  2, // EfiPciWidthUint16
+  4, // EfiPciWidthUint32
+  8, // EfiPciWidthUint64
+  1, // EfiPciWidthFifoUint8
+  2, // EfiPciWidthFifoUint16
+  4, // EfiPciWidthFifoUint32
+  8, // EfiPciWidthFifoUint64
+  0, // EfiPciWidthFillUint8
+  0, // EfiPciWidthFillUint16
+  0, // EfiPciWidthFillUint32
+  0  // EfiPciWidthFillUint64
+};
 
 EFI_STATUS
 EFIAPI
@@ -250,69 +286,26 @@ MockPciIoConfigRead (
   IN OUT VOID                         *Buffer
   )
 {
+  UINT8                                        *Uint8Buffer;
+  UINT8                                        InStride;
+  UINT8                                        OutStride;
+  UINTN                                        Size;
+  UINT64                                       Address;
   MOCK_PCI_IO  *PciIo;
   MOCK_PCI_DEVICE  *PciDev;
-  UINT32  Size;
-  UINT32  *Uint32Buffer;
-  UINT32  Index;
-  UINT64  Val;
-  EFI_STATUS Status;
-  UINT64  Buf;
 
   PciIo = (MOCK_PCI_IO*) This;
   PciDev = PciIo->MockPci;
 
-  if (PciDev->ConfigSpace == NULL) {
-    DEBUG ((DEBUG_INFO, "NULL Bar\n"));
-    return EFI_UNSUPPORTED;
+  InStride  = mInStride[Width];
+  OutStride = mOutStride[Width];
+  Size      = (UINTN)(1 << (Width & 0x03));
+  Address = PciDev->PciSegmentBase + Offset;
+  for (Uint8Buffer = Buffer; Count > 0; Address += InStride, Uint8Buffer += OutStride, Count--) {
+    PciSegmentReadBuffer (Address, Size, Uint8Buffer);
   }
 
-  if (Width == EfiPciIoWidthFifoUint32) {
-    Uint32Buffer = (UINT32*) Buffer;
-    for (Index = 0; Index < Count; Index++) {
-      PciDev->ConfigSpace->Read (PciDev->ConfigSpace, Offset, 4, &Val);
-      Uint32Buffer[Index] = (UINT32) Val;
-    }
-    return EFI_SUCCESS;
-  }
-
-  switch (Width) {
-    case EfiPciIoWidthUint8:
-      Size = 1;
-      break;
-    case EfiPciIoWidthUint16:
-      Size = 2;
-      break;
-    case EfiPciIoWidthUint32:
-      Size = 4;
-      break;
-    case EfiPciIoWidthUint64:
-      Size = 8;
-      break;
-    default:
-      DEBUG ((DEBUG_INFO, "Unsupported width\n"));
-      return EFI_UNSUPPORTED;
-  }
-
-  Status = PciDev->ConfigSpace->Read (PciDev->ConfigSpace, Offset, Size, &Buf);
-
-  switch (Width) {
-    case EfiPciIoWidthUint16:
-      *(UINT16*)Buffer = (UINT16)Buf;
-      break;
-    case EfiPciIoWidthUint32:
-      *(UINT32*)Buffer = (UINT32)Buf;
-      break;
-    case EfiPciIoWidthUint64:
-      *(UINT64*)Buffer = Buf;
-      break;
-    case EfiPciIoWidthUint8:
-    default:
-      *(UINT8*)Buffer = (UINT8)Buf;
-      break;
-  }
-
-  return Status;
+  return EFI_SUCCESS;
 }
 
 EFI_STATUS
@@ -325,41 +318,25 @@ MockPciIoConfigWrite (
   IN OUT VOID                         *Buffer
   )
 {
+  UINT8                                        *Uint8Buffer;
+  UINT8                                        InStride;
+  UINT8                                        OutStride;
+  UINTN                                        Size;
+  UINT64                                       Address;
   MOCK_PCI_IO  *PciIo;
   MOCK_PCI_DEVICE  *PciDev;
-  UINT64           Buf;
-  UINT32  Size;
 
   PciIo = (MOCK_PCI_IO*) This;
   PciDev = PciIo->MockPci;
-
-  if (PciDev->ConfigSpace == NULL) {
-    DEBUG ((DEBUG_INFO, "NULL Bar\n"));
-    return EFI_UNSUPPORTED;
+  Address = PciDev->PciSegmentBase + Offset;
+  InStride  = mInStride[Width];
+  OutStride = mOutStride[Width];
+  Size      = (UINTN)(1 << (Width & 0x03));
+  for (Uint8Buffer = Buffer; Count > 0; Address += InStride, Uint8Buffer += OutStride, Count--) {
+    PciSegmentWriteBuffer (Address, Size, Uint8Buffer);
   }
 
-  switch (Width) {
-    case EfiPciIoWidthUint8:
-      Buf = *(UINT8*)Buffer;
-      Size = 1;
-      break;
-    case EfiPciIoWidthUint16:
-      Buf = *(UINT16*)Buffer;
-      Size = 2;
-      break;
-    case EfiPciIoWidthUint32:
-      Buf = *(UINT32*)Buffer;
-      Size = 4;
-      break;
-    case EfiPciIoWidthUint64:
-      Buf = *(UINT64*)Buffer;
-      Size = 8;
-      break;
-    default:
-      return EFI_UNSUPPORTED;
-  }
-
-  return PciDev->ConfigSpace->Write (PciDev->ConfigSpace, Offset, Size, Buf);
+  return EFI_SUCCESS;
 }
 
 EFI_STATUS
@@ -586,11 +563,28 @@ MockPciIoDestroy (
 
 EFI_STATUS
 MockPciDeviceInitialize (
-  IN REGISTER_SPACE_MOCK       *ConfigSpace,
+  IN REGISTER_SPACE_MOCK  *ConfigSpace,
+  IN UINT8                Segment,
+  IN UINT8                Bus,
+  IN UINT8                Device,
+  IN UINT8                Function,
   OUT MOCK_PCI_DEVICE     **PciDev
   )
 {
   *PciDev = AllocateZeroPool (sizeof (MOCK_PCI_DEVICE));
+  if (PciDev == NULL) {
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  (*PciDev)->PciSegmentBase = PCI_SEGMENT_LIB_ADDRESS (
+    Segment,
+    Bus,
+    Device,
+    Function,
+    0
+  );
+
+  MockPciSegmentRegisterAtPciSegmentAddress (ConfigSpace, (*PciDev)->PciSegmentBase);
 
   (*PciDev)->ConfigSpace = ConfigSpace;
 
@@ -599,15 +593,21 @@ MockPciDeviceInitialize (
 
 EFI_STATUS
 MockPciDeviceRegisterBar (
-  IN MOCK_PCI_DEVICE  *PciDev,
+  IN MOCK_PCI_DEVICE       *PciDev,
   IN REGISTER_SPACE_MOCK   *BarRegisterSpace,
-  IN UINT32           BarIndex
+  IN UINT32                 BarIndex,
+  IN MOCK_IO_MEMORY_TYPE    BarType,
+  IN UINT64                 BarAddress,
+  IN UINT64                 BarSize
   )
 {
   if (PciDev == NULL || BarIndex > MOCK_PCI_LIB_MAX_SUPPORTED_BARS) {
     return EFI_INVALID_PARAMETER;
   }
   PciDev->Bar[BarIndex] = BarRegisterSpace;
+  PciDev->BarAddress[BarIndex] = BarAddress;
+  PciDev->BarType[BarIndex] = BarType;
+  MockIoRegisterMmioAtAddress (BarRegisterSpace, BarType, BarAddress, BarSize);
   return EFI_SUCCESS;
 }
 
@@ -618,6 +618,12 @@ MockPciDeviceDestroy (
 {
   if (PciDev == NULL) {
     return EFI_INVALID_PARAMETER;
+  }
+
+  MockPciSegmentUnRegisterAtPciSegmentAddress (PciDev->PciSegmentBase);
+
+  for (UINTN Index = 0; Index < MOCK_PCI_LIB_MAX_SUPPORTED_BARS; Index++) {
+    MockIoUnRegisterMmioAtAddress (PciDev->BarType[Index], PciDev->BarAddress[Index]);
   }
 
   FreePool (PciDev);

@@ -2,13 +2,17 @@
 #define _MOCK_PCI_LIB_H_
 
 #include <Protocol/PciIo.h>
+#include <Library/MockIoLib.h>
 #include <RegisterSpaceMock.h>
 
 #define MOCK_PCI_LIB_MAX_SUPPORTED_BARS 6
 
 typedef struct {
   REGISTER_SPACE_MOCK  *ConfigSpace;
+  UINT64               PciSegmentBase;
   REGISTER_SPACE_MOCK  *Bar[MOCK_PCI_LIB_MAX_SUPPORTED_BARS]; // BARs 0-4
+  UINT64               BarAddress[MOCK_PCI_LIB_MAX_SUPPORTED_BARS];
+  MOCK_IO_MEMORY_TYPE  BarType[MOCK_PCI_LIB_MAX_SUPPORTED_BARS];
 } MOCK_PCI_DEVICE;
 
 typedef struct {
@@ -29,15 +33,22 @@ MockPciIoDestroy (
 
 EFI_STATUS
 MockPciDeviceInitialize (
-  IN REGISTER_SPACE_MOCK       *ConfigSpace,
+  IN REGISTER_SPACE_MOCK  *ConfigSpace,
+  IN UINT8                Segment,
+  IN UINT8                Bus,
+  IN UINT8                Device,
+  IN UINT8                Function,
   OUT MOCK_PCI_DEVICE     **PciDev
   );
 
 EFI_STATUS
 MockPciDeviceRegisterBar (
-  IN MOCK_PCI_DEVICE  *PciDev,
+  IN MOCK_PCI_DEVICE       *PciDev,
   IN REGISTER_SPACE_MOCK   *BarRegisterSpace,
-  IN UINT32           BarIndex
+  IN UINT32                 BarIndex,
+  IN MOCK_IO_MEMORY_TYPE    BarType,
+  IN UINT64                 BarAddress,
+  IN UINT64                 BarSize
   );
 
 EFI_STATUS

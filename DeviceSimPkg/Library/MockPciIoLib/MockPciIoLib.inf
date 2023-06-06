@@ -32,3 +32,5 @@
   DebugLib
   PcdLib
   UefiLib
+  IoLib
+  PciSegmentLib

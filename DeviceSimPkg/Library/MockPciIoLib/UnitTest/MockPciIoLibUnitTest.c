@@ -301,7 +301,7 @@ MockPciDeviceCreateTest (
     return UNIT_TEST_ERROR_PREREQUISITE_NOT_MET;
   }
 
-  Status = MockPciDeviceInitialize (ConfigSpace, &MockPciDev);
+  Status = MockPciDeviceInitialize (ConfigSpace, 0, 0, 0, 0, &MockPciDev);
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
   UT_ASSERT_NOT_EQUAL (MockPciDev, NULL);
   UT_ASSERT_EQUAL (MockPciDev->ConfigSpace, ConfigSpace);
@@ -312,7 +312,7 @@ MockPciDeviceCreateTest (
         return UNIT_TEST_ERROR_PREREQUISITE_NOT_MET;
     }
 
-    Status = MockPciDeviceRegisterBar (MockPciDev, Bar[BarIndex], BarIndex);
+    Status = MockPciDeviceRegisterBar (MockPciDev, Bar[BarIndex], BarIndex, MockIoTypeMmio, 0x1000 * BarIndex, 0x1000);
     UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
     UT_ASSERT_EQUAL (MockPciDev->Bar[BarIndex], Bar[BarIndex]);
   }
@@ -346,7 +346,7 @@ CreateTestPciDevice (
     return Status;
   }
 
-  Status = MockPciDeviceInitialize (ConfigSpace, MockPciDev);
+  Status = MockPciDeviceInitialize (ConfigSpace, 0, 0, 0, 0, MockPciDev);
   if (EFI_ERROR (Status)) {
     return Status;
   }
@@ -356,7 +356,7 @@ CreateTestPciDevice (
     return Status;
   }
 
-  Status = MockPciDeviceRegisterBar (*MockPciDev, Bar, 0);
+  Status = MockPciDeviceRegisterBar (*MockPciDev, Bar, 0, MockIoTypeMmio, 0x1000, 0x1000);
   if (EFI_ERROR (Status)) {
     return Status;
   }
@@ -366,7 +366,7 @@ CreateTestPciDevice (
     return Status;
   }
 
-  Status = MockPciDeviceRegisterBar (*MockPciDev, IoBar, 1);
+  Status = MockPciDeviceRegisterBar (*MockPciDev, IoBar, 1, MockIoTypeIo, 0x1000, 0x1000);
   if (EFI_ERROR (Status)) {
     return Status;
   }
