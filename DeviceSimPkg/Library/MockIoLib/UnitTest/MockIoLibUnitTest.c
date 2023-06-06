@@ -20,13 +20,16 @@
 #define MOCK_IO_LIB_TEST_DEVICE_REG0_ADDRESS 0x0 // RO register for read test
 #define MOCK_IO_LIB_TEST_DEVICE_REG0_VALUE   0x12348086
 #define MOCK_IO_LIB_TEST_DEVICE_REG1_ADDRESS 0x4 // RW scratchpad for write tests
+#define MOCK_IO_LIB_TEST_DEVICE_FIFO_TEST_REG_ADDRESS 0x8 // RW scratchpad for FIFO tests
 
 #define MOCK_IO_LIB_WRITE_TEST_VAL8  0xAB
-#define MOCK_IO_LIB_WRITE_TEST_VAL16  0xABDE
-#define MOCK_IO_LIB_WRITE_TEST_VAL32  0xABDECF10
+#define MOCK_IO_LIB_WRITE_TEST_VAL16  0xDEAB
+#define MOCK_IO_LIB_WRITE_TEST_VAL32  0xCF10DEAB
 
 typedef struct {
   UINT32  WriteRegister;
+  UINT32  FifoTestRegister;
+  UINT32  FifoCount;
   REGISTER_SPACE_MOCK  *Mock;
 } MOCK_IO_TEST_DEVICE_CONTEXT;
 
@@ -46,6 +49,9 @@ TestMockIoDeviceRead (
   switch (Address) {
     case MOCK_IO_LIB_TEST_DEVICE_REG0_ADDRESS:
       *Value = (MOCK_IO_LIB_TEST_DEVICE_REG0_VALUE & ByteMask);
+      break;
+    case MOCK_IO_LIB_TEST_DEVICE_FIFO_TEST_REG_ADDRESS:
+      *Value = (MOCK_IO_LIB_WRITE_TEST_VAL32 & ByteMask);
       break;
     default:
       *Value = 0xFFFFFFFF;
@@ -76,6 +82,11 @@ TestMockIoDeviceWrite (
     case MOCK_IO_LIB_TEST_DEVICE_REG1_ADDRESS:
       Device->WriteRegister &= (~ByteMask);
       Device->WriteRegister |= (Value & ByteMask);
+      break;
+    case MOCK_IO_LIB_TEST_DEVICE_FIFO_TEST_REG_ADDRESS:
+      Device->FifoTestRegister &= (~ByteMask);
+      Device->FifoTestRegister |= (Value & ByteMask);
+      Device->FifoCount++;
       break;
     default:
       break;
@@ -236,6 +247,89 @@ MockIoMemRwTest (
   return UNIT_TEST_PASSED;
 }
 
+#define MOCK_IO_TEST_FIFO_SIZE 5
+GLOBAL_REMOVE_IF_UNREFERENCED  UINT8 gFifoUint8TestBuffer[MOCK_IO_TEST_FIFO_SIZE] = {
+  MOCK_IO_LIB_WRITE_TEST_VAL8,
+  MOCK_IO_LIB_WRITE_TEST_VAL8,
+  MOCK_IO_LIB_WRITE_TEST_VAL8,
+  MOCK_IO_LIB_WRITE_TEST_VAL8,
+  MOCK_IO_LIB_WRITE_TEST_VAL8
+};
+
+GLOBAL_REMOVE_IF_UNREFERENCED  UINT16 gFifoUint16TestBuffer[MOCK_IO_TEST_FIFO_SIZE] = {
+  MOCK_IO_LIB_WRITE_TEST_VAL16,
+  MOCK_IO_LIB_WRITE_TEST_VAL16,
+  MOCK_IO_LIB_WRITE_TEST_VAL16,
+  MOCK_IO_LIB_WRITE_TEST_VAL16,
+  MOCK_IO_LIB_WRITE_TEST_VAL16
+};
+
+GLOBAL_REMOVE_IF_UNREFERENCED  UINT32 gFifoUint32TestBuffer[MOCK_IO_TEST_FIFO_SIZE] = {
+  MOCK_IO_LIB_WRITE_TEST_VAL32,
+  MOCK_IO_LIB_WRITE_TEST_VAL32,
+  MOCK_IO_LIB_WRITE_TEST_VAL32,
+  MOCK_IO_LIB_WRITE_TEST_VAL32,
+  MOCK_IO_LIB_WRITE_TEST_VAL32
+};
+
+UNIT_TEST_STATUS
+EFIAPI
+MockIoFifoReadTest (
+  IN UNIT_TEST_CONTEXT  Context
+  )
+{
+  MOCK_IO_TEST_DEVICE_CONTEXT  Device;
+  EFI_STATUS                   Status;
+  UINT8   FifoUint8[MOCK_IO_TEST_FIFO_SIZE];
+  UINT16  FifoUint16[MOCK_IO_TEST_FIFO_SIZE];
+  UINT32  FifoUint32[MOCK_IO_TEST_FIFO_SIZE];
+
+  ZeroMem (&Device, sizeof(MOCK_IO_TEST_DEVICE_CONTEXT));
+  Status = MockIoTestDeviceCreate (&Device);
+
+  IoReadFifo8 (MOCK_IO_LIB_TEST_DEVICE_IO_ADDRESS + MOCK_IO_LIB_TEST_DEVICE_FIFO_TEST_REG_ADDRESS, MOCK_IO_TEST_FIFO_SIZE, &FifoUint8);
+  UT_ASSERT_MEM_EQUAL (&FifoUint8, &gFifoUint8TestBuffer, sizeof (gFifoUint8TestBuffer));
+
+  IoReadFifo16 (MOCK_IO_LIB_TEST_DEVICE_IO_ADDRESS + MOCK_IO_LIB_TEST_DEVICE_FIFO_TEST_REG_ADDRESS, MOCK_IO_TEST_FIFO_SIZE, &FifoUint16);
+  UT_ASSERT_MEM_EQUAL (&FifoUint16, &gFifoUint16TestBuffer, sizeof (gFifoUint16TestBuffer));
+
+  IoReadFifo32 (MOCK_IO_LIB_TEST_DEVICE_IO_ADDRESS + MOCK_IO_LIB_TEST_DEVICE_FIFO_TEST_REG_ADDRESS, MOCK_IO_TEST_FIFO_SIZE, &FifoUint32);
+  UT_ASSERT_MEM_EQUAL (&FifoUint32, &gFifoUint32TestBuffer, sizeof (gFifoUint32TestBuffer));
+
+  MockIoTestDeviceDestroy (&Device);
+
+  return UNIT_TEST_PASSED;
+}
+
+UNIT_TEST_STATUS
+EFIAPI
+MockIoFifoWriteTest (
+  IN UNIT_TEST_CONTEXT  Context
+  )
+{
+  MOCK_IO_TEST_DEVICE_CONTEXT  Device;
+  EFI_STATUS                   Status;
+
+  ZeroMem (&Device, sizeof(MOCK_IO_TEST_DEVICE_CONTEXT));
+  Status = MockIoTestDeviceCreate (&Device);
+
+  Device.FifoCount = 0;
+  IoWriteFifo8 (MOCK_IO_LIB_TEST_DEVICE_IO_ADDRESS + MOCK_IO_LIB_TEST_DEVICE_FIFO_TEST_REG_ADDRESS, MOCK_IO_TEST_FIFO_SIZE, &gFifoUint8TestBuffer);
+  UT_ASSERT_EQUAL (Device.FifoCount, MOCK_IO_TEST_FIFO_SIZE);
+
+  Device.FifoCount = 0;
+  IoWriteFifo16 (MOCK_IO_LIB_TEST_DEVICE_IO_ADDRESS + MOCK_IO_LIB_TEST_DEVICE_FIFO_TEST_REG_ADDRESS, MOCK_IO_TEST_FIFO_SIZE, &gFifoUint16TestBuffer);
+  UT_ASSERT_EQUAL (Device.FifoCount, MOCK_IO_TEST_FIFO_SIZE);
+
+  Device.FifoCount = 0;
+  IoWriteFifo32 (MOCK_IO_LIB_TEST_DEVICE_IO_ADDRESS + MOCK_IO_LIB_TEST_DEVICE_FIFO_TEST_REG_ADDRESS, MOCK_IO_TEST_FIFO_SIZE, &gFifoUint32TestBuffer);
+  UT_ASSERT_EQUAL (Device.FifoCount, MOCK_IO_TEST_FIFO_SIZE);
+
+  MockIoTestDeviceDestroy (&Device);
+
+  return UNIT_TEST_PASSED;
+}
+
 EFI_STATUS
 EFIAPI
 UefiTestMain (
@@ -264,6 +358,8 @@ UefiTestMain (
   AddTestCase (MockIoLibTest, "MockIoRegistrationTest", "MockIoRegistrationTest", MockIoRegistrationTest, NULL, NULL, NULL);
   AddTestCase (MockIoLibTest, "MockIoIoRwTest", "MockIoIoRwTest", MockIoIoRwTest, NULL, NULL, NULL);
   AddTestCase (MockIoLibTest, "MockIoMemRwTest", "MockIoMemRwTest", MockIoMemRwTest, NULL, NULL, NULL);
+  AddTestCase (MockIoLibTest, "MockIoFifoReadTest", "MockIoFifoReadTest", MockIoFifoReadTest, NULL, NULL, NULL);
+  AddTestCase (MockIoLibTest, "MockIoFifoWriteTest", "MockIoFifoWriteTest", MockIoFifoWriteTest, NULL, NULL, NULL);
 
   Status = RunAllTestSuites (Framework);
   if (Framework) {
