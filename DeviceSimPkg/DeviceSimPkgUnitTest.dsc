@@ -18,6 +18,9 @@
 
 !include UnitTestFrameworkPkg/UnitTestFrameworkPkgHost.dsc.inc
 
+[PcdsFixedAtBuild]
+  gEfiMdePkgTokenSpaceGuid.PcdPciExpressBaseAddress|0xE0000000
+
 [LibraryClasses]
   PcdLib|MdePkg/Library/BasePcdLibNull/BasePcdLibNull.inf
   DevicePathLib|MdePkg/Library/UefiDevicePathLib/UefiDevicePathLib.inf
@@ -27,6 +30,10 @@
   LocalMockRegisterSpaceLib|DeviceSimPkg/Library/LocalMockRegisterSpaceLib/LocalMockRegisterSpaceLib.inf
   IoLib|DeviceSimPkg/Library/MockIoLib/MockIoLib.inf
   PciSegmentLib|DeviceSimPkg/Library/MockPciSegmentLib/MockPciSegmentLib.inf
+  PciExpressLib|MdePkg/Library/BasePciExpressLib/BasePciExpressLib.inf
+  PciLib|MdePkg/Library/BasePciLibPciExpress/BasePciLibPciExpress.inf
+  RealPciSegment|MdePkg\Library\BasePciSegmentLibPci\BasePciSegmentLibPci.inf
+
 
 [Components]
   DeviceSimPkg/Library/LocalMockRegisterSpaceLib/UnitTest/LocalMockRegisterSpaceLibUnitTest.inf

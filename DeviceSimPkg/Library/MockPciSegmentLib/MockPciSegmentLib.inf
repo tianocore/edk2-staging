@@ -19,6 +19,9 @@
 #  VALID_ARCHITECTURES           = IA32 X64
 #
 
+[Pcd]
+  gEfiMdePkgTokenSpaceGuid.PcdPciExpressBaseAddress  ## CONSUMES
+
 [Sources]
   MockPciSegmentLib.c
 
@@ -32,3 +35,4 @@
   DebugLib
   PcdLib
   UefiLib
+  RealPciSegment

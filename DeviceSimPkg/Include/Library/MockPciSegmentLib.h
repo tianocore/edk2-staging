@@ -6,9 +6,14 @@
 #include <RegisterSpaceMock.h>
 
 EFI_STATUS
-RegisterPciCfgAtPciSegmentAddress (
+MockPciSegmentRegisterAtPciSegmentAddress (
   IN REGISTER_SPACE_MOCK *RegisterSpaceMock,
   IN UINT64              PciSegmentAddress
+  );
+
+EFI_STATUS
+MockPciSegmentUnRegisterAtPciSegmentAddress (
+  IN UINT64  PciSegmentAddress
   );
 
 #endif

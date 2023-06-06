@@ -102,7 +102,7 @@ MockPciSegmentRegistrationTest (
     0
   );
 
-  Status = RegisterPciCfgAtPciSegmentAddress (SampleSpace, PciSegmentBase);
+  Status = MockPciSegmentRegisterAtPciSegmentAddress (SampleSpace, PciSegmentBase);
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
 
   LocalRegisterSpaceDestroy (SampleSpace);
@@ -138,7 +138,7 @@ MockPciSegmentRwTest (
     0
   );
 
-  Status = RegisterPciCfgAtPciSegmentAddress (ConfigSpace, PciSegmentBase);
+  Status = MockPciSegmentRegisterAtPciSegmentAddress (ConfigSpace, PciSegmentBase);
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
 
   Val8 = PciSegmentRead8 (PciSegmentBase + MOCK_PCI_SEGMENT_LIB_TEST_DEVICE_REG0_ADDRESS);
