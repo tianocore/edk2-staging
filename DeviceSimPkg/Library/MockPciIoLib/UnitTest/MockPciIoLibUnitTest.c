@@ -61,6 +61,12 @@ typedef struct {
   UINT32  IoAddend2;
   UINT32  IoResult;
   UINT32  PollIoRegisterCount;
+  //
+  // Register spaces
+  //
+  REGISTER_SPACE_MOCK  *Config;
+  REGISTER_SPACE_MOCK  *Bar;
+  REGISTER_SPACE_MOCK  *IoBar;
 } TEST_PCI_DEVICE_CONTEXT;
 
 VOID
@@ -335,41 +341,53 @@ CreateTestPciDevice (
   )
 {
   EFI_STATUS  Status;
-  REGISTER_SPACE_MOCK  *ConfigSpace;
-  REGISTER_SPACE_MOCK  *Bar;
-  REGISTER_SPACE_MOCK  *IoBar;
 
   ZeroMem (Context, sizeof(TEST_PCI_DEVICE_CONTEXT));
 
-  Status = LocalRegisterSpaceCreate (TEST_PCI_DEVICE_NAME, TestPciDeviceConfigWrite, TestPciDeviceConfigRead, Context, &ConfigSpace);
+  Status = LocalRegisterSpaceCreate (TEST_PCI_DEVICE_NAME, TestPciDeviceConfigWrite, TestPciDeviceConfigRead, Context, &Context->Config);
   if (EFI_ERROR (Status)) {
     return Status;
   }
 
-  Status = MockPciDeviceInitialize (ConfigSpace, 0, 0, 0, 0, MockPciDev);
+  Status = MockPciDeviceInitialize (Context->Config, 0, 0, 0, 0, MockPciDev);
   if (EFI_ERROR (Status)) {
     return Status;
   }
 
-  Status = LocalRegisterSpaceCreate (TEST_PCI_DEVICE_NAME, TestPciDeviceBarWrite, TestPciDeviceBarRead, Context, &Bar);
+  Status = LocalRegisterSpaceCreate (TEST_PCI_DEVICE_NAME, TestPciDeviceBarWrite, TestPciDeviceBarRead, Context, &Context->Bar);
   if (EFI_ERROR (Status)) {
     return Status;
   }
 
-  Status = MockPciDeviceRegisterBar (*MockPciDev, Bar, 0, MockIoTypeMmio, 0x1000, 0x1000);
+  Status = MockPciDeviceRegisterBar (*MockPciDev, Context->Bar, 0, MockIoTypeMmio, 0x1000, 0x1000);
   if (EFI_ERROR (Status)) {
     return Status;
   }
 
-  Status = LocalRegisterSpaceCreate (TEST_PCI_DEVICE_NAME, TestPciDeviceIoBarWrite, TestPciDeviceIoBarRead, Context, &IoBar);
+  Status = LocalRegisterSpaceCreate (TEST_PCI_DEVICE_NAME, TestPciDeviceIoBarWrite, TestPciDeviceIoBarRead, Context, &Context->IoBar);
   if (EFI_ERROR (Status)) {
     return Status;
   }
 
-  Status = MockPciDeviceRegisterBar (*MockPciDev, IoBar, 1, MockIoTypeIo, 0x1000, 0x1000);
+  Status = MockPciDeviceRegisterBar (*MockPciDev, Context->IoBar, 1, MockIoTypeIo, 0x1000, 0x1000);
   if (EFI_ERROR (Status)) {
     return Status;
   }
+
+  return EFI_SUCCESS;
+}
+
+EFI_STATUS
+DestroyTestPciDevice (
+  IN MOCK_PCI_DEVICE  *MockPciDev,
+  IN TEST_PCI_DEVICE_CONTEXT  *Context
+  )
+{
+  MockPciDeviceDestroy (MockPciDev);
+
+  LocalRegisterSpaceDestroy (Context->Config);
+  LocalRegisterSpaceDestroy (Context->Bar);
+  LocalRegisterSpaceDestroy (Context->IoBar);
 
   return EFI_SUCCESS;
 }
@@ -418,6 +436,8 @@ MockPciDevicePciIoCreateTest (
   UT_ASSERT_EQUAL (PciIo->RomImage, NULL);
   UT_ASSERT_EQUAL (PciIo->RomSize, 0);
 
+  DestroyTestPciDevice (MockPciDev, &DevContext);
+
   return UNIT_TEST_PASSED;
 }
 
@@ -463,6 +483,8 @@ MockPciIoConfigRwTest (
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
   UT_ASSERT_EQUAL (Command, EFI_PCI_COMMAND_MEMORY_SPACE);
 
+  DestroyTestPciDevice (MockPciDev, &DevContext);
+
   return UNIT_TEST_PASSED;
 }
 
@@ -504,6 +526,8 @@ MockPciIoBarRwTest (
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
   UT_ASSERT_EQUAL (Result, 5);
 
+  DestroyTestPciDevice (MockPciDev, &DevContext);
+
   return UNIT_TEST_PASSED;
 }
 
@@ -544,6 +568,8 @@ MockPciIoIoBarRwTest (
   Status = PciIo->Io.Read (PciIo, EfiPciIoWidthUint32, 1, TEST_PCI_DEVICE_IO_BAR_RESULT_REG, 1, &Result);
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
   UT_ASSERT_EQUAL (Result, 5);
+
+  DestroyTestPciDevice (MockPciDev, &DevContext);
 
   return UNIT_TEST_PASSED;
 }
@@ -612,6 +638,8 @@ MockPciIoDmaTest (
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
   UT_ASSERT_MEM_EQUAL (Block, gPciTestBlock, sizeof (gPciTestBlock));
 
+  DestroyTestPciDevice (MockPciDev, &DevContext);
+
   return UNIT_TEST_PASSED;
 }
 
@@ -653,6 +681,8 @@ MockPciIoPollTest (
   Status = PciIo->PollIo (PciIo, EfiPciIoWidthUint32, 1, TEST_PCI_DEVICE_IO_BAR_POLL_REG, 0xFF, 0x1, 4 * 100, &Result);
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
   UT_ASSERT_EQUAL (Result, 0x1);
+
+  DestroyTestPciDevice (MockPciDev, &DevContext);
 
   return UNIT_TEST_PASSED;
 }
