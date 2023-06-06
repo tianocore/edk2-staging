@@ -105,6 +105,9 @@ MockPciSegmentRegistrationTest (
   Status = MockPciSegmentRegisterAtPciSegmentAddress (SampleSpace, PciSegmentBase);
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
 
+  Status = MockPciSegmentUnRegisterAtPciSegmentAddress (PciSegmentBase);
+  UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
+
   LocalRegisterSpaceDestroy (SampleSpace);
 
   return UNIT_TEST_PASSED;
@@ -158,6 +161,8 @@ MockPciSegmentRwTest (
 
   PciSegmentWrite32 (PciSegmentBase + MOCK_PCI_SEGMENT_LIB_TEST_DEVICE_REG1_ADDRESS, MOCK_PCI_SEGMENT_LIB_WRITE_TEST_VAL32);
   UT_ASSERT_EQUAL (Device.WriteRegister, MOCK_PCI_SEGMENT_LIB_WRITE_TEST_VAL32);
+
+  MockPciSegmentUnRegisterAtPciSegmentAddress (PciSegmentBase);
 
   LocalRegisterSpaceDestroy (ConfigSpace);
 

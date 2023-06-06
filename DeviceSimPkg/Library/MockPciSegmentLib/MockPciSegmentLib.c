@@ -13,9 +13,7 @@ MockPciSegmentRegisterAtPciSegmentAddress (
   UINT64  Address;
 
   Address = PcdGet64 (PcdPciExpressBaseAddress) + PciSegmentAddress;
-  MockIoRegisterMmioAtAddress (RegisterSpaceMock, MockIoTypeMmio, Address, 0x10000);
-
-  return EFI_SUCCESS;
+  return MockIoRegisterMmioAtAddress (RegisterSpaceMock, MockIoTypeMmio, Address, 0x10000);
 }
 
 EFI_STATUS
@@ -26,7 +24,5 @@ MockPciSegmentUnRegisterAtPciSegmentAddress (
   UINT64  Address;
 
   Address = PcdGet64 (PcdPciExpressBaseAddress) + PciSegmentAddress;
-  MockIoUnRegisterMmioAtAddress (MockIoTypeMmio, Address);
-
-  return EFI_SUCCESS;
+  return MockIoUnRegisterMmioAtAddress (MockIoTypeMmio, Address);
 }
