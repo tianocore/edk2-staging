@@ -687,6 +687,43 @@ MockPciIoPollTest (
   return UNIT_TEST_PASSED;
 }
 
+UNIT_TEST_STATUS
+EFIAPI
+MockPciIoGetLocationTest (
+  IN UNIT_TEST_CONTEXT  Context
+  )
+{
+  EFI_STATUS           Status;
+  MOCK_PCI_DEVICE      *MockPciDev;
+  EFI_PCI_IO_PROTOCOL  *PciIo;
+  TEST_PCI_DEVICE_CONTEXT  DevContext;
+  UINTN                    Segment;
+  UINTN                    Bus;
+  UINTN                    Device;
+  UINTN                    Function;
+
+  Status = CreateTestPciDevice (&MockPciDev, &DevContext);
+  if (EFI_ERROR (Status)) {
+    return UNIT_TEST_ERROR_PREREQUISITE_NOT_MET;
+  }
+
+  Status = MockPciIoCreate (MockPciDev, &PciIo);
+  if (EFI_ERROR (Status)) {
+    return UNIT_TEST_ERROR_PREREQUISITE_NOT_MET;
+  }
+
+  Status = PciIo->GetLocation (PciIo, &Segment, &Bus, &Device, &Function);
+  UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
+  UT_ASSERT_EQUAL (Segment, 0);
+  UT_ASSERT_EQUAL (Bus, 0);
+  UT_ASSERT_EQUAL (Device, 0);
+  UT_ASSERT_EQUAL (Function, 0);
+
+  DestroyTestPciDevice (MockPciDev, &DevContext);
+
+  return UNIT_TEST_PASSED;
+}
+
 EFI_STATUS
 EFIAPI
 UefiTestMain (
@@ -719,6 +756,7 @@ UefiTestMain (
   AddTestCase (MockPciLibTest, "MockPciIoIoBarRwTest", "MockPciIoIoBarRwTest", MockPciIoIoBarRwTest, NULL, NULL, NULL);
   AddTestCase (MockPciLibTest, "MockPciIoDmaTest", "MockPciIoDmaTest", MockPciIoDmaTest, NULL, NULL, NULL);
   AddTestCase (MockPciLibTest, "MockPciIoPollTest", "MockPciIoPollTest", MockPciIoPollTest, NULL, NULL, NULL);
+  AddTestCase (MockPciLibTest, "MockPciIoGetLocationTest", "MockPciIoGetLocationTest", MockPciIoGetLocationTest, NULL, NULL, NULL);
 
   Status = RunAllTestSuites (Framework);
   if (Framework) {

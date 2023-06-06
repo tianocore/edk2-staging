@@ -65,6 +65,7 @@ MockPciIoPollMem (
   // implemented similar to HW implementation anyway. Might be useful if in the
   // future simulation runs on a separate thread.
   //
+  *Result = 0;
   do {
     Status = This->Mem.Read (This, Width, BarIndex, Offset, 1, Result);
     if (EFI_ERROR (Status)) {
@@ -106,6 +107,7 @@ MockPciIoPollIo (
   // implemented similar to HW implementation anyway. Might be useful if in the
   // future simulation runs on a separate thread.
   //
+  *Result = 0;
   do {
     Status = This->Io.Read (This, Width, BarIndex, Offset, 1, Result);
     if (EFI_ERROR (Status)) {
@@ -525,7 +527,18 @@ MockPciIoGetLocation (
   OUT UINTN                       *FunctionNumber
   )
 {
-  return EFI_UNSUPPORTED;
+  MOCK_PCI_IO  *PciIo;
+  MOCK_PCI_DEVICE  *PciDev;
+
+  PciIo = (MOCK_PCI_IO*) This;
+  PciDev = PciIo->MockPci;
+
+  *SegmentNumber = PciDev->Segment;
+  *BusNumber = PciDev->Bus;
+  *DeviceNumber = PciDev->Device;
+  *FunctionNumber = PciDev->Function;
+
+  return EFI_SUCCESS;
 }
 
 EFI_STATUS
@@ -630,6 +643,11 @@ MockPciDeviceInitialize (
   if (PciDev == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
+
+  (*PciDev)->Segment = Segment;
+  (*PciDev)->Bus = Bus;
+  (*PciDev)->Device = Device;
+  (*PciDev)->Function = Function;
 
   (*PciDev)->PciSegmentBase = PCI_SEGMENT_LIB_ADDRESS (
     Segment,

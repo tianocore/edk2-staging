@@ -10,6 +10,10 @@
 typedef struct {
   REGISTER_SPACE_MOCK  *ConfigSpace;
   UINT64               PciSegmentBase;
+  UINTN                Segment;
+  UINTN                Bus;
+  UINTN                Device;
+  UINTN                Function;
   REGISTER_SPACE_MOCK  *Bar[MOCK_PCI_LIB_MAX_SUPPORTED_BARS]; // BARs 0-4
   UINT64               BarAddress[MOCK_PCI_LIB_MAX_SUPPORTED_BARS];
   MOCK_IO_MEMORY_TYPE  BarType[MOCK_PCI_LIB_MAX_SUPPORTED_BARS];
