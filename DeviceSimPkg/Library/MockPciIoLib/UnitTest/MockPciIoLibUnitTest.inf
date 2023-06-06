@@ -32,4 +32,4 @@
   DebugLib
   UnitTestLib
   LocalMockRegisterSpaceLib
-  MockPciLib
+  MockPciIoLib
