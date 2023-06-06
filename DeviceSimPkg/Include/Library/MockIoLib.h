@@ -17,4 +17,10 @@ MockIoRegisterMmioAtAddress (
   IN UINT64               Size
 );
 
+EFI_STATUS
+MockIoUnRegisterMmioAtAddress (
+  IN MOCK_IO_MEMORY_TYPE  Type,
+  IN UINT64               Address
+  );
+
 #endif

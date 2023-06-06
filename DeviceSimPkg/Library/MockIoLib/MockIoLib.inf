@@ -21,6 +21,8 @@
 
 [Sources]
   MockIoLib.c
+  IoLibMmioBuffer.c
+  IoHighLevel.c
 
 [Packages]
   MdePkg/MdePkg.dec
