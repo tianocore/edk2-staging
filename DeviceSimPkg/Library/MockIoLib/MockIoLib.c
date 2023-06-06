@@ -556,39 +556,6 @@ MmioWrite16 (
 }
 
 /**
-  Reads a 16-bit MMIO register, performs a bitwise AND, and writes the result
-  back to the 16-bit MMIO register.
-
-  Reads the 16-bit MMIO register specified by Address, performs a bitwise AND
-  between the read result and the value specified by AndData, and writes the
-  result to the 16-bit MMIO register specified by Address. The value written to
-  the MMIO register is returned. This function must guarantee that all MMIO
-  read and write operations are serialized.
-
-  If 16-bit MMIO register operations are not supported, then ASSERT().
-  If Address is not aligned on a 16-bit boundary, then ASSERT().
-
-  @param  Address The MMIO register to write.
-  @param  AndData The value to AND with the read value from the MMIO register.
-
-  @return The value written back to the MMIO register.
-
-**/
-UINT16
-EFIAPI
-MmioAnd16 (
-  IN      UINTN   Address,
-  IN      UINT16  AndData
-  )
-{
-  UINT16  Val;
-
-  Val = MmioRead16 (Address);
-  Val &= AndData;
-  return MmioWrite16 (Address, Val);
-}
-
-/**
   Reads a 32-bit MMIO register.
 
   Reads the 32-bit MMIO register specified by Address. The 32-bit read value is
