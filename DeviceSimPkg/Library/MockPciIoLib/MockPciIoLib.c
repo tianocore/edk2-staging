@@ -59,15 +59,6 @@ MockPciIoPollMem (
   if (This == NULL || Result == NULL) {
     return EFI_INVALID_PARAMETER;
   }
-
-  Status = This->Mem.Read (This, Width, BarIndex, Offset, 1, Result);
-  if (EFI_ERROR (Status)) {
-    return Status;
-  }
-
-  if (((*Result & Mask) == Value) || (Delay == 0)) {
-    return EFI_SUCCESS;
-  }
  
   //
   // On simulation any update to registers should be instantainous but keep it
@@ -104,7 +95,32 @@ MockPciIoPollIo (
   OUT UINT64                       *Result
   )
 {
-  return This->PollMem (This, Width, BarIndex, Offset, Mask, Value, Delay, Result);
+  EFI_STATUS Status;
+
+  if (This == NULL || Result == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
+ 
+  //
+  // On simulation any update to registers should be instantainous but keep it
+  // implemented similar to HW implementation anyway. Might be useful if in the
+  // future simulation runs on a separate thread.
+  //
+  do {
+    Status = This->Io.Read (This, Width, BarIndex, Offset, 1, Result);
+    if (EFI_ERROR (Status)) {
+      return Status;
+    }
+
+    if ((*Result & Mask) == Value) {
+      return EFI_SUCCESS;
+    }
+
+    if (Delay <= 100) {
+      return EFI_TIMEOUT;
+    }
+    Delay -= 100;
+  } while (TRUE);
 }
 
 EFI_STATUS
@@ -118,73 +134,33 @@ MockPciIoReadMem (
   IN OUT VOID                         *Buffer
   )
 {
+  UINT8                     InStride;
+  UINT8                     OutStride;
+  EFI_PCI_IO_PROTOCOL_WIDTH  OperationWidth;
+  UINT8                     *Uint8Buffer;
+  UINT64                    Address;
   MOCK_PCI_IO  *PciIo;
   MOCK_PCI_DEVICE  *PciDev;
-  UINT32  Size;
-  UINT32  *Uint32Buffer;
-  UINT32  Index;
-  UINT64  Val;
-  UINT64  Buf;
-  EFI_STATUS  Status;
 
   PciIo = (MOCK_PCI_IO*) This;
   PciDev = PciIo->MockPci;
-
-  if (BarIndex > MOCK_PCI_LIB_MAX_SUPPORTED_BARS) {
-    return EFI_UNSUPPORTED;
-  }
-
-  if (PciDev->Bar[BarIndex] == NULL) {
-    DEBUG ((DEBUG_ERROR, "BAR is NULL\n"));
-    return EFI_UNSUPPORTED;
-  }
-
-  if (Width == EfiPciIoWidthFifoUint32) {
-    Uint32Buffer = (UINT32*) Buffer;
-    for (Index = 0; Index < Count; Index++) {
-      PciDev->Bar[BarIndex]->Read (PciDev->Bar[BarIndex], Offset, 4, &Val);
-      Uint32Buffer[Index] = (UINT32) Val;
+  Address = PciDev->BarAddress[BarIndex] + Offset;
+  InStride       = mInStride[Width];
+  OutStride      = mOutStride[Width];
+  OperationWidth = (EFI_PCI_IO_PROTOCOL_WIDTH)(Width & 0x03);
+  for (Uint8Buffer = Buffer; Count > 0; Address += InStride, Uint8Buffer += OutStride, Count--) {
+    if (OperationWidth == EfiPciIoWidthUint8) {
+      *Uint8Buffer = MmioRead8 ((UINTN)Address);
+    } else if (OperationWidth == EfiPciIoWidthUint16) {
+      *((UINT16 *)Uint8Buffer) = MmioRead16 ((UINTN)Address);
+    } else if (OperationWidth == EfiPciIoWidthUint32) {
+      *((UINT32 *)Uint8Buffer) = MmioRead32 ((UINTN)Address);
+    } else if (OperationWidth == EfiPciIoWidthUint64) {
+      *((UINT64 *)Uint8Buffer) = MmioRead64 ((UINTN)Address);
     }
-    return EFI_SUCCESS;
   }
 
-  switch (Width) {
-    case EfiPciIoWidthUint8:
-      Size = 1;
-      break;
-    case EfiPciIoWidthUint16:
-      Size = 2;
-      break;
-    case EfiPciIoWidthUint32:
-      Size = 4;
-      break;
-    case EfiPciIoWidthUint64:
-      Size = 8;
-      break;
-    default:
-      DEBUG ((DEBUG_INFO, "Unsupported width\n"));
-      return EFI_UNSUPPORTED;
-  }
-
-  Status = PciDev->Bar[BarIndex]->Read (PciDev->Bar[BarIndex], Offset, Size, &Buf);
-
-  switch (Width) {
-    case EfiPciIoWidthUint16:
-      *(UINT16*)Buffer = (UINT16)Buf;
-      break;
-    case EfiPciIoWidthUint32:
-      *(UINT32*)Buffer = (UINT32)Buf;
-      break;
-    case EfiPciIoWidthUint64:
-      *(UINT64*)Buffer = Buf;
-      break;
-    case EfiPciIoWidthUint8:
-    default:
-      *(UINT8*)Buffer = (UINT8)Buf;
-      break;
-  }
-
-  return Status;
+  return EFI_SUCCESS;
 }
 
 EFI_STATUS
@@ -198,54 +174,33 @@ MockPciIoWriteMem (
   IN OUT VOID                         *Buffer
   )
 {
+  UINT8                     InStride;
+  UINT8                     OutStride;
+  EFI_PCI_IO_PROTOCOL_WIDTH  OperationWidth;
+  UINT8                     *Uint8Buffer;
+  UINT64                    Address;
   MOCK_PCI_IO  *PciIo;
   MOCK_PCI_DEVICE  *PciDev;
-  UINT32  Size;
-  UINT32  *Uint32Buffer;
-  UINT32  Index;
-  UINT64  Buf;
 
   PciIo = (MOCK_PCI_IO*) This;
   PciDev = PciIo->MockPci;
-
-  if (BarIndex > MOCK_PCI_LIB_MAX_SUPPORTED_BARS) {
-    return EFI_UNSUPPORTED;
-  }
-
-  if (PciDev->Bar[BarIndex] == NULL) {
-    DEBUG ((DEBUG_INFO, "NULL Bar\n"));
-    return EFI_UNSUPPORTED;
-  }
-
-  if (Width == EfiPciIoWidthFifoUint32) {
-    Uint32Buffer = (UINT32*) Buffer;
-    for (Index = 0; Index < Count; Index++) {
-      PciDev->Bar[BarIndex]->Write (PciDev->Bar[BarIndex], Offset, 4, Uint32Buffer[Index]);
+  Address = PciDev->BarAddress[BarIndex] + Offset;
+  InStride       = mInStride[Width];
+  OutStride      = mOutStride[Width];
+  OperationWidth = (EFI_PCI_IO_PROTOCOL_WIDTH)(Width & 0x03);
+  for (Uint8Buffer = Buffer; Count > 0; Address += InStride, Uint8Buffer += OutStride, Count--) {
+    if (OperationWidth == EfiPciIoWidthUint8) {
+      MmioWrite8 ((UINTN)Address, *Uint8Buffer);
+    } else if (OperationWidth == EfiPciIoWidthUint16) {
+      MmioWrite16 ((UINTN)Address, *((UINT16 *)Uint8Buffer));
+    } else if (OperationWidth == EfiPciIoWidthUint32) {
+      MmioWrite32 ((UINTN)Address, *((UINT32 *)Uint8Buffer));
+    } else if (OperationWidth == EfiPciIoWidthUint64) {
+      MmioWrite64 ((UINTN)Address, *((UINT64 *)Uint8Buffer));
     }
-    return EFI_SUCCESS;
   }
-  switch (Width) {
-    case EfiPciIoWidthUint8:
-      Buf = *(UINT8*)Buffer;
-      Size = 1;
-      break;
-    case EfiPciIoWidthUint16:
-      Buf = *(UINT16*)Buffer;
-      Size = 2;
-      break;
-    case EfiPciIoWidthUint32:
-      Buf = *(UINT32*)Buffer;
-      Size = 4;
-      break;
-    case EfiPciIoWidthUint64:
-      Buf = *(UINT64*)Buffer;
-      Size = 8;
-      break;
-    default:
-      return EFI_UNSUPPORTED;
-  }
-  
-  return PciDev->Bar[BarIndex]->Write (PciDev->Bar[BarIndex], Offset, Size, Buf);
+
+  return EFI_SUCCESS;
 }
 
 EFI_STATUS
@@ -259,7 +214,57 @@ MockPciIoReadIo (
   IN OUT VOID                         *Buffer
   )
 {
-  return This->Mem.Read(This, Width, BarIndex, Offset, Count, Buffer);
+  UINT8                     InStride;
+  UINT8                     OutStride;
+  EFI_PCI_IO_PROTOCOL_WIDTH  OperationWidth;
+  UINT8                     *Uint8Buffer;
+  UINT64                    Address;
+  MOCK_PCI_IO  *PciIo;
+  MOCK_PCI_DEVICE  *PciDev;
+
+  PciIo = (MOCK_PCI_IO*) This;
+  PciDev = PciIo->MockPci;
+  Address = PciDev->BarAddress[BarIndex] + Offset;
+
+  InStride       = mInStride[Width];
+  OutStride      = mOutStride[Width];
+  OperationWidth = (EFI_PCI_IO_PROTOCOL_WIDTH)(Width & 0x03);
+
+  //
+  // Fifo operations supported for (mInStride[Width] == 0)
+  //
+  if (InStride == 0) {
+    switch (OperationWidth) {
+      case EfiPciIoWidthUint8:
+        IoReadFifo8 ((UINTN)Address, Count, Buffer);
+        return EFI_SUCCESS;
+      case EfiPciIoWidthUint16:
+        IoReadFifo16 ((UINTN)Address, Count, Buffer);
+        return EFI_SUCCESS;
+      case EfiPciIoWidthUint32:
+        IoReadFifo32 ((UINTN)Address, Count, Buffer);
+        return EFI_SUCCESS;
+      default:
+        //
+        // The CpuIoCheckParameter call above will ensure that this
+        // path is not taken.
+        //
+        ASSERT (FALSE);
+        break;
+    }
+  }
+
+  for (Uint8Buffer = Buffer; Count > 0; Address += InStride, Uint8Buffer += OutStride, Count--) {
+    if (OperationWidth == EfiPciIoWidthUint8) {
+      *Uint8Buffer = IoRead8 ((UINTN)Address);
+    } else if (OperationWidth == EfiPciIoWidthUint16) {
+      *((UINT16 *)Uint8Buffer) = IoRead16 ((UINTN)Address);
+    } else if (OperationWidth == EfiPciIoWidthUint32) {
+      *((UINT32 *)Uint8Buffer) = IoRead32 ((UINTN)Address);
+    }
+  }
+
+  return EFI_SUCCESS;
 }
 
 EFI_STATUS
@@ -273,7 +278,57 @@ MockPciIoWriteIo (
   IN OUT VOID                         *Buffer
   )
 {
-  return This->Mem.Write (This, Width, BarIndex, Offset, Count, Buffer);
+  UINT8                     InStride;
+  UINT8                     OutStride;
+  EFI_PCI_IO_PROTOCOL_WIDTH  OperationWidth;
+  UINT8                     *Uint8Buffer;
+  UINT64                    Address;
+  MOCK_PCI_IO  *PciIo;
+  MOCK_PCI_DEVICE  *PciDev;
+
+  PciIo = (MOCK_PCI_IO*) This;
+  PciDev = PciIo->MockPci;
+  Address = PciDev->BarAddress[BarIndex] + Offset;
+
+  InStride       = mInStride[Width];
+  OutStride      = mOutStride[Width];
+  OperationWidth = (EFI_PCI_IO_PROTOCOL_WIDTH)(Width & 0x03);
+
+  //
+  // Fifo operations supported for (mInStride[Width] == 0)
+  //
+  if (InStride == 0) {
+    switch (OperationWidth) {
+      case EfiPciIoWidthUint8:
+        IoWriteFifo8 ((UINTN)Address, Count, Buffer);
+        return EFI_SUCCESS;
+      case EfiPciIoWidthUint16:
+        IoWriteFifo16 ((UINTN)Address, Count, Buffer);
+        return EFI_SUCCESS;
+      case EfiPciIoWidthUint32:
+        IoWriteFifo32 ((UINTN)Address, Count, Buffer);
+        return EFI_SUCCESS;
+      default:
+        //
+        // The CpuIoCheckParameter call above will ensure that this
+        // path is not taken.
+        //
+        ASSERT (FALSE);
+        break;
+    }
+  }
+
+  for (Uint8Buffer = (UINT8 *)Buffer; Count > 0; Address += InStride, Uint8Buffer += OutStride, Count--) {
+    if (OperationWidth == EfiPciIoWidthUint8) {
+      IoWrite8 ((UINTN)Address, *Uint8Buffer);
+    } else if (OperationWidth == EfiPciIoWidthUint16) {
+      IoWrite16 ((UINTN)Address, *((UINT16 *)Uint8Buffer));
+    } else if (OperationWidth == EfiPciIoWidthUint32) {
+      IoWrite32 ((UINTN)Address, *((UINT32 *)Uint8Buffer));
+    }
+  }
+
+  return EFI_SUCCESS;
 }
 
 EFI_STATUS
