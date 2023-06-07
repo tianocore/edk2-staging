@@ -1,14 +1,15 @@
-#ifndef _MOCK_PCI_LIB_H_
-#define _MOCK_PCI_LIB_H_
-
-#include <Protocol/PciIo.h>
-#include <Library/MockIoLib.h>
 /** @file
 
 Copyright (c) 2023, Intel Corporation. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
+
+#ifndef _MOCK_PCI_LIB_H_
+#define _MOCK_PCI_LIB_H_
+
+#include <Protocol/PciIo.h>
+#include <Library/MockIoLib.h>
 
 #include <RegisterSpaceMock.h>
 
