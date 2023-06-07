@@ -1,3 +1,10 @@
+/** @file
+
+Copyright (c) 2023, Intel Corporation. All rights reserved.<BR>
+SPDX-License-Identifier: BSD-2-Clause-Patent
+
+**/
+
 #ifndef _MAP_BASED_REGISTER_SPACE_LIB_H_
 #define _MAP_BASED_REGISTER_SPACE_LIB_H_
 

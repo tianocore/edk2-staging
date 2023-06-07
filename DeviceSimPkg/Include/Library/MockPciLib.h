@@ -3,6 +3,13 @@
 
 #include <Protocol/PciIo.h>
 #include <Library/MockIoLib.h>
+/** @file
+
+Copyright (c) 2023, Intel Corporation. All rights reserved.<BR>
+SPDX-License-Identifier: BSD-2-Clause-Patent
+
+**/
+
 #include <RegisterSpaceMock.h>
 
 #define MOCK_PCI_LIB_MAX_SUPPORTED_BARS 6

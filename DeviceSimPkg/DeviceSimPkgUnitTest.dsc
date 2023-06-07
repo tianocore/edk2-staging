@@ -1,9 +1,7 @@
 ## @file
-# MdePkg DSC file used to build host-based unit tests.
 #
-# Copyright (c) 2022, Intel Corporation. All rights reserved.<BR>
+# Copyright (c) 2023, Intel Corporation. All rights reserved.<BR>
 # SPDX-License-Identifier: BSD-2-Clause-Patent
-#
 ##
 
 [Defines]

@@ -1,3 +1,10 @@
+/** @file
+
+Copyright (c) 2023, Intel Corporation. All rights reserved.<BR>
+SPDX-License-Identifier: BSD-2-Clause-Patent
+
+**/
+
 #ifndef _REGISTER_SPACE_MOCK_H_
 #define _REGISTER_SPACE_MOCK_H_
 

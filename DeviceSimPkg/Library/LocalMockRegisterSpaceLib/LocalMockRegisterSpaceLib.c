@@ -1,3 +1,10 @@
+/** @file
+
+Copyright (c) 2023, Intel Corporation. All rights reserved.<BR>
+SPDX-License-Identifier: BSD-2-Clause-Patent
+
+**/
+
 #include <Uefi.h>
 #include <Library/UefiLib.h>
 #include <Library/DebugLib.h>

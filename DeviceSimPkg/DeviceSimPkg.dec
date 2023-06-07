@@ -1,11 +1,7 @@
 ## @file
-# This Package provides all definitions (including functions, MACROs,
-# structures library classes, and PCDs) and libraries instances, which are used
-# to support unit testing and interface testing.
 #
-# Copyright (c) Intel Corporation.<BR>
+# Copyright (c) 2023, Intel Corporation. All rights reserved.<BR>
 # SPDX-License-Identifier: BSD-2-Clause-Patent
-#
 ##
 
 [Defines]
