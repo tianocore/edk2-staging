@@ -70,6 +70,17 @@ LocalRegisterMockRead (
   CurrentAddress = ALIGN_ADDR(Address, SimpleRegisterSpace->Alignment);
   ByteEnable = SizeToByteEnable (Size);
   ByteEnable = (ByteEnable << (Address % SimpleRegisterSpace->Alignment)) & 0xF;
+  switch (SimpleRegisterSpace->Alignment) {
+    case 1:
+      ByteEnable = ByteEnable & 0x1;
+      break;
+    case 2:
+      ByteEnable = ByteEnable & 0x3;
+      break;
+    case 4:
+      ByteEnable = ByteEnable & 0xF;
+      break;
+  }
   RemainingSize = Size;
   ShiftValue = Address % SimpleRegisterSpace->Alignment;
   *Value = 0;
@@ -110,7 +121,18 @@ LocalRegisterMockWrite (
 
   CurrentAddress = ALIGN_ADDR(Address, SimpleRegisterSpace->Alignment);
   ByteEnable = SizeToByteEnable (Size);
-  ByteEnable = (ByteEnable << (Address % SimpleRegisterSpace->Alignment)) & 0xF;
+  ByteEnable = (ByteEnable << (Address % SimpleRegisterSpace->Alignment));
+  switch (SimpleRegisterSpace->Alignment) {
+    case 1:
+      ByteEnable = ByteEnable & 0x1;
+      break;
+    case 2:
+      ByteEnable = ByteEnable & 0x3;
+      break;
+    case 4:
+      ByteEnable = ByteEnable & 0xF;
+      break;
+  }
   CurrentValue = (UINT32)(Value << ((Address % SimpleRegisterSpace->Alignment) * 8));
   RemainingSize = Size;
   DwordIndex = 0;

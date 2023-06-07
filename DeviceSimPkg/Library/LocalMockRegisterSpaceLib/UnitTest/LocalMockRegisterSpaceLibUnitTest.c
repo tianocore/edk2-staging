@@ -121,6 +121,107 @@ TestDeviceRegisterWrite (
   DeviceContext->Regs[RegisterIndex] |= (Value & ByteMask);
 }
 
+typedef struct {
+  UINT16  Regs[5];
+  UINT32  ErrorFlags;
+} TEST_DEVICE_WORD_ALIGNED_CONTEXT;
+
+VOID
+TestDeviceWordAlignedRegisterRead (
+  IN  VOID    *Context,
+  IN  UINT64  Address,
+  IN  UINT32  ByteEnable,
+  OUT UINT32  *Value
+  )
+{
+  TEST_DEVICE_WORD_ALIGNED_CONTEXT  *DeviceContext;
+  UINT64               RegisterIndex;
+  UINT32               ByteMask;
+
+  DeviceContext = (TEST_DEVICE_WORD_ALIGNED_CONTEXT*) Context;
+
+  if (DeviceContext == NULL) {
+    *Value = 0xFFFFFFFF;
+    return;
+  }
+
+  DEBUG ((DEBUG_INFO, "Read word access %X %X\n", Address, ByteEnable));
+
+  DeviceContext->ErrorFlags = 0;
+
+  if (!(ByteEnable > 0 && ByteEnable <= 0xF)) {
+    DeviceContext->ErrorFlags |= TEST_DEVICE_ERROR_WRONG_BYTE_ENABLE;
+  }
+
+  if (Address % 2 != 0) {
+    DeviceContext->ErrorFlags |= TEST_DEVICE_ERROR_UNALIGNED_ACCESS;
+  }
+
+  RegisterIndex = Address / 2;
+
+  if (RegisterIndex > ARRAY_SIZE(DeviceContext->Regs)) {
+    DeviceContext->ErrorFlags |= TEST_DEVICE_ERROR_OUT_OF_RANGE;
+  }
+
+  if (DeviceContext->ErrorFlags != 0) {
+    *Value = 0xFFFFFFFF;
+    return;
+  }
+
+  ByteMask = ByteEnableToBitMask (ByteEnable);
+
+  *Value = (DeviceContext->Regs[RegisterIndex] & ByteMask);
+  DEBUG ((DEBUG_INFO, "Read word Access value read %X\n", *Value));
+}
+
+VOID
+TestDeviceWordAlignedRegisterWrite (
+  IN VOID    *Context,
+  IN UINT64  Address,
+  IN UINT32  ByteEnable,
+  IN UINT32  Value
+  )
+{
+  TEST_DEVICE_WORD_ALIGNED_CONTEXT  *DeviceContext;
+  UINT64               RegisterIndex;
+  UINT32               ByteMask;
+
+  DeviceContext = (TEST_DEVICE_WORD_ALIGNED_CONTEXT*) Context;
+
+  if (DeviceContext == NULL) {
+    return;
+  }
+
+  DEBUG ((DEBUG_INFO, "Write word access %X %X %X\n", Address, ByteEnable, Value));
+
+  DeviceContext->ErrorFlags = 0;
+
+  if (!(ByteEnable > 0 && ByteEnable <= 0xF)) {
+    DeviceContext->ErrorFlags |= TEST_DEVICE_ERROR_WRONG_BYTE_ENABLE;
+  }
+
+  if (Address % 2 != 0) {
+    DeviceContext->ErrorFlags |= TEST_DEVICE_ERROR_UNALIGNED_ACCESS;
+  }
+
+  RegisterIndex = Address / 2;
+
+  if (RegisterIndex > ARRAY_SIZE(DeviceContext->Regs)) {
+    DeviceContext->ErrorFlags |= TEST_DEVICE_ERROR_OUT_OF_RANGE;
+  }
+
+  if (DeviceContext->ErrorFlags != 0) {
+    return;
+  }
+
+  ByteMask = ByteEnableToBitMask (ByteEnable);
+
+  DeviceContext->Regs[RegisterIndex] &= ~ByteMask;
+  DeviceContext->Regs[RegisterIndex] |= (Value & ByteMask);
+
+  DEBUG ((DEBUG_INFO, "word Value wrote %X\n", DeviceContext->Regs[RegisterIndex]));
+}
+
 UNIT_TEST_STATUS
 EFIAPI
 LocalMockRegisterSpaceCreateTest (
@@ -521,6 +622,58 @@ ByteEnableToBitMaskTest (
   return UNIT_TEST_PASSED;
 }
 
+UNIT_TEST_STATUS
+EFIAPI
+LocalMockRegisterSpaceWordAlignedDeviceTest (
+  IN UNIT_TEST_CONTEXT  Context
+  )
+{
+  EFI_STATUS           Status;
+  REGISTER_SPACE_MOCK  *RegisterSpace;
+  TEST_DEVICE_WORD_ALIGNED_CONTEXT  *DeviceContext;
+  UINT64                            ReadBackValue;
+
+  DeviceContext = AllocateZeroPool (sizeof (TEST_DEVICE_CONTEXT));
+
+  if (DeviceContext == NULL) {
+    return UNIT_TEST_ERROR_PREREQUISITE_NOT_MET;
+  }
+
+  Status = LocalRegisterSpaceCreate (L"WORD aligned device", LocalRegisterSpaceAlignmentWord, TestDeviceWordAlignedRegisterWrite, TestDeviceWordAlignedRegisterRead, DeviceContext, &RegisterSpace);
+  if (EFI_ERROR (Status)) {
+    return UNIT_TEST_ERROR_PREREQUISITE_NOT_MET;
+  }
+  // Aligned access first
+  RegisterSpace->Write (RegisterSpace, 4, 2, WORD_TEST_VALUE);
+  UT_ASSERT_EQUAL (DeviceContext->ErrorFlags, 0);
+
+  RegisterSpace->Read (RegisterSpace, 4, 2, &ReadBackValue);
+  UT_ASSERT_EQUAL (DeviceContext->ErrorFlags, 0);
+  UT_ASSERT_EQUAL (ReadBackValue, WORD_TEST_VALUE);
+
+  // unaligned access
+  RegisterSpace->Write (RegisterSpace, 7, 2, WORD_TEST_VALUE);
+  UT_ASSERT_EQUAL (DeviceContext->ErrorFlags, 0);
+
+  RegisterSpace->Read (RegisterSpace, 7, 2, &ReadBackValue);
+  UT_ASSERT_EQUAL (DeviceContext->ErrorFlags, 0);
+  UT_ASSERT_EQUAL (ReadBackValue, WORD_TEST_VALUE);
+
+  // boundary crossing
+  RegisterSpace->Write (RegisterSpace, 0, 4, DWORD_TEST_VALUE);
+  UT_ASSERT_EQUAL (DeviceContext->ErrorFlags, 0);
+
+  RegisterSpace->Read (RegisterSpace, 0, 4, &ReadBackValue);
+  UT_ASSERT_EQUAL (DeviceContext->ErrorFlags, 0);
+  UT_ASSERT_EQUAL (ReadBackValue, DWORD_TEST_VALUE);
+
+  Status = LocalRegisterSpaceDestroy (RegisterSpace);
+  FreePool (DeviceContext);
+  UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
+
+  return UNIT_TEST_PASSED;
+}
+
 EFI_STATUS
 EFIAPI
 UefiTestMain (
@@ -576,6 +729,11 @@ UefiTestMain (
   // ByteEnable conversions test
   //
   AddTestCase (LocalMockRegisterSpaceTest, "ByteEnableToBitMaskTest", "ByteEnableToBitMaskTest", ByteEnableToBitMaskTest, NULL, NULL, NULL);
+
+  //
+  // WORD aligned test device
+  //
+  AddTestCase (LocalMockRegisterSpaceTest, "LocalMockRegisterSpaceWordAlignedDeviceTest", "LocalMockRegisterSpaceWordAlignedDeviceTest", LocalMockRegisterSpaceWordAlignedDeviceTest, NULL, NULL, NULL);
   
   Status = RunAllTestSuites (Framework);
   if (Framework) {
