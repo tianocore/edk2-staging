@@ -302,7 +302,7 @@ MockPciDeviceCreateTest (
   MOCK_PCI_DEVICE      *MockPciDev;
   REGISTER_SPACE_MOCK  *Bar[MOCK_PCI_LIB_MAX_SUPPORTED_BARS];
 
-  Status = LocalRegisterSpaceCreate (TEST_PCI_DEVICE_NAME, TestPciDeviceConfigWrite, TestPciDeviceConfigRead, NULL, &ConfigSpace);
+  Status = LocalRegisterSpaceCreate (TEST_PCI_DEVICE_NAME, LocalRegisterSpaceAlignmentDword, TestPciDeviceConfigWrite, TestPciDeviceConfigRead, NULL, &ConfigSpace);
   if (EFI_ERROR (Status)) {
     return UNIT_TEST_ERROR_PREREQUISITE_NOT_MET;
   }
@@ -313,7 +313,7 @@ MockPciDeviceCreateTest (
   UT_ASSERT_EQUAL (MockPciDev->ConfigSpace, ConfigSpace);
 
   for (UINT8 BarIndex = 0; BarIndex < MOCK_PCI_LIB_MAX_SUPPORTED_BARS; BarIndex++) {
-    Status = LocalRegisterSpaceCreate (TEST_PCI_DEVICE_NAME, TestPciDeviceBarWrite, TestPciDeviceBarRead, NULL, &Bar[BarIndex]);
+    Status = LocalRegisterSpaceCreate (TEST_PCI_DEVICE_NAME, LocalRegisterSpaceAlignmentDword, TestPciDeviceBarWrite, TestPciDeviceBarRead, NULL, &Bar[BarIndex]);
     if (EFI_ERROR (Status)) {
         return UNIT_TEST_ERROR_PREREQUISITE_NOT_MET;
     }
@@ -344,7 +344,7 @@ CreateTestPciDevice (
 
   ZeroMem (Context, sizeof(TEST_PCI_DEVICE_CONTEXT));
 
-  Status = LocalRegisterSpaceCreate (TEST_PCI_DEVICE_NAME, TestPciDeviceConfigWrite, TestPciDeviceConfigRead, Context, &Context->Config);
+  Status = LocalRegisterSpaceCreate (TEST_PCI_DEVICE_NAME, LocalRegisterSpaceAlignmentDword, TestPciDeviceConfigWrite, TestPciDeviceConfigRead, Context, &Context->Config);
   if (EFI_ERROR (Status)) {
     return Status;
   }
@@ -354,7 +354,7 @@ CreateTestPciDevice (
     return Status;
   }
 
-  Status = LocalRegisterSpaceCreate (TEST_PCI_DEVICE_NAME, TestPciDeviceBarWrite, TestPciDeviceBarRead, Context, &Context->Bar);
+  Status = LocalRegisterSpaceCreate (TEST_PCI_DEVICE_NAME, LocalRegisterSpaceAlignmentDword, TestPciDeviceBarWrite, TestPciDeviceBarRead, Context, &Context->Bar);
   if (EFI_ERROR (Status)) {
     return Status;
   }
@@ -364,7 +364,7 @@ CreateTestPciDevice (
     return Status;
   }
 
-  Status = LocalRegisterSpaceCreate (TEST_PCI_DEVICE_NAME, TestPciDeviceIoBarWrite, TestPciDeviceIoBarRead, Context, &Context->IoBar);
+  Status = LocalRegisterSpaceCreate (TEST_PCI_DEVICE_NAME, LocalRegisterSpaceAlignmentDword, TestPciDeviceIoBarWrite, TestPciDeviceIoBarRead, Context, &Context->IoBar);
   if (EFI_ERROR (Status)) {
     return Status;
   }

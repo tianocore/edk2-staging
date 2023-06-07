@@ -89,7 +89,7 @@ MockPciSegmentRegistrationTest (
   UINT64               PciSegmentBase;
 
   SampleSpace = NULL;
-  Status = LocalRegisterSpaceCreate (PCI_SEGMENT_LIB_TEST_DEVICE_NAME, TestMockPciSegmentDeviceWrite, TestMockPciSegmentDeviceRead, NULL, &SampleSpace);
+  Status = LocalRegisterSpaceCreate (PCI_SEGMENT_LIB_TEST_DEVICE_NAME, LocalRegisterSpaceAlignmentDword, TestMockPciSegmentDeviceWrite, TestMockPciSegmentDeviceRead, NULL, &SampleSpace);
   if (EFI_ERROR (Status)) {
     return UNIT_TEST_ERROR_PREREQUISITE_NOT_MET;
   }
@@ -128,7 +128,7 @@ MockPciSegmentRwTest (
   MOCK_PCI_SEGMENT_TEST_DEVICE_CONTEXT  Device;
 
   ZeroMem (&Device, sizeof (MOCK_PCI_SEGMENT_TEST_DEVICE_CONTEXT));
-  Status = LocalRegisterSpaceCreate (PCI_SEGMENT_LIB_TEST_DEVICE_NAME, TestMockPciSegmentDeviceWrite, TestMockPciSegmentDeviceRead, &Device, &ConfigSpace);
+  Status = LocalRegisterSpaceCreate (PCI_SEGMENT_LIB_TEST_DEVICE_NAME, LocalRegisterSpaceAlignmentDword, TestMockPciSegmentDeviceWrite, TestMockPciSegmentDeviceRead, &Device, &ConfigSpace);
   if (EFI_ERROR (Status)) {
     return UNIT_TEST_ERROR_PREREQUISITE_NOT_MET;
   }

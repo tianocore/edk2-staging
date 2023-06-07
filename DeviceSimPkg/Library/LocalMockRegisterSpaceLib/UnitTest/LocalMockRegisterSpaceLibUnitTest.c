@@ -137,7 +137,7 @@ LocalMockRegisterSpaceCreateTest (
     return UNIT_TEST_ERROR_PREREQUISITE_NOT_MET;
   }
 
-  Status = LocalRegisterSpaceCreate (DeviceContext->Name, TestDeviceRegisterWrite, TestDeviceRegisterRead, DeviceContext, &LocalRegisterSpace);
+  Status = LocalRegisterSpaceCreate (DeviceContext->Name, LocalRegisterSpaceAlignmentDword, TestDeviceRegisterWrite, TestDeviceRegisterRead, DeviceContext, &LocalRegisterSpace);
 
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
   UT_ASSERT_MEM_EQUAL (LocalRegisterSpace->Name, DeviceContext->Name, sizeof(TestDeviceName));
@@ -168,7 +168,7 @@ LocalMockRegisterSpaceAlignedByteAccessTest (
     return UNIT_TEST_ERROR_PREREQUISITE_NOT_MET;
   }
 
-  Status = LocalRegisterSpaceCreate (DeviceContext->Name, TestDeviceRegisterWrite, TestDeviceRegisterRead, DeviceContext, &RegisterSpace);
+  Status = LocalRegisterSpaceCreate (DeviceContext->Name, LocalRegisterSpaceAlignmentDword, TestDeviceRegisterWrite, TestDeviceRegisterRead, DeviceContext, &RegisterSpace);
 
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
 
@@ -204,7 +204,7 @@ LocalMockRegisterSpaceAlignedWordAccessTest (
     return UNIT_TEST_ERROR_PREREQUISITE_NOT_MET;
   }
 
-  Status = LocalRegisterSpaceCreate (DeviceContext->Name, TestDeviceRegisterWrite, TestDeviceRegisterRead, DeviceContext, &RegisterSpace);
+  Status = LocalRegisterSpaceCreate (DeviceContext->Name, LocalRegisterSpaceAlignmentDword, TestDeviceRegisterWrite, TestDeviceRegisterRead, DeviceContext, &RegisterSpace);
 
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
 
@@ -240,7 +240,7 @@ LocalMockRegisterSpaceAlignedDwordAccessTest (
     return UNIT_TEST_ERROR_PREREQUISITE_NOT_MET;
   }
 
-  Status = LocalRegisterSpaceCreate (DeviceContext->Name, TestDeviceRegisterWrite, TestDeviceRegisterRead, DeviceContext, &RegisterSpace);
+  Status = LocalRegisterSpaceCreate (DeviceContext->Name, LocalRegisterSpaceAlignmentDword, TestDeviceRegisterWrite, TestDeviceRegisterRead, DeviceContext, &RegisterSpace);
 
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
 
@@ -277,7 +277,7 @@ LocalMockRegisterSpaceAlignedQwordAccessTest (
     return UNIT_TEST_ERROR_PREREQUISITE_NOT_MET;
   }
 
-  Status = LocalRegisterSpaceCreate (DeviceContext->Name, TestDeviceRegisterWrite, TestDeviceRegisterRead, DeviceContext, &RegisterSpace);
+  Status = LocalRegisterSpaceCreate (DeviceContext->Name, LocalRegisterSpaceAlignmentDword, TestDeviceRegisterWrite, TestDeviceRegisterRead, DeviceContext, &RegisterSpace);
 
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
 
@@ -316,7 +316,7 @@ LocalMockRegisterSpaceUnalignedByteAccessTest (
     return UNIT_TEST_ERROR_PREREQUISITE_NOT_MET;
   }
 
-  Status = LocalRegisterSpaceCreate (DeviceContext->Name, TestDeviceRegisterWrite, TestDeviceRegisterRead, DeviceContext, &RegisterSpace);
+  Status = LocalRegisterSpaceCreate (DeviceContext->Name, LocalRegisterSpaceAlignmentDword, TestDeviceRegisterWrite, TestDeviceRegisterRead, DeviceContext, &RegisterSpace);
 
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
 
@@ -352,7 +352,7 @@ LocalMockRegisterSpaceUnalignedWordAccessTest (
     return UNIT_TEST_ERROR_PREREQUISITE_NOT_MET;
   }
 
-  Status = LocalRegisterSpaceCreate (DeviceContext->Name, TestDeviceRegisterWrite, TestDeviceRegisterRead, DeviceContext, &RegisterSpace);
+  Status = LocalRegisterSpaceCreate (DeviceContext->Name, LocalRegisterSpaceAlignmentDword, TestDeviceRegisterWrite, TestDeviceRegisterRead, DeviceContext, &RegisterSpace);
 
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
 
@@ -389,7 +389,7 @@ LocalMockRegisterSpaceUnalignedBoundaryCrossingWordAccessTest (
     return UNIT_TEST_ERROR_PREREQUISITE_NOT_MET;
   }
 
-  Status = LocalRegisterSpaceCreate (DeviceContext->Name, TestDeviceRegisterWrite, TestDeviceRegisterRead, DeviceContext, &RegisterSpace);
+  Status = LocalRegisterSpaceCreate (DeviceContext->Name, LocalRegisterSpaceAlignmentDword, TestDeviceRegisterWrite, TestDeviceRegisterRead, DeviceContext, &RegisterSpace);
 
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
 
@@ -428,7 +428,7 @@ LocalMockRegisterSpaceUnalignedBoundaryCrossingDwordAccessTest (
     return UNIT_TEST_ERROR_PREREQUISITE_NOT_MET;
   }
 
-  Status = LocalRegisterSpaceCreate (DeviceContext->Name, TestDeviceRegisterWrite, TestDeviceRegisterRead, DeviceContext, &RegisterSpace);
+  Status = LocalRegisterSpaceCreate (DeviceContext->Name, LocalRegisterSpaceAlignmentDword, TestDeviceRegisterWrite, TestDeviceRegisterRead, DeviceContext, &RegisterSpace);
 
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
 
@@ -468,7 +468,7 @@ LocalMockRegisterSpaceUnalignedBoundaryCrossingQwordAccessTest (
     return UNIT_TEST_ERROR_PREREQUISITE_NOT_MET;
   }
 
-  Status = LocalRegisterSpaceCreate (DeviceContext->Name, TestDeviceRegisterWrite, TestDeviceRegisterRead, DeviceContext, &RegisterSpace);
+  Status = LocalRegisterSpaceCreate (DeviceContext->Name, LocalRegisterSpaceAlignmentDword, TestDeviceRegisterWrite, TestDeviceRegisterRead, DeviceContext, &RegisterSpace);
 
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
 

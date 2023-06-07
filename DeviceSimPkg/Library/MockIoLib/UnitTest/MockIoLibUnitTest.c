@@ -155,7 +155,7 @@ MockIoTestDeviceCreate (
     return EFI_INVALID_PARAMETER;
   }
 
-  Status = LocalRegisterSpaceCreate (MOCK_IO_LIB_TEST_DEVICE_NAME, TestMockIoDeviceWrite, TestMockIoDeviceRead, Context, &Context->Mock);
+  Status = LocalRegisterSpaceCreate (MOCK_IO_LIB_TEST_DEVICE_NAME, LocalRegisterSpaceAlignmentDword, TestMockIoDeviceWrite, TestMockIoDeviceRead, Context, &Context->Mock);
   if (EFI_ERROR (Status)) {
     return Status;
   }
@@ -200,7 +200,7 @@ MockIoRegistrationTest (
   REGISTER_SPACE_MOCK  *SampleSpace;
 
   SampleSpace = NULL;
-  Status = LocalRegisterSpaceCreate (MOCK_IO_LIB_TEST_DEVICE_NAME, TestMockIoDeviceWrite, TestMockIoDeviceRead, NULL, &SampleSpace);
+  Status = LocalRegisterSpaceCreate (MOCK_IO_LIB_TEST_DEVICE_NAME, LocalRegisterSpaceAlignmentDword, TestMockIoDeviceWrite, TestMockIoDeviceRead, NULL, &SampleSpace);
   if (EFI_ERROR (Status)) {
     return UNIT_TEST_ERROR_PREREQUISITE_NOT_MET;
   }

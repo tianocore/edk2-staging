@@ -130,11 +130,12 @@ LocalRegisterMockWrite (
 
 EFI_STATUS
 LocalRegisterSpaceCreate (
-  IN CHAR16                       *RegisterSpaceDescription,
-  IN REGISTER_WRITE_CALLBACK      Write,
-  IN REGISTER_READ_CALLBACK       Read,
-  IN VOID                         *RwContext,
-  OUT REGISTER_SPACE_MOCK         **SimpleRegisterSpace
+  IN CHAR16                          *RegisterSpaceDescription,
+  IN LOCAL_REGISTER_SPACE_ALIGNMENT  Alignment,
+  IN REGISTER_WRITE_CALLBACK         Write,
+  IN REGISTER_READ_CALLBACK          Read,
+  IN VOID                            *RwContext,
+  OUT REGISTER_SPACE_MOCK            **SimpleRegisterSpace
   )
 {
   LOCAL_REGISTER_SPACE  *LocalRegisterSpace;
@@ -143,6 +144,7 @@ LocalRegisterSpaceCreate (
   LocalRegisterSpace->RegisterSpace.Name = RegisterSpaceDescription;
   LocalRegisterSpace->RegisterSpace.Read = LocalRegisterMockRead;
   LocalRegisterSpace->RegisterSpace.Write = LocalRegisterMockWrite;
+  LocalRegisterSpace->Alignment = Alignment;
   LocalRegisterSpace->Read = Read;
   LocalRegisterSpace->Write = Write;
   LocalRegisterSpace->RwContext = RwContext;

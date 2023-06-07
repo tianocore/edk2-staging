@@ -4,6 +4,13 @@
 #include <Base.h>
 #include <RegisterSpaceMock.h>
 
+typedef enum {
+  LocalRegisterSpaceAlignmentByte = 0,
+  LocalRegisterSpaceAlignmentWord,
+  LocalRegisterSpaceAlignmentDword,
+  LocalRegisterSpaceAlignmentQword
+} LOCAL_REGISTER_SPACE_ALIGNMENT;
+
 typedef struct _LOCAL_REGISTER_SPACE LOCAL_REGISTER_SPACE;
 
 typedef
@@ -25,19 +32,21 @@ VOID
   );
 
 struct _LOCAL_REGISTER_SPACE {
-  REGISTER_SPACE_MOCK          RegisterSpace;
-  VOID                         *RwContext;
-  REGISTER_READ_CALLBACK       Read;
-  REGISTER_WRITE_CALLBACK      Write;
+  REGISTER_SPACE_MOCK             RegisterSpace;
+  VOID                            *RwContext;
+  LOCAL_REGISTER_SPACE_ALIGNMENT  Alignment;
+  REGISTER_READ_CALLBACK          Read;
+  REGISTER_WRITE_CALLBACK         Write;
 };
 
 EFI_STATUS
 LocalRegisterSpaceCreate (
-  IN CHAR16                       *RegisterSpaceDescription,
-  IN REGISTER_WRITE_CALLBACK      Write,
-  IN REGISTER_READ_CALLBACK       Read,
-  IN VOID                         *RwContext,
-  OUT REGISTER_SPACE_MOCK         **SimpleRegisterSpace
+  IN CHAR16                          *RegisterSpaceDescription,
+  IN LOCAL_REGISTER_SPACE_ALIGNMENT  Alignment,
+  IN REGISTER_WRITE_CALLBACK         Write,
+  IN REGISTER_READ_CALLBACK          Read,
+  IN VOID                            *RwContext,
+  OUT REGISTER_SPACE_MOCK            **SimpleRegisterSpace
   );
 
 EFI_STATUS
