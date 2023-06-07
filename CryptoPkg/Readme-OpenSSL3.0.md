@@ -36,9 +36,7 @@ https://github.com/tianocore/edk2/pull/4391/
 a.  Platform_CI OVMF_IA32X64_FULL_NOOPT failed  
 the required fv image size 0xdb1940 exceeds the set fv image size 0xd00000  
 b.  GCC ASM test  
-https://github.com/liyi77/edk2/commit/ecb0ee1d3cd9d8a87f4b956dea3703fb8ae5d1a4  
-Debugging...
-c.  Generated files format error: format of newline, trailing spaces, tabs...  
+Done, Tested with Intel client platform and unittest: https://github.com/liyi77/edk2/commit/a4726c667a5c4b7156ae003119c4769f36e27c09  
   
 ## POC result
 Binaries mode (use crypto drivers)  
