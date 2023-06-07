@@ -19,6 +19,8 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #define UNIT_TEST_NAME     "MockIoLib unit tests"
 #define UNIT_TEST_VERSION  "0.1"
 
+#define DEVICE_FROM_CONTEXT(Context) ((TEST_CONTEXT*)Context)->Device
+
 #define MOCK_IO_LIB_TEST_DEVICE_NAME  L"MockIoLibTestDevice"
 #define MOCK_IO_LIB_TEST_DEVICE_SIZE  0x100
 #define MOCK_IO_LIB_TEST_DEVICE_MEM_ADDRESS 0x10000000
@@ -151,50 +153,59 @@ TestMockIoDeviceWrite (
   }
 }
 
-EFI_STATUS
-MockIoTestDeviceCreate (
-  IN MOCK_IO_TEST_DEVICE_CONTEXT  *Context
+typedef struct {
+  MOCK_IO_TEST_DEVICE_CONTEXT  *Device;
+} TEST_CONTEXT;
+
+UNIT_TEST_STATUS
+MockIoTestPrerequisite (
+  IN UNIT_TEST_CONTEXT  Context
   )
 {
-  EFI_STATUS           Status;
+  EFI_STATUS                   Status;
+  TEST_CONTEXT                 *TestContext;
 
-  if (Context == NULL) {
-    return EFI_INVALID_PARAMETER;
+  TestContext = (TEST_CONTEXT*) Context;
+
+  TestContext->Device = AllocateZeroPool (sizeof (MOCK_IO_TEST_DEVICE_CONTEXT));
+  if (TestContext->Device == NULL) {
+    return UNIT_TEST_ERROR_PREREQUISITE_NOT_MET;
   }
 
-  Status = LocalRegisterSpaceCreate (MOCK_IO_LIB_TEST_DEVICE_NAME, LocalRegisterSpaceAlignmentDword, TestMockIoDeviceWrite, TestMockIoDeviceRead, Context, &Context->Mock);
+  Status = LocalRegisterSpaceCreate (MOCK_IO_LIB_TEST_DEVICE_NAME, LocalRegisterSpaceAlignmentDword, TestMockIoDeviceWrite, TestMockIoDeviceRead, TestContext->Device, &TestContext->Device->Mock);
   if (EFI_ERROR (Status)) {
-    return Status;
+    return UNIT_TEST_ERROR_PREREQUISITE_NOT_MET;
   }
 
-  Status = MockIoRegisterMmioAtAddress (Context->Mock, MockIoTypeMmio, MOCK_IO_LIB_TEST_DEVICE_MEM_ADDRESS, MOCK_IO_LIB_TEST_DEVICE_SIZE);
+  Status = MockIoRegisterMmioAtAddress (TestContext->Device->Mock, MockIoTypeMmio, MOCK_IO_LIB_TEST_DEVICE_MEM_ADDRESS, MOCK_IO_LIB_TEST_DEVICE_SIZE);
   if (EFI_ERROR (Status)) {
-    return Status;
+    return UNIT_TEST_ERROR_PREREQUISITE_NOT_MET;
   }
 
-  Status = MockIoRegisterMmioAtAddress (Context->Mock, MockIoTypeIo, MOCK_IO_LIB_TEST_DEVICE_IO_ADDRESS, MOCK_IO_LIB_TEST_DEVICE_SIZE);
+  Status = MockIoRegisterMmioAtAddress (TestContext->Device->Mock, MockIoTypeIo, MOCK_IO_LIB_TEST_DEVICE_IO_ADDRESS, MOCK_IO_LIB_TEST_DEVICE_SIZE);
   if (EFI_ERROR (Status)) {
-    return Status;
+    return UNIT_TEST_ERROR_PREREQUISITE_NOT_MET;
   }
 
-  return EFI_SUCCESS;
+  return UNIT_TEST_PASSED;
 }
 
-EFI_STATUS
-MockIoTestDeviceDestroy (
-  IN MOCK_IO_TEST_DEVICE_CONTEXT  *Context
+VOID
+MockIoTestCleanup (
+  IN UNIT_TEST_CONTEXT  Context
   )
 {
-  if (Context == NULL) {
-    return EFI_INVALID_PARAMETER;
-  }
+  TEST_CONTEXT  *TestContext;
+
+  TestContext = (TEST_CONTEXT*) Context;
 
   MockIoUnRegisterMmioAtAddress (MockIoTypeMmio, MOCK_IO_LIB_TEST_DEVICE_MEM_ADDRESS);
   MockIoUnRegisterMmioAtAddress (MockIoTypeIo, MOCK_IO_LIB_TEST_DEVICE_IO_ADDRESS);
 
-  LocalRegisterSpaceDestroy (Context->Mock);
+  LocalRegisterSpaceDestroy (TestContext->Device->Mock);
 
-  return EFI_SUCCESS;
+  FreePool (TestContext->Device);
+  TestContext->Device = NULL;
 }
 
 UNIT_TEST_STATUS
@@ -235,14 +246,12 @@ MockIoIoRwTest (
   IN UNIT_TEST_CONTEXT  Context
   )
 {
-  EFI_STATUS           Status;
   UINT8                Val8;
   UINT16               Val16;
   UINT32               Val32;
-  MOCK_IO_TEST_DEVICE_CONTEXT  Device;
+  MOCK_IO_TEST_DEVICE_CONTEXT  *Device;
 
-  ZeroMem (&Device, sizeof(MOCK_IO_TEST_DEVICE_CONTEXT));
-  Status = MockIoTestDeviceCreate (&Device);
+  Device = DEVICE_FROM_CONTEXT (Context);
 
   Val8 = IoRead8 (MOCK_IO_LIB_TEST_DEVICE_IO_ADDRESS + MOCK_IO_LIB_TEST_DEVICE_REG0_ADDRESS);
   UT_ASSERT_EQUAL (Val8, MOCK_IO_LIB_TEST_DEVICE_REG0_VALUE & 0xFF);
@@ -254,15 +263,13 @@ MockIoIoRwTest (
   UT_ASSERT_EQUAL (Val32, MOCK_IO_LIB_TEST_DEVICE_REG0_VALUE);
 
   IoWrite8 (MOCK_IO_LIB_TEST_DEVICE_IO_ADDRESS + MOCK_IO_LIB_TEST_DEVICE_REG1_ADDRESS, MOCK_IO_LIB_WRITE_TEST_VAL8);
-  UT_ASSERT_EQUAL (Device.WriteRegister & 0xFF, MOCK_IO_LIB_WRITE_TEST_VAL8);
+  UT_ASSERT_EQUAL (Device->WriteRegister & 0xFF, MOCK_IO_LIB_WRITE_TEST_VAL8);
 
   IoWrite16 (MOCK_IO_LIB_TEST_DEVICE_IO_ADDRESS + MOCK_IO_LIB_TEST_DEVICE_REG1_ADDRESS, MOCK_IO_LIB_WRITE_TEST_VAL16);
-  UT_ASSERT_EQUAL (Device.WriteRegister & 0xFFFF, MOCK_IO_LIB_WRITE_TEST_VAL16);
+  UT_ASSERT_EQUAL (Device->WriteRegister & 0xFFFF, MOCK_IO_LIB_WRITE_TEST_VAL16);
 
   IoWrite32 (MOCK_IO_LIB_TEST_DEVICE_IO_ADDRESS + MOCK_IO_LIB_TEST_DEVICE_REG1_ADDRESS, MOCK_IO_LIB_WRITE_TEST_VAL32);
-  UT_ASSERT_EQUAL (Device.WriteRegister, MOCK_IO_LIB_WRITE_TEST_VAL32);
-
-  MockIoTestDeviceDestroy (&Device);
+  UT_ASSERT_EQUAL (Device->WriteRegister, MOCK_IO_LIB_WRITE_TEST_VAL32);
 
   return UNIT_TEST_PASSED;
 }
@@ -273,14 +280,12 @@ MockIoMemRwTest (
   IN UNIT_TEST_CONTEXT  Context
   )
 {
-  EFI_STATUS           Status;
   UINT8                Val8;
   UINT16               Val16;
   UINT32               Val32;
-  MOCK_IO_TEST_DEVICE_CONTEXT  Device;
+  MOCK_IO_TEST_DEVICE_CONTEXT  *Device;
 
-  ZeroMem (&Device, sizeof(MOCK_IO_TEST_DEVICE_CONTEXT));
-  Status = MockIoTestDeviceCreate (&Device);
+  Device = DEVICE_FROM_CONTEXT (Context);
 
   Val8 = MmioRead8 (MOCK_IO_LIB_TEST_DEVICE_MEM_ADDRESS + MOCK_IO_LIB_TEST_DEVICE_REG0_ADDRESS);
   UT_ASSERT_EQUAL (Val8, MOCK_IO_LIB_TEST_DEVICE_REG0_VALUE & 0xFF);
@@ -292,15 +297,13 @@ MockIoMemRwTest (
   UT_ASSERT_EQUAL (Val32, MOCK_IO_LIB_TEST_DEVICE_REG0_VALUE);
 
   MmioWrite8 (MOCK_IO_LIB_TEST_DEVICE_MEM_ADDRESS + MOCK_IO_LIB_TEST_DEVICE_REG1_ADDRESS, MOCK_IO_LIB_WRITE_TEST_VAL8);
-  UT_ASSERT_EQUAL (Device.WriteRegister & 0xFF, MOCK_IO_LIB_WRITE_TEST_VAL8);
+  UT_ASSERT_EQUAL (Device->WriteRegister & 0xFF, MOCK_IO_LIB_WRITE_TEST_VAL8);
 
   MmioWrite16 (MOCK_IO_LIB_TEST_DEVICE_MEM_ADDRESS + MOCK_IO_LIB_TEST_DEVICE_REG1_ADDRESS, MOCK_IO_LIB_WRITE_TEST_VAL16);
-  UT_ASSERT_EQUAL (Device.WriteRegister & 0xFFFF, MOCK_IO_LIB_WRITE_TEST_VAL16);
+  UT_ASSERT_EQUAL (Device->WriteRegister & 0xFFFF, MOCK_IO_LIB_WRITE_TEST_VAL16);
 
   MmioWrite32 (MOCK_IO_LIB_TEST_DEVICE_MEM_ADDRESS + MOCK_IO_LIB_TEST_DEVICE_REG1_ADDRESS, MOCK_IO_LIB_WRITE_TEST_VAL32);
-  UT_ASSERT_EQUAL (Device.WriteRegister, MOCK_IO_LIB_WRITE_TEST_VAL32);
-
-  MockIoTestDeviceDestroy (&Device);
+  UT_ASSERT_EQUAL (Device->WriteRegister, MOCK_IO_LIB_WRITE_TEST_VAL32);
 
   return UNIT_TEST_PASSED;
 }
@@ -311,14 +314,12 @@ MockIoFifoReadTest (
   IN UNIT_TEST_CONTEXT  Context
   )
 {
-  MOCK_IO_TEST_DEVICE_CONTEXT  Device;
-  EFI_STATUS                   Status;
   UINT8   FifoUint8[MOCK_IO_TEST_FIFO_SIZE];
   UINT16  FifoUint16[MOCK_IO_TEST_FIFO_SIZE];
   UINT32  FifoUint32[MOCK_IO_TEST_FIFO_SIZE];
+  MOCK_IO_TEST_DEVICE_CONTEXT  *Device;
 
-  ZeroMem (&Device, sizeof(MOCK_IO_TEST_DEVICE_CONTEXT));
-  Status = MockIoTestDeviceCreate (&Device);
+  Device = DEVICE_FROM_CONTEXT (Context);
 
   IoReadFifo8 (MOCK_IO_LIB_TEST_DEVICE_IO_ADDRESS + MOCK_IO_LIB_TEST_DEVICE_FIFO_TEST_REG_ADDRESS, MOCK_IO_TEST_FIFO_SIZE, &FifoUint8);
   UT_ASSERT_MEM_EQUAL (&FifoUint8, &gUint8TestBuffer, sizeof (gUint8TestBuffer));
@@ -329,8 +330,6 @@ MockIoFifoReadTest (
   IoReadFifo32 (MOCK_IO_LIB_TEST_DEVICE_IO_ADDRESS + MOCK_IO_LIB_TEST_DEVICE_FIFO_TEST_REG_ADDRESS, MOCK_IO_TEST_FIFO_SIZE, &FifoUint32);
   UT_ASSERT_MEM_EQUAL (&FifoUint32, &gUint32TestBuffer, sizeof (gUint32TestBuffer));
 
-  MockIoTestDeviceDestroy (&Device);
-
   return UNIT_TEST_PASSED;
 }
 
@@ -340,25 +339,21 @@ MockIoFifoWriteTest (
   IN UNIT_TEST_CONTEXT  Context
   )
 {
-  MOCK_IO_TEST_DEVICE_CONTEXT  Device;
-  EFI_STATUS                   Status;
+  MOCK_IO_TEST_DEVICE_CONTEXT  *Device;
 
-  ZeroMem (&Device, sizeof(MOCK_IO_TEST_DEVICE_CONTEXT));
-  Status = MockIoTestDeviceCreate (&Device);
+  Device = DEVICE_FROM_CONTEXT (Context);
 
-  Device.FifoCount = 0;
+  Device->FifoCount = 0;
   IoWriteFifo8 (MOCK_IO_LIB_TEST_DEVICE_IO_ADDRESS + MOCK_IO_LIB_TEST_DEVICE_FIFO_TEST_REG_ADDRESS, MOCK_IO_TEST_FIFO_SIZE, &gUint8TestBuffer);
-  UT_ASSERT_EQUAL (Device.FifoCount, MOCK_IO_TEST_FIFO_SIZE);
+  UT_ASSERT_EQUAL (Device->FifoCount, MOCK_IO_TEST_FIFO_SIZE);
 
-  Device.FifoCount = 0;
+  Device->FifoCount = 0;
   IoWriteFifo16 (MOCK_IO_LIB_TEST_DEVICE_IO_ADDRESS + MOCK_IO_LIB_TEST_DEVICE_FIFO_TEST_REG_ADDRESS, MOCK_IO_TEST_FIFO_SIZE, &gUint16TestBuffer);
-  UT_ASSERT_EQUAL (Device.FifoCount, MOCK_IO_TEST_FIFO_SIZE);
+  UT_ASSERT_EQUAL (Device->FifoCount, MOCK_IO_TEST_FIFO_SIZE);
 
-  Device.FifoCount = 0;
+  Device->FifoCount = 0;
   IoWriteFifo32 (MOCK_IO_LIB_TEST_DEVICE_IO_ADDRESS + MOCK_IO_LIB_TEST_DEVICE_FIFO_TEST_REG_ADDRESS, MOCK_IO_TEST_FIFO_SIZE, &gUint32TestBuffer);
-  UT_ASSERT_EQUAL (Device.FifoCount, MOCK_IO_TEST_FIFO_SIZE);
-
-  MockIoTestDeviceDestroy (&Device);
+  UT_ASSERT_EQUAL (Device->FifoCount, MOCK_IO_TEST_FIFO_SIZE);
 
   return UNIT_TEST_PASSED;
 }
@@ -369,20 +364,16 @@ MockIoBufferRw8Test (
   IN UNIT_TEST_CONTEXT  Context
   )
 {
-  EFI_STATUS           Status;
-  MOCK_IO_TEST_DEVICE_CONTEXT  Device;
   UINT8                        Readback[MOCK_IO_LIB_TEST_DEVICE_BUFFER_NO_OF_DWORDS];
+  MOCK_IO_TEST_DEVICE_CONTEXT  *Device;
 
-  ZeroMem (&Device, sizeof(MOCK_IO_TEST_DEVICE_CONTEXT));
-  Status = MockIoTestDeviceCreate (&Device);
+  Device = DEVICE_FROM_CONTEXT (Context);
 
   MmioWriteBuffer8 (MOCK_IO_LIB_TEST_DEVICE_MEM_ADDRESS + MOCK_IO_LIB_TEST_DEVICE_BUFFER_REG_ADDRESS, sizeof (gUint8TestBuffer), gUint8TestBuffer);
-  UT_ASSERT_MEM_EQUAL (&Device.RwBuffer, &gUint8TestBuffer, sizeof (gUint8TestBuffer));
+  UT_ASSERT_MEM_EQUAL (&Device->RwBuffer, &gUint8TestBuffer, sizeof (gUint8TestBuffer));
 
   MmioReadBuffer8 (MOCK_IO_LIB_TEST_DEVICE_MEM_ADDRESS + MOCK_IO_LIB_TEST_DEVICE_BUFFER_REG_ADDRESS, sizeof (Readback), Readback);
   UT_ASSERT_MEM_EQUAL (&Readback, &gUint8TestBuffer, sizeof (gUint8TestBuffer));
-
-  MockIoTestDeviceDestroy (&Device);
 
   return UNIT_TEST_PASSED;
 }
@@ -393,20 +384,16 @@ MockIoBufferRw16Test (
   IN UNIT_TEST_CONTEXT  Context
   )
 {
-  EFI_STATUS           Status;
-  MOCK_IO_TEST_DEVICE_CONTEXT  Device;
   UINT16                        Readback[MOCK_IO_LIB_TEST_DEVICE_BUFFER_NO_OF_DWORDS];
+  MOCK_IO_TEST_DEVICE_CONTEXT  *Device;
 
-  ZeroMem (&Device, sizeof(MOCK_IO_TEST_DEVICE_CONTEXT));
-  Status = MockIoTestDeviceCreate (&Device);
+  Device = DEVICE_FROM_CONTEXT (Context);
 
   MmioWriteBuffer16 (MOCK_IO_LIB_TEST_DEVICE_MEM_ADDRESS + MOCK_IO_LIB_TEST_DEVICE_BUFFER_REG_ADDRESS, sizeof (gUint16TestBuffer), gUint16TestBuffer);
-  UT_ASSERT_MEM_EQUAL (&Device.RwBuffer, &gUint16TestBuffer, sizeof (gUint16TestBuffer));
+  UT_ASSERT_MEM_EQUAL (&Device->RwBuffer, &gUint16TestBuffer, sizeof (gUint16TestBuffer));
 
   MmioReadBuffer16 (MOCK_IO_LIB_TEST_DEVICE_MEM_ADDRESS + MOCK_IO_LIB_TEST_DEVICE_BUFFER_REG_ADDRESS, sizeof (Readback), Readback);
   UT_ASSERT_MEM_EQUAL (&Readback, &gUint16TestBuffer, sizeof (gUint16TestBuffer));
-
-  MockIoTestDeviceDestroy (&Device);
 
   return UNIT_TEST_PASSED;
 }
@@ -417,20 +404,16 @@ MockIoBufferRw32Test (
   IN UNIT_TEST_CONTEXT  Context
   )
 {
-  EFI_STATUS           Status;
-  MOCK_IO_TEST_DEVICE_CONTEXT  Device;
   UINT32                        Readback[MOCK_IO_LIB_TEST_DEVICE_BUFFER_NO_OF_DWORDS];
+  MOCK_IO_TEST_DEVICE_CONTEXT  *Device;
 
-  ZeroMem (&Device, sizeof(MOCK_IO_TEST_DEVICE_CONTEXT));
-  Status = MockIoTestDeviceCreate (&Device);
+  Device = DEVICE_FROM_CONTEXT (Context);
 
   MmioWriteBuffer32 (MOCK_IO_LIB_TEST_DEVICE_MEM_ADDRESS + MOCK_IO_LIB_TEST_DEVICE_BUFFER_REG_ADDRESS, sizeof (gUint32TestBuffer), gUint32TestBuffer);
-  UT_ASSERT_MEM_EQUAL (&Device.RwBuffer, &gUint32TestBuffer, sizeof (gUint32TestBuffer));
+  UT_ASSERT_MEM_EQUAL (&Device->RwBuffer, &gUint32TestBuffer, sizeof (gUint32TestBuffer));
 
   MmioReadBuffer32 (MOCK_IO_LIB_TEST_DEVICE_MEM_ADDRESS + MOCK_IO_LIB_TEST_DEVICE_BUFFER_REG_ADDRESS, sizeof (Readback), Readback);
   UT_ASSERT_MEM_EQUAL (&Readback, &gUint32TestBuffer, sizeof (gUint32TestBuffer));
-
-  MockIoTestDeviceDestroy (&Device);
 
   return UNIT_TEST_PASSED;
 }
@@ -444,6 +427,7 @@ UefiTestMain (
   EFI_STATUS                  Status;
   UNIT_TEST_FRAMEWORK_HANDLE  Framework;
   UNIT_TEST_SUITE_HANDLE      MockIoLibTest;
+  TEST_CONTEXT                TestContext;
 
   Framework = NULL;
 
@@ -461,13 +445,13 @@ UefiTestMain (
   }
 
   AddTestCase (MockIoLibTest, "MockIoRegistrationTest", "MockIoRegistrationTest", MockIoRegistrationTest, NULL, NULL, NULL);
-  AddTestCase (MockIoLibTest, "MockIoIoRwTest", "MockIoIoRwTest", MockIoIoRwTest, NULL, NULL, NULL);
-  AddTestCase (MockIoLibTest, "MockIoMemRwTest", "MockIoMemRwTest", MockIoMemRwTest, NULL, NULL, NULL);
-  AddTestCase (MockIoLibTest, "MockIoFifoReadTest", "MockIoFifoReadTest", MockIoFifoReadTest, NULL, NULL, NULL);
-  AddTestCase (MockIoLibTest, "MockIoFifoWriteTest", "MockIoFifoWriteTest", MockIoFifoWriteTest, NULL, NULL, NULL);
-  AddTestCase (MockIoLibTest, "MockIoBufferRw8Test", "MockIoBufferRw8Test", MockIoBufferRw8Test, NULL, NULL, NULL);
-  AddTestCase (MockIoLibTest, "MockIoBufferRw16Test", "MockIoBufferRw16Test", MockIoBufferRw16Test, NULL, NULL, NULL);
-  AddTestCase (MockIoLibTest, "MockIoBufferRw32Test", "MockIoBufferRw32Test", MockIoBufferRw32Test, NULL, NULL, NULL);
+  AddTestCase (MockIoLibTest, "MockIoIoRwTest", "MockIoIoRwTest", MockIoIoRwTest, MockIoTestPrerequisite, MockIoTestCleanup, &TestContext);
+  AddTestCase (MockIoLibTest, "MockIoMemRwTest", "MockIoMemRwTest", MockIoMemRwTest, MockIoTestPrerequisite, MockIoTestCleanup, &TestContext);
+  AddTestCase (MockIoLibTest, "MockIoFifoReadTest", "MockIoFifoReadTest", MockIoFifoReadTest, MockIoTestPrerequisite, MockIoTestCleanup, &TestContext);
+  AddTestCase (MockIoLibTest, "MockIoFifoWriteTest", "MockIoFifoWriteTest", MockIoFifoWriteTest, MockIoTestPrerequisite, MockIoTestCleanup, &TestContext);
+  AddTestCase (MockIoLibTest, "MockIoBufferRw8Test", "MockIoBufferRw8Test", MockIoBufferRw8Test, MockIoTestPrerequisite, MockIoTestCleanup, &TestContext);
+  AddTestCase (MockIoLibTest, "MockIoBufferRw16Test", "MockIoBufferRw16Test", MockIoBufferRw16Test, MockIoTestPrerequisite, MockIoTestCleanup, &TestContext);
+  AddTestCase (MockIoLibTest, "MockIoBufferRw32Test", "MockIoBufferRw32Test", MockIoBufferRw32Test, MockIoTestPrerequisite, MockIoTestCleanup, &TestContext);
 
   Status = RunAllTestSuites (Framework);
   if (Framework) {
