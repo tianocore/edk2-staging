@@ -5,10 +5,10 @@
 #include <RegisterSpaceMock.h>
 
 typedef enum {
-  LocalRegisterSpaceAlignmentByte = 0,
-  LocalRegisterSpaceAlignmentWord,
-  LocalRegisterSpaceAlignmentDword,
-  LocalRegisterSpaceAlignmentQword
+  LocalRegisterSpaceAlignmentByte = 1,
+  LocalRegisterSpaceAlignmentWord = 2,
+  LocalRegisterSpaceAlignmentDword = 4,
+  LocalRegisterSpaceAlignmentQword = 8
 } LOCAL_REGISTER_SPACE_ALIGNMENT;
 
 typedef struct _LOCAL_REGISTER_SPACE LOCAL_REGISTER_SPACE;

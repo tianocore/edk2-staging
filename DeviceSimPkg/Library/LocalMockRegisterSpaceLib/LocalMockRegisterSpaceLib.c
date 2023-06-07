@@ -4,9 +4,7 @@
 #include <Library/MemoryAllocationLib.h>
 #include <Library/LocalRegisterSpaceLib.h>
 
-#define DWORD_SIZE 4
-#define ALIGN_ADDR_TO_DWORD(Address) (Address - (Address % 4))
-#define SIZE_FOR_ALIGNED_ACCESS(Size, Address) (Size + (Address % 4))
+#define ALIGN_ADDR(Address, Alignment) (Address - (Address % Alignment))
 
 STATIC
 UINT32
@@ -69,16 +67,16 @@ LocalRegisterMockRead (
   SimpleRegisterSpace = (LOCAL_REGISTER_SPACE*) RegisterSpace;
 
   Status = EFI_SUCCESS;
-  CurrentAddress = ALIGN_ADDR_TO_DWORD(Address);
+  CurrentAddress = ALIGN_ADDR(Address, SimpleRegisterSpace->Alignment);
   ByteEnable = SizeToByteEnable (Size);
-  ByteEnable = (ByteEnable << (Address % 4)) & 0xF;
+  ByteEnable = (ByteEnable << (Address % SimpleRegisterSpace->Alignment)) & 0xF;
   RemainingSize = Size;
-  ShiftValue = Address % 4;
+  ShiftValue = Address % SimpleRegisterSpace->Alignment;
   *Value = 0;
   Position = 0;
   while (RemainingSize > 0) {
     SimpleRegisterSpace->Read(SimpleRegisterSpace->RwContext, CurrentAddress, ByteEnable, &CurrentValue);
-    CurrentAddress += 4;
+    CurrentAddress += SimpleRegisterSpace->Alignment;
     TempValue = CurrentValue;
     TempValue = TempValue << Position;
     TempValue = (TempValue >> (ShiftValue * 8));
@@ -110,10 +108,10 @@ LocalRegisterMockWrite (
 
   SimpleRegisterSpace = (LOCAL_REGISTER_SPACE*) RegisterSpace;
 
-  CurrentAddress = ALIGN_ADDR_TO_DWORD(Address);
+  CurrentAddress = ALIGN_ADDR(Address, SimpleRegisterSpace->Alignment);
   ByteEnable = SizeToByteEnable (Size);
-  ByteEnable = (ByteEnable << (Address % 4)) & 0xF;
-  CurrentValue = (UINT32)(Value << ((Address % 4) * 8));
+  ByteEnable = (ByteEnable << (Address % SimpleRegisterSpace->Alignment)) & 0xF;
+  CurrentValue = (UINT32)(Value << ((Address % SimpleRegisterSpace->Alignment) * 8));
   RemainingSize = Size;
   DwordIndex = 0;
   while (RemainingSize > 0) {
@@ -121,7 +119,7 @@ LocalRegisterMockWrite (
     RemainingSize -= ByteEnableToNoOfBytes(ByteEnable);
     Value = Value >> (ByteEnableToNoOfBytes(ByteEnable) * 8);
     ByteEnable = SizeToByteEnable(RemainingSize);
-    CurrentAddress += 4;
+    CurrentAddress += SimpleRegisterSpace->Alignment;
     CurrentValue = (UINT32)Value;
   }
 
