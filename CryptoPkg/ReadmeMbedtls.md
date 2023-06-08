@@ -101,7 +101,7 @@ OpensslLib|CryptoPkg/Library/OpensslLib/OpensslLibFull.inf
 8. Relace the platform EDK2/CryptoPkg folder using the edk2-staging/CryptoPkg folder;
 9. checkout the IntrinsicLib by using:
 ```
-$ git checkout CryptoPkg/Library/IntrinsicLib
+$ git checkout CryptoPkg/Library/IntrinsicLib/IntrinsicLib.inf
 $ git clean -fd CryptoPkg/Library/IntrinsicLib
 ```
 10. build
