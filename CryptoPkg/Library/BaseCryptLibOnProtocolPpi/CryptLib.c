@@ -5462,7 +5462,32 @@ EcNewByNid (
   IN UINTN  Nid
   )
 {
+  ASSERT(FALSE);
   CALL_CRYPTO_SERVICE (EcNewByNid, (Nid), NULL);
+}
+
+BOOLEAN
+EFIAPI
+EcSetPubKey (
+  IN OUT  VOID         *EcContext,
+  IN      CONST UINT8  *PeerPublic,
+  IN      UINTN        PeerPublicSize
+  )
+{
+  ASSERT(FALSE);
+  return FALSE;
+}
+
+BOOLEAN
+EFIAPI
+EcSetPrivKey (
+  IN OUT  VOID         *EcContext,
+  IN      CONST UINT8  *PeerPrivate,
+  IN      UINTN        PeerPrivateSize
+  )
+{
+  ASSERT(FALSE);
+  return FALSE;
 }
 
 /**

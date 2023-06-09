@@ -37,6 +37,7 @@ CryptoNidToOpensslNid (
       Nid = NID_X9_62_prime256v1;
       break;
     case CRYPTO_NID_SECP384R1:
+    case CRYPTO_NID_ECDSA_NIST_P384:
       Nid = NID_secp384r1;
       break;
     case CRYPTO_NID_SECP521R1:
@@ -426,6 +427,138 @@ EcNewByNid (
 
   return (VOID *)EC_KEY_new_by_curve_name (OpenSslNid);
 }
+
+BOOLEAN
+EFIAPI
+EcSetPrivKey (
+  IN OUT  VOID         *EcContext,
+  IN      CONST UINT8  *PeerPrivate,
+  IN      UINTN        PeerPrivateSize
+  )
+{
+    EC_KEY *ec_key;
+    BOOLEAN ret_val;
+    BIGNUM * priv_key;
+    int32_t openssl_nid;
+    size_t half_size;
+
+    if (EcContext == NULL || PeerPrivate == NULL) {
+      return FALSE;
+    }
+
+    ec_key = (EC_KEY *)EcContext;
+    openssl_nid = EC_GROUP_get_curve_name(EC_KEY_get0_group(ec_key));
+    switch (openssl_nid) {
+    case NID_X9_62_prime256v1:
+        half_size = 32;
+        break;
+    case NID_secp384r1:
+        half_size = 48;
+        break;
+    case NID_secp521r1:
+        half_size = 66;
+        break;
+    default:
+        ASSERT(FALSE);
+        return FALSE;
+    }
+    if (PeerPrivateSize != half_size) {
+      ASSERT(FALSE);
+      return FALSE;
+    }
+
+    priv_key = BN_bin2bn(PeerPrivate, PeerPrivateSize, NULL);
+    if (priv_key == NULL) {
+      ret_val = FALSE;
+      goto done;
+    }
+    ret_val = (BOOLEAN)EC_KEY_set_private_key(ec_key, priv_key);
+    if (!ret_val) {
+      goto done;
+    }
+
+    ret_val = TRUE;
+
+done:
+    if (priv_key != NULL) {
+        BN_free(priv_key);
+    }
+    return ret_val;
+}
+
+BOOLEAN
+EFIAPI
+EcSetPubKey (
+  IN OUT  VOID         *EcContext,
+  IN      CONST UINT8  *PeerPublic,
+  IN      UINTN        PeerPublicSize
+  )
+{
+  EC_KEY          *EcKey;
+  EC_KEY          *PeerEcKey;
+  CONST EC_GROUP  *Group;
+  BOOLEAN         RetVal;
+  BIGNUM          *BnX;
+  BIGNUM          *BnY;
+  EC_POINT        *Point;
+  INT32           OpenSslNid;
+  UINTN           HalfSize;
+
+  if ((EcContext == NULL) || (PeerPublic == NULL)) {
+    ASSERT(FALSE);
+    return FALSE;
+  }
+
+  if (PeerPublicSize > INT_MAX) {
+    ASSERT(FALSE);
+    return FALSE;
+  }
+
+  EcKey    = (EC_KEY *)EcContext;
+  Group    = EC_KEY_get0_group (EcKey);
+  HalfSize = (EC_GROUP_get_degree (Group) + 7) / 8;
+  if (PeerPublicSize != HalfSize * 2) {
+    ASSERT(FALSE);
+    return FALSE;
+  }
+
+  RetVal    = FALSE;
+  BnX       = BN_bin2bn (PeerPublic, (INT32)HalfSize, NULL);
+  BnY       = BN_bin2bn (PeerPublic + HalfSize, (INT32)HalfSize, NULL);
+  Point     = EC_POINT_new (Group);
+  PeerEcKey = NULL;
+  if (BnX == NULL || BnY == NULL || Point == NULL) {
+    goto fail;
+  }
+
+  if (EC_POINT_set_affine_coordinates (Group, Point, BnX, BnY, NULL) != 1) {
+    goto fail;
+  }
+
+  OpenSslNid = EC_GROUP_get_curve_name (Group);
+  PeerEcKey  = EC_KEY_new_by_curve_name (OpenSslNid);
+  if (PeerEcKey == NULL) {
+    goto fail;
+  }
+
+  if (EC_KEY_set_public_key (PeerEcKey, Point) != 1) {
+    goto fail;
+  }
+
+  // Validate NIST ECDH public key
+  if (EC_KEY_check_key (PeerEcKey) != 1) {
+    goto fail;
+  }
+
+  RetVal = TRUE;
+fail:
+  BN_free (BnX);
+  BN_free (BnY);
+  EC_POINT_free (Point);
+  EC_KEY_free (PeerEcKey);
+  return RetVal;
+}
+
 
 /**
   Release the specified EC context.

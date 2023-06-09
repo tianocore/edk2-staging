@@ -26,6 +26,8 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #define CRYPTO_NID_SECP384R1  0x0205
 #define CRYPTO_NID_SECP521R1  0x0206
 
+#define CRYPTO_NID_ECDSA_NIST_P384  0x0108
+
 ///
 /// MD5 digest size in bytes
 ///
@@ -3952,6 +3954,22 @@ VOID *
 EFIAPI
 EcNewByNid (
   IN UINTN  Nid
+  );
+
+BOOLEAN
+EFIAPI
+EcSetPubKey (
+  IN OUT  VOID         *EcContext,
+  IN      CONST UINT8  *PeerPublic,
+  IN      UINTN        PeerPublicSize
+  );
+
+BOOLEAN
+EFIAPI
+EcSetPrivKey (
+  IN OUT  VOID         *EcContext,
+  IN      CONST UINT8  *PeerPrivate,
+  IN      UINTN        PeerPrivateSize
   );
 
 /**
