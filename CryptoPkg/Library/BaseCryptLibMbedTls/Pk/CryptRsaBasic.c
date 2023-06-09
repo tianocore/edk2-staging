@@ -58,7 +58,9 @@ RsaFree (
   )
 {
   mbedtls_rsa_free (RsaContext);
-  FreePool (RsaContext);
+  if (RsaContext != NULL) {
+    FreePool (RsaContext);
+  }
 }
 
 /**

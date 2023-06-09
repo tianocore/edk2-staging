@@ -52,6 +52,10 @@ DhFree (
   )
 {
   mbedtls_dhm_free (DhContext);
+
+  if (DhContext != NULL) {
+    FreePool(DhContext);
+  }
 }
 
 /**

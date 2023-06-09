@@ -182,6 +182,9 @@ EcGroupFree (
   )
 {
   mbedtls_ecp_group_free(EcGroup);
+  if (EcGroup != NULL) {
+    FreePool(EcGroup);
+  }
 }
 
 /**
@@ -225,6 +228,9 @@ EcPointDeInit (
   )
 {
   mbedtls_ecp_point_free(EcPoint);
+  if (EcPoint != NULL) {
+    FreePool(EcPoint);
+  }
 }
 
 /**
@@ -549,7 +555,6 @@ EcPointSetCompressedCoordinates (
   mbedtls_mpi_init(&r);
   mbedtls_mpi_init(&n);
 
-
   // r = x^2
   if(mbedtls_mpi_mul_mpi(&r, BnX, BnX) != 0) {
     Status = FALSE;
@@ -687,7 +692,9 @@ EcFree (
   )
 {
   mbedtls_ecdh_free (EcContext);
-  FreePool (EcContext);
+  if (EcContext != NULL) {
+    FreePool (EcContext);
+  }
 }
 
 /**

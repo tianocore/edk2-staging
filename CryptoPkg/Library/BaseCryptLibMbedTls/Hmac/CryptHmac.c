@@ -44,6 +44,9 @@ HmacMdFree (
   )
 {
   mbedtls_md_free (HmacMdCtx);
+  if (HmacMdCtx != NULL) {
+    FreePool (HmacMdCtx);
+  }
 }
 
 /**

@@ -622,6 +622,10 @@ BigNumContextFree (
   )
 {
   mbedtls_mpi_free(BnCtx);
+
+  if (BnCtx != NULL) {
+    FreePool(BnCtx);
+  }
 }
 
 /**
