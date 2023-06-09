@@ -756,6 +756,18 @@ libspdm_ec_new_by_nid (
   return EcNewByNid (nid);
 }
 
+bool libspdm_ec_set_pub_key(void *ec_context, const uint8_t *public_key,
+                                   size_t public_key_size)
+{
+  return EcSetPubKey(ec_context, public_key, public_key_size);
+}
+
+bool libspdm_ec_set_priv_key(void *ec_context, const uint8_t *private_key,
+                                    size_t private_key_size)
+{
+  return EcSetPrivKey(ec_context, private_key, private_key_size);
+}
+
 void
 libspdm_ec_free (
   void  *ec_context
