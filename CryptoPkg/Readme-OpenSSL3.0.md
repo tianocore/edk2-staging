@@ -35,6 +35,9 @@ Risk:
 https://github.com/tianocore/edk2/pull/4391/  
 a.  Platform_CI OVMF_IA32X64_FULL_NOOPT failed  
 the required fv image size 0xdb1940 exceeds the set fv image size 0xd00000  
+VS2019 skips the NOOPT build, and GCC should do the same.  
+Request has been sent to the EDK2 community, waiting for feedback:  
+https://edk2.groups.io/g/devel/message/106001  
 b.  GCC ASM test  
 Done, Tested with Intel client platform and unittest: https://github.com/liyi77/edk2/commit/a4726c667a5c4b7156ae003119c4769f36e27c09  
   
