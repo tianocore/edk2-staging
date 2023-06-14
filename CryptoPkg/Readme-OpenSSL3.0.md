@@ -45,11 +45,13 @@ Risk:
 ## OpenSSL upstream status
 |   openssl change   |   status   |    backup     |    tips   |  
 |--------------------|------------|---------------|------------|  
-| [Disable ECX][ecxcommit] | [WIP][ecxpr] | | |  
+| [Disable ECX][ecxcommit] | [Done][ecxpr] | [Enable in Edk2 code][ecxbackup] | Will merge to next stable release 3.2.X(1) |  
 | [Enable the legacy path][legacycommit] | [Reject][legacypr] | [Enable in Edk2 code][legacybackup] | |  
 | Drop float for UEFI | [Done][floatpr] | | Bug fix |  
 | Param buffer overflow | [Done][ecpararm] | | Bug fix |  
 | Enable alg auto init | [WIP][autoinit] | [Enable in Edk2 code][autoinitbackup] | Bug fix |  
+  
+(1) OpenSSL are disinclined to backport ECX patch to 3.0, 3.1, stable release branch only accept bug fix.  
   
 ## POC result
 Binaries mode (use crypto drivers)  
@@ -177,3 +179,4 @@ Target for 2023 Q1
 [legacybackup]: https://github.com/tianocore/edk2/pull/4452/commits/076490698f399b45d72366f60284fab02ed4a1fd
 [autoinitbackup]: https://github.com/tianocore/edk2/pull/4452/commits/384187f66352e0507e06b0ff196ffb940822306d
 [legacypr]: https://github.com/openssl/openssl/pull/20777
+[ecxbackup]: https://github.com/liyi77/edk2/commit/d537a486d804c27ee7212cfa80d4bf4818bf91ca
