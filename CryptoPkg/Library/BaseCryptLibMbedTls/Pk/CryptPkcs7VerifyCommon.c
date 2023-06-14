@@ -746,70 +746,48 @@ Pkcs7GetSigners (
   OUT UINTN        *CertLength
   )
 {
-  BOOLEAN      Status;
-  UINT8        *SignedData;
-  UINTN        SignedDataSize;
-  BOOLEAN      Wrapped;
-  INTN               Ret;
-  mbedtls_pkcs7      Pkcs7;
-  mbedtls_x509_crt   *Cert;
+  MbedtlsPkcs7SignerInfo *SignerInfo;
+  mbedtls_x509_crt          *Cert;
+  MbedtlsPkcs7      Pkcs7;
+  BOOLEAN           Status;
+  UINT8             *WrapData;
+  UINTN             WrapDataSize;
+  BOOLEAN           Wrapped;
+
+  UINT8 buf[4096];
+  UINTN  CertSize;
   UINT8  Index;
   UINT8  *CertBuf;
   UINT8  *OldBuf;
   UINTN  BufferSize;
   UINTN  OldSize;
-  UINT8  *SingleCert;
-  UINTN  SingleCertSize;
 
-
-  mbedtls_pkcs7_init(&Pkcs7);
-
-  //
-  // Check input parameter.
-  //
   if ((P7Data == NULL) || (CertStack == NULL) || (StackLength == NULL) ||
       (TrustedCert == NULL) || (CertLength == NULL) || (P7Length > INT_MAX))
   {
     return FALSE;
   }
 
-  SignedData = NULL;
+  Status = WrapPkcs7Data (P7Data, P7Length, &Wrapped, &WrapData, &WrapDataSize);
 
-  Status = WrapPkcs7Data (P7Data, P7Length, &Wrapped, &SignedData, &SignedDataSize);
-  if (!Status || (SignedDataSize > INT_MAX)) {
-    goto _Exit;
+  if (!Status) {
+    return FALSE;
   }
 
-  Status = FALSE;
-
-  //
-  // Retrieve PKCS#7 Data (DER encoding)
-  //
-  if (SignedDataSize > INT_MAX) {
-    goto _Exit;
-  }
-
-  Ret = mbedtls_pkcs7_parse_der(&Pkcs7, SignedData, (INT32)SignedDataSize);
-
-  //
-  // The type of Pkcs7 must be signedData
-  //
-  if (Ret != MBEDTLS_PKCS7_SIGNED_DATA) {
-    goto _Exit;
-  }
-
-
-  Cert      = NULL;
+  Status     = FALSE;
   CertBuf    = NULL;
   OldBuf     = NULL;
-  SingleCert = NULL;
+  Cert       = NULL;
 
-
-  Cert = &Pkcs7.signed_data.certs;
-  if (Cert == NULL) {
+  MbedTlsPkcs7Init (&Pkcs7);
+  if (MbedtlsPkcs7ParseDer (WrapData, (INT32)WrapDataSize, &Pkcs7) != 0){
     goto _Exit;
   }
 
+  SignerInfo = &(Pkcs7.SignedData.SignerInfos);
+
+  //
+  // Traverse each signers
   //
   // Convert CertStack to buffer in following format:
   // UINT8  CertNumber;
@@ -823,15 +801,21 @@ Pkcs7GetSigners (
   //
   BufferSize = sizeof (UINT8);
   OldSize    = BufferSize;
+  Index = 0;
 
-  for (Index = 0; ; Index++) {
+  while (SignerInfo != NULL) {
+    // Find signers cert
+    Cert = MbedTlsPkcs7FindSignerCert (SignerInfo, &(Pkcs7.SignedData.Certificates));
 
-    SingleCertSize = Cert->raw.len;
+    CertSize = mbedtls_x509_crt_info(buf, sizeof(buf), NULL, Cert);
+    if (CertSize < 0) {
+      goto _Exit;
+    }
 
     OldSize    = BufferSize;
     OldBuf     = CertBuf;
-    BufferSize = OldSize + SingleCertSize + sizeof (UINT32);
-    CertBuf    = AllocateZeroPool (BufferSize);
+    BufferSize = OldSize + CertSize + sizeof (UINT32);
+    CertBuf    = malloc (BufferSize);
 
     if (CertBuf == NULL) {
       goto _Exit;
@@ -839,20 +823,19 @@ Pkcs7GetSigners (
 
     if (OldBuf != NULL) {
       CopyMem (CertBuf, OldBuf, OldSize);
-      FreePool (OldBuf);
+      free (OldBuf);
       OldBuf = NULL;
     }
 
-    WriteUnaligned32 ((UINT32 *)(CertBuf + OldSize), (UINT32)SingleCertSize);
-    CopyMem (CertBuf + OldSize + sizeof (UINT32), SingleCert, SingleCertSize);
+    WriteUnaligned32 ((UINT32 *)(CertBuf + OldSize), (UINT32)CertSize);
+    CopyMem (CertBuf + OldSize + sizeof (UINT32), Cert, CertSize);
 
-    FreePool (SingleCert);
-    SingleCert = NULL;
+    Index++;
 
-    if (Cert->next == NULL) {
-      break;
-    }
+    // move to next
+    SignerInfo = SignerInfo->Next;
   }
+
 
   if (CertBuf != NULL) {
     //
@@ -861,7 +844,7 @@ Pkcs7GetSigners (
     CertBuf[0] = Index;
 
     *CertLength  = BufferSize - OldSize - sizeof (UINT32);
-    *TrustedCert = AllocateZeroPool (*CertLength);
+    *TrustedCert = malloc (*CertLength);
     if (*TrustedCert == NULL) {
       goto _Exit;
     }
@@ -876,23 +859,13 @@ _Exit:
   //
   // Release Resources
   //
-  if (!Wrapped) {
-    FreePool (SignedData);
-  }
-
-  mbedtls_pkcs7_free (&Pkcs7);
-
-  if (SingleCert !=  NULL) {
-    FreePool (SingleCert);
-  }
-
   if (!Status && (CertBuf != NULL)) {
-    FreePool (CertBuf);
+    free (CertBuf);
     *CertStack = NULL;
   }
 
   if (OldBuf != NULL) {
-    FreePool (OldBuf);
+    free (OldBuf);
   }
 
   return Status;
@@ -931,154 +904,6 @@ Pkcs7GetCertificatesList (
   OUT UINTN        *UnchainLength
   )
 {
-  BOOLEAN      Status;
-  UINT8        *SignedData;
-  UINTN        SignedDataSize;
-  BOOLEAN      Wrapped;
-  INTN               Ret;
-  mbedtls_pkcs7      Pkcs7;
-  mbedtls_x509_crt   *Cert;
-  UINT8  Index;
-  UINT8  *CertBuf;
-  UINT8  *OldBuf;
-  UINTN  BufferSize;
-  UINTN  OldSize;
-  UINT8  *SingleCert;
-  UINTN  SingleCertSize;
-
-
-  mbedtls_pkcs7_init(&Pkcs7);
-
-  //
-  // Check input parameter.
-  //
-  if ((P7Data == NULL) || (SignerChainCerts == NULL) || (ChainLength == NULL) ||
-      (UnchainCerts == NULL) || (UnchainLength == NULL) || (P7Length > INT_MAX))
-  {
-    return FALSE;
-  }
-
-  SignedData = NULL;
-
-  Status = WrapPkcs7Data (P7Data, P7Length, &Wrapped, &SignedData, &SignedDataSize);
-  if (!Status || (SignedDataSize > INT_MAX)) {
-    goto _Exit;
-  }
-
-  Status = FALSE;
-
-  //
-  // Retrieve PKCS#7 Data (DER encoding)
-  //
-  if (SignedDataSize > INT_MAX) {
-    goto _Exit;
-  }
-
-  Ret = mbedtls_pkcs7_parse_der(&Pkcs7, SignedData, (INT32)SignedDataSize);
-
-  //
-  // The type of Pkcs7 must be signedData
-  //
-  if (Ret != MBEDTLS_PKCS7_SIGNED_DATA) {
-    goto _Exit;
-  }
-
-
-  Cert      = NULL;
-  CertBuf    = NULL;
-  OldBuf     = NULL;
-  SingleCert = NULL;
-
-
-  Cert = &Pkcs7.signed_data.certs;
-  if (Cert == NULL) {
-    goto _Exit;
-  }
-
-  //
-  // Converts Chained and Untrusted Certificate to Certificate Buffer in following format:
-  //      UINT8  CertNumber;
-  //      UINT32 Cert1Length;
-  //      UINT8  Cert1[];
-  //      UINT32 Cert2Length;
-  //      UINT8  Cert2[];
-  //      ...
-  //      UINT32 CertnLength;
-  //      UINT8  Certn[];
-  //
-  BufferSize = sizeof (UINT8);
-  OldSize    = BufferSize;
-
-  for (Index = 0; ; Index++) {
-
-    SingleCertSize = Cert->raw.len;
-
-    OldSize    = BufferSize;
-    OldBuf     = CertBuf;
-    BufferSize = OldSize + SingleCertSize + sizeof (UINT32);
-    CertBuf    = AllocateZeroPool (BufferSize);
-
-    if (CertBuf == NULL) {
-      goto _Exit;
-    }
-
-    if (OldBuf != NULL) {
-      CopyMem (CertBuf, OldBuf, OldSize);
-      FreePool (OldBuf);
-      OldBuf = NULL;
-    }
-
-    WriteUnaligned32 ((UINT32 *)(CertBuf + OldSize), (UINT32)SingleCertSize);
-    CopyMem (CertBuf + OldSize + sizeof (UINT32), SingleCert, SingleCertSize);
-
-    FreePool (SingleCert);
-    SingleCert = NULL;
-
-    if (Cert->next == NULL) {
-      break;
-    }
-  }
-
-  if (CertBuf != NULL) {
-    //
-    // Update CertNumber.
-    //
-    CertBuf[0] = Index;
-
-    *UnchainLength  = BufferSize - OldSize - sizeof (UINT32);
-    *UnchainCerts = AllocateZeroPool (*UnchainLength);
-    if (*UnchainCerts == NULL) {
-      goto _Exit;
-    }
-
-    CopyMem (*UnchainCerts, CertBuf + OldSize + sizeof (UINT32), *UnchainLength);
-    *SignerChainCerts   = CertBuf;
-    *ChainLength = BufferSize;
-    Status       = TRUE;
-  }
-
-_Exit:
-  //
-  // Release Resources
-  //
-  if (!Wrapped) {
-    FreePool (SignedData);
-  }
-
-  mbedtls_pkcs7_free (&Pkcs7);
-
-  if (SingleCert !=  NULL) {
-    FreePool (SingleCert);
-  }
-
-  if (!Status && (CertBuf != NULL)) {
-    FreePool (CertBuf);
-    *SignerChainCerts = NULL;
-  }
-
-  if (OldBuf != NULL) {
-    FreePool (OldBuf);
-  }
-
-  return Status;
+  ASSERT (FALSE);
+  return FALSE;
 }
