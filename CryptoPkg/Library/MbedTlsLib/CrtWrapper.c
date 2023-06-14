@@ -13,10 +13,8 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Library/BaseMemoryLib.h>
 #include <stdio.h>
 
-
 int my_snprintf(char *str, size_t size, const char *format, ...)
 {
-  ASSERT(FALSE);
   return 0;
 }
 
