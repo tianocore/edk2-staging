@@ -768,7 +768,6 @@
   $(OPENSSL_PATH)/providers/implementations/encode_decode/encode_key2blob.c
   $(OPENSSL_PATH)/crypto/evp/ec_support.c
   $(OPENSSL_PATH)/crypto/evp/ec_ctrl.c
-  $(OPENSSL_PATH)/crypto/ec/ecx_meth.c
   $(OPENSSL_PATH)/crypto/ec/ecx_key.c
   $(OPENSSL_PATH)/crypto/ec/ecx_backend.c
   $(OPENSSL_PATH)/crypto/ec/ecp_smpl.c
@@ -828,6 +827,7 @@
   rand_pool.c
 #  SslNull.c
 #  EcSm2Null.c
+  EcxNull.c
   OpensslStub/uefiprov.c
   OpensslGen/der_digests_gen.c
   OpensslGen/der_rsa_gen.c
