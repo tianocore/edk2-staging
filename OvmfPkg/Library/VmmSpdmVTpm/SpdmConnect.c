@@ -26,6 +26,7 @@
 #include <Stub/SpdmLibStub.h>
 #include "VTpmTransport.h"
 #include "VmmSpdmInternal.h"
+#include "VTpmTdCert.h"
 
 UINT32  mUseRequesterCapabilityFlags =
   (0 |
@@ -36,6 +37,7 @@ UINT32  mUseRequesterCapabilityFlags =
    SPDM_GET_CAPABILITIES_REQUEST_FLAGS_ENCAP_CAP |
    SPDM_GET_CAPABILITIES_REQUEST_FLAGS_HANDSHAKE_IN_THE_CLEAR_CAP |
    SPDM_GET_CAPABILITIES_REQUEST_FLAGS_CHUNK_CAP |
+   SPDM_GET_CAPABILITIES_REQUEST_FLAGS_MUT_AUTH_CAP |
    0);
 
 typedef libspdm_error_struct_t               VMM_SPDM_ERROR_STRUCT;
@@ -488,6 +490,17 @@ VmmSpdmVTpmInitSpdmContext (
   UINTN                DataSize;
   SPDM_DATA_PARAMETER  Parameter;
 
+  EFI_STATUS Status;
+  UINT8*     CertChain;
+  UINTN      CertChainSize;
+  BOOLEAN    CertChainSuccess;
+  UINTN      Pages;
+
+  CertChainSuccess = TRUE;
+  CertChain        = NULL;
+  CertChainSize    = 0;
+  Status           = EFI_SUCCESS;
+
   Context->Signature = VMM_SPDM_CONTEXT_SIGNATURE;
   SpdmContext        = Context->SpdmContext;
 
@@ -615,6 +628,7 @@ VmmSpdmVTpmInitSpdmContext (
   Data16 = SPDM_ALGORITHMS_BASE_ASYM_ALGO_TPM_ALG_RSAPSS_3072 |
            SPDM_ALGORITHMS_BASE_ASYM_ALGO_TPM_ALG_RSAPSS_2048 |
            SPDM_ALGORITHMS_BASE_ASYM_ALGO_TPM_ALG_RSASSA_3072 |
+           SPDM_ALGORITHMS_BASE_ASYM_ALGO_TPM_ALG_ECDSA_ECC_NIST_P384 |
            SPDM_ALGORITHMS_BASE_ASYM_ALGO_TPM_ALG_RSASSA_2048;
   SpdmStatus = SpdmSetData (
                             SpdmContext,
@@ -651,6 +665,58 @@ VmmSpdmVTpmInitSpdmContext (
                             );
   if (LIBSPDM_STATUS_IS_ERROR (SpdmStatus)) {
     DEBUG ((DEBUG_ERROR, "SpdmSetData with %x failed - %lx\n", SpdmStatus, LIBSPDM_DATA_OTHER_PARAMS_SUPPORT));
+    return EFI_ABORTED;
+  }
+
+  // init the cert 
+  Pages = VTPM_TD_CERT_CHAIN_DEFAULT_ALLOCATION_PAGE;
+  CertChain = AllocatePages(Pages);
+  CertChainSize = EFI_PAGES_TO_SIZE(Pages);
+  if (CertChain == NULL) {
+    DEBUG ((DEBUG_ERROR, "AllocatePages CertChain failed with %d Pages\n", Pages));
+    return EFI_ABORTED;
+  }
+
+  Status = InitialVtpmTdCertChain(CertChain,&CertChainSize);
+  if (Status == EFI_BUFFER_TOO_SMALL){
+    FreePages(CertChain,Pages);
+    Pages = EFI_SIZE_TO_PAGES(CertChainSize);
+    CertChain = AllocatePages(Pages);
+    if (CertChain == NULL) {
+      DEBUG ((DEBUG_ERROR, "AllocatePages CertChain failed with %d Pages\n", Pages));
+      return EFI_ABORTED;
+    }
+
+    Status = InitialVtpmTdCertChain(CertChain,&CertChainSize);
+  }
+  
+  if (EFI_ERROR(Status)) {
+    DEBUG ((DEBUG_ERROR, "InitialVtpmTdCertChain failed with %r\n", Status));
+    CertChainSuccess =  FALSE;
+    goto ClearCertChain;
+  }
+
+  ZeroMem (&Parameter, sizeof (Parameter));
+  Parameter.location = LIBSPDM_DATA_LOCATION_LOCAL;
+  Parameter.additional_data[0] = Context->SlotId;
+  SpdmStatus = SpdmSetData (
+                            SpdmContext,
+                            LIBSPDM_DATA_LOCAL_PUBLIC_CERT_CHAIN,
+                            &Parameter,
+                            (spdm_cert_chain_t *)CertChain,
+                            CertChainSize
+                            );
+  if (LIBSPDM_STATUS_IS_ERROR (SpdmStatus)) {
+    DEBUG ((DEBUG_ERROR, "SpdmSetData with %x failed - %lx\n", SpdmStatus, LIBSPDM_DATA_LOCAL_PUBLIC_CERT_CHAIN));
+    CertChainSuccess =  FALSE;
+  }
+
+ClearCertChain:
+  if (CertChain) {
+    FreePages(CertChain,Pages);
+  }
+
+  if (CertChainSuccess == FALSE){
     return EFI_ABORTED;
   }
 
@@ -789,7 +855,7 @@ VmmSpdmVTpmInitSpdmContext (
 
   Context->UseReqAsymAlgo = Data16;
 
-  Context->UseMeasurementHashType = SPDM_CHALLENGE_REQUEST_ALL_MEASUREMENTS_HASH;
+  Context->UseMeasurementHashType = SPDM_CHALLENGE_REQUEST_NO_MEASUREMENT_SUMMARY_HASH;
   Context->SessionPolicy          = SPDM_KEY_EXCHANGE_REQUEST_SESSION_POLICY_TERMINATION_POLICY_RUNTIME_UPDATE;
 
   Context->Initialized = TRUE;
@@ -993,6 +1059,8 @@ DoStartSession (
                              &HeartbeatPeriod,
                              MeasurementHash
                              );
+  //After SpdmStartSession, tdvf should clear the key pair info.
+  ClearKeyPairInGuidHob();
 
   return Status;
 }

@@ -28,6 +28,7 @@
   VTpmTransport.c
   VTpmRtmr.c
   VTpmTdEvent.c
+  VTpmTdCert.c
 
 [Packages]
   CryptoPkg/CryptoPkg.dec
@@ -45,6 +46,7 @@
   gEdkiiVTpmSharedBufferInfoHobGuid
   gTpm2StartupLocalityHobGuid
   gEdkiiHCRTMComponentEventHobGuid
+  gEdkiiVTpmTdX509CertKeyInfoHobGuid
 
 [LibraryClasses]
   BaseLib
