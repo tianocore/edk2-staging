@@ -275,6 +275,7 @@ typedef struct {
 #define SpdmStopSession                   libspdm_stop_session
 #define SpdmSendReceiveData               libspdm_send_receive_data
 #define SpdmRegisterGetResponseFunc       libspdm_register_get_response_func
+#define SpdmRegisterDeviceDataSignFunc    libspdm_register_device_data_sign_func
 #define SpdmProcessRequest                libspdm_process_request
 #define SpdmBuildResponse                 libspdm_build_response
 #define SpdmGenerateErrorResponse         libspdm_generate_error_response
@@ -299,4 +300,8 @@ typedef struct {
 #define SpdmSetLastSpdmErrorStruct            libspdm_set_last_spdm_error_struct
 #define SpdmDecodeSecuredMessage              libspdm_decode_secured_message
 #define SpdmSecuredMessageGetLastErrorStruct  libspdm_secured_message_get_last_spdm_error_struct
+
+#define SpdmReqAsymSignHash                   libspdm_req_asym_sign_hash
+#define SpdmReqAsymSign                       libspdm_req_asym_sign
+#define SpdmReqAsymFree                       libspdm_req_asym_free
 #endif
