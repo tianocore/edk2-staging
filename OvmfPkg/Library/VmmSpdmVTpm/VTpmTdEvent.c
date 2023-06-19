@@ -105,7 +105,7 @@ GetTdReportFromHOB(
 
 
 /**
- * Get and hash TD_REPORT for H-CRTM suqeunce.
+ * Get and hash TD_REPORT for H-CRTM sequence.
  * Refer to VTPM 0.7.4
  *
  * @param[out]            The pointer to the digest buffer
