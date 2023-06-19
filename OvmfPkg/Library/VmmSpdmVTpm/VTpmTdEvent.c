@@ -186,8 +186,8 @@ CreateHCRTMComponentEvent (
   UINT16      HashAlgo;
   UINT8       *EventBuffer;
   UINT8       *Ptr;
-  UINTN       HCRTMComponentDescriptionSturctSize;
-  UINTN       HCRTMComponentMeasurementSturctSize;
+  UINTN       HCRTMComponentDescriptionStructSize;
+  UINTN       HCRTMComponentMeasurementStructSize;
 
   TCG_HCRTMComponentDescription *ComponentDescription;
   TCG_HCRTMComponentMeasurement *ComponentMeasurement;
@@ -201,10 +201,10 @@ CreateHCRTMComponentEvent (
   ComponentDescription = NULL;
   ComponentMeasurement = NULL;
 
-  HCRTMComponentDescriptionSturctSize = sizeof(TCG_HCRTMComponentDescription) + sizeof(TCG_HCRTMCOMPONENTEVENT_COMPONENT_DESCRIPTION);
-  HCRTMComponentMeasurementSturctSize = sizeof(TCG_HCRTMComponentMeasurement) + COMPONENT_MEASUREMENT_SIZE;
+  HCRTMComponentDescriptionStructSize = sizeof(TCG_HCRTMComponentDescription) + sizeof(TCG_HCRTMCOMPONENTEVENT_COMPONENT_DESCRIPTION);
+  HCRTMComponentMeasurementStructSize = sizeof(TCG_HCRTMComponentMeasurement) + COMPONENT_MEASUREMENT_SIZE;
 
-  ComponentDescription = (TCG_HCRTMComponentDescription *)AllocatePool(HCRTMComponentDescriptionSturctSize);
+  ComponentDescription = (TCG_HCRTMComponentDescription *)AllocatePool(HCRTMComponentDescriptionStructSize);
 
   if (ComponentDescription == NULL) {
     Status = EFI_OUT_OF_RESOURCES;
@@ -216,7 +216,7 @@ CreateHCRTMComponentEvent (
 
   CopyMem (Ptr, TCG_HCRTMCOMPONENTEVENT_COMPONENT_DESCRIPTION, ComponentDescription->DescriptionSize);
 
-  ComponentMeasurement = (TCG_HCRTMComponentMeasurement *)AllocatePool(HCRTMComponentMeasurementSturctSize);
+  ComponentMeasurement = (TCG_HCRTMComponentMeasurement *)AllocatePool(HCRTMComponentMeasurementStructSize);
   if (ComponentMeasurement == NULL) {
     Status = EFI_OUT_OF_RESOURCES;
     goto CleanComponent;
@@ -237,7 +237,7 @@ CreateHCRTMComponentEvent (
   CopyMem (Ptr, &HashAlgo, sizeof (HashAlgo));
   CopyMem (Ptr + sizeof (HashAlgo), Digest, SHA384_DIGEST_SIZE);
 
-  DataLength = HCRTMComponentDescriptionSturctSize + HCRTMComponentMeasurementSturctSize;
+  DataLength = HCRTMComponentDescriptionStructSize + HCRTMComponentMeasurementStructSize;
 
   //
   // Create a Guid hob to save HCRTMComponentEvent
@@ -253,10 +253,10 @@ CreateHCRTMComponentEvent (
   }
 
   EventBuffer = GuidHobRawData;
-  CopyMem (EventBuffer , ComponentDescription, HCRTMComponentDescriptionSturctSize);
+  CopyMem (EventBuffer , ComponentDescription, HCRTMComponentDescriptionStructSize);
 
-  EventBuffer += HCRTMComponentDescriptionSturctSize;
-  CopyMem (EventBuffer, ComponentMeasurement, HCRTMComponentMeasurementSturctSize);
+  EventBuffer += HCRTMComponentDescriptionStructSize;
+  CopyMem (EventBuffer, ComponentMeasurement, HCRTMComponentMeasurementStructSize);
 
 CleanComponent:
   if (ComponentDescription){
