@@ -183,7 +183,7 @@ CreateHCRTMComponentEvent (
   UINT8       *Digest;
   VOID        *GuidHobRawData;
   UINTN       DataLength;
-  UINT16      HashAlog;
+  UINT16      HashAlgo;
   UINT8       *EventBuffer;
   UINT8       *Ptr;
   UINTN       HCRTMComponentDescriptionSturctSize;
@@ -196,7 +196,7 @@ CreateHCRTMComponentEvent (
   GuidHobRawData = NULL;
   EventBuffer    = NULL;
   Ptr            = NULL;
-  HashAlog       = TPM_ALG_SHA384;
+  HashAlgo       = TPM_ALG_SHA384;
 
   ComponentDescription = NULL;
   ComponentMeasurement = NULL;
@@ -232,10 +232,10 @@ CreateHCRTMComponentEvent (
   }
 
   Ptr = (UINT8 *)(ComponentMeasurement + 1);
-  // ComponentMeasurement layout: HashAlog + Digest
+  // ComponentMeasurement layout: HashAlgo + Digest
   ComponentMeasurement->MeasurementSize = COMPONENT_MEASUREMENT_SIZE;
-  CopyMem (Ptr, &HashAlog, sizeof (HashAlog));
-  CopyMem (Ptr + sizeof (HashAlog), Digest, SHA384_DIGEST_SIZE);
+  CopyMem (Ptr, &HashAlgo, sizeof (HashAlgo));
+  CopyMem (Ptr + sizeof (HashAlgo), Digest, SHA384_DIGEST_SIZE);
 
   DataLength = HCRTMComponentDescriptionSturctSize + HCRTMComponentMeasurementSturctSize;
 
