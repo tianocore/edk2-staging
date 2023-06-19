@@ -870,7 +870,7 @@ ClearCertChain:
 #define SPDM_CERT_CHAIN_HEADER_SIZE (4+48)
 
 /**
- * Verfiy the peer cert.
+ * Verify the peer cert.
  *
  * @param CertChain            A pointer to the cert chain.
  * @param CertChainSize        The size of the cert chain.
