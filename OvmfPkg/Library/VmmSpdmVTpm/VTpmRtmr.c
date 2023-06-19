@@ -142,7 +142,7 @@ HashAndExtendToRtmr(
 
 /**
  * If the VTPM spdm session is established, tdvf will  
- * extend the secuerd session info to RTMR[3] and extend
+ * extend the secured session info to RTMR[3] and extend
  * the hash(vTPM) to RTMR[0] RTMR[1] RTMR[2] RTMR[3].
  * If the session is failed to establish, 
  * TDVF shall extend a random once value to RTMR[3].
