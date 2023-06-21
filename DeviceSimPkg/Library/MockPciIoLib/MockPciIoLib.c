@@ -420,7 +420,7 @@ MockPciIoCopyMem (
 
 typedef struct {
   BOOLEAN  Used;
-  UINT64   HostAddress;
+  VOID*   HostAddress;
   UINT32   DeviceAddress;
 } DEVICE_MEMORY_MAPPING;
 
@@ -448,7 +448,7 @@ MockPciIoMap (
     if (gDeviceMemoryMapping[Index].Used == FALSE) {
       gDeviceMemoryMapping[Index].Used = TRUE;
       *DeviceAddress = (EFI_PHYSICAL_ADDRESS)gDeviceMemoryMapping[Index].DeviceAddress;
-      gDeviceMemoryMapping[Index].HostAddress = (UINT64) HostAddress;
+      gDeviceMemoryMapping[Index].HostAddress = HostAddress;
       *Mapping = &gDeviceMemoryMapping[Index];
       return EFI_SUCCESS;
     }
