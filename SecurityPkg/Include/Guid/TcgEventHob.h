@@ -60,6 +60,15 @@ extern EFI_GUID  gTpm2StartupLocalityHobGuid;
 
 extern EFI_GUID  gEdkiiHCRTMComponentEventHobGuid;
 
+//
+// The Global ID of a GUIDed HOB used to record VtpmTd TD_REPORT Event
+// {E3343A38-EB44-DD85-690E-931CE95C11E0}
+//
+#define EDKII_VTPM_TD_TD_REPORT_EVENT_HOB_GUID \
+  { 0xe3343a38, 0xeb44, 0xdd85, { 0x69, 0x0e, 0x93, 0x1c, 0xe9, 0x5c, 0x11, 0xe0 } };
+
+extern EFI_GUID  gEdkiiVTpmTdTdReportEventHobGuid;
+
 ///
 /// The Global ID of a GUIDed HOB used to record TCG 800-155 PlatformId Event.
 /// HOB payload is the whole TCG_Sp800_155_PlatformId_Event2 according to TCG 800-155 PlatformId Event.
