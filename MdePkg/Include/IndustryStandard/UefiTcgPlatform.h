@@ -55,6 +55,8 @@
 #define EV_EFI_SPDM_FIRMWARE_CONFIG       (EV_EFI_EVENT_BASE + 0xE2)
 #define EV_EFI_SPDM_DEVICE_BLOB           EV_EFI_SPDM_FIRMWARE_BLOB
 #define EV_EFI_SPDM_DEVICE_CONFIG         EV_EFI_SPDM_FIRMWARE_CONFIG
+#define EV_EFI_VTPMTD_TDREPORT            (EV_EFI_EVENT_BASE + 0xE5)
+
 //
 // The SPDM policy database for SPDM verification.
 // It goes to PCR7
