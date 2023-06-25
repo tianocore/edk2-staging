@@ -461,6 +461,52 @@ ClearExtension:
 }
 
 /**
+ * Save the TD_REPORT data to the GUID HOB.
+ *
+ * @param  TdReport        A pointer to the TDREPORT data.
+ *
+ * @return EFI_SUCCESS    Save TD_REPORT data was successfully.
+ * @return Others         Some errors.
+*/
+STATIC
+EFI_STATUS
+SaveTdReportToHob(
+  IN UINT8 *TdReport
+)
+{
+  VOID   *GuidHobRawData;
+  UINTN  DataLength;
+
+  EFI_PEI_HOB_POINTERS  GuidHob;
+
+  if (TdReport == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  GuidHob.Guid = GetFirstGuidHob (&gEdkiiTdReportInfoHobGuid);
+  if (GuidHob.Guid != NULL) {
+    DEBUG ((DEBUG_ERROR, "%a: The Guid HOB should be NULL \n", __FUNCTION__));
+    return EFI_UNSUPPORTED;
+  }
+
+  DataLength = sizeof (TDREPORT_STRUCT);
+
+  GuidHobRawData = BuildGuidHob (
+                                 &gEdkiiTdReportInfoHobGuid,
+                                 DataLength
+                                 );
+
+  if (GuidHobRawData == NULL) {
+    DEBUG ((DEBUG_ERROR, "%a : BuildGuidHob failed \n", __FUNCTION__));
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  CopyMem(GuidHobRawData,TdReport, sizeof (TDREPORT_STRUCT));
+
+  return EFI_SUCCESS;
+}
+
+/**
  * Get the TD_REPORT with the public key.
  *
  * @param  Report         A pointer to the TD_REPORT data.
@@ -573,6 +619,13 @@ AddTdReportExtension (
   Status = GetTdReportForVTpmTdCert (TdReport);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "GetTdReportForVTpmTdCert failed with %r\n", Status));
+    goto ClearExtensionData;
+  }
+
+  // Ensure the TD_REPORT data is not changed in VtpmTd Event log.
+  Status = SaveTdReportToHob(TdReport);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "SaveTdReportToHob failed with %r\n", Status));
     goto ClearExtensionData;
   }
 

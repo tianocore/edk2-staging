@@ -47,6 +47,7 @@
   gTpm2StartupLocalityHobGuid
   gEdkiiHCRTMComponentEventHobGuid
   gEdkiiVTpmTdX509CertKeyInfoHobGuid
+  gEdkiiTdReportInfoHobGuid
 
 [LibraryClasses]
   BaseLib
