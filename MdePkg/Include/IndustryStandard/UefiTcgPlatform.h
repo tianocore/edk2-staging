@@ -525,6 +525,15 @@ typedef struct tdTCG_HCRTMComponentMeasurement {
   // UINT8     Measurement[MeasurementSize];
 }TCG_HCRTMComponentMeasurement;
 
+#define TCG_VTPM_TD_TD_REPORT_SIGNATURE  "vTPM Td TDREPORT"
+
+//
+// VtpmTd TDREPORT Event
+//
+typedef struct tdTCG_VtpmTdTdReportEvent {
+  UINT8      Signature[17];
+} TCG_VtpmTdTdReportEvent;
+
 //
 // Restore original structure alignment
 //
