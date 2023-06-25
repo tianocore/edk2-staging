@@ -145,4 +145,13 @@ extern EFI_GUID  gEdkiiVTpmSharedBufferInfoHobGuid;
 
 extern EFI_GUID  gEdkiiVTpmTdX509CertKeyInfoHobGuid;
 
+//
+// The Global ID of a GUIDed HOB used to save the TDREPORT info
+// {FBBFE4C9-3EE1-13D4-99CE-871068869FD8}
+//
+#define EDKII_TDREPORT_INFO_HOB_GUID \
+  { 0xfbbfe4c9, 0x3ee1, 0x13d4, { 0x99, 0xce, 0x87, 0x10, 0x68, 0x86, 0x9f, 0xd8 } };
+
+extern EFI_GUID  gEdkiiTdReportInfoHobGuid;
+
 #endif
