@@ -63,6 +63,47 @@ CreateStartupLocalityEvent (
   return EFI_SUCCESS;
 }
 
+
+/**
+ * Get the TDREPORT data from the GUID HOB
+ *
+ * @param[out] TdReport   The pointer to the TDREPORT buffer
+ * 
+ * @return EFI_SUCCESS    Get TDREPORT data successfully.
+ * @return Others         Some errors occurred
+*/
+STATIC
+EFI_STATUS
+GetTdReportFromHOB(
+  OUT UINT8  *TdReport
+)
+{
+  EFI_PEI_HOB_POINTERS  GuidHob;
+  UINT16                HobLength;
+
+  if (TdReport == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  GuidHob.Guid = GetFirstGuidHob (&gEdkiiTdReportInfoHobGuid);
+  if (GuidHob.Guid == NULL) {
+    DEBUG ((DEBUG_ERROR, "%a: The Guid HOB is not found \n", __FUNCTION__));
+    return EFI_NOT_FOUND;
+  }
+
+  HobLength = sizeof (EFI_HOB_GUID_TYPE) + sizeof (TDREPORT_STRUCT);
+
+  if (GuidHob.Guid->Header.HobLength != HobLength) {
+    DEBUG ((DEBUG_ERROR, "%a: The GuidHob.Guid->Header.HobLength is not equal HobLength, %d vs %d \n", __FUNCTION__, GuidHob.Guid->Header.HobLength, HobLength));
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  CopyMem(TdReport, GuidHob.Guid + 1, sizeof (TDREPORT_STRUCT));
+
+  return EFI_SUCCESS;
+}
+
+
 /**
  * Get and hash TD_REPORT for H-CRTM suqeunce.
  * Refer to VTPM 0.7.4
@@ -82,14 +123,12 @@ GetAndHashTdReportForVtpmTd (
   UINTN            Pages;
   TDREPORT_STRUCT  *TdReport;
   UINT8            *Report;
-  UINT8            *AdditionalData;
   UINT8            HashValue[SHA384_DIGEST_SIZE];
 
   ZeroMem (HashValue, SHA384_DIGEST_SIZE);
 
   TdReport       = NULL;
   Report         = NULL;
-  AdditionalData = NULL;
 
   Pages = EFI_SIZE_TO_PAGES (sizeof (TDREPORT_STRUCT));
 
@@ -100,16 +139,11 @@ GetAndHashTdReportForVtpmTd (
 
   ZeroMem (Report, EFI_PAGES_TO_SIZE (Pages));
 
-  AdditionalData = Report + sizeof (TDREPORT_STRUCT);
-
-  Status = TdGetReport (
-                        Report,
-                        sizeof (TDREPORT_STRUCT),
-                        AdditionalData,
-                        TDREPORT_ADDITIONAL_DATA_SIZE
+  Status = GetTdReportFromHOB (
+                        Report
                         );
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_ERROR, "%a: TdGetReport failed with %r\n", __FUNCTION__, Status));
+    DEBUG ((DEBUG_ERROR, "%a: GetTdReportFromHOB failed with %r\n", __FUNCTION__, Status));
     goto CleanReport;
   }
 
@@ -236,6 +270,38 @@ CleanComponent:
   return Status;
 }
 
+STATIC
+VOID
+ClearTdReportInGuidHOB (
+  VOID
+  )
+{
+  EFI_PEI_HOB_POINTERS  GuidHob;
+  UINT16                HobLength;
+  TDREPORT_STRUCT       *TdReport;
+
+  TdReport = NULL;
+
+  GuidHob.Guid = GetFirstGuidHob (&gEdkiiTdReportInfoHobGuid);
+  if (GuidHob.Guid == NULL) {
+    DEBUG ((DEBUG_ERROR, "%a: The Guid HOB is not found \n", __FUNCTION__));
+    return;
+  }
+
+  HobLength = sizeof (EFI_HOB_GUID_TYPE) + sizeof (TDREPORT_STRUCT);
+
+  if (GuidHob.Guid->Header.HobLength != HobLength) {
+    DEBUG ((DEBUG_ERROR, "%a: The GuidHob.Guid->Header.HobLength is not equal HobLength, %d vs %d \n", __FUNCTION__, GuidHob.Guid->Header.HobLength, HobLength));
+    return;
+  }
+
+  TdReport = (TDREPORT_STRUCT *)(GuidHob.Guid + 1);
+
+  ZeroMem (TdReport, sizeof (TDREPORT_STRUCT));
+
+  DEBUG ((DEBUG_INFO, "Clear the TDREPORT data at the end of CreateVtpmTdInitialEvents\n"));
+}
+
 /**
  * Refer to VTPM 4.3.1
  * Create the VtpmTd Initial Events according to 
@@ -257,14 +323,17 @@ CreateVtpmTdInitialEvents (
   Status = CreateStartupLocalityEvent ();
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "CreateStartupLocalityEvent failed with %r\n", Status));
-    return Status;
+    goto ClearTdReprot;
   }
 
   Status = CreateHCRTMComponentEvent ();
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "CreateHCRTMComponentEvent failed with %r\n", Status));
-    return Status;
+    goto ClearTdReprot;
   }
 
-  return EFI_SUCCESS;
+ClearTdReprot:
+  ClearTdReportInGuidHOB ();
+
+  return Status;
 }
