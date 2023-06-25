@@ -87,6 +87,7 @@
   gTpm2StartupLocalityHobGuid                        ## SOMETIMES_CONSUMES  ## HOB
   gTcg800155PlatformIdEventHobGuid                   ## SOMETIMES_CONSUMES  ## HOB
   gEdkiiHCRTMComponentEventHobGuid
+  gEdkiiVTpmTdTdReportEventHobGuid
 
 [Protocols]
   gEfiTcg2ProtocolGuid                               ## PRODUCES

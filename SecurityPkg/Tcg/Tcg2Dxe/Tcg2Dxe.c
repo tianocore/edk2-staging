@@ -1648,6 +1648,144 @@ SetupHCRTMComponentEvent (
 }
 
 /**
+  Init the TCG_VtpmTdTdReportEvent.
+
+  @param[in,out]  VtpmTdEvent     The pointer of the event
+  @param[in]      DigestList      The pointer of the digest
+  @param[in]      EventSize       The size of the event
+
+**/
+STATIC
+VOID
+InitVtpmTdEvent (
+  IN OUT TCG_PCR_EVENT2_HDR  *VtpmTdEvent,
+  IN TPML_DIGEST_VALUES      *DigestList,
+  IN UINT32                  EventSize
+  )
+{
+  UINT32         DigestListCount;
+  TPMI_ALG_HASH  HashAlgId;
+  UINT32         HashDigestSize;
+  UINT8          *DigestBuffer;
+  UINT32         Index;
+
+  if ((VtpmTdEvent == NULL) || (DigestList == NULL)) {
+    DEBUG ((DEBUG_ERROR, "%a: VtpmTdEvent or DigestList is NULL\n", __FUNCTION__));
+    return;
+  }
+
+  DigestBuffer    = (UINT8 *)VtpmTdEvent->Digests.digests;
+  DigestListCount = 0;
+
+  VtpmTdEvent->PCRIndex  = 0;
+  VtpmTdEvent->EventType = EV_EFI_VTPMTD_TDREPORT;
+
+  ZeroMem (&VtpmTdEvent->Digests, sizeof (VtpmTdEvent->Digests));
+
+  for (Index = 0; Index < DigestList->count; Index++) {
+    HashAlgId = DigestList->digests[Index].hashAlg;
+    switch (HashAlgId) {
+      case TPM_ALG_SHA256:
+        if ((mTcgDxeData.BsCap.ActivePcrBanks & EFI_TCG2_BOOT_HASH_ALG_SHA256) != 0) {
+          HashDigestSize = GetHashSizeFromAlgo (HashAlgId);
+          CopyMem (DigestBuffer, &HashAlgId, sizeof (TPMI_ALG_HASH));
+          DigestBuffer += sizeof (TPMI_ALG_HASH);
+          CopyMem (DigestBuffer, DigestList->digests[Index].digest.sha256, HashDigestSize);
+          DigestBuffer += HashDigestSize;
+          DigestListCount++;
+        }
+
+        break;
+
+      case TPM_ALG_SHA384:
+        if ((mTcgDxeData.BsCap.ActivePcrBanks & EFI_TCG2_BOOT_HASH_ALG_SHA384) != 0) {
+          CopyMem (DigestBuffer, &HashAlgId, sizeof (TPMI_ALG_HASH));
+          DigestBuffer  += sizeof (TPMI_ALG_HASH);
+          HashDigestSize = GetHashSizeFromAlgo (HashAlgId);
+          CopyMem (DigestBuffer, DigestList->digests[Index].digest.sha384, HashDigestSize);
+          DigestBuffer += HashDigestSize;
+          DigestListCount++;
+        }
+
+        break;
+
+      case TPM_ALG_SHA512:
+        if ((mTcgDxeData.BsCap.ActivePcrBanks & EFI_TCG2_BOOT_HASH_ALG_SHA512) != 0) {
+          CopyMem (DigestBuffer, &HashAlgId, sizeof (TPMI_ALG_HASH));
+          DigestBuffer  += sizeof (TPMI_ALG_HASH);
+          HashDigestSize = GetHashSizeFromAlgo (HashAlgId);
+          CopyMem (DigestBuffer, DigestList->digests[Index].digest.sha512, HashDigestSize);
+          DigestBuffer += HashDigestSize;
+          DigestListCount++;
+        }
+
+        break;
+
+      default:
+        DEBUG ((DEBUG_ERROR, "%a: Unknow HashAlgo %x\n", __FUNCTION__, HashAlgId));
+        break;
+    }
+  }
+
+  //
+  // Set Digests Count
+  //
+  WriteUnaligned32 ((UINT32 *)&VtpmTdEvent->Digests.count, DigestListCount);
+
+  //
+  // Set Event Size
+  //
+  WriteUnaligned32 ((UINT32 *)DigestBuffer, EventSize);
+}
+
+/**
+  Setup the TCG_VtpmTdTdReportEvent.
+
+  @param[in]  Index         The index of the mTcg2EventInfo
+
+**/
+STATIC
+VOID
+SetupVtpmTdTdReportEvent (
+  IN UINTN  Index
+  )
+{
+  EFI_STATUS               Status;
+  TCG_PCR_EVENT2_HDR       VtpmTdEvent;
+  EFI_PEI_HOB_POINTERS     GuidHob;
+  TPML_DIGEST_VALUES       *DigestList;
+  TCG_VtpmTdTdReportEvent  VtpmTdReportEvent;
+  UINTN                    DataLength;
+
+  DigestList = NULL;
+
+  GuidHob.Guid = GetFirstGuidHob (&gEdkiiVTpmTdTdReportEventHobGuid);
+  if (GuidHob.Guid == NULL) {
+    DEBUG ((DEBUG_ERROR, "%a: VTpmTdTdReportEventHob is NULL\n", __FUNCTION__));
+    return;
+  }
+
+  DigestList = (TPML_DIGEST_VALUES *)(GuidHob.Guid + 1);
+
+  DataLength = sizeof (TCG_VtpmTdTdReportEvent);
+
+  CopyMem (VtpmTdReportEvent.Signature, TCG_VTPM_TD_TD_REPORT_SIGNATURE, sizeof (TCG_VTPM_TD_TD_REPORT_SIGNATURE));
+  InitVtpmTdEvent (&VtpmTdEvent, DigestList, DataLength);
+
+  Status = TcgDxeLogEvent (
+                           mTcg2EventInfo[Index].LogFormat,
+                           &VtpmTdEvent,
+                           sizeof (VtpmTdEvent.PCRIndex) + sizeof (VtpmTdEvent.EventType) + GetDigestListBinSize (&VtpmTdEvent.Digests) + sizeof (VtpmTdEvent.EventSize),
+                           (UINT8 *)&VtpmTdReportEvent,
+                           DataLength
+                           );
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "%a: TcgDxeLogEvent failed with %r\n", __FUNCTION__, Status));
+    return;
+  }
+}
+
+/**
   Initialize the Event Log and log events passed from the PEI phase.
 
   @retval EFI_SUCCESS           Operation completed successfully.
@@ -1868,6 +2006,11 @@ SetupEventLog (
         // TCG_HCRTMComponentEvent. Event format is TCG_PCR_EVENT2
         //
         SetupHCRTMComponentEvent(Index);
+
+        //
+        // TCG_VtpmTdTdReportEvent. Event format is TCG_PCR_EVENT2
+        //
+        SetupVtpmTdTdReportEvent(Index);
        
       }
     }
