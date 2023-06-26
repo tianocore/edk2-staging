@@ -48,6 +48,7 @@
   gEdkiiHCRTMComponentEventHobGuid
   gEdkiiVTpmTdX509CertKeyInfoHobGuid
   gEdkiiTdReportInfoHobGuid
+  gEdkiiVTpmTdTdReportEventHobGuid
 
 [LibraryClasses]
   BaseLib
