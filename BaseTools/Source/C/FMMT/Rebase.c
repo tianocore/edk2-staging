@@ -159,8 +159,8 @@ EFI_NOT_FOUND           No compressed sections could be found.
       return Status;
     }
 
-    //if ((ImageContext.Machine == EFI_IMAGE_MACHINE_ARMT) ||
-    //  (ImageContext.Machine == EFI_IMAGE_MACHINE_AARCH64)) {
+    //if ((ImageContext.Machine == IMAGE_FILE_MACHINE_ARMTHUMB_MIXED) ||
+    //  (ImageContext.Machine == IMAGE_FILE_MACHINE_ARM64)) {
     //  mArm = TRUE;
     //}
 
@@ -435,8 +435,8 @@ EFI_NOT_FOUND           No compressed sections could be found.
       return Status;
     }
 
-    //if ((ImageContext.Machine == EFI_IMAGE_MACHINE_ARMT) ||
-    //  (ImageContext.Machine == EFI_IMAGE_MACHINE_AARCH64)) {
+    //if ((ImageContext.Machine == IMAGE_FILE_MACHINE_ARMTHUMB_MIXED) ||
+    //  (ImageContext.Machine == IMAGE_FILE_MACHINE_ARM64)) {
     //  mArm = TRUE;
     //}
 
@@ -835,8 +835,8 @@ Returns:
   //
   // Verify machine type is supported
   //
-  if ((*MachineType != EFI_IMAGE_MACHINE_IA32) && (*MachineType != EFI_IMAGE_MACHINE_X64) && (*MachineType != EFI_IMAGE_MACHINE_EBC) &&
-      (*MachineType != EFI_IMAGE_MACHINE_ARMT) && (*MachineType != EFI_IMAGE_MACHINE_AARCH64)) {
+  if ((*MachineType != IMAGE_FILE_MACHINE_I386) && (*MachineType != IMAGE_FILE_MACHINE_X64) && (*MachineType != IMAGE_FILE_MACHINE_EBC) &&
+      (*MachineType != IMAGE_FILE_MACHINE_ARMTHUMB_MIXED) && (*MachineType != IMAGE_FILE_MACHINE_ARM64)) {
     Error (NULL, 0, 3000, "Invalid", "Unrecognized machine type in the PE32 file.");
     return EFI_UNSUPPORTED;
   }
