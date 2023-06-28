@@ -9,6 +9,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include "InternalCryptLib.h"
 #include <openssl/evp.h>
 #include <openssl/kdf.h>
+#include <openssl/core_names.h>
 
 /**
   Derive HMAC-based Extract-and-Expand Key Derivation Function (HKDF).
@@ -30,7 +31,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 STATIC
 BOOLEAN
 HkdfMdExtractAndExpand (
-  IN   CONST EVP_MD  *Md,
+  IN   UINT8         *Md,
   IN   CONST UINT8   *Key,
   IN   UINTN         KeySize,
   IN   CONST UINT8   *Salt,
@@ -41,43 +42,50 @@ HkdfMdExtractAndExpand (
   IN   UINTN         OutSize
   )
 {
-  EVP_PKEY_CTX  *pHkdfCtx;
   BOOLEAN       Result;
+  OSSL_LIB_CTX  *oCtx;
+  EVP_KDF       *Kdf;
+  EVP_KDF_CTX   *kCtx;
+  OSSL_PARAM    Params[5];
+  OSSL_PARAM    *ParamsPtr;
 
-  if ((Key == NULL) || (Salt == NULL) || (Info == NULL) || (Out == NULL) ||
+  if ((Md == NULL) || (Key == NULL) || (Salt == NULL) || (Info == NULL) || (Out == NULL) ||
       (KeySize > INT_MAX) || (SaltSize > INT_MAX) || (InfoSize > INT_MAX) || (OutSize > INT_MAX))
   {
     return FALSE;
   }
 
-  pHkdfCtx = EVP_PKEY_CTX_new_id (EVP_PKEY_HKDF, NULL);
-  if (pHkdfCtx == NULL) {
+  oCtx = OSSL_LIB_CTX_new ();
+  if (oCtx == NULL) {
     return FALSE;
   }
-
-  Result = EVP_PKEY_derive_init (pHkdfCtx) > 0;
-  if (Result) {
-    Result = EVP_PKEY_CTX_set_hkdf_md (pHkdfCtx, Md) > 0;
-  }
+  Result = (Kdf = EVP_KDF_fetch (oCtx, "HKDF", "provider=default")) != NULL;
 
   if (Result) {
-    Result = EVP_PKEY_CTX_set1_hkdf_salt (pHkdfCtx, Salt, (UINT32)SaltSize) > 0;
+    Result = (kCtx = EVP_KDF_CTX_new (Kdf)) != NULL;
   }
+
+  ParamsPtr = Params;
+  *ParamsPtr++ = OSSL_PARAM_construct_utf8_string (OSSL_KDF_PARAM_DIGEST,
+                                                   Md, strlen(Md));
+  *ParamsPtr++ = OSSL_PARAM_construct_octet_string (OSSL_KDF_PARAM_KEY,
+                                           (CHAR8 *)Key, (size_t)KeySize);
+  *ParamsPtr++ = OSSL_PARAM_construct_octet_string (OSSL_KDF_PARAM_INFO,
+                                           (CHAR8 *)Info, (size_t)InfoSize);
+  *ParamsPtr++ = OSSL_PARAM_construct_octet_string (OSSL_KDF_PARAM_SALT,
+                                           (CHAR8 *)Salt, (size_t)SaltSize);
+  *ParamsPtr = OSSL_PARAM_construct_end ();
 
   if (Result) {
-    Result = EVP_PKEY_CTX_set1_hkdf_key (pHkdfCtx, Key, (UINT32)KeySize) > 0;
+    Result = EVP_KDF_derive (kCtx, Out, OutSize, Params) > 0;
   }
 
-  if (Result) {
-    Result = EVP_PKEY_CTX_add1_hkdf_info (pHkdfCtx, Info, (UINT32)InfoSize) > 0;
-  }
-
-  if (Result) {
-    Result = EVP_PKEY_derive (pHkdfCtx, Out, &OutSize) > 0;
-  }
-
-  EVP_PKEY_CTX_free (pHkdfCtx);
-  pHkdfCtx = NULL;
+  EVP_KDF_free (Kdf);
+  Kdf = NULL;
+  EVP_KDF_CTX_free (kCtx);
+  kCtx = NULL;
+  OSSL_LIB_CTX_free (oCtx);
+  oCtx = NULL;
   return Result;
 }
 
@@ -99,7 +107,7 @@ HkdfMdExtractAndExpand (
 STATIC
 BOOLEAN
 HkdfMdExtract (
-  IN CONST EVP_MD  *Md,
+  IN UINT8         *Md,
   IN CONST UINT8   *Key,
   IN  UINTN        KeySize,
   IN CONST UINT8   *Salt,
@@ -108,56 +116,53 @@ HkdfMdExtract (
   UINTN            PrkOutSize
   )
 {
-  EVP_PKEY_CTX  *pHkdfCtx;
   BOOLEAN       Result;
+  OSSL_LIB_CTX  *oCtx;
+  EVP_KDF       *Kdf;
+  EVP_KDF_CTX   *kCtx;
+  OSSL_PARAM    Params[5];
+  OSSL_PARAM    *ParamsPtr;
+  INT32         Mode;
 
-  if ((Key == NULL) || (Salt == NULL) || (PrkOut == NULL) ||
+  if ((Md == NULL) || (Key == NULL) || (Salt == NULL) || (PrkOut == NULL) ||
       (KeySize > INT_MAX) || (SaltSize > INT_MAX) ||
       (PrkOutSize > INT_MAX))
   {
     return FALSE;
   }
 
-  pHkdfCtx = EVP_PKEY_CTX_new_id (EVP_PKEY_HKDF, NULL);
-  if (pHkdfCtx == NULL) {
+  oCtx = OSSL_LIB_CTX_new ();
+  if (oCtx == NULL) {
     return FALSE;
   }
 
-  Result = EVP_PKEY_derive_init (pHkdfCtx) > 0;
-  if (Result) {
-    Result = EVP_PKEY_CTX_set_hkdf_md (pHkdfCtx, Md) > 0;
-  }
+  Result = (Kdf = EVP_KDF_fetch (oCtx, "HKDF", "provider=default")) != NULL;
 
   if (Result) {
-    Result =
-      EVP_PKEY_CTX_hkdf_mode (
-        pHkdfCtx,
-        EVP_PKEY_HKDEF_MODE_EXTRACT_ONLY
-        ) > 0;
+    Result = (kCtx = EVP_KDF_CTX_new (Kdf)) != NULL;
   }
+
+  ParamsPtr = Params;
+  Mode = EVP_PKEY_HKDEF_MODE_EXTRACT_ONLY;
+  *ParamsPtr++ = OSSL_PARAM_construct_utf8_string (OSSL_KDF_PARAM_DIGEST,
+                                                   Md, strlen(Md));
+  *ParamsPtr++ = OSSL_PARAM_construct_octet_string (OSSL_KDF_PARAM_KEY,
+                                          (CHAR8 *)Key, (size_t)KeySize);
+  *ParamsPtr++ = OSSL_PARAM_construct_octet_string (OSSL_KDF_PARAM_SALT,
+                                          (CHAR8 *)Salt, (size_t)SaltSize);
+  *ParamsPtr++ = OSSL_PARAM_construct_int (OSSL_KDF_PARAM_MODE, &Mode);
+  *ParamsPtr = OSSL_PARAM_construct_end ();
 
   if (Result) {
-    Result = EVP_PKEY_CTX_set1_hkdf_salt (
-               pHkdfCtx,
-               Salt,
-               (uint32_t)SaltSize
-               ) > 0;
+    Result = EVP_KDF_derive (kCtx, PrkOut, PrkOutSize, Params) > 0;
   }
 
-  if (Result) {
-    Result = EVP_PKEY_CTX_set1_hkdf_key (
-               pHkdfCtx,
-               Key,
-               (uint32_t)KeySize
-               ) > 0;
-  }
-
-  if (Result) {
-    Result = EVP_PKEY_derive (pHkdfCtx, PrkOut, &PrkOutSize) > 0;
-  }
-
-  EVP_PKEY_CTX_free (pHkdfCtx);
-  pHkdfCtx = NULL;
+  EVP_KDF_free (Kdf);
+  Kdf = NULL;
+  EVP_KDF_CTX_free (kCtx);
+  kCtx = NULL;
+  OSSL_LIB_CTX_free (oCtx);
+  oCtx = NULL;
   return Result;
 }
 
@@ -179,7 +184,7 @@ HkdfMdExtract (
 STATIC
 BOOLEAN
 HkdfMdExpand (
-  IN   CONST EVP_MD  *Md,
+  IN   UINT8         *Md,
   IN   CONST UINT8   *Prk,
   IN   UINTN         PrkSize,
   IN   CONST UINT8   *Info,
@@ -188,8 +193,13 @@ HkdfMdExpand (
   IN   UINTN         OutSize
   )
 {
-  EVP_PKEY_CTX  *pHkdfCtx;
   BOOLEAN       Result;
+  OSSL_LIB_CTX  *oCtx;
+  EVP_KDF       *Kdf;
+  EVP_KDF_CTX   *kCtx;
+  OSSL_PARAM    Params[5];
+  OSSL_PARAM    *ParamsPtr;
+  INT32         Mode;
 
   if ((Prk == NULL) || (Info == NULL) || (Out == NULL) ||
       (PrkSize > INT_MAX) || (InfoSize > INT_MAX) || (OutSize > INT_MAX))
@@ -197,34 +207,38 @@ HkdfMdExpand (
     return FALSE;
   }
 
-  pHkdfCtx = EVP_PKEY_CTX_new_id (EVP_PKEY_HKDF, NULL);
-  if (pHkdfCtx == NULL) {
+  oCtx = OSSL_LIB_CTX_new ();
+  if (oCtx == NULL) {
     return FALSE;
   }
 
-  Result = EVP_PKEY_derive_init (pHkdfCtx) > 0;
-  if (Result) {
-    Result = EVP_PKEY_CTX_set_hkdf_md (pHkdfCtx, Md) > 0;
-  }
+  Result = (Kdf = EVP_KDF_fetch (oCtx, "HKDF", "provider=default")) != NULL;
 
   if (Result) {
-    Result = EVP_PKEY_CTX_hkdf_mode (pHkdfCtx, EVP_PKEY_HKDEF_MODE_EXPAND_ONLY) > 0;
+    Result = (kCtx = EVP_KDF_CTX_new (Kdf)) != NULL;
   }
+
+  ParamsPtr = Params;
+  Mode = EVP_PKEY_HKDEF_MODE_EXPAND_ONLY;
+  *ParamsPtr++ = OSSL_PARAM_construct_utf8_string (OSSL_KDF_PARAM_DIGEST,
+                                                   Md, strlen(Md));
+  *ParamsPtr++ = OSSL_PARAM_construct_octet_string (OSSL_KDF_PARAM_KEY,
+                                          (CHAR8 *)Prk, (size_t)PrkSize);
+  *ParamsPtr++ = OSSL_PARAM_construct_octet_string (OSSL_KDF_PARAM_INFO,
+                                          (CHAR8 *)Info, (size_t)InfoSize);
+  *ParamsPtr++ = OSSL_PARAM_construct_int (OSSL_KDF_PARAM_MODE, &Mode);
+  *ParamsPtr = OSSL_PARAM_construct_end ();
 
   if (Result) {
-    Result = EVP_PKEY_CTX_set1_hkdf_key (pHkdfCtx, Prk, (UINT32)PrkSize) > 0;
+    Result = EVP_KDF_derive (kCtx, Out, OutSize, Params) > 0;
   }
 
-  if (Result) {
-    Result = EVP_PKEY_CTX_add1_hkdf_info (pHkdfCtx, Info, (UINT32)InfoSize) > 0;
-  }
-
-  if (Result) {
-    Result = EVP_PKEY_derive (pHkdfCtx, Out, &OutSize) > 0;
-  }
-
-  EVP_PKEY_CTX_free (pHkdfCtx);
-  pHkdfCtx = NULL;
+  EVP_KDF_free (Kdf);
+  Kdf = NULL;
+  EVP_KDF_CTX_free (kCtx);
+  kCtx = NULL;
+  OSSL_LIB_CTX_free (oCtx);
+  oCtx = NULL;
   return Result;
 }
 
@@ -257,7 +271,7 @@ HkdfSha256ExtractAndExpand (
   IN   UINTN        OutSize
   )
 {
-  return HkdfMdExtractAndExpand (EVP_sha256 (), Key, KeySize, Salt, SaltSize, Info, InfoSize, Out, OutSize);
+  return HkdfMdExtractAndExpand ("sha256", Key, KeySize, Salt, SaltSize, Info, InfoSize, Out, OutSize);
 }
 
 /**
@@ -286,7 +300,7 @@ HkdfSha256Extract (
   )
 {
   return HkdfMdExtract (
-           EVP_sha256 (),
+           "sha256",
            Key,
            KeySize,
            Salt,
@@ -321,7 +335,7 @@ HkdfSha256Expand (
   IN   UINTN        OutSize
   )
 {
-  return HkdfMdExpand (EVP_sha256 (), Prk, PrkSize, Info, InfoSize, Out, OutSize);
+  return HkdfMdExpand ("sha256", Prk, PrkSize, Info, InfoSize, Out, OutSize);
 }
 
 /**
@@ -353,7 +367,7 @@ HkdfSha384ExtractAndExpand (
   IN   UINTN        OutSize
   )
 {
-  return HkdfMdExtractAndExpand (EVP_sha384 (), Key, KeySize, Salt, SaltSize, Info, InfoSize, Out, OutSize);
+  return HkdfMdExtractAndExpand ("sha384", Key, KeySize, Salt, SaltSize, Info, InfoSize, Out, OutSize);
 }
 
 /**
@@ -382,7 +396,7 @@ HkdfSha384Extract (
   )
 {
   return HkdfMdExtract (
-           EVP_sha384 (),
+           "sha384",
            Key,
            KeySize,
            Salt,
@@ -417,5 +431,5 @@ HkdfSha384Expand (
   IN   UINTN        OutSize
   )
 {
-  return HkdfMdExpand (EVP_sha384 (), Prk, PrkSize, Info, InfoSize, Out, OutSize);
+  return HkdfMdExpand ("sha384", Prk, PrkSize, Info, InfoSize, Out, OutSize);
 }

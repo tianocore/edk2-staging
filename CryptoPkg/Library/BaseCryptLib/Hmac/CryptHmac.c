@@ -10,6 +10,32 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <openssl/hmac.h>
 
 /**
+  Create Md instance based on digest name.
+
+  @return  Md instance
+
+**/
+STATIC
+VOID *
+MdFetch (
+  IN CONST UINT8 *Name
+  )
+{
+  OSSL_LIB_CTX  *OsslCtx;
+  EVP_MD        *Md;
+
+  OsslCtx = OSSL_LIB_CTX_new ();
+  if (OsslCtx == NULL) {
+    return NULL;
+  }
+
+  Md = EVP_MD_fetch (OsslCtx, Name, "provider=default");
+
+  OSSL_LIB_CTX_free (OsslCtx);
+  return Md;
+}
+
+/**
   Allocates and initializes one HMAC_CTX context for subsequent HMAC-MD use.
 
   @return  Pointer to the HMAC_CTX context that has been initialized.
@@ -338,7 +364,7 @@ HmacSha256SetKey (
   IN   UINTN        KeySize
   )
 {
-  return HmacMdSetKey (EVP_sha256 (), HmacSha256Context, Key, KeySize);
+  return HmacMdSetKey (MdFetch ("sha256"), HmacSha256Context, Key, KeySize);
 }
 
 /**
@@ -453,7 +479,7 @@ HmacSha256All (
   OUT  UINT8        *HmacValue
   )
 {
-  return HmacMdAll (EVP_sha256 (), Data, DataSize, Key, KeySize, HmacValue);
+  return HmacMdAll (MdFetch ("sha256"), Data, DataSize, Key, KeySize, HmacValue);
 }
 
 /**
@@ -511,7 +537,7 @@ HmacSha384SetKey (
   IN   UINTN        KeySize
   )
 {
-  return HmacMdSetKey (EVP_sha384 (), HmacSha384Context, Key, KeySize);
+  return HmacMdSetKey (MdFetch ("sha384"), HmacSha384Context, Key, KeySize);
 }
 
 /**
@@ -632,5 +658,5 @@ HmacSha384All (
   OUT  UINT8        *HmacValue
   )
 {
-  return HmacMdAll (EVP_sha384 (), Data, DataSize, Key, KeySize, HmacValue);
+  return HmacMdAll (MdFetch ("sha384"), Data, DataSize, Key, KeySize, HmacValue);
 }
