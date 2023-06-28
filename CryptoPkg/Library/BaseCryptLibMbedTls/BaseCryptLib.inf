@@ -60,7 +60,6 @@
   Pk/CryptRsaPssSign.c
 
   Rand/CryptRand.c
-  SysCall/BaseMemAllocation.c
   SysCall/CrtWrapper.c
   SysCall/DummyOpensslSupport.c
   SysCall/TimerWrapper.c

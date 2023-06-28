@@ -1344,7 +1344,7 @@
  *
  * Uncomment to enable the Connection ID extension.
  */
-// #define MBEDTLS_SSL_DTLS_CONNECTION_ID
+#define MBEDTLS_SSL_DTLS_CONNECTION_ID
 
 
 /**
@@ -1367,7 +1367,7 @@
  *
  * Requires: MBEDTLS_SSL_DTLS_CONNECTION_ID
  */
-// #define MBEDTLS_SSL_DTLS_CONNECTION_ID_COMPAT 0
+#define MBEDTLS_SSL_DTLS_CONNECTION_ID_COMPAT 0
 
 /**
  * \def MBEDTLS_SSL_ASYNC_PRIVATE
@@ -1701,7 +1701,7 @@
  *
  * Comment this macro to disable support for DTLS
  */
-// #define MBEDTLS_SSL_PROTO_DTLS
+#define MBEDTLS_SSL_PROTO_DTLS
 
 /**
  * \def MBEDTLS_SSL_ALPN
@@ -3599,6 +3599,13 @@ extern int my_printf(const char *fmt, ...);
 extern int my_snprintf(char *str, long long size, const char *format, ...);
 #define MBEDTLS_PLATFORM_SNPRINTF_MACRO my_snprintf
 
+
+#define MBEDTLS_PLATFORM_MEMORY
+#include <stddef.h>
+extern void *mbedtls_calloc( size_t n, size_t size );
+extern void mbedtls_free( void *ptr );
+#define MBEDTLS_PLATFORM_CALLOC_MACRO mbedtls_calloc
+#define MBEDTLS_PLATFORM_FREE_MACRO mbedtls_free
 
 
 /** \def MBEDTLS_CHECK_RETURN

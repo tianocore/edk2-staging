@@ -60,7 +60,6 @@
   SysCall/CrtWrapper.c
   SysCall/DummyOpensslSupport.c
   SysCall/ConstantTimeClock.c
-  SysCall/BaseMemAllocation.c
 
 [Packages]
   MdePkg/MdePkg.dec
