@@ -1,8 +1,5 @@
 #include <CrtLibSupport.h>
 
-
-
-
 int  errno = 0;
 
 FILE  *stderr = NULL;

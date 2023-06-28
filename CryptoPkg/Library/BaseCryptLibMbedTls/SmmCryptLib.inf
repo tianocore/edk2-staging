@@ -68,7 +68,6 @@
   SysCall/CrtWrapper.c
   SysCall/DummyOpensslSupport.c
   SysCall/ConstantTimeClock.c
-  SysCall/BaseMemAllocation.c
 
 [Sources.Ia32]
   Rand/CryptRandTsc.c

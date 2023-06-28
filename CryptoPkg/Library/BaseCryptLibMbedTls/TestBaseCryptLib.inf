@@ -56,7 +56,6 @@
   Pk/CryptRsaPss.c
   Pk/CryptRsaPssSign.c
   Rand/CryptRand.c
-  SysCall/BaseMemAllocation.c
   SysCall/CrtWrapper.c
 
 [Packages]
