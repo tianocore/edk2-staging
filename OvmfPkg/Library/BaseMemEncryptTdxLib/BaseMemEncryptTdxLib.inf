@@ -42,6 +42,7 @@
 
 [Pcd]
   gEfiMdePkgTokenSpaceGuid.PcdConfidentialComputingGuestAttr
+  gUefiOvmfPkgTokenSpaceGuid.PcdTdxAcceptPageSize
 
 [Protocols]
   gEdkiiMemoryAcceptProtocolGuid

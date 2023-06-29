@@ -504,6 +504,98 @@ Split1GPageTo2M (
   }
 }
 
+#define ALIGNED_2MB_MASK  0x1fffff
+
+/**
+  This function accept the memory with TdAcceptPages
+
+  @param[in]  StartAddress      The address of the memory.
+  
+  @param[in]  Size              The size of memory.
+
+  @return EFI_SUCCESS           Accept successfully
+  @return others                Indicate other errors
+**/
+EFI_STATUS
+TdxAcceptMemory(
+  IN EFI_PHYSICAL_ADDRESS          StartAddress,
+  IN UINTN                         Size
+  )
+{
+  EFI_STATUS  Status;
+  UINT32      AcceptPageSize;
+  UINT64      StartAddress1;
+  UINT64      StartAddress2;
+  UINT64      StartAddress3;
+  UINT64      Length1;
+  UINT64      Length2;
+  UINT64      Length3;
+  UINT64      Pages;
+
+  AcceptPageSize = FixedPcdGet32 (PcdTdxAcceptPageSize);
+  StartAddress1  = 0;
+  StartAddress2  = 0;
+  StartAddress3  = 0;
+  Length1        = 0;
+  Length2        = 0;
+  Length3        = 0;
+
+  if (Size == 0) {
+    return EFI_SUCCESS;
+  }
+
+  if (ALIGN_VALUE (StartAddress, SIZE_2MB) != StartAddress) {
+    StartAddress1 = StartAddress;
+    Length1       = ALIGN_VALUE (StartAddress, SIZE_2MB) - StartAddress;
+    if (Length1 >= Size) {
+      Length1 = Size;
+    }
+
+    StartAddress += Length1;
+    Size         -= Length1;
+  }
+
+  if (Size > SIZE_2MB) {
+    StartAddress2 = StartAddress;
+    Length2       = Size & ~(UINT64)ALIGNED_2MB_MASK;
+    StartAddress += Length2;
+    Size         -= Length2;
+  }
+
+  if (Size) {
+    StartAddress3 = StartAddress;
+    Length3       = Size;
+  }
+
+  Status = EFI_SUCCESS;
+  if (Length1 > 0) {
+    Pages  = Length1 / SIZE_4KB;
+    Status = TdAcceptPages (StartAddress1, Pages, SIZE_4KB);
+    if (EFI_ERROR (Status)) {
+      return Status;
+    }
+  }
+
+  if (Length2 > 0) {
+    Pages  = Length2 / AcceptPageSize;
+    Status = TdAcceptPages (StartAddress2, Pages, AcceptPageSize);
+    if (EFI_ERROR (Status)) {
+      return Status;
+    }
+  }
+
+  if (Length3 > 0) {
+    Pages  = Length3 / SIZE_4KB;
+    Status = TdAcceptPages (StartAddress3, Pages, SIZE_4KB);
+    ASSERT (!EFI_ERROR (Status));
+    if (EFI_ERROR (Status)) {
+      return Status;
+    }
+  }
+
+  return Status;
+}
+
 /**
   Set or Clear the memory shared bit
 
@@ -525,7 +617,6 @@ SetOrClearSharedBit (
   UINT64                        AddressEncMask;
   UINT64                        TdStatus;
   EFI_STATUS                    Status;
-  EDKII_MEMORY_ACCEPT_PROTOCOL  *MemoryAcceptProtocol;
 
   AddressEncMask = GetMemEncryptionAddressMask ();
 
@@ -551,14 +642,7 @@ SetOrClearSharedBit (
   // If changing shared to private, must accept-page again
   //
   if (Mode == ClearSharedBit) {
-    Status = gBS->LocateProtocol (&gEdkiiMemoryAcceptProtocolGuid, NULL, (VOID **)&MemoryAcceptProtocol);
-    if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_ERROR, "%a: Failed to locate MemoryAcceptProtocol with %r\n", __FUNCTION__, Status));
-      ASSERT (FALSE);
-      return Status;
-    }
-
-    Status = MemoryAcceptProtocol->AcceptMemory (MemoryAcceptProtocol, PhysicalAddress, Length);
+    Status = TdxAcceptMemory (PhysicalAddress, Length);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_ERROR, "%a: Failed to AcceptMemory with %r\n", __FUNCTION__, Status));
       ASSERT (FALSE);
