@@ -38,6 +38,7 @@
 
 [Ppis]
   gPeiVmmSpdmTunnelPpiGuid            ## PRODUCES
+  gEfiEndOfPeiSignalPpiGuid
 
 [Depex]
   TRUE

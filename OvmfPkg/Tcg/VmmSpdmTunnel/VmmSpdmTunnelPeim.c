@@ -114,6 +114,53 @@ STATIC CONST EFI_PEI_PPI_DESCRIPTOR  mVmmSpdmTunnlPpiListNull = {
   &mPeiVmmSpdmTunnelNull
 };
 
+/**
+  Notification function to clear the shared bit. 
+
+  @param[in] PeiServices      Indirect reference to the PEI Services Table.
+  @param[in] NotifyDescriptor Address of the notification descriptor data
+                              structure.
+  @param[in] Ppi              Address of the PPI that was installed.
+
+**/
+STATIC
+EFI_STATUS
+EFIAPI
+VmmSpdmVTpmEndOfPeiNotify (
+  IN EFI_PEI_SERVICES           **PeiServices,
+  IN EFI_PEI_NOTIFY_DESCRIPTOR  *NotifyDescriptor,
+  IN VOID                       *Ppi
+  )
+{
+  return VmmSpdmVTpmClearSharedBit();
+}
+
+STATIC CONST EFI_PEI_NOTIFY_DESCRIPTOR  mVmmSpdmVTpmClearShareBitNotify = {
+  EFI_PEI_PPI_DESCRIPTOR_NOTIFY_CALLBACK | // Flags
+  EFI_PEI_PPI_DESCRIPTOR_TERMINATE_LIST,
+  &gEfiEndOfPeiSignalPpiGuid,               // Guid
+  VmmSpdmVTpmEndOfPeiNotify                 // Notifyre
+};
+
+
+VOID
+InstallClearSharedBitCallback (
+  VOID
+  )
+{
+  EFI_STATUS  Status;
+
+  Status = PeiServicesNotifyPpi (&mVmmSpdmVTpmClearShareBitNotify);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((
+      DEBUG_ERROR,
+      "%a: failed to set up VTPM Clear Shared BIT callback: %r\n",
+      __FUNCTION__,
+      Status
+      ));
+  }
+
+}
 
 /**
   The entry point for VmmSpdmTunnel driver.
@@ -146,6 +193,9 @@ VmmSpdmTunnelPeimEntryPoint (
     Status = PeiServicesInstallPpi (&mVmmSpdmTunnlPpiList);
     DEBUG((DEBUG_INFO, "PeiServicesInstallPpi with mVmmSpdmTunnelPpiList is %r\n", Status));
   }
+
+  //TDVF should clear the shared bit when end of PEI.
+  InstallClearSharedBitCallback();
 
   return Status;
 }
