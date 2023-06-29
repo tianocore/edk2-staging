@@ -521,3 +521,46 @@ VtpmAllocateSharedBuffer (
   *SharedBuffer = (UINT8 *)(UINTN)(VtpmSharedBufferInfo->BufferAddress);
   return EFI_SUCCESS;
 }
+
+EFI_STATUS
+EFIAPI
+VmmSpdmVTpmClearSharedBit (
+  VOID
+  )
+{
+  EFI_STATUS  Status;
+  UINT8       *Buffer;
+  UINT32       Pages;
+
+  EFI_PEI_HOB_POINTERS  GuidHob;
+  UINT16                HobLength;
+
+  VTPM_SHARED_BUFFER_INFO_STRUCT  *VtpmSharedBufferInfo;
+
+  Buffer = NULL;
+  VtpmSharedBufferInfo= NULL;
+
+  GuidHob.Guid = GetFirstGuidHob (&gEdkiiVTpmSharedBufferInfoHobGuid);
+  DEBUG ((DEBUG_INFO, "%a: GuidHob.Guid %p \n", __FUNCTION__ , GuidHob.Guid));
+  if (GuidHob.Guid == NULL) {
+    return EFI_SUCCESS;
+  }
+
+  HobLength = sizeof (EFI_HOB_GUID_TYPE) + sizeof (VTPM_SHARED_BUFFER_INFO_STRUCT);
+  if (GuidHob.Guid->Header.HobLength != HobLength) {
+    DEBUG ((DEBUG_ERROR, "%a: The GuidHob.Guid->Header.HobLength is not equal HobLength, %x vs %x \n", __FUNCTION__, GuidHob.Guid->Header.HobLength, HobLength));
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  VtpmSharedBufferInfo = (VTPM_SHARED_BUFFER_INFO_STRUCT *)(GuidHob.Guid + 1);
+
+  Buffer = (UINT8 *)(UINTN)(VtpmSharedBufferInfo->BufferAddress);
+  Pages  = EFI_SIZE_TO_PAGES(VtpmSharedBufferInfo->BufferSize);
+  Status = MemEncryptTdxClearPageSharedBit (0, (PHYSICAL_ADDRESS)Buffer, Pages);
+  if (EFI_ERROR(Status)) {
+    DEBUG ((DEBUG_INFO, "%a: MemEncryptTdxClearPageSharedBit failed with %r \n", __FUNCTION__ , Status));
+  }
+
+  return Status;
+
+}

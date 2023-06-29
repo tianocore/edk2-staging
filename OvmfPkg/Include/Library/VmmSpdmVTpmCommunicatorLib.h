@@ -52,4 +52,10 @@ VmmSpdmVTpmSendReceive (
   UINTN             *ResponseSize
   );
 
+EFI_STATUS
+EFIAPI
+VmmSpdmVTpmClearSharedBit (
+  VOID
+  );
+
 #endif
