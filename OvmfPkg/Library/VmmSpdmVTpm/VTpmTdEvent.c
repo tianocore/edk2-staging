@@ -283,71 +283,65 @@ CreateVtpmTdReportEvenmt (
   )
 {
   EFI_STATUS  Status;
-  UINTN       Pages;
-  UINT8       *Report;
   VOID        *GuidHobRawData;
   UINTN       DataLength;
   UINT8       Digest256[SHA256_DIGEST_SIZE];
   UINT8       Digest384[SHA384_DIGEST_SIZE];
   UINT8       Digest512[SHA512_DIGEST_SIZE];
+  UINT8       TdReportSha384[SHA384_DIGEST_SIZE];
+  UINT8       TdReportData[sizeof (TDREPORT_STRUCT)];
 
   TPML_DIGEST_VALUES  DigestList;
   TDREPORT_STRUCT     *TdReport;
 
   TdReport = NULL;
-  Report = NULL;
-
   GuidHobRawData = NULL;
 
   ZeroMem (Digest256, SHA256_DIGEST_SIZE);
   ZeroMem (Digest384, SHA384_DIGEST_SIZE);
   ZeroMem (Digest512, SHA512_DIGEST_SIZE);
 
+  ZeroMem (TdReportSha384, SHA384_DIGEST_SIZE);
+  ZeroMem (TdReportData, sizeof (TDREPORT_STRUCT));
+
   ZeroMem(&DigestList,sizeof(TPML_DIGEST_VALUES));
 
-  Pages = EFI_SIZE_TO_PAGES (sizeof (TDREPORT_STRUCT));
-
-  Report = AllocatePages (Pages);
-  if (Report == NULL) {
-    return EFI_OUT_OF_RESOURCES;
-  }
-
-  ZeroMem (Report, EFI_PAGES_TO_SIZE (Pages));
-
-  Status = GetTdReportFromHOB (Report);
+  Status = GetTdReportFromHOB (TdReportData);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "%a: GetTdReportFromHOB failed with %r\n", __FUNCTION__, Status));
-    goto ClearBuffer;
+    return Status;
   }
 
-  TdReport = (TDREPORT_STRUCT *)Report;
+  TdReport = (TDREPORT_STRUCT *)TdReportData;
   ZeroMem (TdReport->ReportMacStruct.ReportData, sizeof (TdReport->ReportMacStruct.ReportData));
   ZeroMem (TdReport->ReportMacStruct.Mac, sizeof (TdReport->ReportMacStruct.Mac));
 
+  if (!Sha384HashAll (TdReport, sizeof (TDREPORT_STRUCT), TdReportSha384)) {
+    DEBUG ((DEBUG_ERROR, "%a: Sha384HashAll failed \n", __FUNCTION__));
+    return EFI_ABORTED;
+  }
+
   DigestList.count              = 3;
   DigestList.digests[0].hashAlg = TPM_ALG_SHA256;
-  if (!Sha256HashAll (TdReport, sizeof (TDREPORT_STRUCT), Digest256)) {
+  if (!Sha256HashAll (TdReportSha384, SHA384_DIGEST_SIZE, Digest256)) {
     DEBUG ((DEBUG_ERROR, "%a: Sha256HashAll failed \n", __FUNCTION__));
-    Status = EFI_ABORTED;
-    goto ClearBuffer;
+    return EFI_ABORTED;
   }
 
   CopyMem (DigestList.digests[0].digest.sha256, Digest256, SHA256_DIGEST_SIZE);
 
   DigestList.digests[1].hashAlg = TPM_ALG_SHA384;
-  if (!Sha384HashAll (TdReport, sizeof (TDREPORT_STRUCT), Digest384)) {
+  if (!Sha384HashAll (TdReportSha384, SHA384_DIGEST_SIZE, Digest384)) {
     DEBUG ((DEBUG_ERROR, "%a: Sha384HashAll failed \n", __FUNCTION__));
-    Status = EFI_ABORTED;
-    goto ClearBuffer;
+    return EFI_ABORTED;
   }
 
   CopyMem (DigestList.digests[1].digest.sha384, Digest384, SHA384_DIGEST_SIZE);
 
   DigestList.digests[2].hashAlg = TPM_ALG_SHA512;
-  if (!Sha512HashAll (TdReport, sizeof (TDREPORT_STRUCT), Digest512)) {
+  if (!Sha512HashAll (TdReportSha384, SHA384_DIGEST_SIZE, Digest512)) {
     DEBUG ((DEBUG_ERROR, "%a: Sha512HashAll failed \n", __FUNCTION__));
-    Status = EFI_ABORTED;
-    goto ClearBuffer;
+    return EFI_ABORTED;
   }
 
   CopyMem (DigestList.digests[2].digest.sha512, Digest512, SHA512_DIGEST_SIZE);
@@ -360,19 +354,12 @@ CreateVtpmTdReportEvenmt (
                                  );
   if (GuidHobRawData == NULL) {
     DEBUG ((DEBUG_ERROR, "%a : BuildGuidHob failed \n", __FUNCTION__));
-    Status = EFI_UNSUPPORTED;
-    goto ClearBuffer;
+    return EFI_UNSUPPORTED;
   }
 
   CopyMem (GuidHobRawData, &DigestList, DataLength);
 
-  Status = EFI_SUCCESS;
-ClearBuffer:
-  if (TdReport) {
-    FreePages (TdReport, Pages);
-  }
-
-  return Status;
+  return EFI_SUCCESS;
 }
 
 STATIC

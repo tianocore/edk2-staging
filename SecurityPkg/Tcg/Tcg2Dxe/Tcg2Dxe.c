@@ -1648,17 +1648,17 @@ SetupHCRTMComponentEvent (
 }
 
 /**
-  Init the TCG_VtpmTdTdReportEvent.
+  Init the TCG_HCRTMEvent.
 
-  @param[in,out]  VtpmTdEvent     The pointer of the event
+  @param[in,out]  HCRTMEvent      The pointer of the event
   @param[in]      DigestList      The pointer of the digest
   @param[in]      EventSize       The size of the event
 
 **/
 STATIC
 VOID
-InitVtpmTdEvent (
-  IN OUT TCG_PCR_EVENT2_HDR  *VtpmTdEvent,
+InitHCRTMEvent (
+  IN OUT TCG_PCR_EVENT2_HDR  *EventHdr,
   IN TPML_DIGEST_VALUES      *DigestList,
   IN UINT32                  EventSize
   )
@@ -1669,18 +1669,18 @@ InitVtpmTdEvent (
   UINT8          *DigestBuffer;
   UINT32         Index;
 
-  if ((VtpmTdEvent == NULL) || (DigestList == NULL)) {
-    DEBUG ((DEBUG_ERROR, "%a: VtpmTdEvent or DigestList is NULL\n", __FUNCTION__));
+  if ((EventHdr == NULL) || (DigestList == NULL)) {
+    DEBUG ((DEBUG_ERROR, "%a: EventHdr or DigestList is NULL\n", __FUNCTION__));
     return;
   }
 
-  DigestBuffer    = (UINT8 *)VtpmTdEvent->Digests.digests;
+  DigestBuffer    = (UINT8 *)EventHdr->Digests.digests;
   DigestListCount = 0;
 
-  VtpmTdEvent->PCRIndex  = 0;
-  VtpmTdEvent->EventType = EV_EFI_VTPMTD_TDREPORT;
+  EventHdr->PCRIndex  = 0;
+  EventHdr->EventType = EV_EFI_HCRTM_EVENT;
 
-  ZeroMem (&VtpmTdEvent->Digests, sizeof (VtpmTdEvent->Digests));
+  ZeroMem (&EventHdr->Digests, sizeof (EventHdr->Digests));
 
   for (Index = 0; Index < DigestList->count; Index++) {
     HashAlgId = DigestList->digests[Index].hashAlg;
@@ -1730,7 +1730,7 @@ InitVtpmTdEvent (
   //
   // Set Digests Count
   //
-  WriteUnaligned32 ((UINT32 *)&VtpmTdEvent->Digests.count, DigestListCount);
+  WriteUnaligned32 ((UINT32 *)&EventHdr->Digests.count, DigestListCount);
 
   //
   // Set Event Size
@@ -1739,22 +1739,22 @@ InitVtpmTdEvent (
 }
 
 /**
-  Setup the TCG_VtpmTdTdReportEvent.
+  Setup the TCG_HCRTMEvent.
 
   @param[in]  Index         The index of the mTcg2EventInfo
 
 **/
 STATIC
 VOID
-SetupVtpmTdTdReportEvent (
+SetupVtpmTdHcrtmEvent (
   IN UINTN  Index
   )
 {
   EFI_STATUS               Status;
-  TCG_PCR_EVENT2_HDR       VtpmTdEvent;
+  TCG_PCR_EVENT2_HDR       EventHdr;
   EFI_PEI_HOB_POINTERS     GuidHob;
   TPML_DIGEST_VALUES       *DigestList;
-  TCG_VtpmTdTdReportEvent  VtpmTdReportEvent;
+  TCG_HCRTMEvent           HCRTMEvent;
   UINTN                    DataLength;
 
   DigestList = NULL;
@@ -1767,16 +1767,16 @@ SetupVtpmTdTdReportEvent (
 
   DigestList = (TPML_DIGEST_VALUES *)(GuidHob.Guid + 1);
 
-  DataLength = sizeof (TCG_VtpmTdTdReportEvent);
+  DataLength = sizeof (TCG_HCRTMEvent);
 
-  CopyMem (VtpmTdReportEvent.Signature, TCG_VTPM_TD_TD_REPORT_SIGNATURE, sizeof (TCG_VTPM_TD_TD_REPORT_SIGNATURE));
-  InitVtpmTdEvent (&VtpmTdEvent, DigestList, DataLength);
+  CopyMem (HCRTMEvent.Signature, TCG_HCRTM_EVENT, sizeof (TCG_HCRTM_EVENT));
+  InitHCRTMEvent (&EventHdr, DigestList, DataLength);
 
   Status = TcgDxeLogEvent (
                            mTcg2EventInfo[Index].LogFormat,
-                           &VtpmTdEvent,
-                           sizeof (VtpmTdEvent.PCRIndex) + sizeof (VtpmTdEvent.EventType) + GetDigestListBinSize (&VtpmTdEvent.Digests) + sizeof (VtpmTdEvent.EventSize),
-                           (UINT8 *)&VtpmTdReportEvent,
+                           &EventHdr,
+                           sizeof (EventHdr.PCRIndex) + sizeof (EventHdr.EventType) + GetDigestListBinSize (&EventHdr.Digests) + sizeof (EventHdr.EventSize),
+                           (UINT8 *)&HCRTMEvent,
                            DataLength
                            );
   if (EFI_ERROR (Status)) {
@@ -2003,15 +2003,15 @@ SetupEventLog (
         }
 
         //
+        // HCRTMEvent. Event format is TCG_PCR_EVENT2
+        //
+        SetupVtpmTdHcrtmEvent (Index);
+
+        //
         // TCG_HCRTMComponentEvent. Event format is TCG_PCR_EVENT2
         //
         SetupHCRTMComponentEvent(Index);
 
-        //
-        // TCG_VtpmTdTdReportEvent. Event format is TCG_PCR_EVENT2
-        //
-        SetupVtpmTdTdReportEvent(Index);
-       
       }
     }
   }
