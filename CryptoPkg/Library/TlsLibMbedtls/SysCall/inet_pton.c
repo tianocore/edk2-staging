@@ -67,6 +67,10 @@ static char  rcsid[] = "$Id: inet_pton.c,v 1.1.1.1 2003/11/19 01:51:30 kyu3 Exp 
 #include <string.h>
 #include <errno.h>
 
+#include "mbedtls/platform.h"
+#include "mbedtls/net_sockets.h"
+#include "mbedtls/error.h"
+
 /*
  * WARNING: Don't even consider trying to compile this on a system where
  * sizeof(int) < 4.  sizeof(int) > 4 is fine; all the world's not a VAX.
@@ -108,7 +112,6 @@ inet_pton (
     case AF_INET6:
       return (inet_pton6 (src, dst));
     default:
-      errno = EAFNOSUPPORT;
       return (-1);
   }
 
@@ -297,4 +300,103 @@ inet_pton6 (
 
   memcpy (dst, tmp, NS_IN6ADDRSZ);
   return (1);
+}
+
+/*
+ * Return 0 if the file descriptor is valid, an error otherwise.
+ * If for_select != 0, check whether the file descriptor is within the range
+ * allowed for fd_set used for the FD_xxx macros and the select() function.
+ */
+static int check_fd( int fd, int for_select )
+{
+    if( fd < 0 )
+        return( MBEDTLS_ERR_NET_INVALID_CONTEXT );
+
+    /* A limitation of select() is that it only works with file descriptors
+     * that are strictly less than FD_SETSIZE. This is a limitation of the
+     * fd_set type. Error out early, because attempting to call FD_SET on a
+     * large file descriptor is a buffer overflow on typical platforms. */
+    if( for_select && fd >= FD_SETSIZE )
+        return( MBEDTLS_ERR_NET_POLL_FAILED );
+
+    return( 0 );
+}
+
+/*
+ * Initialize a context
+ */
+void mbedtls_net_init( mbedtls_net_context *ctx )
+{
+    ctx->fd = -1;
+}
+
+/*
+ * Read at most 'len' characters
+ */
+int mbedtls_net_recv( void *ctx, unsigned char *buf, size_t len )
+{
+    int ret = MBEDTLS_ERR_ERROR_CORRUPTION_DETECTED;
+    int fd = ((mbedtls_net_context *) ctx)->fd;
+
+    ret = check_fd( fd, 0 );
+    if( ret != 0 )
+        return( ret );
+
+    ret = (int) read( fd, buf, len );
+
+    if( ret < 0 )
+    {
+      return( MBEDTLS_ERR_NET_RECV_FAILED );
+    }
+
+    return( ret );
+}
+
+/*
+ * Write at most 'len' characters
+ */
+int mbedtls_net_send( void *ctx, const unsigned char *buf, size_t len )
+{
+    int ret = MBEDTLS_ERR_ERROR_CORRUPTION_DETECTED;
+    int fd = ((mbedtls_net_context *) ctx)->fd;
+
+    ret = check_fd( fd, 0 );
+    if( ret != 0 )
+        return( ret );
+
+    ret = (int) write( fd, buf, len );
+
+    if( ret < 0 )
+    {
+      return( MBEDTLS_ERR_NET_SEND_FAILED );
+    }
+
+    return( ret );
+}
+
+/*
+ * Close the connection
+ */
+void mbedtls_net_close( mbedtls_net_context *ctx )
+{
+    if( ctx->fd == -1 )
+        return;
+
+    close( ctx->fd );
+
+    ctx->fd = -1;
+}
+
+/*
+ * Gracefully close the connection
+ */
+void mbedtls_net_free( mbedtls_net_context *ctx )
+{
+    if( ctx->fd == -1 )
+        return;
+
+    // shutdown( ctx->fd, 2 );
+    close( ctx->fd );
+
+    ctx->fd = -1;
 }

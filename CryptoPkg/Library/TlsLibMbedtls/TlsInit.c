@@ -9,6 +9,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 #include "InternalTlsLib.h"
 
+int myrand( void *rng_state, unsigned char *output, size_t len );
 /**
   Initializes the OpenSSL library.
 
@@ -143,9 +144,6 @@ TlsNew (
   )
 {
   TLS_CONNECTION  *TlsConn;
-  mbedtls_ssl_config conf;
-
-  mbedtls_ssl_config_init(&conf);
   TlsConn = NULL;
 
   //
@@ -158,20 +156,23 @@ TlsNew (
 
   TlsConn->Ssl = (mbedtls_ssl_context *)TlsCtx;
 
+  TlsConn->Conf = AllocateZeroPool(sizeof( mbedtls_ssl_config));
+  mbedtls_ssl_config_init(TlsConn->Conf);
 
-  if (mbedtls_ssl_setup(TlsConn->Ssl, &conf) != 0) {
+  mbedtls_ssl_conf_rng(TlsConn->Conf, myrand, NULL);
+
+  TlsConn->Conf->min_tls_version = MBEDTLS_SSL_VERSION_TLS1_2;
+  TlsConn->Conf->max_tls_version = MBEDTLS_SSL_VERSION_TLS1_2;
+
+  if (mbedtls_ssl_setup(TlsConn->Ssl, TlsConn->Conf) != 0) {
     return NULL;
   }
 
-  // TlsConn->fd = AllocateZeroPool(sizeof(mbedtls_net_context));
-  // mbedtls_net_init(TlsConn->fd);
+  TlsConn->fd = AllocateZeroPool(sizeof(mbedtls_net_context));
+  mbedtls_net_init(TlsConn->fd);
 
-
-  // TlsConn->Conf = AllocateZeroPool(sizeof( mbedtls_ssl_config));
-  // mbedtls_ssl_config_init(TlsConn->Conf);
-
-  // mbedtls_ssl_set_bio(TlsConn->Ssl, TlsConn->fd,
-  //                     mbedtls_net_send, mbedtls_net_recv, mbedtls_net_recv_timeout);
+  mbedtls_ssl_set_bio(TlsConn->Ssl, TlsConn->fd,
+                      mbedtls_net_send, mbedtls_net_recv, NULL);
 
   return (VOID *)TlsConn;
 }
