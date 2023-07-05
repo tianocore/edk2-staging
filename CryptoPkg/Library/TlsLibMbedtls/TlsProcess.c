@@ -96,7 +96,6 @@ TlsDoHandshake (
     return EFI_INVALID_PARAMETER;
   }
 
-
   if ((BufferOutSize == NULL) || \
       ((BufferIn == NULL) && (BufferInSize != 0)) || \
       ((BufferIn != NULL) && (BufferInSize == 0)) || \
@@ -104,8 +103,6 @@ TlsDoHandshake (
   {
     return EFI_INVALID_PARAMETER;
   }
-
-
 
   while((Ret = mbedtls_ssl_handshake(TlsConn->Ssl) ) != 0 )
   {
@@ -172,7 +169,6 @@ TlsHandleAlert (
   {
     return EFI_INVALID_PARAMETER;
   }
-
 
   if (mbedtls_ssl_handle_pending_alert(TlsConn->Ssl) != 0) {
     return EFI_INVALID_PARAMETER;

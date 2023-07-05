@@ -231,8 +231,7 @@ TlsSetConnectionEnd (
     // Set TLS to work in Server mode.
     // It is unsupported for UEFI version currently.
     //
-    // mbedtls_ssl_conf_endpoint(TlsConn->Ssl.conf, MBEDTLS_SSL_IS_SERVER);
-    return EFI_UNSUPPORTED;
+    mbedtls_ssl_conf_endpoint((mbedtls_ssl_config *)TlsConn->Ssl->conf, MBEDTLS_SSL_IS_SERVER);
   }
 
   return EFI_SUCCESS;

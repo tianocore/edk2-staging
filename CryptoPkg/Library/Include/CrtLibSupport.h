@@ -403,6 +403,22 @@ strcpy (
   const char  *strSource
   );
 
+ssize_t read(int fd, void *buf, size_t count);
+
+ssize_t write(int fd, const void *buf, size_t count);
+
+int close(int fd);
+
+int shutdown(int sockfd, int how);
+
+#ifndef FD_SETSIZE
+#define FD_SETSIZE      64
+#endif /* FD_SETSIZE */
+
+#define EINTR           4
+#define EPIPE           32
+#define ECONNRESET      108
+
 //
 // Macros that directly map functions to BaseLib, BaseMemoryLib, and DebugLib functions
 //
