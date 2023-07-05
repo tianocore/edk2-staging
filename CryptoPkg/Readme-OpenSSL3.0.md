@@ -76,6 +76,15 @@ Library mode (use crypto library)
 |      FV (LZMA)     |   459      |    539     |     80     |  
 |SecurityStubDxe.efi |   562      |    605     |     43     |  
 
+#### Binaries mode build dependency
+| Driver          |  Normal build        |    Accel build                 |  
+|-----------------|----------------------|--------------------------------|  
+|CryptoPei        | OpensslLib.inf       | OpensslLibAccel.inf            |  
+|CryptoPeiPreMem  | OpensslLib.inf       | OpensslLibAccel.inf            |  
+|CryptoDxeFull    | OpensslLibFull.inf   | OpensslLibFullAccel.inf        |  
+|CryptoDxe        | OpensslLib.inf       | OpensslLibAccel.inf            |  
+|CryptoSmm        | OpensslLibCrypto.inf | OpensslLibCryptoAccel.inf(New) |  
+  
 ## Limitation
 
 1. This package is only the sample code to show the concept. It does not have a full validation and meet the production quality yet.  
