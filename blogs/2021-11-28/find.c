@@ -43,7 +43,7 @@ int main(int argc, char** argv) {
     int i, iargv = 2;
     FILE* fp = stdin;                                                                       // take file from STDIN, by default
     enum PARM { V, C, N, I, O/*FF*/, L/*OFFLINE*/, H };
-    int nRet = 0;
+    int nRet = 1; // assume NOT FOUND
     int cntFile = 0;
     size_t linelen, stringlen;
     char* pLineOrg = malloc(MAXLINELEN), * pLineUpcase = malloc(MAXLINELEN) , * pString;
@@ -61,7 +61,7 @@ int main(int argc, char** argv) {
         }
         else {
             fprintf(stderr, "FIND: Parameter format not correct\n");
-            nRet = 1;
+            exit(3);
             break;//while(0)
         }
         
@@ -99,7 +99,7 @@ int main(int argc, char** argv) {
             printf("             Specifies a file or files to search.\n");
             printf("\nIf a path is not specified, FIND searches the text typed at the prompt\n");
             printf("    or piped from another command.\n");
-            break;
+            exit(0);
         }
         //printf("parmV = %d, parmC = %d, parmN = %d, parmI = %d, parmO = %d, parmL = %d\n", parm[V], parm[C], parm[N], parm[I], parm[O], parm[L]);
 
@@ -108,7 +108,7 @@ int main(int argc, char** argv) {
 
             if (-1 == xRet) {
                 fprintf(stderr, "FIND: Invalid switch \"%s\"\n",argv[i]);
-                exit(1);
+                exit(3);
             }
 
             cntFile += (1 == xRet ? 1 : 0); // count number of files passed in the command line
@@ -131,7 +131,7 @@ int main(int argc, char** argv) {
                     exit(1);
                 }
                 else {
-                    printf("---------- %s%s", argv[iargv], 0 == parm[C] ? "\n" : ": ");
+                    printf("\n---------- %s%s", argv[iargv], 0 == parm[C] ? "\n" : ": ");
                     
                     //
                     // check BOM byte order mark UTF-16 (LE) https://en.wikipedia.org/wiki/Byte_order_mark#UTF-16
@@ -215,17 +215,18 @@ int main(int argc, char** argv) {
                         if (0 != parm[N])                               // printf line number
                             printf("[%d]", line);
                         printf("%s", pLineOrg);
+                        nRet = 0;
                     }
                 }
                 memset(pLineOrg, 0, (linelen + 1) * sizeof(wchar_t));   // clear old buffer before reading next line
             }
             if (0 != parm[C])
                 printf("%d\n", count);
-            printf("\n");
+
             if (stdin != fp)
                 fclose(fp);                                             // close fp, that was opened above
         } while (++iargv < argc );                                      // next file...
     } while (0);
-    return 0;
+    return nRet;
 }
 

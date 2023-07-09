@@ -17,6 +17,7 @@
         * [2. stdin is redirected, BOM is not detected](README.md#2-stdin-is-redirected-bom-is-not-yet-detected)
         * [3. stdin is redirected, BOM is detected](README.md#3-stdin-is-redirected-bom-is-detected)
     * [Reading lines from file(s)](README.md#reading-lines-from-files)
+    * [Exitcodes](README.md#exitcodes-findefi)
 * [In a nutshell: `MORE.EFI`](README.md#in-a-nutshell-morefi)
 * [Building: `MORE.EFI`](README.md#building-moreefi)
 * [Internal Processing: MORE.C](README.md#internal-processing-morec)
@@ -374,6 +375,14 @@ The wide (UTF16-LE) strings needs a small number of additional processing:
 [220]       memset(pLineOrg, 0, (linelen + 1) * sizeof(wchar_t));   // clear old buffer before reading next line
 [221]   }
 ```
+
+## Exitcodes: `FIND.EFI`
+* 3: `Parameter format not correct`
+* 3: `Invalid switch`
+* 1: `File not found`
+* 0: `Help`
+* 1: find result negativ
+* 0: find result positive
 
 # In a nutshell: `MORE.EFI`
 `MORE.EFI` lists a text-file content page-wise on the screen.
