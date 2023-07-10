@@ -234,7 +234,7 @@ ExtendMeasurement (
       return EFI_SECURITY_VIOLATION;
     }
 
-    if ((SpdmMeasurementBlockCommonHeader->MeasurementSpecification & SPDM_MEASUREMENT_BLOCK_HEADER_SPECIFICATION_DMTF) == 0) {
+    if ((SpdmMeasurementBlockCommonHeader->MeasurementSpecification & SPDM_MEASUREMENT_SPECIFICATION_DMTF) == 0) {
       SecurityState->MeasurementState = EDKII_DEVICE_SECURITY_STATE_ERROR_MEASUREMENT_AUTH_FAILURE;
       return EFI_SECURITY_VIOLATION;
     }
@@ -557,7 +557,8 @@ DoDeviceMeasurement (
                  MeasurementRecord,
                  NULL,
                  RequesterNonce,
-                 ResponderNonce
+                 ResponderNonce,
+                 NULL, 0
                  );
   if (LIBSPDM_STATUS_IS_SUCCESS (SpdmReturn)) {
     DEBUG ((DEBUG_INFO, "NumberOfBlocks %d\n", NumberOfBlocks));
@@ -594,7 +595,6 @@ ContentChangedFlag:
     RequestAttribute      = 0;
     ContentChanged        = SPDM_MEASUREMENTS_RESPONSE_CONTENT_NO_CHANGE_DETECTED;
     ReceivedNumberOfBlock = 0;
-
     //
     // 1. Query the total number of measurements available.
     //
@@ -648,7 +648,8 @@ ContentChangedFlag:
                      MeasurementRecord,
                      NULL,
                      RequesterNonce,
-                     ResponderNonce
+                     ResponderNonce,
+                     NULL, 0
                      );
       if (LIBSPDM_STATUS_IS_ERROR (SpdmReturn)) {
         continue;

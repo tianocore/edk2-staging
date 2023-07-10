@@ -262,8 +262,12 @@ CreateSpdmDriverContext (
   ASSERT(SpdmContext != NULL);
   SpdmInitContext (SpdmContext);
   SpdmRegisterDeviceIoFunc (SpdmContext, SpdmDeviceSendMessage, SpdmDeviceReceiveMessage);
-  SpdmRegisterTransportLayerFunc (SpdmContext, SpdmTransportMctpEncodeMessage, SpdmTransportMctpDecodeMessage);
-//  SpdmRegisterTransportLayerFunc (SpdmContext, SpdmTransportPciDoeEncodeMessage, SpdmTransportPciDoeDecodeMessage);
+  SpdmRegisterTransportLayerFunc (SpdmContext,
+                                  LIBSPDM_MAX_SPDM_MSG_SIZE,
+                                  LIBSPDM_MAX_SPDM_MSG_SIZE,
+                                  LIBSPDM_TRANSPORT_HEADER_SIZE,
+                                  LIBSPDM_TRANSPORT_TAIL_SIZE,SpdmTransportMctpEncodeMessage);
+//  SpdmRegisterTransportLayerFunc (SpdmContext, LIBSPDM_MAX_SPDM_MSG_SIZE, SpdmTransportPciDoeEncodeMessage, SpdmTransportPciDoeDecodeMessage);
 
   SpdmDriverContext->SpdmContext = SpdmContext;
 
@@ -390,7 +394,7 @@ CreateSpdmDriverContext (
   }
   SpdmSetData (SpdmContext, SpdmDataCapabilityFlags, &Parameter, &Data32, sizeof(Data32));
 
-  Data8 = SPDM_MEASUREMENT_BLOCK_HEADER_SPECIFICATION_DMTF;
+  Data8 = SPDM_MEASUREMENT_SPECIFICATION_DMTF;
   SpdmSetData (SpdmContext, SpdmDataMeasurementSpec, &Parameter, &Data8, sizeof(Data8));
   Data32 = SPDM_ALGORITHMS_BASE_ASYM_ALGO_TPM_ALG_RSASSA_2048;
   SpdmSetData (SpdmContext, SpdmDataBaseAsymAlgo, &Parameter, &Data32, sizeof(Data32));

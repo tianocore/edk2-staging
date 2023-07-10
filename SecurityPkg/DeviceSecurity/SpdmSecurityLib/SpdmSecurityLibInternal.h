@@ -41,6 +41,31 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 #define SPDM_DEVICE_CONTEXT_SIGNATURE  SIGNATURE_32 ('S', 'P', 'D', 'C')
 
+
+#ifndef LIBSPDM_TRANSPORT_HEADER_SIZE
+#define LIBSPDM_TRANSPORT_HEADER_SIZE 64
+#endif
+
+#ifndef LIBSPDM_TRANSPORT_TAIL_SIZE
+#define LIBSPDM_TRANSPORT_TAIL_SIZE 64
+#endif
+
+/* define common LIBSPDM_TRANSPORT_ADDITIONAL_SIZE. It should be the biggest one. */
+#ifndef LIBSPDM_TRANSPORT_ADDITIONAL_SIZE
+#define LIBSPDM_TRANSPORT_ADDITIONAL_SIZE \
+    (LIBSPDM_TRANSPORT_HEADER_SIZE + LIBSPDM_TRANSPORT_TAIL_SIZE)
+#endif
+
+#ifndef LIBSPDM_SENDER_BUFFER_SIZE
+#define LIBSPDM_SENDER_BUFFER_SIZE (0x1100 + \
+                                    LIBSPDM_TRANSPORT_ADDITIONAL_SIZE)
+#endif
+#ifndef LIBSPDM_RECEIVER_BUFFER_SIZE
+#define LIBSPDM_RECEIVER_BUFFER_SIZE (0x1200 + \
+                                      LIBSPDM_TRANSPORT_ADDITIONAL_SIZE)
+#endif
+
+
 typedef struct {
   UINT32                      Signature;
   // UEFI Context

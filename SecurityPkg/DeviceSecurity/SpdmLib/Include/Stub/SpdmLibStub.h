@@ -15,6 +15,35 @@
 #include <library/spdm_responder_lib.h>
 #include <library/spdm_transport_pcidoe_lib.h>
 
+
+
+
+#ifndef LIBSPDM_TRANSPORT_HEADER_SIZE
+#define LIBSPDM_TRANSPORT_HEADER_SIZE 64
+#endif
+
+#ifndef LIBSPDM_TRANSPORT_TAIL_SIZE
+#define LIBSPDM_TRANSPORT_TAIL_SIZE 64
+#endif
+
+/* define common LIBSPDM_TRANSPORT_ADDITIONAL_SIZE. It should be the biggest one. */
+#ifndef LIBSPDM_TRANSPORT_ADDITIONAL_SIZE
+#define LIBSPDM_TRANSPORT_ADDITIONAL_SIZE \
+    (LIBSPDM_TRANSPORT_HEADER_SIZE + LIBSPDM_TRANSPORT_TAIL_SIZE)
+#endif
+
+#ifndef LIBSPDM_SENDER_BUFFER_SIZE
+#define LIBSPDM_SENDER_BUFFER_SIZE (0x1100 + \
+                                    LIBSPDM_TRANSPORT_ADDITIONAL_SIZE)
+#endif
+#ifndef LIBSPDM_RECEIVER_BUFFER_SIZE
+#define LIBSPDM_RECEIVER_BUFFER_SIZE (0x1200 + \
+                                      LIBSPDM_TRANSPORT_ADDITIONAL_SIZE)
+#endif
+
+
+
+
 #pragma pack(1)
 
 /*Interface of spdm.h*/
@@ -90,6 +119,7 @@ typedef enum {
   SpdmDataCapabilityRttUs,
   SpdmDataCapabilityDataTransferSize,
   SpdmDataCapabilityMaxSpdmMsgSize,
+  SpdmDataCapabilitySenderDataTransferSize,
 
   //
   // SPDM Algorithm setting
@@ -115,16 +145,16 @@ typedef enum {
   // Certificate info
   //
   SpdmDataLocalPublicCertChain,
-  SpdmDataLocalSlotCount,
   SpdmDataPeerPublicRootCert,
+  SpdmDataLocalSlotCount,
   SpdmDataPeerPublicCertChains,
+
   SpdmDataBasicMutAuthRequested,
   SpdmDataMutAuthRequested,
   SpdmDataHeartBeatPeriod,
   //
   // Negotiated result
   //
-  SpdmDataLocalUsedCertChainBuffer,
   SpdmDataPeerUsedCertChainBuffer,
   SpdmDataPeerSlotMask,
   SpdmDataPeerTotalDigestBuffer,
@@ -280,7 +310,6 @@ typedef struct {
 #define SpdmGenerateErrorResponse         libspdm_generate_error_response
 #define SpdmTransportPciDoeEncodeMessage  libspdm_transport_pci_doe_encode_message
 #define SpdmTransportPciDoeDecodeMessage  libspdm_transport_pci_doe_decode_message
-#define SpdmTransportPciDoeGetHeaderSize  libspdm_transport_pci_doe_get_header_size
 
 #define SpdmMeasurementCollectionFunc         libspdm_measurement_collection
 #define SpdmRequesterDataSignFunc             libspdm_requester_data_sign
@@ -288,5 +317,7 @@ typedef struct {
 #define SpdmGenerateMeasurementSummaryHash    libspdm_generate_measurement_summary_hash
 #define SpdmPskMasterSecretHkdfExpandFunc     libspdm_psk_master_secret_hkdf_expand
 #define SpdmPskHandshakeSecretHkdfExpandFunc  libspdm_psk_handshake_secret_hkdf_expand
+#define SpdmMeasurementOpaqueData             libspdm_measurement_opaque_data
+#define SpdmChallengeOpaqueData               libspdm_challenge_opaque_data
 
 #endif

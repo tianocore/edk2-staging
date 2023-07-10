@@ -204,13 +204,6 @@ CreateSpdmDeviceContext (
     goto Error;
   }
 
-  ScratchBufferSize = SpdmGetSizeofRequiredScratchBuffer (SpdmContext);
-  ScratchBuffer     = AllocateZeroPool (ScratchBufferSize);
-  if (ScratchBuffer == NULL) {
-    ASSERT (ScratchBuffer != NULL);
-    goto Error;
-  }
-
   SpdmReturn = SpdmInitContext (SpdmContext);
   if (LIBSPDM_STATUS_IS_ERROR (SpdmReturn)) {
     goto Error;
@@ -223,19 +216,31 @@ CreateSpdmDeviceContext (
     );
   SpdmRegisterTransportLayerFunc (
     SpdmContext,
+    LIBSPDM_MAX_SPDM_MSG_SIZE,
+    LIBSPDM_TRANSPORT_HEADER_SIZE,
+    LIBSPDM_TRANSPORT_TAIL_SIZE,
     SpdmDeviceInfo->TransportEncodeMessage,
-    SpdmDeviceInfo->TransportDecodeMessage,
-    SpdmDeviceInfo->TransportGetHeaderSize
+    SpdmDeviceInfo->TransportDecodeMessage
     );
+
   SpdmRegisterDeviceBufferFunc (
     SpdmContext,
+    LIBSPDM_SENDER_BUFFER_SIZE,
+    LIBSPDM_RECEIVER_BUFFER_SIZE,
     SpdmDeviceInfo->AcquireSenderBuffer,
     SpdmDeviceInfo->ReleaseSenderBuffer,
     SpdmDeviceInfo->AcquireReceiverBuffer,
     SpdmDeviceInfo->ReleaseReceiverBuffer
     );
-  SpdmSetScratchBuffer (SpdmContext, ScratchBuffer, ScratchBufferSize);
 
+  ScratchBufferSize = SpdmGetSizeofRequiredScratchBuffer (SpdmContext);
+  ScratchBuffer     = AllocateZeroPool (ScratchBufferSize);
+  if (ScratchBuffer == NULL) {
+    ASSERT (ScratchBuffer != NULL);
+    goto Error;
+  }
+
+  SpdmSetScratchBuffer (SpdmContext, ScratchBuffer, ScratchBufferSize);
   SpdmDeviceContext->SpdmContextSize   = SpdmContextSize;
   SpdmDeviceContext->SpdmContext       = SpdmContext;
   SpdmDeviceContext->ScratchBufferSize = ScratchBufferSize;
@@ -294,7 +299,6 @@ CreateSpdmDeviceContext (
     DEBUG ((DEBUG_ERROR, "Fail to get UID - %r\n", Status));
     goto Error;
   }
-
   RecordSpdmDeviceContextInList (SpdmDeviceContext);
 
   Status = GetVariable2 (
@@ -366,8 +370,7 @@ CreateSpdmDeviceContext (
   if (LIBSPDM_STATUS_IS_ERROR (SpdmReturn)) {
     goto Error;
   }
-
-  Data8      = SPDM_MEASUREMENT_BLOCK_HEADER_SPECIFICATION_DMTF;
+  Data8      = SPDM_MEASUREMENT_SPECIFICATION_DMTF;
   SpdmReturn = SpdmSetData (SpdmContext, SpdmDataMeasurementSpec, &Parameter, &Data8, sizeof (Data8));
   if (LIBSPDM_STATUS_IS_ERROR (SpdmReturn)) {
     goto Error;
@@ -388,7 +391,6 @@ CreateSpdmDeviceContext (
   if (LIBSPDM_STATUS_IS_ERROR (SpdmReturn)) {
     goto Error;
   }
-
   if (SpdmDeviceInfo->BaseHashAlgo != 0) {
     Data32 = SpdmDeviceInfo->BaseHashAlgo;
   } else {

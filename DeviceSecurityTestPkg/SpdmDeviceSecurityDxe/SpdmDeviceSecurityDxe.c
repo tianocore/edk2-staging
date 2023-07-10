@@ -236,12 +236,10 @@ IsSpdmDeviceInAuthenticationList (
 SPDM_RETURN
 SpdmDeviceAcquireSenderBuffer (
   VOID   *Context,
-  UINTN  *MaxMsgSize,
   VOID   **MsgBufPtr
   )
 {
   ASSERT (!mSendReceiveBufferAcquired);
-  *MaxMsgSize = sizeof (mSendReceiveBuffer);
   *MsgBufPtr  = mSendReceiveBuffer;
   ZeroMem (mSendReceiveBuffer, sizeof (mSendReceiveBuffer));
   mSendReceiveBufferAcquired = TRUE;
@@ -265,12 +263,10 @@ SpdmDeviceReleaseSenderBuffer (
 SPDM_RETURN
 SpdmDeviceAcquireReceiverBuffer (
   VOID   *Context,
-  UINTN  *MaxMsgSize,
   VOID   **MsgBufPtr
   )
 {
   ASSERT (!mSendReceiveBufferAcquired);
-  *MaxMsgSize = sizeof (mSendReceiveBuffer);
   *MsgBufPtr  = mSendReceiveBuffer;
   ZeroMem (mSendReceiveBuffer, sizeof (mSendReceiveBuffer));
   mSendReceiveBufferAcquired = TRUE;
@@ -332,25 +328,30 @@ CreateSpdmDriverContext (
 
   SpdmInitContext (SpdmContext);
 
-  ScratchBufferSize = SpdmGetSizeofRequiredScratchBuffer (SpdmContext);
-  mScratchBuffer    = AllocateZeroPool (ScratchBufferSize);
-  ASSERT (mScratchBuffer != NULL);
-
   SpdmRegisterDeviceIoFunc (SpdmContext, SpdmDeviceSendMessage, SpdmDeviceReceiveMessage);
-  //  SpdmRegisterTransportLayerFunc (SpdmContext, SpdmTransportMctpEncodeMessage, SpdmTransportMctpDecodeMessage);
+  //  SpdmRegisterTransportLayerFunc (SpdmContext, LIBSPDM_MAX_SPDM_MSG_SIZE, SpdmTransportMctpEncodeMessage, SpdmTransportMctpDecodeMessage);
   SpdmRegisterTransportLayerFunc (
     SpdmContext,
+    LIBSPDM_MAX_SPDM_MSG_SIZE,
+    LIBSPDM_TRANSPORT_HEADER_SIZE,
+    LIBSPDM_TRANSPORT_TAIL_SIZE,
     SpdmTransportPciDoeEncodeMessage,
-    SpdmTransportPciDoeDecodeMessage,
-    SpdmTransportPciDoeGetHeaderSize
+    SpdmTransportPciDoeDecodeMessage
     );
   SpdmRegisterDeviceBufferFunc (
     SpdmContext,
+    LIBSPDM_SENDER_BUFFER_SIZE,
+    LIBSPDM_RECEIVER_BUFFER_SIZE,
     SpdmDeviceAcquireSenderBuffer,
     SpdmDeviceReleaseSenderBuffer,
     SpdmDeviceAcquireReceiverBuffer,
     SpdmDeviceReleaseReceiverBuffer
     );
+
+  ScratchBufferSize = SpdmGetSizeofRequiredScratchBuffer (SpdmContext);
+  mScratchBuffer    = AllocateZeroPool (ScratchBufferSize);
+  ASSERT (mScratchBuffer != NULL);
+
   SpdmSetScratchBuffer (SpdmContext, mScratchBuffer, ScratchBufferSize);
 
   SpdmDriverContext->SpdmContext = SpdmContext;
@@ -460,7 +461,7 @@ CreateSpdmDriverContext (
 
   SpdmSetData (SpdmContext, SpdmDataCapabilityFlags, &Parameter, &Data32, sizeof (Data32));
 
-  Data8 = SPDM_MEASUREMENT_BLOCK_HEADER_SPECIFICATION_DMTF;
+  Data8 = SPDM_MEASUREMENT_SPECIFICATION_DMTF;
   SpdmSetData (SpdmContext, SpdmDataMeasurementSpec, &Parameter, &Data8, sizeof (Data8));
   Data32 = SPDM_ALGORITHMS_BASE_ASYM_ALGO_TPM_ALG_RSASSA_2048 |
            SPDM_ALGORITHMS_BASE_ASYM_ALGO_TPM_ALG_RSASSA_3072 |
@@ -603,7 +604,7 @@ DeviceAuthentication (
   SpdmDeviceInfo.ReceiveMessage         = SpdmIoProtocolDeviceReceiveMessage;
   SpdmDeviceInfo.TransportEncodeMessage = SpdmTransportPciDoeEncodeMessage;
   SpdmDeviceInfo.TransportDecodeMessage = SpdmTransportPciDoeDecodeMessage;
-  SpdmDeviceInfo.TransportGetHeaderSize = SpdmTransportPciDoeGetHeaderSize;
+  SpdmDeviceInfo.TransportHeaderSize = LIBSPDM_PCI_DOE_TRANSPORT_HEADER_SIZE;
 
   SpdmDeviceInfo.AcquireSenderBuffer   = SpdmDeviceAcquireSenderBuffer;
   SpdmDeviceInfo.ReleaseSenderBuffer   = SpdmDeviceReleaseSenderBuffer;
