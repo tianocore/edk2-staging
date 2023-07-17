@@ -15,4 +15,4 @@
   PciSegmentLib|DeviceSimPkg/Library/MockPciSegmentLib/MockPciSegmentLib.inf
   PciExpressLib|MdePkg/Library/BasePciExpressLib/BasePciExpressLib.inf
   PciLib|MdePkg/Library/BasePciLibPciExpress/BasePciLibPciExpress.inf
-  RealPciSegment|MdePkg\Library\BasePciSegmentLibPci\BasePciSegmentLibPci.inf
+  RealPciSegment|MdePkg/Library/BasePciSegmentLibPci/BasePciSegmentLibPci.inf

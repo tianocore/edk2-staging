@@ -84,6 +84,7 @@ LocalRegisterMockRead (
     case 2:
       ByteEnable = ByteEnable & 0x3;
       break;
+    default:
     case 4:
       ByteEnable = ByteEnable & 0xF;
       break;
@@ -122,7 +123,6 @@ LocalRegisterMockWrite (
   INT32       RemainingSize;
   UINT32      CurrentValue;
   UINT32      ByteEnable;
-  UINT32      DwordIndex;
 
   SimpleRegisterSpace = (LOCAL_REGISTER_SPACE*) RegisterSpace;
 
@@ -136,13 +136,13 @@ LocalRegisterMockWrite (
     case 2:
       ByteEnable = ByteEnable & 0x3;
       break;
+    default:
     case 4:
       ByteEnable = ByteEnable & 0xF;
       break;
   }
   CurrentValue = (UINT32)(Value << ((Address % SimpleRegisterSpace->Alignment) * 8));
   RemainingSize = Size;
-  DwordIndex = 0;
   while (RemainingSize > 0) {
     SimpleRegisterSpace->Write(SimpleRegisterSpace->RwContext, CurrentAddress, ByteEnable, CurrentValue);
     RemainingSize -= ByteEnableToNoOfBytes(ByteEnable);
