@@ -112,7 +112,6 @@ int OSSL_ENCODER_CTX_get_num_encoders(OSSL_ENCODER_CTX *ctx) {
     return 0;
 };
 
-typedef struct ossl_encoder_instance_st OSSL_ENCODER_INSTANCE;
 OSSL_ENCODER *
 OSSL_ENCODER_INSTANCE_get_encoder(OSSL_ENCODER_INSTANCE *encoder_inst) {
                                     return NULL;
@@ -129,10 +128,6 @@ const char *
 OSSL_ENCODER_INSTANCE_get_output_structure(OSSL_ENCODER_INSTANCE *encoder_inst) {
                                     return NULL;
                                  };
-
-typedef const void *OSSL_ENCODER_CONSTRUCT(OSSL_ENCODER_INSTANCE *encoder_inst,
-                                           void *construct_data);
-typedef void OSSL_ENCODER_CLEANUP(void *construct_data);
 
 int OSSL_ENCODER_CTX_set_construct(OSSL_ENCODER_CTX *ctx,
                                    OSSL_ENCODER_CONSTRUCT *construct) {
