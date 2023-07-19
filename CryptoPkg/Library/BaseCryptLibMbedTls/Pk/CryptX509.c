@@ -30,6 +30,28 @@ STATIC CONST UINT8 OID_BasicConstraints[] = {
   0x55, 0x1D, 0x13
 };
 
+/* Profile for backward compatibility. Allows RSA 1024, unlike the default
+   profile. */
+STATIC mbedtls_x509_crt_profile compat_profile =
+{
+    /* Hashes from SHA-256 and above. Note that this selection
+     * should be aligned with ssl_preset_default_hashes in ssl_tls.c. */
+    MBEDTLS_X509_ID_FLAG( MBEDTLS_MD_SHA256 ) |
+    MBEDTLS_X509_ID_FLAG( MBEDTLS_MD_SHA384 ) |
+    MBEDTLS_X509_ID_FLAG( MBEDTLS_MD_SHA512 ),
+    0xFFFFFFF, /* Any PK alg    */
+    /* Curves at or above 128-bit security level. Note that this selection
+     * should be aligned with ssl_preset_default_curves in ssl_tls.c. */
+    MBEDTLS_X509_ID_FLAG( MBEDTLS_ECP_DP_SECP256R1 ) |
+    MBEDTLS_X509_ID_FLAG( MBEDTLS_ECP_DP_SECP384R1 ) |
+    MBEDTLS_X509_ID_FLAG( MBEDTLS_ECP_DP_SECP521R1 ) |
+    MBEDTLS_X509_ID_FLAG( MBEDTLS_ECP_DP_BP256R1 ) |
+    MBEDTLS_X509_ID_FLAG( MBEDTLS_ECP_DP_BP384R1 ) |
+    MBEDTLS_X509_ID_FLAG( MBEDTLS_ECP_DP_BP512R1 ) |
+    0,
+    1024,
+};
+
 /**
   Construct a X509 object from DER-encoded certificate data.
 
@@ -650,7 +672,7 @@ X509VerifyCert (
     return FALSE;
   }
 
-  CopyMem(&Profile, &mbedtls_x509_crt_profile_default, sizeof(mbedtls_x509_crt_profile));
+  CopyMem(&Profile, &compat_profile, sizeof(mbedtls_x509_crt_profile));
 
   mbedtls_x509_crt_init(&Ca);
   mbedtls_x509_crt_init(&End);
