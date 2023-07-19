@@ -35,12 +35,30 @@ The goal of POC has been reached, next step:
 1.  Optimize code quality  
 2.  Upstream OpenSsl code change  
 3.  Fully validation  
-  
-Risk:  
+#### Risk
 1.  Upstream the openssl code is a long process. if all goes well, it can be completed before the next openssl stable release (July 2023).  
 	If missed, the next stable release will be in September 2023.  
 2.  If bugs are found during validation, some size optimization work will have to be discarded.   
 	This will result in that size increase greater than the current result.  
+3.  All 'provider' related crypto API will no longer work in PeiPreMemory stage due to known issue in OpenSSL3.0:  
+    https://github.com/openssl/openssl/issues/21304  
+    In OpenSSL3.0, most algorithms delete the legacy implementation and turn to the provider implementation. The provider will use global variables to record and update the state, but all global variables are read-only in the PeiPreMemory stage. The algorithms affected are:  
+    Not work: RSA, RSAPSS, HMAC, HKDF, PKCS7  
+    Still work: SHA1, SHA(256, 384, 512), SHA3, AES, SM3  
+    Need to use OpenSSL30-MbedTls dual-mode if user want to use the 'Not work' algorithm in the PeiPreMemory stage.
+
+## OpenSSL30-MbedTls dual-mode
+MbedTls is a smaller alternative to OpenSSL: https://github.com/tianocore/edk2-staging/blob/OpenSSL11_EOL/CryptoPkg/ReadmeMbedtls.md  
+#### Type 1: OpenSSL 3.0 (main) + MbedTLS (for PEI-PreMem)
+a. Issue: OpenSSL 3.0 does not support Writable Global Variable in PEI-PreMem phase.  
+b. Impacted Algorithm: RSA, RSAPSS, HMAC, HKDF, PKCS7  
+c. Solution: using MbedTls PeiCryptLib in PeiPreMem: https://github.com/tianocore/edk2-staging/blob/OpenSSL11_EOL/CryptoPkg/Library/BaseCryptLibMbedTls/PeiCryptLib.inf   
+
+#### Type 2: MbedTLS (main) + OpenSSL 3.0 (for SHA3-ParallelHash and SM3)
+a. Issue: MbedTLS does not support SHA3-ParallelHash or SM3 yet.  
+b. Impacted Algorithm: SM3, SHA3  
+c. Solution: using OpenSSL SM3 and SHA3 in MbedTlsLib: https://github.com/tianocore/edk2-staging/blob/7cd76a78cecf212abe8ca98ac5ef784461943450/CryptoPkg/Library/MbedTlsLib/MbedTlsLib.inf#L25-L29  
+
 
 ## OpenSSL upstream status
 |   openssl change   |   status   |    backup     |    tips   |  
