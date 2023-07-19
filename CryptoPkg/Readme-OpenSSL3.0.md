@@ -100,8 +100,8 @@ Library mode (use crypto library)
 Any codes including the API definition, the library and the drivers are subject to change.  
 2. Only passed Crypto Unit Test, no other tests.  
 3. There are some changes that require a more elegant implementation or upstream to openssl.  
-For convenience, openssl submodule currently uses Owner's private branch:  
-https://github.com/liyi77/openssl/tree/openssl-3.0-POC  
+For convenience, openssl submodule currently uses Tianocore's private branch:  
+https://github.com/tianocore/openssl/tree/edk2-staging-openssl-3.0.8  
 
 ## Why size increased  
 
@@ -144,13 +144,13 @@ https://github.com/openssl/openssl/issues/20260
 ### 5.Hash API downgrade (for PeiPreMem)
 High level API (EVP) will introduce provider and NID mapping which can increase size extremely.  
 This can bring the PeiPreMem size down to 31KB.  
-Commit: https://github.com/liyi77/edk2-staging/commit/8ed8c5afef878c2299d49f32bc093285203d4479  
+Commit: https://github.com/tianocore/edk2/commit/f335d91a3bfe47de702af564eb3661ab8906d1be  
 
 ### 6.Remove EN/DECODER provider
 Will reduce the size by ~70KB, but needs to ensure that all API works properly in the legacy code path,  
 so that we can remove the entire EN/DECODER module.  
 This needs to change the openssl code, such as:  
-https://github.com/liyi77/openssl/commit/d1b07663c40c5fccfa60fcd2fea9620819e8e5d5
+https://github.com/tianocore/openssl/commit/8e53333f3ad824badb55254b218906258a4edd88  
 #### Risk:
 This will become workaround if openssl doesn't accept such changes.  
   
