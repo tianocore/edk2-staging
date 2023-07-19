@@ -110,7 +110,6 @@ int OSSL_DECODER_CTX_get_num_decoders(OSSL_DECODER_CTX *ctx) {
     return 0;
 };
 
-typedef struct ossl_decoder_instance_st OSSL_DECODER_INSTANCE;
 OSSL_DECODER *
 OSSL_DECODER_INSTANCE_get_decoder(OSSL_DECODER_INSTANCE *decoder_inst) {
                                     return NULL;
@@ -128,11 +127,6 @@ OSSL_DECODER_INSTANCE_get_input_structure(OSSL_DECODER_INSTANCE *decoder_inst,
                                           int *was_set) {
                                     return NULL;
                                  }
-
-typedef int OSSL_DECODER_CONSTRUCT(OSSL_DECODER_INSTANCE *decoder_inst,
-                                   const OSSL_PARAM *params,
-                                   void *construct_data);
-typedef void OSSL_DECODER_CLEANUP(void *construct_data);
 
 int OSSL_DECODER_CTX_set_construct(OSSL_DECODER_CTX *ctx,
                                    OSSL_DECODER_CONSTRUCT *construct) {
