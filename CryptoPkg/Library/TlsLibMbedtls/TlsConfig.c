@@ -856,8 +856,8 @@ TlsSetSignatureAlgoList (
   TLS_CONNECTION  *TlsConn;
   UINTN           Index;
   UINTN           SignAlgoStrSize;
-  CHAR8           *SignAlgoStr;
-  CHAR8           *Pos;
+  UINT16           *SignAlgoStr;
+  UINT16           *Pos;
   UINT8           *SignatureAlgoList;
   EFI_STATUS      Status;
 
@@ -871,33 +871,8 @@ TlsSetSignatureAlgoList (
 
   SignatureAlgoList = Data + 1;
   SignAlgoStrSize   = 0;
-  for (Index = 0; Index < Data[0]; Index += 2) {
-    CONST CHAR8  *Tmp;
 
-    if (SignatureAlgoList[Index] >= ARRAY_SIZE (TlsHashAlgoToName)) {
-      return EFI_INVALID_PARAMETER;
-    }
-
-    Tmp = TlsHashAlgoToName[SignatureAlgoList[Index]].Name;
-    if (!Tmp) {
-      return EFI_INVALID_PARAMETER;
-    }
-
-    // Add 1 for the '+'
-    SignAlgoStrSize += AsciiStrLen (Tmp) + 1;
-
-    if (SignatureAlgoList[Index + 1] >= ARRAY_SIZE (TlsSignatureAlgoToName)) {
-      return EFI_INVALID_PARAMETER;
-    }
-
-    Tmp = TlsSignatureAlgoToName[SignatureAlgoList[Index + 1]].Name;
-    if (!Tmp) {
-      return EFI_INVALID_PARAMETER;
-    }
-
-    // Add 1 for the ':' or for the NULL terminator
-    SignAlgoStrSize += AsciiStrLen (Tmp) + 1;
-  }
+  SignAlgoStrSize = Data[0]/2 + 1;
 
   if (!SignAlgoStrSize) {
     return EFI_UNSUPPORTED;
@@ -910,26 +885,16 @@ TlsSetSignatureAlgoList (
 
   Pos = SignAlgoStr;
   for (Index = 0; Index < Data[0]; Index += 2) {
-    CONST CHAR8  *Tmp;
-
-    Tmp = TlsHashAlgoToName[SignatureAlgoList[Index]].Name;
-    CopyMem (Pos, Tmp, AsciiStrLen (Tmp));
-    Pos   += AsciiStrLen (Tmp);
-    *Pos++ = '+';
-
-    Tmp = TlsSignatureAlgoToName[SignatureAlgoList[Index + 1]].Name;
-    CopyMem (Pos, Tmp, AsciiStrLen (Tmp));
-    Pos   += AsciiStrLen (Tmp);
-    *Pos++ = ':';
+    *Pos = (Data[1 + Index] <<8) | Data[2 + Index];
+    Pos++;
   }
 
-  *(Pos - 1) = '\0';
+  *Pos = 0;
 
   mbedtls_ssl_conf_sig_algs((mbedtls_ssl_config *)TlsConn->Ssl->conf, (const uint16_t*)SignAlgoStr);
 
   Status = EFI_SUCCESS;
 
-  FreePool (SignAlgoStr);
   return Status;
 }
 
