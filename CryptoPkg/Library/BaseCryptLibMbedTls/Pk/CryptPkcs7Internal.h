@@ -46,6 +46,7 @@ typedef struct MbedtlsPkcs7SignerInfo {
   mbedtls_x509_buf IssuerRaw;
   mbedtls_x509_buf AlgIdentifier;
   mbedtls_x509_buf SigAlgIdentifier;
+  mbedtls_x509_buf AuthAttr;
   mbedtls_x509_buf Sig;
   struct MbedtlsPkcs7SignerInfo *Next;
 } MbedtlsPkcs7SignerInfo;

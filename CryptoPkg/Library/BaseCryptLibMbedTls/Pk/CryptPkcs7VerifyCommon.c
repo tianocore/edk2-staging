@@ -13,6 +13,32 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include "CryptPkcs7Internal.h"
 #include <mbedtls/pkcs7.h>
 
+/* Profile for backward compatibility. Allows RSA 1024, unlike the default
+   profile. */
+STATIC mbedtls_x509_crt_profile compat_profile =
+{
+    /* Hashes from SHA-256 and above. Note that this selection
+     * should be aligned with ssl_preset_default_hashes in ssl_tls.c. */
+
+#ifndef DISABLE_SHA1_DEPRECATED_INTERFACES
+    MBEDTLS_X509_ID_FLAG( MBEDTLS_MD_SHA1 ) |
+#endif
+    MBEDTLS_X509_ID_FLAG( MBEDTLS_MD_SHA256 ) |
+    MBEDTLS_X509_ID_FLAG( MBEDTLS_MD_SHA384 ) |
+    MBEDTLS_X509_ID_FLAG( MBEDTLS_MD_SHA512 ),
+    0xFFFFFFF, /* Any PK alg    */
+    /* Curves at or above 128-bit security level. Note that this selection
+     * should be aligned with ssl_preset_default_curves in ssl_tls.c. */
+    MBEDTLS_X509_ID_FLAG( MBEDTLS_ECP_DP_SECP256R1 ) |
+    MBEDTLS_X509_ID_FLAG( MBEDTLS_ECP_DP_SECP384R1 ) |
+    MBEDTLS_X509_ID_FLAG( MBEDTLS_ECP_DP_SECP521R1 ) |
+    MBEDTLS_X509_ID_FLAG( MBEDTLS_ECP_DP_BP256R1 ) |
+    MBEDTLS_X509_ID_FLAG( MBEDTLS_ECP_DP_BP384R1 ) |
+    MBEDTLS_X509_ID_FLAG( MBEDTLS_ECP_DP_BP512R1 ) |
+    0,
+    1024,
+};
+
 STATIC
 VOID
 MbedTlsPkcs7Init (
@@ -191,6 +217,7 @@ MbedTlsPkcs7GetSignersInfoSet (
   UINT8 *EndSet;
   INT32 Ret;
   INTN Len;
+  UINT8 *TempP;
 
   Len = 0;
 
@@ -237,6 +264,21 @@ MbedTlsPkcs7GetSignersInfoSet (
     Ret = MbedTlsPkcs7GetDigestAlgorithm (P, EndSet, &SignersSet->AlgIdentifier);
   }
 
+  //OPTIONAL AuthenticatedAttributes
+  if (Ret == 0) {
+    TempP = *P;
+    if (mbedtls_asn1_get_tag (&TempP, EndSet, &Len, 0xA0) == 0) {
+
+      SignersSet->AuthAttr.len = Len + (TempP - *P);
+      SignersSet->AuthAttr.p = *P;
+      *(SignersSet->AuthAttr.p) = 0x31;
+
+      *P = TempP + Len;
+   } else {
+    SignersSet->AuthAttr.p = NULL;
+   }
+  }
+
   if (Ret == 0) {
     Ret = MbedTlsPkcs7GetDigestAlgorithm (P, EndSet, &SignersSet->SigAlgIdentifier);
   }
@@ -276,6 +318,12 @@ Pkcs7GetSignedData (
   UINT8 *End;
   INTN Len;
   INT32 Ret;
+  UINT8 *CertP;
+  INTN CertLen;
+  UINT8 *OldCertP;
+  INTN TotalCertLen;
+  mbedtls_x509_crt *MoreCert;
+  UINT8 CertNum;
 
   Len = 0;
   P = Buffer;
@@ -299,42 +347,93 @@ Pkcs7GetSignedData (
       &P, End, &SignedData->DigestAlgorithms);
   }
 
-  if (Ret == 0 &&
-    (SignedData->DigestAlgorithms.len != sizeof (MBEDTLS_OID_DIGEST_ALG_SHA256) - 1)) {
-    Ret = -1;
-  }
-
-  if (Ret == 0 &&
-    CompareMem (
-      SignedData->DigestAlgorithms.p,
-      MBEDTLS_OID_DIGEST_ALG_SHA256,
-      SignedData->DigestAlgorithms.len) != 0){
-    Ret = -1;
+  if (Ret == 0) {
+    if (
+#ifndef DISABLE_SHA1_DEPRECATED_INTERFACES
+        ((SignedData->DigestAlgorithms.len == sizeof (MBEDTLS_OID_DIGEST_ALG_SHA1) - 1) &&
+         (CompareMem (SignedData->DigestAlgorithms.p,
+                      MBEDTLS_OID_DIGEST_ALG_SHA1,
+                      SignedData->DigestAlgorithms.len) == 0)) ||
+#endif
+        ((SignedData->DigestAlgorithms.len == sizeof (MBEDTLS_OID_DIGEST_ALG_SHA256) - 1) &&
+         (CompareMem (SignedData->DigestAlgorithms.p,
+                      MBEDTLS_OID_DIGEST_ALG_SHA256,
+                      SignedData->DigestAlgorithms.len) == 0)) ||
+        ((SignedData->DigestAlgorithms.len == sizeof (MBEDTLS_OID_DIGEST_ALG_SHA384) - 1) &&
+         (CompareMem (SignedData->DigestAlgorithms.p,
+                      MBEDTLS_OID_DIGEST_ALG_SHA384,
+                      SignedData->DigestAlgorithms.len) == 0)) ||
+        ((SignedData->DigestAlgorithms.len == sizeof (MBEDTLS_OID_DIGEST_ALG_SHA512) - 1) &&
+         (CompareMem (SignedData->DigestAlgorithms.p,
+                      MBEDTLS_OID_DIGEST_ALG_SHA512,
+                      SignedData->DigestAlgorithms.len) == 0))) {
+      Ret = 0;
+    } else {
+      Ret = -1;
+    }
   }
 
   if (Ret == 0) {
     Ret = Pkcs7GetContentInfoType(&P, End, &SignedData->ContentInfo.Oid);
   }
 
-  if (Ret == 0 &&
-    CompareMem (
-      SignedData->ContentInfo.Oid.p,
-      MBEDTLS_OID_PKCS7_DATA,
-      SignedData->ContentInfo.Oid.len) != 0) {
-      // Invalid PKCS7 data
-      Ret = -1;
-  }
-
   if (Ret == 0) {
     // move to next
     P = P + SignedData->ContentInfo.Oid.len;
     Ret = MbedTlsPkcs7GetNextContentLen (&P, End, &Len);
+    CertP = P + Len;
+
+    if (MbedTlsPkcs7GetNextContentLen (&CertP, End, &CertLen) == 0) {
+      Len = CertLen - (CertP - P -Len);
+      Len = CertLen;
+      P = CertP;
+    }
   }
 
-  // certificates
-  if (Ret == 0) {
-    mbedtls_x509_crt_init (&SignedData->Certificates);
-    Ret = MbedTlsPkcs7GetCertificates (&P, Len, &SignedData->Certificates);
+  // certificates: may have many certs
+  CertP = P;
+
+  TotalCertLen = 0;
+
+  MoreCert = &SignedData->Certificates;
+  CertNum = 0;
+
+  while (TotalCertLen < Len) {
+    OldCertP = CertP;
+
+    Ret = mbedtls_asn1_get_tag(&CertP, End, &CertLen, 0x30);
+
+    //cert total len
+    CertLen = CertLen + (CertP - OldCertP);
+
+    //move to next cert
+    CertP = OldCertP + CertLen;
+
+    //change TotalCertLen
+    TotalCertLen += CertLen;
+
+    mbedtls_x509_crt_init (MoreCert);
+    Ret = MbedTlsPkcs7GetCertificates (&OldCertP, CertLen, MoreCert);
+
+    CertNum++;
+    MoreCert->next = AllocatePool(sizeof(mbedtls_x509_crt));
+    MoreCert = MoreCert->next;
+  }
+
+  FreePool (MoreCert);
+  MoreCert = NULL;
+
+  mbedtls_x509_crt *LastCert;
+
+  LastCert = &(SignedData->Certificates);
+
+  while(CertNum--) {
+    if (CertNum == 0) {
+      LastCert->next = NULL;
+      break;
+    } else {
+      LastCert = LastCert->next;
+    }
   }
 
   // signers info
@@ -414,14 +513,64 @@ MbedtlsPkcs7SignedDataVerifySigners (
   )
 {
   INT32 Ret;
-  UINT8 Hash[32];
+  UINT8 Hash[MBEDTLS_MD_MAX_SIZE];
   mbedtls_pk_context Pk;
   CONST mbedtls_md_info_t *MdInfo;
+  INTN HashLen;
 
   Pk = Cert->pk;
-  MdInfo = mbedtls_md_info_from_type (MBEDTLS_MD_SHA256);
+  ZeroMem(Hash, MBEDTLS_MD_MAX_SIZE);
+
+  //all the hash algo
+#ifndef DISABLE_SHA1_DEPRECATED_INTERFACES
+  MdInfo = mbedtls_md_info_from_type (MBEDTLS_MD_SHA1);
+  HashLen = mbedtls_md_get_size(MdInfo);
   mbedtls_md (MdInfo, Data, DataLen, Hash);
-  Ret = mbedtls_pk_verify (&Pk, MBEDTLS_MD_SHA256,Hash, 32, SignerInfo->Sig.p, SignerInfo->Sig.len);
+  if (SignerInfo->AuthAttr.p != NULL) {
+    mbedtls_md (MdInfo, SignerInfo->AuthAttr.p, SignerInfo->AuthAttr.len, Hash);
+  }
+  Ret = mbedtls_pk_verify (&Pk, MBEDTLS_MD_SHA1, Hash, HashLen, SignerInfo->Sig.p, SignerInfo->Sig.len);
+
+  if (Ret == 0) {
+    return Ret;
+  }
+#endif
+
+  MdInfo = mbedtls_md_info_from_type (MBEDTLS_MD_SHA256);
+  HashLen = mbedtls_md_get_size(MdInfo);
+  ZeroMem(Hash, MBEDTLS_MD_MAX_SIZE);
+  mbedtls_md (MdInfo, Data, DataLen, Hash);
+  if (SignerInfo->AuthAttr.p != NULL) {
+    mbedtls_md (MdInfo, SignerInfo->AuthAttr.p, SignerInfo->AuthAttr.len, Hash);
+  }
+  Ret = mbedtls_pk_verify (&Pk, MBEDTLS_MD_SHA256, Hash, HashLen, SignerInfo->Sig.p, SignerInfo->Sig.len);
+  if (Ret == 0) {
+    return Ret;
+  }
+
+  MdInfo = mbedtls_md_info_from_type (MBEDTLS_MD_SHA384);
+  HashLen = mbedtls_md_get_size(MdInfo);
+  ZeroMem(Hash, MBEDTLS_MD_MAX_SIZE);
+  mbedtls_md (MdInfo, Data, DataLen, Hash);
+  if (SignerInfo->AuthAttr.p != NULL) {
+    mbedtls_md (MdInfo, SignerInfo->AuthAttr.p, SignerInfo->AuthAttr.len, Hash);
+  }
+  Ret = mbedtls_pk_verify (&Pk, MBEDTLS_MD_SHA384, Hash, HashLen, SignerInfo->Sig.p, SignerInfo->Sig.len);
+  if (Ret == 0) {
+    return Ret;
+  }
+
+  MdInfo = mbedtls_md_info_from_type (MBEDTLS_MD_SHA512);
+  HashLen = mbedtls_md_get_size(MdInfo);
+  ZeroMem(Hash, MBEDTLS_MD_MAX_SIZE);
+  mbedtls_md (MdInfo, Data, DataLen, Hash);
+  if (SignerInfo->AuthAttr.p != NULL) {
+    mbedtls_md (MdInfo, SignerInfo->AuthAttr.p, SignerInfo->AuthAttr.len, Hash);
+  }
+  Ret = mbedtls_pk_verify (&Pk, MBEDTLS_MD_SHA512, Hash, HashLen, SignerInfo->Sig.p, SignerInfo->Sig.len);
+  if (Ret == 0) {
+    return Ret;
+  }
   return Ret;
 }
 
@@ -458,12 +607,48 @@ MbedTlsPkcs7VerifyCert (
   UINT32  VFlag = 0;
   mbedtls_x509_crt_profile Profile = {0};
 
-  CopyMem (&Profile, &mbedtls_x509_crt_profile_default, sizeof(mbedtls_x509_crt_profile));
+  CopyMem (&Profile, &compat_profile, sizeof(mbedtls_x509_crt_profile));
 
   Ret = mbedtls_x509_crt_verify_with_profile (End, Ca, CaCrl, &Profile, NULL, &VFlag, NULL, NULL);
 
   return Ret == 0;
 }
+
+STATIC
+BOOLEAN
+MbedTlsPkcs7VerifyCertChain (
+  MbedtlsPkcs7 *Pkcs7,
+  mbedtls_x509_crt *Ca,
+  mbedtls_x509_crt *End
+  )
+{
+  mbedtls_x509_crt          *AllCert;
+  mbedtls_x509_crt          *InterCert;
+
+  AllCert = &(Pkcs7->SignedData.Certificates);
+  InterCert = NULL;
+
+
+  while(AllCert != NULL) {
+    if ((AllCert->next == End) && (MbedTlsPkcs7VerifyCert(AllCert , NULL, End))) {
+        InterCert = AllCert;
+        break;
+    }
+
+    AllCert = AllCert->next;
+  }
+
+  if (InterCert == NULL) {
+    return FALSE;
+  }
+
+  if (MbedTlsPkcs7VerifyCert (Ca, &(Pkcs7->SignedData.Crls), InterCert)) {
+    return TRUE;
+  } else {
+    return MbedTlsPkcs7VerifyCertChain(Pkcs7, Ca, InterCert);
+  }
+}
+
 
 STATIC
 BOOLEAN
@@ -476,25 +661,44 @@ MbedTlsPkcs7SignedDataVerify (
 {
   MbedtlsPkcs7SignerInfo *SignerInfo;
   mbedtls_x509_crt          *Cert;
+  mbedtls_x509_crt          *AllCert;
 
   SignerInfo = &(Pkcs7->SignedData.SignerInfos);
+  BOOLEAN  Result;
+  Result = TRUE;
 
   //
   // Traverse signers and verify each signers
   //
   while (SignerInfo != NULL) {
+    Result = FALSE;
     // 1. Find signers cert
     Cert = MbedTlsPkcs7FindSignerCert (SignerInfo, &(Pkcs7->SignedData.Certificates));
-
-    // 2. Check signer cert is trusted by trustCert
-    if (!MbedTlsPkcs7VerifyCert (TrustCert, &(Pkcs7->SignedData.Crls), Cert)) {
-      return FALSE;
-    }
-
     if (Cert != NULL) {
-    // 3. Check signed data
-      if (MbedtlsPkcs7SignedDataVerifySigners(SignerInfo, Cert, Data, DataLen) != 0) {
-        return FALSE;
+
+      // 2. Check signer cert is trusted by trustCert
+      if (MbedTlsPkcs7VerifyCert (TrustCert, &(Pkcs7->SignedData.Crls), Cert)) {
+        //root cert verify pass
+        Result = TRUE;
+      } else {
+        if (MbedTlsPkcs7VerifyCertChain(Pkcs7, TrustCert, Cert)) {
+          Result = TRUE;
+        } else {
+          Result = FALSE;
+        }
+      }
+
+      if (Result == TRUE) {
+        // 3. Check signed data
+        AllCert = &(Pkcs7->SignedData.Certificates);
+        while(AllCert != NULL) {
+          if (MbedtlsPkcs7SignedDataVerifySigners(SignerInfo, AllCert, Data, DataLen) == 0) {
+            return TRUE;
+          }
+          AllCert = AllCert->next;
+        }
+
+        Result = FALSE;
       }
     }
 
@@ -502,7 +706,7 @@ MbedTlsPkcs7SignedDataVerify (
     SignerInfo = SignerInfo->Next;
   }
 
-  return TRUE;
+  return Result;
 }
 
 /**
@@ -656,7 +860,7 @@ Pkcs7Verify (
 
   Status = WrapPkcs7Data (P7Data, P7Length, &Wrapped, &WrapData, &WrapDataSize);
 
-  if (!Status) {
+  if (Status) {
     Ret = 0;
     Status = FALSE;
   } else {
@@ -677,7 +881,6 @@ Pkcs7Verify (
   if (Ret == 0) {
     Status = MbedTlsPkcs7SignedDataVerify (&Pkcs7, &Crt, InData, (INT32)DataLength);
   }
-
 
   if (&Crt != NULL) {
     mbedtls_x509_crt_free(&Crt);
