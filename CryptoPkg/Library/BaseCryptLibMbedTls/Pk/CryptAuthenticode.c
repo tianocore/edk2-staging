@@ -58,6 +58,7 @@ AuthenticodeVerify (
   UINT8 *End;
   INT32 Len;
   UINTN ObjLen;
+  UINT8 *NewPtr;
 
   OrigAuthData = AuthData;
 
@@ -111,7 +112,9 @@ AuthenticodeVerify (
   if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x30) != 0) {
     return FALSE;
   }
-  End = Ptr + ObjLen;
+
+  NewPtr = Ptr + ObjLen;
+
   //eContentType
   if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x06) != 0) {
     return FALSE;
@@ -190,10 +193,26 @@ AuthenticodeVerify (
     goto _Exit;
   }
 
-  //
-  // Verifies the PKCS#7 Signed Data in PE/COFF Authenticode Signature
-  //
-  Status = (BOOLEAN)Pkcs7Verify (OrigAuthData, DataSize, TrustedCert, CertSize, SpcIndirectDataContent, ContentSize);
+  //cert
+  if (mbedtls_asn1_get_tag(&NewPtr, End, &ObjLen, 0xA0) != 0) {
+    return FALSE;
+  }
+  End = NewPtr + ObjLen;
+
+  while (NewPtr != End)
+  {
+    Ptr = NewPtr;
+    if (mbedtls_asn1_get_tag(&NewPtr, End, &ObjLen, 0x30) != 0) {
+      return FALSE;
+    }
+
+    ObjLen = ObjLen + (NewPtr -Ptr);
+    NewPtr = Ptr;
+
+    NewPtr += ObjLen;
+  }
+
+  Status = TRUE;
 
 _Exit:
 
