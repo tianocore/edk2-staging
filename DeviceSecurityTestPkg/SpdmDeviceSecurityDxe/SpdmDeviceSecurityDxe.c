@@ -15,7 +15,7 @@ LIST_ENTRY  mSpdmDeviceList = INITIALIZE_LIST_HEAD_VARIABLE (mSpdmDeviceList);
 EDKII_DEVICE_SECURITY_POLICY_PROTOCOL  *mDeviceSecurityPolicy;
 
 BOOLEAN  mSendReceiveBufferAcquired = FALSE;
-UINT8    mSendReceiveBuffer[LIBSPDM_MAX_MESSAGE_BUFFER_SIZE];
+UINT8    mSendReceiveBuffer[LIBSPDM_MAX_SENDER_RECEIVER_BUFFER_SIZE];
 UINTN    mSendReceiveBufferSize;
 VOID     *mScratchBuffer;
 
@@ -236,12 +236,10 @@ IsSpdmDeviceInAuthenticationList (
 SPDM_RETURN
 SpdmDeviceAcquireSenderBuffer (
   VOID   *Context,
-  UINTN  *MaxMsgSize,
   VOID   **MsgBufPtr
   )
 {
   ASSERT (!mSendReceiveBufferAcquired);
-  *MaxMsgSize = sizeof (mSendReceiveBuffer);
   *MsgBufPtr  = mSendReceiveBuffer;
   ZeroMem (mSendReceiveBuffer, sizeof (mSendReceiveBuffer));
   mSendReceiveBufferAcquired = TRUE;
@@ -265,12 +263,10 @@ SpdmDeviceReleaseSenderBuffer (
 SPDM_RETURN
 SpdmDeviceAcquireReceiverBuffer (
   VOID   *Context,
-  UINTN  *MaxMsgSize,
   VOID   **MsgBufPtr
   )
 {
   ASSERT (!mSendReceiveBufferAcquired);
-  *MaxMsgSize = sizeof (mSendReceiveBuffer);
   *MsgBufPtr  = mSendReceiveBuffer;
   ZeroMem (mSendReceiveBuffer, sizeof (mSendReceiveBuffer));
   mSendReceiveBufferAcquired = TRUE;
@@ -307,13 +303,10 @@ CreateSpdmDriverContext (
   VOID                        *SpdmContext;
   EFI_STATUS                  Status;
   SPDM_RETURN                 SpdmReturn;
-  VOID                        *Data;
-  UINTN                       DataSize;
   SPDM_DATA_PARAMETER         Parameter;
   UINT8                       Data8;
   UINT16                      Data16;
   UINT32                      Data32;
-  BOOLEAN                     HasRspPubCert;
   UINTN                       ScratchBufferSize;
   BOOLEAN                     IsRequrester;
 
@@ -332,25 +325,30 @@ CreateSpdmDriverContext (
 
   SpdmInitContext (SpdmContext);
 
-  ScratchBufferSize = SpdmGetSizeofRequiredScratchBuffer (SpdmContext);
-  mScratchBuffer    = AllocateZeroPool (ScratchBufferSize);
-  ASSERT (mScratchBuffer != NULL);
-
   SpdmRegisterDeviceIoFunc (SpdmContext, SpdmDeviceSendMessage, SpdmDeviceReceiveMessage);
-  //  SpdmRegisterTransportLayerFunc (SpdmContext, SpdmTransportMctpEncodeMessage, SpdmTransportMctpDecodeMessage);
+  //  SpdmRegisterTransportLayerFunc (SpdmContext, LIBSPDM_MAX_SPDM_MSG_SIZE, SpdmTransportMctpEncodeMessage, SpdmTransportMctpDecodeMessage);
   SpdmRegisterTransportLayerFunc (
     SpdmContext,
+    LIBSPDM_MAX_SPDM_MSG_SIZE,
+    LIBSPDM_TRANSPORT_HEADER_SIZE,
+    LIBSPDM_TRANSPORT_TAIL_SIZE,
     SpdmTransportPciDoeEncodeMessage,
-    SpdmTransportPciDoeDecodeMessage,
-    SpdmTransportPciDoeGetHeaderSize
+    SpdmTransportPciDoeDecodeMessage
     );
   SpdmRegisterDeviceBufferFunc (
     SpdmContext,
+    LIBSPDM_SENDER_BUFFER_SIZE,
+    LIBSPDM_RECEIVER_BUFFER_SIZE,
     SpdmDeviceAcquireSenderBuffer,
     SpdmDeviceReleaseSenderBuffer,
     SpdmDeviceAcquireReceiverBuffer,
     SpdmDeviceReleaseReceiverBuffer
     );
+
+  ScratchBufferSize = SpdmGetSizeofRequiredScratchBuffer (SpdmContext);
+  mScratchBuffer    = AllocateZeroPool (ScratchBufferSize);
+  ASSERT (mScratchBuffer != NULL);
+
   SpdmSetScratchBuffer (SpdmContext, mScratchBuffer, ScratchBufferSize);
 
   SpdmDriverContext->SpdmContext = SpdmContext;
@@ -415,22 +413,6 @@ CreateSpdmDriverContext (
   //
   RecordSpdmDeviceInList (SpdmDriverContext);
 
-  Status = GetVariable2 (
-             L"ProvisionSpdmCertChain",
-             &gEfiDeviceSecurityPkgTestConfig,
-             &Data,
-             &DataSize
-             );
-  if (!EFI_ERROR (Status)) {
-    HasRspPubCert = TRUE;
-    ZeroMem (&Parameter, sizeof (Parameter));
-    Parameter.location = SpdmDataLocationLocal;
-    SpdmSetData (SpdmContext, SpdmDataPeerPublicCertChains, &Parameter, Data, DataSize);
-    // Do not free it.
-  } else {
-    HasRspPubCert = FALSE;
-  }
-
   Data8 = 0;
   ZeroMem (&Parameter, sizeof (Parameter));
   Parameter.location = SpdmDataLocationLocal;
@@ -438,7 +420,7 @@ CreateSpdmDriverContext (
 
   Data32 = 0 |
            SPDM_GET_CAPABILITIES_REQUEST_FLAGS_CERT_CAP |
-           //           SPDM_GET_CAPABILITIES_REQUEST_FLAGS_CHAL_CAP |
+           SPDM_GET_CAPABILITIES_REQUEST_FLAGS_CHAL_CAP |
            SPDM_GET_CAPABILITIES_REQUEST_FLAGS_ENCRYPT_CAP |
            SPDM_GET_CAPABILITIES_REQUEST_FLAGS_MAC_CAP |
            //           SPDM_GET_CAPABILITIES_REQUEST_FLAGS_MUT_AUTH_CAP |
@@ -452,15 +434,10 @@ CreateSpdmDriverContext (
            //           SPDM_GET_CAPABILITIES_REQUEST_FLAGS_HANDSHAKE_IN_THE_CLEAR_CAP |
            //           SPDM_GET_CAPABILITIES_REQUEST_FLAGS_PUB_KEY_ID_CAP |
            0;
-  if (!HasRspPubCert) {
-    Data32 &= ~SPDM_GET_CAPABILITIES_REQUEST_FLAGS_CHAL_CAP;
-  } else {
-    Data32 |= SPDM_GET_CAPABILITIES_REQUEST_FLAGS_CHAL_CAP;
-  }
 
   SpdmSetData (SpdmContext, SpdmDataCapabilityFlags, &Parameter, &Data32, sizeof (Data32));
 
-  Data8 = SPDM_MEASUREMENT_BLOCK_HEADER_SPECIFICATION_DMTF;
+  Data8 = SPDM_MEASUREMENT_SPECIFICATION_DMTF;
   SpdmSetData (SpdmContext, SpdmDataMeasurementSpec, &Parameter, &Data8, sizeof (Data8));
   Data32 = SPDM_ALGORITHMS_BASE_ASYM_ALGO_TPM_ALG_RSASSA_2048 |
            SPDM_ALGORITHMS_BASE_ASYM_ALGO_TPM_ALG_RSASSA_3072 |
@@ -603,7 +580,7 @@ DeviceAuthentication (
   SpdmDeviceInfo.ReceiveMessage         = SpdmIoProtocolDeviceReceiveMessage;
   SpdmDeviceInfo.TransportEncodeMessage = SpdmTransportPciDoeEncodeMessage;
   SpdmDeviceInfo.TransportDecodeMessage = SpdmTransportPciDoeDecodeMessage;
-  SpdmDeviceInfo.TransportGetHeaderSize = SpdmTransportPciDoeGetHeaderSize;
+  SpdmDeviceInfo.TransportHeaderSize = LIBSPDM_PCI_DOE_TRANSPORT_HEADER_SIZE;
 
   SpdmDeviceInfo.AcquireSenderBuffer   = SpdmDeviceAcquireSenderBuffer;
   SpdmDeviceInfo.ReleaseSenderBuffer   = SpdmDeviceReleaseSenderBuffer;

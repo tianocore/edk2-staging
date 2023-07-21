@@ -90,6 +90,7 @@ typedef enum {
   SpdmDataCapabilityRttUs,
   SpdmDataCapabilityDataTransferSize,
   SpdmDataCapabilityMaxSpdmMsgSize,
+  SpdmDataCapabilitySenderDataTransferSize,
 
   //
   // SPDM Algorithm setting
@@ -115,16 +116,16 @@ typedef enum {
   // Certificate info
   //
   SpdmDataLocalPublicCertChain,
-  SpdmDataLocalSlotCount,
   SpdmDataPeerPublicRootCert,
-  SpdmDataPeerPublicCertChains,
+  SpdmDataPeerPublicKey,
+  SpdmDataLocalPublicKey,
+
   SpdmDataBasicMutAuthRequested,
   SpdmDataMutAuthRequested,
   SpdmDataHeartBeatPeriod,
   //
   // Negotiated result
   //
-  SpdmDataLocalUsedCertChainBuffer,
   SpdmDataPeerUsedCertChainBuffer,
   SpdmDataPeerSlotMask,
   SpdmDataPeerTotalDigestBuffer,
@@ -149,6 +150,30 @@ typedef enum {
 
   /* VCA cached for CACHE_CAP in 1.2 for transcript.*/
   SpdmDataVcaCache,
+
+  /* if the context is for a requester. It only needs to be set in VCA cache.*/
+  SpdmDataIsRequester,
+
+  // If the Responder replies with a Busy `ERROR` response to a request
+  // then the Requester is free to retry sending the request.
+  // This value specifies the maximum number of times libspdm will retry
+  // sending the request before returning an error.
+  // If its value is 0 then libspdm will not send any retry requests.
+  SpdmDataRequestRetryTimes,
+
+  // If the Responder replies with a Busy `ERROR` response to a request
+  // then the Requester is free to retry sending the request.
+  // This value specifies the delay time in microseconds between each retry requests.
+  // If its value is 0 then libspdm will send retry request immediately.
+  SpdmDataRequestRetryDelayTime,
+
+  /* limit the number of DHE session and PSK session separately.*/
+  SpdmDataMaxDheSessionConut,
+  SpdmDataMaxPskSessionConut,
+
+  SpdmDataSessionSequenceNumberRspDir,
+  SpdmDataSessionSequenceNumberReqDir,
+  SpdmDataMaxSessionSequenceNumber,
 
   //
   // MAX
@@ -207,10 +232,12 @@ typedef enum {
   // Other component is busy.
   //
   SpdmResponseStateBusy,
+  #if LIBSPDM_RESPOND_IF_READY_SUPPORT
   //
   // Hardware is not ready.
   //
   SpdmResponseStateNotReady,
+  #endif /* LIBSPDM_RESPOND_IF_READY_SUPPORT */
   //
   // Firmware Update is done. Need resync.
   //
@@ -280,7 +307,6 @@ typedef struct {
 #define SpdmGenerateErrorResponse         libspdm_generate_error_response
 #define SpdmTransportPciDoeEncodeMessage  libspdm_transport_pci_doe_encode_message
 #define SpdmTransportPciDoeDecodeMessage  libspdm_transport_pci_doe_decode_message
-#define SpdmTransportPciDoeGetHeaderSize  libspdm_transport_pci_doe_get_header_size
 
 #define SpdmMeasurementCollectionFunc         libspdm_measurement_collection
 #define SpdmRequesterDataSignFunc             libspdm_requester_data_sign
@@ -288,5 +314,7 @@ typedef struct {
 #define SpdmGenerateMeasurementSummaryHash    libspdm_generate_measurement_summary_hash
 #define SpdmPskMasterSecretHkdfExpandFunc     libspdm_psk_master_secret_hkdf_expand
 #define SpdmPskHandshakeSecretHkdfExpandFunc  libspdm_psk_handshake_secret_hkdf_expand
+#define SpdmMeasurementOpaqueData             libspdm_measurement_opaque_data
+#define SpdmChallengeOpaqueData               libspdm_challenge_opaque_data
 
 #endif

@@ -10,7 +10,6 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
 #include "hal/base.h"
-#include "hal/library/platform_lib.h"
 
 /**
  * Suspends the execution of the current thread until the time-out interval elapses.
