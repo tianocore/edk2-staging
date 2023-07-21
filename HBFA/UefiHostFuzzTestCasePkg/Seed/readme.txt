@@ -35,11 +35,12 @@ TestUpdateLockBoxFuzzLength                HBFA\UefiHostFuzzTestCasePkg\Seed\Loc
 TestUpdateLockBoxFuzzOffset                HBFA\UefiHostFuzzTestCasePkg\Seed\LockBox\Raw
 TestFileName                               HBFA\UefiHostFuzzTestCasePkg\Seed\UDF\Raw\FileName
 TestPeiGpt                                 HBFA\UefiHostFuzzTestCasePkg\Seed\Gpt\Raw
-TestValidateTdvfCfv                        HBFA\UefiHostFuzzTestCasePkg\Seed\Cfv
-TestValidateHobList                        HBFA\UefiHostFuzzTestCasePkg\Seed\TdxHob
+TestValidateTdxCfv                         HBFA\UefiHostFuzzTestCasePkg\Seed\Cfv
+TestHobList                                HBFA\UefiHostFuzzTestCasePkg\Seed\TdxHob
 TestTcg2MeasureGptTable                    HBFA\UefiHostFuzzTestCasePkg\Seed\Gpt
 TestTcg2MeasurePeImage                     # PE format image
 TestVirtioPciDevice                        HBFA\UefiHostFuzzTestCasePkg\Seed\Blk
-TestVirtioBlk10                            HBFA\UefiHostFuzzTestCasePkg\Seed\Blk
+TestVirtio10Blk                            HBFA\UefiHostFuzzTestCasePkg\Seed\Blk
 TestVirtioBlk                              HBFA\UefiHostFuzzTestCasePkg\Seed\Blk
 TestVirtioBlkReadWrite                     HBFA\UefiHostFuzzTestCasePkg\Seed\Blk
+TestParseMmioExitInstructions              HBFA\UefiHostFuzzTestCasePkg\Seed\Instruction

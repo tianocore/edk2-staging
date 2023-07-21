@@ -298,21 +298,28 @@ EFI_CC_MEASUREMENT_PROTOCOL mCcProtocol = {
 
 EFI_STATUS
 EFIAPI
-Tcg2StubInitlize(
+Tcg2StubInitialize(
     VOID
 ){
   EFI_STATUS        Status;
   EFI_HANDLE        Handle;
+  EFI_STATUS        Tcg2_Status;
+  EFI_STATUS        CcMeasurement_Status;
 
   Handle = NULL;
-  Status = gBS->InstallMultipleProtocolInterfaces (
+  Tcg2_Status = gBS->InstallProtocolInterface(
                   &Handle,
                   &gEfiTcg2ProtocolGuid,
-                  &mTcg2Protocol,
+                  EFI_NATIVE_INTERFACE,
+                  &mTcg2Protocol
+  );
+  CcMeasurement_Status = gBS->InstallProtocolInterface(
+                  &Handle,
                   &gEfiCcMeasurementProtocolGuid,
-                  &mCcProtocol,
-                  NULL
-                  );
+                  EFI_NATIVE_INTERFACE,
+                  &mCcProtocol
+  );
+  Status = Tcg2_Status || CcMeasurement_Status;
   return Status;
 
 }
