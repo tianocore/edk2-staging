@@ -25,7 +25,6 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include "hal/library/memlib.h"
 #include <Stub/SpdmLibStub.h>
 #include <SpdmReturnStatus.h>
-#include "library/spdm_device_secret_lib.h"
 #include "spdm_crypt_ext_lib.h"
 
 #define LIBSPDM_MEASUREMENT_BLOCK_HASH_NUMBER  4
@@ -73,7 +72,7 @@ SpdmFillMeasurementImageHashBlock (
     .Index = measurements_index;
   measurement_block->MeasurementBlockCommonHeader
     .MeasurementSpecification =
-    SPDM_MEASUREMENT_BLOCK_HEADER_SPECIFICATION_DMTF;
+    SPDM_MEASUREMENT_SPECIFICATION_DMTF;
 
   SetMem (data, sizeof (data), (uint8_t)(measurements_index));
 
@@ -137,7 +136,7 @@ SpdmFillMeasurementSvnBlock (
     .Index = LIBSPDM_MEASUREMENT_INDEX_SVN;
   measurement_block->MeasurementBlockCommonHeader
     .MeasurementSpecification =
-    SPDM_MEASUREMENT_BLOCK_HEADER_SPECIFICATION_DMTF;
+    SPDM_MEASUREMENT_SPECIFICATION_DMTF;
 
   svn = 0x7;
 
@@ -175,7 +174,7 @@ SpdmFillMeasurementManifestBlock (
     .Index = SPDM_MEASUREMENT_BLOCK_MEASUREMENT_INDEX_MEASUREMENT_MANIFEST;
   measurement_block->MeasurementBlockCommonHeader
     .MeasurementSpecification =
-    SPDM_MEASUREMENT_BLOCK_HEADER_SPECIFICATION_DMTF;
+    SPDM_MEASUREMENT_SPECIFICATION_DMTF;
 
   SetMem (
     data,
@@ -217,7 +216,7 @@ SpdmFillMeasurementDeviceModeBlock (
     .Index = SPDM_MEASUREMENT_BLOCK_MEASUREMENT_INDEX_DEVICE_MODE;
   measurement_block->MeasurementBlockCommonHeader
     .MeasurementSpecification =
-    SPDM_MEASUREMENT_BLOCK_HEADER_SPECIFICATION_DMTF;
+    SPDM_MEASUREMENT_SPECIFICATION_DMTF;
 
   device_mode.operational_mode_capabilities =
     SPDM_MEASUREMENT_DEVICE_OPERATION_MODE_MANUFACTURING_MODE |
@@ -312,11 +311,11 @@ SpdmMeasurementCollectionFunc (
 
   ASSERT (
     measurement_specification ==
-    SPDM_MEASUREMENT_BLOCK_HEADER_SPECIFICATION_DMTF
+    SPDM_MEASUREMENT_SPECIFICATION_DMTF
     );
 
   if (measurement_specification !=
-      SPDM_MEASUREMENT_BLOCK_HEADER_SPECIFICATION_DMTF)
+      SPDM_MEASUREMENT_SPECIFICATION_DMTF)
   {
     return LIBSPDM_STATUS_UNSUPPORTED_CAP;
   }
@@ -657,6 +656,59 @@ SpdmGenerateMeasurementSummaryHash (
 
   return true;
 }
+
+size_t libspdm_secret_lib_meas_opaque_data_size;
+
+BOOLEAN
+SpdmMeasurementOpaqueData(
+    uint16_t spdm_version,
+    uint8_t measurement_specification,
+    uint32_t measurement_hash_algo,
+    uint8_t measurement_index,
+    uint8_t request_attribute,
+    void *opaque_data,
+    size_t *opaque_data_size)
+{
+    size_t index;
+
+    ASSERT(libspdm_secret_lib_meas_opaque_data_size <= *opaque_data_size);
+
+    *opaque_data_size = libspdm_secret_lib_meas_opaque_data_size;
+
+    for (index = 0; index < *opaque_data_size; index++)
+    {
+        ((uint8_t *)opaque_data)[index] = (uint8_t)index;
+    }
+
+    return true;
+}
+
+
+size_t libspdm_secret_lib_challenge_opaque_data_size;
+
+bool SpdmChallengeOpaqueData(
+    spdm_version_number_t spdm_version,
+    uint8_t slot_id,
+    uint8_t *measurement_summary_hash,
+    size_t measurement_summary_hash_size,
+    void *opaque_data,
+    size_t *opaque_data_size)
+{
+    size_t index;
+
+    ASSERT(libspdm_secret_lib_challenge_opaque_data_size <= *opaque_data_size);
+
+    *opaque_data_size = libspdm_secret_lib_challenge_opaque_data_size;
+
+    for (index = 0; index < *opaque_data_size; index++)
+    {
+        ((uint8_t *)opaque_data)[index] = (uint8_t)index;
+    }
+
+    return true;
+}
+
+
 
 /**
   Sign an SPDM message data.

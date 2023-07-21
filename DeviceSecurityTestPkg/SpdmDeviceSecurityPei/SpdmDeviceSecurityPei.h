@@ -37,7 +37,6 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Ppi/DeviceSecurityPolicy.h>
 #include <Ppi/ReadOnlyVariable2.h>
 
-
 typedef struct {
   UINTN                                           Signature;
   EDKII_DEVICE_IDENTIFIER                         DeviceId;
