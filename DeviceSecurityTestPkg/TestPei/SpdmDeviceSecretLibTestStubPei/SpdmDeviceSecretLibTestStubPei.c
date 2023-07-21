@@ -58,7 +58,7 @@ SpdmMeasurementCollectionFunc (
   UINT8                        Data[MEASUREMENT_MANIFEST_SIZE];
   UINTN                        TotalSize;
 
-  ASSERT (MeasurementSpecification == SPDM_MEASUREMENT_BLOCK_HEADER_SPECIFICATION_DMTF);
+  ASSERT (MeasurementSpecification == SPDM_MEASUREMENT_SPECIFICATION_DMTF);
 
   HashSize = GetSpdmMeasurementHashSize (MeasurementHashAlgo);
 
@@ -71,7 +71,7 @@ SpdmMeasurementCollectionFunc (
   MeasurementBlock = DeviceMeasurement;
   for (Index = 0; Index < MEASUREMENT_BLOCK_NUMBER; Index++) {
     MeasurementBlock->Measurement_block_common_header.index = Index + 1;
-    MeasurementBlock->Measurement_block_common_header.measurement_specification = SPDM_MEASUREMENT_BLOCK_HEADER_SPECIFICATION_DMTF;
+    MeasurementBlock->Measurement_block_common_header.measurement_specification = SPDM_MEASUREMENT_SPECIFICATION_DMTF;
     if (Index < 4) {
       MeasurementBlock->Measurement_block_dmtf_header.dmtf_spec_measurement_value_type = Index;
       MeasurementBlock->Measurement_block_dmtf_header.dmtf_spec_measurement_value_size = (UINT16)HashSize;

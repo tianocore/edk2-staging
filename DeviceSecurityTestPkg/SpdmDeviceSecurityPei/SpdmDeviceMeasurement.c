@@ -203,7 +203,7 @@ ExtendMeasurement (
   if (MeasurementRecordLength <= sizeof(SPDM_MEASUREMENT_BLOCK_COMMON_HEADER) + sizeof(SPDM_MEASUREMENT_BLOCK_DMTF_HEADER)) {
     return EFI_SECURITY_VIOLATION;
   }
-  if ((SpdmMeasurementBlockCommonHeader->measurement_specification & SPDM_MEASUREMENT_BLOCK_HEADER_SPECIFICATION_DMTF) == 0) {
+  if ((SpdmMeasurementBlockCommonHeader->measurement_specification & SPDM_MEASUREMENT_SPECIFICATION_DMTF) == 0) {
     return EFI_SECURITY_VIOLATION;
   }
   if (SpdmMeasurementBlockCommonHeader->measurement_size != MeasurementRecordLength - sizeof(SPDM_MEASUREMENT_BLOCK_COMMON_HEADER)) {

@@ -73,38 +73,6 @@
 #define LIBSPDM_MAX_CERT_CHAIN_BLOCK_LEN  1024
 #endif
 
-#ifndef LIBSPDM_MAX_MESSAGE_BUFFER_SIZE
-#define LIBSPDM_MAX_MESSAGE_BUFFER_SIZE  0x1200
-#endif
-#ifndef LIBSPDM_MAX_MESSAGE_SMALL_BUFFER_SIZE
-#define LIBSPDM_MAX_MESSAGE_SMALL_BUFFER_SIZE  0x100 /* to hold message_a before negotiate*/
-#endif
-#ifndef LIBSPDM_MAX_MESSAGE_MEDIUM_BUFFER_SIZE
-#define LIBSPDM_MAX_MESSAGE_MEDIUM_BUFFER_SIZE  0x1200/* to hold message_k before finished_key is ready*/
-#endif
-
-/* If the Responder replies with a Busy `ERROR` response to a request then the Requester is free to
- * retry sending the request. This value specifies the maximum number of times libspdm will retry
- * sending the request before returning an error. If its value is 0 then libspdm will not send any
- * retry requests.
- */
-#ifndef LIBSPDM_MAX_REQUEST_RETRY_TIMES
-#define LIBSPDM_MAX_REQUEST_RETRY_TIMES  3
-#endif
-#ifndef LIBSPDM_MAX_SESSION_STATE_CALLBACK_NUM
-#define LIBSPDM_MAX_SESSION_STATE_CALLBACK_NUM  4
-#endif
-#ifndef LIBSPDM_MAX_CONNECTION_STATE_CALLBACK_NUM
-#define LIBSPDM_MAX_CONNECTION_STATE_CALLBACK_NUM  4
-#endif
-#ifndef LIBSPDM_MAX_KEY_UPDATE_CALLBACK_NUM
-#define LIBSPDM_MAX_KEY_UPDATE_CALLBACK_NUM 4
-#endif
-
-#ifndef LIBSPDM_MAX_CSR_SIZE
-#define LIBSPDM_MAX_CSR_SIZE  0x1000
-#endif
-
 /* To ensure integrity in communication between the Requester and the Responder libspdm calculates
  * cryptographic digests and signatures over multiple requests and responses. This value specifies
  * whether libspdm will use a running calculation over the transcript, where requests and responses
@@ -119,65 +87,113 @@
  * In each category, at least one should be selected.
  * NOTE: Not all combination can be supported. E.g. Don't mix NIST algo with SMx.*/
 
-#ifndef LIBSPDM_RSA_SSA_SUPPORT
-#define LIBSPDM_RSA_SSA_SUPPORT  1
+#ifndef LIBSPDM_RSA_SSA_2048_SUPPORT
+#define LIBSPDM_RSA_SSA_2048_SUPPORT 1
 #endif
-#ifndef LIBSPDM_RSA_PSS_SUPPORT
-#define LIBSPDM_RSA_PSS_SUPPORT  0
+#ifndef LIBSPDM_RSA_SSA_3072_SUPPORT
+#define LIBSPDM_RSA_SSA_3072_SUPPORT 1
 #endif
-#ifndef LIBSPDM_ECDSA_SUPPORT
-#define LIBSPDM_ECDSA_SUPPORT  1
+#ifndef LIBSPDM_RSA_SSA_4096_SUPPORT
+#define LIBSPDM_RSA_SSA_4096_SUPPORT 1
 #endif
-#ifndef LIBSPDM_SM2_DSA_SUPPORT
-#define LIBSPDM_SM2_DSA_SUPPORT  0
+
+#ifndef LIBSPDM_RSA_PSS_2048_SUPPORT
+#define LIBSPDM_RSA_PSS_2048_SUPPORT 0
 #endif
+#ifndef LIBSPDM_RSA_PSS_3072_SUPPORT
+#define LIBSPDM_RSA_PSS_3072_SUPPORT 0
+#endif
+#ifndef LIBSPDM_RSA_PSS_4096_SUPPORT
+#define LIBSPDM_RSA_PSS_4096_SUPPORT 0
+#endif
+
+#ifndef LIBSPDM_ECDSA_P256_SUPPORT
+#define LIBSPDM_ECDSA_P256_SUPPORT 1
+#endif
+#ifndef LIBSPDM_ECDSA_P384_SUPPORT
+#define LIBSPDM_ECDSA_P384_SUPPORT 1
+#endif
+#ifndef LIBSPDM_ECDSA_P521_SUPPORT
+#define LIBSPDM_ECDSA_P521_SUPPORT 1
+#endif
+
+#ifndef LIBSPDM_SM2_DSA_P256_SUPPORT
+#define LIBSPDM_SM2_DSA_P256_SUPPORT 0
+#endif
+
 #ifndef LIBSPDM_EDDSA_ED25519_SUPPORT
-#define LIBSPDM_EDDSA_ED25519_SUPPORT  0
+#define LIBSPDM_EDDSA_ED25519_SUPPORT 0
 #endif
 #ifndef LIBSPDM_EDDSA_ED448_SUPPORT
-#define LIBSPDM_EDDSA_ED448_SUPPORT  0
+#define LIBSPDM_EDDSA_ED448_SUPPORT 0
 #endif
 
-#ifndef LIBSPDM_FFDHE_SUPPORT
-#define LIBSPDM_FFDHE_SUPPORT  0
+#ifndef LIBSPDM_FFDHE_2048_SUPPORT
+#define LIBSPDM_FFDHE_2048_SUPPORT 0
 #endif
-#ifndef LIBSPDM_ECDHE_SUPPORT
-#define LIBSPDM_ECDHE_SUPPORT  1
+#ifndef LIBSPDM_FFDHE_3072_SUPPORT
+#define LIBSPDM_FFDHE_3072_SUPPORT 0
 #endif
-#ifndef LIBSPDM_SM2_KEY_EXCHANGE_SUPPORT
-#define LIBSPDM_SM2_KEY_EXCHANGE_SUPPORT  0
+#ifndef LIBSPDM_FFDHE_4096_SUPPORT
+#define LIBSPDM_FFDHE_4096_SUPPORT 0
 #endif
 
-#ifndef LIBSPDM_AEAD_GCM_SUPPORT
-#define LIBSPDM_AEAD_GCM_SUPPORT  1
+#ifndef LIBSPDM_ECDHE_P256_SUPPORT
+#define LIBSPDM_ECDHE_P256_SUPPORT 1
 #endif
+#ifndef LIBSPDM_ECDHE_P384_SUPPORT
+#define LIBSPDM_ECDHE_P384_SUPPORT 1
+#endif
+#ifndef LIBSPDM_ECDHE_P521_SUPPORT
+#define LIBSPDM_ECDHE_P521_SUPPORT 1
+#endif
+
+#ifndef LIBSPDM_SM2_KEY_EXCHANGE_P256_SUPPORT
+#define LIBSPDM_SM2_KEY_EXCHANGE_P256_SUPPORT 0
+#endif
+
+#ifndef LIBSPDM_AEAD_AES_128_GCM_SUPPORT
+#define LIBSPDM_AEAD_AES_128_GCM_SUPPORT 1
+#endif
+#ifndef LIBSPDM_AEAD_AES_256_GCM_SUPPORT
+#define LIBSPDM_AEAD_AES_256_GCM_SUPPORT 1
+#endif
+
 #ifndef LIBSPDM_AEAD_CHACHA20_POLY1305_SUPPORT
-#define LIBSPDM_AEAD_CHACHA20_POLY1305_SUPPORT  0
+#define LIBSPDM_AEAD_CHACHA20_POLY1305_SUPPORT 0
 #endif
-#ifndef LIBSPDM_AEAD_SM4_SUPPORT
-#define LIBSPDM_AEAD_SM4_SUPPORT  0
+
+#ifndef LIBSPDM_AEAD_SM4_128_GCM_SUPPORT
+#define LIBSPDM_AEAD_SM4_128_GCM_SUPPORT 0
 #endif
 
 #ifndef LIBSPDM_SHA256_SUPPORT
-#define LIBSPDM_SHA256_SUPPORT  1
+#define LIBSPDM_SHA256_SUPPORT 1
 #endif
 #ifndef LIBSPDM_SHA384_SUPPORT
-#define LIBSPDM_SHA384_SUPPORT  1
+#define LIBSPDM_SHA384_SUPPORT 1
 #endif
 #ifndef LIBSPDM_SHA512_SUPPORT
-#define LIBSPDM_SHA512_SUPPORT  0
+#define LIBSPDM_SHA512_SUPPORT 0
 #endif
+
 #ifndef LIBSPDM_SHA3_256_SUPPORT
-#define LIBSPDM_SHA3_256_SUPPORT  0
+#define LIBSPDM_SHA3_256_SUPPORT 0
 #endif
 #ifndef LIBSPDM_SHA3_384_SUPPORT
-#define LIBSPDM_SHA3_384_SUPPORT  0
+#define LIBSPDM_SHA3_384_SUPPORT 0
 #endif
 #ifndef LIBSPDM_SHA3_512_SUPPORT
-#define LIBSPDM_SHA3_512_SUPPORT  0
+#define LIBSPDM_SHA3_512_SUPPORT 0
 #endif
+
 #ifndef LIBSPDM_SM3_256_SUPPORT
-#define LIBSPDM_SM3_256_SUPPORT  0
+#define LIBSPDM_SM3_256_SUPPORT 0
+#endif
+
+/* This can be set to 0 for the device which does not need X509 parser.*/
+#ifndef LIBSPDM_CERT_PARSE_SUPPORT
+#define LIBSPDM_CERT_PARSE_SUPPORT 1
 #endif
 
 /* Code space optimization for Optional request/response messages.*/
@@ -193,7 +209,7 @@
 
 /* LIBSPDM_ENABLE_CAPABILITY_CERT_CAP - Enable/Disable single CERT capability.
  * LIBSPDM_ENABLE_CAPABILITY_CHAL_CAP - Enable/Disable single CHAL capability.
- * LIBSPDM_ENABLE_CAPABILTIY_MEAS_CAP - Enable/Disables multiple MEAS capabilities:
+ * LIBSPDM_ENABLE_CAPABILITY_MEAS_CAP - Enable/Disables multiple MEAS capabilities:
  *                                  (MEAS_CAP_NO_SIG, MEAS_CAP_SIG, MEAS_FRESH_CAP)*/
 
 /* LIBSPDM_ENABLE_CAPABILITY_KEY_EX_CAP - Enable/Disable single Key Exchange capability.
@@ -202,8 +218,8 @@
 /* LIBSPDM_ENABLE_CAPABILITY_MUT_AUTH_CAP - Enable/Disable mutual authentication.
 * LIBSPDM_ENABLE_CAPABILITY_ENCAP_CAP    - Enable/Disable encapsulated message.*/
 
-/* LIBSPDM_ENABLE_CAPABILITY_GET_CSR_CAP - Enable/Disable get csr capability.
- * LIBSPDM_ENABLE_CAPABILITY_SET_CERTIFICATE_CAP - Enable/Disable set certificate capability. */
+/* LIBSPDM_ENABLE_CAPABILITY_CSR_CAP - Enable/Disable get csr capability.
+ * LIBSPDM_ENABLE_CAPABILITY_SET_CERT_CAP - Enable/Disable set certificate capability. */
 
 #ifndef LIBSPDM_ENABLE_CAPABILITY_CERT_CAP
 #define LIBSPDM_ENABLE_CAPABILITY_CERT_CAP  1
@@ -234,16 +250,49 @@
 #define LIBSPDM_ENABLE_CAPABILITY_ENCAP_CAP 0
 #endif
 
-#ifndef LIBSPDM_ENABLE_CAPABILITY_GET_CSR_CAP
-#define LIBSPDM_ENABLE_CAPABILITY_GET_CSR_CAP 0
+#ifndef LIBSPDM_ENABLE_CAPABILITY_CSR_CAP
+#define LIBSPDM_ENABLE_CAPABILITY_CSR_CAP 0
 #endif
 
-#ifndef LIBSPDM_ENABLE_CAPABILITY_SET_CERTIFICATE_CAP
-#define LIBSPDM_ENABLE_CAPABILITY_SET_CERTIFICATE_CAP 0
+#ifndef LIBSPDM_ENABLE_CAPABILITY_SET_CERT_CAP
+#define LIBSPDM_ENABLE_CAPABILITY_SET_CERT_CAP 0
 #endif
 
 #ifndef LIBSPDM_ENABLE_CAPABILITY_CHUNK_CAP
 #define LIBSPDM_ENABLE_CAPABILITY_CHUNK_CAP 0
+#endif
+
+/* If 1 then endpoint supports sending GET_CERTIFICATE and GET_DIGESTS requests.
+ * If enabled and endpoint is a Responder then LIBSPDM_ENABLE_CAPABILITY_ENCAP_CAP
+ * must also be enabled.
+ */
+#ifndef LIBSPDM_SEND_GET_CERTIFICATE_SUPPORT
+#define LIBSPDM_SEND_GET_CERTIFICATE_SUPPORT 1
+#endif
+
+/* If 1 then endpoint supports sending CHALLENGE request.
+ * If enabled and endpoint is a Responder then LIBSPDM_ENABLE_CAPABILITY_ENCAP_CAP
+ * must also be enabled.
+ */
+#ifndef LIBSPDM_SEND_CHALLENGE_SUPPORT
+#define LIBSPDM_SEND_CHALLENGE_SUPPORT 1
+#endif
+
+/* When LIBSPDM_RESPOND_IF_READY_SUPPORT is 0 then
+ *      - For a Requester, if the Responder sends a ResponseNotReady ERROR response then the error
+ *        is immediately returned to the Integrator. The Requester cannot send a RESPOND_IF_READY
+ *        request.
+ *      - For a Responder, it cannot send a RESPOND_IF_READY ERROR response and does not support
+ *        RESPOND_IF_READY.
+ * When LIBSPDM_RESPOND_IF_READY_SUPPORT is 1 then
+ *      - For a Requester, if the Responder sends a ResponseNotReady ERROR response then libspdm
+ *        waits an amount of time, as specified by the RDTExponent parameter, before sending
+ *        RESPOND_IF_READY.
+ *      - For a Responder, if its response state is NOT_READY then it will send a ResponseNotReady
+ *        ERROR response to the Requester, and will accept a subsequent RESPOND_IF_READY request.
+ */
+#ifndef LIBSPDM_RESPOND_IF_READY_SUPPORT
+#define LIBSPDM_RESPOND_IF_READY_SUPPORT 1
 #endif
 
 /*
@@ -288,7 +337,7 @@
  * | CHALLENGE 1.2            | 40                                       | 1       |
  * | CHALLENGE_AUTH 1.2       | 38 + H * 2 + S [+ O] = [166, 678]        | [6, 23] |
  * +--------------------------+------------------------------------------+---------+
- * | GET_MEASUREMENTS 1.2     | 5 + Nounce (0 or 32)                     | 1       |
+ * | GET_MEASUREMENTS 1.2     | 5 + Nonce (0 or 32)                      | 1       |
  * | MEASUREMENTS 1.2         | 42 + MeasRecLen (+ S) [+ O] = [106, 554] | [4, 19] |
  * +--------------------------+------------------------------------------+---------+
  * | KEY_EXCHANGE 1.2         | 42 + D [+ O] = [106, 554]                | [4, 19] |
@@ -311,20 +360,6 @@
  * +==========================+==========================================+=========+
  */
 
-/* Maximum size of a large SPDM message.
- * If chunk is unsupported, it must be same as LIBSPDM_DATA_TRANSFER_SIZE.
- * If chunk is supported, it must be larger than LIBSPDM_DATA_TRANSFER_SIZE.
- * It matches MaxSPDMmsgSize in SPDM specification. */
-#ifndef LIBSPDM_MAX_SPDM_MSG_SIZE
-#define LIBSPDM_MAX_SPDM_MSG_SIZE  LIBSPDM_MAX_MESSAGE_BUFFER_SIZE
-#endif
-
-/* Maximum size of a single SPDM message.
- * It matches DataTransferSize in SPDM specification. */
-#ifndef LIBSPDM_DATA_TRANSFER_SIZE
-#define LIBSPDM_DATA_TRANSFER_SIZE  LIBSPDM_MAX_MESSAGE_BUFFER_SIZE
-#endif
-
 /* Required sender/receive buffer in device io.
  * NOTE: This is transport specific. Below configuration is just an example.
  * +-------+--------+---------------------------+------+--+------+---+--------+-----+
@@ -335,78 +370,22 @@
  * |PCI_DOE|    8   |    4    |   0  | 2 |   2  |   0  |  |   0  | 12|   3    |  31 |
  * +-------+--------+---------------------------+------+--+------+---+--------+-----+
  */
-#ifndef LIBSPDM_TRANSPORT_ADDITIONAL_SIZE
-#define LIBSPDM_TRANSPORT_ADDITIONAL_SIZE  64
-#endif
-#ifndef LIBSPDM_SENDER_RECEIVE_BUFFER_SIZE
-#define LIBSPDM_SENDER_RECEIVE_BUFFER_SIZE  (LIBSPDM_DATA_TRANSFER_SIZE +\
-                                            LIBSPDM_TRANSPORT_ADDITIONAL_SIZE)
-#endif
-
-/* Required scratch buffer size for libspdm internal usage.
- * It may be used to hold the encrypted/decrypted message and/or last sent/received message.
- * It may be used to hold the large request/response and intermediate send/receive buffer
- * in case of chunking.
- *
- * If chunking is not supported, it may be just LIBSPDM_SENDER_RECEIVE_BUFFER_SIZE.
- * If chunking is supported, it should be at least below.
- *
- * +---------------+--------------+--------------------------+------------------------------+
- * |SECURE_MESSAGE |LARGE_MESSAGE |    SENDER_RECEIVER       | LARGE_SENDER_RECEIVER        |
- * +---------------+--------------+--------------------------+------------------------------+
- * |<-Secure msg ->|<-Large msg ->|<-Snd/Rcv buf for chunk ->|<-Snd/Rcv buf for large msg ->|
- *
- * The value is NOT configurable.
- * The value MAY be changed in different libspdm version.
- * It is exposed here, just in case the libspdm consumer wants to configure the setting at build time.
- */
-#if LIBSPDM_ENABLE_CAPABILITY_CHUNK_CAP
-
-/* first section */
-#define LIBSPDM_SCRATCH_BUFFER_SECURE_MESSAGE_OFFSET  0
-
-#define LIBSPDM_SCRATCH_BUFFER_SECURE_MESSAGE_CAPACITY  (LIBSPDM_MAX_SPDM_MSG_SIZE)
-
-/* second section */
-#define LIBSPDM_SCRATCH_BUFFER_LARGE_MESSAGE_OFFSET  (LIBSPDM_SCRATCH_BUFFER_SECURE_MESSAGE_CAPACITY)
-
-#define LIBSPDM_SCRATCH_BUFFER_LARGE_MESSAGE_CAPACITY  (LIBSPDM_MAX_SPDM_MSG_SIZE)
-
-/* third section */
-#define LIBSPDM_SCRATCH_BUFFER_SENDER_RECEIVER_OFFSET  \
-    (LIBSPDM_SCRATCH_BUFFER_SECURE_MESSAGE_CAPACITY + \
-     LIBSPDM_SCRATCH_BUFFER_LARGE_MESSAGE_CAPACITY)
-
-#define LIBSPDM_SCRATCH_BUFFER_SENDER_RECEIVER_CAPACITY  (LIBSPDM_MAX_SPDM_MSG_SIZE)
-
-/* fourth section */
-#define LIBSPDM_SCRATCH_BUFFER_LARGE_SENDER_RECEIVER_OFFSET  \
-    (LIBSPDM_SCRATCH_BUFFER_SECURE_MESSAGE_CAPACITY + \
-     LIBSPDM_SCRATCH_BUFFER_LARGE_MESSAGE_CAPACITY + \
-     LIBSPDM_SCRATCH_BUFFER_SENDER_RECEIVER_CAPACITY)
-
-#define LIBSPDM_SCRATCH_BUFFER_LARGE_SENDER_RECEIVER_CAPACITY  (LIBSPDM_MAX_SPDM_MSG_SIZE)
-
-#define LIBSPDM_SCRATCH_BUFFER_SIZE  (LIBSPDM_SCRATCH_BUFFER_SECURE_MESSAGE_CAPACITY +\
-                                     LIBSPDM_SCRATCH_BUFFER_LARGE_MESSAGE_CAPACITY + \
-                                     LIBSPDM_SCRATCH_BUFFER_SENDER_RECEIVER_CAPACITY + \
-                                     LIBSPDM_SCRATCH_BUFFER_LARGE_SENDER_RECEIVER_CAPACITY \
-                                     )
-
-#else
-#define LIBSPDM_SCRATCH_BUFFER_SIZE  (LIBSPDM_SENDER_RECEIVE_BUFFER_SIZE)
-#endif
 
 /* Enable message logging.
  * See https://github.com/DMTF/libspdm/blob/main/doc/user_guide.md#message-logging
  * for more information */
 #ifndef LIBSPDM_ENABLE_MSG_LOG
-#define LIBSPDM_ENABLE_MSG_LOG  1
+#define LIBSPDM_ENABLE_MSG_LOG 1
 #endif
 
 /* Enable macro checking during compilation. */
 #ifndef LIBSPDM_CHECK_MACRO
 #define LIBSPDM_CHECK_MACRO 0
+#endif
+
+/* Enable checks to the SPDM context during runtime. */
+#ifndef LIBSPDM_CHECK_SPDM_CONTEXT
+#define LIBSPDM_CHECK_SPDM_CONTEXT 1
 #endif
 
 #endif /* SPDM_LIB_CONFIG_H */
