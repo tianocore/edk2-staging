@@ -86,7 +86,7 @@ RunTestHarness(
   
   FixBuffer (TestBuffer);
   DiskStubInitialize (TestBuffer, TestBufferSize, BLOCK_SIZE, IO_ALIGN, &BlockIo, &DiskIo);
-  Tcg2StubInitlize();
+  Tcg2StubInitialize();
   
   MeasureBootProtocols.Tcg2Protocol = NULL;
   MeasureBootProtocols.CcProtocol = NULL;
@@ -98,14 +98,18 @@ RunTestHarness(
   // no asm code.
   
   GptHandle =NULL;
-  Status = gBS->InstallMultipleProtocolInterfaces (
-                      &GptHandle,
-                      &gEfiBlockIoProtocolGuid,
-                      BlockIo,
-                      &gEfiDiskIoProtocolGuid,
-                      DiskIo,
-                      NULL
-                      );
+  EFI_STATUS BlockIo_Status = gBS->InstallProtocolInterface(
+                  &GptHandle,
+                  &gEfiBlockIoProtocolGuid,
+                  EFI_NATIVE_INTERFACE,
+                  BlockIo
+  );
+  EFI_STATUS DiskIo_Status = gBS->InstallProtocolInterface(
+                  &GptHandle,
+                  &gEfiDiskIoProtocolGuid,
+                  EFI_NATIVE_INTERFACE,
+                  DiskIo
+  );
   Status = gBS->LocateProtocol (&gEfiTcg2ProtocolGuid, NULL, (VOID **) &Tcg2Protocol);
   Status = gBS->LocateProtocol (&gEfiCcMeasurementProtocolGuid, NULL, (VOID **) &CcProtocol);
   
@@ -118,7 +122,10 @@ RunTestHarness(
                                                     );
   */
   OrigDevicePathNode= (EFI_DEVICE_PATH_PROTOCOL*) DeviceArray;
-  #pragma warning(disable: 4700)
+
+#if defined(_MSC_VER)
+#pragma warning(disable: 4700)
+#endif
 
   //test case 1:set MeasureBootProtocols.CcProtocol = NULL; 
   ImageContext.ImageType = 0x1;

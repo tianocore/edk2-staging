@@ -5,7 +5,7 @@
 
 EFI_STATUS
 EFIAPI
-Tcg2StubInitlize(
+Tcg2StubInitialize(
     VOID
 );
 
