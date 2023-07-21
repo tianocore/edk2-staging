@@ -111,8 +111,12 @@ MainEntryPoint (
   SpdmInitContext (SpdmContext);
   mSpdmTestDeviceContext.SpdmContext = SpdmContext;
   SpdmRegisterDeviceIoFunc (SpdmContext, SpdmDeviceSendMessage, SpdmDeviceReceiveMessage);
-  SpdmRegisterTransportLayerFunc (SpdmContext, SpdmTransportMctpEncodeMessage, SpdmTransportMctpDecodeMessage);
-//  SpdmRegisterTransportLayerFunc (SpdmContext, SpdmTransportPciDoeEncodeMessage, SpdmTransportPciDoeDecodeMessage);
+  SpdmRegisterTransportLayerFunc (SpdmContext,
+                                  LIBSPDM_MAX_SPDM_MSG_SIZE,
+                                  LIBSPDM_TRANSPORT_HEADER_SIZE,
+                                  LIBSPDM_TRANSPORT_TAIL_SIZE,
+                                  SpdmTransportMctpEncodeMessage, SpdmTransportMctpDecodeMessage);
+//  SpdmRegisterTransportLayerFunc (SpdmContext, LIBSPDM_MAX_SPDM_MSG_SIZE, SpdmTransportPciDoeEncodeMessage, SpdmTransportPciDoeDecodeMessage);
 
   Status = PeiServicesLocatePpi (&gEfiPeiReadOnlyVariable2PpiGuid, 0, NULL, (VOID **) &VariablePpi);
   ASSERT_EFI_ERROR (Status);
@@ -143,8 +147,6 @@ MainEntryPoint (
 
     ZeroMem (&Parameter, sizeof(Parameter));
     Parameter.location = SpdmDataLocationLocal;
-    Data8 = SLOT_NUMBER;
-    SpdmSetData (SpdmContext, SpdmDataLocalSlotCount, &Parameter, &Data8, sizeof(Data8));
 
     for (Index = 0; Index < SLOT_NUMBER; Index++) {
       Parameter.additional_data[0] = Index;
@@ -189,7 +191,7 @@ MainEntryPoint (
   }
   SpdmSetData (SpdmContext, SpdmDataCapabilityFlags, &Parameter, &Data32, sizeof(Data32));
 
-  Data8 = SPDM_MEASUREMENT_BLOCK_HEADER_SPECIFICATION_DMTF;
+  Data8 = SPDM_MEASUREMENT_SPECIFICATION_DMTF;
   SpdmSetData (SpdmContext, SpdmDataMeasurementSpec, &Parameter, &Data8, sizeof(Data8));
   Data32 = SPDM_ALGORITHMS_MEASUREMENT_HASH_ALGO_TPM_ALG_SHA_256;
   SpdmSetData (SpdmContext, SpdmDataMeasurementHashAlgo, &Parameter, &Data32, sizeof(Data32));

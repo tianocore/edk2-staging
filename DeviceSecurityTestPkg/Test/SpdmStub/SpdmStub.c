@@ -16,7 +16,7 @@ SPDM_MESSAGE_HEADER  *mSpdmIoLastSpdmRequest;
 UINTN                mSpdmIoLastSpdmRequestSize;
 
 BOOLEAN  mSendReceiveBufferAcquired = FALSE;
-UINT8    mSendReceiveBuffer[LIBSPDM_MAX_MESSAGE_BUFFER_SIZE];
+UINT8    mSendReceiveBuffer[LIBSPDM_MAX_SENDER_RECEIVER_BUFFER_SIZE];
 UINTN    mSendReceiveBufferSize;
 VOID     *mScratchBuffer;
 
@@ -109,12 +109,10 @@ SPDM_TEST_DEVICE_CONTEXT  mSpdmTestDeviceContext = {
 SPDM_RETURN
 SpdmDeviceAcquireSenderBuffer (
   VOID   *Context,
-  UINTN  *MaxMsgSize,
   VOID   **MsgBufPtr
   )
 {
   ASSERT (!mSendReceiveBufferAcquired);
-  *MaxMsgSize = sizeof (mSendReceiveBuffer);
   *MsgBufPtr  = mSendReceiveBuffer;
   ZeroMem (mSendReceiveBuffer, sizeof (mSendReceiveBuffer));
   mSendReceiveBufferAcquired = TRUE;
@@ -138,12 +136,10 @@ SpdmDeviceReleaseSenderBuffer (
 SPDM_RETURN
 SpdmDeviceAcquireReceiverBuffer (
   VOID   *Context,
-  UINTN  *MaxMsgSize,
   VOID   **MsgBufPtr
   )
 {
   ASSERT (!mSendReceiveBufferAcquired);
-  *MaxMsgSize = sizeof (mSendReceiveBuffer);
   *MsgBufPtr  = mSendReceiveBuffer;
   ZeroMem (mSendReceiveBuffer, sizeof (mSendReceiveBuffer));
   mSendReceiveBufferAcquired = TRUE;
@@ -216,27 +212,32 @@ MainEntryPoint (
     SpdmSetData (SpdmContext, SpdmDataSpdmVersion, &Parameter, &SpdmVersion, sizeof (SpdmVersion));
   }
 
-  ScratchBufferSize = SpdmGetSizeofRequiredScratchBuffer (SpdmContext);
-  mScratchBuffer    = AllocateZeroPool (ScratchBufferSize);
-  ASSERT (mScratchBuffer != NULL);
-
   mSpdmTestDeviceContext.SpdmContext = SpdmContext;
 
   SpdmRegisterDeviceIoFunc (SpdmContext, SpdmDeviceSendMessage, SpdmDeviceReceiveMessage);
-  //  SpdmRegisterTransportLayerFunc (SpdmContext, SpdmTransportMctpEncodeMessage, SpdmTransportMctpDecodeMessage);
+  //  SpdmRegisterTransportLayerFunc (SpdmContext, LIBSPDM_MAX_SPDM_MSG_SIZE, SpdmTransportMctpEncodeMessage, SpdmTransportMctpDecodeMessage);
   SpdmRegisterTransportLayerFunc (
     SpdmContext,
+    LIBSPDM_MAX_SPDM_MSG_SIZE,
+    LIBSPDM_TRANSPORT_HEADER_SIZE,
+    LIBSPDM_TRANSPORT_TAIL_SIZE,
     SpdmTransportPciDoeEncodeMessage,
-    SpdmTransportPciDoeDecodeMessage,
-    SpdmTransportPciDoeGetHeaderSize
+    SpdmTransportPciDoeDecodeMessage
     );
   SpdmRegisterDeviceBufferFunc (
     SpdmContext,
+    LIBSPDM_SENDER_BUFFER_SIZE,
+    LIBSPDM_RECEIVER_BUFFER_SIZE,
     SpdmDeviceAcquireSenderBuffer,
     SpdmDeviceReleaseSenderBuffer,
     SpdmDeviceAcquireReceiverBuffer,
     SpdmDeviceReleaseReceiverBuffer
     );
+
+  ScratchBufferSize = SpdmGetSizeofRequiredScratchBuffer (SpdmContext);
+  mScratchBuffer    = AllocateZeroPool (ScratchBufferSize);
+  ASSERT (mScratchBuffer != NULL);
+
   SpdmSetScratchBuffer (SpdmContext, mScratchBuffer, ScratchBufferSize);
 
   Status = GetVariable2 (
@@ -251,8 +252,6 @@ MainEntryPoint (
 
     ZeroMem (&Parameter, sizeof (Parameter));
     Parameter.location = SpdmDataLocationLocal;
-    Data8              = SLOT_NUMBER;
-    SpdmSetData (SpdmContext, SpdmDataLocalSlotCount, &Parameter, &Data8, sizeof (Data8));
 
     for (Index = 0; Index < SLOT_NUMBER; Index++) {
       Parameter.additional_data[0] = Index;
@@ -341,7 +340,7 @@ MainEntryPoint (
   if ((TestConfig == TEST_CONFIG_NO_MEAS_CAP) || (TestConfig == TEST_CONFIG_NO_CERT_CAP)) {
     Data8 = 0;
   } else {
-    Data8 = SPDM_MEASUREMENT_BLOCK_HEADER_SPECIFICATION_DMTF;
+    Data8 = SPDM_MEASUREMENT_SPECIFICATION_DMTF;
   }
 
   SpdmSetData (SpdmContext, SpdmDataMeasurementSpec, &Parameter, &Data8, sizeof (Data8));

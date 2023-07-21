@@ -241,8 +241,6 @@ CreateSpdmDriverContext (
   SPDM_DRIVER_DEVICE_CONTEXT        *SpdmDriverContext;
   VOID                              *SpdmContext;
   EFI_STATUS                        Status;
-  EFI_SIGNATURE_LIST                *SignatureList;
-  UINTN                             SignatureListSize;
   VOID                              *Data;
   UINTN                             DataSize;
   SPDM_DATA_PARAMETER               Parameter;
@@ -262,8 +260,12 @@ CreateSpdmDriverContext (
   ASSERT(SpdmContext != NULL);
   SpdmInitContext (SpdmContext);
   SpdmRegisterDeviceIoFunc (SpdmContext, SpdmDeviceSendMessage, SpdmDeviceReceiveMessage);
-  SpdmRegisterTransportLayerFunc (SpdmContext, SpdmTransportMctpEncodeMessage, SpdmTransportMctpDecodeMessage);
-//  SpdmRegisterTransportLayerFunc (SpdmContext, SpdmTransportPciDoeEncodeMessage, SpdmTransportPciDoeDecodeMessage);
+  SpdmRegisterTransportLayerFunc (SpdmContext,
+                                  LIBSPDM_MAX_SPDM_MSG_SIZE,
+                                  LIBSPDM_MAX_SPDM_MSG_SIZE,
+                                  LIBSPDM_TRANSPORT_HEADER_SIZE,
+                                  LIBSPDM_TRANSPORT_TAIL_SIZE,SpdmTransportMctpEncodeMessage);
+//  SpdmRegisterTransportLayerFunc (SpdmContext, LIBSPDM_MAX_SPDM_MSG_SIZE, SpdmTransportPciDoeEncodeMessage, SpdmTransportPciDoeDecodeMessage);
 
   SpdmDriverContext->SpdmContext = SpdmContext;
 
@@ -331,39 +333,7 @@ CreateSpdmDriverContext (
   Status = PeiServicesLocatePpi (&gEfiPeiReadOnlyVariable2PpiGuid, 0, NULL, (VOID **) &VariablePpi);
   ASSERT_EFI_ERROR (Status);
 
-  //SignatureListSize = sizeof (EFI_SIGNATURE_LIST);
-  SignatureListSize = 1024;
-  SignatureList = AllocateZeroPool (SignatureListSize);
-  Status = VariablePpi->GetVariable (
-                          VariablePpi,
-                          EDKII_DEVICE_SECURITY_DATABASE,
-                          &gEdkiiDeviceSignatureDatabaseGuid,
-                          NULL,
-                          &SignatureListSize,
-                          SignatureList
-                          );
-  if (!EFI_ERROR(Status)) {
-    HasRspPubCert = TRUE;
-    // BUGBUG: Assume only 1 SPDM cert.
-    ASSERT (CompareGuid (&SignatureList->SignatureType, &gEdkiiCertSpdmCertChainGuid));
-    ASSERT (SignatureList->SignatureListSize == SignatureList->SignatureListSize);
-    ASSERT (SignatureList->SignatureHeaderSize == 0);
-    ASSERT (SignatureList->SignatureSize == SignatureList->SignatureListSize - (sizeof(EFI_SIGNATURE_LIST) + SignatureList->SignatureHeaderSize));
-
-    Data = (VOID *)((UINT8 *)SignatureList +
-                             sizeof(EFI_SIGNATURE_LIST) +
-                             SignatureList->SignatureHeaderSize +
-                             sizeof(EFI_GUID));
-    DataSize = SignatureList->SignatureSize - sizeof(EFI_GUID);
-    
-    ZeroMem (&Parameter, sizeof(Parameter));
-    Parameter.location = SpdmDataLocationLocal;
-    SpdmSetData (SpdmContext, SpdmDataPeerPublicCertChains, &Parameter, Data, DataSize);
-    // Do not free it.
-  } else {
-    HasRspPubCert = FALSE;
-  }
-
+  HasRspPubCert = FALSE;
   Data8 = 0;
   ZeroMem (&Parameter, sizeof(Parameter));
   Parameter.location = SpdmDataLocationLocal;
@@ -390,7 +360,7 @@ CreateSpdmDriverContext (
   }
   SpdmSetData (SpdmContext, SpdmDataCapabilityFlags, &Parameter, &Data32, sizeof(Data32));
 
-  Data8 = SPDM_MEASUREMENT_BLOCK_HEADER_SPECIFICATION_DMTF;
+  Data8 = SPDM_MEASUREMENT_SPECIFICATION_DMTF;
   SpdmSetData (SpdmContext, SpdmDataMeasurementSpec, &Parameter, &Data8, sizeof(Data8));
   Data32 = SPDM_ALGORITHMS_BASE_ASYM_ALGO_TPM_ALG_RSASSA_2048;
   SpdmSetData (SpdmContext, SpdmDataBaseAsymAlgo, &Parameter, &Data32, sizeof(Data32));

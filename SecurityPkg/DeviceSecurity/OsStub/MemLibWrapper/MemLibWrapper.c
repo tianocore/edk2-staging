@@ -49,7 +49,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
  * @return   0 on success. non-zero on error.
  *
  **/
-int
+void
 libspdm_copy_mem (
   void        *dst_buf,
   size_t      dst_len,
@@ -67,21 +67,18 @@ libspdm_copy_mem (
    * Do not zero "dst" in this case. */
   if ((dst == NULL) || (dst_len > (SIZE_MAX >> 1))) {
     ASSERT (0);
-    return -1;
   }
 
   /* Gaurd against invalid source. Zero "dst" in this case. */
   if (src == NULL) {
     ZeroMem (dst_buf, dst_len);
     ASSERT (0);
-    return -1;
   }
 
   /* Guard against overlap case. Zero "dst" in these cases. */
   if (((src < dst) && (src + src_len > dst)) || ((dst < src) && (dst + src_len > src))) {
     ZeroMem (dst_buf, dst_len);
     ASSERT (0);
-    return -1;
   }
 
   /* Guard against invalid lengths. Zero "dst" in these cases. */
@@ -90,14 +87,11 @@ libspdm_copy_mem (
   {
     ZeroMem (dst_buf, dst_len);
     ASSERT (0);
-    return -1;
   }
 
   while (src_len-- != 0) {
     *(dst++) = *(src++);
   }
-
-  return 0;
 }
 
 /**
@@ -114,14 +108,14 @@ libspdm_copy_mem (
  * @return buffer.
  *
  **/
-void *
+void
 libspdm_set_mem (
   void     *buffer,
   size_t   length,
   uint8_t  value
   )
 {
-  return SetMem (buffer, length, value);
+  SetMem (buffer, length, value);
 }
 
 /**
@@ -138,13 +132,13 @@ libspdm_set_mem (
  * @return buffer.
  *
  **/
-void *
+void
 libspdm_zero_mem (
   void    *buffer,
   size_t  length
   )
 {
-  return ZeroMem (buffer, length);
+  ZeroMem (buffer, length);
 }
 
 /**

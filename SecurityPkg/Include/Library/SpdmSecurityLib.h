@@ -182,23 +182,6 @@ SPDM_RETURN
   );
 
 /**
- * Return the maximum transport layer message header size.
- *   Transport Message Header Size + sizeof(spdm_secured_message_cipher_header_t))
- *
- *   For MCTP, Transport Message Header Size = sizeof(mctp_message_header_t)
- *   For PCI_DOE, Transport Message Header Size = sizeof(pci_doe_data_object_header_t)
- *
- * @param  spdm_context                  A pointer to the SPDM context.
- *
- * @return size of maximum transport layer message header size
- **/
-typedef
-UINT32
-(*SPDM_TRANSPORT_GET_HEADER_SIZE_FUNC)(
-  IN VOID  *SpdmContext
-  );
-
-/**
  * Acquire a device sender buffer for transport layer message.
  *
  * The max_msg_size must be larger than
@@ -239,7 +222,6 @@ typedef
 SPDM_RETURN
 (*SPDM_DEVICE_ACQUIRE_SENDER_BUFFER_FUNC)(
   IN VOID       *SpdmContext,
-  IN OUT UINTN  *MaxMsgSize,
   IN OUT VOID   **MsgBufPtr
   );
 
@@ -299,7 +281,6 @@ typedef
 SPDM_RETURN
 (*SPDM_DEVICE_ACQUIRE_RECEIVER_BUFFER_FUNC)(
   IN VOID       *SpdmContext,
-  IN OUT UINTN  *MaxMsgSize,
   IN OUT VOID   **MsgBufPtr
   );
 
@@ -348,7 +329,7 @@ typedef struct {
   //   | SenderBuffer
   //
   //   AcquireSenderBuffer (&SenderBuffer, &SenderBufferSize);
-  //   SpdmRequestBuffer = SenderBuffer + TransportGetHeaderSize();
+  //   SpdmRequestBuffer = SenderBuffer + TransportHeaderSize;
   //   /* build SPDM request in SpdmRequestBuffer */
   //   TransportEncodeMessage (SpdmRequestBuffer, SpdmRequestBufferSize,
   //       &TransportRequestBuffer, &TransportRequestBufferSize);
@@ -388,7 +369,7 @@ typedef struct {
   //
   SPDM_TRANSPORT_ENCODE_MESSAGE_FUNC          TransportEncodeMessage;
   SPDM_TRANSPORT_DECODE_MESSAGE_FUNC          TransportDecodeMessage;
-  SPDM_TRANSPORT_GET_HEADER_SIZE_FUNC         TransportGetHeaderSize;
+  UINT32                                      TransportHeaderSize;
   //
   // API required by SpdmRegisterDeviceBufferFunc in libspdm
   // It is used to get the sender/receiver buffer for transport message (SPDM + transport header).

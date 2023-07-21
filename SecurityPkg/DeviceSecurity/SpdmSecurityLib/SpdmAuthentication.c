@@ -594,7 +594,7 @@ DoDeviceAuthentication (
   if ((CapabilityFlags & SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_CHAL_CAP) != 0) {
     ZeroMem (RequesterNonce, sizeof (RequesterNonce));
     ZeroMem (ResponderNonce, sizeof (ResponderNonce));
-    SpdmReturn = SpdmChallengeEx (SpdmContext, NULL, *ValidSlotId, SPDM_CHALLENGE_REQUEST_NO_MEASUREMENT_SUMMARY_HASH, NULL, NULL, NULL, RequesterNonce, ResponderNonce);
+    SpdmReturn = SpdmChallengeEx (SpdmContext, NULL, *ValidSlotId, SPDM_CHALLENGE_REQUEST_NO_MEASUREMENT_SUMMARY_HASH, NULL, NULL, NULL, RequesterNonce, ResponderNonce, NULL, 0);
     if (SpdmReturn == LIBSPDM_STATUS_SUCCESS) {
       IsValidChallengeAuthSig = TRUE;
     } else if (SpdmReturn == LIBSPDM_STATUS_VERIF_FAIL) {
