@@ -5,4 +5,6 @@ https://github.com/tianocore/edk2-staging
 
 [![Repo name](https://github-readme-stats.vercel.app/api/pin/?username=KilianKegel&repo=edk2-staging)](https://github.com/tianocore/edk2-staging)
 
-[![Repo name](https://github-readme-stats.vercel.app/api/pin/?username=KilianKegel&repo=edk2-staging)](https://github.com/tianocore/edk2-staging/tree/CdePkg/blogs/2022-01-16#introduction-of-the-acpica-port-to-uefi)
+[![Repo name](https://github-readme-stats.vercel.app/api/pin/?username=KilianKegel&repo=EDK2-STAGING)](https://github.com/tianocore/edk2-staging/tree/CdePkg/blogs/2022-01-16#introduction-of-the-acpica-port-to-uefi)
+
+[![Blog GitHub stats](https://github-readme-stats.vercel.app/api/?username=KilianKegel&show_icons=false)](https://github.com/tianocore/edk2-staging/tree/CdePkg/blogs/2022-01-16#introduction-of-the-acpica-port-to-uefi)
