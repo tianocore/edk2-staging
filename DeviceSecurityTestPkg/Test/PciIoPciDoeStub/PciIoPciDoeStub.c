@@ -37,7 +37,7 @@ SPDM_TEST_DEVICE_CONTEXT  mSpdmTestDeviceContext = {
 VOID  *mSpdmContext = NULL;
 
 BOOLEAN  mSendReceiveBufferAcquired = FALSE;
-UINT8    mSendReceiveBuffer[LIBSPDM_MAX_SENDER_RECEIVER_BUFFER_SIZE];
+UINT8    mSendReceiveBuffer[SPDM_MAX_SENDER_RECEIVER_BUFFER_SIZE];
 UINTN    mSendReceiveBufferSize;
 VOID     *mScratchBuffer;
 
@@ -59,14 +59,14 @@ typedef struct {
 //
 // mMailboxDataIn
 //
-UINT8  mRequestDataBuffer[LIBSPDM_MAX_SENDER_RECEIVER_BUFFER_SIZE];
+UINT8  mRequestDataBuffer[SPDM_MAX_SENDER_RECEIVER_BUFFER_SIZE];
 UINTN  mRequestDataSize       = 0;
 UINTN  mRequestDataWriteIndex = 0;
 
 //
 // mMailboxDataOut
 //
-UINT8  mResponseDataBuffer[LIBSPDM_MAX_SENDER_RECEIVER_BUFFER_SIZE];
+UINT8  mResponseDataBuffer[SPDM_MAX_SENDER_RECEIVER_BUFFER_SIZE];
 UINT8  *mResponseDataBufferPtr;
 UINTN  mResponseDataSize      = 0;
 UINTN  mResponseDataReadIndex = 0;
@@ -953,19 +953,19 @@ MainEntryPoint (
   mSpdmTestDeviceContext.SpdmContext = SpdmContext;
 
   SpdmRegisterDeviceIoFunc (SpdmContext, SpdmDeviceSendMessage, SpdmDeviceReceiveMessage);
-  //  SpdmRegisterTransportLayerFunc (SpdmContext, LIBSPDM_MAX_SPDM_MSG_SIZE, SpdmTransportMctpEncodeMessage, SpdmTransportMctpDecodeMessage);
+  //  SpdmRegisterTransportLayerFunc (SpdmContext, SPDM_MAX_SPDM_MSG_SIZE, SpdmTransportMctpEncodeMessage, SpdmTransportMctpDecodeMessage);
   SpdmRegisterTransportLayerFunc (
     SpdmContext,
-    LIBSPDM_MAX_SPDM_MSG_SIZE,
-    LIBSPDM_TRANSPORT_HEADER_SIZE,
-    LIBSPDM_TRANSPORT_TAIL_SIZE,
+    SPDM_MAX_SPDM_MSG_SIZE,
+    SPDM_TRANSPORT_HEADER_SIZE,
+    SPDM_TRANSPORT_TAIL_SIZE,
     SpdmTransportPciDoeEncodeMessage,
     SpdmTransportPciDoeDecodeMessage
     );
   SpdmRegisterDeviceBufferFunc (
     SpdmContext,
-    LIBSPDM_SENDER_BUFFER_SIZE,
-    LIBSPDM_RECEIVER_BUFFER_SIZE,
+    SPDM_SENDER_BUFFER_SIZE,
+    SPDM_RECEIVER_BUFFER_SIZE,
     SpdmDeviceAcquireSenderBuffer,
     SpdmDeviceReleaseSenderBuffer,
     SpdmDeviceAcquireReceiverBuffer,
