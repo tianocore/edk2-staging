@@ -216,17 +216,17 @@ CreateSpdmDeviceContext (
     );
   SpdmRegisterTransportLayerFunc (
     SpdmContext,
-    LIBSPDM_MAX_SPDM_MSG_SIZE,
-    LIBSPDM_TRANSPORT_HEADER_SIZE,
-    LIBSPDM_TRANSPORT_TAIL_SIZE,
+    SpdmDeviceInfo->MaxSpdmMsgSize,
+    SpdmDeviceInfo->TransportHeaderSize,
+    SpdmDeviceInfo->TransportTailSize,
     SpdmDeviceInfo->TransportEncodeMessage,
     SpdmDeviceInfo->TransportDecodeMessage
     );
 
   SpdmRegisterDeviceBufferFunc (
     SpdmContext,
-    LIBSPDM_SENDER_BUFFER_SIZE,
-    LIBSPDM_RECEIVER_BUFFER_SIZE,
+    SpdmDeviceInfo->SenderBufferSize,
+    SpdmDeviceInfo->ReceiverBufferSize,
     SpdmDeviceInfo->AcquireSenderBuffer,
     SpdmDeviceInfo->ReleaseSenderBuffer,
     SpdmDeviceInfo->AcquireReceiverBuffer,
