@@ -112,11 +112,11 @@ MainEntryPoint (
   mSpdmTestDeviceContext.SpdmContext = SpdmContext;
   SpdmRegisterDeviceIoFunc (SpdmContext, SpdmDeviceSendMessage, SpdmDeviceReceiveMessage);
   SpdmRegisterTransportLayerFunc (SpdmContext,
-                                  LIBSPDM_MAX_SPDM_MSG_SIZE,
-                                  LIBSPDM_TRANSPORT_HEADER_SIZE,
-                                  LIBSPDM_TRANSPORT_TAIL_SIZE,
+                                  SPDM_MAX_SPDM_MSG_SIZE,
+                                  SPDM_TRANSPORT_HEADER_SIZE,
+                                  SPDM_TRANSPORT_TAIL_SIZE,
                                   SpdmTransportMctpEncodeMessage, SpdmTransportMctpDecodeMessage);
-//  SpdmRegisterTransportLayerFunc (SpdmContext, LIBSPDM_MAX_SPDM_MSG_SIZE, SpdmTransportPciDoeEncodeMessage, SpdmTransportPciDoeDecodeMessage);
+//  SpdmRegisterTransportLayerFunc (SpdmContext, SPDM_MAX_SPDM_MSG_SIZE, SpdmTransportPciDoeEncodeMessage, SpdmTransportPciDoeDecodeMessage);
 
   Status = PeiServicesLocatePpi (&gEfiPeiReadOnlyVariable2PpiGuid, 0, NULL, (VOID **) &VariablePpi);
   ASSERT_EFI_ERROR (Status);
