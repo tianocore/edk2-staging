@@ -37,6 +37,38 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Ppi/DeviceSecurityPolicy.h>
 #include <Ppi/ReadOnlyVariable2.h>
 
+#ifndef SPDM_TRANSPORT_HEADER_SIZE
+#define SPDM_TRANSPORT_HEADER_SIZE 64
+#endif
+#ifndef SPDM_TRANSPORT_TAIL_SIZE
+#define SPDM_TRANSPORT_TAIL_SIZE 64
+#endif
+/* define common SPDM_TRANSPORT_ADDITIONAL_SIZE. It should be the biggest one. */
+#ifndef SPDM_TRANSPORT_ADDITIONAL_SIZE
+#define SPDM_TRANSPORT_ADDITIONAL_SIZE \
+    (SPDM_TRANSPORT_HEADER_SIZE + SPDM_TRANSPORT_TAIL_SIZE)
+#endif
+#ifndef SPDM_SENDER_BUFFER_SIZE
+#define SPDM_SENDER_BUFFER_SIZE (0x1100 + \
+                                    SPDM_TRANSPORT_ADDITIONAL_SIZE)
+#endif
+#ifndef SPDM_RECEIVER_BUFFER_SIZE
+#define SPDM_RECEIVER_BUFFER_SIZE (0x1200 + \
+                                      SPDM_TRANSPORT_ADDITIONAL_SIZE)
+#endif
+#if (SPDM_SENDER_BUFFER_SIZE > SPDM_RECEIVER_BUFFER_SIZE)
+#define SPDM_MAX_SENDER_RECEIVER_BUFFER_SIZE SPDM_SENDER_BUFFER_SIZE
+#else
+#define SPDM_MAX_SENDER_RECEIVER_BUFFER_SIZE SPDM_RECEIVER_BUFFER_SIZE
+#endif
+/* Maximum size of a large SPDM message.
+ * If chunk is unsupported, it must be same as SPDM_DATA_TRANSFER_SIZE.
+ * If chunk is supported, it must be larger than SPDM_DATA_TRANSFER_SIZE.
+ * It matches MaxSPDMmsgSize in SPDM specification. */
+#ifndef SPDM_MAX_SPDM_MSG_SIZE
+#define SPDM_MAX_SPDM_MSG_SIZE  0x1200
+#endif
+
 typedef struct {
   UINTN                                           Signature;
   EDKII_DEVICE_IDENTIFIER                         DeviceId;

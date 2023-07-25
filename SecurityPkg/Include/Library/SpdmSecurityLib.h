@@ -369,7 +369,6 @@ typedef struct {
   //
   SPDM_TRANSPORT_ENCODE_MESSAGE_FUNC          TransportEncodeMessage;
   SPDM_TRANSPORT_DECODE_MESSAGE_FUNC          TransportDecodeMessage;
-  UINT32                                      TransportHeaderSize;
   //
   // API required by SpdmRegisterDeviceBufferFunc in libspdm
   // It is used to get the sender/receiver buffer for transport message (SPDM + transport header).
@@ -388,6 +387,15 @@ typedef struct {
   //
   UINT32                                      BaseHashAlgo;
   UINT32                                      BaseAsymAlgo;
+
+  //
+  // transfer size
+  //
+  UINT32                                      MaxSpdmMsgSize;
+  UINT32                                      TransportHeaderSize;
+  UINT32                                      TransportTailSize;
+  UINT32                                      SenderBufferSize;
+  UINT32                                      ReceiverBufferSize;
 
   EFI_GUID                                    *SpdmIoProtocolGuid;
 } EDKII_SPDM_DEVICE_INFO;

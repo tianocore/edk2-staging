@@ -261,11 +261,11 @@ CreateSpdmDriverContext (
   SpdmInitContext (SpdmContext);
   SpdmRegisterDeviceIoFunc (SpdmContext, SpdmDeviceSendMessage, SpdmDeviceReceiveMessage);
   SpdmRegisterTransportLayerFunc (SpdmContext,
-                                  LIBSPDM_MAX_SPDM_MSG_SIZE,
-                                  LIBSPDM_MAX_SPDM_MSG_SIZE,
-                                  LIBSPDM_TRANSPORT_HEADER_SIZE,
-                                  LIBSPDM_TRANSPORT_TAIL_SIZE,SpdmTransportMctpEncodeMessage);
-//  SpdmRegisterTransportLayerFunc (SpdmContext, LIBSPDM_MAX_SPDM_MSG_SIZE, SpdmTransportPciDoeEncodeMessage, SpdmTransportPciDoeDecodeMessage);
+                                  SPDM_MAX_SPDM_MSG_SIZE,
+                                  SPDM_MAX_SPDM_MSG_SIZE,
+                                  SPDM_TRANSPORT_HEADER_SIZE,
+                                  SPDM_TRANSPORT_TAIL_SIZE,SpdmTransportMctpEncodeMessage);
+//  SpdmRegisterTransportLayerFunc (SpdmContext, SPDM_MAX_SPDM_MSG_SIZE, SpdmTransportPciDoeEncodeMessage, SpdmTransportPciDoeDecodeMessage);
 
   SpdmDriverContext->SpdmContext = SpdmContext;
 
