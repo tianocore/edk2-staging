@@ -417,7 +417,7 @@ CreateSpdmDeviceContext (
   DataSize           = sizeof (Data16);
   SpdmReturn         = SpdmGetData (SpdmContext, SpdmDataSpdmVersion, &Parameter, &Data16, &DataSize);
   if (LIBSPDM_STATUS_IS_ERROR (SpdmReturn)) {
-    DEBUG ((DEBUG_ERROR, "SpdmInitConnection - %p\n", SpdmReturn));
+    DEBUG ((DEBUG_ERROR, "SpdmGetData - %p\n", SpdmReturn));
     goto Error;
   }
 
