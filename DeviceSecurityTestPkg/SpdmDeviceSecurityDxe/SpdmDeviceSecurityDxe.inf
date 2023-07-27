@@ -45,7 +45,7 @@
   SpdmRequesterLib
   SpdmTransportMctpLib
   SpdmTransportPciDoeLib
-  SpdmMeasurementLib
+  SpdmSecurityLib
   CryptlibWrapper
 
 [Guids]
