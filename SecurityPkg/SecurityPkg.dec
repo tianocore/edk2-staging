@@ -103,7 +103,7 @@
 
   ##  @libraryclass Perform SPDM (following SPDM spec) and measure data to TPM (following TCG PFP spec).
   ##
-  SpdmMeasurementLib|Include/Library/SpdmSecurityLib.h
+  SpdmSecurityLib|Include/Library/SpdmSecurityLib.h
 
 [Guids]
   ## Security package token space guid.
