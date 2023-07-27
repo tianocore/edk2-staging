@@ -9,11 +9,11 @@
 
 [Defines]
   INF_VERSION                    = 0x00010005
-  BASE_NAME                      = SpdmMeasurementLib
+  BASE_NAME                      = SpdmSecurityLib
   FILE_GUID                      = 77D7770D-158E-4354-B813-B8792A0E982D
   MODULE_TYPE                    = BASE
   VERSION_STRING                 = 1.0
-  LIBRARY_CLASS                  = SpdmMeasurementLib
+  LIBRARY_CLASS                  = SpdmSecurityLib
 
 #
 # The following information is for reference only and not required by the build tools.
