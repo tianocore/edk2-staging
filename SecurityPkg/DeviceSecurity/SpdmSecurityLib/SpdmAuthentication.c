@@ -552,6 +552,8 @@ DoDeviceAuthentication (
     *ValidSlotId  = SPDM_MAX_SLOT_COUNT;
 
     for (SlotId = 0; SlotId < SPDM_MAX_SLOT_COUNT; SlotId++) {
+      CertChainSize = sizeof (CertChain);
+      ZeroMem (CertChain, sizeof (CertChain));
       SpdmReturn = SpdmGetCertificateEx (SpdmContext, NULL, SlotId, &CertChainSize, CertChain, (CONST VOID **)&TrustAnchor, &TrustAnchorSize);
       if (LIBSPDM_STATUS_IS_SUCCESS (SpdmReturn)) {
         IsValidCertChain = TRUE;
