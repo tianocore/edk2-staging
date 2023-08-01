@@ -1,5 +1,5 @@
 # CdePkg - C Development Environment Package for EDK2
-* <img src="https://github.com/KilianKegel/pictures/blob/master/refresh-icon.png"  width="18" height="18">[CdePkgBlog](README.md#cdepkgblog)
+* <img src="https://github.com/KilianKegel/pictures/blob/master/refresh-icon.png"  width="18" height="18">[CdePkgBlog](README.md#cdepkg-blog-at--uefi--tianocore)
 * [Preface](README.md#preface)
 * [Introduction](README.md#introduction)
 * [Intention](README.md#intention)
