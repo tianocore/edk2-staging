@@ -75,3 +75,27 @@ b. Copy openssl\crypto\evp\pmeth_lib.c to OpensslStub\crypto\evp\pmeth_lib.c, an
 # else
         app_pmeth = pmeth = evp_pkey_meth_find_added_by_application(id);
 # endif
+
+=============================================================================
+3. Disable AUTOALGINIT for non-tls build
+=============================================================================
+a. Copy openssl\crypto\evp\digest.c to OpensslStub\crypto\evp\digest.c, and apply below change:
+(L1069, EVP_MD *EVP_MD_fetch())
+>>>>>>>>>>>>>>>before>>>>>>>>>>>>>>>>
+    EVP_MD *md =
+        evp_generic_fetch(ctx, OSSL_OP_DIGEST, algorithm, properties,
+                          evp_md_from_algorithm, evp_md_up_ref, evp_md_free);
+
+    return md;
+>>>>>>>>>>>>>>>after>>>>>>>>>>>>>>>>
+    EVP_MD *md =
+        evp_generic_fetch(ctx, OSSL_OP_DIGEST, algorithm, properties,
+                          evp_md_from_algorithm, evp_md_up_ref, evp_md_free);
+    /*  If turn on OPENSSL_NO_AUTOALGINIT, The value of 'type' will be lost when
+        using EVP_MD_fetch() to retrieve EVP_MD after EVP_add_digest().
+        Manually add it back here. */
+#ifdef OPENSSL_NO_AUTOALGINIT
+    if (md != NULL)
+        md->type = OBJ_txt2nid(algorithm);
+#endif
+    return md;
