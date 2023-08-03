@@ -127,6 +127,7 @@ ImageTimestampVerify (
   UINT8 *End;
   INT32 Len;
   UINTN ObjLen;
+  UINT8 *TempPtr;
 
   //
   // Initializations
@@ -193,6 +194,12 @@ ImageTimestampVerify (
   }
   Ptr += ObjLen;
 
+  TempPtr = Ptr;
+  //OPTIONAL CRLs
+  if (mbedtls_asn1_get_tag(&TempPtr, End, &ObjLen, 0xA0) == 0) {
+    Ptr = TempPtr + ObjLen;
+  }
+
   //signerInfo
   if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x31) != 0) {
     return FALSE;
@@ -223,11 +230,11 @@ ImageTimestampVerify (
   }
   Ptr += ObjLen;
 
-  //signerattr
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0xA0) != 0) {
-    return FALSE;
+  //OPTIONAL AuthenticatedAttributes
+  TempPtr = Ptr;
+  if (mbedtls_asn1_get_tag(&TempPtr, End, &ObjLen, 0xA0) == 0) {
+    Ptr = TempPtr + ObjLen;
   }
-  Ptr += ObjLen;
 
   //signaturealgo
   if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x30) != 0) {
@@ -241,7 +248,7 @@ ImageTimestampVerify (
   }
   Ptr += ObjLen;
 
-  //unsignedattr
+  //OPTIONAL UnauthenticatedAttributes
   if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0xA1) != 0) {
     return FALSE;
   }
