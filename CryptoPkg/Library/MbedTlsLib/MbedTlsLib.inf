@@ -10,7 +10,7 @@
   INF_VERSION                    = 0x00010005
   BASE_NAME                      = MbedTlsLib
   FILE_GUID                      = BB8E7D92-3E14-4907-A890-B28C7A0A1931
-  MODULE_TYPE                    = DXE_DRIVER
+  MODULE_TYPE                    = BASE
   VERSION_STRING                 = 1.0
   LIBRARY_CLASS                  = MbedTlsLib
   DEFINE OPENSSL_PATH            = ../OpensslLib/openssl
