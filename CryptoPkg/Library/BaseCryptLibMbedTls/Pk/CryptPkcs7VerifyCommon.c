@@ -324,6 +324,7 @@ Pkcs7GetSignedData (
   INTN TotalCertLen;
   mbedtls_x509_crt *MoreCert;
   UINT8 CertNum;
+  mbedtls_x509_crt *LastCert;
 
   Len = 0;
   P = Buffer;
@@ -383,8 +384,8 @@ Pkcs7GetSignedData (
     Ret = MbedTlsPkcs7GetNextContentLen (&P, End, &Len);
     CertP = P + Len;
 
+    // move to actual cert, if there are more [0]
     if (MbedTlsPkcs7GetNextContentLen (&CertP, End, &CertLen) == 0) {
-      Len = CertLen - (CertP - P -Len);
       Len = CertLen;
       P = CertP;
     }
@@ -402,6 +403,9 @@ Pkcs7GetSignedData (
     OldCertP = CertP;
 
     Ret = mbedtls_asn1_get_tag(&CertP, End, &CertLen, 0x30);
+    if (Ret != 0) {
+      goto End;
+    }
 
     //cert total len
     CertLen = CertLen + (CertP - OldCertP);
@@ -414,16 +418,19 @@ Pkcs7GetSignedData (
 
     mbedtls_x509_crt_init (MoreCert);
     Ret = MbedTlsPkcs7GetCertificates (&OldCertP, CertLen, MoreCert);
+    if (Ret != 0) {
+      goto End;
+    }
 
     CertNum++;
     MoreCert->next = AllocatePool(sizeof(mbedtls_x509_crt));
     MoreCert = MoreCert->next;
   }
 
-  FreePool (MoreCert);
-  MoreCert = NULL;
-
-  mbedtls_x509_crt *LastCert;
+  if (TotalCertLen != Len) {
+    Ret == -1;
+    goto End;
+  }
 
   LastCert = &(SignedData->Certificates);
 
@@ -440,6 +447,12 @@ Pkcs7GetSignedData (
   if (Ret == 0) {
     P = P + Len;
     Ret = MbedTlsPkcs7GetSignersInfoSet (&P, End, &SignedData->SignerInfos);
+  }
+
+End:
+  if (MoreCert != NULL) {
+    FreePool (MoreCert);
+    MoreCert = NULL;
   }
 
   return Ret;
@@ -627,7 +640,6 @@ MbedTlsPkcs7VerifyCertChain (
 
   AllCert = &(Pkcs7->SignedData.Certificates);
   InterCert = NULL;
-
 
   while(AllCert != NULL) {
     if ((AllCert->next == End) && (MbedTlsPkcs7VerifyCert(AllCert , NULL, End))) {
