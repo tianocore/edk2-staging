@@ -12,6 +12,8 @@
 
 #include <ConfidentialComputingGuestAttr.h>
 #include <IndustryStandard/Tpm20.h>
+#include <IndustryStandard/VTpmTd.h>
+#include <IndustryStandard/Tdx.h>
 
 //
 // Confidential computing work area header definition. Any change
@@ -72,6 +74,10 @@ typedef struct _SEV_WORK_AREA {
 #define TDX_MEASUREMENT_TDHOB_BITMASK   0x1
 #define TDX_MEASUREMENT_CFVIMG_BITMASK  0x2
 
+#define TDX_MEASUREMENT_TYPE_NONE       0x0
+#define TDX_MEASUREMENT_TYPE_CC         0x1
+#define TDX_MEASUREMENT_TYPE_VTPM       0x2
+
 typedef struct _TDX_MEASUREMENTS_DATA {
   UINT32    MeasurementsBitmap;
   UINT8     TdHobHashValue[SHA384_DIGEST_SIZE];
@@ -86,6 +92,9 @@ typedef struct _SEC_TDX_WORK_AREA {
   UINT32                   Gpaw;
   UINT64                   HobList;
   TDX_MEASUREMENTS_DATA    TdxMeasurementsData;
+  UINT32                   SharedMemoryReady;
+  UINT32                   MeasurementType;
+  UINT32                   Tpm2ActivePcrBanks;
 } SEC_TDX_WORK_AREA;
 
 typedef struct _TDX_WORK_AREA {
