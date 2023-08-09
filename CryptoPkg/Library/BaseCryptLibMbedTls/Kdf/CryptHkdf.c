@@ -172,7 +172,10 @@ HkdfMdExpand (
   case MBEDTLS_MD_SHA512:
     MdSize = SHA512_DIGEST_SIZE;
     break;
+  default:
+    return FALSE;
   }
+
   if (PrkSize != MdSize) {
     return FALSE;
   }
