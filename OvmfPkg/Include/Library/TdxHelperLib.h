@@ -67,4 +67,28 @@ TdxHelperBuildGuidHobForTdxMeasurement (
   VOID
   );
 
+/**
+ * Initialize shared buffer.
+ *
+ * @retval EFI_SUCCESS Shared buffer is successfully initialized
+ * @retval Others      Other errors as indicated
+ */
+EFI_STATUS
+EFIAPI
+TdxHelperInitSharedBuffer (
+  VOID
+  );
+
+/**
+ * Dropped shared buffer.
+ *
+ * @retval EFI_SUCCESS Shared buffer is successfully dropped
+ * @retval Others      Other errors as indicated
+ */
+EFI_STATUS
+EFIAPI
+TdxHelperDropSharedBuffer (
+  VOID
+  );
+
 #endif
