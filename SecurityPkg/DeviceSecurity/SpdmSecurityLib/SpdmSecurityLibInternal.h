@@ -35,7 +35,6 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Guid/ImageAuthentication.h>
 
 #include <Protocol/PciIo.h>
-#include <SpdmReturnStatus.h>
 #include <Library/SpdmSecurityLib.h>
 #include "library/spdm_crypt_lib.h"
 
