@@ -89,3 +89,33 @@ TdxHelperBuildGuidHobForTdxMeasurement (
 {
   return InternalBuildGuidHobForTdxMeasurement ();
 }
+
+/**
+ * Initialize shared buffer.
+ *
+ * @retval EFI_SUCCESS Shared buffer is successfully initialized
+ * @retval Others      Other others as indicated
+ */
+EFI_STATUS
+EFIAPI
+TdxHelperInitSharedBuffer (
+  VOID
+  )
+{
+  return EFI_UNSUPPORTED;
+}
+
+/**
+ * Dropped shared buffer.
+ *
+ * @retval EFI_SUCCESS Shared buffer is successfully dropped
+ * @retval Others      Other others as indicated
+ */
+EFI_STATUS
+EFIAPI
+TdxHelperDropSharedBuffer (
+  VOID
+  )
+{
+  return EFI_UNSUPPORTED;
+}
