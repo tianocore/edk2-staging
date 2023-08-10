@@ -20,7 +20,6 @@
 #include <Guid/DeviceAuthentication.h>
 #include <Guid/ImageAuthentication.h>
 #include <Stub/SpdmLibStub.h>
-#include <SpdmReturnStatus.h>
 #include <industry_standard/spdm.h>
 #include <Library/Tpm2CommandLib.h>
 #include <Library/ShellLib.h>

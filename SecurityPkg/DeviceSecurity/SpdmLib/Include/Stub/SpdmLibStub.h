@@ -17,6 +17,14 @@
 
 #pragma pack(1)
 
+/* The layout of SPDM_RETURN is
+ * [31:28] - Severity
+ * [27:24] - Reserved
+ * [23:16] - Source
+ * [15:00] - Code
+ */
+typedef UINT32 SPDM_RETURN;
+
 /*Interface of spdm.h*/
 /* SPDM message header*/
 typedef struct {
