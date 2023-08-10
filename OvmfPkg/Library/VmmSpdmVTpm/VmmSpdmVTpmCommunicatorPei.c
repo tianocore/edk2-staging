@@ -220,16 +220,45 @@ VmmSpdmVTpmDisconnect (
   return EFI_UNSUPPORTED;
 }
 
+STATIC
+VOID
+SetTdxMeasurementTypeInWorkare (
+ BOOLEAN VTpmEnabled
+ )
+{
+  OVMF_WORK_AREA  *WorkArea;
+  WorkArea = (OVMF_WORK_AREA *)FixedPcdGet32 (PcdOvmfWorkAreaBase);
+  if (WorkArea == NULL) {
+    DEBUG((DEBUG_ERROR, "%a: WorkArea should not be NULL\n", __FUNCTION__));
+    return;
+  }
+
+  WorkArea->TdxWorkArea.SecTdxWorkArea.MeasurementType = VTpmEnabled ? TDX_MEASUREMENT_TYPE_VTPM : TDX_MEASUREMENT_TYPE_CC;
+
+}
+
 EFI_STATUS
 EFIAPI
 VmmSpdmVTpmIsSupported (
   VOID
   )
 {
-  // TDVMCALL.QueryService?
-  return EFI_SUCCESS;
-}
+  EFI_STATUS        Status;
+  BOOLEAN           VTpmEnabled;
 
+  VTpmEnabled = FALSE;
+
+  // If VMCALL_SERVICE_VTPM_GUID is not supported, VMM will not 
+  // allow tdvf to send and receive VTPM messages over an spdm session.
+  Status = TdQueryServiceForVtpm ();
+  if (!EFI_ERROR (Status)) {
+    VTpmEnabled = TRUE;
+  }
+
+  SetTdxMeasurementTypeInWorkare(VTpmEnabled);
+
+  return Status ;
+}
 /**
  * Check if a SecuredSpdmSession is established by finding a specific GuidHob.
  *
@@ -291,11 +320,9 @@ VmmSpdmVTpmConnect (
   SessionSuccess   = FALSE;
   DestroySession   = FALSE;
 
-  // If VMCALL_SERVICE_VTPM_GUID is not supported, VMM will not 
-  // allow tdvf to send and receive VTPM messages over an spdm session.
-  Status = TdQueryServiceForVtpm ();
+  Status = VmmSpdmVTpmIsSupported ();
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_ERROR, "TdQueryServiceForVtpm failed with %r \n", Status));
+    DEBUG ((DEBUG_ERROR, "VmmSpdmVTpmIsSupported failed with %r \n", Status));
     return Status;
   }
 
