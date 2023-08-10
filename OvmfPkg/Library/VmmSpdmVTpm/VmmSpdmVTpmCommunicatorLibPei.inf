@@ -38,8 +38,7 @@
   SecurityPkg/SecurityPkg.dec
 
 [Pcd]
-  # gUefiOvmfPkgTokenSpaceGuid.PcdVtpmSecureSessionInfoTableAddr
-  # gUefiOvmfPkgTokenSpaceGuid.PcdVtpmSecureSessionInfoTableSize
+  gUefiOvmfPkgTokenSpaceGuid.PcdOvmfWorkAreaBase
 
 [Guids]
   gEdkiiVTpmSecureSpdmSessionInfoHobGuid
