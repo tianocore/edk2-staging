@@ -8,8 +8,6 @@
 
 #include <Library/DebugLib.h>
 
-#undef OPENSSL_NO_EC
-
 #include <mbedtls/ecp.h>
 #include <mbedtls/ecdh.h>
 #include <mbedtls/ecdsa.h>
@@ -326,5 +324,3 @@ int mbedtls_ecdsa_sign( mbedtls_ecp_group *grp, mbedtls_mpi *r, mbedtls_mpi *s,
   ASSERT (FALSE);
   return -1;
 }
-
-
