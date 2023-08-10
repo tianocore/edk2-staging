@@ -203,7 +203,7 @@ ExtendToVTpm (
 */
 STATIC
 EFI_STATUS
-DoMeasurementForVTpm (
+DoMeasurement (
   VOID
   )
 {
@@ -265,22 +265,13 @@ PeilessStartupDoMeasurement (
   VOID
   )
 {
-  // EFI_STATUS Status;
   BOOLEAN  VTpmEnabled;
-  BOOLEAN  SharedBufferInitialized;
   UINT32   TpmActivePcrBanks;
 
   VTpmEnabled             = FALSE;
-  SharedBufferInitialized = FALSE;
   TpmActivePcrBanks       = 0;
 
   do {
-    if (EFI_ERROR (TdxHelperInitSharedBuffer ())) {
-      DEBUG ((DEBUG_INFO, "Init shared buffer failed.\n"));
-      break;
-    }
-
-    SharedBufferInitialized = TRUE;
 
     if (EFI_ERROR (VmmSpdmVTpmIsSupported ())) {
       DEBUG ((DEBUG_INFO, "VTpm is not supported.\n"));
@@ -305,10 +296,13 @@ PeilessStartupDoMeasurement (
     DEBUG ((DEBUG_INFO, "Set TdxMeasurement In Workarea failed.\n"));
   }
 
-  DoMeasurement ();
+  if (EFI_ERROR( DoMeasurement ())) {
+    DEBUG ((DEBUG_INFO, "Do Measurement failed.\n"));
+  }
 
-  if (SharedBufferInitialized) {
-    TdxHelperDropSharedBuffer ();
+
+  if (EFI_ERROR(VmmSpdmVTpmClearSharedBit ())) {
+      DEBUG ((DEBUG_INFO, "VmmSpdmVTpmClearSharedBit failed\n"));
   }
 
   return EFI_SUCCESS;

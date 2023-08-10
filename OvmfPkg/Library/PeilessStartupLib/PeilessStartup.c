@@ -18,9 +18,11 @@
 #include <Library/PeilessStartupLib.h>
 #include <Library/PlatformInitLib.h>
 #include <Library/TdxHelperLib.h>
+#include <Library/Tpm2CommandLib.h>
 #include <ConfidentialComputingGuestAttr.h>
 #include <Guid/MemoryTypeInformation.h>
 #include <OvmfPlatforms.h>
+#include <Library/VmmSpdmVTpmCommunicatorLib.h>
 #include "PeilessStartupInternal.h"
 
 #define GET_GPAW_INIT_STATE(INFO)  ((UINT8) ((INFO) & 0x3f))
@@ -175,6 +177,13 @@ PeilessStartup (
   DEBUG ((DEBUG_INFO, "HobList: %p\n", GetHobList ()));
 
   if (TdIsEnabled ()) {
+
+    Status = PeilessStartupDoMeasurement ();
+    if (EFI_ERROR (Status)) {
+      ASSERT (FALSE);
+      CpuDeadLoop ();
+    }
+
     //
     // Build GuidHob for the tdx measurements which were done in SEC phase.
     //
