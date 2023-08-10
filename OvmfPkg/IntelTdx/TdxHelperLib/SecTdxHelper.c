@@ -23,6 +23,7 @@
 #include <WorkArea.h>
 #include <ConfidentialComputingGuestAttr.h>
 #include <Library/TdxHelperLib.h>
+#include <Library/MemEncryptTdxLib.h>
 
 #define ALIGNED_2MB_MASK  0x1fffff
 #define MEGABYTE_SHIFT    20
@@ -976,4 +977,88 @@ TdxHelperBuildGuidHobForTdxMeasurement (
  #else
   return EFI_UNSUPPORTED;
  #endif
+}
+
+
+/**
+ * Initialize shared buffer.
+ *
+ * @retval EFI_SUCCESS Shared buffer is successfully initialized
+ * @retval Others      Other others as indicated
+ */
+EFI_STATUS
+EFIAPI
+TdxHelperInitSharedBuffer (
+  VOID
+  )
+{
+  EFI_STATUS      Status;
+  OVMF_WORK_AREA  *WorkArea;
+  PHYSICAL_ADDRESS SharedMemoryBase;
+  UINT64           SharedMemorySize;
+
+  WorkArea = (OVMF_WORK_AREA *)FixedPcdGet32 (PcdOvmfWorkAreaBase);
+  if (WorkArea == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  SharedMemoryBase = (PHYSICAL_ADDRESS)FixedPcdGet32 (PcdOvmfSecScratchMemoryBase) + SIZE_4MB;
+  SharedMemorySize = SIZE_2MB;
+
+  Status = EFI_SUCCESS;
+
+  if (WorkArea->TdxWorkArea.SecTdxWorkArea.SharedMemoryReady == 0) {
+    Status = MemEncryptTdxSetPageSharedBit (
+              0,
+              SharedMemoryBase,
+              EFI_SIZE_TO_PAGES (SharedMemorySize)
+            );
+    if (!EFI_ERROR (Status)) {
+      WorkArea->TdxWorkArea.SecTdxWorkArea.SharedMemoryReady = 1;
+    } else {
+      ASSERT (FALSE);
+    }
+  }
+
+  return Status;
+}
+
+/**
+ * Dropped shared buffer.
+ *
+ * @retval EFI_SUCCESS Shared buffer is successfully dropped
+ * @retval Others      Other others as indicated
+ */
+EFI_STATUS
+EFIAPI
+TdxHelperDropSharedBuffer (
+  VOID
+  )
+{
+  EFI_STATUS      Status;
+  OVMF_WORK_AREA  *WorkArea;
+  PHYSICAL_ADDRESS SharedMemoryBase;
+  UINT64           SharedMemorySize;
+
+  Status = EFI_SUCCESS;
+
+  WorkArea = (OVMF_WORK_AREA *)FixedPcdGet32 (PcdOvmfWorkAreaBase);
+  if (WorkArea == NULL) {
+    return EFI_UNSUPPORTED;
+  }
+
+  SharedMemoryBase = (PHYSICAL_ADDRESS)FixedPcdGet32 (PcdOvmfSecScratchMemoryBase) + SIZE_4MB;
+  SharedMemorySize = SIZE_2MB;
+
+  if (WorkArea->TdxWorkArea.SecTdxWorkArea.SharedMemoryReady == 1) {
+    Status = MemEncryptTdxClearPageSharedBit (
+      0,
+      SharedMemoryBase,
+      EFI_SIZE_TO_PAGES (SharedMemorySize)
+    );
+    WorkArea->TdxWorkArea.SecTdxWorkArea.SharedMemoryReady = 0;
+    ASSERT (!EFI_ERROR (Status));
+  }
+
+  return Status;
 }

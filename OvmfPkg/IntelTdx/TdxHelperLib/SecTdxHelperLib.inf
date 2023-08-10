@@ -38,6 +38,7 @@
   BaseCryptLib
   DebugLib
   HobLib
+  MemEncryptTdxLib
   PcdLib
   TdxMailboxLib
   TdxLib
@@ -48,6 +49,8 @@
   gUefiOvmfPkgTokenSpaceGuid.PcdOvmfSecGhcbBase
   gUefiOvmfPkgTokenSpaceGuid.PcdOvmfFlashNvStorageVariableBase
   gUefiOvmfPkgTokenSpaceGuid.PcdCfvRawDataSize
+  gUefiOvmfPkgTokenSpaceGuid.PcdOvmfSecScratchMemoryBase
+  gUefiOvmfPkgTokenSpaceGuid.PcdOvmfSecScratchMemorySize
 
 [Guids]
   gCcEventEntryHobGuid
