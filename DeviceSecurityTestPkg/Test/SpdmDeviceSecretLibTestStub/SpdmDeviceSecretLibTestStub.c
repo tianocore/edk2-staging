@@ -24,7 +24,6 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include "library/spdm_crypt_lib.h"
 #include "hal/library/memlib.h"
 #include <Stub/SpdmLibStub.h>
-#include <SpdmReturnStatus.h>
 #include "spdm_crypt_ext_lib.h"
 
 #define LIBSPDM_MEASUREMENT_BLOCK_HASH_NUMBER  4
