@@ -2431,6 +2431,14 @@ DriverEntry (
 
   mImageHandle = ImageHandle;
 
+#ifdef VTPM_FEATURE_ENABLED
+  if (GetFirstGuidHob(&gEdkiiVTpmBasedMeasurementHobGuid) != NULL)
+  {
+    DEBUG ((DEBUG_INFO, "It is vTPM based measurement.\n"));
+    return EFI_UNSUPPORTED;
+  }
+
+#endif
   //
   // Fill information
   //
