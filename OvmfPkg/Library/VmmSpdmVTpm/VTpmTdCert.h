@@ -48,3 +48,8 @@ VTPMTD_CERT_ECDSA_P_384_KEY_PAIR_INFO *
 GetCertEcP384KeyPairInfo (
   VOID
   );
+
+EFI_STATUS
+SetSpdmCertChainBuffer(
+  IN OUT VMM_SPDM_CONTEXT     *Context
+ );

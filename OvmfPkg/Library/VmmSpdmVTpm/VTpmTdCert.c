@@ -1056,3 +1056,64 @@ ClearKeyPairInGuidHob (
 
   DEBUG ((DEBUG_INFO, "Clear the Key Pair after StartSession\n"));
 }
+
+EFI_STATUS
+SetSpdmCertChainBuffer(
+  IN OUT VMM_SPDM_CONTEXT     *Context
+ )
+{
+  EFI_STATUS   Status;
+  SPDM_RETURN  SpdmStatus;
+  UINT8*       CertChain;
+  UINTN        CertChainSize;
+  UINT32       Pages;
+  SPDM_DATA_PARAMETER  Parameter;
+
+  if (Context == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  CertChain        = NULL;
+  CertChainSize    = 0;
+  Pages = VTPM_TD_CERT_CHAIN_DEFAULT_ALLOCATION_PAGE;
+  CertChain = AllocatePages(Pages);
+  CertChainSize = EFI_PAGES_TO_SIZE(Pages);
+  if (CertChain == NULL) {
+    DEBUG ((DEBUG_ERROR, "AllocatePages CertChain failed with %d Pages\n", Pages));
+    return EFI_ABORTED;
+  }
+
+  Status = InitialVtpmTdCertChain(CertChain,&CertChainSize);
+  
+  Context->SpdmCertChainBufferAddress = (UINT64)CertChain;
+  Context->SpdmCertChainBufferSize    = CertChainSize;
+
+  if (EFI_ERROR(Status)) {
+    DEBUG ((DEBUG_ERROR, "InitialVtpmTdCertChain failed with %r\n", Status));
+    goto CleanBuffer;
+  }
+
+  ZeroMem (&Parameter, sizeof (Parameter));
+  Parameter.location = LIBSPDM_DATA_LOCATION_LOCAL;
+  Parameter.additional_data[0] = Context->SlotId;
+  SpdmStatus = SpdmSetData (
+                            Context->SpdmContext,
+                            LIBSPDM_DATA_LOCAL_PUBLIC_CERT_CHAIN,
+                            &Parameter,
+                            (spdm_cert_chain_t *)CertChain,
+                            CertChainSize
+                            );
+  if (LIBSPDM_STATUS_IS_ERROR (SpdmStatus)) {
+    DEBUG ((DEBUG_ERROR, "SpdmSetData with %x failed - %lx\n", SpdmStatus, LIBSPDM_DATA_LOCAL_PUBLIC_CERT_CHAIN));
+    goto CleanBuffer;
+  }
+
+  return EFI_SUCCESS;
+
+CleanBuffer:
+  if (CertChain){
+    FreePages(CertChain, Pages);
+  }
+  
+  return EFI_ABORTED;
+}

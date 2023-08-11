@@ -60,6 +60,16 @@ FreeMemoryForVmmSpdmContext (
     return EFI_INVALID_PARAMETER;
   }
 
+  UINT8 *CerChain;
+  UINT32 CertChainPage;
+  CerChain = NULL;
+  CerChain = (UINT8 *)(UINTN)Context->SpdmCertChainBufferAddress;
+  CertChainPage = EFI_SIZE_TO_PAGES(Context->SpdmCertChainBufferSize);
+  if (CerChain){
+    ZeroMem(CerChain, Context->SpdmCertChainBufferSize);
+    FreePages(CerChain, CertChainPage);
+  }
+
   FreePages (Context, Pages);
 
   return EFI_SUCCESS;
