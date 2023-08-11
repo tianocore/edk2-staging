@@ -491,15 +491,6 @@ VmmSpdmVTpmInitSpdmContext (
   SPDM_DATA_PARAMETER  Parameter;
 
   EFI_STATUS Status;
-  UINT8*     CertChain;
-  UINTN      CertChainSize;
-  BOOLEAN    CertChainSuccess;
-  UINTN      Pages;
-
-  CertChainSuccess = TRUE;
-  CertChain        = NULL;
-  CertChainSize    = 0;
-  Status           = EFI_SUCCESS;
 
   Context->Signature = VMM_SPDM_CONTEXT_SIGNATURE;
   SpdmContext        = Context->SpdmContext;
@@ -668,55 +659,9 @@ VmmSpdmVTpmInitSpdmContext (
     return EFI_ABORTED;
   }
 
-  // init the cert 
-  Pages = VTPM_TD_CERT_CHAIN_DEFAULT_ALLOCATION_PAGE;
-  CertChain = AllocatePages(Pages);
-  CertChainSize = EFI_PAGES_TO_SIZE(Pages);
-  if (CertChain == NULL) {
-    DEBUG ((DEBUG_ERROR, "AllocatePages CertChain failed with %d Pages\n", Pages));
-    return EFI_ABORTED;
-  }
-
-  Status = InitialVtpmTdCertChain(CertChain,&CertChainSize);
-  if (Status == EFI_BUFFER_TOO_SMALL){
-    FreePages(CertChain,Pages);
-    Pages = EFI_SIZE_TO_PAGES(CertChainSize);
-    CertChain = AllocatePages(Pages);
-    if (CertChain == NULL) {
-      DEBUG ((DEBUG_ERROR, "AllocatePages CertChain failed with %d Pages\n", Pages));
-      return EFI_ABORTED;
-    }
-
-    Status = InitialVtpmTdCertChain(CertChain,&CertChainSize);
-  }
-  
-  if (EFI_ERROR(Status)) {
-    DEBUG ((DEBUG_ERROR, "InitialVtpmTdCertChain failed with %r\n", Status));
-    CertChainSuccess =  FALSE;
-    goto ClearCertChain;
-  }
-
-  ZeroMem (&Parameter, sizeof (Parameter));
-  Parameter.location = LIBSPDM_DATA_LOCATION_LOCAL;
-  Parameter.additional_data[0] = Context->SlotId;
-  SpdmStatus = SpdmSetData (
-                            SpdmContext,
-                            LIBSPDM_DATA_LOCAL_PUBLIC_CERT_CHAIN,
-                            &Parameter,
-                            (spdm_cert_chain_t *)CertChain,
-                            CertChainSize
-                            );
-  if (LIBSPDM_STATUS_IS_ERROR (SpdmStatus)) {
-    DEBUG ((DEBUG_ERROR, "SpdmSetData with %x failed - %lx\n", SpdmStatus, LIBSPDM_DATA_LOCAL_PUBLIC_CERT_CHAIN));
-    CertChainSuccess =  FALSE;
-  }
-
-ClearCertChain:
-  if (CertChain) {
-    FreePages(CertChain,Pages);
-  }
-
-  if (CertChainSuccess == FALSE){
+  Status = SetSpdmCertChainBuffer(Context);
+  if (EFI_ERROR(Status)){
+    DEBUG ((DEBUG_ERROR, "SetSpdmCertChainBuffer failed with %r\n", Status));
     return EFI_ABORTED;
   }
 
