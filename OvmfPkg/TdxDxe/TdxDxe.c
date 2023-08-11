@@ -33,6 +33,7 @@
 #include <TdxAcpiTable.h>
 #include <Library/MemEncryptTdxLib.h>
 #include <IndustryStandard/VTpmTd.h>
+#include <WorkArea.h>
 
 #define ALIGNED_2MB_MASK  0x1fffff
 EFI_HANDLE  mTdxDxeHandle = NULL;
@@ -302,6 +303,7 @@ SetMmioSharedBit (
   return EFI_SUCCESS;
 }
 
+#ifdef VTPM_FEATURE_ENABLED
 STATIC
 VTPM_SECURE_SESSION_INFO_TABLE *
 GetSpdmSecuredSessionInfo (
@@ -335,14 +337,46 @@ PrepareForVtpm (
   EFI_STATUS            Status;
   EFI_PHYSICAL_ADDRESS  Address;
   VOID                  *Registration;
+  UINTN                 Size;
   EFI_EVENT             AcpiTableEvent;
+
   VTPM_SECURE_SESSION_INFO_TABLE *InfoTable;
+  OVMF_WORK_AREA                 *WorkArea;
+
+  DEBUG ((DEBUG_INFO, ">>%a\n", __FUNCTION__));
 
   // Check if SecuredSpdmSession is established
   InfoTable = GetSpdmSecuredSessionInfo ();
   if (InfoTable == NULL || InfoTable->SessionId == 0) {
     DEBUG ((DEBUG_INFO, "SecuredSpdmSession is not established.\n"));
     return EFI_NOT_STARTED;
+  }
+
+  WorkArea = (OVMF_WORK_AREA *)FixedPcdGet32 (PcdOvmfWorkAreaBase);
+  if (WorkArea == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  UINT32 MeasurementType = WorkArea->TdxWorkArea.SecTdxWorkArea.MeasurementType;
+  UINT32 Tpm2ActivePcrBanks = WorkArea->TdxWorkArea.SecTdxWorkArea.Tpm2ActivePcrBanks;
+
+  if (MeasurementType == TDX_MEASUREMENT_TYPE_VTPM && Tpm2ActivePcrBanks != 0)
+  {
+    // Set PcdTpmInstanceGuid
+    Size   = sizeof (gEfiTpmDeviceInstanceTpm20DtpmGuid);
+    Status = PcdSetPtrS (
+                PcdTpmInstanceGuid,
+                &Size,
+                &gEfiTpmDeviceInstanceTpm20DtpmGuid
+                );
+    ASSERT_EFI_ERROR (Status);
+    if (EFI_ERROR(Status)) {
+      DEBUG((DEBUG_ERROR, "Set PcdTpmInstanceGuid failed with %r\n", Status));
+    }
+    
+
+    // Set active pcr banks
+    PcdSet32S (PcdTpm2HashMask, WorkArea->TdxWorkArea.SecTdxWorkArea.Tpm2ActivePcrBanks);
   }
 
   Status = gBS->AllocatePages (
@@ -383,6 +417,7 @@ PrepareForVtpm (
 
   return EFI_SUCCESS;
 }
+#endif
 
 EFI_STATUS
 EFIAPI
@@ -501,7 +536,9 @@ TdxDxeEntryPoint (
                   &Registration
                   );
 
+ #ifdef VTPM_FEATURE_ENABLED
   PrepareForVtpm ();
+ #endif
 
   #define INIT_PCDSET(NAME, RES)  do {\
   PcdStatus = PcdSet64S (NAME##Base, (RES)->PhysicalStart); \
