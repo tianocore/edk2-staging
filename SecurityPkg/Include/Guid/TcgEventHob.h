@@ -69,6 +69,14 @@ extern EFI_GUID  gEdkiiHCRTMComponentEventHobGuid;
 
 extern EFI_GUID  gEdkiiHCRTMEventHobGuid;
 
+//
+// The Global ID of a GUIDed HOB used to record vTPM based measurement.
+//
+#define EDKII_VTPM_BASED_MEASUREMENT_HOB_GUID \
+ { 0x908986d7, 0xdcc5, 0x4fa5, { 0x8c, 0x7a, 0xc6, 0x5c, 0x62, 0x31, 0xbe, 0x35 } }
+
+extern EFI_GUID  gEdkiiVTpmBasedMeasurementHobGuid;
+
 ///
 /// The Global ID of a GUIDed HOB used to record TCG 800-155 PlatformId Event.
 /// HOB payload is the whole TCG_Sp800_155_PlatformId_Event2 according to TCG 800-155 PlatformId Event.
