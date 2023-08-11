@@ -1030,7 +1030,7 @@ DoEndSession (
     return EFI_INVALID_PARAMETER;
   }
 
-  if (!Context->Initialized) {
+  if ((!Context->Initialized) || (Context->SessionId == 0)) {
     return EFI_SUCCESS;
   }
 
@@ -1039,6 +1039,13 @@ DoEndSession (
                             Context->SessionId,
                             SPDM_END_SESSION_REQUEST_ATTRIBUTES_PRESERVE_NEGOTIATED_STATE_CLEAR
                             );
+
+  //Session info in workarea must be invalid after SpdmStopSession
+  VTPM_SECURE_SESSION_INFO_TABLE *InfoTable;
+
+  InfoTable = GetSpdmSecuredSessionInfo ();
+  InfoTable->SessionId = 0;
+
   if (LIBSPDM_STATUS_IS_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "SpdmStopSession is failed with %lx\n", Status));
     return EFI_DEVICE_ERROR;
