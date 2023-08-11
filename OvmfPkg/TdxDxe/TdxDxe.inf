@@ -26,6 +26,7 @@
   MdePkg/MdePkg.dec
   UefiCpuPkg/UefiCpuPkg.dec
   OvmfPkg/OvmfPkg.dec
+  SecurityPkg/SecurityPkg.dec
 
 [LibraryClasses]
   BaseLib
@@ -46,6 +47,7 @@
 [Guids]
   gUefiOvmfPkgPlatformInfoGuid                      ## CONSUMES
   gEdkiiVTpmSecureSpdmSessionInfoHobGuid
+  gEfiTpmDeviceInstanceTpm20DtpmGuid
 
 [Protocols]
   gQemuAcpiTableNotifyProtocolGuid                 ## CONSUMES
@@ -79,3 +81,6 @@
   gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiDefaultCreatorRevision              ## CONSUMES
   gUefiOvmfPkgTokenSpaceGuid.PcdVtpmSecureSessionInfoTableAddr
   gUefiOvmfPkgTokenSpaceGuid.PcdVtpmSecureSessionInfoTableSize
+  gUefiOvmfPkgTokenSpaceGuid.PcdOvmfWorkAreaBase
+  gEfiSecurityPkgTokenSpaceGuid.PcdTpmInstanceGuid
+  gEfiSecurityPkgTokenSpaceGuid.PcdTpm2HashMask
