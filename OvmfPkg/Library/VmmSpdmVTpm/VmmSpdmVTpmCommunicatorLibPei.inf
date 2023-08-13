@@ -11,7 +11,7 @@
   FILE_GUID                      = c2663a26-0806-4859-b386-936569315246
   MODULE_TYPE                    = BASE
   VERSION_STRING                 = 1.0
-  LIBRARY_CLASS                  = VmmSpdmVTpmCommunicatorLib|PEIM
+  LIBRARY_CLASS                  = VmmSpdmVTpmCommunicatorLib|PEIM SEC
 
 #
 # The following information is for reference only and not required by the build tools.
