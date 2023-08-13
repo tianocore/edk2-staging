@@ -253,6 +253,7 @@ VmmSpdmVTpmIsSupported (
   Status = TdQueryServiceForVtpm ();
   if (!EFI_ERROR (Status)) {
     VTpmEnabled = TRUE;
+    BuildGuidHob(&gEdkiiVTpmBasedMeasurementHobGuid, 0); 
   }
 
   SetTdxMeasurementTypeInWorkare(VTpmEnabled);
