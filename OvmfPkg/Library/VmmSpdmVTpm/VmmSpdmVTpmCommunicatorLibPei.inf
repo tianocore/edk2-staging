@@ -48,6 +48,7 @@
   gEdkiiVTpmTdX509CertKeyInfoHobGuid
   gEdkiiTdReportInfoHobGuid
   gEdkiiVTpmTdTdReportEventHobGuid
+  gEdkiiVTpmBasedMeasurementHobGuid
 
 [LibraryClasses]
   BaseLib
