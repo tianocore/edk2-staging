@@ -39,6 +39,8 @@
 
 [Pcd]
   gUefiOvmfPkgTokenSpaceGuid.PcdOvmfWorkAreaBase
+  gUefiOvmfPkgTokenSpaceGuid.PcdOvmfSecScratchMemoryBase
+  gUefiOvmfPkgTokenSpaceGuid.PcdOvmfSecScratchMemorySize
 
 [Guids]
   gEdkiiVTpmSecureSpdmSessionInfoHobGuid

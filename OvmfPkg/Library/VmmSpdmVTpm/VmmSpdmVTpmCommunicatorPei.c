@@ -486,6 +486,28 @@ VmmSpdmVTpmSendReceive (
   return Status;
 }
 
+#ifdef TDX_PEI_LESS_BOOT
+/**
+ * In IntelTdxX64, TDVF needs to allocate shared buffer with 4kb aligned in SEC phase.
+ *
+ * @param SharedBuffer   The pointer of the buffer   
+ * @param Pages          The number of 4 KB pages to allocate
+ * 
+ * @return EFI_SUCCESS   The shared buffer is allocated successfully.
+ * @return Others        Some error occurs when allocated 
+*/
+EFI_STATUS
+VtpmAllocateSharedBufferInSec (
+  IN OUT UINT8  **SharedBuffer,
+  IN UINT32     Pages
+  )
+{
+  ASSERT (EFI_PAGES_TO_SIZE (Pages) < SIZE_2MB);
+  *SharedBuffer = (UINT8 *)(UINTN)(FixedPcdGet32 (PcdOvmfSecScratchMemoryBase) + SIZE_4MB);
+  return EFI_SUCCESS;
+}
+#endif
+
 /**
  * TDVF needs the shared buffer with 4kb aligned to call the VMCALL_SERVICE
  *
@@ -501,6 +523,11 @@ VtpmAllocateSharedBuffer (
   IN UINT32     Pages
   )
 {
+
+#ifdef TDX_PEI_LESS_BOOT
+  return VtpmAllocateSharedBufferInSec(SharedBuffer, Pages);
+#else
+
   EFI_STATUS  Status;
   UINT8       *Buffer;
   UINTN       DataLength;
@@ -558,6 +585,9 @@ VtpmAllocateSharedBuffer (
 
   *SharedBuffer = (UINT8 *)(UINTN)(VtpmSharedBufferInfo->BufferAddress);
   return EFI_SUCCESS;
+
+#endif
+
 }
 
 EFI_STATUS
