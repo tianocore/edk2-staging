@@ -267,11 +267,19 @@ PeilessStartupDoMeasurement (
 {
   BOOLEAN  VTpmEnabled;
   UINT32   TpmActivePcrBanks;
+  BOOLEAN  SharedMemoryReady;
 
   VTpmEnabled             = FALSE;
+  SharedMemoryReady       = FALSE;
   TpmActivePcrBanks       = 0;
 
   do {
+    if (EFI_ERROR (TdxHelperInitSharedBuffer ())) {
+      DEBUG ((DEBUG_INFO, "Init shared buffer failed.\n"));
+      break;
+    }
+
+    SharedMemoryReady = TRUE;
 
     if (EFI_ERROR (VmmSpdmVTpmIsSupported ())) {
       DEBUG ((DEBUG_INFO, "VTpm is not supported.\n"));
@@ -300,9 +308,10 @@ PeilessStartupDoMeasurement (
     DEBUG ((DEBUG_INFO, "Do Measurement failed.\n"));
   }
 
-
-  if (EFI_ERROR(VmmSpdmVTpmClearSharedBit ())) {
-      DEBUG ((DEBUG_INFO, "VmmSpdmVTpmClearSharedBit failed\n"));
+  if (SharedMemoryReady) {
+    if (EFI_ERROR(TdxHelperDropSharedBuffer  ())) {
+        DEBUG ((DEBUG_INFO, "TdxHelperDropSharedBuffer failed\n"));
+    }
   }
 
   return EFI_SUCCESS;
