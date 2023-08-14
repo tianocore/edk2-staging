@@ -477,7 +477,6 @@ SaveTdReportToHob(
 )
 {
   VOID   *GuidHobRawData;
-  UINTN  DataLength;
 
   EFI_PEI_HOB_POINTERS  GuidHob;
 
@@ -491,11 +490,9 @@ SaveTdReportToHob(
     return EFI_UNSUPPORTED;
   }
 
-  DataLength = TdReportSize;
-
   GuidHobRawData = BuildGuidHob (
                                  &gEdkiiTdReportInfoHobGuid,
-                                 DataLength
+                                 TdReportSize
                                  );
 
   if (GuidHobRawData == NULL) {
