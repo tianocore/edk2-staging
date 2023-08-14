@@ -239,7 +239,6 @@ DoMeasurement (
 STATIC
 EFI_STATUS
 SetTdxMeasurementInWorkarea (
-  BOOLEAN  VTpmEnabled,
   UINT32   TpmActivePcrBanks
   )
 {
@@ -250,7 +249,6 @@ SetTdxMeasurementInWorkarea (
     return EFI_INVALID_PARAMETER;
   }
 
-  WorkArea->TdxWorkArea.SecTdxWorkArea.MeasurementType    = VTpmEnabled ? TDX_MEASUREMENT_TYPE_VTPM : TDX_MEASUREMENT_TYPE_CC;
   WorkArea->TdxWorkArea.SecTdxWorkArea.Tpm2ActivePcrBanks = TpmActivePcrBanks;
 
   return EFI_SUCCESS;
@@ -265,13 +263,11 @@ PeilessStartupDoMeasurement (
   VOID
   )
 {
-  BOOLEAN  VTpmEnabled;
   UINT32   TpmActivePcrBanks;
   BOOLEAN  SharedMemoryReady;
 
-  VTpmEnabled             = FALSE;
-  SharedMemoryReady       = FALSE;
-  TpmActivePcrBanks       = 0;
+  SharedMemoryReady = FALSE;
+  TpmActivePcrBanks = 0;
 
   do {
     if (EFI_ERROR (TdxHelperInitSharedBuffer ())) {
@@ -281,12 +277,6 @@ PeilessStartupDoMeasurement (
 
     SharedMemoryReady = TRUE;
 
-    if (EFI_ERROR (VmmSpdmVTpmIsSupported ())) {
-      DEBUG ((DEBUG_INFO, "VTpm is not supported.\n"));
-      break;
-    }
-
-    VTpmEnabled = TRUE;
     if (EFI_ERROR (VmmSpdmVTpmConnect ())) {
       DEBUG ((DEBUG_INFO, "Connect to vTPM-TD failed.\n"));
       break;
@@ -300,7 +290,7 @@ PeilessStartupDoMeasurement (
     TpmActivePcrBanks = SyncPcrAllocationsAndPcrMask ();
   } while (FALSE);
 
-  if (EFI_ERROR (SetTdxMeasurementInWorkarea (VTpmEnabled, TpmActivePcrBanks))) {
+  if (EFI_ERROR (SetTdxMeasurementInWorkarea ( TpmActivePcrBanks))) {
     DEBUG ((DEBUG_INFO, "Set TdxMeasurement In Workarea failed.\n"));
   }
 
