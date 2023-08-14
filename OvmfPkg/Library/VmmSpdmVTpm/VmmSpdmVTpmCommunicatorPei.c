@@ -500,6 +500,13 @@ VtpmAllocateSharedBuffer (
   IN UINT32     Pages
   )
 {
+
+#ifdef TDX_PEI_LESS_BOOT
+  ASSERT (EFI_PAGES_TO_SIZE (Pages) < SIZE_2MB);
+  *SharedBuffer = (UINT8 *)(UINTN)(FixedPcdGet32 (PcdOvmfSecScratchMemoryBase) + SIZE_4MB);
+  return EFI_SUCCESS;
+#endif
+
   EFI_STATUS  Status;
   UINT8       *Buffer;
   UINTN       DataLength;
