@@ -18,7 +18,7 @@ Note: DXE doesn't include ECC; DXEFULL includes ECC.
 
 ### Current enabling status
 
-For BaseCryptLibMbedTls:
+For BaseCryptLibMbedTls(Test is Unit_test in EDKII):
 |  FILE  | Build Pass  | Test Pass |
 |  ----  | ----  | ----  |
 | Bn/CryptBn.c  | YES | YES |
@@ -28,8 +28,8 @@ For BaseCryptLibMbedTls:
 | Hash/CryptSha1.c  | YES | YES |
 | Hash/CryptSha256.c  | YES | YES |
 | Hash/CryptSha512.c  | YES | YES |
-| Hash/CryptSha3.c  | NA | NA |
-| Hash/CryptSm3.c  | NA | NA |
+| Hash/CryptSha3.c  | YES(with OpensslLib) | YES(with OpensslLib) |
+| Hash/CryptSm3.c  | YES(with OpensslLib) | YES(with OpensslLib) |
 | Hmac/CryptHmac.c  | YES | YES |
 | Kdf/CryptHkdf.c  | YES | YES |
 | Pem/CryptPem.c  | YES | YES |
@@ -49,12 +49,16 @@ For BaseCryptLibMbedTls:
 | Pk/CryptTs.c  | YES | YES |
 | Pk/CryptX509.c  | YES | YES |
 
-For TlsLibMbedtls:
+For TlsLibMbedtls(Test is Unit_test in EDKII):
 |  FILE  | Build Pass  | Test Pass |
 |  ----  | ----  | ----  |
 | TlsInit.c  | YES | YES |
 | TlsProcess.c  | YES | YES |
 | TlsConfig.c  | YES | YES |
+
+### Known issues(Fixing in progress)
+1. UEFI secure boot have some issues, because the Pkcs7Verify have some issues;
+2. UEFI HTTTPS boot failed, because the TlsLibMbedtls have some issues;
 
 ## Build command
 
@@ -63,7 +67,7 @@ For TlsLibMbedtls:
    build -a X64 -p CryptoPkg/CryptoPkgMbedTls.dsc -DCRYPTO_IMG_TYPE=PEI_DEFAULT -t VS2019
    ```
 
-## Unsupported Features
+## Unsupported Features with MbedtlsLib
 
 |  Feature  | Reference  | Enable Feature for Mbedtls Time required |
 |  ----  | ----  | ----  |
@@ -131,7 +135,7 @@ OpensslLib|CryptoPkg/Library/OpensslLib/OpensslLibFull.inf
 8. Replace the platform source code from `TlsLib|CryptoPkg/Library/TlsLib/TlsLib.inf` to `TlsLib|CryptoPkg/Library/TlsLibMbedtls/TlsLib.inf`
 9. build;
 
-## Timeline
+## POC Timeline
 Target for 2023 Q1
 ## Owner
 The branch owner: Wenxing Hou <wenxing.hou@intel.com>  
