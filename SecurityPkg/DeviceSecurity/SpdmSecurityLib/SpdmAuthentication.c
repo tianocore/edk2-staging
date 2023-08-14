@@ -536,7 +536,7 @@ DoDeviceAuthentication (
   if ((CapabilityFlags & SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_CERT_CAP) != 0) {
     ZeroMem (TotalDigestBuffer, sizeof (TotalDigestBuffer));
     SpdmReturn = SpdmGetDigest (SpdmContext, NULL, &SlotMask, TotalDigestBuffer);
-    if (LIBSPDM_STATUS_IS_ERROR (SpdmReturn)) {
+    if ((LIBSPDM_STATUS_IS_ERROR (SpdmReturn)) || ((SlotMask & 0x01) == 0)) {
       SecurityState->AuthenticationState = EDKII_DEVICE_SECURITY_STATE_ERROR_DEVICE_ERROR;
       return EFI_DEVICE_ERROR;
     }
@@ -552,6 +552,10 @@ DoDeviceAuthentication (
     *ValidSlotId  = SPDM_MAX_SLOT_COUNT;
 
     for (SlotId = 0; SlotId < SPDM_MAX_SLOT_COUNT; SlotId++) {
+      if (((SlotMask >> SlotId) & 0x01) == 0) {
+        continue;
+      }
+
       CertChainSize = sizeof (CertChain);
       ZeroMem (CertChain, sizeof (CertChain));
       SpdmReturn = SpdmGetCertificateEx (SpdmContext, NULL, SlotId, &CertChainSize, CertChain, (CONST VOID **)&TrustAnchor, &TrustAnchorSize);
