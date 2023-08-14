@@ -160,6 +160,11 @@ VmmSpdmVTpmSendReceive (
 
   }
 
+  Status = VtpmClearSharedBuffer();
+  if (EFI_ERROR(Status)) {
+    DEBUG((DEBUG_ERROR, "VtpmClearSharedBuffer failed with %r\n", Status));
+  }
+
   return Status;
 }
 
@@ -199,4 +204,45 @@ VtpmAllocateSharedBuffer (
 
   *SharedBuffer = (UINT8 *)(UINTN)mVtpmSharedBufferInfo.BufferAddress;
   return EFI_SUCCESS;
+}
+
+/**
+ * TDVF needs to clear the shared buffer after send and receive.
+ * 
+ * @return EFI_SUCCESS   The shared buffer was successfully cleared.
+ * @return Others        Some error occurs when clearing.
+*/
+EFI_STATUS
+VtpmClearSharedBuffer (
+  VOID
+  )
+{
+  EFI_STATUS  Status;
+  UINT8       *Buffer;
+  UINT32      Pages;
+
+  Buffer = NULL;
+
+
+  if ((mVtpmSharedBufferInfo.BufferAddress == 0) || (mVtpmSharedBufferInfo.BufferSize == 0)) {
+      return EFI_SUCCESS;
+  }
+
+   Buffer = (UINT8 *)(UINTN)mVtpmSharedBufferInfo.BufferAddress;
+   Pages  = EFI_SIZE_TO_PAGES(mVtpmSharedBufferInfo.BufferSize);
+
+  Status = MemEncryptTdxClearPageSharedBit (0, (PHYSICAL_ADDRESS)Buffer, Pages);
+  if (EFI_ERROR(Status)) {
+    DEBUG ((DEBUG_INFO, "%a: MemEncryptTdxClearPageSharedBit failed with %r \n", __FUNCTION__ , Status));
+  }
+
+  if (Buffer){
+    ZeroMem(Buffer, EFI_PAGES_TO_SIZE(Pages));
+    FreePages(Buffer, Pages);
+  }
+
+  mVtpmSharedBufferInfo.BufferAddress = 0;
+  mVtpmSharedBufferInfo.BufferSize    = 0;
+
+  return Status; 
 }
