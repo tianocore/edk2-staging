@@ -92,7 +92,6 @@ typedef struct _SEC_TDX_WORK_AREA {
   UINT32                   Gpaw;
   UINT64                   HobList;
   TDX_MEASUREMENTS_DATA    TdxMeasurementsData;
-  UINT32                   SharedMemoryReady;
   UINT32                   MeasurementType;
   UINT32                   Tpm2ActivePcrBanks;
 } SEC_TDX_WORK_AREA;

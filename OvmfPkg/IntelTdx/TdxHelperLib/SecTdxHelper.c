@@ -1007,18 +1007,16 @@ TdxHelperInitSharedBuffer (
 
   Status = EFI_SUCCESS;
 
-  if (WorkArea->TdxWorkArea.SecTdxWorkArea.SharedMemoryReady == 0) {
-    Status = MemEncryptTdxSetPageSharedBit (
+  
+  Status = MemEncryptTdxSetPageSharedBit (
               0,
               SharedMemoryBase,
               EFI_SIZE_TO_PAGES (SharedMemorySize)
             );
-    if (!EFI_ERROR (Status)) {
-      WorkArea->TdxWorkArea.SecTdxWorkArea.SharedMemoryReady = 1;
-    } else {
-      ASSERT (FALSE);
-    }
-  }
+  if (EFI_ERROR (Status)) {
+    DEBUG((DEBUG_ERROR, "MemEncryptTdxSetPageSharedBit failed with %r\n", Status));
+    ASSERT (FALSE);
+  } 
 
   return Status;
 }
@@ -1050,15 +1048,16 @@ TdxHelperDropSharedBuffer (
   SharedMemoryBase = (PHYSICAL_ADDRESS)FixedPcdGet32 (PcdOvmfSecScratchMemoryBase) + SIZE_4MB;
   SharedMemorySize = SIZE_2MB;
 
-  if (WorkArea->TdxWorkArea.SecTdxWorkArea.SharedMemoryReady == 1) {
-    Status = MemEncryptTdxClearPageSharedBit (
+  
+  Status = MemEncryptTdxClearPageSharedBit (
       0,
       SharedMemoryBase,
       EFI_SIZE_TO_PAGES (SharedMemorySize)
     );
-    WorkArea->TdxWorkArea.SecTdxWorkArea.SharedMemoryReady = 0;
-    ASSERT (!EFI_ERROR (Status));
-  }
+  if (EFI_ERROR (Status)) {
+    DEBUG((DEBUG_ERROR, "MemEncryptTdxClearPageSharedBit failed with %r\n", Status));
+    ASSERT (FALSE);
+  } 
 
   return Status;
 }
