@@ -517,18 +517,29 @@ SaveTdReportToHob(
 STATIC
 EFI_STATUS
 GetTdReportForVTpmTdCert (
-  OUT UINT8  *Report
+  OUT UINT8  *Report,
+  IN  UINT32  ReportSize
   )
 {
   EFI_STATUS  Status;
   UINT8       *AdditionalData;
   UINT8       Digest[SHA384_DIGEST_SIZE];
+  UINTN       Pages;
+  UINT8       *TdReport;
 
   VTPMTD_CERT_ECDSA_P_384_KEY_PAIR_INFO  *KeyInfo;
 
-  if (Report == NULL) {
+  if (Report == NULL || ReportSize != sizeof (TDREPORT_STRUCT)) {
     return EFI_INVALID_PARAMETER;
   }
+
+  Pages    = EFI_SIZE_TO_PAGES ((sizeof (TDREPORT_STRUCT) + TDREPORT_ADDITIONAL_DATA_SIZE));
+  TdReport = (UINT8 *)AllocatePages (Pages);
+  if ((TdReport == NULL)) {
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  ZeroMem (TdReport, EFI_PAGES_TO_SIZE (Pages));
 
   ZeroMem (Digest, SHA384_DIGEST_SIZE);
 
@@ -541,7 +552,7 @@ GetTdReportForVTpmTdCert (
     return EFI_ABORTED;
   }
 
-  AdditionalData = Report + sizeof (TDREPORT_STRUCT);
+  AdditionalData = TdReport + sizeof (TDREPORT_STRUCT);
   if (!Sha384HashAll (KeyInfo->PublicKey, sizeof (TDREPORT_STRUCT), Digest)) {
     DEBUG ((DEBUG_ERROR, "Sha384HashAll failed \n"));
     return EFI_ABORTED;
@@ -549,7 +560,7 @@ GetTdReportForVTpmTdCert (
 
   CopyMem (AdditionalData, Digest, SHA384_DIGEST_SIZE);
   Status = TdGetReport (
-                        Report,
+                        TdReport,
                         sizeof (TDREPORT_STRUCT),
                         AdditionalData,
                         TDREPORT_ADDITIONAL_DATA_SIZE
@@ -557,6 +568,8 @@ GetTdReportForVTpmTdCert (
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "%a: TdGetReport failed with %r\n", __FUNCTION__, Status));
   }
+
+  CopyMem(Report, TdReport, sizeof (TDREPORT_STRUCT));
 
   return Status;
 }
@@ -577,8 +590,7 @@ AddTdReportExtension (
 {
   EFI_STATUS      Status;
   INT32           Result;
-  UINTN           Pages;
-  UINT8           *TdReport;
+  UINT8           TdReport[sizeof(TDREPORT_STRUCT)];
   INT32           Nid;
   X509_EXTENSION  *Extension;
   X509V3_CTX      Ctx;
@@ -589,7 +601,6 @@ AddTdReportExtension (
     return EFI_INVALID_PARAMETER;
   }
 
-  TdReport  = NULL;
   Extension = NULL;
   Result    = 0;
   Nid       = 0;
@@ -607,16 +618,10 @@ AddTdReportExtension (
     return EFI_ABORTED;
   }
 
-  Pages    = EFI_SIZE_TO_PAGES ((sizeof (TDREPORT_STRUCT) + TDREPORT_ADDITIONAL_DATA_SIZE));
-  TdReport = (UINT8 *)AllocatePages (Pages);
-  if ((TdReport == NULL)) {
-    return EFI_OUT_OF_RESOURCES;
-  }
-
-  ZeroMem (TdReport, EFI_PAGES_TO_SIZE (Pages));
+  ZeroMem(TdReport, sizeof(TdReport));
 
   // Get the TD_REPORT Data
-  Status = GetTdReportForVTpmTdCert (TdReport);
+  Status = GetTdReportForVTpmTdCert (TdReport, sizeof(TdReport));
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "GetTdReportForVTpmTdCert failed with %r\n", Status));
     goto ClearExtensionData;
@@ -675,9 +680,6 @@ AddTdReportExtension (
   Status = EFI_SUCCESS;
 
 ClearExtensionData:
-  if (TdReport) {
-    FreePages (TdReport, Pages);
-  }
 
   if (Data) {
     ASN1_BIT_STRING_free (Data);
