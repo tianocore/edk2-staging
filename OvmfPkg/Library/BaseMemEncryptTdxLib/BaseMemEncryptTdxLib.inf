@@ -13,7 +13,7 @@
   FILE_GUID                      = 7E6651B2-B775-4593-A410-FC05B8C61993
   MODULE_TYPE                    = BASE
   VERSION_STRING                 = 1.0
-  LIBRARY_CLASS                  = MemEncryptTdxLib|SEC PEIM DXE_DRIVER DXE_RUNTIME_DRIVER DXE_SMM_DRIVER UEFI_DRIVER
+  LIBRARY_CLASS                  = MemEncryptTdxLib|PEIM DXE_DRIVER DXE_RUNTIME_DRIVER DXE_SMM_DRIVER UEFI_DRIVER
 
 #
 # The following information is for reference only and not required by the build
@@ -44,3 +44,5 @@
   gEfiMdePkgTokenSpaceGuid.PcdConfidentialComputingGuestAttr
   gUefiOvmfPkgTokenSpaceGuid.PcdTdxAcceptPageSize
 
+[Protocols]
+  gEdkiiMemoryAcceptProtocolGuid

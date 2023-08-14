@@ -572,7 +572,7 @@
       NULL|MdeModulePkg/Library/LzmaCustomDecompressLib/LzmaCustomDecompressLib.inf
       NULL|OvmfPkg/IntelTdx/TdxHelperLib/SecTdxHelperLib.inf
       BaseCryptLib|CryptoPkg/Library/BaseCryptLib/PeiCryptLib.inf
-      MemEncryptTdxLib|OvmfPkg/Library/BaseMemEncryptTdxLib/BaseMemEncryptTdxLib.inf
+      MemEncryptTdxLib|OvmfPkg/Library/BaseMemEncryptTdxLib/SecBaseMemEncryptTdxLib.inf
       Tpm2CommandLib|SecurityPkg/Library/Tpm2CommandLib/Tpm2CommandLib.inf
       Tpm2DeviceLib|OvmfPkg/Tcg/Tpm2DeviceLibVTpmTd/Tpm2DeviceLibVTpmTdSec.inf
       !include ../VmmSpdmLibs.dsc.inc
