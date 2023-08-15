@@ -361,7 +361,6 @@
   $(OPENSSL_PATH)/crypto/modes/wrap128.c
   $(OPENSSL_PATH)/crypto/modes/xts128.c
   $(OPENSSL_PATH)/crypto/objects/o_names.c
-  $(OPENSSL_PATH)/crypto/objects/obj_dat.c
   $(OPENSSL_PATH)/crypto/objects/obj_err.c
   $(OPENSSL_PATH)/crypto/objects/obj_lib.c
   $(OPENSSL_PATH)/crypto/objects/obj_xref.c
@@ -656,6 +655,7 @@
   OpensslStub/SslStatServNull.c
   OpensslStub/SslExtServNull.c
   OpensslStub/Pkcs12Null.c
+  OpensslStub/crypto/objects/obj_dat.c
 
 [Packages]
   MdePkg/MdePkg.dec
