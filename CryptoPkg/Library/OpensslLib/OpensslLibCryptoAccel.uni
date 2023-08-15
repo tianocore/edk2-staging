@@ -1,0 +1,15 @@
+// /** @file
+// This module provides OpenSSL Library implementation along with
+// performance optimized implementations of SHA1, SHA256, SHA512,
+// AESNI, VPAED, and GHASH for IA32 and X64. (libcrypto only, no
+// libssl or ecc).
+//
+// Copyright (c) 2023, Intel Corporation. All rights reserved.<BR>
+//
+// SPDX-License-Identifier: BSD-2-Clause-Patent
+//
+// **/
+
+#string STR_MODULE_ABSTRACT             #language en-US "OpenSSL Library implementation and performance optimizations (libcrypto only, no libssl or ecc)"
+
+#string STR_MODULE_DESCRIPTION          #language en-US "This module provides OpenSSL Library implementation along with performance optimized implementations of SHA1, SHA256, SHA512, AESNI, VPAED, and GHASH for IA32 and X64 (libcrypto only, no libssl or ecc)."
