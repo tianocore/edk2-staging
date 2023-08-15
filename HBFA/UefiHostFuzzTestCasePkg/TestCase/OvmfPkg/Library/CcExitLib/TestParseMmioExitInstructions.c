@@ -21,7 +21,7 @@
 #include <Library/MemoryAllocationLib.h>
 #include <Library/PcdLib.h>
 #include <Library/CcExitLib.h>
-#include <Library/CcExitLib/CcExitVeHandler.c>  // TODO: temporary hack for static functions
+#include <Library/CcExitLib/CcExitVeHandler.c>
 
 #define GET_GPAW_INIT_STATE(INFO)  ((UINT8) ((INFO) & 0x3f))
 
