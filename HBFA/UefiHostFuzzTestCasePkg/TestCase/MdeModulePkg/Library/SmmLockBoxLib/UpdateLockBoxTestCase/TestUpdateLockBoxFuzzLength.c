@@ -79,8 +79,7 @@ RunTestHarness(
     0xdea652b0, 0xd588, 0x4c55, { 0xb5, 0xb4, 0xc6, 0x82, 0xe7, 0xa0,0x3d }
   };
 
-  // commented due to no implementation
-  //SmmLockBoxSmmConstructor(NULL, NULL);
+  SmmLockBoxSmmConstructor(NULL, NULL);
   
   Buffercontent = malloc(*(UINTN*)TestBuffer);
   if (Buffercontent == NULL){

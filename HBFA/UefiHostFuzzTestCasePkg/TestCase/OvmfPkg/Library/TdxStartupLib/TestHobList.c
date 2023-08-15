@@ -31,7 +31,6 @@
 #define BLOCK_SIZE   (512)
 #define IO_ALIGN     (1)
 
-// TODO: copied from SecTdxHelper.c, temporary hack for static functions
 /**
   Check the value whether in the valid list.
 
@@ -67,7 +66,6 @@ IsInValidList (
   return FALSE;
 }
 
-// TODO: copied from SecTdxHelper.c, temporary hack for static functions
 /**
   Check the integrity of VMM Hob List.
 
