@@ -1,0 +1,16 @@
+=============================================================================
+Introduction
+=============================================================================
+According to https://www.OpenSSL.org/policies/releasestrat.html, 
+OpenSSL Version 1.1.1 will be supported until 2023-09-11 (LTS).
+Need to upgrade OpenSsl to 3.0.X before 1.1.1 support stopping.
+Initial build with OpenSSL 3.0.X showed significant size increase versus OpenSSL 1.1.1, 
+EDKII need to find ways to optimize it.
+This file will introduce HOW-TO implement current optimization.
+
+=============================================================================
+1. Trim objects structure
+=============================================================================
+a. Run python object_trim.py.
+b. Replace $(OPENSSL_PATH)/crypto/objects/obj_dat.c with OpensslStub/crypto/objects/obj_dat.c 
+in all OpensslLib*.inf files.
