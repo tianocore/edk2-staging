@@ -325,4 +325,19 @@ typedef struct {
 #define SpdmMeasurementOpaqueData             libspdm_measurement_opaque_data
 #define SpdmChallengeOpaqueData               libspdm_challenge_opaque_data
 
+#define SpdmGetSecuredMessageContextViaSessionId  libspdm_get_secured_message_context_via_session_id
+#define SpdmSecuredMessageExportSessionKeys       libspdm_secured_message_export_session_keys
+
+#define SpdmAeadDecryption                    libspdm_aead_decryption
+#define SpdmAeadEncryption                    libspdm_aead_encryption
+#define SpdmGetRandomNumber                   libspdm_get_random_number
+#define SpdmEncodeSecuredMessage              libspdm_encode_secured_message
+#define SpdmSetLastSpdmErrorStruct            libspdm_set_last_spdm_error_struct
+#define SpdmDecodeSecuredMessage              libspdm_decode_secured_message
+#define SpdmSecuredMessageGetLastErrorStruct  libspdm_secured_message_get_last_spdm_error_struct
+
+#define SpdmReqAsymSignHash                   libspdm_req_asym_sign_hash
+#define SpdmReqAsymSign                       libspdm_req_asym_sign
+#define SpdmReqAsymFree                       libspdm_req_asym_free
+
 #endif
