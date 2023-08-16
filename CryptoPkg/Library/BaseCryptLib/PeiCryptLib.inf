@@ -47,8 +47,8 @@
   Hash/CryptDispatchApPei.c
   Hmac/CryptHmac.c
   Kdf/CryptHkdf.c
-  Cipher/CryptAes.c
-  Cipher/CryptAeadAesGcmNull.c
+  Cipher/CryptAesNull.c
+  Cipher/CryptAeadAesGcm.c
   Pk/CryptRsaBasic.c
   Pk/CryptRsaExtNull.c
   Pk/CryptPkcs1OaepNull.c
@@ -58,14 +58,14 @@
   Pk/CryptPkcs7VerifyBase.c
   Pk/CryptPkcs7VerifyEku.c
   Pk/CryptDhNull.c
-  Pk/CryptX509Null.c
+  Pk/CryptX509.c
   Pk/CryptAuthenticodeNull.c
   Pk/CryptTsNull.c
   Pk/CryptRsaPss.c
   Pk/CryptRsaPssSignNull.c
-  Pk/CryptEcNull.c
+  Pk/CryptEc.c
   Pem/CryptPemNull.c
-  Rand/CryptRandNull.c
+  Rand/CryptRand.c
   Bn/CryptBnNull.c
 
   SysCall/CrtWrapper.c
