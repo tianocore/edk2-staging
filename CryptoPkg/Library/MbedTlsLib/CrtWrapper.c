@@ -20,6 +20,12 @@ int my_snprintf(char *str, size_t size, const char *format, ...)
   return 0;
 }
 
+/*work around to support OpenSSL dummy API*/
+int EC_KEY_set_public_key(void *key, const void *pub)
+{
+  ASSERT (FALSE);
+  return 0;
+}
 
 //
 // Extra header to record the memory buffer size from malloc routine.
