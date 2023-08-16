@@ -44,12 +44,13 @@
   Pk/CryptRsaExt.c
   Pk/CryptPkcs1Oaep.c
   Pk/CryptPkcs5Pbkdf2.c
-  Pk/CryptPkcs7SignNull.c
-  Pk/CryptPkcs7VerifyNull.c
-  Pk/CryptPkcs7VerifyEkuNull.c
-  Pk/CryptAuthenticodeNull.c
+  Pk/CryptPkcs7VerifyBase.c
+  Pk/CryptPkcs7Sign.c
+  Pk/CryptPkcs7VerifyCommon.c
+  Pk/CryptPkcs7VerifyEku.c
+  Pk/CryptAuthenticode.c
   Pk/CryptX509.c
-  Pk/CryptTsNull.c
+  Pk/CryptTs.c
   Pk/CryptRsaPss.c
   Pk/CryptRsaPssSign.c
   Rand/CryptRand.c
