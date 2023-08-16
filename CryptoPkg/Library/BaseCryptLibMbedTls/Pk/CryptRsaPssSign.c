@@ -1,17 +1,16 @@
 /** @file
-  RSA PSS Asymmetric Cipher Wrapper Implementation over OpenSSL.
+  RSA PSS Asymmetric Cipher Wrapper Implementation over MbedTLS.
 
   This file implements following APIs which provide basic capabilities for RSA:
   1) RsaPssSign
 
-Copyright (c) 2021, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2023, Intel Corporation. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
 #include "InternalCryptLib.h"
 #include <mbedtls/rsa.h>
-
 
 /**
   Carries out the RSA-SSA signature generation with EMSA-PSS encoding scheme.

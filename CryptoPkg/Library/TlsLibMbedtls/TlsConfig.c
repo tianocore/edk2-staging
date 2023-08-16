@@ -1,7 +1,7 @@
 /** @file
   SSL/TLS Configuration Library Wrapper Implementation over Mbedtls.
 
-Copyright (c) 2016 - 2018, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2023, Intel Corporation. All rights reserved.<BR>
 (C) Copyright 2016 Hewlett Packard Enterprise Development LP<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 

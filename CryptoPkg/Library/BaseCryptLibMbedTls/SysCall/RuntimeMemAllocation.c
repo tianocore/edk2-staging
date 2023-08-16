@@ -1,8 +1,8 @@
 /** @file
-  Light-weight Memory Management Routines for OpenSSL-based Crypto
+  Light-weight Memory Management Routines for MbedTLS-based Crypto
   Library at Runtime Phase.
 
-Copyright (c) 2009 - 2018, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2023, Intel Corporation. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
@@ -382,7 +382,7 @@ RuntimeCryptLibConstructor (
 }
 
 //
-// -- Memory-Allocation Routines Wrapper for UEFI-OpenSSL Library --
+// -- Memory-Allocation Routines Wrapper for UEFI-MbedTLS Library --
 //
 
 /* Allocates memory blocks */

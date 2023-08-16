@@ -1,10 +1,10 @@
 /** @file
-  RSA-PSS Asymmetric Cipher Wrapper Implementation over OpenSSL.
+  RSA-PSS Asymmetric Cipher Wrapper Implementation over MbedTLS.
 
   This file does not provide real capabilities for following APIs in RSA handling:
   1) RsaPssSign
 
-Copyright (c) 2021, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2023, Intel Corporation. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/

@@ -1,16 +1,15 @@
 /** @file
-  RSA Asymmetric Cipher Wrapper Implementation over OpenSSL.
+  RSA Asymmetric Cipher Wrapper Implementation over MbedTLS.
 
   This file implements following APIs which provide basic capabilities for RSA:
   1) RsaPssVerify
 
-Copyright (c) 2021, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2023, Intel Corporation. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
 #include "InternalCryptLib.h"
-
 #include <mbedtls/rsa.h>
 
 /**

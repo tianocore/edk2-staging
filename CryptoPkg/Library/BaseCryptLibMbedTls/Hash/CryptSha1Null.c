@@ -1,7 +1,7 @@
 /** @file
   SHA-1 Digest Wrapper Null Implementation.
 
-Copyright (c) 2009 - 2016, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2023, Intel Corporation. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/

@@ -1,10 +1,10 @@
 /** @file
-  AEAD (AES-GCM) Wrapper Implementation over OpenSSL.
+  AEAD (AES-GCM) Wrapper Implementation over MbedTLS.
 
   RFC 5116 - An Interface and Algorithms for Authenticated Encryption
   NIST SP800-38d - Cipher Modes of Operation: Galois / Counter Mode(GCM) and GMAC
 
-Copyright (c) 2020, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2023, Intel Corporation. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/

@@ -1,8 +1,8 @@
 /** @file
-  C Run-Time Libraries (CRT) Wrapper Implementation for OpenSSL-based
+  C Run-Time Libraries (CRT) Wrapper Implementation for MbedTLS-based
   Cryptographic Library.
 
-Copyright (c) 2009 - 2017, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2023, Intel Corporation. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/

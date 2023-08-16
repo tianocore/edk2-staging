@@ -1,9 +1,9 @@
 /** @file
-  Diffie-Hellman Wrapper Implementation over OpenSSL.
+  Diffie-Hellman Wrapper Implementation over MbedTLS.
 
   RFC 7919 - Negotiated Finite Field Diffie-Hellman Ephemeral (FFDHE) Parameters
 
-Copyright (c) 2010 - 2018, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2023, Intel Corporation. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/

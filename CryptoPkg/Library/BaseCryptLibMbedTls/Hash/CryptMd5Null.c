@@ -2,7 +2,7 @@
 
 MD5 Digest Wrapper Null Implementation.
 
-Copyright (c) Microsoft Corporation. All rights reserved.
+Copyright (c) 2023, Intel Corporation. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/

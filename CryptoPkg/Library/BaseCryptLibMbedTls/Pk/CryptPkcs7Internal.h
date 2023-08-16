@@ -4,7 +4,7 @@
 
   RFC 2315 - PKCS #7: Cryptographic Message Syntax Version 1.5
 
-Copyright (c) 2020, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2023, Intel Corporation. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/

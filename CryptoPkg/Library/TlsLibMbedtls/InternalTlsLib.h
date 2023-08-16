@@ -1,7 +1,7 @@
 /** @file
   Internal include file for TlsLib.
 
-Copyright (c) 2016 - 2017, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2023, Intel Corporation. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/

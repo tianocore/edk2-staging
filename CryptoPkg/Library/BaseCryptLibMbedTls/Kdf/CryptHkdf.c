@@ -1,9 +1,9 @@
 /** @file
-  HMAC-SHA256 KDF Wrapper Implementation over OpenSSL.
+  HMAC-SHA256 KDF Wrapper Implementation over MbedTLS.
 
   RFC 5869: HMAC-based Extract-and-Expand Key Derivation Function (HKDF)
 
-Copyright (c) 2018 - 2019, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2023, Intel Corporation. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/

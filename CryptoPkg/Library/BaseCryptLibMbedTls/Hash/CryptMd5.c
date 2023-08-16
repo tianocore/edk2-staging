@@ -1,7 +1,7 @@
 /** @file
-  MD5 Digest Wrapper Implementation over OpenSSL.
+  MD5 Digest Wrapper Implementation over MbedTLS.
 
-Copyright (c) 2009 - 2016, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2023, Intel Corporation. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/

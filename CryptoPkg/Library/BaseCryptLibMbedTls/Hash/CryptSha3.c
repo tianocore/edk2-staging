@@ -1,10 +1,10 @@
 /** @file
   SHA3 realted functions from OpenSSL.
 
-Copyright (c) 2022, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2023, Intel Corporation. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
-Copyright 2022 The OpenSSL Project Authors. All Rights Reserved.
+Copyright 2023 The OpenSSL Project Authors. All Rights Reserved.
 Licensed under the OpenSSL license (the "License").  You may not use
 this file except in compliance with the License.  You can obtain a copy
 in the file LICENSE in the source distribution or at

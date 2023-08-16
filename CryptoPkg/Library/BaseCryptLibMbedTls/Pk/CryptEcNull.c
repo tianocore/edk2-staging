@@ -1,7 +1,7 @@
 /** @file
-  Elliptic Curve and ECDH API implementation based on OpenSSL
+  Elliptic Curve and ECDH API implementation based on MbedTLS
 
-  Copyright (c) 2022, Intel Corporation. All rights reserved.<BR>
+  Copyright (c) 2023, Intel Corporation. All rights reserved.<BR>
   SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/

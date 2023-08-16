@@ -1,7 +1,7 @@
 /** @file
-  Pseudorandom Number Generator Wrapper Implementation over OpenSSL.
+  Pseudorandom Number Generator Wrapper Implementation over MbedTLS.
 
-Copyright (c) 2010 - 2013, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2023, Intel Corporation. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/

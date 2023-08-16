@@ -1,7 +1,7 @@
 /** @file
-  SHA-384 and SHA-512 Digest Wrapper Implementations over OpenSSL.
+  SHA-384 and SHA-512 Digest Wrapper Implementations over MbedTLS.
 
-Copyright (c) 2014 - 2016, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2023, Intel Corporation. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/

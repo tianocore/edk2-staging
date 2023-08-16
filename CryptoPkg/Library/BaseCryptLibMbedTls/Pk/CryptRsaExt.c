@@ -1,5 +1,5 @@
 /** @file
-  RSA Asymmetric Cipher Wrapper Implementation over OpenSSL.
+  RSA Asymmetric Cipher Wrapper Implementation over MbedTLS.
 
   This file implements following APIs which provide more capabilities for RSA:
   1) RsaGetKey
@@ -9,7 +9,7 @@
 
   RFC 8017 - PKCS #1: RSA Cryptography Specifications Version 2.2
 
-Copyright (c) 2009 - 2018, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2023, Intel Corporation. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/

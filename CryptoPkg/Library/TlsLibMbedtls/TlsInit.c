@@ -1,7 +1,7 @@
 /** @file
-  SSL/TLS Initialization Library Wrapper Implementation over OpenSSL.
+  SSL/TLS Initialization Library Wrapper Implementation over MbedTLS.
 
-Copyright (c) 2016 - 2017, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2023, Intel Corporation. All rights reserved.<BR>
 (C) Copyright 2016 Hewlett Packard Enterprise Development LP<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
@@ -11,14 +11,14 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 int myrand( void *rng_state, unsigned char *output, size_t len );
 /**
-  Initializes the OpenSSL library.
+  Initializes the MbedTLS library.
 
   This function registers ciphers and digests used directly and indirectly
   by SSL/TLS, and initializes the readable error messages.
   This function must be called before any other action takes places.
 
-  @retval TRUE   The OpenSSL library has been initialized.
-  @retval FALSE  Failed to initialize the OpenSSL library.
+  @retval TRUE   The MbedTLS library has been initialized.
+  @retval FALSE  Failed to initialize the MbedTLS library.
 
 **/
 BOOLEAN

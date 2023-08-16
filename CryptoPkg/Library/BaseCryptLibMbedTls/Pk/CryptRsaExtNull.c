@@ -1,5 +1,5 @@
 /** @file
-  RSA Asymmetric Cipher Wrapper Implementation over OpenSSL.
+  RSA Asymmetric Cipher Wrapper Implementation over MbedTLS.
 
   This file does not provide real capabilities for following APIs in RSA handling:
   1) RsaGetKey
@@ -7,7 +7,7 @@
   3) RsaCheckKey
   4) RsaPkcs1Sign
 
-Copyright (c) 2009 - 2018, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2023, Intel Corporation. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/

@@ -1,8 +1,8 @@
 /** @file
   C Run-Time Libraries (CRT) Time Management Routines Wrapper Implementation
-  for OpenSSL-based Cryptographic Library (used in DXE & RUNTIME).
+  for MbedTLS-based Cryptographic Library (used in DXE & RUNTIME).
 
-Copyright (c) 2010 - 2018, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2023, Intel Corporation. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/

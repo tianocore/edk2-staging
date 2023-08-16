@@ -2,7 +2,7 @@
   RFC3161 Timestamp Countersignature Verification Wrapper Implementation which does
   not provide real capabilities.
 
-Copyright (c) 2014, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2023, Intel Corporation. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/

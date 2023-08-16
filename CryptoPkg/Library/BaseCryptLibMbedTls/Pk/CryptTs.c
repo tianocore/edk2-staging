@@ -2,15 +2,13 @@
   RFC3161 Timestamp Countersignature Verification Wrapper Implementation which does
   not provide real capabilities.
 
-Copyright (c) 2014, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2023, Intel Corporation. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
 #include "InternalCryptLib.h"
 #include <mbedtls/asn1.h>
-
-
 
 //
 // OID ASN.1 Value for SPC_RFC3161_OBJID ("1.3.6.1.4.1.311.3.3.1")

@@ -1,16 +1,16 @@
 /** @file
   ParallelHash related function and type declaration.
 
-Copyright (c) 2022, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2023, Intel Corporation. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
-Copyright 2022 The OpenSSL Project Authors. All Rights Reserved.
+Copyright 2023 The OpenSSL Project Authors. All Rights Reserved.
 Licensed under the OpenSSL license (the "License").  You may not use
 this file except in compliance with the License.  You can obtain a copy
 in the file LICENSE in the source distribution or at
 https://www.openssl.org/source/license.html
 
-Copyright 2022 The eXtended Keccak Code Package (XKCP)
+Copyright 2023 The eXtended Keccak Code Package (XKCP)
 https://github.com/XKCP/XKCP
 Keccak, designed by Guido Bertoni, Joan Daemen, Michael Peeters and Gilles Van Assche.
 Implementation by the designers, hereby denoted as "the implementer".

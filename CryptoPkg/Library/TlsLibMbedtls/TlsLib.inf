@@ -1,9 +1,7 @@
 ## @file
-#  SSL/TLS Wrapper Library Instance based on OpenSSL.
+#  SSL/TLS Wrapper Library Instance based on MbedTLS.
 #
-#  Copyright (c) 2016 - 2018, Intel Corporation. All rights reserved.<BR>
-#  (C) Copyright 2016-2020 Hewlett Packard Enterprise Development LP<BR>
-#  Copyright (c) 2022, Loongson Technology Corporation Limited. All rights reserved.<BR>
+#  Copyright (c) 2023, Intel Corporation. All rights reserved.<BR>
 #  SPDX-License-Identifier: BSD-2-Clause-Patent
 #
 ##
