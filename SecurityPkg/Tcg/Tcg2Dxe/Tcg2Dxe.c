@@ -1550,6 +1550,81 @@ EFI_TCG2_PROTOCOL  mTcg2Protocol = {
 };
 
 /**
+  Setup the TCG_HCRTMComponentEvent.
+  @param[in]  Index         The index of the mTcg2EventInfo
+**/
+STATIC
+VOID
+SetupHCRTMComponentEvent (
+  UINTN    Index
+  )
+{
+  EFI_STATUS            Status;
+  TCG_PCR_EVENT2_HDR    NoActionEvent;
+  EFI_PEI_HOB_POINTERS  GuidHob;
+  UINT8*                EventData;
+
+  TCG_HCRTMComponentEvent        *HCRTMComponentEvent;
+  TCG_HCRTMComponentDescription  HCRTMComponentDescription;
+  TCG_HCRTMComponentMeasurement  HCRTMComponentMeasurement;
+  UINTN                          HCRTMComponentDescriptionStructSize;
+  UINTN                          HCRTMComponentMeasurementStructSize;
+  UINTN                          HCRTMComponentEventSize;
+
+  GuidHob.Guid = GetFirstGuidHob (&gEdkiiHCRTMComponentEventHobGuid);
+  if (GuidHob.Guid == NULL){
+    DEBUG((DEBUG_ERROR, "%a: HCRTMComponentEventHob is NULL\n", __FUNCTION__));
+    return;
+  }
+
+  HCRTMComponentEvent = NULL;
+
+  EventData = (UINT8 *)(GET_GUID_HOB_DATA (GuidHob.Guid));
+
+  HCRTMComponentDescription           = *(TCG_HCRTMComponentDescription *)EventData;
+  HCRTMComponentDescriptionStructSize = sizeof (HCRTMComponentDescription.DescriptionSize) + HCRTMComponentDescription.DescriptionSize;
+
+  HCRTMComponentMeasurement           = *(TCG_HCRTMComponentMeasurement *)(EventData + HCRTMComponentDescriptionStructSize);
+  HCRTMComponentMeasurementStructSize = sizeof (HCRTMComponentMeasurement.MeasurementFormatType) + sizeof (HCRTMComponentMeasurement.MeasurementSize) +  HCRTMComponentMeasurement.MeasurementSize;
+
+  HCRTMComponentEventSize = sizeof (HCRTMComponentEvent->Signature) + HCRTMComponentDescriptionStructSize +  HCRTMComponentMeasurementStructSize;
+
+  HCRTMComponentEvent = (TCG_HCRTMComponentEvent *)AllocatePool(HCRTMComponentEventSize);
+  if (HCRTMComponentEvent == NULL){
+    DEBUG((DEBUG_ERROR, "%a: AllocatePool failed\n", __FUNCTION__));
+    return;
+  }
+
+  CopyMem (HCRTMComponentEvent->Signature, TCG_HCRTMCOMPONENTEVENT_SIGNATURE, sizeof (HCRTMComponentEvent->Signature));
+  CopyMem (HCRTMComponentEvent + 1, EventData, HCRTMComponentDescriptionStructSize +  HCRTMComponentMeasurementStructSize);
+
+  //
+  // Initialize TCG_HCRTMComponentEvent
+  //
+  InitNoActionEvent (&NoActionEvent, HCRTMComponentEventSize);
+
+  //
+  // Log TCG_HCRTMComponentEvent after EfiStartupLocalityEvent 
+  //   TCG PC Client PFP spec. Section 10.4.5.5 H-CRTM Component Measurement Data
+  //
+  Status = TcgDxeLogEvent (
+             mTcg2EventInfo[Index].LogFormat,
+             &NoActionEvent,
+             sizeof (NoActionEvent.PCRIndex) + sizeof (NoActionEvent.EventType) + GetDigestListBinSize (&NoActionEvent.Digests) + sizeof (NoActionEvent.EventSize),
+             (UINT8 *)HCRTMComponentEvent,
+             HCRTMComponentEventSize
+             );
+  if (EFI_ERROR(Status)) {
+    DEBUG((DEBUG_ERROR, "%a: TcgDxeLogEvent failed with %r\n", __FUNCTION__, Status));
+  }
+
+  if (HCRTMComponentEvent){
+    FreePool(HCRTMComponentEvent);
+  }
+
+}
+
+/**
   Initialize the Event Log and log events passed from the PEI phase.
 
   @retval EFI_SUCCESS           Operation completed successfully.
@@ -1765,6 +1840,11 @@ SetupEventLog (
                      sizeof (StartupLocalityEvent)
                      );
         }
+
+        //
+        // TCG_HCRTMComponentEvent. Event format is TCG_PCR_EVENT2
+        //
+        SetupHCRTMComponentEvent(Index);
       }
     }
   }
