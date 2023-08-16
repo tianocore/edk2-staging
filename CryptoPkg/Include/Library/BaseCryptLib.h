@@ -20,6 +20,8 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #define CRYPTO_NID_SHA256  0x0001
 #define CRYPTO_NID_SHA384  0x0002
 #define CRYPTO_NID_SHA512  0x0003
+#define CRYPTO_NID_MD5     0x0008
+#define CRYPTO_NID_SHA1    0x0009
 
 // Key Exchange
 #define CRYPTO_NID_SECP256R1  0x0204
