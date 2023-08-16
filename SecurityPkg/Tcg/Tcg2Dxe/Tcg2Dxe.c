@@ -1625,6 +1625,144 @@ SetupHCRTMComponentEvent (
 }
 
 /**
+  Init the TCG_HCRTMEvent.
+
+  @param[in,out]  HCRTMEvent      The pointer of the event
+  @param[in]      DigestList      The pointer of the digest
+  @param[in]      EventSize       The size of the event
+
+**/
+STATIC
+VOID
+InitHCRTMEvent (
+  IN OUT TCG_PCR_EVENT2_HDR  *EventHdr,
+  IN TPML_DIGEST_VALUES      *DigestList,
+  IN UINT32                  EventSize
+  )
+{
+  UINT32         DigestListCount;
+  TPMI_ALG_HASH  HashAlgId;
+  UINT32         HashDigestSize;
+  UINT8          *DigestBuffer;
+  UINT32         Index;
+
+  if ((EventHdr == NULL) || (DigestList == NULL)) {
+    DEBUG ((DEBUG_ERROR, "%a: EventHdr or DigestList is NULL\n", __FUNCTION__));
+    return;
+  }
+
+  DigestBuffer    = (UINT8 *)EventHdr->Digests.digests;
+  DigestListCount = 0;
+
+  EventHdr->PCRIndex  = 0;
+  EventHdr->EventType = EV_EFI_HCRTM_EVENT;
+
+  ZeroMem (&EventHdr->Digests, sizeof (EventHdr->Digests));
+
+  for (Index = 0; Index < DigestList->count; Index++) {
+    HashAlgId = DigestList->digests[Index].hashAlg;
+    switch (HashAlgId) {
+      case TPM_ALG_SHA256:
+        if ((mTcgDxeData.BsCap.ActivePcrBanks & EFI_TCG2_BOOT_HASH_ALG_SHA256) != 0) {
+          HashDigestSize = GetHashSizeFromAlgo (HashAlgId);
+          CopyMem (DigestBuffer, &HashAlgId, sizeof (TPMI_ALG_HASH));
+          DigestBuffer += sizeof (TPMI_ALG_HASH);
+          CopyMem (DigestBuffer, DigestList->digests[Index].digest.sha256, HashDigestSize);
+          DigestBuffer += HashDigestSize;
+          DigestListCount++;
+        }
+
+        break;
+
+      case TPM_ALG_SHA384:
+        if ((mTcgDxeData.BsCap.ActivePcrBanks & EFI_TCG2_BOOT_HASH_ALG_SHA384) != 0) {
+          CopyMem (DigestBuffer, &HashAlgId, sizeof (TPMI_ALG_HASH));
+          DigestBuffer  += sizeof (TPMI_ALG_HASH);
+          HashDigestSize = GetHashSizeFromAlgo (HashAlgId);
+          CopyMem (DigestBuffer, DigestList->digests[Index].digest.sha384, HashDigestSize);
+          DigestBuffer += HashDigestSize;
+          DigestListCount++;
+        }
+
+        break;
+
+      case TPM_ALG_SHA512:
+        if ((mTcgDxeData.BsCap.ActivePcrBanks & EFI_TCG2_BOOT_HASH_ALG_SHA512) != 0) {
+          CopyMem (DigestBuffer, &HashAlgId, sizeof (TPMI_ALG_HASH));
+          DigestBuffer  += sizeof (TPMI_ALG_HASH);
+          HashDigestSize = GetHashSizeFromAlgo (HashAlgId);
+          CopyMem (DigestBuffer, DigestList->digests[Index].digest.sha512, HashDigestSize);
+          DigestBuffer += HashDigestSize;
+          DigestListCount++;
+        }
+
+        break;
+
+      default:
+        DEBUG ((DEBUG_ERROR, "%a: Unknow HashAlgo %x\n", __FUNCTION__, HashAlgId));
+        break;
+    }
+  }
+
+  //
+  // Set Digests Count
+  //
+  WriteUnaligned32 ((UINT32 *)&EventHdr->Digests.count, DigestListCount);
+
+  //
+  // Set Event Size
+  //
+  WriteUnaligned32 ((UINT32 *)DigestBuffer, EventSize);
+}
+
+/**
+  Setup the TCG_HCRTMEvent.
+
+  @param[in]  Index         The index of the mTcg2EventInfo
+
+**/
+STATIC
+VOID
+SetupHCRTMEvent (
+  IN UINTN  Index
+  )
+{
+  EFI_STATUS               Status;
+  TCG_PCR_EVENT2_HDR       EventHdr;
+  EFI_PEI_HOB_POINTERS     GuidHob;
+  TPML_DIGEST_VALUES       *DigestList;
+  TCG_HCRTMEvent           HCRTMEvent;
+  UINTN                    DataLength;
+
+  DigestList = NULL;
+
+  GuidHob.Guid = GetFirstGuidHob (&gEdkiiHCRTMEventHobGuid);
+  if (GuidHob.Guid == NULL) {
+    DEBUG ((DEBUG_ERROR, "%a: HCRTMEventHob is NULL\n", __FUNCTION__));
+    return;
+  }
+
+  DigestList = (TPML_DIGEST_VALUES *)(GuidHob.Guid + 1);
+
+  DataLength = sizeof (TCG_HCRTMEvent);
+
+  CopyMem (HCRTMEvent.Signature, TCG_HCRTM_EVENT, sizeof (TCG_HCRTM_EVENT));
+  InitHCRTMEvent (&EventHdr, DigestList, DataLength);
+
+  Status = TcgDxeLogEvent (
+                           mTcg2EventInfo[Index].LogFormat,
+                           &EventHdr,
+                           sizeof (EventHdr.PCRIndex) + sizeof (EventHdr.EventType) + GetDigestListBinSize (&EventHdr.Digests) + sizeof (EventHdr.EventSize),
+                           (UINT8 *)&HCRTMEvent,
+                           DataLength
+                           );
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "%a: TcgDxeLogEvent failed with %r\n", __FUNCTION__, Status));
+    return;
+  }
+}
+
+/**
   Initialize the Event Log and log events passed from the PEI phase.
 
   @retval EFI_SUCCESS           Operation completed successfully.
@@ -1840,6 +1978,11 @@ SetupEventLog (
                      sizeof (StartupLocalityEvent)
                      );
         }
+
+        //
+        // HCRTMEvent. Event format is TCG_PCR_EVENT2
+        //
+        SetupHCRTMEvent (Index);
 
         //
         // TCG_HCRTMComponentEvent. Event format is TCG_PCR_EVENT2
