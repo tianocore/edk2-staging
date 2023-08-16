@@ -1,0 +1,40 @@
+## @file
+#
+# Copyright (c) 2023, Intel Corporation. All rights reserved. <BR>
+# SPDX-License-Identifier: BSD-2-Clause-Patent
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = Tpm2InstanceLibVTpm
+  FILE_GUID                      = 0217e1a8-1e2f-4d96-8d83-745636d1e84d
+  MODULE_TYPE                    = BASE
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = NULL
+  CONSTRUCTOR                    = Tpm2InstanceLibVTpmConstructor
+
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = X64
+#
+
+[Sources]
+  Tpm2InstanceLibVTpmTd.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  SecurityPkg/SecurityPkg.dec
+  OvmfPkg/OvmfPkg.dec
+
+[LibraryClasses]
+  BaseLib
+  BaseMemoryLib
+  DebugLib
+  MemoryAllocationLib
+  PcdLib
+  #VmmSpdmLib
+  # MemEncryptTdxLib
+
+[Protocols]
+  gEdkiiVmmSpdmTunnelProtocolGuid
