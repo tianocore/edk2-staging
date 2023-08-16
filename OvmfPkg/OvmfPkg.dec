@@ -429,6 +429,10 @@
   ## Restrict boot to EFI applications in firmware volumes.
   gUefiOvmfPkgTokenSpaceGuid.PcdBootRestrictToFirmware|FALSE|BOOLEAN|0x6c
 
+  ## The scratch buffer that is used by TDX in startup.
+  gUefiOvmfPkgTokenSpaceGuid.PcdOvmfSecScratchMemoryBase|0x0|UINT32|0x6e
+  gUefiOvmfPkgTokenSpaceGuid.PcdOvmfSecScratchMemorySize|0x800000|UINT32|0x6f
+
 [PcdsDynamic, PcdsDynamicEx]
   gUefiOvmfPkgTokenSpaceGuid.PcdEmuVariableEvent|0|UINT64|2
   gUefiOvmfPkgTokenSpaceGuid.PcdOvmfFlashVariablesEnable|FALSE|BOOLEAN|0x10
