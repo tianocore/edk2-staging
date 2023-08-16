@@ -85,4 +85,4 @@
 # Remove these [BuildOptions] after this library is cleaned up
 #
 [BuildOptions]
-  *_*_*_CC_FLAGS = /GL-
+  MSFT:*_*_*_CC_FLAGS = /GL-

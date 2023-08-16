@@ -181,7 +181,7 @@ Pkcs7GetSignature (
   )
 {
   INT32 Ret;
-  INTN Len;
+  UINTN Len;
 
   Len = 0;
   Ret = mbedtls_asn1_get_tag (P, End, &Len, MBEDTLS_ASN1_OCTET_STRING);
@@ -216,7 +216,7 @@ MbedTlsPkcs7GetSignersInfoSet (
 {
   UINT8 *EndSet;
   INT32 Ret;
-  INTN Len;
+  UINTN Len;
   UINT8 *TempP;
 
   Len = 0;
@@ -316,12 +316,12 @@ Pkcs7GetSignedData (
 {
   UINT8 *P;
   UINT8 *End;
-  INTN Len;
+  UINTN Len;
   INT32 Ret;
   UINT8 *CertP;
-  INTN CertLen;
+  UINTN CertLen;
   UINT8 *OldCertP;
-  INTN TotalCertLen;
+  UINTN TotalCertLen;
   mbedtls_x509_crt *MoreCert;
   UINT8 CertNum;
   mbedtls_x509_crt *LastCert;
@@ -329,6 +329,7 @@ Pkcs7GetSignedData (
   Len = 0;
   P = Buffer;
   End = Buffer + BufferLen;
+  MoreCert = NULL;
 
   Ret = mbedtls_asn1_get_tag (
     &P, End, &Len, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE);
@@ -428,7 +429,7 @@ Pkcs7GetSignedData (
   }
 
   if (TotalCertLen != Len) {
-    Ret == -1;
+    Ret = -1;
     goto End;
   }
 
@@ -468,7 +469,7 @@ MbedtlsPkcs7ParseDer(
 {
   UINT8   *P;
   UINT8   *End;
-  INTN    Len;
+  UINTN    Len;
   INT32   Ret;
 
   if (Pkcs7 == NULL)
@@ -969,7 +970,7 @@ Pkcs7GetSigners (
   UINTN             WrapDataSize;
   BOOLEAN           Wrapped;
 
-  UINT8 buf[4096];
+  CHAR8 buf[4096];
   UINTN  CertSize;
   UINT8  Index;
   UINT8  *CertBuf;

@@ -21,6 +21,8 @@ and related or neighboring rights to the source code in this file.
 http://creativecommons.org/publicdomain/zero/1.0/
 **/
 
+#include <CrtLibSupport.h>
+
 #define KECCAK1600_WIDTH  1600
 
 typedef UINT64 uint64_t;

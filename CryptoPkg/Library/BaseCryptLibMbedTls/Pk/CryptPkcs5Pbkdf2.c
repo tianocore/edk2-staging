@@ -81,7 +81,7 @@ Pkcs5HashPassword (
   //
   if (mbedtls_pkcs5_pbkdf2_hmac_ext(
               HashAlg,
-              (const char *)Password,
+              (CONST INT8 *)Password,
               (int)PasswordLength,
               (const unsigned char *)Salt,
               (int)SaltLength,

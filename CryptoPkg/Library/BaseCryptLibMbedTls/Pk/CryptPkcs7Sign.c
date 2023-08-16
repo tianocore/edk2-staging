@@ -27,11 +27,11 @@ MbedTlsPkcs7WriteDigestAlgorithm (
   )
 {
   UINT8     *OidPtr;
-  INTN      OidLen;
+  UINTN      OidLen;
   INT32     Ret;
-  Ret = mbedtls_oid_get_oid_by_md (DigestType, &OidPtr, &OidLen);
+  Ret = mbedtls_oid_get_oid_by_md (DigestType, (CONST CHAR8**)&OidPtr, &OidLen);
   if (Ret == 0) {
-    return mbedtls_asn1_write_oid (P, Start, OidPtr, OidLen);
+    return mbedtls_asn1_write_oid (P, (CONST UINT8*)Start, (CONST CHAR8*)OidPtr, OidLen);
   }
   return 0;
 }
@@ -217,9 +217,9 @@ MbedTlsPkcs7WriteSignerInfo (
 
   MBEDTLS_ASN1_CHK_ADD (Len, mbedtls_asn1_write_octet_string (P, Start, SignerInfo->Sig.p, SignerInfo->Sig.len));
 
-  MBEDTLS_ASN1_CHK_ADD (Len, mbedtls_asn1_write_algorithm_identifier (P, Start, SignerInfo->SigAlgIdentifier.p, SignerInfo->SigAlgIdentifier.len, 0));
+  MBEDTLS_ASN1_CHK_ADD (Len, mbedtls_asn1_write_algorithm_identifier (P, Start, (CONST CHAR8*)SignerInfo->SigAlgIdentifier.p, SignerInfo->SigAlgIdentifier.len, 0));
 
-  MBEDTLS_ASN1_CHK_ADD (Len, mbedtls_asn1_write_algorithm_identifier (P, Start, SignerInfo->AlgIdentifier.p, SignerInfo->AlgIdentifier.len, 0));
+  MBEDTLS_ASN1_CHK_ADD (Len, mbedtls_asn1_write_algorithm_identifier (P, Start, (CONST CHAR8*)SignerInfo->AlgIdentifier.p, SignerInfo->AlgIdentifier.len, 0));
 
   MBEDTLS_ASN1_CHK_ADD (Len, MbedTlsPkcs7WriteIssuerAndSerialNumber (P, Start, SignerInfo->Serial.p, SignerInfo->Serial.len, SignerInfo->IssuerRaw.p, SignerInfo->IssuerRaw.len));
 
@@ -352,7 +352,7 @@ Pkcs7Sign (
   mbedtls_pk_context  Pkey;
   UINT8               HashValue[SHA256_DIGEST_SIZE];
   UINT8               Signature[MAX_SIGNATURE_SIZE];
-  INTN                SignatureLen;
+  UINTN                SignatureLen;
   UINT8               *NewPrivateKey;
   mbedtls_x509_crt    *Crt;
 
@@ -362,6 +362,9 @@ Pkcs7Sign (
   INTN                BufferSize;
   UINT8               *P;
   INT32               Len;
+
+  UINT8 MbedtlsOidDigestAlgSha256[] = MBEDTLS_OID_DIGEST_ALG_SHA256;
+  UINT8 MbedtlsOidPkcs1Rsa[] = MBEDTLS_OID_PKCS1_RSA;
 
   BufferSize = 4096;
 
@@ -388,7 +391,7 @@ Pkcs7Sign (
   mbedtls_pk_init (&Pkey);
   Ret = mbedtls_pk_parse_key (
     &Pkey, NewPrivateKey, PrivateKeySize,
-    KeyPassword, KeyPassword == NULL ? 0 : AsciiStrLen (KeyPassword),
+    KeyPassword, KeyPassword == NULL ? 0 : AsciiStrLen ((CONST CHAR8 *)KeyPassword),
     NULL, NULL
   );
   if (Ret != 0) {
@@ -423,13 +426,13 @@ Pkcs7Sign (
   SignerInfo.Sig.p = Signature;
   SignerInfo.Sig.len = SignatureLen;
   SignerInfo.Version = 1;
-  SignerInfo.AlgIdentifier.p = MBEDTLS_OID_DIGEST_ALG_SHA256;
+  SignerInfo.AlgIdentifier.p = MbedtlsOidDigestAlgSha256;
   SignerInfo.AlgIdentifier.len = sizeof (MBEDTLS_OID_DIGEST_ALG_SHA256) - 1;
   if (mbedtls_pk_get_type (&Pkey) == MBEDTLS_PK_RSA) {
-    SignerInfo.SigAlgIdentifier.p = MBEDTLS_OID_PKCS1_RSA;
+    SignerInfo.SigAlgIdentifier.p = MbedtlsOidPkcs1Rsa;
     SignerInfo.SigAlgIdentifier.len = sizeof (MBEDTLS_OID_PKCS1_RSA) - 1;
   } else {
-    mbedtls_oid_get_oid_by_sig_alg (MBEDTLS_PK_ECDSA, MBEDTLS_MD_SHA256, &SignerInfo.SigAlgIdentifier.p, &SignerInfo.SigAlgIdentifier.len);
+    mbedtls_oid_get_oid_by_sig_alg (MBEDTLS_PK_ECDSA, MBEDTLS_MD_SHA256, (CONST CHAR8 **)&SignerInfo.SigAlgIdentifier.p, &SignerInfo.SigAlgIdentifier.len);
   }
   SignerInfo.Serial = ((mbedtls_x509_crt *)SignCert)->serial;
   SignerInfo.IssuerRaw = ((mbedtls_x509_crt *)SignCert)->issuer_raw;

@@ -296,7 +296,7 @@ RETURN_STATUS
 EFIAPI
 InternalX509GetNIDName (
   IN      mbedtls_x509_name     *Name,
-  IN      UINT8         *Oid,
+  IN      CHAR8         *Oid,
   IN      UINTN         OidSize,
   IN OUT  CHAR8         *CommonName,  OPTIONAL
   IN OUT  UINTN         *CommonNameSize)
@@ -325,7 +325,7 @@ EFIAPI
 InternalX509GetSubjectNIDName (
   IN      CONST UINT8   *Cert,
   IN      UINTN         CertSize,
-  IN      UINT8         *Oid,
+  IN      CHAR8         *Oid,
   IN      UINTN         OidSize,
   OUT     CHAR8         *CommonName,  OPTIONAL
   IN OUT  UINTN         *CommonNameSize
@@ -361,7 +361,7 @@ EFIAPI
 InternalX509GetIssuerNIDName (
   IN      CONST UINT8   *Cert,
   IN      UINTN         CertSize,
-  IN      UINT8         *Oid,
+  IN      CHAR8         *Oid,
   IN      UINTN         OidSize,
   OUT     CHAR8         *CommonName,  OPTIONAL
   IN OUT  UINTN         *CommonNameSize
@@ -428,7 +428,7 @@ X509GetCommonName (
   IN OUT  UINTN        *CommonNameSize
   )
 {
-  return InternalX509GetSubjectNIDName (Cert, CertSize, (UINT8 *)OID_commonName, sizeof (OID_commonName), CommonName, CommonNameSize);
+  return InternalX509GetSubjectNIDName (Cert, CertSize, (CHAR8 *)OID_commonName, sizeof (OID_commonName), CommonName, CommonNameSize);
 }
 
 /**
@@ -466,7 +466,7 @@ X509GetOrganizationName (
   IN OUT  UINTN         *NameBufferSize
   )
 {
-  return InternalX509GetSubjectNIDName (Cert, CertSize, (UINT8 *)OID_organizationName, sizeof (OID_organizationName), NameBuffer, NameBufferSize);
+  return InternalX509GetSubjectNIDName (Cert, CertSize, (CHAR8 *)OID_organizationName, sizeof (OID_organizationName), NameBuffer, NameBufferSize);
 }
 
 /**
@@ -1147,7 +1147,7 @@ X509GetIssuerCommonName (
   IN OUT  UINTN        *CommonNameSize
   )
 {
-  return InternalX509GetIssuerNIDName (Cert, CertSize, (UINT8 *)OID_commonName, sizeof (OID_commonName), CommonName, CommonNameSize);
+  return InternalX509GetIssuerNIDName (Cert, CertSize, (CHAR8 *)OID_commonName, sizeof (OID_commonName), CommonName, CommonNameSize);
 }
 
 /**
@@ -1185,7 +1185,7 @@ X509GetIssuerOrganizationName (
   IN OUT  UINTN         *NameBufferSize
   )
 {
-  return InternalX509GetIssuerNIDName (Cert, CertSize, (UINT8 *)OID_organizationName, sizeof (OID_organizationName), NameBuffer, NameBufferSize);
+  return InternalX509GetIssuerNIDName (Cert, CertSize, (CHAR8 *)OID_organizationName, sizeof (OID_organizationName), NameBuffer, NameBufferSize);
 }
 
 /**
