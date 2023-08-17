@@ -49,7 +49,8 @@ SpdmDeviceAuthenticationAndMeasurement (
       DEBUG ((DEBUG_ERROR, "DoDeviceAuthentication failed - %r\n", Status));
       goto Ret;
     } else {
-      if (AuthState == TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_FAIL_NO_SIG) {
+      if ((AuthState == TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_FAIL_NO_SIG) ||
+          (AuthState == TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_FAIL_INVALID)) {
         goto Ret;
       } else {
         IsAuthenticated = TRUE;
