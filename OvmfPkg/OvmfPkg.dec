@@ -15,9 +15,15 @@
   PACKAGE_GUID                   = 2daf5f34-50e5-4b9d-b8e3-5562334d87e5
   PACKAGE_VERSION                = 0.1
 
+[Includes.Common.Private]
+  ../CryptoPkg/Library/Include
+  ../CryptoPkg/Library/OpensslLib/OpensslGen/include
+
 [Includes]
   Include
   Csm/Include
+  ../SecurityPkg/DeviceSecurity/SpdmLib/Include
+  ../SecurityPkg/DeviceSecurity/SpdmLib/libspdm/include
 
 [LibraryClasses]
   ##  @libraryclass  Search and install ACPI tables.
