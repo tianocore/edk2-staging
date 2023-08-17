@@ -58,6 +58,7 @@
   Bn/CryptBnNull.c
 
   SysCall/CrtWrapper.c
+  SysCall/DummyOpensslSupport.c
   SysCall/ConstantTimeClock.c
 
 [Packages]

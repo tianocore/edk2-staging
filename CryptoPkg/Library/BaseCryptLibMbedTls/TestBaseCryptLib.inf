@@ -32,9 +32,11 @@
   Cipher/CryptAes.c
   Hash/CryptSha256.c
   Hash/CryptSha512.c
-  Hash/CryptSm3Null.c
+  Hash/CryptSha3.c
+  Hash/CryptSm3.c
   Hash/CryptMd5.c
   Hash/CryptSha1.c
+  Hash/CryptXkcp.c
   Hmac/CryptHmac.c
   Kdf/CryptHkdf.c
   Pem/CryptPem.c
