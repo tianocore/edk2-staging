@@ -81,13 +81,13 @@ Pkcs5HashPassword (
   //
   if (mbedtls_pkcs5_pbkdf2_hmac_ext(
               HashAlg,
-              (CONST INT8 *)Password,
+              (CONST UINT8 *)Password,
               (int)PasswordLength,
-              (const unsigned char *)Salt,
+              (CONST UINT8 *)Salt,
               (int)SaltLength,
               (int)IterationCount,
               (int)KeyLength,
-              (unsigned char *)OutKey
+              (UINT8 *)OutKey
         ) != 0) {
     return FALSE;
   } else {
