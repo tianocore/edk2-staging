@@ -1,0 +1,47 @@
+name: build
+
+on:
+  push:
+    branches: [ "DeviceSecurity" ]
+  pull_request:
+    branches: [ "DeviceSecurity" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+
+    runs-on: windows-2019
+    defaults:
+      run:
+        shell: cmd
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        submodules: recursive
+    - name: Set up NASM
+      uses: ilammy/setup-nasm@v1
+    - name: Set up python
+      uses: actions/setup-python@v4
+      id: cp380
+      with:
+        python-version: '3.8.0'
+        update-environment: true
+    - name: build
+      run: |
+        echo "display current branch!"
+        git branch
+        echo "===========!+++++Separator++++++!==========="
+        echo "set and display PYTHON_HOME!"
+        set PYTHON_HOME=${{ Env.pythonLocation }}
+        echo %PYTHON_HOME%
+        echo "===========!+++++Separator++++++!==========="
+        echo "file name too long will lead to build fail, so shorten the full path by subst!"
+        subst z: %cd%
+        cd /d z:\
+        echo "===========!+++++Separator++++++!==========="
+        echo "build EmulatorPkg and DeviceSecurityTestPkg!"
+        call edksetup.bat Rebuild
+        call build.bat -p EmulatorPkg\EmulatorPkg.dsc -t VS2019 -a X64 -b DEBUG -j build_DEBUG.log
+        call build.bat -p DeviceSecurityTestPkg\DeviceSecurityTestPkg.dsc -t VS2019 -a X64 -b DEBUG -j build_DEBUG.log
