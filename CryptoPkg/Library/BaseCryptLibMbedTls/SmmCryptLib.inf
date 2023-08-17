@@ -36,9 +36,13 @@
   Hash/CryptMd5.c
   Hash/CryptSha1.c
   Hash/CryptSha256.c
-  Hash/CryptSm3Null.c
+  Hash/CryptSm3.c
   Hash/CryptSha512.c
-  Hash/CryptParallelHashNull.c
+  Hash/CryptSha3.c
+  Hash/CryptXkcp.c
+  Hash/CryptCShake256.c
+  Hash/CryptParallelHash.c
+  Hash/CryptDispatchApMm.c
   Hmac/CryptHmac.c
   Kdf/CryptHkdf.c
   Cipher/CryptAes.c
@@ -62,6 +66,7 @@
   Bn/CryptBnNull.c
 
   SysCall/CrtWrapper.c
+  SysCall/DummyOpensslSupport.c
   SysCall/ConstantTimeClock.c
 
 [Sources.Ia32]
