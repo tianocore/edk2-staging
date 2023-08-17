@@ -653,12 +653,14 @@ ContentChangedFlag:
                      NULL, 0
                      );
       if (LIBSPDM_STATUS_IS_ERROR (SpdmReturn)) {
-        continue;
-      } else if (SpdmReturn == LIBSPDM_STATUS_VERIF_FAIL) {
-        AuthState                       = TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_FAIL_INVALID;
-        SecurityState->MeasurementState = EDKII_DEVICE_SECURITY_STATE_ERROR_DEVICE_ERROR;
-        Status                          = ExtendMeasurement (SpdmDeviceContext, AuthState, 0, NULL, NULL, NULL, SecurityState);
-        continue;
+        if (SpdmReturn == LIBSPDM_STATUS_VERIF_FAIL) {
+          AuthState                       = TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_FAIL_INVALID;
+          SecurityState->MeasurementState = EDKII_DEVICE_SECURITY_STATE_ERROR_DEVICE_ERROR;
+          Status                          = ExtendMeasurement (SpdmDeviceContext, AuthState, 0, NULL, NULL, NULL, SecurityState);
+          continue;
+        } else {
+          continue;
+        }
       }
 
       if (  (ReceivedNumberOfBlock == NumberOfBlocks - 1)
