@@ -4,6 +4,9 @@
 
 !if $(TPM2_ENABLE) == TRUE
 INF  OvmfPkg/Tcg/TpmMmioSevDecryptPei/TpmMmioSevDecryptPei.inf
+!if $(VTPM_ENABLE) == TRUE
+INF  OvmfPkg/Tcg/VmmSpdmTunnel/VmmSpdmTunnelPei.inf
+!endif
 !if $(TPM1_ENABLE) == TRUE
 INF  OvmfPkg/Tcg/Tcg2Config/Tcg12ConfigPei.inf
 INF  SecurityPkg/Tcg/TcgPei/TcgPei.inf
