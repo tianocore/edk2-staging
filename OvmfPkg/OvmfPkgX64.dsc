@@ -114,6 +114,17 @@
   INTEL:*_*_*_CC_FLAGS = /D TDX_GUEST_SUPPORTED
   GCC:*_*_*_CC_FLAGS = -D TDX_GUEST_SUPPORTED
 
+  #
+  # TPM2_ENABLE and VTPM_ENABLE
+  #
+!if $(TPM2_ENABLE) == TRUE
+!if $(VTPM_ENABLE) == TRUE
+  MSFT:*_*_*_CC_FLAGS = /D VTPM_FEATURE_ENABLED
+  INTEL:*_*_*_CC_FLAGS = /D VTPM_FEATURE_ENABLED
+  GCC:*_*_*_CC_FLAGS = -D VTPM_FEATURE_ENABLED
+!endif
+!endif
+
 !include NetworkPkg/NetworkBuildOptions.dsc.inc
 
 [BuildOptions.common.EDKII.DXE_RUNTIME_DRIVER]
@@ -229,7 +240,8 @@
 !if $(NETWORK_TLS_ENABLE) == TRUE
   OpensslLib|CryptoPkg/Library/OpensslLib/OpensslLib.inf
 !else
-  OpensslLib|CryptoPkg/Library/OpensslLib/OpensslLibCrypto.inf
+  OpensslLib|CryptoPkg/Library/OpensslLib/OpensslLibFull.inf
+# OpensslLib|CryptoPkg/Library/OpensslLib/OpensslLibCrypto.inf
 !endif
   RngLib|MdePkg/Library/BaseRngLibTimerLib/BaseRngLibTimerLib.inf
 
@@ -1037,6 +1049,16 @@
   OvmfPkg/IoMmuDxe/IoMmuDxe.inf
 
   OvmfPkg/TdxDxe/TdxDxe.inf
+!if $(TPM2_ENABLE) == TRUE
+!if $(VTPM_ENABLE) == TRUE
+  OvmfPkg/Tcg/VmmSpdmTunnel/VmmSpdmTunnelDxe.inf {
+    <LibraryClasses>
+      !include VmmSpdmLibs.dsc.inc
+      VmmSpdmVTpmCommunicatorLib|OvmfPkg/Library/VmmSpdmVTpm/VmmSpdmVTpmCommunicatorLibDxe.inf
+  }
+
+!endif
+!endif
 
 !if $(SMM_REQUIRE) == TRUE
   OvmfPkg/SmmAccess/SmmAccess2Dxe.inf

@@ -4,6 +4,13 @@
 
 !if $(TPM2_ENABLE) == TRUE
   OvmfPkg/Tcg/TpmMmioSevDecryptPei/TpmMmioSevDecryptPei.inf
+!if $(VTPM_ENABLE) == TRUE
+  OvmfPkg/Tcg/VmmSpdmTunnel/VmmSpdmTunnelPei.inf {
+    <LibraryClasses>
+      !include VmmSpdmLibs.dsc.inc
+      VmmSpdmVTpmCommunicatorLib|OvmfPkg/Library/VmmSpdmVTpm/VmmSpdmVTpmCommunicatorLibSecPei.inf
+  }
+!endif
 !if $(TPM1_ENABLE) == TRUE
   OvmfPkg/Tcg/Tcg2Config/Tcg12ConfigPei.inf
   SecurityPkg/Tcg/TcgPei/TcgPei.inf
