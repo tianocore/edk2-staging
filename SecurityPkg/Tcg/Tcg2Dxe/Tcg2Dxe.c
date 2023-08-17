@@ -2916,6 +2916,38 @@ InstallTcg2 (
   return Status;
 }
 
+#ifdef VTPM_FEATURE_ENABLED
+/**
+  The function install VtpmTdPresent protocol when 
+  SecureSessionInfoTable is ready.
+**/
+STATIC
+VOID
+InstallVtpmTdPresent (
+  VOID
+  )
+{
+  EFI_STATUS  Status;
+  EFI_HANDLE  Handle;
+
+  Handle = NULL;
+  Status = gBS->InstallMultipleProtocolInterfaces (
+                  &Handle,
+                  &gEdkiiVtpmTdPresentProtocolGuid,
+                  &mVtpmTdPresentProtocol,
+                  NULL
+                  );
+  if (EFI_ERROR(Status)){
+    DEBUG ((DEBUG_ERROR, "InstallMultipleProtocolInterfaces is failed with %r\n", Status));
+    return;
+  }
+
+  DEBUG ((DEBUG_INFO, "InstallVtpmTdPresentProtocol is %r\n", Status));
+
+}
+
+#endif
+
 /**
   The driver's entry point. It publishes EFI Tcg2 Protocol.
 
@@ -3103,6 +3135,13 @@ DriverEntry (
   //
   Status = InstallTcg2 ();
   DEBUG ((DEBUG_INFO, "InstallTcg2 - %r\n", Status));
+
+#ifdef VTPM_FEATURE_ENABLED
+  if (!EFI_ERROR(Status)) {
+    InstallVtpmTdPresent();
+  }
+
+#endif
 
   return Status;
 }
