@@ -58,4 +58,13 @@ EFIAPI
 ConstructSecHobList (
   );
 
+/**
+ * Do measurement in Td guest.
+ * The measurement type may be vTPM or RTMR.
+ */
+EFI_STATUS
+PeilessStartupDoMeasurement (
+  VOID
+  );
+
 #endif

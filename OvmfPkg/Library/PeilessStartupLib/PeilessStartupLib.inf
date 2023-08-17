@@ -27,6 +27,7 @@
 
 [Sources]
   PeilessStartup.c
+  Measurement.c
   Hob.c
   DxeLoad.c
   X64/VirtualMemory.c
@@ -42,6 +43,7 @@
 
 [LibraryClasses]
   BaseLib
+  BaseCryptLib
   DebugLib
   BaseMemoryLib
   PcdLib
@@ -56,6 +58,8 @@
   PrePiLib
   QemuFwCfgLib
   PlatformInitLib
+  Tpm2DeviceLib
+  Tpm2CommandLib
 
 [Guids]
   gEfiHobMemoryAllocModuleGuid
@@ -65,6 +69,7 @@
   gPcdDataBaseHobGuid
   gCcEventEntryHobGuid
   gEfiNonCcFvGuid
+  gEdkiiVtpmTdMeasurementDataHobGuid
 
 [Pcd]
   gUefiOvmfPkgTokenSpaceGuid.PcdBfvBase
@@ -84,3 +89,8 @@
   gUefiOvmfPkgTokenSpaceGuid.PcdOvmfDxeMemFvBase
   gUefiOvmfPkgTokenSpaceGuid.PcdOvmfDxeMemFvSize
   gUefiOvmfPkgTokenSpaceGuid.PcdSecureBootSupported
+  gEfiSecurityPkgTokenSpaceGuid.PcdTpm2HashMask
+  gEfiSecurityPkgTokenSpaceGuid.PcdTcg2HashAlgorithmBitmap
+  gUefiOvmfPkgTokenSpaceGuid.PcdOvmfWorkAreaBase
+  gUefiOvmfPkgTokenSpaceGuid.PcdOvmfFlashNvStorageVariableBase
+  gUefiOvmfPkgTokenSpaceGuid.PcdCfvRawDataSize
