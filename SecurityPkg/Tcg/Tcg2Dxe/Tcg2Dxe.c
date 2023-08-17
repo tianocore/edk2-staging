@@ -1550,6 +1550,26 @@ EFI_TCG2_PROTOCOL  mTcg2Protocol = {
 };
 
 /**
+  Set the TPMPresentFlag to False.
+  @param[in]  This              Indicates the calling context
+**/
+VOID
+EFIAPI
+VtpmTdSetAbsent(
+ IN  EDKII_VTPM_TD_PRESENT_PROTOCOL  *This
+ )
+{
+  mTcgDxeData.BsCap.TPMPresentFlag = FALSE;
+
+  DEBUG((DEBUG_INFO, "Set TPMPresentFlag to FALSE\n"));
+
+}
+
+EDKII_VTPM_TD_PRESENT_PROTOCOL mVtpmTdPresentProtocol = {
+ VtpmTdSetAbsent
+};
+
+/**
   Setup the TCG_HCRTMComponentEvent.
   @param[in]  Index         The index of the mTcg2EventInfo
 **/
