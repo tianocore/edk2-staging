@@ -175,6 +175,13 @@ PeilessStartup (
   DEBUG ((DEBUG_INFO, "HobList: %p\n", GetHobList ()));
 
   if (TdIsEnabled ()) {
+
+    Status = PeilessStartupDoMeasurement ();
+    if (EFI_ERROR (Status)) {
+      ASSERT (FALSE);
+      CpuDeadLoop ();
+    }
+
     //
     // Build GuidHob for the tdx measurements which were done in SEC phase.
     //
