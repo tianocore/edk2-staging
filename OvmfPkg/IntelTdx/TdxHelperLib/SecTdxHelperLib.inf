@@ -56,3 +56,4 @@
   gCcEventEntryHobGuid
   gTcgEvent2EntryHobGuid
   gEdkiiVtpmTdMeasurementDataHobGuid
+  gEdkiiVTpmSecureSpdmSessionInfoHobGuid

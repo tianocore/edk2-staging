@@ -291,6 +291,31 @@ GetVtpmTdMeasurementData (
   return (VTPM_TD_MEASUREMENT_DATA *)(GuidHob.Guid + 1);
 }
 
+STATIC
+VTPM_SECURE_SESSION_INFO_TABLE *
+GetSpdmSecuredSessionInfo (
+  VOID
+  )
+{
+  EFI_PEI_HOB_POINTERS  GuidHob;
+  UINT16                HobLength;
+
+  GuidHob.Guid = GetFirstGuidHob (&gEdkiiVTpmSecureSpdmSessionInfoHobGuid);
+  if (GuidHob.Guid == NULL) {
+    DEBUG ((DEBUG_ERROR, "%a: The Guid HOB is not found \n", __FUNCTION__));
+    return NULL;
+  }
+
+  HobLength = sizeof (EFI_HOB_GUID_TYPE) + VTPM_SECURE_SESSION_INFO_TABLE_SIZE;
+
+  if (GuidHob.Guid->Header.HobLength != HobLength) {
+    DEBUG ((DEBUG_ERROR, "%a: The GuidHob.Guid->Header.HobLength is not equal HobLength, %x vs %x \n", __FUNCTION__, GuidHob.Guid->Header.HobLength, HobLength));
+    return NULL;
+  }
+
+  return (VTPM_SECURE_SESSION_INFO_TABLE *)(GuidHob.Guid + 1);
+}
+
 /**
   Build the GuidHob for tdx measurements which were done in SEC phase.
   The measurement values are stored in WorkArea.
@@ -312,7 +337,16 @@ VTpmBuildGuidHobForTdxMeasurement (
   EFI_PEI_HOB_POINTERS         Hob;
   VOID                         *TdHob;
 
-  VTPM_TD_MEASUREMENT_DATA     *VtpmTdMeasurementData;
+  VTPM_TD_MEASUREMENT_DATA        *VtpmTdMeasurementData;
+  VTPM_SECURE_SESSION_INFO_TABLE  *InfoTable;
+
+
+  // Check if SecuredSpdmSession is established
+  InfoTable = GetSpdmSecuredSessionInfo ();
+  if (InfoTable == NULL || InfoTable->SessionId == 0) {
+    DEBUG ((DEBUG_INFO, "SecuredSpdmSession is not established.\n"));
+    return EFI_SUCCESS;
+  }
 
   VtpmTdMeasurementData = GetVtpmTdMeasurementData();
   if (VtpmTdMeasurementData == NULL) {
