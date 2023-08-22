@@ -412,11 +412,22 @@ EcPointInvert (
   mbedtls_mpi InvBnY;
   mbedtls_mpi P;
 
-  mbedtls_mpi_init(&InvBnY);
-  mbedtls_mpi_init(&P);
-
   pt = ( mbedtls_ecp_point *)EcPoint;
   grp = ( mbedtls_ecp_group *)EcGroup;
+
+  //
+  // Check input parameters.
+  //
+  if ((EcGroup == NULL) || (EcPoint == NULL) || (BnCtx == NULL) ||
+      (pt->Y.n == 0) || (pt->Y.n > UINT_MAX) ||
+      (pt->Y.p == NULL) || ((pt->Y.s != 1) && (pt->Y.s != -1)) ||
+      (grp->P.n == 0) || (grp->P.n  > UINT_MAX) ||
+      (grp->P.p == NULL) || ((grp->P.s != 1) && (grp->P.s != -1))) {
+    return FALSE;
+  }
+
+  mbedtls_mpi_init(&InvBnY);
+  mbedtls_mpi_init(&P);
 
   if (mbedtls_mpi_copy(&InvBnY, &pt->Y) != 0) {
     mbedtls_mpi_free(&P);

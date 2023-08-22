@@ -44,6 +44,13 @@ BigNumFromBin (
 {
   mbedtls_mpi *X;
 
+  //
+  // Check input parameters.
+  //
+  if ((Buf == NULL) || (Len > UINT_MAX)) {
+    return NULL;
+  }
+
   X = AllocateZeroPool(sizeof(mbedtls_mpi));
 
  if(mbedtls_mpi_read_binary(X, Buf, Len) == 0 ) {
@@ -97,7 +104,9 @@ BigNumFree (
   IN BOOLEAN  Clear
   )
 {
-  mbedtls_mpi_free(Bn);
+  if (Bn != NULL) {
+    mbedtls_mpi_free(Bn);
+  }
 }
 
 /**
@@ -393,6 +402,10 @@ BigNumIsWord (
   IN UINTN       Num
   )
 {
+  if ((Bn == NULL) || (Num > UINT_MAX)) {
+    return FALSE;
+  }
+
   if (mbedtls_mpi_cmp_int(Bn, Num) == 0) {
     return TRUE;
   } else {
@@ -417,6 +430,16 @@ BigNumIsOdd (
   mbedtls_mpi X;
   mbedtls_mpi TemBn;
   BOOLEAN Result;
+
+  //
+  // Check input parameters.
+  //
+  if ((Bn == NULL) ||
+      (((mbedtls_mpi *)Bn)->n == 0) || (((mbedtls_mpi *)Bn)->n > UINT_MAX) ||
+      (((mbedtls_mpi *)Bn)->p == NULL) ||
+      ((((mbedtls_mpi *)Bn)->s != 1) && (((mbedtls_mpi *)Bn)->s != -1))) {
+    return FALSE;
+  }
 
   mbedtls_mpi_init(&X);
   mbedtls_mpi_init(&TemBn);
@@ -464,6 +487,10 @@ BigNumCopy (
   IN CONST VOID  *BnSrc
   )
 {
+  if ((BnDst == NULL) || (BnSrc == NULL)) {
+    return NULL;
+  }
+
   if (mbedtls_mpi_copy(BnDst, BnSrc) != 0) {
     return NULL;
   }
@@ -516,6 +543,16 @@ BigNumRShift (
   )
 {
   mbedtls_mpi TempBn;
+
+  //
+  // Check input parameters.
+  //
+  if ((Bn == NULL) || (BnRes == NULL) ||
+      (((mbedtls_mpi *)Bn)->n == 0) || (((mbedtls_mpi *)Bn)->n > UINT_MAX) ||
+      (((mbedtls_mpi *)Bn)->p == NULL) ||
+      ((((mbedtls_mpi *)Bn)->s != 1) && (((mbedtls_mpi *)Bn)->s != -1))) {
+    return FALSE;
+  }
 
   mbedtls_mpi_init(&TempBn);
 
@@ -644,6 +681,10 @@ BigNumSetUint (
   IN UINTN  Val
   )
 {
+  if ((Bn == NULL) || (Val > UINT_MAX)) {
+    return FALSE;
+  }
+
   if (mbedtls_mpi_lset(Bn, Val) == 0){
     return TRUE;
   } else {
