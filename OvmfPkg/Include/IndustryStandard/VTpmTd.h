@@ -8,6 +8,7 @@
 #define VTPM_TD_H
 
 #include <Uefi.h>
+#include <IndustryStandard/Tpm20.h>
 
 #define EDKII_TDTK_ACPI_TABLE_SIGNATURE           SIGNATURE_32('T', 'D', 'T', 'K')
 #define EDKII_TDTK_ACPI_TABLE_REVISION            1
@@ -89,6 +90,12 @@ typedef struct {
   UINT8  PrivateKey[EC_KEY_ECDSA_P_384_PRIVATE_KEY_SIZE];
 }VTPMTD_CERT_ECDSA_P_384_KEY_PAIR_INFO;
 
+typedef struct {
+  UINT32                 MeasurementsBitmap;
+  TPML_DIGEST_VALUES     TdHobHashValue;
+  TPML_DIGEST_VALUES     CfvImgHashValue;
+}VTPM_TD_MEASUREMENT_DATA;
+
 
 #pragma pack()
 
@@ -153,5 +160,13 @@ extern EFI_GUID  gEdkiiVTpmTdX509CertKeyInfoHobGuid;
   { 0xfbbfe4c9, 0x3ee1, 0x13d4, { 0x99, 0xce, 0x87, 0x10, 0x68, 0x86, 0x9f, 0xd8 } };
 
 extern EFI_GUID  gEdkiiTdReportInfoHobGuid;
+
+// The Global ID of a GUIDed HOB used to save the TDREPORT info
+// {9A1216F5-6528-3B88-58FA-5D5791A7C9B4}
+//
+#define EDKII_VTPM_TD_MEASUREMENT_DATA_HOB_GUID \
+  { 0x9a1216f5, 0x6528, 0x3b88, { 0x58, 0xfa, 0x5d, 0x57, 0x91, 0xa7, 0xc9, 0xb4 } };
+
+extern EFI_GUID  gEdkiiVtpmTdMeasurementDataHobGuid;
 
 #endif
