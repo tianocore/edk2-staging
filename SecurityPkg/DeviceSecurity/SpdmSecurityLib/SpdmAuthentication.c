@@ -603,7 +603,7 @@ DoDeviceAuthentication (
     SpdmReturn = SpdmChallengeEx (SpdmContext, NULL, *ValidSlotId, SPDM_CHALLENGE_REQUEST_NO_MEASUREMENT_SUMMARY_HASH, NULL, NULL, NULL, RequesterNonce, ResponderNonce, NULL, 0);
     if (SpdmReturn == LIBSPDM_STATUS_SUCCESS) {
       IsValidChallengeAuthSig = TRUE;
-    } else if (SpdmReturn == LIBSPDM_STATUS_VERIF_FAIL) {
+    } else if ((LIBSPDM_STATUS_IS_ERROR (SpdmReturn))) {
       IsValidChallengeAuthSig            = FALSE;
       *AuthState                         = TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_FAIL_INVALID;
       SecurityState->AuthenticationState = EDKII_DEVICE_SECURITY_STATE_ERROR_CHALLENGE_FAILURE;
