@@ -20,6 +20,7 @@
 #include "PeilessStartupInternal.h"
 #include "WorkArea.h"
 #include <Library/HobLib.h>
+#include <IndustryStandard/VTpmTd.h>
 
 /**
   Make sure that the current PCR allocations, the TPM supported PCRs,
@@ -131,15 +132,20 @@ InitDigestList (
 STATIC
 EFI_STATUS
 HashAndExtendTdHobToVtpm (
-  UINT32  Tpm2ActivePcrBanks,
-  UINT32  PcrIndex
+  UINT32             Tpm2ActivePcrBanks,
+  UINT32             PcrIndex,
+  TPML_DIGEST_VALUES   *TdHobHashValue
   )
 {
   EFI_PEI_HOB_POINTERS  Hob;
-  TPML_DIGEST_VALUES    DigestList;
   EFI_STATUS            Status;
   VOID                  *TdHob;
   UINTN                 TdHobSize;
+
+  if (TdHobHashValue == NULL){
+    return EFI_INVALID_PARAMETER;
+  }
+  
 
   TdHob   = (VOID *)(UINTN)FixedPcdGet32 (PcdOvmfSecGhcbBase);
   Hob.Raw = (UINT8 *)TdHob;
@@ -151,16 +157,16 @@ HashAndExtendTdHobToVtpm (
     Hob.Raw = GET_NEXT_HOB (Hob);
   }
 
-  ZeroMem (&DigestList, sizeof (TPML_DIGEST_VALUES));
+  ZeroMem (TdHobHashValue, sizeof (TPML_DIGEST_VALUES));
 
   TdHobSize = (UINTN)((UINT8 *)Hob.Raw - (UINT8 *)TdHob);
-  Status    = InitDigestList (Tpm2ActivePcrBanks, &DigestList, TdHob, TdHobSize);
+  Status    = InitDigestList (Tpm2ActivePcrBanks, TdHobHashValue, TdHob, TdHobSize);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "%a: InitDigestList failed with %r\n", __func__, Status));
     return Status;
   }
 
-  Status = Tpm2PcrExtend (PcrIndex, &DigestList);
+  Status = Tpm2PcrExtend (PcrIndex, TdHobHashValue);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "%a: Tpm2PcrExtend failed with %r\n", __func__, Status));
   }
@@ -180,30 +186,66 @@ HashAndExtendTdHobToVtpm (
 STATIC
 EFI_STATUS
 HashAndExtendCfvImageToVtpm (
-  UINT32  Tpm2ActivePcrBanks,
-  UINT32  PcrIndex
+  UINT32             Tpm2ActivePcrBanks,
+  UINT32             PcrIndex,
+  TPML_DIGEST_VALUES   *CfvImgHashValue
   )
 {
   EFI_STATUS          Status;
   UINTN               CfvSize;
   UINT8               *CfvImage;
-  TPML_DIGEST_VALUES  DigestList;
+
+  if (CfvImgHashValue == NULL){
+    return EFI_INVALID_PARAMETER;
+  }
+  
 
   CfvImage = (UINT8 *)(UINTN)PcdGet32 (PcdOvmfFlashNvStorageVariableBase);
   CfvSize  = (UINT64)PcdGet32 (PcdCfvRawDataSize);
 
-  Status = InitDigestList (Tpm2ActivePcrBanks, &DigestList, CfvImage, CfvSize);
+
+  ZeroMem (CfvImgHashValue, sizeof (TPML_DIGEST_VALUES));
+
+  Status = InitDigestList (Tpm2ActivePcrBanks, CfvImgHashValue, CfvImage, CfvSize);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "%a: InitDigestList failed with %r\n", __func__, Status));
     return Status;
   }
 
-  Status = Tpm2PcrExtend (PcrIndex, &DigestList);
+  Status = Tpm2PcrExtend (PcrIndex, CfvImgHashValue);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "%a: Tpm2PcrExtend failed with %r\n", __func__, Status));
   }
 
   return Status;
+}
+
+
+STATIC
+EFI_STATUS
+BuildVtpmTdMeasurementDataGuidHob(
+  VTPM_TD_MEASUREMENT_DATA  *VtpmTdMeasurementData
+  )
+{
+  if (VtpmTdMeasurementData == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  VOID   *GuidHobRawData;
+
+  GuidHobRawData = BuildGuidHob (
+                                 &gEdkiiVtpmTdMeasurementDataHobGuid,
+                                 sizeof (VTPM_TD_MEASUREMENT_DATA)
+                                 );
+
+  if (GuidHobRawData == NULL) {
+    DEBUG ((DEBUG_ERROR, "%a : BuildGuidHob failed \n", __FUNCTION__));
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  CopyMem(GuidHobRawData, VtpmTdMeasurementData, sizeof (VTPM_TD_MEASUREMENT_DATA));
+
+  return EFI_SUCCESS;
 }
 
 /**
@@ -224,6 +266,11 @@ ExtendToVTpm (
 {
   UINT32  PcrIndex;
 
+  VTPM_TD_MEASUREMENT_DATA  VtpmTdMeasurementData;
+
+
+  ZeroMem(&VtpmTdMeasurementData, sizeof(VtpmTdMeasurementData));
+
   if (TdxMeasurementsData == NULL) {
     return EFI_INVALID_PARAMETER;
   }
@@ -231,15 +278,22 @@ ExtendToVTpm (
   PcrIndex = 0;
 
   if (TdxMeasurementsData->MeasurementsBitmap & TDX_MEASUREMENT_TDHOB_BITMASK) {
-    if (EFI_ERROR (HashAndExtendTdHobToVtpm (Tpm2ActivePcrBanks, PcrIndex))) {
+    VtpmTdMeasurementData.MeasurementsBitmap |= TDX_MEASUREMENT_TDHOB_BITMASK;
+    if (EFI_ERROR (HashAndExtendTdHobToVtpm (Tpm2ActivePcrBanks, PcrIndex, &VtpmTdMeasurementData.TdHobHashValue))) {
       return EFI_ABORTED;
     }
   }
 
   if (TdxMeasurementsData->MeasurementsBitmap & TDX_MEASUREMENT_CFVIMG_BITMASK) {
-    if (EFI_ERROR (HashAndExtendCfvImageToVtpm (Tpm2ActivePcrBanks, PcrIndex))) {
+    VtpmTdMeasurementData.MeasurementsBitmap |= TDX_MEASUREMENT_CFVIMG_BITMASK;
+    if (EFI_ERROR (HashAndExtendCfvImageToVtpm (Tpm2ActivePcrBanks, PcrIndex, &VtpmTdMeasurementData.CfvImgHashValue))) {
       return EFI_ABORTED;
     }
+  }
+
+  if (EFI_ERROR(BuildVtpmTdMeasurementDataGuidHob(&VtpmTdMeasurementData))) {
+    DEBUG((DEBUG_ERROR, "Build VtpmTd Measurement Data Guid Hob failed \n"));
+    return EFI_ABORTED;
   }
 
   return EFI_SUCCESS;
