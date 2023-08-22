@@ -17,6 +17,7 @@
 #include <Library/PrintLib.h>
 #include <Library/TcgEventLogRecordLib.h>
 #include <WorkArea.h>
+#include <IndustryStandard/VTpmTd.h>
 
 #ifdef TDX_PEI_LESS_BOOT
 #include <Protocol/Tcg2Protocol.h>
@@ -171,78 +172,6 @@ GetFvName (
 
 #ifdef TDX_PEI_LESS_BOOT
 /**
- * Initialize the digest list by the active pcr banks.
- *
- * @param Tpm2ActivePcrBanks      The active pcr banks in vTPM.
- * @param DigestList              A pointer of TPML_DIGEST_VALUES.
- * @param DataToHash              A pointer of data.
- * @param DataSize                The size of the data.
- *
- * @retval EFI_SUCCESS  Initialization successful.
- * @retval Others       Other error as indicated
- */
-STATIC
-EFI_STATUS
-InitDigestList (
-  IN  UINT32              Tpm2ActivePcrBanks,
-  IN  TPML_DIGEST_VALUES  *DigestList,
-  IN  UINT8               *DataToHash,
-  IN  UINTN               DataSize
-  )
-{
-  UINT8  Hash256[SHA256_DIGEST_SIZE];
-  UINT8  Hash384[SHA384_DIGEST_SIZE];
-  UINT8  Hash512[SHA512_DIGEST_SIZE];
-
-  if ((DigestList == NULL) || (DataToHash == NULL)) {
-    return EFI_INVALID_PARAMETER;
-  }
-
-  ZeroMem(Hash256, SHA256_DIGEST_SIZE);
-  ZeroMem(Hash384, SHA384_DIGEST_SIZE);
-  ZeroMem(Hash512, SHA512_DIGEST_SIZE);
-
-  ZeroMem (DigestList, sizeof (TPML_DIGEST_VALUES));
-
-  DigestList->count = 0;
-
-  if ((Tpm2ActivePcrBanks & EFI_TCG2_BOOT_HASH_ALG_SHA256) != 0) {
-    if (!Sha256HashAll (DataToHash, DataSize, Hash256)) {
-      DEBUG ((DEBUG_INFO, "Sha256HashAll failed\n"));
-      return EFI_ABORTED;
-    }
-
-    DigestList->digests[DigestList->count].hashAlg = TPM_ALG_SHA256;
-    CopyMem (DigestList->digests[0].digest.sha256, Hash256, SHA256_DIGEST_SIZE);
-    DigestList->count++;
-  }
-
-  if ((Tpm2ActivePcrBanks & EFI_TCG2_BOOT_HASH_ALG_SHA384) != 0) {
-    if (!Sha384HashAll (DataToHash, DataSize, Hash384)) {
-      DEBUG ((DEBUG_INFO, "Sha384HashAll failed\n"));
-      return EFI_ABORTED;
-    }
-
-    DigestList->digests[DigestList->count].hashAlg = TPM_ALG_SHA384;
-    CopyMem (DigestList->digests[1].digest.sha384, Hash384, SHA384_DIGEST_SIZE);
-    DigestList->count++;
-  }
-
-  if ((Tpm2ActivePcrBanks & EFI_TCG2_BOOT_HASH_ALG_SHA512) != 0) {
-    if (!Sha512HashAll (DataToHash, DataSize, Hash512)) {
-      DEBUG ((DEBUG_INFO, "Sha512HashAll failed\n"));
-      return EFI_ABORTED;
-    }
-
-    DigestList->digests[DigestList->count].hashAlg = TPM_ALG_SHA512;
-    CopyMem (DigestList->digests[2].digest.sha512, Hash512, SHA512_DIGEST_SIZE);
-    DigestList->count++;
-  }
-
-  return EFI_SUCCESS;
-}
-
-/**
   Copy TPML_DIGEST_VALUES into a buffer
 
   @param[in,out] Buffer             Buffer to hold copied TPML_DIGEST_VALUES compact binary.
@@ -337,6 +266,31 @@ BuildTdxMeasurementGuidHobForVtpm (
   return EFI_SUCCESS;
 }
 
+STATIC
+VTPM_TD_MEASUREMENT_DATA *
+GetVtpmTdMeasurementData (
+  VOID
+  )
+{
+  EFI_PEI_HOB_POINTERS            GuidHob;
+  UINT16                          HobLength;
+
+  GuidHob.Guid = GetFirstGuidHob (&gEdkiiVtpmTdMeasurementDataHobGuid);
+  if (GuidHob.Guid == NULL) {
+    return NULL;
+  }
+
+  HobLength = sizeof (EFI_HOB_GUID_TYPE) + sizeof(VTPM_TD_MEASUREMENT_DATA);
+
+  if (GuidHob.Guid->Header.HobLength != HobLength) {
+    DEBUG ((DEBUG_ERROR, "%a: The GuidHob.Guid->Header.HobLength is not equal HobLength, %x vs %x \n", __FUNCTION__, GuidHob.Guid->Header.HobLength, HobLength));
+    ASSERT (FALSE);
+    return NULL;
+  }
+
+  return (VTPM_TD_MEASUREMENT_DATA *)(GuidHob.Guid + 1);
+}
+
 /**
   Build the GuidHob for tdx measurements which were done in SEC phase.
   The measurement values are stored in WorkArea.
@@ -350,7 +304,6 @@ VTpmBuildGuidHobForTdxMeasurement (
   )
 {
   EFI_STATUS                   Status;
-  OVMF_WORK_AREA               *WorkArea;
   TDX_HANDOFF_TABLE_POINTERS2  HandoffTables;
   VOID                         *FvName;
   CFV_HANDOFF_TABLE_POINTERS2  FvBlob2;
@@ -358,6 +311,14 @@ VTpmBuildGuidHobForTdxMeasurement (
   UINT64                       FvLength;
   EFI_PEI_HOB_POINTERS         Hob;
   VOID                         *TdHob;
+
+  VTPM_TD_MEASUREMENT_DATA     *VtpmTdMeasurementData;
+
+  VtpmTdMeasurementData = GetVtpmTdMeasurementData();
+  if (VtpmTdMeasurementData == NULL) {
+    DEBUG((DEBUG_ERROR, "Get VtpmTd MeasurementData is NULL\n"));
+    return EFI_ABORTED;
+  }
 
   TdHob   = (VOID *)(UINTN)FixedPcdGet32 (PcdOvmfSecGhcbBase);
   Hob.Raw = (UINT8 *)TdHob;
@@ -368,36 +329,19 @@ VTpmBuildGuidHobForTdxMeasurement (
     Hob.Raw = GET_NEXT_HOB (Hob);
   }
 
-  WorkArea = (OVMF_WORK_AREA *)FixedPcdGet32 (PcdOvmfWorkAreaBase);
-  if (WorkArea == NULL) {
-    return EFI_ABORTED;
-  }
-
-  UINT32              Tpm2ActivePcrBanks;
-  UINTN               TdHobSize;
-  TPML_DIGEST_VALUES  DigestList;
-
-  Tpm2ActivePcrBanks = WorkArea->TdxWorkArea.SecTdxWorkArea.Tpm2ActivePcrBanks;
-
-  TdHobSize = (UINTN)((UINT8 *)Hob.Raw - (UINT8 *)TdHob);
-  if (WorkArea->TdxWorkArea.SecTdxWorkArea.TdxMeasurementsData.MeasurementsBitmap & TDX_MEASUREMENT_TDHOB_BITMASK) {
+  if (VtpmTdMeasurementData->MeasurementsBitmap & TDX_MEASUREMENT_TDHOB_BITMASK) {
     HandoffTables.TableDescriptionSize = sizeof (HandoffTables.TableDescription);
     CopyMem (HandoffTables.TableDescription, HANDOFF_TABLE_DESC, sizeof (HandoffTables.TableDescription));
     HandoffTables.NumberOfTables = 1;
     CopyGuid (&(HandoffTables.TableEntry[0].VendorGuid), &gUefiOvmfPkgTokenSpaceGuid);
     HandoffTables.TableEntry[0].VendorTable = TdHob;
-    Status                                  = InitDigestList (Tpm2ActivePcrBanks, &DigestList, TdHob, TdHobSize);
-    if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_ERROR, "%a: InitDigestList failed with %r\n", __FUNCTION__, Status));
-      return Status;
-    }
 
     Status = BuildTdxMeasurementGuidHobForVtpm (
                                                 0,                             // PcrIndex
                                                 EV_EFI_HANDOFF_TABLES2,        // EventType
                                                 (UINT8 *)(UINTN)&HandoffTables,// EventData
                                                 sizeof (HandoffTables),        // EventSize
-                                                &DigestList
+                                                &VtpmTdMeasurementData->TdHobHashValue
                                                 );
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_ERROR, "%a: BuildTdxMeasurementGuidHobForVtpm failed with %r\n", __FUNCTION__, Status));
@@ -405,7 +349,7 @@ VTpmBuildGuidHobForTdxMeasurement (
     }
   }
 
-  if (WorkArea->TdxWorkArea.SecTdxWorkArea.TdxMeasurementsData.MeasurementsBitmap & TDX_MEASUREMENT_CFVIMG_BITMASK) {
+  if (VtpmTdMeasurementData->MeasurementsBitmap & TDX_MEASUREMENT_CFVIMG_BITMASK) {
     FvBase                      = (UINT64)PcdGet32 (PcdOvmfFlashNvStorageVariableBase);
     FvLength                    = (UINT64)PcdGet32 (PcdCfvRawDataSize);
     FvBlob2.BlobDescriptionSize = sizeof (FvBlob2.BlobDescription);
@@ -417,18 +361,13 @@ VTpmBuildGuidHobForTdxMeasurement (
 
     FvBlob2.BlobBase   = FvBase;
     FvBlob2.BlobLength = FvLength;
-    Status             = InitDigestList (Tpm2ActivePcrBanks, &DigestList, (UINT8 *)(UINTN)FvBase, FvLength);
-    if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_ERROR, "%a: InitDigestList failed with %r\n", __FUNCTION__, Status));
-      return Status;
-    }
 
     Status = BuildTdxMeasurementGuidHobForVtpm (
                                                 0,                             // PcrIndex
                                                 EV_EFI_PLATFORM_FIRMWARE_BLOB2,// EventType
                                                 (VOID *)&FvBlob2,              // EventData
                                                 sizeof (FvBlob2),              // EventSize
-                                                &DigestList
+                                                &VtpmTdMeasurementData->CfvImgHashValue
                                                 );
   }
 
