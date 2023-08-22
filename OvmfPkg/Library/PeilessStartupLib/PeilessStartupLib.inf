@@ -69,6 +69,7 @@
   gPcdDataBaseHobGuid
   gCcEventEntryHobGuid
   gEfiNonCcFvGuid
+  gEdkiiVtpmTdMeasurementDataHobGuid
 
 [Pcd]
   gUefiOvmfPkgTokenSpaceGuid.PcdBfvBase
