@@ -679,7 +679,6 @@ ContentChangedFlag:
         }
       }
 
-      ReceivedNumberOfBlock += 1;
       DEBUG ((DEBUG_INFO, "ExtendMeasurement...\n"));
       AuthState                       = TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_SUCCESS;
       SecurityState->MeasurementState = EDKII_DEVICE_SECURITY_STATE_SUCCESS;
@@ -692,6 +691,8 @@ ContentChangedFlag:
       if (Status != EFI_SUCCESS) {
         return Status;
       }
+
+      ReceivedNumberOfBlock += 1;
     }
 
     if (ReceivedNumberOfBlock != NumberOfBlocks) {
