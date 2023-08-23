@@ -660,7 +660,7 @@ ContentChangedFlag:
           AuthState                       = TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_FAIL_INVALID;
           SecurityState->MeasurementState = EDKII_DEVICE_SECURITY_STATE_ERROR_DEVICE_ERROR;
           Status                          = ExtendMeasurement (SpdmDeviceContext, AuthState, 0, NULL, NULL, NULL, SecurityState);
-          continue;
+          return Status;
         } else {
           continue;
         }
