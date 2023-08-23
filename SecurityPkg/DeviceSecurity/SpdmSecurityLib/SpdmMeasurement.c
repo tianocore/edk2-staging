@@ -422,9 +422,8 @@ ExtendMeasurement (
       return EFI_UNSUPPORTED;
   }
 
-  if ((RequesterNonce != NULL) && (ResponderNonce != NULL)) {
+  if (RequesterNonce != NULL) {
     TCG_NV_INDEX_DYNAMIC_EVENT_LOG_STRUCT_SPDM_GET_MEASUREMENTS  DynamicEventLogSpdmGetMeasurementsEvent;
-    TCG_NV_INDEX_DYNAMIC_EVENT_LOG_STRUCT_SPDM_MEASUREMENTS      DynamicEventLogSpdmMeasurementsEvent;
 
     CopyMem (DynamicEventLogSpdmGetMeasurementsEvent.Header.Signature, TCG_NV_EXTEND_INDEX_FOR_DYNAMIC_SIGNATURE, sizeof (TCG_NV_EXTEND_INDEX_FOR_DYNAMIC_SIGNATURE));
     DynamicEventLogSpdmGetMeasurementsEvent.Header.Version = TCG_NV_INDEX_DYNAMIC_EVENT_LOG_STRUCT_VERSION;
@@ -448,6 +447,10 @@ ExtendMeasurement (
     }
 
     DEBUG ((DEBUG_INFO, "TpmMeasureAndLogData (Dynamic) - %r\n", Status));
+  }
+
+  if (ResponderNonce != NULL) {
+    TCG_NV_INDEX_DYNAMIC_EVENT_LOG_STRUCT_SPDM_MEASUREMENTS      DynamicEventLogSpdmMeasurementsEvent;
 
     CopyMem (DynamicEventLogSpdmMeasurementsEvent.Header.Signature, TCG_NV_EXTEND_INDEX_FOR_DYNAMIC_SIGNATURE, sizeof (TCG_NV_EXTEND_INDEX_FOR_DYNAMIC_SIGNATURE));
     DynamicEventLogSpdmMeasurementsEvent.Header.Version = TCG_NV_INDEX_DYNAMIC_EVENT_LOG_STRUCT_VERSION;
@@ -663,9 +666,8 @@ ContentChangedFlag:
         }
       }
 
-      if (  (ReceivedNumberOfBlock == NumberOfBlocks - 1)
-         && (ContentChanged == SPDM_MEASUREMENTS_RESPONSE_CONTENT_CHANGE_DETECTED))
-      {
+      if ((ReceivedNumberOfBlock == NumberOfBlocks - 1) &&
+          (ContentChanged == SPDM_MEASUREMENTS_RESPONSE_CONTENT_CHANGE_DETECTED)) {
         if (ContentChangedCount == 0) {
           ContentChangedCount++;
           goto ContentChangedFlag;
@@ -684,7 +686,7 @@ ContentChangedFlag:
       if (ReceivedNumberOfBlock == NumberOfBlocks - 1) {
         Status = ExtendMeasurement (SpdmDeviceContext, AuthState, MeasurementRecordLength, MeasurementRecord, RequesterNonce, ResponderNonce, SecurityState);
       } else {
-        Status = ExtendMeasurement (SpdmDeviceContext, AuthState, MeasurementRecordLength, MeasurementRecord, NULL, NULL, SecurityState);
+        Status = ExtendMeasurement (SpdmDeviceContext, AuthState, MeasurementRecordLength, MeasurementRecord, NULL, ResponderNonce, SecurityState);
       }
 
       if (Status != EFI_SUCCESS) {
