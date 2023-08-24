@@ -11,7 +11,7 @@
 ################################################################################
 
 [Defines]
-!include OvmfPkg/Include/Fdf/OvmfPkgDefines.fdf.inc
+!include OvmfPkg/Include/Fdf/OvmfPkgIntelDefines.fdf.inc
 
 #
 # Build the variable store and the firmware code as one unified flash device
@@ -173,6 +173,7 @@ APRIORI DXE {
   INF  MdeModulePkg/Universal/DevicePathDxe/DevicePathDxe.inf
   INF  MdeModulePkg/Universal/PCD/Dxe/Pcd.inf
   INF  OvmfPkg/TdxDxe/TdxDxe.inf
+  INF  OvmfPkg/Tcg/VmmSpdmTunnel/VmmSpdmTunnelDxe.inf
   INF  OvmfPkg/QemuFlashFvbServicesRuntimeDxe/FvbServicesRuntimeDxe.inf
 }
 
@@ -240,7 +241,8 @@ INF  MdeModulePkg/Universal/Acpi/AcpiTableDxe/AcpiTableDxe.inf
 INF  OvmfPkg/AcpiPlatformDxe/AcpiPlatformDxe.inf
 
 INF  FatPkg/EnhancedFatDxe/Fat.inf
-INF OvmfPkg/TdxDxe/TdxDxe.inf
+INF  OvmfPkg/TdxDxe/TdxDxe.inf
+INF  OvmfPkg/Tcg/VmmSpdmTunnel/VmmSpdmTunnelDxe.inf
 
 INF  OvmfPkg/IoMmuDxe/IoMmuDxe.inf
 
@@ -256,6 +258,11 @@ INF  MdeModulePkg/Universal/Variable/RuntimeDxe/VariableRuntimeDxe.inf
 # EFI_CC_MEASUREMENT_PROTOCOL
 #
 INF SecurityPkg/Tcg/TdTcg2Dxe/TdTcg2Dxe.inf
+
+#
+# EFI_TCG2_PROTOCOL
+#
+INF SecurityPkg/Tcg/Tcg2Dxe/Tcg2Dxe.inf
 
 ################################################################################
 
