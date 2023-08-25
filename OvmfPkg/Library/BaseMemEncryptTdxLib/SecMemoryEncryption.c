@@ -347,8 +347,10 @@ SetMemorySharedOrPrivate (
           __func__,
           PhysicalAddress
           ));
+        // In SEC phase, TDVF should not split the memory.
         ASSERT (FALSE);
-        continue;
+        Status = RETURN_NOT_READY;
+        goto Done;
       }
     } else {
       //
@@ -403,8 +405,10 @@ SetMemorySharedOrPrivate (
             __func__,
             PhysicalAddress
             ));
+          // In SEC phase, TDVF should not split the memory.
           ASSERT (FALSE);
-          continue;
+          Status = RETURN_NOT_READY;
+          goto Done;
         }
       } else {
         PageDirectoryPointerEntry =
