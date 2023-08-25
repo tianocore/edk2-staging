@@ -596,7 +596,7 @@ DoDeviceAuthentication (
   if ((CapabilityFlags & SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_CHAL_CAP) == 0) {
     *AuthState                         = TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_NO_BINDING;
     SecurityState->AuthenticationState = EDKII_DEVICE_SECURITY_STATE_ERROR_DEVICE_NO_CAPABILITIES;
-    Status                             = ExtendCertificate (SpdmDeviceContext, *AuthState, CertChainSize, CertChain, TrustAnchor, TrustAnchorSize, *ValidSlotId, SecurityState);
+    Status                             = ExtendCertificate (SpdmDeviceContext, *AuthState, CertChainSize, CertChain, NULL, 0, *ValidSlotId, SecurityState);
     return Status;
   }
 
