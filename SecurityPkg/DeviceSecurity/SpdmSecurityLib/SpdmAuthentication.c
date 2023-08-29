@@ -591,6 +591,14 @@ DoDeviceAuthentication (
     }
 
     DEBUG ((DEBUG_INFO, "SpdmGetCertificateEx - SpdmReturn %p, TrustAnchorSize 0x%x, RootCertMatch %d\n", SpdmReturn, TrustAnchorSize, RootCertMatch));
+
+    //get the valid CertChain
+    CertChainSize = sizeof (CertChain);
+    ZeroMem (CertChain, sizeof (CertChain));
+    SpdmReturn = SpdmGetCertificateEx (SpdmContext, NULL, *ValidSlotId, &CertChainSize, CertChain, (CONST VOID **)&TrustAnchor, &TrustAnchorSize);
+    if ((!LIBSPDM_STATUS_IS_SUCCESS (SpdmReturn)) && (!(SpdmReturn == LIBSPDM_STATUS_VERIF_NO_AUTHORITY))) {
+      return EFI_DEVICE_ERROR;
+    }
   }
 
   if ((CapabilityFlags & SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_CHAL_CAP) == 0) {
