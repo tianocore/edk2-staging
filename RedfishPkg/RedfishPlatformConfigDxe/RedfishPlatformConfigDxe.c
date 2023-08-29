@@ -1961,9 +1961,7 @@ RedfishPlatformConfigProtocolGetConfigureLang (
         TmpString = HiiGetRedfishString (StatementRef->Statement->ParentForm->ParentFormset->HiiHandle, FullSchema, StatementRef->Statement->Description);
         ASSERT (TmpString != NULL);
         if (TmpString != NULL) {
-          TmpConfigureLangList[Index] = AllocateCopyPool (StrSize (TmpString), TmpString);
-          ASSERT (TmpConfigureLangList[Index] != NULL);
-          FreePool (TmpString);
+          TmpConfigureLangList[Index] = TmpString;
           ++Index;
         }
       }
