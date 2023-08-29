@@ -17,6 +17,7 @@
 
 [Includes.Common.Private]
   ../CryptoPkg/Library/Include
+  ../CryptoPkg/Library/OpensslLib/openssl/include
   ../CryptoPkg/Library/OpensslLib/OpensslGen/include
 
 [Includes]
