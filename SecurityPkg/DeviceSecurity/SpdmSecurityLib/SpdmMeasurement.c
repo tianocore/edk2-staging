@@ -277,7 +277,7 @@ ExtendMeasurement (
         EventType = EV_EFI_SPDM_FIRMWARE_CONFIG;
         break;
       case SPDM_MEASUREMENT_BLOCK_MEASUREMENT_TYPE_MEASUREMENT_MANIFEST:
-      // skip manifest
+      // skip manifest, because manifest doesn't belong to the EV_EFI_SPDM_FIRMWARE_BLOB and EV_EFI_SPDM_FIRMWARE_CONFIG
       default:
         return EFI_SUCCESS;
     }
