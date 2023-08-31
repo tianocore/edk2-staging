@@ -66,9 +66,10 @@ c. Solution: using OpenSSL SM3 and SHA3 in MbedTlsLib: https://github.com/tianoc
 | [Enable the legacy path][legacycommit] | [Reject][legacypr] | [Enable in Edk2 code][legacybackup] | |  
 | Drop float for UEFI | [Done][floatpr] | | Bug fix |  
 | Param buffer overflow | [Done][ecpararm] | | Bug fix |  
-| Enable alg auto init | [WIP][autoinit] | [Enable in Edk2 code][autoinitbackup] | Bug fix |  
+| Enable alg auto init | [Done][autoinitstaging] | [Enable in Edk2 code][autoinitbackup] | Disable alg auto init in Edk2Staging(2) |  
   
 (1) OpenSSL are disinclined to backport ECX patch to 3.0, 3.1, stable release branch only accept bug fix.  
+(2) It is a known issue of openssl3.0, OpenSSL community will help to fix this issues in openssl repository, [link][autoinit].  
   
 ## POC result
 Binaries mode (use crypto drivers)  
@@ -208,3 +209,4 @@ Target for 2023 Q1
 [autoinitbackup]: https://github.com/tianocore/edk2/pull/4452/commits/384187f66352e0507e06b0ff196ffb940822306d
 [legacypr]: https://github.com/openssl/openssl/pull/20777
 [ecxbackup]: https://github.com/liyi77/edk2/commit/d537a486d804c27ee7212cfa80d4bf4818bf91ca
+[autoinitstaging]: https://github.com/tianocore/edk2-staging/commit/872df826dd4a9f1db9e3f534614d0eca9736806a
