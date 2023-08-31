@@ -315,8 +315,10 @@ Pkcs7GetSignedData (
   )
 {
   UINT8 *P;
+  UINT8 *TemP;
   UINT8 *End;
   UINTN Len;
+  UINTN ObjLen;
   INT32 Ret;
   UINT8 *CertP;
   UINTN CertLen;
@@ -333,122 +335,126 @@ Pkcs7GetSignedData (
 
   Ret = mbedtls_asn1_get_tag (
     &P, End, &Len, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE);
-
-  if (Ret == 0) {
-    // version
-    Ret = MbedTlsPkcs7GetVersion (&P, End, &SignedData->Version);
-  }
-
-  if (Ret == 0 && SignedData->Version != 1) {
+  if (Ret != 0) {
     Ret = -1;
+    return Ret;
   }
 
-  if (Ret == 0) {
-    // digest algorithm
-    Ret = MbedTlsPkcs7GetDigestAlgorithmSet (
-      &P, End, &SignedData->DigestAlgorithms);
+  // version
+  Ret = MbedTlsPkcs7GetVersion (&P, End, &SignedData->Version);
+  if ((Ret != 0) || (SignedData->Version != 1)) {
+    Ret = -1;
+    return Ret;
   }
 
-  if (Ret == 0) {
-    if (
+  // digest algorithm
+  Ret = MbedTlsPkcs7GetDigestAlgorithmSet (
+    &P, End, &SignedData->DigestAlgorithms);
+  if (Ret != 0) {
+    Ret = -1;
+    return Ret;
+  }
+
+  if (
 #ifndef DISABLE_SHA1_DEPRECATED_INTERFACES
-        ((SignedData->DigestAlgorithms.len == sizeof (MBEDTLS_OID_DIGEST_ALG_SHA1) - 1) &&
-         (CompareMem (SignedData->DigestAlgorithms.p,
-                      MBEDTLS_OID_DIGEST_ALG_SHA1,
-                      SignedData->DigestAlgorithms.len) == 0)) ||
+      ((SignedData->DigestAlgorithms.len == sizeof (MBEDTLS_OID_DIGEST_ALG_SHA1) - 1) &&
+        (CompareMem (SignedData->DigestAlgorithms.p,
+                    MBEDTLS_OID_DIGEST_ALG_SHA1,
+                    SignedData->DigestAlgorithms.len) == 0)) ||
 #endif
-        ((SignedData->DigestAlgorithms.len == sizeof (MBEDTLS_OID_DIGEST_ALG_SHA256) - 1) &&
-         (CompareMem (SignedData->DigestAlgorithms.p,
-                      MBEDTLS_OID_DIGEST_ALG_SHA256,
-                      SignedData->DigestAlgorithms.len) == 0)) ||
-        ((SignedData->DigestAlgorithms.len == sizeof (MBEDTLS_OID_DIGEST_ALG_SHA384) - 1) &&
-         (CompareMem (SignedData->DigestAlgorithms.p,
-                      MBEDTLS_OID_DIGEST_ALG_SHA384,
-                      SignedData->DigestAlgorithms.len) == 0)) ||
-        ((SignedData->DigestAlgorithms.len == sizeof (MBEDTLS_OID_DIGEST_ALG_SHA512) - 1) &&
-         (CompareMem (SignedData->DigestAlgorithms.p,
-                      MBEDTLS_OID_DIGEST_ALG_SHA512,
-                      SignedData->DigestAlgorithms.len) == 0))) {
-      Ret = 0;
-    } else {
-      Ret = -1;
-    }
-  }
-
-  if (Ret == 0) {
-    Ret = Pkcs7GetContentInfoType(&P, End, &SignedData->ContentInfo.Oid);
-  }
-
-  if (Ret == 0) {
-    // move to next
-    P = P + SignedData->ContentInfo.Oid.len;
-    Ret = MbedTlsPkcs7GetNextContentLen (&P, End, &Len);
-    CertP = P + Len;
-
-    // move to actual cert, if there are more [0]
-    if (MbedTlsPkcs7GetNextContentLen (&CertP, End, &CertLen) == 0) {
-      Len = CertLen;
-      P = CertP;
-    }
-  }
-
-  // certificates: may have many certs
-  CertP = P;
-
-  TotalCertLen = 0;
-
-  MoreCert = &SignedData->Certificates;
-  CertNum = 0;
-
-  while (TotalCertLen < Len) {
-    OldCertP = CertP;
-
-    Ret = mbedtls_asn1_get_tag(&CertP, End, &CertLen, 0x30);
-    if (Ret != 0) {
-      goto End;
-    }
-
-    //cert total len
-    CertLen = CertLen + (CertP - OldCertP);
-
-    //move to next cert
-    CertP = OldCertP + CertLen;
-
-    //change TotalCertLen
-    TotalCertLen += CertLen;
-
-    mbedtls_x509_crt_init (MoreCert);
-    Ret = MbedTlsPkcs7GetCertificates (&OldCertP, CertLen, MoreCert);
-    if (Ret != 0) {
-      goto End;
-    }
-
-    CertNum++;
-    MoreCert->next = AllocatePool(sizeof(mbedtls_x509_crt));
-    MoreCert = MoreCert->next;
-  }
-
-  if (TotalCertLen != Len) {
+      ((SignedData->DigestAlgorithms.len == sizeof (MBEDTLS_OID_DIGEST_ALG_SHA256) - 1) &&
+        (CompareMem (SignedData->DigestAlgorithms.p,
+                    MBEDTLS_OID_DIGEST_ALG_SHA256,
+                    SignedData->DigestAlgorithms.len) == 0)) ||
+      ((SignedData->DigestAlgorithms.len == sizeof (MBEDTLS_OID_DIGEST_ALG_SHA384) - 1) &&
+        (CompareMem (SignedData->DigestAlgorithms.p,
+                    MBEDTLS_OID_DIGEST_ALG_SHA384,
+                    SignedData->DigestAlgorithms.len) == 0)) ||
+      ((SignedData->DigestAlgorithms.len == sizeof (MBEDTLS_OID_DIGEST_ALG_SHA512) - 1) &&
+        (CompareMem (SignedData->DigestAlgorithms.p,
+                    MBEDTLS_OID_DIGEST_ALG_SHA512,
+                    SignedData->DigestAlgorithms.len) == 0))) {
+    Ret = 0;
+  } else {
     Ret = -1;
-    goto End;
+    return Ret;
   }
 
-  LastCert = &(SignedData->Certificates);
+  //contentInfo
+  TemP = P;
+  if (mbedtls_asn1_get_tag(&P, End, &ObjLen, 0x30) != 0) {
+    Ret = -1;
+    return Ret;
+  }
 
-  while(CertNum--) {
-    if (CertNum == 0) {
-      LastCert->next = NULL;
-      break;
-    } else {
-      LastCert = LastCert->next;
+  P += ObjLen;
+  Ret = Pkcs7GetContentInfoType(&TemP, End, &SignedData->ContentInfo.Oid);
+  if (Ret != 0) {
+    Ret = -1;
+    return Ret;
+  }
+
+  // certificates: may have many certs or have no cert
+  if (mbedtls_asn1_get_tag(&P, End, &Len, 0xA0) == 0) {
+    CertP = P;
+    TotalCertLen = 0;
+    MoreCert = &SignedData->Certificates;
+    CertNum = 0;
+
+    while (TotalCertLen < Len) {
+      OldCertP = CertP;
+
+      Ret = mbedtls_asn1_get_tag(&CertP, End, &CertLen, 0x30);
+      if (Ret != 0) {
+        goto End;
+      }
+
+      //cert total len
+      CertLen = CertLen + (CertP - OldCertP);
+
+      //move to next cert
+      CertP = OldCertP + CertLen;
+
+      //change TotalCertLen
+      TotalCertLen += CertLen;
+
+      mbedtls_x509_crt_init (MoreCert);
+      Ret = MbedTlsPkcs7GetCertificates (&OldCertP, CertLen, MoreCert);
+      if (Ret != 0) {
+        goto End;
+      }
+
+      CertNum++;
+      MoreCert->next = AllocatePool(sizeof(mbedtls_x509_crt));
+      MoreCert = MoreCert->next;
     }
+
+    if (TotalCertLen != Len) {
+      Ret = -1;
+      goto End;
+    }
+
+    LastCert = &(SignedData->Certificates);
+
+    while(CertNum--) {
+      if (CertNum == 0) {
+        LastCert->next = NULL;
+        break;
+      } else {
+        LastCert = LastCert->next;
+      }
+    }
+  }
+
+  //crls
+  P = P + Len;
+  TemP = P;
+  if (mbedtls_asn1_get_tag(&TemP, End, &ObjLen, 0xA1) == 0) {
+    P = TemP + ObjLen;
   }
 
   // signers info
-  if (Ret == 0) {
-    P = P + Len;
-    Ret = MbedTlsPkcs7GetSignersInfoSet (&P, End, &SignedData->SignerInfos);
-  }
+  Ret = MbedTlsPkcs7GetSignersInfoSet (&P, End, &SignedData->SignerInfos);
 
 End:
   if (MoreCert != NULL) {

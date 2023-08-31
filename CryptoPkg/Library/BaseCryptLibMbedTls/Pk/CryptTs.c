@@ -180,21 +180,21 @@ ImageTimestampVerify (
   }
   Ptr += ObjLen;
 
-  //encapContentInfo
+  //ContentInfo
   if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x30) != 0) {
     return FALSE;
   }
   Ptr += ObjLen;
 
-  //cert
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0xA0) != 0) {
-    return FALSE;
-  }
-  Ptr += ObjLen;
-
+  //OPTIONAL cert
   TempPtr = Ptr;
-  //OPTIONAL CRLs
   if (mbedtls_asn1_get_tag(&TempPtr, End, &ObjLen, 0xA0) == 0) {
+    Ptr = TempPtr + ObjLen;
+  }
+
+  //OPTIONAL CRLs
+  TempPtr = Ptr;
+  if (mbedtls_asn1_get_tag(&TempPtr, End, &ObjLen, 0xA1) == 0) {
     Ptr = TempPtr + ObjLen;
   }
 
@@ -216,7 +216,7 @@ ImageTimestampVerify (
   }
   Ptr += ObjLen;
 
-  //sid
+  //IssuerAndSerialNumber
   if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x30) != 0) {
     return FALSE;
   }
