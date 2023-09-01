@@ -34,7 +34,7 @@ SpdmDeviceAuthenticationAndMeasurement (
   UINT8                AuthState;
   UINT8                SlotId;
 
-  SpdmDeviceContext = CreateSpdmDeviceContext (SpdmDeviceInfo);
+  SpdmDeviceContext = CreateSpdmDeviceContext (SpdmDeviceInfo, SecurityState);
   if (SpdmDeviceContext == NULL) {
     return EFI_UNSUPPORTED;
   }

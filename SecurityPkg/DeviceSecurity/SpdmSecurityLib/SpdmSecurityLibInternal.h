@@ -74,10 +74,21 @@ GetSpdmIoProtocolViaSpdmContext (
   IN VOID  *SpdmContext
   );
 
+/**
+  This function creates the spdm device context and init connection to the
+  responder with the device info.
+
+  @param[in]  SpdmDeviceInfo        A pointer to device info.
+  @param[out] SecurityState         A pointer to the security state of the requester.
+
+  @return the spdm device conext after the init connection succeeds.
+
+**/
 SPDM_DEVICE_CONTEXT *
 EFIAPI
 CreateSpdmDeviceContext (
-  IN EDKII_SPDM_DEVICE_INFO  *SpdmDeviceInfo
+  IN  EDKII_SPDM_DEVICE_INFO       *SpdmDeviceInfo,
+  OUT EDKII_DEVICE_SECURITY_STATE  *SecurityState
   );
 
 VOID
@@ -128,6 +139,36 @@ CreateDeviceMeasurementContext (
   IN  SPDM_DEVICE_CONTEXT  *SpdmDeviceContext,
   IN OUT VOID              *DeviceContext,
   IN UINTN                 DeviceContextSize
+  );
+
+/**
+  Extend Certicate and auth state to NV Index and measure trust anchor to PCR.
+
+  @param[in]  SpdmDeviceContext          The SPDM context for the device.
+  @param[in]  AuthState                  The auth state of this deice.
+  @param[in]  CertChainSize              The size of cert chain.
+  @param[in]  CertChain                  A pointer to a destination buffer to store the certificate chain.
+  @param[in]  TrustAnchor                A buffer to hold the trust_anchor which is used to validate the peer
+                                         certificate, if not NULL.
+  @param[in]  TrustAnchorSize            A buffer to hold the trust_anchor_size, if not NULL..
+  @param[in]  SlotId                     The number of slot for the certificate chain.
+  @param[out]  SecurityState             A pointer to the security state of the requester.
+
+  @retval EFI_SUCCESS           Operation completed successfully.
+  @retval EFI_OUT_OF_RESOURCES  Out of memory.
+  @retval EFI_DEVICE_ERROR      The operation was unsuccessful.
+
+**/
+EFI_STATUS
+ExtendCertificate (
+  IN  SPDM_DEVICE_CONTEXT          *SpdmDeviceContext,
+  IN UINT8                         AuthState,
+  IN UINTN                         CertChainSize,
+  IN UINT8                         *CertChain,
+  IN VOID                          *TrustAnchor,
+  IN UINTN                         TrustAnchorSize,
+  IN UINT8                         SlotId,
+  OUT EDKII_DEVICE_SECURITY_STATE  *SecurityState
   );
 
 /**
