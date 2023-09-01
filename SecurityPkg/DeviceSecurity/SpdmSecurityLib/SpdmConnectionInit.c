@@ -157,6 +157,7 @@ RecordConnectionFailureStatus (
   responder with the device info.
 
   @param[in]  SpdmDeviceInfo        A pointer to device info.
+  @param[out] SecurityState         A pointer to the security state of the requester.
 
   @return the spdm device conext after the init connection succeeds.
 
@@ -164,7 +165,8 @@ RecordConnectionFailureStatus (
 SPDM_DEVICE_CONTEXT *
 EFIAPI
 CreateSpdmDeviceContext (
-  IN EDKII_SPDM_DEVICE_INFO  *SpdmDeviceInfo
+  IN  EDKII_SPDM_DEVICE_INFO       *SpdmDeviceInfo,
+  OUT EDKII_DEVICE_SECURITY_STATE  *SecurityState
   )
 {
   SPDM_DEVICE_CONTEXT  *SpdmDeviceContext;
@@ -186,6 +188,7 @@ CreateSpdmDeviceContext (
   UINT8                Data8;
   UINT16               Data16;
   UINT32               Data32;
+  UINT8                AuthState;
 
   SpdmDeviceContext = AllocateZeroPool (sizeof (*SpdmDeviceContext));
   if (SpdmDeviceContext == NULL) {
@@ -363,17 +366,20 @@ CreateSpdmDeviceContext (
   Parameter.location = SpdmDataLocationLocal;
   SpdmReturn         = SpdmSetData (SpdmContext, SpdmDataCapabilityCTExponent, &Parameter, &Data8, sizeof (Data8));
   if (LIBSPDM_STATUS_IS_ERROR (SpdmReturn)) {
+    ASSERT (FALSE);
     goto Error;
   }
 
   Data32     = 0;
   SpdmReturn = SpdmSetData (SpdmContext, SpdmDataCapabilityFlags, &Parameter, &Data32, sizeof (Data32));
   if (LIBSPDM_STATUS_IS_ERROR (SpdmReturn)) {
+    ASSERT (FALSE);
     goto Error;
   }
   Data8      = SPDM_MEASUREMENT_SPECIFICATION_DMTF;
   SpdmReturn = SpdmSetData (SpdmContext, SpdmDataMeasurementSpec, &Parameter, &Data8, sizeof (Data8));
   if (LIBSPDM_STATUS_IS_ERROR (SpdmReturn)) {
+    ASSERT (FALSE);
     goto Error;
   }
 
@@ -390,6 +396,7 @@ CreateSpdmDeviceContext (
 
   SpdmReturn = SpdmSetData (SpdmContext, SpdmDataBaseAsymAlgo, &Parameter, &Data32, sizeof (Data32));
   if (LIBSPDM_STATUS_IS_ERROR (SpdmReturn)) {
+    ASSERT (FALSE);
     goto Error;
   }
 
@@ -403,12 +410,20 @@ CreateSpdmDeviceContext (
 
   SpdmReturn = SpdmSetData (SpdmContext, SpdmDataBaseHashAlgo, &Parameter, &Data32, sizeof (Data32));
   if (LIBSPDM_STATUS_IS_ERROR (SpdmReturn)) {
+    ASSERT (FALSE);
     goto Error;
   }
 
   SpdmReturn = SpdmInitConnection (SpdmContext, FALSE);
   if (LIBSPDM_STATUS_IS_ERROR (SpdmReturn)) {
     DEBUG ((DEBUG_ERROR, "SpdmInitConnection - %p\n", SpdmReturn));
+
+    AuthState = TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_NO_SPDM;
+    SecurityState->AuthenticationState = EDKII_DEVICE_SECURITY_STATE_ERROR_DEVICE_NO_CAPABILITIES;
+    Status                             = ExtendCertificate (SpdmDeviceContext, AuthState, 0, NULL, NULL, 0, 0, SecurityState);
+    if (Status != EFI_SUCCESS) {
+      DEBUG ((DEBUG_ERROR, "ExtendCertificate  AUTH_STATE_NO_SPDM failed\n"));
+    }
     goto Error;
   }
 
