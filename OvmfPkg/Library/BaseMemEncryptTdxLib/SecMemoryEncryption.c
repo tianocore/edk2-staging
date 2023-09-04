@@ -92,6 +92,7 @@ SetOrClearSharedBit (
 
   DEBUG ((DEBUG_INFO, ">> EncMask=%llx\n", AddressEncMask));
 
+  Status = EFI_SUCCESS;
   //
   // Set or clear page table entry. Also, set shared bit in physical address, before calling MapGPA
   //
