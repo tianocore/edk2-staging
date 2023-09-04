@@ -339,6 +339,7 @@ PrepareForVtpm (
   EFI_PHYSICAL_ADDRESS  Address;
   VOID                  *Registration;
   EFI_EVENT             AcpiTableEvent;
+  RETURN_STATUS         PcdStatus;
 
   VTPM_SECURE_SESSION_INFO_TABLE *InfoTable;
 
@@ -377,7 +378,8 @@ PrepareForVtpm (
     
 
     // Set active pcr banks
-    PcdSet32S (PcdTpm2HashMask, WorkArea->TdxWorkArea.SecTdxWorkArea.Tpm2ActivePcrBanks);
+    PcdStatus = PcdSet32S (PcdTpm2HashMask, WorkArea->TdxWorkArea.SecTdxWorkArea.Tpm2ActivePcrBanks);
+    ASSERT_RETURN_ERROR (PcdStatus);
   }
 
  #endif
@@ -395,9 +397,10 @@ PrepareForVtpm (
   ZeroMem ((VOID *)(UINTN)Address, EFI_PAGES_TO_SIZE (1));
   CopyMem ((VOID *)(UINTN)Address, InfoTable, VTPM_SECURE_SESSION_INFO_TABLE_SIZE);
 
-  PcdSet64S (PcdVtpmSecureSessionInfoTableAddr, Address);
-  PcdSet64S (PcdVtpmSecureSessionInfoTableSize, EFI_PAGES_TO_SIZE (1));
-
+  PcdStatus = PcdSet64S (PcdVtpmSecureSessionInfoTableAddr, Address);
+  ASSERT_RETURN_ERROR (PcdStatus);
+  PcdStatus = PcdSet64S (PcdVtpmSecureSessionInfoTableSize, EFI_PAGES_TO_SIZE (1));
+  ASSERT_RETURN_ERROR (PcdStatus);
   //
   // If VTPM is enabled then create event callback to install TDTK ACPI Table
   //
