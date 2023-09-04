@@ -292,6 +292,8 @@ GetCertKeyPairAndSaveToHob (
     return EFI_INVALID_PARAMETER;
   }
 
+  PriKey = NULL;
+
   // Get public key size
   IsPubKey = TRUE;
   if (GetEcKeySize (EcKey, IsPubKey, &PubKeySize) == FALSE) {
@@ -945,8 +947,9 @@ InitialVtpmTdCertChain (
 
   UINT32  UseHashAlgo = SPDM_ALGORITHMS_BASE_HASH_ALGO_TPM_ALG_SHA_384;
 
-  Pages = VTPM_TD_CERT_DEFAULT_ALLOCATION_PAGE;
-  Ptr   = NULL;
+  Pages      = VTPM_TD_CERT_DEFAULT_ALLOCATION_PAGE;
+  Ptr        = NULL;
+  cert_chain = NULL;
 
   // UINT32  UseReqAsymAlgo = SPDM_ALGORITHMS_BASE_ASYM_ALGO_TPM_ALG_ECDSA_ECC_NIST_P384;
 

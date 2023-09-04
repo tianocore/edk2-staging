@@ -186,6 +186,8 @@ CreateHCRTMComponentEvent (
 
   ZeroMem(Digest, SHA384_DIGEST_SIZE);
 
+  ComponentMeasurement = NULL;
+
   HashAlgo = TPM_ALG_SHA384;
 
   HCRTMComponentDescriptionStructSize = sizeof(TCG_HCRTMComponentDescription) + sizeof(TCG_HCRTMCOMPONENTEVENT_COMPONENT_DESCRIPTION);
