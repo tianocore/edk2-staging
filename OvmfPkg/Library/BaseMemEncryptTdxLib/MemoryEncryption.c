@@ -618,6 +618,7 @@ SetOrClearSharedBit (
 
   AddressEncMask = GetMemEncryptionAddressMask ();
 
+  Status = EFI_SUCCESS;
   //
   // Set or clear page table entry. Also, set shared bit in physical address, before calling MapGPA
   //
