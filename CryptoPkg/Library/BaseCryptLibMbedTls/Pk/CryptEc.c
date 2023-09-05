@@ -121,17 +121,37 @@ EcGroupGetCurve (
 
   grp = ( mbedtls_ecp_group *)EcGroup;
 
+  //
+  // Check input parameters.
+  //
+  if ((EcGroup == NULL) || (BnPrime == NULL) ||
+      (grp->P.n == 0) || (grp->P.n > UINT_MAX) ||
+      (grp->P.p == NULL) ||
+      ((grp->P.s != 1) && (grp->P.s != -1))) {
+    return FALSE;
+  }
+
   if (mbedtls_mpi_copy((mbedtls_mpi *)BnPrime, &grp->P) != 0) {
     return FALSE;
   }
 
   if (BnA != NULL) {
+    if ((grp->A.n == 0) || (grp->A.n > UINT_MAX) ||
+        (grp->A.p == NULL) ||
+        ((grp->A.s != 1) && (grp->A.s != -1))) {
+      return FALSE;
+    }
     if (mbedtls_mpi_copy((mbedtls_mpi *)BnA, &grp->A) != 0) {
       return FALSE;
     }
   }
 
   if (BnB != NULL) {
+    if ((grp->B.n == 0) || (grp->B.n > UINT_MAX) ||
+        (grp->B.p == NULL) ||
+        ((grp->B.s != 1) && (grp->B.s != -1))) {
+      return FALSE;
+    }
     if (mbedtls_mpi_copy((mbedtls_mpi *)BnB, &grp->B) != 0) {
       return FALSE;
     }
@@ -162,6 +182,16 @@ EcGroupGetOrder (
   mbedtls_ecp_group *grp;
 
   grp = ( mbedtls_ecp_group *)EcGroup;
+
+  //
+  // Check input parameters.
+  //
+  if ((EcGroup == NULL) || (BnOrder == NULL) ||
+      (grp->N.n == 0) || (grp->N.n > UINT_MAX) ||
+      (grp->N.p == NULL) ||
+      ((grp->N.s != 1) && (grp->N.s != -1))) {
+    return FALSE;
+  }
 
   if (mbedtls_mpi_copy((mbedtls_mpi *)BnOrder, &grp->N) != 0) {
     return FALSE;
@@ -262,6 +292,19 @@ EcPointGetAffineCoordinates (
 
   pt = ( mbedtls_ecp_point *)EcPoint;
 
+  //
+  // Check input parameters.
+  //
+  if ((EcPoint == NULL) || (BnX == NULL) || (BnY == NULL) ||
+      (pt->X.n == 0) || (pt->X.n > UINT_MAX) ||
+      (pt->X.p == NULL) ||
+      ((pt->X.s != 1) && (pt->X.s != -1)) ||
+      (pt->Y.n == 0) || (pt->Y.n > UINT_MAX) ||
+      (pt->Y.p == NULL) ||
+      ((pt->Y.s != 1) && (pt->Y.s != -1))) {
+    return FALSE;
+  }
+
   if (mbedtls_mpi_copy((mbedtls_mpi *)BnX, &pt->X) != 0) {
     return FALSE;
   }
@@ -298,6 +341,19 @@ EcPointSetAffineCoordinates (
   mbedtls_ecp_point *pt;
 
   pt = ( mbedtls_ecp_point *)EcPoint;
+
+  //
+  // Check input parameters.
+  //
+  if ((EcPoint == NULL) || (BnX == NULL) || (BnY == NULL) ||
+      (((mbedtls_mpi *)BnY)->n == 0) || (((mbedtls_mpi *)BnY)->n > UINT_MAX) ||
+      (((mbedtls_mpi *)BnX)->n == 0) || (((mbedtls_mpi *)BnX)->n > UINT_MAX) ||
+      (((mbedtls_mpi *)BnX)->p == NULL) ||
+      ((((mbedtls_mpi *)BnX)->s != 1) && (((mbedtls_mpi *)BnX)->s != -1)) ||
+      (((mbedtls_mpi *)BnY)->p == NULL) ||
+      ((((mbedtls_mpi *)BnY)->s != 1) && (((mbedtls_mpi *)BnY)->s != -1))) {
+    return FALSE;
+  }
 
   if (mbedtls_mpi_copy(&pt->X, (mbedtls_mpi *)BnX) != 0) {
     return FALSE;
@@ -562,6 +618,21 @@ EcPointSetCompressedCoordinates (
 
   pt = ( mbedtls_ecp_point *)EcPoint;
   grp = ( mbedtls_ecp_group *)EcGroup;
+
+  //
+  // Check input parameters.
+  //
+  if ((EcGroup == NULL) || (EcPoint == NULL) || (BnX == NULL) ||
+      (((mbedtls_mpi *)BnX)->n == 0) || (((mbedtls_mpi *)BnX)->n > UINT_MAX) ||
+      (((mbedtls_mpi *)BnX)->p == NULL) ||
+      ((((mbedtls_mpi *)BnX)->s != 1) && (((mbedtls_mpi *)BnX)->s != -1)) ||
+      (grp->P.n == 0) || (grp->P.n  > UINT_MAX) ||
+      (grp->A.p == NULL) || ((grp->A.s != 1) && (grp->A.s != -1)) ||
+      (grp->A.n == 0) || (grp->A.n  > UINT_MAX) ||
+      (grp->B.p == NULL) || ((grp->B.s != 1) && (grp->B.s != -1)) ||
+      (grp->B.n == 0) || (grp->B.n  > UINT_MAX)) {
+    return FALSE;
+  }
 
   mbedtls_mpi_init(&r);
   mbedtls_mpi_init(&n);
