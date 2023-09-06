@@ -392,55 +392,58 @@ Pkcs7GetSignedData (
     }
   }
 
-  // certificates: may have many certs
-  CertP = P;
+  if (Ret == 0) {
+    // certificates: may have many certs
+    CertP = P;
 
-  TotalCertLen = 0;
+    TotalCertLen = 0;
 
-  MoreCert = &SignedData->Certificates;
-  CertNum = 0;
+    MoreCert = &SignedData->Certificates;
+    CertNum = 0;
+    MoreCert->next = NULL;
 
-  while (TotalCertLen < Len) {
-    OldCertP = CertP;
+    while (TotalCertLen < Len) {
+      OldCertP = CertP;
 
-    Ret = mbedtls_asn1_get_tag(&CertP, End, &CertLen, 0x30);
-    if (Ret != 0) {
-      goto End;
+      Ret = mbedtls_asn1_get_tag(&CertP, End, &CertLen, 0x30);
+      if (Ret != 0) {
+        goto Out;
+      }
+
+      //cert total len
+      CertLen = CertLen + (CertP - OldCertP);
+
+      //move to next cert
+      CertP = OldCertP + CertLen;
+
+      //change TotalCertLen
+      TotalCertLen += CertLen;
+
+      mbedtls_x509_crt_init (MoreCert);
+      Ret = MbedTlsPkcs7GetCertificates (&OldCertP, CertLen, MoreCert);
+      if (Ret != 0) {
+        goto Out;
+      }
+
+      CertNum++;
+      MoreCert->next = AllocatePool(sizeof(mbedtls_x509_crt));
+      MoreCert = MoreCert->next;
     }
 
-    //cert total len
-    CertLen = CertLen + (CertP - OldCertP);
-
-    //move to next cert
-    CertP = OldCertP + CertLen;
-
-    //change TotalCertLen
-    TotalCertLen += CertLen;
-
-    mbedtls_x509_crt_init (MoreCert);
-    Ret = MbedTlsPkcs7GetCertificates (&OldCertP, CertLen, MoreCert);
-    if (Ret != 0) {
-      goto End;
+    if (TotalCertLen != Len) {
+      Ret = -1;
+      goto Out;
     }
 
-    CertNum++;
-    MoreCert->next = AllocatePool(sizeof(mbedtls_x509_crt));
-    MoreCert = MoreCert->next;
-  }
+    LastCert = &(SignedData->Certificates);
 
-  if (TotalCertLen != Len) {
-    Ret = -1;
-    goto End;
-  }
-
-  LastCert = &(SignedData->Certificates);
-
-  while(CertNum--) {
-    if (CertNum == 0) {
-      LastCert->next = NULL;
-      break;
-    } else {
-      LastCert = LastCert->next;
+    while(CertNum--) {
+      if (CertNum == 0) {
+        LastCert->next = NULL;
+        break;
+      } else {
+        LastCert = LastCert->next;
+      }
     }
   }
 
@@ -450,8 +453,8 @@ Pkcs7GetSignedData (
     Ret = MbedTlsPkcs7GetSignersInfoSet (&P, End, &SignedData->SignerInfos);
   }
 
-End:
-  if (MoreCert != NULL) {
+Out:
+  if ((MoreCert != NULL) && (TotalCertLen != 0) && (MoreCert != &(SignedData->Certificates))) {
     FreePool (MoreCert);
     MoreCert = NULL;
   }
@@ -770,8 +773,14 @@ WrapPkcs7Data (
   }
 
   if (Wrapped) {
-    *WrapData     = (UINT8 *) P7Data;
     *WrapDataSize = P7Length;
+    *WrapData     = AllocateZeroPool (*WrapDataSize);
+    if (*WrapData == NULL) {
+      *WrapFlag = Wrapped;
+      return FALSE;
+    }
+    CopyMem (*WrapData, P7Data, P7Length);
+
   } else {
     //
     // Wrap PKCS#7 signeddata to a ContentInfo structure - add a header in 19 bytes.
