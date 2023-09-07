@@ -142,6 +142,32 @@ CreateDeviceMeasurementContext (
   );
 
 /**
+  Measure and log an EFI variable, and extend the measurement result into a specific PCR.
+
+  @param[in]  PcrIndex          PCR Index.
+  @param[in]  EventType         Event type.
+  @param[in]  VarName           A Null-terminated string that is the name of the vendor's variable.
+  @param[in]  VendorGuid        A unique identifier for the vendor.
+  @param[in]  VarData           The content of the variable data.
+  @param[in]  VarSize           The size of the variable data.
+
+  @retval EFI_SUCCESS           Operation completed successfully.
+  @retval EFI_OUT_OF_RESOURCES  Out of memory.
+  @retval EFI_DEVICE_ERROR      The operation was unsuccessful.
+
+**/
+EFI_STATUS
+EFIAPI
+MeasureVariable (
+  IN      UINT32    PcrIndex,
+  IN      UINT32    EventType,
+  IN      CHAR16    *VarName,
+  IN      EFI_GUID  *VendorGuid,
+  IN      VOID      *VarData,
+  IN      UINTN     VarSize
+  );
+
+/**
   Extend Certicate and auth state to NV Index and measure trust anchor to PCR.
 
   @param[in]  SpdmDeviceContext          The SPDM context for the device.

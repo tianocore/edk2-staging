@@ -607,38 +607,6 @@ MainEntryPoint (
   ASSERT_EFI_ERROR (Status);
   FreePool (ResponderCertChain);
 
-  {
-    //
-    // TBD - we need only include the root-cert, instead of the CertChain
-    // BUGBUG: Hardcode here to pass measurement at first
-    //
-    SignatureHeaderSize = 0;
-    SignatureListSize   = sizeof (EFI_SIGNATURE_LIST) + SignatureHeaderSize + sizeof (EFI_GUID) + RootCertSize;
-    SignatureList       = AllocateZeroPool (SignatureListSize);
-    ASSERT (SignatureList != NULL);
-    CopyGuid (&SignatureList->SignatureType, &gEfiCertX509Guid);
-    SignatureList->SignatureListSize   = (UINT32)SignatureListSize;
-    SignatureList->SignatureHeaderSize = (UINT32)SignatureHeaderSize;
-    SignatureList->SignatureSize       = (UINT32)(sizeof (EFI_GUID) + RootCertSize);
-    CertData                           = (VOID *)((UINT8 *)SignatureList + sizeof (EFI_SIGNATURE_LIST));
-    CopyGuid (&CertData->SignatureOwner, &gEfiCallerIdGuid);
-    CopyMem (
-      (UINT8 *)SignatureList + sizeof (EFI_SIGNATURE_LIST) + SignatureHeaderSize + sizeof (EFI_GUID),
-      RootCert,
-      RootCertSize
-      );
-
-    MeasureVariable (
-      PCR_INDEX_FOR_SIGNATURE_DB,
-      EV_EFI_SPDM_DEVICE_POLICY,
-      EDKII_DEVICE_SECURITY_DATABASE,
-      &gEdkiiDeviceSignatureDatabaseGuid,
-      SignatureList,
-      SignatureListSize
-      );
-    FreePool (SignatureList);
-  }
-
   Status = gRT->SetVariable (
                   L"PrivDevKey",
                   &gEdkiiDeviceSignatureDatabaseGuid,
