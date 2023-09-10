@@ -235,9 +235,15 @@ Therefore the **CdePkg**'s C library will be validated by simple tests only, in 
 |[Visual HWTools for UEFI Shell](https://github.com/KilianKegel/Visual-HWTools-for-UEFI-Shell#visual-hwtools-for-uefi-shell)|HWTools: PCI- and GPIOSpy for Baytrail. MemSpy for all.|
 
 ## Revision history
+### 20230910 update CdePkgBlog
+* update [**ACPICA port to UEFI**](https://github.com/tianocore/edk2-staging/tree/CdePkg/blogs/2022-01-16#cdepkgblog-2022-01-16)
+
+### 2022-01-16 CdePkgBlog
+* https://github.com/tianocore/edk2-staging/tree/CdePkg/blogs/2022-01-16#cdepkgblog-2022-01-16
 ### 2021-12-19 CdePkgBlog
 * https://github.com/tianocore/edk2-staging/tree/CdePkg/blogs/2021-12-19#cdepkgblog-2021-12-19
-
+### 2021-11-28 CdePkgBlog
+* https://github.com/tianocore/edk2-staging/tree/CdePkg/blogs/2021-11-28#cdepkgblog-2021-11-28
 ### 2021-11-14 CdePkgBlog
 * https://github.com/tianocore/edk2-staging/tree/CdePkg/blogs/2021-11-14#cdepkgblog-2021-11-14
 
