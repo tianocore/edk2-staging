@@ -169,7 +169,7 @@ InternalDumpData (
   UINTN  Index;
 
   for (Index = 0; Index < Size; Index++) {
-    DEBUG ((DEBUG_INFO, "%02x ", (UINTN)Data[Index]));
+    DEBUG ((DEBUG_INFO, ", 0x%02x ", (UINTN)Data[Index]));
     if (Index == 15) {
       DEBUG ((DEBUG_INFO, "|"));
     }
