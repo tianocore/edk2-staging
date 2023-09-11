@@ -685,6 +685,43 @@ ClearExtensionData:
 }
 
 /**
+ * Add the Basic Constraints in the X509 Cert for VTpmTd.
+ *
+ * @param  X509Cert       A pointer to the X509 cert data.
+ *
+ * @return EFI_SUCCESS    Add TD_REPORT extension was successfully.
+ * @return Others         Some errors.
+*/
+STATIC
+EFI_STATUS
+AddBasicConstraintsExtension (
+  IN OUT X509  *X509Cert
+  )
+{
+  INT32           Result;
+  BASIC_CONSTRAINTS *BasicCon;
+
+  BasicCon = BASIC_CONSTRAINTS_new();
+
+  BasicCon->ca = 0;
+  BasicCon->pathlen = NULL;
+
+  if (X509Cert == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  Result = 0;
+
+  Result = X509_add1_ext_i2d(X509Cert, NID_basic_constraints, BasicCon, 0, FALSE);
+  if (Result == 0) {
+    DEBUG ((DEBUG_ERROR, "X509_add1_ext_i2d failed\n"));
+    return EFI_ABORTED;
+  }
+
+  return EFI_SUCCESS;
+}
+
+/**
  * Generate the X509 Cert for VTpmTd.
  *
  * @param  Certificate        A pointer to the X509 cert data.
@@ -794,11 +831,44 @@ GenerateX509CertificateForVTpmTd (
   }
 
   // Set certificate subject
+  // Add Country Name 
+  Result = X509_NAME_add_entry_by_txt (
+                                       Name,
+                                       "C",
+                                       MBSTRING_ASC,
+                                       (const unsigned char *)"US",
+                                       -1,
+                                       -1,
+                                       0
+                                       );
+  if (Result == 0) {
+    DEBUG ((DEBUG_ERROR, "X509_NAME_add_entry_by_txt failed\n"));
+    Status = EFI_ABORTED;
+    goto ClearBuffer;
+  }
+
+  //Add Organization Name
+  Result = X509_NAME_add_entry_by_txt (
+                                       Name,
+                                       "O",
+                                       MBSTRING_ASC,
+                                       (const unsigned char *)"Intel",
+                                       -1,
+                                       -1,
+                                       0
+                                       );
+  if (Result == 0) {
+    DEBUG ((DEBUG_ERROR, "X509_NAME_add_entry_by_txt failed\n"));
+    Status = EFI_ABORTED;
+    goto ClearBuffer;
+  }
+
+  //Add Common Name
   Result = X509_NAME_add_entry_by_txt (
                                        Name,
                                        "CN",
                                        MBSTRING_ASC,
-                                       (const unsigned char *)"TDVF Test",
+                                       (const unsigned char *)"Intel vTPM TD",
                                        -1,
                                        -1,
                                        0
@@ -833,6 +903,13 @@ GenerateX509CertificateForVTpmTd (
   if (Result == 0) {
     DEBUG ((DEBUG_ERROR, "X509_set_pubkey failed\n"));
     Status = EFI_ABORTED;
+    goto ClearBuffer;
+  }
+
+  //Add X509 Extension with Basic Constraints
+  Status = AddBasicConstraintsExtension (X509Cert);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "Add Basic Constraints failed with %r\n", Status));
     goto ClearBuffer;
   }
 
