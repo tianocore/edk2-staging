@@ -689,7 +689,7 @@ ClearExtensionData:
  *
  * @param  X509Cert       A pointer to the X509 cert data.
  *
- * @return EFI_SUCCESS    Add TD_REPORT extension was successfully.
+ * @return EFI_SUCCESS    Add the extension was successfully.
  * @return Others         Some errors.
 */
 STATIC
@@ -701,24 +701,30 @@ AddBasicConstraintsExtension (
   INT32           Result;
   BASIC_CONSTRAINTS *BasicCon;
 
-  BasicCon = BASIC_CONSTRAINTS_new();
-
-  BasicCon->ca = 0;
-  BasicCon->pathlen = NULL;
-
   if (X509Cert == NULL) {
     return EFI_INVALID_PARAMETER;
   }
 
-  Result = 0;
+  BasicCon = BASIC_CONSTRAINTS_new();
+  if (BasicCon == NULL){
+    DEBUG ((DEBUG_ERROR, "BASIC_CONSTRAINTS_new failed\n"));
+    return EFI_ABORTED;
+  }
+
+  //Ref Intel TD based virtual TPM Design Guide Rev 0.7.7 table 19.
+  BasicCon->ca = 0;
+  BasicCon->pathlen = NULL;
 
   Result = X509_add1_ext_i2d(X509Cert, NID_basic_constraints, BasicCon, 0, FALSE);
   if (Result == 0) {
     DEBUG ((DEBUG_ERROR, "X509_add1_ext_i2d failed\n"));
-    return EFI_ABORTED;
   }
 
-  return EFI_SUCCESS;
+  if (BasicCon) {
+    BASIC_CONSTRAINTS_free(BasicCon);
+  }
+
+  return Result == 0 ? EFI_ABORTED : EFI_SUCCESS;
 }
 
 /**
