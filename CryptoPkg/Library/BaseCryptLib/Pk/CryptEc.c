@@ -481,7 +481,7 @@ EcSetPrivKey (
 
 done:
     if (priv_key != NULL) {
-        BN_free(priv_key);
+        BN_clear_free(priv_key);
     }
     return ret_val;
 }
