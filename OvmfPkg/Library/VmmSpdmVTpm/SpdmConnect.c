@@ -1035,8 +1035,6 @@ DoStartSession (
                              &HeartbeatPeriod,
                              MeasurementHash
                              );
-  //After SpdmStartSession, tdvf should clear the key pair info.
-  ClearKeyPairInGuidHob();
 
   return Status;
 }
