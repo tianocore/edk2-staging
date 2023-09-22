@@ -20,6 +20,7 @@
 #include <Library/BaseCryptLib.h>
 #include <IndustryStandard/Tdx.h>
 #include <Library/MemEncryptTdxLib.h>
+#include "VTpmTdCert.h"
 
 
 #define  LIBSPDM_SCRATCH_BUFFER_SIZE  0x7000
@@ -74,6 +75,9 @@ FreeMemoryForVmmSpdmContext (
   }
 
   FreePages (Context, Pages);
+
+  //tdvf should clear the key pair info end at spdm connect.
+  ClearKeyPairInGuidHob();
 
   return EFI_SUCCESS;
 }
