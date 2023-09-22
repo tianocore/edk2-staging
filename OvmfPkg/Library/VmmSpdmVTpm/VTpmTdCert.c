@@ -351,10 +351,12 @@ GetCertKeyPairAndSaveToHob (
   Status = EFI_SUCCESS;
 ClearKeyBuffer:
   if (PubKey) {
+    ZeroMem(PubKey,PubKeySize);
     FreePool (PubKey);
   }
 
   if (PriKey) {
+    ZeroMem(PriKey,PriKeySize);
     FreePool (PriKey);
   }
 
@@ -984,6 +986,10 @@ GenerateX509CertificateForVTpmTd (
 ClearBuffer:
   if (DerBytes) {
     FreePool (DerBytes);
+  }
+
+  if (EcKey){
+    EC_KEY_free(EcKey);
   }
 
   if (KeyPair) {
