@@ -132,6 +132,8 @@ GetEcPubKey (
     BN_bn2bin (bn_y, &PubKey[half_size + half_size - y_size]);
   }
 
+  DEBUG((DEBUG_INFO, "%a: x_size is %d , y_size is %d\n",__func__, x_size, y_size));
+
   Result = TRUE;
 
 done:
@@ -164,6 +166,7 @@ GetEcPritKey (
   )
 {
   const BIGNUM  *ec_pbingnum;
+  int         ec_pbingnum_len;
 
   if ((EcKey == NULL) || (PriKey == NULL)) {
     return FALSE;
@@ -174,10 +177,18 @@ GetEcPritKey (
     return FALSE;
   }
 
+  ec_pbingnum_len = BN_num_bytes(ec_pbingnum);
+  if (ec_pbingnum_len <= 0 || (ec_pbingnum_len > PriKeySize)){
+    return FALSE;
+  }
+  
+
   if (PriKey != NULL) {
     ZeroMem (PriKey, PriKeySize);
-    BN_bn2bin (ec_pbingnum, PriKey);
+    BN_bn2bin (ec_pbingnum, &PriKey[PriKeySize - ec_pbingnum_len]);
   }
+
+  DEBUG((DEBUG_INFO, "%a: the Private key size is %d\n", __func__ , ec_pbingnum_len));
 
   return TRUE;
 }
