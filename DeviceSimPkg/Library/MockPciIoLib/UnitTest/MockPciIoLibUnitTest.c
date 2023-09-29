@@ -15,6 +15,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Library/LocalRegisterSpaceLib.h>
 #include <Library/MockPciLib.h>
 #include <IndustryStandard/Pci.h>
+#include <stdint.h>
 
 #define UNIT_TEST_NAME     "MockPciIoLib unit tests"
 #define UNIT_TEST_VERSION  "0.1"
@@ -316,8 +317,8 @@ MockPciDeviceCreateTest (
 
   Status = MockPciDeviceInitialize (ConfigSpace, 0, 0, 0, 0, &MockPciDev);
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
-  UT_ASSERT_NOT_EQUAL (MockPciDev, NULL);
-  UT_ASSERT_EQUAL (MockPciDev->ConfigSpace, ConfigSpace);
+  UT_ASSERT_NOT_EQUAL ((uintptr_t)MockPciDev, (uintptr_t)NULL);
+  UT_ASSERT_EQUAL ((uintptr_t)MockPciDev->ConfigSpace, (uintptr_t)ConfigSpace);
 
   for (UINT8 BarIndex = 0; BarIndex < MOCK_PCI_LIB_MAX_SUPPORTED_BARS; BarIndex++) {
     Status = LocalRegisterSpaceCreate (TEST_PCI_DEVICE_NAME, LocalRegisterSpaceAlignmentDword, TestPciDeviceBarWrite, TestPciDeviceBarRead, NULL, &Bar[BarIndex]);
@@ -327,7 +328,7 @@ MockPciDeviceCreateTest (
 
     Status = MockPciDeviceRegisterBar (MockPciDev, Bar[BarIndex], BarIndex, MockIoTypeMmio, 0x1000 * BarIndex, 0x1000);
     UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
-    UT_ASSERT_EQUAL (MockPciDev->Bar[BarIndex], Bar[BarIndex]);
+    UT_ASSERT_EQUAL ((uintptr_t)MockPciDev->Bar[BarIndex], (uintptr_t)Bar[BarIndex]);
   }
 
   Status = MockPciDeviceDestroy (MockPciDev);
@@ -417,30 +418,30 @@ MockPciDevicePciIoCreateTest (
 
   Status = MockPciIoCreate (MockPciDev, &PciIo);
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
-  UT_ASSERT_NOT_EQUAL (PciIo, NULL);
+  UT_ASSERT_NOT_EQUAL ((uintptr_t)PciIo, (uintptr_t)NULL);
 
   // Member functions can't be NULL
-  UT_ASSERT_NOT_EQUAL (PciIo->Pci.Read, NULL);
-  UT_ASSERT_NOT_EQUAL (PciIo->Pci.Write, NULL);
-  UT_ASSERT_NOT_EQUAL (PciIo->PollMem, NULL);
-  UT_ASSERT_NOT_EQUAL (PciIo->PollIo, NULL);
-  UT_ASSERT_NOT_EQUAL (PciIo->Mem.Read, NULL);
-  UT_ASSERT_NOT_EQUAL (PciIo->Mem.Write, NULL);
-  UT_ASSERT_NOT_EQUAL (PciIo->Io.Read, NULL);
-  UT_ASSERT_NOT_EQUAL (PciIo->Io.Write, NULL);
-  UT_ASSERT_NOT_EQUAL (PciIo->CopyMem, NULL);
-  UT_ASSERT_NOT_EQUAL (PciIo->Map, NULL);
-  UT_ASSERT_NOT_EQUAL (PciIo->Unmap, NULL);
-  UT_ASSERT_NOT_EQUAL (PciIo->AllocateBuffer, NULL);
-  UT_ASSERT_NOT_EQUAL (PciIo->FreeBuffer, NULL);
-  UT_ASSERT_NOT_EQUAL (PciIo->Flush, NULL);
-  UT_ASSERT_NOT_EQUAL (PciIo->GetLocation, NULL);
-  UT_ASSERT_NOT_EQUAL (PciIo->Attributes, NULL);
-  UT_ASSERT_NOT_EQUAL (PciIo->GetBarAttributes, NULL);
-  UT_ASSERT_NOT_EQUAL (PciIo->SetBarAttributes, NULL);
+  UT_ASSERT_NOT_EQUAL ((uintptr_t)PciIo->Pci.Read, (uintptr_t)NULL);
+  UT_ASSERT_NOT_EQUAL ((uintptr_t)PciIo->Pci.Write, (uintptr_t)NULL);
+  UT_ASSERT_NOT_EQUAL ((uintptr_t)PciIo->PollMem, (uintptr_t)NULL);
+  UT_ASSERT_NOT_EQUAL ((uintptr_t)PciIo->PollIo, (uintptr_t)NULL);
+  UT_ASSERT_NOT_EQUAL ((uintptr_t)PciIo->Mem.Read, (uintptr_t)NULL);
+  UT_ASSERT_NOT_EQUAL ((uintptr_t)PciIo->Mem.Write, (uintptr_t)NULL);
+  UT_ASSERT_NOT_EQUAL ((uintptr_t)PciIo->Io.Read, (uintptr_t)NULL);
+  UT_ASSERT_NOT_EQUAL ((uintptr_t)PciIo->Io.Write, (uintptr_t)NULL);
+  UT_ASSERT_NOT_EQUAL ((uintptr_t)PciIo->CopyMem, (uintptr_t)NULL);
+  UT_ASSERT_NOT_EQUAL ((uintptr_t)PciIo->Map, (uintptr_t)NULL);
+  UT_ASSERT_NOT_EQUAL ((uintptr_t)PciIo->Unmap, (uintptr_t)NULL);
+  UT_ASSERT_NOT_EQUAL ((uintptr_t)PciIo->AllocateBuffer, (uintptr_t)NULL);
+  UT_ASSERT_NOT_EQUAL ((uintptr_t)PciIo->FreeBuffer, (uintptr_t)NULL);
+  UT_ASSERT_NOT_EQUAL ((uintptr_t)PciIo->Flush, (uintptr_t)NULL);
+  UT_ASSERT_NOT_EQUAL ((uintptr_t)PciIo->GetLocation, (uintptr_t)NULL);
+  UT_ASSERT_NOT_EQUAL ((uintptr_t)PciIo->Attributes, (uintptr_t)NULL);
+  UT_ASSERT_NOT_EQUAL ((uintptr_t)PciIo->GetBarAttributes, (uintptr_t)NULL);
+  UT_ASSERT_NOT_EQUAL ((uintptr_t)PciIo->SetBarAttributes, (uintptr_t)NULL);
 
   // ROM is not supported
-  UT_ASSERT_EQUAL (PciIo->RomImage, NULL);
+  UT_ASSERT_EQUAL ((uintptr_t)PciIo->RomImage, (uintptr_t)NULL);
   UT_ASSERT_EQUAL (PciIo->RomSize, 0);
 
   DestroyTestPciDevice (MockPciDev, &DevContext);
@@ -608,13 +609,13 @@ MockPciIoDmaTest (
   }
 
   NumberOfBytes = sizeof (gPciTestBlock);
-  PhyAddress = (EFI_PHYSICAL_ADDRESS)NULL;
+  PhyAddress = (EFI_PHYSICAL_ADDRESS)(uintptr_t)NULL;
   Mapping = NULL;
   Status = PciIo->Map (PciIo, EfiPciIoOperationBusMasterRead, &gPciTestBlock, &NumberOfBytes, &PhyAddress, &Mapping);
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
   UT_ASSERT_EQUAL (NumberOfBytes, sizeof (gPciTestBlock));
-  UT_ASSERT_NOT_EQUAL (PhyAddress, NULL);
-  UT_ASSERT_NOT_EQUAL (Mapping, NULL);
+  UT_ASSERT_NOT_EQUAL ((uintptr_t)PhyAddress, (uintptr_t)NULL);
+  UT_ASSERT_NOT_EQUAL ((uintptr_t)Mapping, (uintptr_t)NULL);
 
   Status = PciIo->Mem.Write (PciIo, EfiPciIoWidthUint32, 0, TEST_PCI_DEVICE_BAR_DMA_ADDR_REG, 1, &PhyAddress);
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
@@ -627,14 +628,14 @@ MockPciIoDmaTest (
 
   Block = AllocateZeroPool (sizeof (gPciTestBlock));
   NumberOfBytes = sizeof (gPciTestBlock);
-  PhyAddress = (EFI_PHYSICAL_ADDRESS)NULL;
+  PhyAddress = (EFI_PHYSICAL_ADDRESS)(uintptr_t)NULL;
   Mapping = NULL;
-  UT_ASSERT_NOT_EQUAL (Block, NULL);
+  UT_ASSERT_NOT_EQUAL ((uintptr_t)Block, (uintptr_t)NULL);
   Status = PciIo->Map (PciIo, EfiPciIoOperationBusMasterWrite, Block, &NumberOfBytes, &PhyAddress, &Mapping);
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
   UT_ASSERT_EQUAL (NumberOfBytes, sizeof (gPciTestBlock));
-  UT_ASSERT_NOT_EQUAL (PhyAddress, NULL);
-  UT_ASSERT_NOT_EQUAL (Mapping, NULL);
+  UT_ASSERT_NOT_EQUAL ((uintptr_t)PhyAddress, (uintptr_t)NULL);
+  UT_ASSERT_NOT_EQUAL ((uintptr_t)Mapping, (uintptr_t)NULL);
 
   Status = PciIo->Mem.Write (PciIo, EfiPciIoWidthUint32, 0, TEST_PCI_DEVICE_BAR_DMA_ADDR_REG, 1, &PhyAddress);
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);

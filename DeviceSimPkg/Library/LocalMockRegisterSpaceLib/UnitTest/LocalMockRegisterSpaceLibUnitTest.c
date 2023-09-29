@@ -12,6 +12,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Library/UnitTestLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/LocalRegisterSpaceLib.h>
+#include <stdint.h>
 
 #define UNIT_TEST_NAME     "LocalMockRegisterSpaceLib unit tests"
 #define UNIT_TEST_VERSION  "0.1"
@@ -249,8 +250,8 @@ LocalMockRegisterSpaceCreateTest (
 
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
   UT_ASSERT_MEM_EQUAL (LocalRegisterSpace->Name, DeviceContext->Name, sizeof(TestDeviceName));
-  UT_ASSERT_NOT_EQUAL (LocalRegisterSpace->Read, NULL);
-  UT_ASSERT_NOT_EQUAL (LocalRegisterSpace->Write, NULL);
+  UT_ASSERT_NOT_EQUAL ((uintptr_t)LocalRegisterSpace->Read, (uintptr_t)NULL);
+  UT_ASSERT_NOT_EQUAL ((uintptr_t)LocalRegisterSpace->Write, (uintptr_t)NULL);
 
   Status = LocalRegisterSpaceDestroy (LocalRegisterSpace);
 

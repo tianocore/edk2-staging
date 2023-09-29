@@ -134,6 +134,7 @@ MockIoUnRegisterMmioAtAddress (
     MapEntry = BASE_CR (Entry, MOCK_IO_MEMORY_MAP, Link);
     if (Address == MapEntry->Address) {
       RemoveEntryList (Entry);
+      FreePool (MapEntry);
       return EFI_SUCCESS;
     }
   }
