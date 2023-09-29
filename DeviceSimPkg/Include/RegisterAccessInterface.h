@@ -5,18 +5,18 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef _REGISTER_SPACE_MOCK_H_
-#define _REGISTER_SPACE_MOCK_H_
+#ifndef _REGISTER_ACCESS_INTERFACE_H_
+#define _REGISTER_ACCESS_INTERFACE_H_
 
 #include <Base.h>
 #include <Uefi.h>
 
-typedef struct  _REGISTER_SPACE_MOCK REGISTER_SPACE_MOCK;
+typedef struct _REGISTER_ACCESS_INTERFACE REGISTER_ACCESS_INTERFACE;
 
 typedef
 EFI_STATUS
-(*REGISTER_SPACE_MOCK_READ) (
-  IN REGISTER_SPACE_MOCK  *RegisterSpace,
+(*REGISTER_SPACE_READ) (
+  IN REGISTER_ACCESS_INTERFACE  *RegisterSpace,
   IN UINT64               Address,
   IN UINT32               Size,
   OUT UINT64              *Value
@@ -24,17 +24,17 @@ EFI_STATUS
 
 typedef
 EFI_STATUS
-(*REGISTER_SPACE_MOCK_WRITE) (
-  IN REGISTER_SPACE_MOCK  *RegisterSpace,
+(*REGISTER_SPACE_WRITE) (
+  IN REGISTER_ACCESS_INTERFACE  *RegisterSpace,
   IN UINT64               Address,
   IN UINT32               Size,
   IN UINT64               Value
   );
 
-struct _REGISTER_SPACE_MOCK {
-  CHAR16                     *Name;
-  REGISTER_SPACE_MOCK_READ   Read;
-  REGISTER_SPACE_MOCK_WRITE  Write;
+struct _REGISTER_ACCESS_INTERFACE {
+  CHAR16                *Name;
+  REGISTER_SPACE_READ   Read;
+  REGISTER_SPACE_WRITE  Write;
 };
 
 #endif

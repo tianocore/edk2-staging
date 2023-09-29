@@ -5,20 +5,20 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef _MAP_BASED_REGISTER_SPACE_LIB_H_
-#define _MAP_BASED_REGISTER_SPACE_LIB_H_
+#ifndef _FAKE_REGISTER_SPACE_LIB_H_
+#define _FAKE_REGISTER_SPACE_LIB_H_
 
 #include <Base.h>
-#include <RegisterSpaceMock.h>
+#include <RegisterAccessInterface.h>
 
 typedef enum {
-  LocalRegisterSpaceAlignmentByte = 1,
-  LocalRegisterSpaceAlignmentWord = 2,
-  LocalRegisterSpaceAlignmentDword = 4,
-  LocalRegisterSpaceAlignmentQword = 8
-} LOCAL_REGISTER_SPACE_ALIGNMENT;
+  FakeRegisterSpaceAlignmentByte = 1,
+  FakeRegisterSpaceAlignmentWord = 2,
+  FakeRegisterSpaceAlignmentDword = 4,
+  FakeRegisterSpaceAlignmentQword = 8
+} FAKE_REGISTER_SPACE_ALIGNMENT;
 
-typedef struct _LOCAL_REGISTER_SPACE LOCAL_REGISTER_SPACE;
+typedef struct _FAKE_REGISTER_SPACE FAKE_REGISTER_SPACE;
 
 typedef
 VOID
@@ -38,27 +38,27 @@ VOID
   IN UINT32                Value
   );
 
-struct _LOCAL_REGISTER_SPACE {
-  REGISTER_SPACE_MOCK             RegisterSpace;
+struct _FAKE_REGISTER_SPACE {
+  REGISTER_ACCESS_INTERFACE             RegisterSpace;
   VOID                            *RwContext;
-  LOCAL_REGISTER_SPACE_ALIGNMENT  Alignment;
+  FAKE_REGISTER_SPACE_ALIGNMENT  Alignment;
   REGISTER_READ_CALLBACK          Read;
   REGISTER_WRITE_CALLBACK         Write;
 };
 
 EFI_STATUS
-LocalRegisterSpaceCreate (
+FakeRegisterSpaceCreate (
   IN CHAR16                          *RegisterSpaceDescription,
-  IN LOCAL_REGISTER_SPACE_ALIGNMENT  Alignment,
+  IN FAKE_REGISTER_SPACE_ALIGNMENT  Alignment,
   IN REGISTER_WRITE_CALLBACK         Write,
   IN REGISTER_READ_CALLBACK          Read,
   IN VOID                            *RwContext,
-  OUT REGISTER_SPACE_MOCK            **SimpleRegisterSpace
+  OUT REGISTER_ACCESS_INTERFACE            **SimpleRegisterSpace
   );
 
 EFI_STATUS
-LocalRegisterSpaceDestroy (
-  IN REGISTER_SPACE_MOCK  *RegisterSpace
+FakeRegisterSpaceDestroy (
+  IN REGISTER_ACCESS_INTERFACE  *RegisterSpace
   );
 
 UINT32

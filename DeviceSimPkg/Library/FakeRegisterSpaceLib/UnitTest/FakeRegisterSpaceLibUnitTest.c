@@ -11,10 +11,10 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Library/DebugLib.h>
 #include <Library/UnitTestLib.h>
 #include <Library/MemoryAllocationLib.h>
-#include <Library/LocalRegisterSpaceLib.h>
+#include <Library/FakeRegisterSpaceLib.h>
 #include <stdint.h>
 
-#define UNIT_TEST_NAME     "LocalMockRegisterSpaceLib unit tests"
+#define UNIT_TEST_NAME     "FakeRegisterSpaceLib unit tests"
 #define UNIT_TEST_VERSION  "0.1"
 
 GLOBAL_REMOVE_IF_UNREFERENCED CHAR16 *TestDeviceName = L"TestDeviceRegisterSpace";
@@ -232,13 +232,13 @@ TestDeviceWordAlignedRegisterWrite (
 
 UNIT_TEST_STATUS
 EFIAPI
-LocalMockRegisterSpaceCreateTest (
+FakeRegisterSpaceCreateTest (
   IN UNIT_TEST_CONTEXT  Context
   )
 {
   EFI_STATUS  Status;
   TEST_DEVICE_CONTEXT  *DeviceContext;
-  REGISTER_SPACE_MOCK  *LocalRegisterSpace;
+  REGISTER_ACCESS_INTERFACE  *LocalRegisterSpace;
 
   DeviceContext = (TEST_DEVICE_CONTEXT*) Context;
 
@@ -246,14 +246,14 @@ LocalMockRegisterSpaceCreateTest (
     return UNIT_TEST_ERROR_PREREQUISITE_NOT_MET;
   }
 
-  Status = LocalRegisterSpaceCreate (DeviceContext->Name, LocalRegisterSpaceAlignmentDword, TestDeviceRegisterWrite, TestDeviceRegisterRead, DeviceContext, &LocalRegisterSpace);
+  Status = FakeRegisterSpaceCreate (DeviceContext->Name, FakeRegisterSpaceAlignmentDword, TestDeviceRegisterWrite, TestDeviceRegisterRead, DeviceContext, &LocalRegisterSpace);
 
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
   UT_ASSERT_MEM_EQUAL (LocalRegisterSpace->Name, DeviceContext->Name, sizeof(TestDeviceName));
   UT_ASSERT_NOT_EQUAL ((uintptr_t)LocalRegisterSpace->Read, (uintptr_t)NULL);
   UT_ASSERT_NOT_EQUAL ((uintptr_t)LocalRegisterSpace->Write, (uintptr_t)NULL);
 
-  Status = LocalRegisterSpaceDestroy (LocalRegisterSpace);
+  Status = FakeRegisterSpaceDestroy (LocalRegisterSpace);
 
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
 
@@ -262,12 +262,12 @@ LocalMockRegisterSpaceCreateTest (
 
 UNIT_TEST_STATUS
 EFIAPI
-LocalMockRegisterSpaceAlignedByteAccessTest (
+FakeRegisterSpaceAlignedByteAccessTest (
   IN UNIT_TEST_CONTEXT  Context
   )
 {
   EFI_STATUS           Status;
-  REGISTER_SPACE_MOCK  *RegisterSpace;
+  REGISTER_ACCESS_INTERFACE  *RegisterSpace;
   UINT64               ReadBackValue;
   TEST_DEVICE_CONTEXT  *DeviceContext;
   
@@ -277,7 +277,7 @@ LocalMockRegisterSpaceAlignedByteAccessTest (
     return UNIT_TEST_ERROR_PREREQUISITE_NOT_MET;
   }
 
-  Status = LocalRegisterSpaceCreate (DeviceContext->Name, LocalRegisterSpaceAlignmentDword, TestDeviceRegisterWrite, TestDeviceRegisterRead, DeviceContext, &RegisterSpace);
+  Status = FakeRegisterSpaceCreate (DeviceContext->Name, FakeRegisterSpaceAlignmentDword, TestDeviceRegisterWrite, TestDeviceRegisterRead, DeviceContext, &RegisterSpace);
 
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
 
@@ -289,7 +289,7 @@ LocalMockRegisterSpaceAlignedByteAccessTest (
   UT_ASSERT_EQUAL (DeviceContext->ErrorFlags, 0);
   UT_ASSERT_EQUAL (ReadBackValue, BYTE_TEST_VALUE);
 
-  Status = LocalRegisterSpaceDestroy (RegisterSpace);
+  Status = FakeRegisterSpaceDestroy (RegisterSpace);
 
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
 
@@ -298,12 +298,12 @@ LocalMockRegisterSpaceAlignedByteAccessTest (
 
 UNIT_TEST_STATUS
 EFIAPI
-LocalMockRegisterSpaceAlignedWordAccessTest (
+FakeRegisterSpaceAlignedWordAccessTest (
   IN UNIT_TEST_CONTEXT  Context
   )
 {
   EFI_STATUS           Status;
-  REGISTER_SPACE_MOCK  *RegisterSpace;
+  REGISTER_ACCESS_INTERFACE  *RegisterSpace;
   UINT64               ReadBackValue;
   TEST_DEVICE_CONTEXT  *DeviceContext;
   
@@ -313,7 +313,7 @@ LocalMockRegisterSpaceAlignedWordAccessTest (
     return UNIT_TEST_ERROR_PREREQUISITE_NOT_MET;
   }
 
-  Status = LocalRegisterSpaceCreate (DeviceContext->Name, LocalRegisterSpaceAlignmentDword, TestDeviceRegisterWrite, TestDeviceRegisterRead, DeviceContext, &RegisterSpace);
+  Status = FakeRegisterSpaceCreate (DeviceContext->Name, FakeRegisterSpaceAlignmentDword, TestDeviceRegisterWrite, TestDeviceRegisterRead, DeviceContext, &RegisterSpace);
 
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
 
@@ -325,7 +325,7 @@ LocalMockRegisterSpaceAlignedWordAccessTest (
   UT_ASSERT_EQUAL (DeviceContext->ErrorFlags, 0);
   UT_ASSERT_EQUAL (ReadBackValue, WORD_TEST_VALUE);
 
-  Status = LocalRegisterSpaceDestroy (RegisterSpace);
+  Status = FakeRegisterSpaceDestroy (RegisterSpace);
 
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
 
@@ -334,12 +334,12 @@ LocalMockRegisterSpaceAlignedWordAccessTest (
 
 UNIT_TEST_STATUS
 EFIAPI
-LocalMockRegisterSpaceAlignedDwordAccessTest (
+FakeRegisterSpaceAlignedDwordAccessTest (
   IN UNIT_TEST_CONTEXT  Context
   )
 {
   EFI_STATUS           Status;
-  REGISTER_SPACE_MOCK  *RegisterSpace;
+  REGISTER_ACCESS_INTERFACE  *RegisterSpace;
   UINT64               ReadBackValue;
   TEST_DEVICE_CONTEXT  *DeviceContext;
   
@@ -349,7 +349,7 @@ LocalMockRegisterSpaceAlignedDwordAccessTest (
     return UNIT_TEST_ERROR_PREREQUISITE_NOT_MET;
   }
 
-  Status = LocalRegisterSpaceCreate (DeviceContext->Name, LocalRegisterSpaceAlignmentDword, TestDeviceRegisterWrite, TestDeviceRegisterRead, DeviceContext, &RegisterSpace);
+  Status = FakeRegisterSpaceCreate (DeviceContext->Name, FakeRegisterSpaceAlignmentDword, TestDeviceRegisterWrite, TestDeviceRegisterRead, DeviceContext, &RegisterSpace);
 
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
 
@@ -361,7 +361,7 @@ LocalMockRegisterSpaceAlignedDwordAccessTest (
   UT_ASSERT_EQUAL (DeviceContext->ErrorFlags, 0);
   UT_ASSERT_EQUAL (ReadBackValue, DWORD_TEST_VALUE);
 
-  Status = LocalRegisterSpaceDestroy (RegisterSpace);
+  Status = FakeRegisterSpaceDestroy (RegisterSpace);
 
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
 
@@ -370,12 +370,12 @@ LocalMockRegisterSpaceAlignedDwordAccessTest (
 
 UNIT_TEST_STATUS
 EFIAPI
-LocalMockRegisterSpaceAlignedQwordAccessTest (
+FakeRegisterSpaceAlignedQwordAccessTest (
   IN UNIT_TEST_CONTEXT  Context
   )
 {
   EFI_STATUS           Status;
-  REGISTER_SPACE_MOCK  *RegisterSpace;
+  REGISTER_ACCESS_INTERFACE  *RegisterSpace;
   UINT64               ReadBackValue;
   TEST_DEVICE_CONTEXT  *DeviceContext;
   UINT64               RegValue;
@@ -386,7 +386,7 @@ LocalMockRegisterSpaceAlignedQwordAccessTest (
     return UNIT_TEST_ERROR_PREREQUISITE_NOT_MET;
   }
 
-  Status = LocalRegisterSpaceCreate (DeviceContext->Name, LocalRegisterSpaceAlignmentDword, TestDeviceRegisterWrite, TestDeviceRegisterRead, DeviceContext, &RegisterSpace);
+  Status = FakeRegisterSpaceCreate (DeviceContext->Name, FakeRegisterSpaceAlignmentDword, TestDeviceRegisterWrite, TestDeviceRegisterRead, DeviceContext, &RegisterSpace);
 
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
 
@@ -401,7 +401,7 @@ LocalMockRegisterSpaceAlignedQwordAccessTest (
   UT_ASSERT_EQUAL (DeviceContext->ErrorFlags, 0);
   UT_ASSERT_EQUAL (ReadBackValue, QWORD_TEST_VALUE);
 
-  Status = LocalRegisterSpaceDestroy (RegisterSpace);
+  Status = FakeRegisterSpaceDestroy (RegisterSpace);
 
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
 
@@ -410,12 +410,12 @@ LocalMockRegisterSpaceAlignedQwordAccessTest (
 
 UNIT_TEST_STATUS
 EFIAPI
-LocalMockRegisterSpaceUnalignedByteAccessTest (
+FakeRegisterSpaceUnalignedByteAccessTest (
   IN UNIT_TEST_CONTEXT  Context
   )
 {
   EFI_STATUS           Status;
-  REGISTER_SPACE_MOCK  *RegisterSpace;
+  REGISTER_ACCESS_INTERFACE  *RegisterSpace;
   UINT64               ReadBackValue;
   TEST_DEVICE_CONTEXT  *DeviceContext;
   
@@ -425,7 +425,7 @@ LocalMockRegisterSpaceUnalignedByteAccessTest (
     return UNIT_TEST_ERROR_PREREQUISITE_NOT_MET;
   }
 
-  Status = LocalRegisterSpaceCreate (DeviceContext->Name, LocalRegisterSpaceAlignmentDword, TestDeviceRegisterWrite, TestDeviceRegisterRead, DeviceContext, &RegisterSpace);
+  Status = FakeRegisterSpaceCreate (DeviceContext->Name, FakeRegisterSpaceAlignmentDword, TestDeviceRegisterWrite, TestDeviceRegisterRead, DeviceContext, &RegisterSpace);
 
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
 
@@ -437,7 +437,7 @@ LocalMockRegisterSpaceUnalignedByteAccessTest (
   UT_ASSERT_EQUAL (DeviceContext->ErrorFlags, 0);
   UT_ASSERT_EQUAL (ReadBackValue, BYTE_TEST_VALUE);
 
-  Status = LocalRegisterSpaceDestroy (RegisterSpace);
+  Status = FakeRegisterSpaceDestroy (RegisterSpace);
 
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
 
@@ -446,12 +446,12 @@ LocalMockRegisterSpaceUnalignedByteAccessTest (
 
 UNIT_TEST_STATUS
 EFIAPI
-LocalMockRegisterSpaceUnalignedWordAccessTest (
+FakeRegisterSpaceUnalignedWordAccessTest (
   IN UNIT_TEST_CONTEXT  Context
   )
 {
   EFI_STATUS           Status;
-  REGISTER_SPACE_MOCK  *RegisterSpace;
+  REGISTER_ACCESS_INTERFACE  *RegisterSpace;
   UINT64               ReadBackValue;
   TEST_DEVICE_CONTEXT  *DeviceContext;
   
@@ -461,7 +461,7 @@ LocalMockRegisterSpaceUnalignedWordAccessTest (
     return UNIT_TEST_ERROR_PREREQUISITE_NOT_MET;
   }
 
-  Status = LocalRegisterSpaceCreate (DeviceContext->Name, LocalRegisterSpaceAlignmentDword, TestDeviceRegisterWrite, TestDeviceRegisterRead, DeviceContext, &RegisterSpace);
+  Status = FakeRegisterSpaceCreate (DeviceContext->Name, FakeRegisterSpaceAlignmentDword, TestDeviceRegisterWrite, TestDeviceRegisterRead, DeviceContext, &RegisterSpace);
 
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
 
@@ -473,7 +473,7 @@ LocalMockRegisterSpaceUnalignedWordAccessTest (
   UT_ASSERT_EQUAL (DeviceContext->ErrorFlags, 0);
   UT_ASSERT_EQUAL (ReadBackValue, WORD_TEST_VALUE);
 
-  Status = LocalRegisterSpaceDestroy (RegisterSpace);
+  Status = FakeRegisterSpaceDestroy (RegisterSpace);
 
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
 
@@ -482,12 +482,12 @@ LocalMockRegisterSpaceUnalignedWordAccessTest (
 
 UNIT_TEST_STATUS
 EFIAPI
-LocalMockRegisterSpaceUnalignedBoundaryCrossingWordAccessTest (
+FakeRegisterSpaceUnalignedBoundaryCrossingWordAccessTest (
   IN UNIT_TEST_CONTEXT  Context
   )
 {
   EFI_STATUS           Status;
-  REGISTER_SPACE_MOCK  *RegisterSpace;
+  REGISTER_ACCESS_INTERFACE  *RegisterSpace;
   UINT64               ReadBackValue;
   TEST_DEVICE_CONTEXT  *DeviceContext;
   UINT64               RegValue;
@@ -498,7 +498,7 @@ LocalMockRegisterSpaceUnalignedBoundaryCrossingWordAccessTest (
     return UNIT_TEST_ERROR_PREREQUISITE_NOT_MET;
   }
 
-  Status = LocalRegisterSpaceCreate (DeviceContext->Name, LocalRegisterSpaceAlignmentDword, TestDeviceRegisterWrite, TestDeviceRegisterRead, DeviceContext, &RegisterSpace);
+  Status = FakeRegisterSpaceCreate (DeviceContext->Name, FakeRegisterSpaceAlignmentDword, TestDeviceRegisterWrite, TestDeviceRegisterRead, DeviceContext, &RegisterSpace);
 
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
 
@@ -512,7 +512,7 @@ LocalMockRegisterSpaceUnalignedBoundaryCrossingWordAccessTest (
   UT_ASSERT_EQUAL (DeviceContext->ErrorFlags, 0);
   UT_ASSERT_EQUAL (ReadBackValue, WORD_TEST_VALUE);
 
-  Status = LocalRegisterSpaceDestroy (RegisterSpace);
+  Status = FakeRegisterSpaceDestroy (RegisterSpace);
 
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
 
@@ -521,12 +521,12 @@ LocalMockRegisterSpaceUnalignedBoundaryCrossingWordAccessTest (
 
 UNIT_TEST_STATUS
 EFIAPI
-LocalMockRegisterSpaceUnalignedBoundaryCrossingDwordAccessTest (
+FakeRegisterSpaceUnalignedBoundaryCrossingDwordAccessTest (
   IN UNIT_TEST_CONTEXT  Context
   )
 {
   EFI_STATUS           Status;
-  REGISTER_SPACE_MOCK  *RegisterSpace;
+  REGISTER_ACCESS_INTERFACE  *RegisterSpace;
   UINT64               ReadBackValue;
   TEST_DEVICE_CONTEXT  *DeviceContext;
   UINT64               RegValue;
@@ -537,7 +537,7 @@ LocalMockRegisterSpaceUnalignedBoundaryCrossingDwordAccessTest (
     return UNIT_TEST_ERROR_PREREQUISITE_NOT_MET;
   }
 
-  Status = LocalRegisterSpaceCreate (DeviceContext->Name, LocalRegisterSpaceAlignmentDword, TestDeviceRegisterWrite, TestDeviceRegisterRead, DeviceContext, &RegisterSpace);
+  Status = FakeRegisterSpaceCreate (DeviceContext->Name, FakeRegisterSpaceAlignmentDword, TestDeviceRegisterWrite, TestDeviceRegisterRead, DeviceContext, &RegisterSpace);
 
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
 
@@ -551,7 +551,7 @@ LocalMockRegisterSpaceUnalignedBoundaryCrossingDwordAccessTest (
   UT_ASSERT_EQUAL (DeviceContext->ErrorFlags, 0);
   UT_ASSERT_EQUAL (ReadBackValue, DWORD_TEST_VALUE);
 
-  Status = LocalRegisterSpaceDestroy (RegisterSpace);
+  Status = FakeRegisterSpaceDestroy (RegisterSpace);
 
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
 
@@ -560,12 +560,12 @@ LocalMockRegisterSpaceUnalignedBoundaryCrossingDwordAccessTest (
 
 UNIT_TEST_STATUS
 EFIAPI
-LocalMockRegisterSpaceUnalignedBoundaryCrossingQwordAccessTest (
+FakeRegisterSpaceUnalignedBoundaryCrossingQwordAccessTest (
   IN UNIT_TEST_CONTEXT  Context
   )
 {
   EFI_STATUS           Status;
-  REGISTER_SPACE_MOCK  *RegisterSpace;
+  REGISTER_ACCESS_INTERFACE  *RegisterSpace;
   UINT64               ReadBackValue;
   TEST_DEVICE_CONTEXT  *DeviceContext;
   UINT64               RegValue;
@@ -577,7 +577,7 @@ LocalMockRegisterSpaceUnalignedBoundaryCrossingQwordAccessTest (
     return UNIT_TEST_ERROR_PREREQUISITE_NOT_MET;
   }
 
-  Status = LocalRegisterSpaceCreate (DeviceContext->Name, LocalRegisterSpaceAlignmentDword, TestDeviceRegisterWrite, TestDeviceRegisterRead, DeviceContext, &RegisterSpace);
+  Status = FakeRegisterSpaceCreate (DeviceContext->Name, FakeRegisterSpaceAlignmentDword, TestDeviceRegisterWrite, TestDeviceRegisterRead, DeviceContext, &RegisterSpace);
 
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
 
@@ -594,7 +594,7 @@ LocalMockRegisterSpaceUnalignedBoundaryCrossingQwordAccessTest (
   UT_ASSERT_EQUAL (DeviceContext->ErrorFlags, 0);
   UT_ASSERT_EQUAL (ReadBackValue, QWORD_TEST_VALUE);
 
-  Status = LocalRegisterSpaceDestroy (RegisterSpace);
+  Status = FakeRegisterSpaceDestroy (RegisterSpace);
 
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
 
@@ -632,12 +632,12 @@ ByteEnableToBitMaskTest (
 
 UNIT_TEST_STATUS
 EFIAPI
-LocalMockRegisterSpaceWordAlignedDeviceTest (
+FakeRegisterSpaceWordAlignedDeviceTest (
   IN UNIT_TEST_CONTEXT  Context
   )
 {
   EFI_STATUS           Status;
-  REGISTER_SPACE_MOCK  *RegisterSpace;
+  REGISTER_ACCESS_INTERFACE  *RegisterSpace;
   TEST_DEVICE_WORD_ALIGNED_CONTEXT  *DeviceContext;
   UINT64                            ReadBackValue;
 
@@ -647,7 +647,7 @@ LocalMockRegisterSpaceWordAlignedDeviceTest (
     return UNIT_TEST_ERROR_PREREQUISITE_NOT_MET;
   }
 
-  Status = LocalRegisterSpaceCreate (L"WORD aligned device", LocalRegisterSpaceAlignmentWord, TestDeviceWordAlignedRegisterWrite, TestDeviceWordAlignedRegisterRead, DeviceContext, &RegisterSpace);
+  Status = FakeRegisterSpaceCreate (L"WORD aligned device", FakeRegisterSpaceAlignmentWord, TestDeviceWordAlignedRegisterWrite, TestDeviceWordAlignedRegisterRead, DeviceContext, &RegisterSpace);
   if (EFI_ERROR (Status)) {
     return UNIT_TEST_ERROR_PREREQUISITE_NOT_MET;
   }
@@ -675,7 +675,7 @@ LocalMockRegisterSpaceWordAlignedDeviceTest (
   UT_ASSERT_EQUAL (DeviceContext->ErrorFlags, 0);
   UT_ASSERT_EQUAL (ReadBackValue, DWORD_TEST_VALUE);
 
-  Status = LocalRegisterSpaceDestroy (RegisterSpace);
+  Status = FakeRegisterSpaceDestroy (RegisterSpace);
   FreePool (DeviceContext);
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
 
@@ -690,7 +690,7 @@ UefiTestMain (
 {
   EFI_STATUS                  Status;
   UNIT_TEST_FRAMEWORK_HANDLE  Framework;
-  UNIT_TEST_SUITE_HANDLE      LocalMockRegisterSpaceTest;
+  UNIT_TEST_SUITE_HANDLE      FakeRegisterSpaceTest;
   TEST_DEVICE_CONTEXT         *DeviceContext;
 
   Framework = NULL;
@@ -706,42 +706,42 @@ UefiTestMain (
     return Status;
   }
 
-  Status = CreateUnitTestSuite (&LocalMockRegisterSpaceTest, Framework, "LocalMockRegisterSpaceUnitTest", "LocalMockRegisterSpace", NULL, NULL);
+  Status = CreateUnitTestSuite (&FakeRegisterSpaceTest, Framework, "FakeRegisterSpaceUnitTest", "FakeRegisterSpace", NULL, NULL);
   if (EFI_ERROR (Status)) {
     return Status;
   }
 
-  AddTestCase (LocalMockRegisterSpaceTest, "LocalMockRegisterSpaceCreateTest", "LocalMockRegisterSpaceCreateTest", LocalMockRegisterSpaceCreateTest, NULL, NULL, (UNIT_TEST_CONTEXT)DeviceContext);
+  AddTestCase (FakeRegisterSpaceTest, "FakeRegisterSpaceCreateTest", "FakeRegisterSpaceCreateTest", FakeRegisterSpaceCreateTest, NULL, NULL, (UNIT_TEST_CONTEXT)DeviceContext);
   //
   // Simple aligned access tests for all supported widths
   //
-  AddTestCase (LocalMockRegisterSpaceTest, "LocalMockRegisterSpaceAlignedByteAccessTest", "LocalMockRegisterSpaceAlignedByteAccessTest", LocalMockRegisterSpaceAlignedByteAccessTest, NULL, NULL, (UNIT_TEST_CONTEXT)DeviceContext);
-  AddTestCase (LocalMockRegisterSpaceTest, "LocalMockRegisterSpaceAlignedWordAccessTest", "LocalMockRegisterSpaceAlignedWordAccessTest", LocalMockRegisterSpaceAlignedWordAccessTest, NULL, NULL, (UNIT_TEST_CONTEXT)DeviceContext);
-  AddTestCase (LocalMockRegisterSpaceTest, "LocalMockRegisterSpaceAlignedDwordAccessTest", "LocalMockRegisterSpaceAlignedDwordAccessTest", LocalMockRegisterSpaceAlignedDwordAccessTest, NULL, NULL, (UNIT_TEST_CONTEXT)DeviceContext);
-  AddTestCase (LocalMockRegisterSpaceTest, "LocalMockRegisterSpaceAlignedQwordAccessTest", "LocalMockRegisterSpaceAlignedQwordAccessTest", LocalMockRegisterSpaceAlignedQwordAccessTest, NULL, NULL, (UNIT_TEST_CONTEXT)DeviceContext);
+  AddTestCase (FakeRegisterSpaceTest, "FakeRegisterSpaceAlignedByteAccessTest", "FakeRegisterSpaceAlignedByteAccessTest", FakeRegisterSpaceAlignedByteAccessTest, NULL, NULL, (UNIT_TEST_CONTEXT)DeviceContext);
+  AddTestCase (FakeRegisterSpaceTest, "FakeRegisterSpaceAlignedWordAccessTest", "FakeRegisterSpaceAlignedWordAccessTest", FakeRegisterSpaceAlignedWordAccessTest, NULL, NULL, (UNIT_TEST_CONTEXT)DeviceContext);
+  AddTestCase (FakeRegisterSpaceTest, "FakeRegisterSpaceAlignedDwordAccessTest", "FakeRegisterSpaceAlignedDwordAccessTest", FakeRegisterSpaceAlignedDwordAccessTest, NULL, NULL, (UNIT_TEST_CONTEXT)DeviceContext);
+  AddTestCase (FakeRegisterSpaceTest, "FakeRegisterSpaceAlignedQwordAccessTest", "FakeRegisterSpaceAlignedQwordAccessTest", FakeRegisterSpaceAlignedQwordAccessTest, NULL, NULL, (UNIT_TEST_CONTEXT)DeviceContext);
 
   //
   // Simple non-crossing unaligned tests for byte and word
   //
-  AddTestCase (LocalMockRegisterSpaceTest, "LocalMockRegisterSpaceUnalignedByteAccessTest", "LocalMockRegisterSpaceUnalignedByteAccessTest", LocalMockRegisterSpaceUnalignedByteAccessTest, NULL, NULL, (UNIT_TEST_CONTEXT)DeviceContext);
-  AddTestCase (LocalMockRegisterSpaceTest, "LocalMockRegisterSpaceUnalignedWordAccessTest", "LocalMockRegisterSpaceUnalignedWordAccessTest", LocalMockRegisterSpaceUnalignedWordAccessTest, NULL, NULL, (UNIT_TEST_CONTEXT)DeviceContext);
+  AddTestCase (FakeRegisterSpaceTest, "FakeRegisterSpaceUnalignedByteAccessTest", "FakeRegisterSpaceUnalignedByteAccessTest", FakeRegisterSpaceUnalignedByteAccessTest, NULL, NULL, (UNIT_TEST_CONTEXT)DeviceContext);
+  AddTestCase (FakeRegisterSpaceTest, "FakeRegisterSpaceUnalignedWordAccessTest", "FakeRegisterSpaceUnalignedWordAccessTest", FakeRegisterSpaceUnalignedWordAccessTest, NULL, NULL, (UNIT_TEST_CONTEXT)DeviceContext);
 
   //
   // Boundary crossing unaligned access test
   //
-  AddTestCase (LocalMockRegisterSpaceTest, "LocalMockRegisterSpaceUnalignedBoundaryCrossingWordAccessTest", "LocalMockRegisterSpaceUnalignedBoundaryCrossingWordAccessTest", LocalMockRegisterSpaceUnalignedBoundaryCrossingWordAccessTest, NULL, NULL, (UNIT_TEST_CONTEXT)DeviceContext);
-  AddTestCase (LocalMockRegisterSpaceTest, "LocalMockRegisterSpaceUnalignedBoundaryCrossingDwordAccessTest", "LocalMockRegisterSpaceUnalignedBoundaryCrossingDwordAccessTest", LocalMockRegisterSpaceUnalignedBoundaryCrossingDwordAccessTest, NULL, NULL, (UNIT_TEST_CONTEXT)DeviceContext);
-  AddTestCase (LocalMockRegisterSpaceTest, "LocalMockRegisterSpaceUnalignedBoundaryCrossingQwordAccessTest", "LocalMockRegisterSpaceUnalignedBoundaryCrossingQwordAccessTest", LocalMockRegisterSpaceUnalignedBoundaryCrossingQwordAccessTest, NULL, NULL, (UNIT_TEST_CONTEXT)DeviceContext);
+  AddTestCase (FakeRegisterSpaceTest, "FakeRegisterSpaceUnalignedBoundaryCrossingWordAccessTest", "FakeRegisterSpaceUnalignedBoundaryCrossingWordAccessTest", FakeRegisterSpaceUnalignedBoundaryCrossingWordAccessTest, NULL, NULL, (UNIT_TEST_CONTEXT)DeviceContext);
+  AddTestCase (FakeRegisterSpaceTest, "FakeRegisterSpaceUnalignedBoundaryCrossingDwordAccessTest", "FakeRegisterSpaceUnalignedBoundaryCrossingDwordAccessTest", FakeRegisterSpaceUnalignedBoundaryCrossingDwordAccessTest, NULL, NULL, (UNIT_TEST_CONTEXT)DeviceContext);
+  AddTestCase (FakeRegisterSpaceTest, "FakeRegisterSpaceUnalignedBoundaryCrossingQwordAccessTest", "FakeRegisterSpaceUnalignedBoundaryCrossingQwordAccessTest", FakeRegisterSpaceUnalignedBoundaryCrossingQwordAccessTest, NULL, NULL, (UNIT_TEST_CONTEXT)DeviceContext);
 
   //
   // ByteEnable conversions test
   //
-  AddTestCase (LocalMockRegisterSpaceTest, "ByteEnableToBitMaskTest", "ByteEnableToBitMaskTest", ByteEnableToBitMaskTest, NULL, NULL, NULL);
+  AddTestCase (FakeRegisterSpaceTest, "ByteEnableToBitMaskTest", "ByteEnableToBitMaskTest", ByteEnableToBitMaskTest, NULL, NULL, NULL);
 
   //
   // WORD aligned test device
   //
-  AddTestCase (LocalMockRegisterSpaceTest, "LocalMockRegisterSpaceWordAlignedDeviceTest", "LocalMockRegisterSpaceWordAlignedDeviceTest", LocalMockRegisterSpaceWordAlignedDeviceTest, NULL, NULL, NULL);
+  AddTestCase (FakeRegisterSpaceTest, "FakeRegisterSpaceWordAlignedDeviceTest", "FakeRegisterSpaceWordAlignedDeviceTest", FakeRegisterSpaceWordAlignedDeviceTest, NULL, NULL, NULL);
   
   Status = RunAllTestSuites (Framework);
   if (Framework) {

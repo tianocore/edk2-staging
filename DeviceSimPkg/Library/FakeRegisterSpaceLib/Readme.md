@@ -1,4 +1,4 @@
-# LocalRegisterSpaceMockLib
+# FakeRegisterSpaceLib
 
 ## Introduction
 
@@ -25,7 +25,7 @@ Single memory read at address 0x0 with QWORD width will be split into 2 memory r
 
 ### Test code responsibilities
 
-Test code is responsible for providing DeviceRead/DeviceWrite functions which contain device logic. Test code can assume that all accesses to the device passed to it from the LocalRegisterSpaceMockLib will be aligned to the natural boundary (currently only DWORD alignment is supported) of the device with correct byte enables set. Test code is also responsible for managing all of the device state.
+Test code is responsible for providing DeviceRead/DeviceWrite functions which contain device logic. Test code can assume that all accesses to the device passed to it from the FakeRegisterSpaceLib will be aligned to the natural boundary (currently only DWORD alignment is supported) of the device with correct byte enables set. Test code is also responsible for managing all of the device state.
 
 ### Limitations
 

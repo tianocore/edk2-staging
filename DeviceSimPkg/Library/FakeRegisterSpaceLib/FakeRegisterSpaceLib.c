@@ -9,7 +9,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Library/UefiLib.h>
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
-#include <Library/LocalRegisterSpaceLib.h>
+#include <Library/FakeRegisterSpaceLib.h>
 
 #define ALIGN_ADDR(Address, Alignment) (Address - (Address % Alignment))
 
@@ -54,14 +54,14 @@ ByteEnableToNoOfBytes (
 }
 
 EFI_STATUS
-LocalRegisterMockRead (
-  IN REGISTER_SPACE_MOCK  *RegisterSpace,
+FakeRegisterRead (
+  IN REGISTER_ACCESS_INTERFACE  *RegisterSpace,
   IN UINT64               Address,
   IN UINT32               Size,
   OUT UINT64              *Value
   )
 {
-  LOCAL_REGISTER_SPACE  *SimpleRegisterSpace;
+  FAKE_REGISTER_SPACE  *SimpleRegisterSpace;
   UINT64      CurrentAddress;
   INT32       RemainingSize;
   UINT32      CurrentValue;
@@ -71,7 +71,7 @@ LocalRegisterMockRead (
   UINT32      Position;
   EFI_STATUS  Status;
 
-  SimpleRegisterSpace = (LOCAL_REGISTER_SPACE*) RegisterSpace;
+  SimpleRegisterSpace = (FAKE_REGISTER_SPACE*) RegisterSpace;
 
   Status = EFI_SUCCESS;
   CurrentAddress = ALIGN_ADDR(Address, SimpleRegisterSpace->Alignment);
@@ -111,20 +111,20 @@ LocalRegisterMockRead (
 }
 
 EFI_STATUS
-LocalRegisterMockWrite (
-  IN REGISTER_SPACE_MOCK  *RegisterSpace,
+FakeRegisterWrite (
+  IN REGISTER_ACCESS_INTERFACE  *RegisterSpace,
   IN UINT64          Address,
   IN UINT32          Size,
   IN UINT64          Value
   )
 {
-  LOCAL_REGISTER_SPACE  *SimpleRegisterSpace;
+  FAKE_REGISTER_SPACE  *SimpleRegisterSpace;
   UINT64      CurrentAddress;
   INT32       RemainingSize;
   UINT32      CurrentValue;
   UINT32      ByteEnable;
 
-  SimpleRegisterSpace = (LOCAL_REGISTER_SPACE*) RegisterSpace;
+  SimpleRegisterSpace = (FAKE_REGISTER_SPACE*) RegisterSpace;
 
   CurrentAddress = ALIGN_ADDR(Address, SimpleRegisterSpace->Alignment);
   ByteEnable = SizeToByteEnable (Size);
@@ -156,34 +156,34 @@ LocalRegisterMockWrite (
 }
 
 EFI_STATUS
-LocalRegisterSpaceCreate (
+FakeRegisterSpaceCreate (
   IN CHAR16                          *RegisterSpaceDescription,
-  IN LOCAL_REGISTER_SPACE_ALIGNMENT  Alignment,
+  IN FAKE_REGISTER_SPACE_ALIGNMENT  Alignment,
   IN REGISTER_WRITE_CALLBACK         Write,
   IN REGISTER_READ_CALLBACK          Read,
   IN VOID                            *RwContext,
-  OUT REGISTER_SPACE_MOCK            **SimpleRegisterSpace
+  OUT REGISTER_ACCESS_INTERFACE            **SimpleRegisterSpace
   )
 {
-  LOCAL_REGISTER_SPACE  *LocalRegisterSpace;
+  FAKE_REGISTER_SPACE  *LocalRegisterSpace;
 
-  LocalRegisterSpace = AllocateZeroPool (sizeof (LOCAL_REGISTER_SPACE));
+  LocalRegisterSpace = AllocateZeroPool (sizeof (FAKE_REGISTER_SPACE));
   LocalRegisterSpace->RegisterSpace.Name = RegisterSpaceDescription;
-  LocalRegisterSpace->RegisterSpace.Read = LocalRegisterMockRead;
-  LocalRegisterSpace->RegisterSpace.Write = LocalRegisterMockWrite;
+  LocalRegisterSpace->RegisterSpace.Read = FakeRegisterRead;
+  LocalRegisterSpace->RegisterSpace.Write = FakeRegisterWrite;
   LocalRegisterSpace->Alignment = Alignment;
   LocalRegisterSpace->Read = Read;
   LocalRegisterSpace->Write = Write;
   LocalRegisterSpace->RwContext = RwContext;
 
-  *SimpleRegisterSpace = (REGISTER_SPACE_MOCK*)LocalRegisterSpace;
+  *SimpleRegisterSpace = (REGISTER_ACCESS_INTERFACE*)LocalRegisterSpace;
 
   return EFI_SUCCESS;
 }
 
 EFI_STATUS
-LocalRegisterSpaceDestroy (
-  IN REGISTER_SPACE_MOCK  *RegisterSpace
+FakeRegisterSpaceDestroy (
+  IN REGISTER_ACCESS_INTERFACE  *RegisterSpace
   )
 {
   if (RegisterSpace == NULL) {

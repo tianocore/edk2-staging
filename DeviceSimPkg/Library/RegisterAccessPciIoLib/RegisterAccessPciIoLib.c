@@ -9,8 +9,8 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Library/UefiLib.h>
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
-#include <Library/MockPciSegmentLib.h>
-#include <Library/MockPciLib.h>
+#include <Library/RegisterAccessPciSegmentLib.h>
+#include <Library/RegisterAccessPciLib.h>
 
 //
 // Lookup table for increment values based on transfer widths
@@ -50,7 +50,7 @@ UINT8  mOutStride[] = {
 
 EFI_STATUS
 EFIAPI
-MockPciIoPollMem (
+RegisterAccessPciIoPollMem (
   IN EFI_PCI_IO_PROTOCOL           *This,
   IN  EFI_PCI_IO_PROTOCOL_WIDTH    Width,
   IN  UINT8                        BarIndex,
@@ -92,7 +92,7 @@ MockPciIoPollMem (
 
 EFI_STATUS
 EFIAPI
-MockPciIoPollIo (
+RegisterAccessPciIoPollIo (
   IN EFI_PCI_IO_PROTOCOL           *This,
   IN  EFI_PCI_IO_PROTOCOL_WIDTH    Width,
   IN  UINT8                        BarIndex,
@@ -134,7 +134,7 @@ MockPciIoPollIo (
 
 EFI_STATUS
 EFIAPI
-MockPciIoReadMem (
+RegisterAccessPciIoReadMem (
   IN EFI_PCI_IO_PROTOCOL              *This,
   IN     EFI_PCI_IO_PROTOCOL_WIDTH    Width,
   IN     UINT8                        BarIndex,
@@ -148,11 +148,11 @@ MockPciIoReadMem (
   EFI_PCI_IO_PROTOCOL_WIDTH  OperationWidth;
   UINT8                     *Uint8Buffer;
   UINT64                    Address;
-  MOCK_PCI_IO  *PciIo;
-  MOCK_PCI_DEVICE  *PciDev;
+  REGISTER_ACCESS_PCI_IO  *PciIo;
+  REGISTER_ACCESS_PCI_DEVICE  *PciDev;
 
-  PciIo = (MOCK_PCI_IO*) This;
-  PciDev = PciIo->MockPci;
+  PciIo = (REGISTER_ACCESS_PCI_IO*) This;
+  PciDev = PciIo->PciDev;
   Address = PciDev->BarAddress[BarIndex] + Offset;
   InStride       = mInStride[Width];
   OutStride      = mOutStride[Width];
@@ -174,7 +174,7 @@ MockPciIoReadMem (
 
 EFI_STATUS
 EFIAPI
-MockPciIoWriteMem (
+RegisterAccessPciIoWriteMem (
   IN EFI_PCI_IO_PROTOCOL              *This,
   IN     EFI_PCI_IO_PROTOCOL_WIDTH    Width,
   IN     UINT8                        BarIndex,
@@ -188,11 +188,11 @@ MockPciIoWriteMem (
   EFI_PCI_IO_PROTOCOL_WIDTH  OperationWidth;
   UINT8                     *Uint8Buffer;
   UINT64                    Address;
-  MOCK_PCI_IO  *PciIo;
-  MOCK_PCI_DEVICE  *PciDev;
+  REGISTER_ACCESS_PCI_IO  *PciIo;
+  REGISTER_ACCESS_PCI_DEVICE  *PciDev;
 
-  PciIo = (MOCK_PCI_IO*) This;
-  PciDev = PciIo->MockPci;
+  PciIo = (REGISTER_ACCESS_PCI_IO*) This;
+  PciDev = PciIo->PciDev;
   Address = PciDev->BarAddress[BarIndex] + Offset;
   InStride       = mInStride[Width];
   OutStride      = mOutStride[Width];
@@ -214,7 +214,7 @@ MockPciIoWriteMem (
 
 EFI_STATUS
 EFIAPI
-MockPciIoReadIo (
+RegisterAccessPciIoReadIo (
   IN EFI_PCI_IO_PROTOCOL              *This,
   IN     EFI_PCI_IO_PROTOCOL_WIDTH    Width,
   IN     UINT8                        BarIndex,
@@ -228,11 +228,11 @@ MockPciIoReadIo (
   EFI_PCI_IO_PROTOCOL_WIDTH  OperationWidth;
   UINT8                     *Uint8Buffer;
   UINT64                    Address;
-  MOCK_PCI_IO  *PciIo;
-  MOCK_PCI_DEVICE  *PciDev;
+  REGISTER_ACCESS_PCI_IO  *PciIo;
+  REGISTER_ACCESS_PCI_DEVICE  *PciDev;
 
-  PciIo = (MOCK_PCI_IO*) This;
-  PciDev = PciIo->MockPci;
+  PciIo = (REGISTER_ACCESS_PCI_IO*) This;
+  PciDev = PciIo->PciDev;
   Address = PciDev->BarAddress[BarIndex] + Offset;
 
   InStride       = mInStride[Width];
@@ -278,7 +278,7 @@ MockPciIoReadIo (
 
 EFI_STATUS
 EFIAPI
-MockPciIoWriteIo (
+RegisterAccessPciIoWriteIo (
   IN EFI_PCI_IO_PROTOCOL              *This,
   IN     EFI_PCI_IO_PROTOCOL_WIDTH    Width,
   IN     UINT8                        BarIndex,
@@ -292,11 +292,11 @@ MockPciIoWriteIo (
   EFI_PCI_IO_PROTOCOL_WIDTH  OperationWidth;
   UINT8                     *Uint8Buffer;
   UINT64                    Address;
-  MOCK_PCI_IO  *PciIo;
-  MOCK_PCI_DEVICE  *PciDev;
+  REGISTER_ACCESS_PCI_IO  *PciIo;
+  REGISTER_ACCESS_PCI_DEVICE  *PciDev;
 
-  PciIo = (MOCK_PCI_IO*) This;
-  PciDev = PciIo->MockPci;
+  PciIo = (REGISTER_ACCESS_PCI_IO*) This;
+  PciDev = PciIo->PciDev;
   Address = PciDev->BarAddress[BarIndex] + Offset;
 
   InStride       = mInStride[Width];
@@ -342,7 +342,7 @@ MockPciIoWriteIo (
 
 EFI_STATUS
 EFIAPI
-MockPciIoConfigRead (
+RegisterAccessPciIoConfigRead (
   IN EFI_PCI_IO_PROTOCOL              *This,
   IN     EFI_PCI_IO_PROTOCOL_WIDTH    Width,
   IN     UINT32                       Offset,
@@ -355,11 +355,11 @@ MockPciIoConfigRead (
   UINT8                                        OutStride;
   UINTN                                        Size;
   UINT64                                       Address;
-  MOCK_PCI_IO  *PciIo;
-  MOCK_PCI_DEVICE  *PciDev;
+  REGISTER_ACCESS_PCI_IO  *PciIo;
+  REGISTER_ACCESS_PCI_DEVICE  *PciDev;
 
-  PciIo = (MOCK_PCI_IO*) This;
-  PciDev = PciIo->MockPci;
+  PciIo = (REGISTER_ACCESS_PCI_IO*) This;
+  PciDev = PciIo->PciDev;
 
   InStride  = mInStride[Width];
   OutStride = mOutStride[Width];
@@ -374,7 +374,7 @@ MockPciIoConfigRead (
 
 EFI_STATUS
 EFIAPI
-MockPciIoConfigWrite (
+RegisterAccessPciIoConfigWrite (
   IN EFI_PCI_IO_PROTOCOL              *This,
   IN     EFI_PCI_IO_PROTOCOL_WIDTH    Width,
   IN     UINT32                       Offset,
@@ -387,11 +387,11 @@ MockPciIoConfigWrite (
   UINT8                                        OutStride;
   UINTN                                        Size;
   UINT64                                       Address;
-  MOCK_PCI_IO  *PciIo;
-  MOCK_PCI_DEVICE  *PciDev;
+  REGISTER_ACCESS_PCI_IO  *PciIo;
+  REGISTER_ACCESS_PCI_DEVICE  *PciDev;
 
-  PciIo = (MOCK_PCI_IO*) This;
-  PciDev = PciIo->MockPci;
+  PciIo = (REGISTER_ACCESS_PCI_IO*) This;
+  PciDev = PciIo->PciDev;
   Address = PciDev->PciSegmentBase + Offset;
   InStride  = mInStride[Width];
   OutStride = mOutStride[Width];
@@ -405,7 +405,7 @@ MockPciIoConfigWrite (
 
 EFI_STATUS
 EFIAPI
-MockPciIoCopyMem (
+RegisterAccessPciIoCopyMem (
   IN EFI_PCI_IO_PROTOCOL              *This,
   IN     EFI_PCI_IO_PROTOCOL_WIDTH    Width,
   IN     UINT8                        DestBarIndex,
@@ -434,7 +434,7 @@ DEVICE_MEMORY_MAPPING  gDeviceMemoryMapping[5] = {
 
 EFI_STATUS
 EFIAPI
-MockPciIoMap (
+RegisterAccessPciIoMap (
   IN EFI_PCI_IO_PROTOCOL                *This,
   IN     EFI_PCI_IO_PROTOCOL_OPERATION  Operation,
   IN     VOID                           *HostAddress,
@@ -459,7 +459,7 @@ MockPciIoMap (
 
 EFI_STATUS
 EFIAPI
-MockPciIoUnmap (
+RegisterAccessPciIoUnmap (
   IN EFI_PCI_IO_PROTOCOL           *This,
   IN  VOID                         *Mapping
   )
@@ -475,7 +475,7 @@ MockPciIoUnmap (
 
 EFI_STATUS
 EFIAPI
-MockPciIoGetHostAddressFromDeviceAddress (
+RegisterAccessPciIoGetHostAddressFromDeviceAddress (
   IN UINT32  DeviceAddress,
   OUT VOID   **HostAddress
   )
@@ -492,7 +492,7 @@ MockPciIoGetHostAddressFromDeviceAddress (
 
 EFI_STATUS
 EFIAPI
-MockPciIoAllocateBuffer (
+RegisterAccessPciIoAllocateBuffer (
   IN EFI_PCI_IO_PROTOCOL           *This,
   IN  EFI_ALLOCATE_TYPE            Type,
   IN  EFI_MEMORY_TYPE              MemoryType,
@@ -506,7 +506,7 @@ MockPciIoAllocateBuffer (
 
 EFI_STATUS
 EFIAPI
-MockPciIoFreeBuffer (
+RegisterAccessPciIoFreeBuffer (
   IN EFI_PCI_IO_PROTOCOL           *This,
   IN  UINTN                        Pages,
   IN  VOID                         *HostAddress
@@ -517,7 +517,7 @@ MockPciIoFreeBuffer (
 
 EFI_STATUS
 EFIAPI
-MockPciIoFlush (
+RegisterAccessPciIoFlush (
   IN EFI_PCI_IO_PROTOCOL  *This
   )
 {
@@ -526,7 +526,7 @@ MockPciIoFlush (
 
 EFI_STATUS
 EFIAPI
-MockPciIoGetLocation (
+RegisterAccessPciIoGetLocation (
   IN EFI_PCI_IO_PROTOCOL          *This,
   OUT UINTN                       *SegmentNumber,
   OUT UINTN                       *BusNumber,
@@ -534,11 +534,11 @@ MockPciIoGetLocation (
   OUT UINTN                       *FunctionNumber
   )
 {
-  MOCK_PCI_IO  *PciIo;
-  MOCK_PCI_DEVICE  *PciDev;
+  REGISTER_ACCESS_PCI_IO  *PciIo;
+  REGISTER_ACCESS_PCI_DEVICE  *PciDev;
 
-  PciIo = (MOCK_PCI_IO*) This;
-  PciDev = PciIo->MockPci;
+  PciIo = (REGISTER_ACCESS_PCI_IO*) This;
+  PciDev = PciIo->PciDev;
 
   *SegmentNumber = PciDev->Segment;
   *BusNumber = PciDev->Bus;
@@ -550,7 +550,7 @@ MockPciIoGetLocation (
 
 EFI_STATUS
 EFIAPI
-MockPciIoProtocolAttributes (
+RegisterAccessPciIoProtocolAttributes (
   IN EFI_PCI_IO_PROTOCOL                       *This,
   IN  EFI_PCI_IO_PROTOCOL_ATTRIBUTE_OPERATION  Operation,
   IN  UINT64                                   Attributes,
@@ -562,7 +562,7 @@ MockPciIoProtocolAttributes (
 
 EFI_STATUS
 EFIAPI
-MockPciIoGetBarAttributes (
+RegisterAccessPciIoGetBarAttributes (
   IN EFI_PCI_IO_PROTOCOL             *This,
   IN  UINT8                          BarIndex,
   OUT UINT64                         *Supports  OPTIONAL,
@@ -574,7 +574,7 @@ MockPciIoGetBarAttributes (
 
 EFI_STATUS
 EFIAPI
-MockPciIoSetBarAttributes (
+RegisterAccessPciIoSetBarAttributes (
   IN EFI_PCI_IO_PROTOCOL              *This,
   IN     UINT64                       Attributes,
   IN     UINT8                        BarIndex,
@@ -586,45 +586,45 @@ MockPciIoSetBarAttributes (
 }
 
 EFI_STATUS
-MockPciIoCreate (
-  IN MOCK_PCI_DEVICE  *MockPci,
+RegisterAccessPciIoCreate (
+  IN REGISTER_ACCESS_PCI_DEVICE  *PciDev,
   OUT EFI_PCI_IO_PROTOCOL  **PciIo
   )
 {
-  MOCK_PCI_IO  *MockPciIo;
+  REGISTER_ACCESS_PCI_IO  *RegisterAccessPciIo;
 
-  MockPciIo = AllocateZeroPool (sizeof (MOCK_PCI_IO));
+  RegisterAccessPciIo = AllocateZeroPool (sizeof (REGISTER_ACCESS_PCI_IO));
 
-  MockPciIo->MockPci = MockPci;
+  RegisterAccessPciIo->PciDev = PciDev;
 
-  MockPciIo->PciIo.Pci.Read = MockPciIoConfigRead;
-  MockPciIo->PciIo.Pci.Write = MockPciIoConfigWrite;
-  MockPciIo->PciIo.PollMem = MockPciIoPollMem;
-  MockPciIo->PciIo.PollIo = MockPciIoPollIo;
-  MockPciIo->PciIo.Mem.Read = MockPciIoReadMem;
-  MockPciIo->PciIo.Mem.Write = MockPciIoWriteMem;
-  MockPciIo->PciIo.Io.Read = MockPciIoReadIo;
-  MockPciIo->PciIo.Io.Write = MockPciIoWriteIo;
-  MockPciIo->PciIo.CopyMem = MockPciIoCopyMem;
-  MockPciIo->PciIo.Map = MockPciIoMap;
-  MockPciIo->PciIo.Unmap = MockPciIoUnmap;
-  MockPciIo->PciIo.AllocateBuffer = MockPciIoAllocateBuffer;
-  MockPciIo->PciIo.FreeBuffer = MockPciIoFreeBuffer;
-  MockPciIo->PciIo.Flush = MockPciIoFlush;
-  MockPciIo->PciIo.GetLocation = MockPciIoGetLocation;
-  MockPciIo->PciIo.Attributes = MockPciIoProtocolAttributes;
-  MockPciIo->PciIo.GetBarAttributes = MockPciIoGetBarAttributes;
-  MockPciIo->PciIo.SetBarAttributes = MockPciIoSetBarAttributes;
-  MockPciIo->PciIo.RomSize = 0;
-  MockPciIo->PciIo.RomImage = NULL;
+  RegisterAccessPciIo->PciIo.Pci.Read = RegisterAccessPciIoConfigRead;
+  RegisterAccessPciIo->PciIo.Pci.Write = RegisterAccessPciIoConfigWrite;
+  RegisterAccessPciIo->PciIo.PollMem = RegisterAccessPciIoPollMem;
+  RegisterAccessPciIo->PciIo.PollIo = RegisterAccessPciIoPollIo;
+  RegisterAccessPciIo->PciIo.Mem.Read = RegisterAccessPciIoReadMem;
+  RegisterAccessPciIo->PciIo.Mem.Write = RegisterAccessPciIoWriteMem;
+  RegisterAccessPciIo->PciIo.Io.Read = RegisterAccessPciIoReadIo;
+  RegisterAccessPciIo->PciIo.Io.Write = RegisterAccessPciIoWriteIo;
+  RegisterAccessPciIo->PciIo.CopyMem = RegisterAccessPciIoCopyMem;
+  RegisterAccessPciIo->PciIo.Map = RegisterAccessPciIoMap;
+  RegisterAccessPciIo->PciIo.Unmap = RegisterAccessPciIoUnmap;
+  RegisterAccessPciIo->PciIo.AllocateBuffer = RegisterAccessPciIoAllocateBuffer;
+  RegisterAccessPciIo->PciIo.FreeBuffer = RegisterAccessPciIoFreeBuffer;
+  RegisterAccessPciIo->PciIo.Flush = RegisterAccessPciIoFlush;
+  RegisterAccessPciIo->PciIo.GetLocation = RegisterAccessPciIoGetLocation;
+  RegisterAccessPciIo->PciIo.Attributes = RegisterAccessPciIoProtocolAttributes;
+  RegisterAccessPciIo->PciIo.GetBarAttributes = RegisterAccessPciIoGetBarAttributes;
+  RegisterAccessPciIo->PciIo.SetBarAttributes = RegisterAccessPciIoSetBarAttributes;
+  RegisterAccessPciIo->PciIo.RomSize = 0;
+  RegisterAccessPciIo->PciIo.RomImage = NULL;
 
-  *PciIo = (EFI_PCI_IO_PROTOCOL*) MockPciIo;
+  *PciIo = (EFI_PCI_IO_PROTOCOL*) RegisterAccessPciIo;
 
   return EFI_SUCCESS;
 }
 
 EFI_STATUS
-MockPciIoDestroy (
+RegisterAccessPciIoDestroy (
   IN EFI_PCI_IO_PROTOCOL  *PciIo
   )
 {
@@ -637,16 +637,16 @@ MockPciIoDestroy (
 }
 
 EFI_STATUS
-MockPciDeviceInitialize (
-  IN REGISTER_SPACE_MOCK  *ConfigSpace,
+RegisterAccessPciDeviceInitialize (
+  IN REGISTER_ACCESS_INTERFACE  *ConfigSpace,
   IN UINT8                Segment,
   IN UINT8                Bus,
   IN UINT8                Device,
   IN UINT8                Function,
-  OUT MOCK_PCI_DEVICE     **PciDev
+  OUT REGISTER_ACCESS_PCI_DEVICE     **PciDev
   )
 {
-  *PciDev = AllocateZeroPool (sizeof (MOCK_PCI_DEVICE));
+  *PciDev = AllocateZeroPool (sizeof (REGISTER_ACCESS_PCI_DEVICE));
   if (PciDev == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
@@ -664,7 +664,7 @@ MockPciDeviceInitialize (
     0
   );
 
-  MockPciSegmentRegisterAtPciSegmentAddress (ConfigSpace, (*PciDev)->PciSegmentBase);
+  RegisterAccessPciSegmentRegisterAtPciSegmentAddress (ConfigSpace, (*PciDev)->PciSegmentBase);
 
   (*PciDev)->ConfigSpace = ConfigSpace;
 
@@ -672,38 +672,38 @@ MockPciDeviceInitialize (
 }
 
 EFI_STATUS
-MockPciDeviceRegisterBar (
-  IN MOCK_PCI_DEVICE       *PciDev,
-  IN REGISTER_SPACE_MOCK   *BarRegisterSpace,
+RegisterAccessPciDeviceRegisterBar (
+  IN REGISTER_ACCESS_PCI_DEVICE       *PciDev,
+  IN REGISTER_ACCESS_INTERFACE   *BarRegisterSpace,
   IN UINT32                 BarIndex,
-  IN MOCK_IO_MEMORY_TYPE    BarType,
+  IN REGISTER_ACCESS_IO_MEMORY_TYPE    BarType,
   IN UINT64                 BarAddress,
   IN UINT64                 BarSize
   )
 {
-  if (PciDev == NULL || BarIndex > MOCK_PCI_LIB_MAX_SUPPORTED_BARS) {
+  if (PciDev == NULL || BarIndex > REGISTER_SPACE_PCI_LIB_MAX_SUPPORTED_BARS) {
     return EFI_INVALID_PARAMETER;
   }
   PciDev->Bar[BarIndex] = BarRegisterSpace;
   PciDev->BarAddress[BarIndex] = BarAddress;
   PciDev->BarType[BarIndex] = BarType;
-  MockIoRegisterMmioAtAddress (BarRegisterSpace, BarType, BarAddress, BarSize);
+  RegisterAccessIoRegisterMmioAtAddress (BarRegisterSpace, BarType, BarAddress, BarSize);
   return EFI_SUCCESS;
 }
 
 EFI_STATUS
-MockPciDeviceDestroy (
-  IN MOCK_PCI_DEVICE  *PciDev
+RegisterAccessPciDeviceDestroy (
+  IN REGISTER_ACCESS_PCI_DEVICE  *PciDev
   )
 {
   if (PciDev == NULL) {
     return EFI_INVALID_PARAMETER;
   }
 
-  MockPciSegmentUnRegisterAtPciSegmentAddress (PciDev->PciSegmentBase);
+  RegisterAccessPciSegmentUnRegisterAtPciSegmentAddress (PciDev->PciSegmentBase);
 
-  for (UINTN Index = 0; Index < MOCK_PCI_LIB_MAX_SUPPORTED_BARS; Index++) {
-    MockIoUnRegisterMmioAtAddress (PciDev->BarType[Index], PciDev->BarAddress[Index]);
+  for (UINTN Index = 0; Index < REGISTER_SPACE_PCI_LIB_MAX_SUPPORTED_BARS; Index++) {
+    RegisterAccessIoUnRegisterMmioAtAddress (PciDev->BarType[Index], PciDev->BarAddress[Index]);
   }
 
   FreePool (PciDev);

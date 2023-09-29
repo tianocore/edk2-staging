@@ -23,7 +23,7 @@
 
 
 [Components]
-  DeviceSimPkg/Library/LocalMockRegisterSpaceLib/UnitTest/LocalMockRegisterSpaceLibUnitTest.inf
-  DeviceSimPkg/Library/MockPciIoLib/UnitTest/MockPciIoLibUnitTest.inf
-  DeviceSimPkg/Library/MockIoLib/UnitTest/MockIoLibUnitTest.inf
-  DeviceSimPkg/Library/MockPciSegmentLib/UnitTest/MockPciSegmentLibUnitTest.inf
+  DeviceSimPkg/Library/FakeRegisterSpaceLib/UnitTest/FakeRegisterSpaceLibUnitTest.inf
+  DeviceSimPkg/Library/RegisterAccessPciIoLib/UnitTest/RegisterAccessPciIoLibUnitTest.inf
+  DeviceSimPkg/Library/RegisterAccessIoLib/UnitTest/RegisterAccessIoLibUnitTest.inf
+  DeviceSimPkg/Library/RegisterAccessPciSegmentLib/UnitTest/RegisterAccessPciSegmentLibUnitTest.inf

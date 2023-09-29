@@ -6,11 +6,11 @@
 
 [Defines]
   INF_VERSION     = 0x00010005
-  BASE_NAME       = LocalMockRegisterSpaceLib
-  FILE_GUID       = D2487689-9E30-41AD-B773-3650C94BCBE2
+  BASE_NAME       = RegisterAccessPciSegmentLib
+  FILE_GUID       = C2487689-9E30-41AD-B773-3650C94BCBE2
   MODULE_TYPE     = HOST_APPLICATION
   VERSION_STRING  = 1.0
-  LIBRARY_CLASS   = LocalMockRegisterSpaceLib
+  LIBRARY_CLASS   = RegisterAccessPciSegmentLib
 
 #
 # The following information is for reference only and not required by the build tools.
@@ -18,8 +18,11 @@
 #  VALID_ARCHITECTURES           = IA32 X64
 #
 
+[Pcd]
+  gEfiMdePkgTokenSpaceGuid.PcdPciExpressBaseAddress  ## CONSUMES
+
 [Sources]
-  LocalMockRegisterSpaceLib.c
+  RegisterAccessPciSegmentLib.c
 
 [Packages]
   MdePkg/MdePkg.dec
@@ -31,3 +34,4 @@
   DebugLib
   PcdLib
   UefiLib
+  RealPciSegment

@@ -9,10 +9,10 @@
   DevicePathLib|MdePkg/Library/UefiDevicePathLib/UefiDevicePathLib.inf
   UefiLib|MdePkg/Library/UefiLib/UefiLib.inf
   UefiRuntimeServicesTableLib|MdePkg/Library/UefiRuntimeServicesTableLib/UefiRuntimeServicesTableLib.inf
-  MockPciIoLib|DeviceSimPkg/Library/MockPciIoLib/MockPciIoLib.inf
-  LocalMockRegisterSpaceLib|DeviceSimPkg/Library/LocalMockRegisterSpaceLib/LocalMockRegisterSpaceLib.inf
-  IoLib|DeviceSimPkg/Library/MockIoLib/MockIoLib.inf
-  PciSegmentLib|DeviceSimPkg/Library/MockPciSegmentLib/MockPciSegmentLib.inf
+  RegisterAccessPciIoLib|DeviceSimPkg/Library/RegisterAccessPciIoLib/RegisterAccessPciIoLib.inf
+  FakeRegisterSpaceLib|DeviceSimPkg/Library/FakeRegisterSpaceLib/FakeRegisterSpaceLib.inf
+  IoLib|DeviceSimPkg/Library/RegisterAccessIoLib/RegisterAccessIoLib.inf
+  PciSegmentLib|DeviceSimPkg/Library/RegisterAccessPciSegmentLib/RegisterAccessPciSegmentLib.inf
   PciExpressLib|MdePkg/Library/BasePciExpressLib/BasePciExpressLib.inf
   PciLib|MdePkg/Library/BasePciLibPciExpress/BasePciLibPciExpress.inf
   RealPciSegment|MdePkg/Library/BasePciSegmentLibPci/BasePciSegmentLibPci.inf

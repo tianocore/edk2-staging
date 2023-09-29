@@ -6,11 +6,10 @@
 
 [Defines]
   INF_VERSION     = 0x00010005
-  BASE_NAME       = MockPciIoLib
-  FILE_GUID       = B2487689-9E30-41AD-B773-3650C94BCBE2
+  BASE_NAME       = RegisterAccessPciIoLibUnitTest
+  FILE_GUID       = 64C846E3-3A1A-4377-A192-3788763D0090
   MODULE_TYPE     = HOST_APPLICATION
   VERSION_STRING  = 1.0
-  LIBRARY_CLASS   = MockPciIoLib
 
 #
 # The following information is for reference only and not required by the build tools.
@@ -19,17 +18,17 @@
 #
 
 [Sources]
-  MockPciIoLib.c
+  RegisterAccessPciIoLibUnitTest.c
 
 [Packages]
   MdePkg/MdePkg.dec
   MdeModulePkg/MdeModulePkg.dec
+  UnitTestFrameworkPkg/UnitTestFrameworkPkg.dec
   DeviceSimPkg/DeviceSimPkg.dec
 
 [LibraryClasses]
   BaseLib
   DebugLib
-  PcdLib
-  UefiLib
-  IoLib
-  PciSegmentLib
+  UnitTestLib
+  FakeRegisterSpaceLib
+  RegisterAccessPciIoLib

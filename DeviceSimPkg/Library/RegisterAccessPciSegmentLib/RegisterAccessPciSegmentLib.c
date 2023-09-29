@@ -5,30 +5,30 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#include <Library/MockPciSegmentLib.h>
-#include <Library/MockIoLib.h>
+#include <Library/RegisterAccessPciSegmentLib.h>
+#include <Library/RegisterAccessIoLib.h>
 #include <Library/DebugLib.h>
 #include <Library/PcdLib.h>
 
 EFI_STATUS
-MockPciSegmentRegisterAtPciSegmentAddress (
-  IN REGISTER_SPACE_MOCK *RegisterSpaceMock,
+RegisterAccessPciSegmentRegisterAtPciSegmentAddress (
+  IN REGISTER_ACCESS_INTERFACE *RegisterAccess,
   IN UINT64              PciSegmentAddress
   )
 {
   UINT64  Address;
 
   Address = PcdGet64 (PcdPciExpressBaseAddress) + PciSegmentAddress;
-  return MockIoRegisterMmioAtAddress (RegisterSpaceMock, MockIoTypeMmio, Address, 0x10000);
+  return RegisterAccessIoRegisterMmioAtAddress (RegisterAccess, RegisterAccessIoTypeMmio, Address, 0x10000);
 }
 
 EFI_STATUS
-MockPciSegmentUnRegisterAtPciSegmentAddress (
+RegisterAccessPciSegmentUnRegisterAtPciSegmentAddress (
   IN UINT64  PciSegmentAddress
   )
 {
   UINT64  Address;
 
   Address = PcdGet64 (PcdPciExpressBaseAddress) + PciSegmentAddress;
-  return MockIoUnRegisterMmioAtAddress (MockIoTypeMmio, Address);
+  return RegisterAccessIoUnRegisterMmioAtAddress (RegisterAccessIoTypeMmio, Address);
 }

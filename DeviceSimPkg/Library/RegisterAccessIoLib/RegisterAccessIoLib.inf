@@ -6,7 +6,7 @@
 
 [Defines]
   INF_VERSION     = 0x00010005
-  BASE_NAME       = MockIoLib
+  BASE_NAME       = RegisterAccessIoLib
   FILE_GUID       = 12487689-9E30-41AD-B773-3650C94BCBE2
   MODULE_TYPE     = HOST_APPLICATION
   VERSION_STRING  = 1.0
@@ -19,7 +19,7 @@
 #
 
 [Sources]
-  MockIoLib.c
+  RegisterAccessIoLib.c
   IoLibMmioBuffer.c
   IoHighLevel.c
 

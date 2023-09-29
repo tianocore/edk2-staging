@@ -6,8 +6,8 @@
 
 [Defines]
   INF_VERSION     = 0x00010005
-  BASE_NAME       = MockPciSegmentLibUnitTest
-  FILE_GUID       = 9BE8D4B2-A5C1-40B6-ACF6-070A9515A63D
+  BASE_NAME       = RegisterAccessIoLibUnitTest
+  FILE_GUID       = 9F7C6D33-D2C0-4CC5-9051-71D2D343E6BA
   MODULE_TYPE     = HOST_APPLICATION
   VERSION_STRING  = 1.0
 
@@ -18,7 +18,7 @@
 #
 
 [Sources]
-  MockPciSegmentLibUnitTest.c
+  RegisterAccessIoLibUnitTest.c
 
 [Packages]
   MdePkg/MdePkg.dec
@@ -30,5 +30,5 @@
   BaseLib
   DebugLib
   UnitTestLib
-  LocalMockRegisterSpaceLib
-  PciSegmentLib
+  FakeRegisterSpaceLib
+  IoLib

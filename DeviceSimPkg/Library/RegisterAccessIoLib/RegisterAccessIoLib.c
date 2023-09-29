@@ -5,7 +5,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#include <Library/MockIoLib.h>
+#include <Library/RegisterAccessIoLib.h>
 #include <Library/DebugLib.h>
 #include <Base.h>
 #include <Library/BaseLib.h>
@@ -15,33 +15,33 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 typedef struct {
   UINT64               Address;
   UINT64               Size;
-  REGISTER_SPACE_MOCK  *RegisterMock;
+  REGISTER_ACCESS_INTERFACE  *RegisterAccess;
   LIST_ENTRY           Link;
-} MOCK_IO_MEMORY_MAP;
+} REGISTER_ACCESS_IO_MEMORY_MAP;
 
-MOCK_IO_MEMORY_MAP  *mIoMap = NULL;
-MOCK_IO_MEMORY_MAP  *mMemMap = NULL;
+REGISTER_ACCESS_IO_MEMORY_MAP  *mIoMap = NULL;
+REGISTER_ACCESS_IO_MEMORY_MAP  *mMemMap = NULL;
 
-REGISTER_SPACE_MOCK*
-MockIoGetRegisterSpace (
+REGISTER_ACCESS_INTERFACE*
+RegisterAccessIoGetRegisterSpace (
   IN UINT64               Address,
-  IN MOCK_IO_MEMORY_TYPE  MemoryType,
+  IN REGISTER_ACCESS_IO_MEMORY_TYPE  MemoryType,
   OUT UINT64              *Offset
 )
 {
-  MOCK_IO_MEMORY_MAP  *MemoryMap;
+  REGISTER_ACCESS_IO_MEMORY_MAP  *MemoryMap;
   LIST_ENTRY  *Entry;
   LIST_ENTRY  *Next;
-  MOCK_IO_MEMORY_MAP  *MapEntry;
+  REGISTER_ACCESS_IO_MEMORY_MAP  *MapEntry;
 
   switch (MemoryType) {
-    case MockIoTypeIo:
+    case RegisterAccessIoTypeIo:
       if (mIoMap == NULL) {
         return NULL;
       }
       MemoryMap = mIoMap;
       break;
-    case MockIoTypeMmio:
+    case RegisterAccessIoTypeMmio:
     default:
       if (mMemMap == NULL) {
         return NULL;
@@ -51,11 +51,11 @@ MockIoGetRegisterSpace (
   }
 
   BASE_LIST_FOR_EACH_SAFE (Entry, Next, &MemoryMap->Link) {
-    MapEntry = BASE_CR (Entry, MOCK_IO_MEMORY_MAP, Link);
+    MapEntry = BASE_CR (Entry, REGISTER_ACCESS_IO_MEMORY_MAP, Link);
     if (Address >= MapEntry->Address &&
         Address < MapEntry->Address + MapEntry->Size) {
       *Offset = Address - MapEntry->Address;
-      return MapEntry->RegisterMock;
+      return MapEntry->RegisterAccess;
     }
   }
 
@@ -63,65 +63,65 @@ MockIoGetRegisterSpace (
 }
 
 EFI_STATUS
-MockIoRegisterMmioAtAddress (
-  IN REGISTER_SPACE_MOCK *RegisterSpaceMock,
-  IN MOCK_IO_MEMORY_TYPE  Type,
+RegisterAccessIoRegisterMmioAtAddress (
+  IN REGISTER_ACCESS_INTERFACE *RegisterAccess,
+  IN REGISTER_ACCESS_IO_MEMORY_TYPE  Type,
   IN UINT64               Address,
   IN UINT64               Size
   )
 {
-  MOCK_IO_MEMORY_MAP  **Map;
-  MOCK_IO_MEMORY_MAP  *MapEntry;
+  REGISTER_ACCESS_IO_MEMORY_MAP  **Map;
+  REGISTER_ACCESS_IO_MEMORY_MAP  *MapEntry;
 
   switch (Type) {
-    case MockIoTypeIo:
+    case RegisterAccessIoTypeIo:
       Map = &mIoMap;
       break;
-    case MockIoTypeMmio:
+    case RegisterAccessIoTypeMmio:
     default:
       Map = &mMemMap;
       break;
   }
 
   if (*Map == NULL) {
-    *Map = AllocateZeroPool (sizeof (MOCK_IO_MEMORY_MAP));
+    *Map = AllocateZeroPool (sizeof (REGISTER_ACCESS_IO_MEMORY_MAP));
     if (*Map == NULL) {
       return EFI_OUT_OF_RESOURCES;
     }
     InitializeListHead (&(*Map)->Link);
   }
 
-  MapEntry = AllocateZeroPool (sizeof (MOCK_IO_MEMORY_MAP)); 
+  MapEntry = AllocateZeroPool (sizeof (REGISTER_ACCESS_IO_MEMORY_MAP)); 
   if (MapEntry == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
   MapEntry->Address = Address;
   MapEntry->Size = Size;
-  MapEntry->RegisterMock = RegisterSpaceMock;
+  MapEntry->RegisterAccess = RegisterAccess;
   InsertTailList (&(*Map)->Link, &MapEntry->Link);
 
   return EFI_SUCCESS;
 }
 
 EFI_STATUS
-MockIoUnRegisterMmioAtAddress (
-  IN MOCK_IO_MEMORY_TYPE  MemoryType,
+RegisterAccessIoUnRegisterMmioAtAddress (
+  IN REGISTER_ACCESS_IO_MEMORY_TYPE  MemoryType,
   IN UINT64               Address
   )
 {
-  MOCK_IO_MEMORY_MAP  *MemoryMap;
+  REGISTER_ACCESS_IO_MEMORY_MAP  *MemoryMap;
   LIST_ENTRY  *Entry;
   LIST_ENTRY  *Next;
-  MOCK_IO_MEMORY_MAP  *MapEntry;
+  REGISTER_ACCESS_IO_MEMORY_MAP  *MapEntry;
 
   switch (MemoryType) {
-    case MockIoTypeIo:
+    case RegisterAccessIoTypeIo:
       if (mIoMap == NULL) {
         return EFI_NOT_FOUND;
       }
       MemoryMap = mIoMap;
       break;
-    case MockIoTypeMmio:
+    case RegisterAccessIoTypeMmio:
     default:
       if (mMemMap == NULL) {
         return EFI_NOT_FOUND;
@@ -131,7 +131,7 @@ MockIoUnRegisterMmioAtAddress (
   }
 
   BASE_LIST_FOR_EACH_SAFE (Entry, Next, &MemoryMap->Link) {
-    MapEntry = BASE_CR (Entry, MOCK_IO_MEMORY_MAP, Link);
+    MapEntry = BASE_CR (Entry, REGISTER_ACCESS_IO_MEMORY_MAP, Link);
     if (Address == MapEntry->Address) {
       RemoveEntryList (Entry);
       FreePool (MapEntry);
@@ -162,16 +162,16 @@ IoRead8 (
   IN      UINTN  Port
   )
 {
-  REGISTER_SPACE_MOCK  *Mock;
+  REGISTER_ACCESS_INTERFACE  *RegisterAccess;
   UINT64               Value;
   UINT64               Offset;
 
-  Mock = MockIoGetRegisterSpace (Port, MockIoTypeIo, &Offset);
-  if (Mock == NULL) {
+  RegisterAccess = RegisterAccessIoGetRegisterSpace (Port, RegisterAccessIoTypeIo, &Offset);
+  if (RegisterAccess == NULL) {
     return 0xFF;
   }
 
-  Mock->Read (Mock, Offset, 1, &Value);
+  RegisterAccess->Read (RegisterAccess, Offset, 1, &Value);
   return (UINT8) Value;
 }
 
@@ -198,17 +198,17 @@ IoWrite8 (
   IN      UINT8  Value
   )
 {
-  REGISTER_SPACE_MOCK  *Mock;
+  REGISTER_ACCESS_INTERFACE  *RegisterAccess;
   UINT64                Val;
   UINT64               Offset;
 
-  Mock = MockIoGetRegisterSpace (Port, MockIoTypeIo, &Offset);
-  if (Mock == NULL) {
+  RegisterAccess = RegisterAccessIoGetRegisterSpace (Port, RegisterAccessIoTypeIo, &Offset);
+  if (RegisterAccess == NULL) {
     return 0xFF;
   }
 
   Val = Value;
-  Mock->Write (Mock, Offset, 1, Val);
+  RegisterAccess->Write (RegisterAccess, Offset, 1, Val);
   return Value;
 }
 
@@ -233,16 +233,16 @@ IoRead16 (
   IN      UINTN  Port
   )
 {
-  REGISTER_SPACE_MOCK  *Mock;
+  REGISTER_ACCESS_INTERFACE  *RegisterAccess;
   UINT64               Value;
   UINT64               Offset;
 
-  Mock = MockIoGetRegisterSpace (Port, MockIoTypeIo, &Offset);
-  if (Mock == NULL) {
+  RegisterAccess = RegisterAccessIoGetRegisterSpace (Port, RegisterAccessIoTypeIo, &Offset);
+  if (RegisterAccess == NULL) {
     return 0xFFFF;
   }
 
-  Mock->Read (Mock, Offset, 2, &Value);
+  RegisterAccess->Read (RegisterAccess, Offset, 2, &Value);
   return (UINT16) Value;
 }
 
@@ -269,17 +269,17 @@ IoWrite16 (
   IN      UINT16  Value
   )
 {
-  REGISTER_SPACE_MOCK  *Mock;
+  REGISTER_ACCESS_INTERFACE  *RegisterAccess;
   UINT64                Val;
   UINT64                Offset;
 
-  Mock = MockIoGetRegisterSpace (Port, MockIoTypeIo, &Offset);
-  if (Mock == NULL) {
+  RegisterAccess = RegisterAccessIoGetRegisterSpace (Port, RegisterAccessIoTypeIo, &Offset);
+  if (RegisterAccess == NULL) {
     return 0xFFFF;
   }
 
   Val = Value;
-  Mock->Write (Mock, Offset, 2, Val);
+  RegisterAccess->Write (RegisterAccess, Offset, 2, Val);
   return Value;
 }
 
@@ -304,16 +304,16 @@ IoRead32 (
   IN      UINTN  Port
   )
 {
-  REGISTER_SPACE_MOCK  *Mock;
+  REGISTER_ACCESS_INTERFACE  *RegisterAccess;
   UINT64               Value;
   UINT64               Offset;
 
-  Mock = MockIoGetRegisterSpace (Port, MockIoTypeIo, &Offset);
-  if (Mock == NULL) {
+  RegisterAccess = RegisterAccessIoGetRegisterSpace (Port, RegisterAccessIoTypeIo, &Offset);
+  if (RegisterAccess == NULL) {
     return 0xFFFFFFFF;
   }
 
-  Mock->Read (Mock, Offset, 4, &Value);
+  RegisterAccess->Read (RegisterAccess, Offset, 4, &Value);
   return (UINT32) Value;
 }
 
@@ -340,17 +340,17 @@ IoWrite32 (
   IN      UINT32  Value
   )
 {
-  REGISTER_SPACE_MOCK  *Mock;
+  REGISTER_ACCESS_INTERFACE  *RegisterAccess;
   UINT64                Val;
   UINT64               Offset;
 
-  Mock = MockIoGetRegisterSpace (Port, MockIoTypeIo, &Offset);
-  if (Mock == NULL) {
+  RegisterAccess = RegisterAccessIoGetRegisterSpace (Port, RegisterAccessIoTypeIo, &Offset);
+  if (RegisterAccess == NULL) {
     return 0xFFFFFFFF;
   }
 
   Val = Value;
-  Mock->Write (Mock, Offset, 4, Val);
+  RegisterAccess->Write (RegisterAccess, Offset, 4, Val);
   return Value;
 }
 
@@ -375,16 +375,16 @@ IoRead64 (
   IN      UINTN  Port
   )
 {
-  REGISTER_SPACE_MOCK  *Mock;
+  REGISTER_ACCESS_INTERFACE  *RegisterAccess;
   UINT64               Value;
   UINT64               Offset;
 
-  Mock = MockIoGetRegisterSpace (Port, MockIoTypeIo, &Offset);
-  if (Mock == NULL) {
+  RegisterAccess = RegisterAccessIoGetRegisterSpace (Port, RegisterAccessIoTypeIo, &Offset);
+  if (RegisterAccess == NULL) {
     return 0xFFFFFFFFFFFFFFFF;
   }
 
-  Mock->Read (Mock, Offset, 8, &Value);
+  RegisterAccess->Read (RegisterAccess, Offset, 8, &Value);
   return (UINT64) Value;
 }
 
@@ -411,15 +411,15 @@ IoWrite64 (
   IN      UINT64  Value
   )
 {
-  REGISTER_SPACE_MOCK  *Mock;
+  REGISTER_ACCESS_INTERFACE  *RegisterAccess;
   UINT64               Offset;
 
-  Mock = MockIoGetRegisterSpace (Port, MockIoTypeIo, &Offset);
-  if (Mock == NULL) {
+  RegisterAccess = RegisterAccessIoGetRegisterSpace (Port, RegisterAccessIoTypeIo, &Offset);
+  if (RegisterAccess == NULL) {
     return 0xFFFFFFFFFFFFFFFF;
   }
 
-  Mock->Write (Mock, Offset, 8, Value);
+  RegisterAccess->Write (RegisterAccess, Offset, 8, Value);
   return Value;
 }
 
@@ -443,16 +443,16 @@ MmioRead8 (
   IN      UINTN  Address
   )
 {
-  REGISTER_SPACE_MOCK  *Mock;
+  REGISTER_ACCESS_INTERFACE  *RegisterAccess;
   UINT64               Value;
   UINT64               Offset;
 
-  Mock = MockIoGetRegisterSpace (Address, MockIoTypeMmio, &Offset);
-  if (Mock == NULL) {
+  RegisterAccess = RegisterAccessIoGetRegisterSpace (Address, RegisterAccessIoTypeMmio, &Offset);
+  if (RegisterAccess == NULL) {
     return 0xFF;
   }
 
-  Mock->Read (Mock, Offset, 1, &Value);
+  RegisterAccess->Read (RegisterAccess, Offset, 1, &Value);
   return (UINT8) Value;
 }
 
@@ -478,17 +478,17 @@ MmioWrite8 (
   IN      UINT8  Value
   )
 {
-  REGISTER_SPACE_MOCK  *Mock;
+  REGISTER_ACCESS_INTERFACE  *RegisterAccess;
   UINT64               Val;
   UINT64               Offset;
 
-  Mock = MockIoGetRegisterSpace (Address, MockIoTypeMmio, &Offset);
-  if (Mock == NULL) {
+  RegisterAccess = RegisterAccessIoGetRegisterSpace (Address, RegisterAccessIoTypeMmio, &Offset);
+  if (RegisterAccess == NULL) {
     return 0xFF;
   }
 
   Val = Value;
-  Mock->Write (Mock, Offset, 1, Val);
+  RegisterAccess->Write (RegisterAccess, Offset, 1, Val);
   return (UINT8) Value;
 }
 
@@ -513,16 +513,16 @@ MmioRead16 (
   IN      UINTN  Address
   )
 {
-  REGISTER_SPACE_MOCK  *Mock;
+  REGISTER_ACCESS_INTERFACE  *RegisterAccess;
   UINT64               Value;
   UINT64               Offset;
 
-  Mock = MockIoGetRegisterSpace (Address, MockIoTypeMmio, &Offset);
-  if (Mock == NULL) {
+  RegisterAccess = RegisterAccessIoGetRegisterSpace (Address, RegisterAccessIoTypeMmio, &Offset);
+  if (RegisterAccess == NULL) {
     return 0xFFFF;
   }
 
-  Mock->Read (Mock, Offset, 2, &Value);
+  RegisterAccess->Read (RegisterAccess, Offset, 2, &Value);
   return (UINT16) Value;
 }
 
@@ -549,17 +549,17 @@ MmioWrite16 (
   IN      UINT16  Value
   )
 {
-  REGISTER_SPACE_MOCK  *Mock;
+  REGISTER_ACCESS_INTERFACE  *RegisterAccess;
   UINT64               Val;
   UINT64               Offset;
 
-  Mock = MockIoGetRegisterSpace (Address, MockIoTypeMmio, &Offset);
-  if (Mock == NULL) {
+  RegisterAccess = RegisterAccessIoGetRegisterSpace (Address, RegisterAccessIoTypeMmio, &Offset);
+  if (RegisterAccess == NULL) {
     return 0xFFFF;
   }
 
   Val = Value;
-  Mock->Write (Mock, Offset, 2, Val);
+  RegisterAccess->Write (RegisterAccess, Offset, 2, Val);
   return (UINT16) Value;
 }
 
@@ -584,16 +584,16 @@ MmioRead32 (
   IN      UINTN  Address
   )
 {
-  REGISTER_SPACE_MOCK  *Mock;
+  REGISTER_ACCESS_INTERFACE  *RegisterAccess;
   UINT64               Value;
   UINT64               Offset;
 
-  Mock = MockIoGetRegisterSpace (Address, MockIoTypeMmio, &Offset);
-  if (Mock == NULL) {
+  RegisterAccess = RegisterAccessIoGetRegisterSpace (Address, RegisterAccessIoTypeMmio, &Offset);
+  if (RegisterAccess == NULL) {
     return 0xFFFFFFFF;
   }
 
-  Mock->Read (Mock, Offset, 4, &Value);
+  RegisterAccess->Read (RegisterAccess, Offset, 4, &Value);
   return (UINT32) Value;
 }
 
@@ -620,17 +620,17 @@ MmioWrite32 (
   IN      UINT32  Value
   )
 {
-  REGISTER_SPACE_MOCK  *Mock;
+  REGISTER_ACCESS_INTERFACE  *RegisterAccess;
   UINT64               Val;
   UINT64               Offset;
 
-  Mock = MockIoGetRegisterSpace (Address, MockIoTypeMmio, &Offset);
-  if (Mock == NULL) {
+  RegisterAccess = RegisterAccessIoGetRegisterSpace (Address, RegisterAccessIoTypeMmio, &Offset);
+  if (RegisterAccess == NULL) {
     return 0xFFFFFFFF;
   }
 
   Val = Value;
-  Mock->Write (Mock, Offset, 4, Val);
+  RegisterAccess->Write (RegisterAccess, Offset, 4, Val);
   return (UINT32) Value;
 }
 
@@ -655,16 +655,16 @@ MmioRead64 (
   IN      UINTN  Address
   )
 {
-  REGISTER_SPACE_MOCK  *Mock;
+  REGISTER_ACCESS_INTERFACE  *RegisterAccess;
   UINT64               Value;
   UINT64               Offset;
 
-  Mock = MockIoGetRegisterSpace (Address, MockIoTypeMmio, &Offset);
-  if (Mock == NULL) {
+  RegisterAccess = RegisterAccessIoGetRegisterSpace (Address, RegisterAccessIoTypeMmio, &Offset);
+  if (RegisterAccess == NULL) {
     return 0xFFFFFFFFFFFFFFFF;
   }
 
-  Mock->Read (Mock, Offset, 8, &Value);
+  RegisterAccess->Read (RegisterAccess, Offset, 8, &Value);
   return Value;
 }
 
@@ -689,17 +689,17 @@ MmioWrite64 (
   IN      UINT64  Value
   )
 {
-  REGISTER_SPACE_MOCK  *Mock;
+  REGISTER_ACCESS_INTERFACE  *RegisterAccess;
   UINT64               Val;
   UINT64               Offset;
 
-  Mock = MockIoGetRegisterSpace (Address, MockIoTypeMmio, &Offset);
-  if (Mock == NULL) {
+  RegisterAccess = RegisterAccessIoGetRegisterSpace (Address, RegisterAccessIoTypeMmio, &Offset);
+  if (RegisterAccess == NULL) {
     return 0xFFFFFFFFFFFFFFFF;
   }
 
   Val = Value;
-  Mock->Write (Mock, Offset, 8, Val);
+  RegisterAccess->Write (RegisterAccess, Offset, 8, Val);
   return Value;
 }
 

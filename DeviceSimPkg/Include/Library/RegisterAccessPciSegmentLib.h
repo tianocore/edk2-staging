@@ -5,21 +5,21 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef _MOCK_PCI_SEGMENT_LIB_H_
-#define _MOCK_PCI_SEGMENT_LIB_H_
+#ifndef _REGISTER_ACCESS_PCI_SEGMENT_LIB_H_
+#define _REGISTER_ACCESS_PCI_SEGMENT_LIB_H_
 
 #include <Base.h>
 #include <Library/PciSegmentLib.h>
-#include <RegisterSpaceMock.h>
+#include <RegisterAccessInterface.h>
 
 EFI_STATUS
-MockPciSegmentRegisterAtPciSegmentAddress (
-  IN REGISTER_SPACE_MOCK *RegisterSpaceMock,
+RegisterAccessPciSegmentRegisterAtPciSegmentAddress (
+  IN REGISTER_ACCESS_INTERFACE *RegisterAccess,
   IN UINT64              PciSegmentAddress
   );
 
 EFI_STATUS
-MockPciSegmentUnRegisterAtPciSegmentAddress (
+RegisterAccessPciSegmentUnRegisterAtPciSegmentAddress (
   IN UINT64  PciSegmentAddress
   );
 

@@ -6,10 +6,11 @@
 
 [Defines]
   INF_VERSION     = 0x00010005
-  BASE_NAME       = LocalMockRegisterSpaceTest
-  FILE_GUID       = A5487689-9E30-41AD-B773-3650C94BCBE2
+  BASE_NAME       = FakeRegisterSpaceLib
+  FILE_GUID       = D2487689-9E30-41AD-B773-3650C94BCBE2
   MODULE_TYPE     = HOST_APPLICATION
   VERSION_STRING  = 1.0
+  LIBRARY_CLASS   = FakeRegisterSpaceLib
 
 #
 # The following information is for reference only and not required by the build tools.
@@ -18,16 +19,15 @@
 #
 
 [Sources]
-  LocalMockRegisterSpaceLibUnitTest.c
+  FakeRegisterSpaceLib.c
 
 [Packages]
   MdePkg/MdePkg.dec
   MdeModulePkg/MdeModulePkg.dec
-  UnitTestFrameworkPkg/UnitTestFrameworkPkg.dec
   DeviceSimPkg/DeviceSimPkg.dec
 
 [LibraryClasses]
   BaseLib
   DebugLib
-  UnitTestLib
-  LocalMockRegisterSpaceLib
+  PcdLib
+  UefiLib
