@@ -1,0 +1,50 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28729.10
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CdeWelcomeDxe", "CdePkg\CdeWelcomeDxe\CdeWelcomeDxe.vcxproj", "{A9F095DD-8BE2-4576-992A-C37E1E56A46F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D50FA0CE-6F63-496A-AEFE-CC665E775B50}"
+	ProjectSection(SolutionItems) = preProject
+		CdePkg\CdeLib\CdeLib.inf = CdePkg\CdeLib\CdeLib.inf
+		CdePkg\CdePkg.dec = CdePkg\CdePkg.dec
+		CdePkg\CdePkg.dsc = CdePkg\CdePkg.dsc
+		CdePkg\CdeServices\CdeServicesDxe.inf = CdePkg\CdeServices\CdeServicesDxe.inf
+		CdePkg\CdeServices\CdeServicesPei.inf = CdePkg\CdeServices\CdeServicesPei.inf
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CdeLoadOptionsDxe", "CdePkg\CdeLoadOptionsDxe\CdeLoadOptionsDxe.vcxproj", "{6A9608DB-E447-40EA-B6D7-98CB33A5D2A3}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CdeLoadOptionsPei", "CdePkg\CdeLoadOptionsPei\CdeLoadOptionsPei.vcxproj", "{6D7FB80F-0760-4095-9FE2-0F461B49B299}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CdeWelcomePei", "CdePkg\CdeWelcomePei\CdeWelcomePei.vcxproj", "{CD22E2E2-9815-452D-8BB9-781D2B826534}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A9F095DD-8BE2-4576-992A-C37E1E56A46F}.Release|x64.ActiveCfg = Release|x64
+		{A9F095DD-8BE2-4576-992A-C37E1E56A46F}.Release|x64.Build.0 = Release|x64
+		{A9F095DD-8BE2-4576-992A-C37E1E56A46F}.Release|x86.ActiveCfg = Release|Win32
+		{A9F095DD-8BE2-4576-992A-C37E1E56A46F}.Release|x86.Build.0 = Release|Win32
+		{6A9608DB-E447-40EA-B6D7-98CB33A5D2A3}.Release|x64.ActiveCfg = Release|x64
+		{6A9608DB-E447-40EA-B6D7-98CB33A5D2A3}.Release|x64.Build.0 = Release|x64
+		{6A9608DB-E447-40EA-B6D7-98CB33A5D2A3}.Release|x86.ActiveCfg = Release|Win32
+		{6A9608DB-E447-40EA-B6D7-98CB33A5D2A3}.Release|x86.Build.0 = Release|Win32
+		{6D7FB80F-0760-4095-9FE2-0F461B49B299}.Release|x64.ActiveCfg = Release|x64
+		{6D7FB80F-0760-4095-9FE2-0F461B49B299}.Release|x86.ActiveCfg = Release|Win32
+		{6D7FB80F-0760-4095-9FE2-0F461B49B299}.Release|x86.Build.0 = Release|Win32
+		{CD22E2E2-9815-452D-8BB9-781D2B826534}.Release|x64.ActiveCfg = Release|x64
+		{CD22E2E2-9815-452D-8BB9-781D2B826534}.Release|x86.ActiveCfg = Release|Win32
+		{CD22E2E2-9815-452D-8BB9-781D2B826534}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {AA34126F-8A18-490D-B9F4-96D6EA121627}
+	EndGlobalSection
+EndGlobal

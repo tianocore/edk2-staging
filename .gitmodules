@@ -1,0 +1,27 @@
+[submodule "blogs/2021-11-14/lib"]
+	path = blogs/2021-11-14/lib
+	url = https://github.com/KilianKegel/toro-C-Library.git
+[submodule "blogs/2021-11-28/lib"]
+	path = blogs/2021-11-28/lib
+	url = https://github.com/KilianKegel/toro-C-Library.git
+[submodule "blogs/2021-11-28/MdePkgInc"]
+	path = blogs/2021-11-28/MdePkgInc
+	url = https://github.com/KilianKegel/MdePkgInc.git
+[submodule "edk2"]
+	path = edk2
+	url = https://github.com/tianocore/edk2.git
+[submodule "edk2-non-osi"]
+	path = edk2-non-osi
+	url = https://github.com/tianocore/edk2-non-osi.git
+[submodule "edk2-platforms"]
+	path = edk2-platforms
+	url = https://github.com/tianocore/edk2-platforms.git
+[submodule "CdePkg"]
+	path = CdePkg
+	url = https://github.com/KilianKegel/CdePkg.git
+[submodule "CdeEmuPkg/RedfishPkg/Library/JsonLib/jansson"]
+	path = CdeEmuPkg/RedfishPkg/Library/JsonLib/jansson
+	url = https://github.com/akheron/jansson.git
+[submodule "blogs/2022-01-16/Visual-ACPICA-for-UEFI-Shell"]
+	path = blogs/2022-01-16/Visual-ACPICA-for-UEFI-Shell
+	url = https://github.com/KilianKegel/Visual-ACPICA-for-UEFI-Shell.git
