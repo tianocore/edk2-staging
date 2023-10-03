@@ -176,7 +176,7 @@ The original **toro-C-Library** source code is included in the project.
 This is for informational purpose only.
 
 Currently **toro-C-Library** has these functions implemented:<br>
-https://github.com/KilianKegel/toro-C-Library/blob/master/implemented.md#validation-status
+https://github.com/KilianKegel/toro-C-Library#implementation-status
 
 The library can also be used for UEFI POST drivers and to build executables for Windows.
 
