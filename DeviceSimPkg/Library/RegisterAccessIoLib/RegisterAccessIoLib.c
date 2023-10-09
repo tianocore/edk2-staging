@@ -11,6 +11,9 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/MemoryAllocationLib.h>
+#include <Library/GmockIoLib.hpp>
+
+#include "FakeNameDecorator.h"
 
 typedef struct {
   UINT64               Address;
@@ -158,7 +161,7 @@ RegisterAccessIoUnRegisterMmioAtAddress (
 **/
 UINT8
 EFIAPI
-IoRead8 (
+FAKE_NAME_DECORATOR(IoRead8) (
   IN      UINTN  Port
   )
 {
@@ -193,7 +196,7 @@ IoRead8 (
 **/
 UINT8
 EFIAPI
-IoWrite8 (
+FAKE_NAME_DECORATOR(IoWrite8) (
   IN      UINTN  Port,
   IN      UINT8  Value
   )
@@ -229,7 +232,7 @@ IoWrite8 (
 **/
 UINT16
 EFIAPI
-IoRead16 (
+FAKE_NAME_DECORATOR(IoRead16) (
   IN      UINTN  Port
   )
 {
@@ -264,7 +267,7 @@ IoRead16 (
 **/
 UINT16
 EFIAPI
-IoWrite16 (
+FAKE_NAME_DECORATOR(IoWrite16) (
   IN      UINTN   Port,
   IN      UINT16  Value
   )
@@ -300,7 +303,7 @@ IoWrite16 (
 **/
 UINT32
 EFIAPI
-IoRead32 (
+FAKE_NAME_DECORATOR(IoRead32) (
   IN      UINTN  Port
   )
 {
@@ -335,7 +338,7 @@ IoRead32 (
 **/
 UINT32
 EFIAPI
-IoWrite32 (
+FAKE_NAME_DECORATOR(IoWrite32) (
   IN      UINTN   Port,
   IN      UINT32  Value
   )
@@ -371,7 +374,7 @@ IoWrite32 (
 **/
 UINT64
 EFIAPI
-IoRead64 (
+FAKE_NAME_DECORATOR(IoRead64) (
   IN      UINTN  Port
   )
 {
@@ -406,7 +409,7 @@ IoRead64 (
 **/
 UINT64
 EFIAPI
-IoWrite64 (
+FAKE_NAME_DECORATOR(IoWrite64) (
   IN      UINTN   Port,
   IN      UINT64  Value
   )
@@ -439,7 +442,7 @@ IoWrite64 (
 **/
 UINT8
 EFIAPI
-MmioRead8 (
+FAKE_NAME_DECORATOR(MmioRead8) (
   IN      UINTN  Address
   )
 {
@@ -473,7 +476,7 @@ MmioRead8 (
 **/
 UINT8
 EFIAPI
-MmioWrite8 (
+FAKE_NAME_DECORATOR(MmioWrite8) (
   IN      UINTN  Address,
   IN      UINT8  Value
   )
@@ -509,7 +512,7 @@ MmioWrite8 (
 **/
 UINT16
 EFIAPI
-MmioRead16 (
+FAKE_NAME_DECORATOR(MmioRead16) (
   IN      UINTN  Address
   )
 {
@@ -544,7 +547,7 @@ MmioRead16 (
 **/
 UINT16
 EFIAPI
-MmioWrite16 (
+FAKE_NAME_DECORATOR(MmioWrite16) (
   IN      UINTN   Address,
   IN      UINT16  Value
   )
@@ -580,7 +583,7 @@ MmioWrite16 (
 **/
 UINT32
 EFIAPI
-MmioRead32 (
+FAKE_NAME_DECORATOR(MmioRead32) (
   IN      UINTN  Address
   )
 {
@@ -615,7 +618,7 @@ MmioRead32 (
 **/
 UINT32
 EFIAPI
-MmioWrite32 (
+FAKE_NAME_DECORATOR(MmioWrite32) (
   IN      UINTN   Address,
   IN      UINT32  Value
   )
@@ -651,7 +654,7 @@ MmioWrite32 (
 **/
 UINT64
 EFIAPI
-MmioRead64 (
+FAKE_NAME_DECORATOR(MmioRead64) (
   IN      UINTN  Address
   )
 {
@@ -684,7 +687,7 @@ MmioRead64 (
 **/
 UINT64
 EFIAPI
-MmioWrite64 (
+FAKE_NAME_DECORATOR(MmioWrite64) (
   IN      UINTN   Address,
   IN      UINT64  Value
   )
@@ -722,7 +725,7 @@ MmioWrite64 (
 **/
 VOID
 EFIAPI
-IoReadFifo8 (
+FAKE_NAME_DECORATOR(IoReadFifo8) (
   IN      UINTN  Port,
   IN      UINTN  Count,
   OUT     VOID   *Buffer
@@ -732,7 +735,7 @@ IoReadFifo8 (
 
   Uint8Buffer = (UINT8*) Buffer;
   for (UINTN Index = 0; Index < Count; Index++) {
-    Uint8Buffer[Index] = IoRead8 (Port);
+    Uint8Buffer[Index] = FAKE_NAME_DECORATOR(IoRead8) (Port);
   }
 }
 
@@ -755,7 +758,7 @@ IoReadFifo8 (
 **/
 VOID
 EFIAPI
-IoWriteFifo8 (
+FAKE_NAME_DECORATOR(IoWriteFifo8) (
   IN      UINTN  Port,
   IN      UINTN  Count,
   IN      VOID   *Buffer
@@ -765,7 +768,7 @@ IoWriteFifo8 (
 
   Uint8Buffer = (UINT8*) Buffer;
   for (UINTN Index = 0; Index < Count; Index++) {
-    IoWrite8 (Port, Uint8Buffer[Index]);
+    FAKE_NAME_DECORATOR(IoWrite8) (Port, Uint8Buffer[Index]);
   }
 }
 
@@ -788,7 +791,7 @@ IoWriteFifo8 (
 **/
 VOID
 EFIAPI
-IoReadFifo16 (
+FAKE_NAME_DECORATOR(IoReadFifo16) (
   IN      UINTN  Port,
   IN      UINTN  Count,
   OUT     VOID   *Buffer
@@ -798,7 +801,7 @@ IoReadFifo16 (
 
   Uint16Buffer = (UINT16*) Buffer;
   for (UINTN Index = 0; Index < Count; Index++) {
-    Uint16Buffer[Index] = IoRead16 (Port);
+    Uint16Buffer[Index] = FAKE_NAME_DECORATOR(IoRead16) (Port);
   }
 }
 
@@ -821,7 +824,7 @@ IoReadFifo16 (
 **/
 VOID
 EFIAPI
-IoWriteFifo16 (
+FAKE_NAME_DECORATOR(IoWriteFifo16) (
   IN      UINTN  Port,
   IN      UINTN  Count,
   IN      VOID   *Buffer
@@ -831,7 +834,7 @@ IoWriteFifo16 (
 
   Uint16Buffer = (UINT16*) Buffer;
   for (UINTN Index = 0; Index < Count; Index++) {
-    IoWrite16 (Port, Uint16Buffer[Index]);
+    FAKE_NAME_DECORATOR(IoWrite16) (Port, Uint16Buffer[Index]);
   }
 }
 
@@ -854,7 +857,7 @@ IoWriteFifo16 (
 **/
 VOID
 EFIAPI
-IoReadFifo32 (
+FAKE_NAME_DECORATOR(IoReadFifo32) (
   IN      UINTN  Port,
   IN      UINTN  Count,
   OUT     VOID   *Buffer
@@ -864,7 +867,7 @@ IoReadFifo32 (
 
   Uint32Buffer = (UINT32*) Buffer;
   for (UINTN Index = 0; Index < Count; Index++) {
-    Uint32Buffer[Index] = IoRead32 (Port);
+    Uint32Buffer[Index] = FAKE_NAME_DECORATOR(IoRead32) (Port);
   }
 }
 
@@ -887,7 +890,7 @@ IoReadFifo32 (
 **/
 VOID
 EFIAPI
-IoWriteFifo32 (
+FAKE_NAME_DECORATOR(IoWriteFifo32) (
   IN      UINTN  Port,
   IN      UINTN  Count,
   IN      VOID   *Buffer
@@ -897,6 +900,6 @@ IoWriteFifo32 (
 
   Uint32Buffer = (UINT32*) Buffer;
   for (UINTN Index = 0; Index < Count; Index++) {
-    IoWrite32 (Port, Uint32Buffer[Index]);
+    FAKE_NAME_DECORATOR(IoWrite32) (Port, Uint32Buffer[Index]);
   }
 }

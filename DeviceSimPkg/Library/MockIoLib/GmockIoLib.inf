@@ -1,0 +1,31 @@
+
+
+[Defines]
+  INF_VERSION    = 0x00010005
+  BASE_NAME      = GmockIoLib
+  FILE_GUID      = B8DF356A-18EA-4A95-AFC9-759807B7AFD1
+  MODULE_TYPE    = HOST_APPLICATION
+  VERSION_STRING = 1.0
+  LIBRARY_CLASS   = GmockIoLib
+
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = IA32 X64
+#
+
+[Sources]
+  GmockIoLib.cpp
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  UnitTestFrameworkPkg/UnitTestFrameworkPkg.dec
+  DeviceSimPkg/DeviceSimPkg.dec
+
+[LibraryClasses]
+  BaseLib
+  DebugLib
+  UefiLib
+  GoogleTestLib
+  FakeIoLib

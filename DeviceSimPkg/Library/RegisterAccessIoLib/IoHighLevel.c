@@ -16,6 +16,8 @@
 #include <Library/BaseLib.h>
 #include <Library/PeiServicesTablePointerLib.h>
 
+#include "FakeNameDecorator.h"
+
 /**
   Reads an 8-bit I/O port, performs a bitwise OR, and writes the
   result back to the 8-bit I/O port.
@@ -36,12 +38,12 @@
 **/
 UINT8
 EFIAPI
-IoOr8 (
+FAKE_NAME_DECORATOR(IoOr8) (
   IN      UINTN  Port,
   IN      UINT8  OrData
   )
 {
-  return IoWrite8 (Port, (UINT8)(IoRead8 (Port) | OrData));
+  return FAKE_NAME_DECORATOR(IoWrite8) (Port, (UINT8)(FAKE_NAME_DECORATOR(IoRead8) (Port) | OrData));
 }
 
 /**
@@ -64,12 +66,12 @@ IoOr8 (
 **/
 UINT8
 EFIAPI
-IoAnd8 (
+FAKE_NAME_DECORATOR(IoAnd8) (
   IN      UINTN  Port,
   IN      UINT8  AndData
   )
 {
-  return IoWrite8 (Port, (UINT8)(IoRead8 (Port) & AndData));
+  return FAKE_NAME_DECORATOR(IoWrite8) (Port, (UINT8)(FAKE_NAME_DECORATOR(IoRead8) (Port) & AndData));
 }
 
 /**
@@ -94,13 +96,13 @@ IoAnd8 (
 **/
 UINT8
 EFIAPI
-IoAndThenOr8 (
+FAKE_NAME_DECORATOR(IoAndThenOr8) (
   IN      UINTN  Port,
   IN      UINT8  AndData,
   IN      UINT8  OrData
   )
 {
-  return IoWrite8 (Port, (UINT8)((IoRead8 (Port) & AndData) | OrData));
+  return FAKE_NAME_DECORATOR(IoWrite8) (Port, (UINT8)((FAKE_NAME_DECORATOR(IoRead8) (Port) & AndData) | OrData));
 }
 
 /**
@@ -125,13 +127,13 @@ IoAndThenOr8 (
 **/
 UINT8
 EFIAPI
-IoBitFieldRead8 (
+FAKE_NAME_DECORATOR(IoBitFieldRead8) (
   IN      UINTN  Port,
   IN      UINTN  StartBit,
   IN      UINTN  EndBit
   )
 {
-  return BitFieldRead8 (IoRead8 (Port), StartBit, EndBit);
+  return BitFieldRead8 (FAKE_NAME_DECORATOR(IoRead8) (Port), StartBit, EndBit);
 }
 
 /**
@@ -159,16 +161,16 @@ IoBitFieldRead8 (
 **/
 UINT8
 EFIAPI
-IoBitFieldWrite8 (
+FAKE_NAME_DECORATOR(IoBitFieldWrite8) (
   IN      UINTN  Port,
   IN      UINTN  StartBit,
   IN      UINTN  EndBit,
   IN      UINT8  Value
   )
 {
-  return IoWrite8 (
+  return FAKE_NAME_DECORATOR(IoWrite8) (
            Port,
-           BitFieldWrite8 (IoRead8 (Port), StartBit, EndBit, Value)
+           BitFieldWrite8 (FAKE_NAME_DECORATOR(IoRead8) (Port), StartBit, EndBit, Value)
            );
 }
 
@@ -200,16 +202,16 @@ IoBitFieldWrite8 (
 **/
 UINT8
 EFIAPI
-IoBitFieldOr8 (
+FAKE_NAME_DECORATOR(IoBitFieldOr8) (
   IN      UINTN  Port,
   IN      UINTN  StartBit,
   IN      UINTN  EndBit,
   IN      UINT8  OrData
   )
 {
-  return IoWrite8 (
+  return FAKE_NAME_DECORATOR(IoWrite8) (
            Port,
-           BitFieldOr8 (IoRead8 (Port), StartBit, EndBit, OrData)
+           BitFieldOr8 (FAKE_NAME_DECORATOR(IoRead8) (Port), StartBit, EndBit, OrData)
            );
 }
 
@@ -241,16 +243,16 @@ IoBitFieldOr8 (
 **/
 UINT8
 EFIAPI
-IoBitFieldAnd8 (
+FAKE_NAME_DECORATOR(IoBitFieldAnd8) (
   IN      UINTN  Port,
   IN      UINTN  StartBit,
   IN      UINTN  EndBit,
   IN      UINT8  AndData
   )
 {
-  return IoWrite8 (
+  return FAKE_NAME_DECORATOR(IoWrite8) (
            Port,
-           BitFieldAnd8 (IoRead8 (Port), StartBit, EndBit, AndData)
+           BitFieldAnd8 (FAKE_NAME_DECORATOR(IoRead8) (Port), StartBit, EndBit, AndData)
            );
 }
 
@@ -286,7 +288,7 @@ IoBitFieldAnd8 (
 **/
 UINT8
 EFIAPI
-IoBitFieldAndThenOr8 (
+FAKE_NAME_DECORATOR(IoBitFieldAndThenOr8) (
   IN      UINTN  Port,
   IN      UINTN  StartBit,
   IN      UINTN  EndBit,
@@ -294,9 +296,9 @@ IoBitFieldAndThenOr8 (
   IN      UINT8  OrData
   )
 {
-  return IoWrite8 (
+  return FAKE_NAME_DECORATOR(IoWrite8) (
            Port,
-           BitFieldAndThenOr8 (IoRead8 (Port), StartBit, EndBit, AndData, OrData)
+           BitFieldAndThenOr8 (FAKE_NAME_DECORATOR(IoRead8) (Port), StartBit, EndBit, AndData, OrData)
            );
 }
 
@@ -321,12 +323,12 @@ IoBitFieldAndThenOr8 (
 **/
 UINT16
 EFIAPI
-IoOr16 (
+FAKE_NAME_DECORATOR(IoOr16) (
   IN      UINTN   Port,
   IN      UINT16  OrData
   )
 {
-  return IoWrite16 (Port, (UINT16)(IoRead16 (Port) | OrData));
+  return FAKE_NAME_DECORATOR(IoWrite16) (Port, (UINT16)(FAKE_NAME_DECORATOR(IoRead16) (Port) | OrData));
 }
 
 /**
@@ -350,12 +352,12 @@ IoOr16 (
 **/
 UINT16
 EFIAPI
-IoAnd16 (
+FAKE_NAME_DECORATOR(IoAnd16) (
   IN      UINTN   Port,
   IN      UINT16  AndData
   )
 {
-  return IoWrite16 (Port, (UINT16)(IoRead16 (Port) & AndData));
+  return FAKE_NAME_DECORATOR(IoWrite16) (Port, (UINT16)(FAKE_NAME_DECORATOR(IoRead16) (Port) & AndData));
 }
 
 /**
@@ -381,13 +383,13 @@ IoAnd16 (
 **/
 UINT16
 EFIAPI
-IoAndThenOr16 (
+FAKE_NAME_DECORATOR(IoAndThenOr16) (
   IN      UINTN   Port,
   IN      UINT16  AndData,
   IN      UINT16  OrData
   )
 {
-  return IoWrite16 (Port, (UINT16)((IoRead16 (Port) & AndData) | OrData));
+  return FAKE_NAME_DECORATOR(IoWrite16) (Port, (UINT16)((FAKE_NAME_DECORATOR(IoRead16) (Port) & AndData) | OrData));
 }
 
 /**
@@ -413,13 +415,13 @@ IoAndThenOr16 (
 **/
 UINT16
 EFIAPI
-IoBitFieldRead16 (
+FAKE_NAME_DECORATOR(IoBitFieldRead16) (
   IN      UINTN  Port,
   IN      UINTN  StartBit,
   IN      UINTN  EndBit
   )
 {
-  return BitFieldRead16 (IoRead16 (Port), StartBit, EndBit);
+  return BitFieldRead16 (FAKE_NAME_DECORATOR(IoRead16) (Port), StartBit, EndBit);
 }
 
 /**
@@ -449,16 +451,16 @@ IoBitFieldRead16 (
 **/
 UINT16
 EFIAPI
-IoBitFieldWrite16 (
+FAKE_NAME_DECORATOR(IoBitFieldWrite16) (
   IN      UINTN   Port,
   IN      UINTN   StartBit,
   IN      UINTN   EndBit,
   IN      UINT16  Value
   )
 {
-  return IoWrite16 (
+  return FAKE_NAME_DECORATOR(IoWrite16) (
            Port,
-           BitFieldWrite16 (IoRead16 (Port), StartBit, EndBit, Value)
+           BitFieldWrite16 (FAKE_NAME_DECORATOR(IoRead16) (Port), StartBit, EndBit, Value)
            );
 }
 
@@ -491,16 +493,16 @@ IoBitFieldWrite16 (
 **/
 UINT16
 EFIAPI
-IoBitFieldOr16 (
+FAKE_NAME_DECORATOR(IoBitFieldOr16) (
   IN      UINTN   Port,
   IN      UINTN   StartBit,
   IN      UINTN   EndBit,
   IN      UINT16  OrData
   )
 {
-  return IoWrite16 (
+  return FAKE_NAME_DECORATOR(IoWrite16) (
            Port,
-           BitFieldOr16 (IoRead16 (Port), StartBit, EndBit, OrData)
+           BitFieldOr16 (FAKE_NAME_DECORATOR(IoRead16) (Port), StartBit, EndBit, OrData)
            );
 }
 
@@ -533,16 +535,16 @@ IoBitFieldOr16 (
 **/
 UINT16
 EFIAPI
-IoBitFieldAnd16 (
+FAKE_NAME_DECORATOR(IoBitFieldAnd16) (
   IN      UINTN   Port,
   IN      UINTN   StartBit,
   IN      UINTN   EndBit,
   IN      UINT16  AndData
   )
 {
-  return IoWrite16 (
+  return FAKE_NAME_DECORATOR(IoWrite16) (
            Port,
-           BitFieldAnd16 (IoRead16 (Port), StartBit, EndBit, AndData)
+           BitFieldAnd16 (FAKE_NAME_DECORATOR(IoRead16) (Port), StartBit, EndBit, AndData)
            );
 }
 
@@ -579,7 +581,7 @@ IoBitFieldAnd16 (
 **/
 UINT16
 EFIAPI
-IoBitFieldAndThenOr16 (
+FAKE_NAME_DECORATOR(IoBitFieldAndThenOr16) (
   IN      UINTN   Port,
   IN      UINTN   StartBit,
   IN      UINTN   EndBit,
@@ -587,9 +589,9 @@ IoBitFieldAndThenOr16 (
   IN      UINT16  OrData
   )
 {
-  return IoWrite16 (
+  return FAKE_NAME_DECORATOR(IoWrite16) (
            Port,
-           BitFieldAndThenOr16 (IoRead16 (Port), StartBit, EndBit, AndData, OrData)
+           BitFieldAndThenOr16 (FAKE_NAME_DECORATOR(IoRead16) (Port), StartBit, EndBit, AndData, OrData)
            );
 }
 
@@ -614,12 +616,12 @@ IoBitFieldAndThenOr16 (
 **/
 UINT32
 EFIAPI
-IoOr32 (
+FAKE_NAME_DECORATOR(IoOr32) (
   IN      UINTN   Port,
   IN      UINT32  OrData
   )
 {
-  return IoWrite32 (Port, IoRead32 (Port) | OrData);
+  return FAKE_NAME_DECORATOR(IoWrite32) (Port, FAKE_NAME_DECORATOR(IoRead32) (Port) | OrData);
 }
 
 /**
@@ -643,12 +645,12 @@ IoOr32 (
 **/
 UINT32
 EFIAPI
-IoAnd32 (
+FAKE_NAME_DECORATOR(IoAnd32) (
   IN      UINTN   Port,
   IN      UINT32  AndData
   )
 {
-  return IoWrite32 (Port, IoRead32 (Port) & AndData);
+  return FAKE_NAME_DECORATOR(IoWrite32) (Port, FAKE_NAME_DECORATOR(IoRead32) (Port) & AndData);
 }
 
 /**
@@ -674,13 +676,13 @@ IoAnd32 (
 **/
 UINT32
 EFIAPI
-IoAndThenOr32 (
+FAKE_NAME_DECORATOR(IoAndThenOr32) (
   IN      UINTN   Port,
   IN      UINT32  AndData,
   IN      UINT32  OrData
   )
 {
-  return IoWrite32 (Port, (IoRead32 (Port) & AndData) | OrData);
+  return FAKE_NAME_DECORATOR(IoWrite32) (Port, (FAKE_NAME_DECORATOR(IoRead32) (Port) & AndData) | OrData);
 }
 
 /**
@@ -706,13 +708,13 @@ IoAndThenOr32 (
 **/
 UINT32
 EFIAPI
-IoBitFieldRead32 (
+FAKE_NAME_DECORATOR(IoBitFieldRead32) (
   IN      UINTN  Port,
   IN      UINTN  StartBit,
   IN      UINTN  EndBit
   )
 {
-  return BitFieldRead32 (IoRead32 (Port), StartBit, EndBit);
+  return BitFieldRead32 (FAKE_NAME_DECORATOR(IoRead32) (Port), StartBit, EndBit);
 }
 
 /**
@@ -742,16 +744,16 @@ IoBitFieldRead32 (
 **/
 UINT32
 EFIAPI
-IoBitFieldWrite32 (
+FAKE_NAME_DECORATOR(IoBitFieldWrite32) (
   IN      UINTN   Port,
   IN      UINTN   StartBit,
   IN      UINTN   EndBit,
   IN      UINT32  Value
   )
 {
-  return IoWrite32 (
+  return FAKE_NAME_DECORATOR(IoWrite32) (
            Port,
-           BitFieldWrite32 (IoRead32 (Port), StartBit, EndBit, Value)
+           BitFieldWrite32 (FAKE_NAME_DECORATOR(IoRead32) (Port), StartBit, EndBit, Value)
            );
 }
 
@@ -784,16 +786,16 @@ IoBitFieldWrite32 (
 **/
 UINT32
 EFIAPI
-IoBitFieldOr32 (
+FAKE_NAME_DECORATOR(IoBitFieldOr32) (
   IN      UINTN   Port,
   IN      UINTN   StartBit,
   IN      UINTN   EndBit,
   IN      UINT32  OrData
   )
 {
-  return IoWrite32 (
+  return FAKE_NAME_DECORATOR(IoWrite32) (
            Port,
-           BitFieldOr32 (IoRead32 (Port), StartBit, EndBit, OrData)
+           BitFieldOr32 (FAKE_NAME_DECORATOR(IoRead32) (Port), StartBit, EndBit, OrData)
            );
 }
 
@@ -826,16 +828,16 @@ IoBitFieldOr32 (
 **/
 UINT32
 EFIAPI
-IoBitFieldAnd32 (
+FAKE_NAME_DECORATOR(IoBitFieldAnd32) (
   IN      UINTN   Port,
   IN      UINTN   StartBit,
   IN      UINTN   EndBit,
   IN      UINT32  AndData
   )
 {
-  return IoWrite32 (
+  return FAKE_NAME_DECORATOR(IoWrite32) (
            Port,
-           BitFieldAnd32 (IoRead32 (Port), StartBit, EndBit, AndData)
+           BitFieldAnd32 (FAKE_NAME_DECORATOR(IoRead32) (Port), StartBit, EndBit, AndData)
            );
 }
 
@@ -872,7 +874,7 @@ IoBitFieldAnd32 (
 **/
 UINT32
 EFIAPI
-IoBitFieldAndThenOr32 (
+FAKE_NAME_DECORATOR(IoBitFieldAndThenOr32) (
   IN      UINTN   Port,
   IN      UINTN   StartBit,
   IN      UINTN   EndBit,
@@ -880,9 +882,9 @@ IoBitFieldAndThenOr32 (
   IN      UINT32  OrData
   )
 {
-  return IoWrite32 (
+  return FAKE_NAME_DECORATOR(IoWrite32) (
            Port,
-           BitFieldAndThenOr32 (IoRead32 (Port), StartBit, EndBit, AndData, OrData)
+           BitFieldAndThenOr32 (FAKE_NAME_DECORATOR(IoRead32) (Port), StartBit, EndBit, AndData, OrData)
            );
 }
 
@@ -907,12 +909,12 @@ IoBitFieldAndThenOr32 (
 **/
 UINT64
 EFIAPI
-IoOr64 (
+FAKE_NAME_DECORATOR(IoOr64) (
   IN      UINTN   Port,
   IN      UINT64  OrData
   )
 {
-  return IoWrite64 (Port, IoRead64 (Port) | OrData);
+  return FAKE_NAME_DECORATOR(IoWrite64) (Port, FAKE_NAME_DECORATOR(IoRead64) (Port) | OrData);
 }
 
 /**
@@ -936,12 +938,12 @@ IoOr64 (
 **/
 UINT64
 EFIAPI
-IoAnd64 (
+FAKE_NAME_DECORATOR(IoAnd64) (
   IN      UINTN   Port,
   IN      UINT64  AndData
   )
 {
-  return IoWrite64 (Port, IoRead64 (Port) & AndData);
+  return FAKE_NAME_DECORATOR(IoWrite64) (Port, FAKE_NAME_DECORATOR(IoRead64) (Port) & AndData);
 }
 
 /**
@@ -967,13 +969,13 @@ IoAnd64 (
 **/
 UINT64
 EFIAPI
-IoAndThenOr64 (
+FAKE_NAME_DECORATOR(IoAndThenOr64) (
   IN      UINTN   Port,
   IN      UINT64  AndData,
   IN      UINT64  OrData
   )
 {
-  return IoWrite64 (Port, (IoRead64 (Port) & AndData) | OrData);
+  return FAKE_NAME_DECORATOR(IoWrite64) (Port, (FAKE_NAME_DECORATOR(IoRead64) (Port) & AndData) | OrData);
 }
 
 /**
@@ -999,13 +1001,13 @@ IoAndThenOr64 (
 **/
 UINT64
 EFIAPI
-IoBitFieldRead64 (
+FAKE_NAME_DECORATOR(IoBitFieldRead64) (
   IN      UINTN  Port,
   IN      UINTN  StartBit,
   IN      UINTN  EndBit
   )
 {
-  return BitFieldRead64 (IoRead64 (Port), StartBit, EndBit);
+  return BitFieldRead64 (FAKE_NAME_DECORATOR(IoRead64) (Port), StartBit, EndBit);
 }
 
 /**
@@ -1035,16 +1037,16 @@ IoBitFieldRead64 (
 **/
 UINT64
 EFIAPI
-IoBitFieldWrite64 (
+FAKE_NAME_DECORATOR(IoBitFieldWrite64) (
   IN      UINTN   Port,
   IN      UINTN   StartBit,
   IN      UINTN   EndBit,
   IN      UINT64  Value
   )
 {
-  return IoWrite64 (
+  return FAKE_NAME_DECORATOR(IoWrite64) (
            Port,
-           BitFieldWrite64 (IoRead64 (Port), StartBit, EndBit, Value)
+           BitFieldWrite64 (FAKE_NAME_DECORATOR(IoRead64) (Port), StartBit, EndBit, Value)
            );
 }
 
@@ -1077,16 +1079,16 @@ IoBitFieldWrite64 (
 **/
 UINT64
 EFIAPI
-IoBitFieldOr64 (
+FAKE_NAME_DECORATOR(IoBitFieldOr64) (
   IN      UINTN   Port,
   IN      UINTN   StartBit,
   IN      UINTN   EndBit,
   IN      UINT64  OrData
   )
 {
-  return IoWrite64 (
+  return FAKE_NAME_DECORATOR(IoWrite64) (
            Port,
-           BitFieldOr64 (IoRead64 (Port), StartBit, EndBit, OrData)
+           BitFieldOr64 (FAKE_NAME_DECORATOR(IoRead64) (Port), StartBit, EndBit, OrData)
            );
 }
 
@@ -1119,16 +1121,16 @@ IoBitFieldOr64 (
 **/
 UINT64
 EFIAPI
-IoBitFieldAnd64 (
+FAKE_NAME_DECORATOR(IoBitFieldAnd64) (
   IN      UINTN   Port,
   IN      UINTN   StartBit,
   IN      UINTN   EndBit,
   IN      UINT64  AndData
   )
 {
-  return IoWrite64 (
+  return FAKE_NAME_DECORATOR(IoWrite64) (
            Port,
-           BitFieldAnd64 (IoRead64 (Port), StartBit, EndBit, AndData)
+           BitFieldAnd64 (FAKE_NAME_DECORATOR(IoRead64) (Port), StartBit, EndBit, AndData)
            );
 }
 
@@ -1165,7 +1167,7 @@ IoBitFieldAnd64 (
 **/
 UINT64
 EFIAPI
-IoBitFieldAndThenOr64 (
+FAKE_NAME_DECORATOR(IoBitFieldAndThenOr64) (
   IN      UINTN   Port,
   IN      UINTN   StartBit,
   IN      UINTN   EndBit,
@@ -1173,9 +1175,9 @@ IoBitFieldAndThenOr64 (
   IN      UINT64  OrData
   )
 {
-  return IoWrite64 (
+  return FAKE_NAME_DECORATOR(IoWrite64) (
            Port,
-           BitFieldAndThenOr64 (IoRead64 (Port), StartBit, EndBit, AndData, OrData)
+           BitFieldAndThenOr64 (FAKE_NAME_DECORATOR(IoRead64) (Port), StartBit, EndBit, AndData, OrData)
            );
 }
 
@@ -1199,12 +1201,12 @@ IoBitFieldAndThenOr64 (
 **/
 UINT8
 EFIAPI
-MmioOr8 (
+FAKE_NAME_DECORATOR(MmioOr8) (
   IN      UINTN  Address,
   IN      UINT8  OrData
   )
 {
-  return MmioWrite8 (Address, (UINT8)(MmioRead8 (Address) | OrData));
+  return FAKE_NAME_DECORATOR(MmioWrite8) (Address, (UINT8)(FAKE_NAME_DECORATOR(MmioRead8) (Address) | OrData));
 }
 
 /**
@@ -1227,12 +1229,12 @@ MmioOr8 (
 **/
 UINT8
 EFIAPI
-MmioAnd8 (
+FAKE_NAME_DECORATOR(MmioAnd8) (
   IN      UINTN  Address,
   IN      UINT8  AndData
   )
 {
-  return MmioWrite8 (Address, (UINT8)(MmioRead8 (Address) & AndData));
+  return FAKE_NAME_DECORATOR(MmioWrite8) (Address, (UINT8)(FAKE_NAME_DECORATOR(MmioRead8) (Address) & AndData));
 }
 
 /**
@@ -1258,13 +1260,13 @@ MmioAnd8 (
 **/
 UINT8
 EFIAPI
-MmioAndThenOr8 (
+FAKE_NAME_DECORATOR(MmioAndThenOr8) (
   IN      UINTN  Address,
   IN      UINT8  AndData,
   IN      UINT8  OrData
   )
 {
-  return MmioWrite8 (Address, (UINT8)((MmioRead8 (Address) & AndData) | OrData));
+  return FAKE_NAME_DECORATOR(MmioWrite8) (Address, (UINT8)((FAKE_NAME_DECORATOR(MmioRead8) (Address) & AndData) | OrData));
 }
 
 /**
@@ -1289,13 +1291,13 @@ MmioAndThenOr8 (
 **/
 UINT8
 EFIAPI
-MmioBitFieldRead8 (
+FAKE_NAME_DECORATOR(MmioBitFieldRead8) (
   IN      UINTN  Address,
   IN      UINTN  StartBit,
   IN      UINTN  EndBit
   )
 {
-  return BitFieldRead8 (MmioRead8 (Address), StartBit, EndBit);
+  return BitFieldRead8 (FAKE_NAME_DECORATOR(MmioRead8) (Address), StartBit, EndBit);
 }
 
 /**
@@ -1323,16 +1325,16 @@ MmioBitFieldRead8 (
 **/
 UINT8
 EFIAPI
-MmioBitFieldWrite8 (
+FAKE_NAME_DECORATOR(MmioBitFieldWrite8) (
   IN      UINTN  Address,
   IN      UINTN  StartBit,
   IN      UINTN  EndBit,
   IN      UINT8  Value
   )
 {
-  return MmioWrite8 (
+  return FAKE_NAME_DECORATOR(MmioWrite8) (
            Address,
-           BitFieldWrite8 (MmioRead8 (Address), StartBit, EndBit, Value)
+           BitFieldWrite8 (FAKE_NAME_DECORATOR(MmioRead8) (Address), StartBit, EndBit, Value)
            );
 }
 
@@ -1365,16 +1367,16 @@ MmioBitFieldWrite8 (
 **/
 UINT8
 EFIAPI
-MmioBitFieldOr8 (
+FAKE_NAME_DECORATOR(MmioBitFieldOr8) (
   IN      UINTN  Address,
   IN      UINTN  StartBit,
   IN      UINTN  EndBit,
   IN      UINT8  OrData
   )
 {
-  return MmioWrite8 (
+  return FAKE_NAME_DECORATOR(MmioWrite8) (
            Address,
-           BitFieldOr8 (MmioRead8 (Address), StartBit, EndBit, OrData)
+           BitFieldOr8 (FAKE_NAME_DECORATOR(MmioRead8) (Address), StartBit, EndBit, OrData)
            );
 }
 
@@ -1407,16 +1409,16 @@ MmioBitFieldOr8 (
 **/
 UINT8
 EFIAPI
-MmioBitFieldAnd8 (
+FAKE_NAME_DECORATOR(MmioBitFieldAnd8) (
   IN      UINTN  Address,
   IN      UINTN  StartBit,
   IN      UINTN  EndBit,
   IN      UINT8  AndData
   )
 {
-  return MmioWrite8 (
+  return FAKE_NAME_DECORATOR(MmioWrite8) (
            Address,
-           BitFieldAnd8 (MmioRead8 (Address), StartBit, EndBit, AndData)
+           BitFieldAnd8 (FAKE_NAME_DECORATOR(MmioRead8) (Address), StartBit, EndBit, AndData)
            );
 }
 
@@ -1452,7 +1454,7 @@ MmioBitFieldAnd8 (
 **/
 UINT8
 EFIAPI
-MmioBitFieldAndThenOr8 (
+FAKE_NAME_DECORATOR(MmioBitFieldAndThenOr8) (
   IN      UINTN  Address,
   IN      UINTN  StartBit,
   IN      UINTN  EndBit,
@@ -1460,9 +1462,9 @@ MmioBitFieldAndThenOr8 (
   IN      UINT8  OrData
   )
 {
-  return MmioWrite8 (
+  return FAKE_NAME_DECORATOR(MmioWrite8) (
            Address,
-           BitFieldAndThenOr8 (MmioRead8 (Address), StartBit, EndBit, AndData, OrData)
+           BitFieldAndThenOr8 (FAKE_NAME_DECORATOR(MmioRead8) (Address), StartBit, EndBit, AndData, OrData)
            );
 }
 
@@ -1487,12 +1489,12 @@ MmioBitFieldAndThenOr8 (
 **/
 UINT16
 EFIAPI
-MmioOr16 (
+FAKE_NAME_DECORATOR(MmioOr16) (
   IN      UINTN   Address,
   IN      UINT16  OrData
   )
 {
-  return MmioWrite16 (Address, (UINT16)(MmioRead16 (Address) | OrData));
+  return FAKE_NAME_DECORATOR(MmioWrite16) (Address, (UINT16)(FAKE_NAME_DECORATOR(MmioRead16) (Address) | OrData));
 }
 
 /**
@@ -1516,12 +1518,12 @@ MmioOr16 (
 **/
 UINT16
 EFIAPI
-MmioAnd16 (
+FAKE_NAME_DECORATOR(MmioAnd16) (
   IN      UINTN   Address,
   IN      UINT16  AndData
   )
 {
-  return MmioWrite16 (Address, (UINT16)(MmioRead16 (Address) & AndData));
+  return FAKE_NAME_DECORATOR(MmioWrite16) (Address, (UINT16)(FAKE_NAME_DECORATOR(MmioRead16) (Address) & AndData));
 }
 
 /**
@@ -1547,13 +1549,13 @@ MmioAnd16 (
 **/
 UINT16
 EFIAPI
-MmioAndThenOr16 (
+FAKE_NAME_DECORATOR(MmioAndThenOr16) (
   IN      UINTN   Address,
   IN      UINT16  AndData,
   IN      UINT16  OrData
   )
 {
-  return MmioWrite16 (Address, (UINT16)((MmioRead16 (Address) & AndData) | OrData));
+  return FAKE_NAME_DECORATOR(MmioWrite16) (Address, (UINT16)((FAKE_NAME_DECORATOR(MmioRead16) (Address) & AndData) | OrData));
 }
 
 /**
@@ -1579,13 +1581,13 @@ MmioAndThenOr16 (
 **/
 UINT16
 EFIAPI
-MmioBitFieldRead16 (
+FAKE_NAME_DECORATOR(MmioBitFieldRead16) (
   IN      UINTN  Address,
   IN      UINTN  StartBit,
   IN      UINTN  EndBit
   )
 {
-  return BitFieldRead16 (MmioRead16 (Address), StartBit, EndBit);
+  return BitFieldRead16 (FAKE_NAME_DECORATOR(MmioRead16) (Address), StartBit, EndBit);
 }
 
 /**
@@ -1614,16 +1616,16 @@ MmioBitFieldRead16 (
 **/
 UINT16
 EFIAPI
-MmioBitFieldWrite16 (
+FAKE_NAME_DECORATOR(MmioBitFieldWrite16) (
   IN      UINTN   Address,
   IN      UINTN   StartBit,
   IN      UINTN   EndBit,
   IN      UINT16  Value
   )
 {
-  return MmioWrite16 (
+  return FAKE_NAME_DECORATOR(MmioWrite16) (
            Address,
-           BitFieldWrite16 (MmioRead16 (Address), StartBit, EndBit, Value)
+           BitFieldWrite16 (FAKE_NAME_DECORATOR(MmioRead16) (Address), StartBit, EndBit, Value)
            );
 }
 
@@ -1657,16 +1659,16 @@ MmioBitFieldWrite16 (
 **/
 UINT16
 EFIAPI
-MmioBitFieldOr16 (
+FAKE_NAME_DECORATOR(MmioBitFieldOr16) (
   IN      UINTN   Address,
   IN      UINTN   StartBit,
   IN      UINTN   EndBit,
   IN      UINT16  OrData
   )
 {
-  return MmioWrite16 (
+  return FAKE_NAME_DECORATOR(MmioWrite16) (
            Address,
-           BitFieldOr16 (MmioRead16 (Address), StartBit, EndBit, OrData)
+           BitFieldOr16 (FAKE_NAME_DECORATOR(MmioRead16) (Address), StartBit, EndBit, OrData)
            );
 }
 
@@ -1700,16 +1702,16 @@ MmioBitFieldOr16 (
 **/
 UINT16
 EFIAPI
-MmioBitFieldAnd16 (
+FAKE_NAME_DECORATOR(MmioBitFieldAnd16) (
   IN      UINTN   Address,
   IN      UINTN   StartBit,
   IN      UINTN   EndBit,
   IN      UINT16  AndData
   )
 {
-  return MmioWrite16 (
+  return FAKE_NAME_DECORATOR(MmioWrite16) (
            Address,
-           BitFieldAnd16 (MmioRead16 (Address), StartBit, EndBit, AndData)
+           BitFieldAnd16 (FAKE_NAME_DECORATOR(MmioRead16) (Address), StartBit, EndBit, AndData)
            );
 }
 
@@ -1746,7 +1748,7 @@ MmioBitFieldAnd16 (
 **/
 UINT16
 EFIAPI
-MmioBitFieldAndThenOr16 (
+FAKE_NAME_DECORATOR(MmioBitFieldAndThenOr16) (
   IN      UINTN   Address,
   IN      UINTN   StartBit,
   IN      UINTN   EndBit,
@@ -1754,9 +1756,9 @@ MmioBitFieldAndThenOr16 (
   IN      UINT16  OrData
   )
 {
-  return MmioWrite16 (
+  return FAKE_NAME_DECORATOR(MmioWrite16) (
            Address,
-           BitFieldAndThenOr16 (MmioRead16 (Address), StartBit, EndBit, AndData, OrData)
+           BitFieldAndThenOr16 (FAKE_NAME_DECORATOR(MmioRead16) (Address), StartBit, EndBit, AndData, OrData)
            );
 }
 
@@ -1781,12 +1783,12 @@ MmioBitFieldAndThenOr16 (
 **/
 UINT32
 EFIAPI
-MmioOr32 (
+FAKE_NAME_DECORATOR(MmioOr32) (
   IN      UINTN   Address,
   IN      UINT32  OrData
   )
 {
-  return MmioWrite32 (Address, MmioRead32 (Address) | OrData);
+  return FAKE_NAME_DECORATOR(MmioWrite32) (Address, FAKE_NAME_DECORATOR(MmioRead32) (Address) | OrData);
 }
 
 /**
@@ -1810,12 +1812,12 @@ MmioOr32 (
 **/
 UINT32
 EFIAPI
-MmioAnd32 (
+FAKE_NAME_DECORATOR(MmioAnd32) (
   IN      UINTN   Address,
   IN      UINT32  AndData
   )
 {
-  return MmioWrite32 (Address, MmioRead32 (Address) & AndData);
+  return FAKE_NAME_DECORATOR(MmioWrite32) (Address, FAKE_NAME_DECORATOR(MmioRead32) (Address) & AndData);
 }
 
 /**
@@ -1841,13 +1843,13 @@ MmioAnd32 (
 **/
 UINT32
 EFIAPI
-MmioAndThenOr32 (
+FAKE_NAME_DECORATOR(MmioAndThenOr32) (
   IN      UINTN   Address,
   IN      UINT32  AndData,
   IN      UINT32  OrData
   )
 {
-  return MmioWrite32 (Address, (MmioRead32 (Address) & AndData) | OrData);
+  return FAKE_NAME_DECORATOR(MmioWrite32) (Address, (FAKE_NAME_DECORATOR(MmioRead32) (Address) & AndData) | OrData);
 }
 
 /**
@@ -1873,13 +1875,13 @@ MmioAndThenOr32 (
 **/
 UINT32
 EFIAPI
-MmioBitFieldRead32 (
+FAKE_NAME_DECORATOR(MmioBitFieldRead32) (
   IN      UINTN  Address,
   IN      UINTN  StartBit,
   IN      UINTN  EndBit
   )
 {
-  return BitFieldRead32 (MmioRead32 (Address), StartBit, EndBit);
+  return BitFieldRead32 (FAKE_NAME_DECORATOR(MmioRead32) (Address), StartBit, EndBit);
 }
 
 /**
@@ -1908,16 +1910,16 @@ MmioBitFieldRead32 (
 **/
 UINT32
 EFIAPI
-MmioBitFieldWrite32 (
+FAKE_NAME_DECORATOR(MmioBitFieldWrite32) (
   IN      UINTN   Address,
   IN      UINTN   StartBit,
   IN      UINTN   EndBit,
   IN      UINT32  Value
   )
 {
-  return MmioWrite32 (
+  return FAKE_NAME_DECORATOR(MmioWrite32) (
            Address,
-           BitFieldWrite32 (MmioRead32 (Address), StartBit, EndBit, Value)
+           BitFieldWrite32 (FAKE_NAME_DECORATOR(MmioRead32) (Address), StartBit, EndBit, Value)
            );
 }
 
@@ -1951,16 +1953,16 @@ MmioBitFieldWrite32 (
 **/
 UINT32
 EFIAPI
-MmioBitFieldOr32 (
+FAKE_NAME_DECORATOR(MmioBitFieldOr32) (
   IN      UINTN   Address,
   IN      UINTN   StartBit,
   IN      UINTN   EndBit,
   IN      UINT32  OrData
   )
 {
-  return MmioWrite32 (
+  return FAKE_NAME_DECORATOR(MmioWrite32) (
            Address,
-           BitFieldOr32 (MmioRead32 (Address), StartBit, EndBit, OrData)
+           BitFieldOr32 (FAKE_NAME_DECORATOR(MmioRead32) (Address), StartBit, EndBit, OrData)
            );
 }
 
@@ -1994,16 +1996,16 @@ MmioBitFieldOr32 (
 **/
 UINT32
 EFIAPI
-MmioBitFieldAnd32 (
+FAKE_NAME_DECORATOR(MmioBitFieldAnd32) (
   IN      UINTN   Address,
   IN      UINTN   StartBit,
   IN      UINTN   EndBit,
   IN      UINT32  AndData
   )
 {
-  return MmioWrite32 (
+  return FAKE_NAME_DECORATOR(MmioWrite32) (
            Address,
-           BitFieldAnd32 (MmioRead32 (Address), StartBit, EndBit, AndData)
+           BitFieldAnd32 (FAKE_NAME_DECORATOR(MmioRead32) (Address), StartBit, EndBit, AndData)
            );
 }
 
@@ -2040,7 +2042,7 @@ MmioBitFieldAnd32 (
 **/
 UINT32
 EFIAPI
-MmioBitFieldAndThenOr32 (
+FAKE_NAME_DECORATOR(MmioBitFieldAndThenOr32) (
   IN      UINTN   Address,
   IN      UINTN   StartBit,
   IN      UINTN   EndBit,
@@ -2048,9 +2050,9 @@ MmioBitFieldAndThenOr32 (
   IN      UINT32  OrData
   )
 {
-  return MmioWrite32 (
+  return FAKE_NAME_DECORATOR(MmioWrite32) (
            Address,
-           BitFieldAndThenOr32 (MmioRead32 (Address), StartBit, EndBit, AndData, OrData)
+           BitFieldAndThenOr32 (FAKE_NAME_DECORATOR(MmioRead32) (Address), StartBit, EndBit, AndData, OrData)
            );
 }
 
@@ -2075,12 +2077,12 @@ MmioBitFieldAndThenOr32 (
 **/
 UINT64
 EFIAPI
-MmioOr64 (
+FAKE_NAME_DECORATOR(MmioOr64) (
   IN      UINTN   Address,
   IN      UINT64  OrData
   )
 {
-  return MmioWrite64 (Address, MmioRead64 (Address) | OrData);
+  return FAKE_NAME_DECORATOR(MmioWrite64) (Address, FAKE_NAME_DECORATOR(MmioRead64) (Address) | OrData);
 }
 
 /**
@@ -2104,12 +2106,12 @@ MmioOr64 (
 **/
 UINT64
 EFIAPI
-MmioAnd64 (
+FAKE_NAME_DECORATOR(MmioAnd64) (
   IN      UINTN   Address,
   IN      UINT64  AndData
   )
 {
-  return MmioWrite64 (Address, MmioRead64 (Address) & AndData);
+  return FAKE_NAME_DECORATOR(MmioWrite64) (Address, FAKE_NAME_DECORATOR(MmioRead64) (Address) & AndData);
 }
 
 /**
@@ -2135,13 +2137,13 @@ MmioAnd64 (
 **/
 UINT64
 EFIAPI
-MmioAndThenOr64 (
+FAKE_NAME_DECORATOR(MmioAndThenOr64) (
   IN      UINTN   Address,
   IN      UINT64  AndData,
   IN      UINT64  OrData
   )
 {
-  return MmioWrite64 (Address, (MmioRead64 (Address) & AndData) | OrData);
+  return FAKE_NAME_DECORATOR(MmioWrite64) (Address, (FAKE_NAME_DECORATOR(MmioRead64) (Address) & AndData) | OrData);
 }
 
 /**
@@ -2167,13 +2169,13 @@ MmioAndThenOr64 (
 **/
 UINT64
 EFIAPI
-MmioBitFieldRead64 (
+FAKE_NAME_DECORATOR(MmioBitFieldRead64) (
   IN      UINTN  Address,
   IN      UINTN  StartBit,
   IN      UINTN  EndBit
   )
 {
-  return BitFieldRead64 (MmioRead64 (Address), StartBit, EndBit);
+  return BitFieldRead64 (FAKE_NAME_DECORATOR(MmioRead64) (Address), StartBit, EndBit);
 }
 
 /**
@@ -2202,16 +2204,16 @@ MmioBitFieldRead64 (
 **/
 UINT64
 EFIAPI
-MmioBitFieldWrite64 (
+FAKE_NAME_DECORATOR(MmioBitFieldWrite64) (
   IN      UINTN   Address,
   IN      UINTN   StartBit,
   IN      UINTN   EndBit,
   IN      UINT64  Value
   )
 {
-  return MmioWrite64 (
+  return FAKE_NAME_DECORATOR(MmioWrite64) (
            Address,
-           BitFieldWrite64 (MmioRead64 (Address), StartBit, EndBit, Value)
+           BitFieldWrite64 (FAKE_NAME_DECORATOR(MmioRead64) (Address), StartBit, EndBit, Value)
            );
 }
 
@@ -2245,16 +2247,16 @@ MmioBitFieldWrite64 (
 **/
 UINT64
 EFIAPI
-MmioBitFieldOr64 (
+FAKE_NAME_DECORATOR(MmioBitFieldOr64) (
   IN      UINTN   Address,
   IN      UINTN   StartBit,
   IN      UINTN   EndBit,
   IN      UINT64  OrData
   )
 {
-  return MmioWrite64 (
+  return FAKE_NAME_DECORATOR(MmioWrite64) (
            Address,
-           BitFieldOr64 (MmioRead64 (Address), StartBit, EndBit, OrData)
+           BitFieldOr64 (FAKE_NAME_DECORATOR(MmioRead64) (Address), StartBit, EndBit, OrData)
            );
 }
 
@@ -2288,16 +2290,16 @@ MmioBitFieldOr64 (
 **/
 UINT64
 EFIAPI
-MmioBitFieldAnd64 (
+FAKE_NAME_DECORATOR(MmioBitFieldAnd64) (
   IN      UINTN   Address,
   IN      UINTN   StartBit,
   IN      UINTN   EndBit,
   IN      UINT64  AndData
   )
 {
-  return MmioWrite64 (
+  return FAKE_NAME_DECORATOR(MmioWrite64) (
            Address,
-           BitFieldAnd64 (MmioRead64 (Address), StartBit, EndBit, AndData)
+           BitFieldAnd64 (FAKE_NAME_DECORATOR(MmioRead64) (Address), StartBit, EndBit, AndData)
            );
 }
 
@@ -2334,7 +2336,7 @@ MmioBitFieldAnd64 (
 **/
 UINT64
 EFIAPI
-MmioBitFieldAndThenOr64 (
+FAKE_NAME_DECORATOR(MmioBitFieldAndThenOr64) (
   IN      UINTN   Address,
   IN      UINTN   StartBit,
   IN      UINTN   EndBit,
@@ -2342,8 +2344,8 @@ MmioBitFieldAndThenOr64 (
   IN      UINT64  OrData
   )
 {
-  return MmioWrite64 (
+  return FAKE_NAME_DECORATOR(MmioWrite64) (
            Address,
-           BitFieldAndThenOr64 (MmioRead64 (Address), StartBit, EndBit, AndData, OrData)
+           BitFieldAndThenOr64 (FAKE_NAME_DECORATOR(MmioRead64) (Address), StartBit, EndBit, AndData, OrData)
            );
 }

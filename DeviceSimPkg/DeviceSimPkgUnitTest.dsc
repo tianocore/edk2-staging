@@ -14,16 +14,19 @@
   BUILD_TARGETS           = NOOPT
   SKUID_IDENTIFIER        = DEFAULT
 
-!include UnitTestFrameworkPkg/UnitTestFrameworkPkgHost.dsc.inc
-
-!include DeviceSimPkg/DeviceSimPkg.dsc.inc
-
 [PcdsFixedAtBuild]
   gEfiMdePkgTokenSpaceGuid.PcdPciExpressBaseAddress|0xE0000000
+  gDeviceSimPkgTokenSpaceGuid.PcdMmioLibWithGmock|FALSE
 
+!include UnitTestFrameworkPkg/UnitTestFrameworkPkgHost.dsc.inc
+!include DeviceSimPkg/DeviceSimPkg.dsc.inc
 
 [Components]
   DeviceSimPkg/Library/FakeRegisterSpaceLib/UnitTest/FakeRegisterSpaceLibUnitTest.inf
   DeviceSimPkg/Library/RegisterAccessPciIoLib/UnitTest/RegisterAccessPciIoLibUnitTest.inf
   DeviceSimPkg/Library/RegisterAccessIoLib/UnitTest/RegisterAccessIoLibUnitTest.inf
   DeviceSimPkg/Library/RegisterAccessPciSegmentLib/UnitTest/RegisterAccessPciSegmentLibUnitTest.inf
+  DeviceSimPkg/Library/MockIoLib/UnitTest/GmockIoLibUnitTest.inf {
+    <LibraryClasses>
+      IoLib|DeviceSimPkg/Library/MockIoLib/GmockIoLib.inf
+  }

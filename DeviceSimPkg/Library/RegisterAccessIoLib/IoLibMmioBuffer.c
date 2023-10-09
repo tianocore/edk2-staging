@@ -14,6 +14,8 @@
 #include <Library/BaseLib.h>
 #include <Library/PeiServicesTablePointerLib.h>
 
+#include "FakeNameDecorator.h"
+
 /**
   Copy data from MMIO region to system memory by using 8-bit access.
 
@@ -34,7 +36,7 @@
 **/
 UINT8 *
 EFIAPI
-MmioReadBuffer8 (
+FAKE_NAME_DECORATOR(MmioReadBuffer8) (
   IN  UINTN  StartAddress,
   IN  UINTN  Length,
   OUT UINT8  *Buffer
@@ -48,7 +50,7 @@ MmioReadBuffer8 (
   ReturnBuffer = Buffer;
 
   while (Length-- != 0) {
-    *(Buffer++) = MmioRead8 (StartAddress++);
+    *(Buffer++) = FAKE_NAME_DECORATOR(MmioRead8) (StartAddress++);
   }
 
   return ReturnBuffer;
@@ -78,7 +80,7 @@ MmioReadBuffer8 (
 **/
 UINT16 *
 EFIAPI
-MmioReadBuffer16 (
+FAKE_NAME_DECORATOR(MmioReadBuffer16) (
   IN  UINTN   StartAddress,
   IN  UINTN   Length,
   OUT UINT16  *Buffer
@@ -97,7 +99,7 @@ MmioReadBuffer16 (
   ReturnBuffer = Buffer;
 
   while (Length != 0) {
-    *(Buffer++)   = MmioRead16 (StartAddress);
+    *(Buffer++)   = FAKE_NAME_DECORATOR(MmioRead16) (StartAddress);
     StartAddress += sizeof (UINT16);
     Length       -= sizeof (UINT16);
   }
@@ -129,7 +131,7 @@ MmioReadBuffer16 (
 **/
 UINT32 *
 EFIAPI
-MmioReadBuffer32 (
+FAKE_NAME_DECORATOR(MmioReadBuffer32) (
   IN  UINTN   StartAddress,
   IN  UINTN   Length,
   OUT UINT32  *Buffer
@@ -148,7 +150,7 @@ MmioReadBuffer32 (
   ReturnBuffer = Buffer;
 
   while (Length != 0) {
-    *(Buffer++)   = MmioRead32 (StartAddress);
+    *(Buffer++)   = FAKE_NAME_DECORATOR(MmioRead32) (StartAddress);
     StartAddress += sizeof (UINT32);
     Length       -= sizeof (UINT32);
   }
@@ -180,7 +182,7 @@ MmioReadBuffer32 (
 **/
 UINT64 *
 EFIAPI
-MmioReadBuffer64 (
+FAKE_NAME_DECORATOR(MmioReadBuffer64) (
   IN  UINTN   StartAddress,
   IN  UINTN   Length,
   OUT UINT64  *Buffer
@@ -199,7 +201,7 @@ MmioReadBuffer64 (
   ReturnBuffer = Buffer;
 
   while (Length != 0) {
-    *(Buffer++)   = MmioRead64 (StartAddress);
+    *(Buffer++)   = FAKE_NAME_DECORATOR(MmioRead64) (StartAddress);
     StartAddress += sizeof (UINT64);
     Length       -= sizeof (UINT64);
   }
@@ -227,7 +229,7 @@ MmioReadBuffer64 (
 **/
 UINT8 *
 EFIAPI
-MmioWriteBuffer8 (
+FAKE_NAME_DECORATOR(MmioWriteBuffer8) (
   IN  UINTN        StartAddress,
   IN  UINTN        Length,
   IN  CONST UINT8  *Buffer
@@ -241,7 +243,7 @@ MmioWriteBuffer8 (
   ReturnBuffer = (UINT8 *)Buffer;
 
   while (Length-- != 0) {
-    MmioWrite8 (StartAddress++, *(Buffer++));
+    FAKE_NAME_DECORATOR(MmioWrite8) (StartAddress++, *(Buffer++));
   }
 
   return ReturnBuffer;
@@ -272,7 +274,7 @@ MmioWriteBuffer8 (
 **/
 UINT16 *
 EFIAPI
-MmioWriteBuffer16 (
+FAKE_NAME_DECORATOR(MmioWriteBuffer16) (
   IN  UINTN         StartAddress,
   IN  UINTN         Length,
   IN  CONST UINT16  *Buffer
@@ -291,7 +293,7 @@ MmioWriteBuffer16 (
   ReturnBuffer = (UINT16 *)Buffer;
 
   while (Length != 0) {
-    MmioWrite16 (StartAddress, *(Buffer++));
+    FAKE_NAME_DECORATOR(MmioWrite16) (StartAddress, *(Buffer++));
 
     StartAddress += sizeof (UINT16);
     Length       -= sizeof (UINT16);
@@ -325,7 +327,7 @@ MmioWriteBuffer16 (
 **/
 UINT32 *
 EFIAPI
-MmioWriteBuffer32 (
+FAKE_NAME_DECORATOR(MmioWriteBuffer32) (
   IN  UINTN         StartAddress,
   IN  UINTN         Length,
   IN  CONST UINT32  *Buffer
@@ -344,7 +346,7 @@ MmioWriteBuffer32 (
   ReturnBuffer = (UINT32 *)Buffer;
 
   while (Length != 0) {
-    MmioWrite32 (StartAddress, *(Buffer++));
+    FAKE_NAME_DECORATOR(MmioWrite32) (StartAddress, *(Buffer++));
 
     StartAddress += sizeof (UINT32);
     Length       -= sizeof (UINT32);
@@ -378,7 +380,7 @@ MmioWriteBuffer32 (
 **/
 UINT64 *
 EFIAPI
-MmioWriteBuffer64 (
+FAKE_NAME_DECORATOR(MmioWriteBuffer64) (
   IN  UINTN         StartAddress,
   IN  UINTN         Length,
   IN  CONST UINT64  *Buffer
@@ -397,7 +399,7 @@ MmioWriteBuffer64 (
   ReturnBuffer = (UINT64 *)Buffer;
 
   while (Length != 0) {
-    MmioWrite64 (StartAddress, *(Buffer++));
+    FAKE_NAME_DECORATOR(MmioWrite64) (StartAddress, *(Buffer++));
 
     StartAddress += sizeof (UINT64);
     Length       -= sizeof (UINT64);

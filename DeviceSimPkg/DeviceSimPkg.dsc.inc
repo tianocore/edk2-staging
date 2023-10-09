@@ -11,8 +11,13 @@
   UefiRuntimeServicesTableLib|MdePkg/Library/UefiRuntimeServicesTableLib/UefiRuntimeServicesTableLib.inf
   RegisterAccessPciIoLib|DeviceSimPkg/Library/RegisterAccessPciIoLib/RegisterAccessPciIoLib.inf
   FakeRegisterSpaceLib|DeviceSimPkg/Library/FakeRegisterSpaceLib/FakeRegisterSpaceLib.inf
-  IoLib|DeviceSimPkg/Library/RegisterAccessIoLib/RegisterAccessIoLib.inf
   PciSegmentLib|DeviceSimPkg/Library/RegisterAccessPciSegmentLib/RegisterAccessPciSegmentLib.inf
   PciExpressLib|MdePkg/Library/BasePciExpressLib/BasePciExpressLib.inf
   PciLib|MdePkg/Library/BasePciLibPciExpress/BasePciLibPciExpress.inf
   RealPciSegment|MdePkg/Library/BasePciSegmentLibPci/BasePciSegmentLibPci.inf
+  FakeIoLib|DeviceSimPkg/Library/RegisterAccessIoLib/FakeRegisterAccessIoLib.inf
+!if gDeviceSimPkgTokenSpaceGuid.PcdMmioLibWithGmock == TRUE
+  IoLib|DeviceSimPkg/Library/MockIoLib/GmockIoLib.inf
+!else
+  IoLib|DeviceSimPkg/Library/RegisterAccessIoLib/RegisterAccessIoLib.inf
+!endif
