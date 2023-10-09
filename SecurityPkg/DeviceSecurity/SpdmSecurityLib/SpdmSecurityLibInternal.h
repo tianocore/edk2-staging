@@ -180,22 +180,59 @@ EFI_STATUS
 EFIAPI
 DoDeviceMeasurement (
   IN  SPDM_DEVICE_CONTEXT          *SpdmDeviceContext,
-  IN  BOOLEAN                      IsAuthenticated,
   IN  UINT8                        SlotId,
   OUT EDKII_DEVICE_SECURITY_STATE  *SecurityState
   );
 
-/**
-  This function gets SPDM certificate and does authentication.
 
-  @param[in]  SpdmDeviceContext            The SPDM context for the device.
+
+/**
+  This function gets SPDM digest and certificates.
+
+  @param[in]  SpdmDeviceContext           The SPDM context for the device.
+  @param[out]  AuthState                  The auth state of the devices.
+  @param[out]  ValidSlotId                The number of slot for the certificate chain.
+  @param[out]  SecurityState              The security state of the requester.
+  @param[out]  IsValidCertChain           The validity of the certificate chain.
+  @param[out]  RootCertMatch              The authority of the certificate chain.
+
+  @retval EFI_SUCCESS           Operation completed successfully.
+  @retval EFI_OUT_OF_RESOURCES  Out of memory.
+  @retval EFI_DEVICE_ERROR      The operation was unsuccessful.
+
+**/
+EFI_STATUS
+EFIAPI
+DoDeviceCertificate (
+  IN  SPDM_DEVICE_CONTEXT          *SpdmDeviceContext,
+  OUT UINT8                        *AuthState,
+  OUT UINT8                        *ValidSlotId,
+  OUT EDKII_DEVICE_SECURITY_STATE  *SecurityState,
+  OUT BOOLEAN                      *IsValidCertChain,
+  OUT BOOLEAN                      *RootCertMatch
+  );
+
+/**
+  This function does authentication.
+
+  @param[in]  SpdmDeviceContext           The SPDM context for the device.
+  @param[out]  AuthState                  The auth state of the devices.
+  @param[in]  ValidSlotId                 The number of slot for the certificate chain.
+  @param[out]  SecurityState              The security state of the requester.
+
+  @retval EFI_SUCCESS           Operation completed successfully.
+  @retval EFI_OUT_OF_RESOURCES  Out of memory.
+  @retval EFI_DEVICE_ERROR      The operation was unsuccessful.
+
 **/
 EFI_STATUS
 EFIAPI
 DoDeviceAuthentication (
   IN  SPDM_DEVICE_CONTEXT          *SpdmDeviceContext,
   OUT UINT8                        *AuthState,
-  OUT UINT8                        *ValidSlotId,
+  IN  UINT8                        ValidSlotId,
+  IN  BOOLEAN                      IsValidCertChain,
+  IN  BOOLEAN                      RootCertMatch,
   OUT EDKII_DEVICE_SECURITY_STATE  *SecurityState
   );
 
