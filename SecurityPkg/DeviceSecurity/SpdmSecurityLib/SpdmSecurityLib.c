@@ -30,36 +30,47 @@ SpdmDeviceAuthenticationAndMeasurement (
 {
   EFI_STATUS           Status;
   SPDM_DEVICE_CONTEXT  *SpdmDeviceContext;
-  BOOLEAN              IsAuthenticated;
   UINT8                AuthState;
   UINT8                SlotId;
+  BOOLEAN              IsValidCertChain;
+  BOOLEAN              RootCertMatch;
 
   SpdmDeviceContext = CreateSpdmDeviceContext (SpdmDeviceInfo, SecurityState);
   if (SpdmDeviceContext == NULL) {
     return EFI_UNSUPPORTED;
   }
 
-  Status = EFI_SUCCESS;
-  IsAuthenticated = FALSE;
-  AuthState       = TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_SUCCESS;
-  SlotId          = 0;
+  Status           = EFI_SUCCESS;
+  AuthState        = TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_SUCCESS;
+  SlotId           = 0;
+  IsValidCertChain = FALSE;
+  RootCertMatch    = FALSE;
+
+  if (((SecurityPolicy->AuthenticationPolicy & EDKII_DEVICE_AUTHENTICATION_REQUIRED) != 0) ||
+      ((SecurityPolicy->MeasurementPolicy & EDKII_DEVICE_MEASUREMENT_REQUIRED) != 0)) {
+    Status = DoDeviceCertificate (SpdmDeviceContext, &AuthState, &SlotId, SecurityState, &IsValidCertChain, &RootCertMatch);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_ERROR, "DoDeviceCertificate failed - %r\n", Status));
+      goto Ret;
+    } else if ((AuthState == TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_FAIL_NO_SIG) ||
+               (AuthState == TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_FAIL_INVALID)) {
+      goto Ret;
+    }
+  }
+
   if ((SecurityPolicy->AuthenticationPolicy & EDKII_DEVICE_AUTHENTICATION_REQUIRED) != 0) {
-    Status = DoDeviceAuthentication (SpdmDeviceContext, &AuthState, &SlotId, SecurityState);
+    Status = DoDeviceAuthentication (SpdmDeviceContext, &AuthState, SlotId, IsValidCertChain, RootCertMatch, SecurityState);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_ERROR, "DoDeviceAuthentication failed - %r\n", Status));
       goto Ret;
-    } else {
-      if ((AuthState == TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_FAIL_NO_SIG) ||
-          (AuthState == TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_FAIL_INVALID)) {
-        goto Ret;
-      } else {
-        IsAuthenticated = TRUE;
-      }
+    } else if ((AuthState == TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_FAIL_NO_SIG) ||
+               (AuthState == TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_FAIL_INVALID)) {
+      goto Ret;
     }
   }
 
   if ((SecurityPolicy->MeasurementPolicy & EDKII_DEVICE_MEASUREMENT_REQUIRED) != 0) {
-    Status = DoDeviceMeasurement (SpdmDeviceContext, IsAuthenticated, SlotId, SecurityState);
+    Status = DoDeviceMeasurement (SpdmDeviceContext, SlotId, SecurityState);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_ERROR, "DoDeviceMeasurement failed - %r\n", Status));
     }

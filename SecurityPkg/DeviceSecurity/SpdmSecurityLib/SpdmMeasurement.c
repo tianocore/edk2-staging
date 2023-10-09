@@ -483,7 +483,6 @@ ExtendMeasurement (
   This function gets SPDM measurement and extend to TPM.
 
   @param[in]  SpdmDeviceContext            The SPDM context for the device.
-  @param[in]  IsAuthenticated              Indicates the device is authenticated or not.
   @param[in]  SlotId                       The number of slot id of the certificate.
   @param[out] SecurityState                A poniter to security state of the requester.
 
@@ -496,7 +495,6 @@ EFI_STATUS
 EFIAPI
 DoDeviceMeasurement (
   IN  SPDM_DEVICE_CONTEXT          *SpdmDeviceContext,
-  IN  BOOLEAN                      IsAuthenticated,
   IN  UINT8                        SlotId,
   OUT EDKII_DEVICE_SECURITY_STATE  *SecurityState
   )
@@ -529,17 +527,19 @@ DoDeviceMeasurement (
   DataSize           = sizeof (CapabilityFlags);
   SpdmGetData (SpdmContext, SpdmDataCapabilityFlags, &Parameter, &CapabilityFlags, &DataSize);
 
-  if ((CapabilityFlags & SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_MEAS_CAP) == 0) {
+  if ((CapabilityFlags & SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_MEAS_CAP_SIG) == 0) {
     AuthState                       = TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_FAIL_NO_SIG;
-    Status                          = ExtendMeasurement (SpdmDeviceContext, AuthState, 0, NULL, NULL, NULL, SecurityState);
+    Status                          = ExtendCertificate (SpdmDeviceContext, AuthState, 0, NULL, NULL, 0, 0, SecurityState);
     SecurityState->MeasurementState = EDKII_DEVICE_SECURITY_STATE_ERROR_DEVICE_NO_CAPABILITIES;
-    return EFI_UNSUPPORTED;
+    if (Status != EFI_SUCCESS) {
+      return Status;
+    } else {
+      return EFI_UNSUPPORTED;
+    }
   }
 
   RequestAttribute = 0;
-  if (IsAuthenticated) {
-    RequestAttribute |= SPDM_GET_MEASUREMENTS_REQUEST_ATTRIBUTES_GENERATE_SIGNATURE;
-  }
+  RequestAttribute |= SPDM_GET_MEASUREMENTS_REQUEST_ATTRIBUTES_GENERATE_SIGNATURE;
 
   MeasurementRecordLength = sizeof (MeasurementRecord);
   ZeroMem (RequesterNonce, sizeof (RequesterNonce));
@@ -632,9 +632,7 @@ ContentChangedFlag:
       //    get signature in last message only.
       //
       if (ReceivedNumberOfBlock == NumberOfBlocks - 1) {
-        if (IsAuthenticated) {
-          RequestAttribute |= SPDM_GET_MEASUREMENTS_REQUEST_ATTRIBUTES_GENERATE_SIGNATURE;
-        }
+        RequestAttribute |= SPDM_GET_MEASUREMENTS_REQUEST_ATTRIBUTES_GENERATE_SIGNATURE;
       }
 
       MeasurementRecordLength = sizeof (MeasurementRecord);
