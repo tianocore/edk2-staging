@@ -1028,363 +1028,363 @@ UINT64 EFIAPI MmioBitFieldAndThenOr64 (
 }
 
 void IoLibMock::DelegateToFake () {
-  ON_CALL(*this, IoRead8).WillByDefault([this](UINTN Port) {
+  ON_CALL(*this, IoRead8).WillByDefault([](UINTN Port) {
     return FakeIoRead8 (Port);
   });
 
-  ON_CALL(*this, IoWrite8).WillByDefault([this](UINTN Port, UINT8 Value) {
+  ON_CALL(*this, IoWrite8).WillByDefault([](UINTN Port, UINT8 Value) {
     return FakeIoWrite8 (Port, Value);
   });
 
-  ON_CALL(*this, IoRead16).WillByDefault([this](UINTN Port) {
+  ON_CALL(*this, IoRead16).WillByDefault([](UINTN Port) {
     return FakeIoRead16 (Port);
   });
 
-  ON_CALL(*this, IoWrite16).WillByDefault([this](UINTN Port, UINT16 Value) {
+  ON_CALL(*this, IoWrite16).WillByDefault([](UINTN Port, UINT16 Value) {
     return FakeIoWrite16 (Port, Value);
   });
 
-  ON_CALL(*this, IoRead32).WillByDefault([this](UINTN Port) {
+  ON_CALL(*this, IoRead32).WillByDefault([](UINTN Port) {
     return FakeIoRead32 (Port);
   });
 
-  ON_CALL(*this, IoWrite32).WillByDefault([this](UINTN Port, UINT32 Value) {
+  ON_CALL(*this, IoWrite32).WillByDefault([](UINTN Port, UINT32 Value) {
     return FakeIoWrite32 (Port, Value);
   });
 
-  ON_CALL(*this, MmioRead8).WillByDefault([this](UINTN Address) {
+  ON_CALL(*this, MmioRead8).WillByDefault([](UINTN Address) {
     return FakeMmioRead8 (Address);
   });
 
-  ON_CALL(*this, MmioWrite8).WillByDefault([this](UINTN Address, UINT8 Value) {
+  ON_CALL(*this, MmioWrite8).WillByDefault([](UINTN Address, UINT8 Value) {
     return FakeMmioWrite8 (Address, Value);
   });
 
-  ON_CALL(*this, MmioRead16).WillByDefault([this](UINTN Address) {
+  ON_CALL(*this, MmioRead16).WillByDefault([](UINTN Address) {
     return FakeMmioRead16 (Address);
   });
 
-  ON_CALL(*this, MmioWrite16).WillByDefault([this](UINTN Address, UINT16 Value) {
+  ON_CALL(*this, MmioWrite16).WillByDefault([](UINTN Address, UINT16 Value) {
     return FakeMmioWrite16 (Address, Value);
   });
 
-  ON_CALL(*this, MmioRead32).WillByDefault([this](UINTN Address) {
+  ON_CALL(*this, MmioRead32).WillByDefault([](UINTN Address) {
     return FakeMmioRead32 (Address);
   });
 
-  ON_CALL(*this, MmioWrite32).WillByDefault([this](UINTN Address, UINT32 Value) {
+  ON_CALL(*this, MmioWrite32).WillByDefault([](UINTN Address, UINT32 Value) {
     return FakeMmioWrite32 (Address, Value);
   });
 
-  ON_CALL(*this, IoReadFifo8).WillByDefault([this] (UINTN  Port, UINTN  Count, VOID *Buffer) {
+  ON_CALL(*this, IoReadFifo8).WillByDefault([] (UINTN  Port, UINTN  Count, VOID *Buffer) {
     return FakeIoReadFifo8 (Port, Count, Buffer);
   });
 
-  ON_CALL(*this, IoWriteFifo8).WillByDefault([this] (UINTN  Port, UINTN  Count, VOID *Buffer) {
+  ON_CALL(*this, IoWriteFifo8).WillByDefault([] (UINTN  Port, UINTN  Count, VOID *Buffer) {
     return FakeIoWriteFifo8 (Port, Count, Buffer);
   });
 
-  ON_CALL(*this, IoReadFifo16).WillByDefault([this] (UINTN  Port, UINTN  Count, VOID *Buffer) {
+  ON_CALL(*this, IoReadFifo16).WillByDefault([] (UINTN  Port, UINTN  Count, VOID *Buffer) {
     return FakeIoReadFifo16 (Port, Count, Buffer);
   });
 
-  ON_CALL(*this, IoWriteFifo16).WillByDefault([this] (UINTN  Port, UINTN  Count, VOID *Buffer) {
+  ON_CALL(*this, IoWriteFifo16).WillByDefault([] (UINTN  Port, UINTN  Count, VOID *Buffer) {
     return FakeIoWriteFifo16 (Port, Count, Buffer);
   });
 
-  ON_CALL(*this, IoReadFifo32).WillByDefault([this] (UINTN  Port, UINTN  Count, VOID *Buffer) {
+  ON_CALL(*this, IoReadFifo32).WillByDefault([] (UINTN  Port, UINTN  Count, VOID *Buffer) {
     return FakeIoReadFifo32 (Port, Count, Buffer);
   });
 
-  ON_CALL(*this, IoWriteFifo32).WillByDefault([this] (UINTN  Port, UINTN  Count, VOID *Buffer) {
+  ON_CALL(*this, IoWriteFifo32).WillByDefault([] (UINTN  Port, UINTN  Count, VOID *Buffer) {
     return FakeIoWriteFifo32 (Port, Count, Buffer);
   });
 
-  ON_CALL(*this, MmioReadBuffer8).WillByDefault([this] (UINTN StartAddress, UINTN Length, UINT8* Buffer) {
+  ON_CALL(*this, MmioReadBuffer8).WillByDefault([] (UINTN StartAddress, UINTN Length, UINT8* Buffer) {
     return FakeMmioReadBuffer8 (StartAddress, Length, Buffer);
   });
 
-  ON_CALL(*this, MmioReadBuffer16).WillByDefault([this] (UINTN StartAddress, UINTN Length, UINT16* Buffer) {
+  ON_CALL(*this, MmioReadBuffer16).WillByDefault([] (UINTN StartAddress, UINTN Length, UINT16* Buffer) {
     return FakeMmioReadBuffer16 (StartAddress, Length, Buffer);
   });
 
-  ON_CALL(*this, MmioReadBuffer32).WillByDefault([this] (UINTN StartAddress, UINTN Length, UINT32* Buffer) {
+  ON_CALL(*this, MmioReadBuffer32).WillByDefault([] (UINTN StartAddress, UINTN Length, UINT32* Buffer) {
     return FakeMmioReadBuffer32 (StartAddress, Length, Buffer);
   });
 
-  ON_CALL(*this, MmioReadBuffer64).WillByDefault([this] (UINTN StartAddress, UINTN Length, UINT64* Buffer) {
+  ON_CALL(*this, MmioReadBuffer64).WillByDefault([] (UINTN StartAddress, UINTN Length, UINT64* Buffer) {
     return FakeMmioReadBuffer64 (StartAddress, Length, Buffer);
   });
 
-  ON_CALL(*this, MmioWriteBuffer8).WillByDefault([this] (UINTN StartAddress, UINTN Length, CONST UINT8* Buffer) {
+  ON_CALL(*this, MmioWriteBuffer8).WillByDefault([] (UINTN StartAddress, UINTN Length, CONST UINT8* Buffer) {
     return FakeMmioWriteBuffer8 (StartAddress, Length, Buffer);
   });
 
-  ON_CALL(*this, MmioWriteBuffer16).WillByDefault([this] (UINTN StartAddress, UINTN Length, CONST UINT16* Buffer) {
+  ON_CALL(*this, MmioWriteBuffer16).WillByDefault([] (UINTN StartAddress, UINTN Length, CONST UINT16* Buffer) {
     return FakeMmioWriteBuffer16 (StartAddress, Length, Buffer);
   });
 
-  ON_CALL(*this, MmioWriteBuffer32).WillByDefault([this] (UINTN StartAddress, UINTN Length, CONST UINT32* Buffer) {
+  ON_CALL(*this, MmioWriteBuffer32).WillByDefault([] (UINTN StartAddress, UINTN Length, CONST UINT32* Buffer) {
     return FakeMmioWriteBuffer32 (StartAddress, Length, Buffer);
   });
 
-  ON_CALL(*this, MmioWriteBuffer64).WillByDefault([this] (UINTN StartAddress, UINTN Length, CONST UINT64* Buffer) {
+  ON_CALL(*this, MmioWriteBuffer64).WillByDefault([] (UINTN StartAddress, UINTN Length, CONST UINT64* Buffer) {
     return FakeMmioWriteBuffer64 (StartAddress, Length, Buffer);
   });
 
-  ON_CALL(*this, IoOr8).WillByDefault([this] (UINTN Port, UINT8  OrData) {
+  ON_CALL(*this, IoOr8).WillByDefault([] (UINTN Port, UINT8  OrData) {
     return FakeIoOr8 (Port, OrData);
   });
 
-  ON_CALL(*this, IoAnd8).WillByDefault([this] (UINTN  Port, UINT8  AndData) {
+  ON_CALL(*this, IoAnd8).WillByDefault([] (UINTN  Port, UINT8  AndData) {
     return FakeIoAnd8(Port, AndData);
   });
 
-  ON_CALL(*this, IoAndThenOr8).WillByDefault([this] (UINTN  Port, UINT8  AndData, UINT8  OrData) {
+  ON_CALL(*this, IoAndThenOr8).WillByDefault([] (UINTN  Port, UINT8  AndData, UINT8  OrData) {
     return FakeIoAndThenOr8(Port, AndData, OrData);
   });
 
-  ON_CALL(*this, IoBitFieldRead8).WillByDefault([this] (UINTN  Port,UINTN  StartBit,UINTN  EndBit) {
+  ON_CALL(*this, IoBitFieldRead8).WillByDefault([] (UINTN  Port,UINTN  StartBit,UINTN  EndBit) {
     return FakeIoBitFieldRead8(Port, StartBit, EndBit);
   });
 
-  ON_CALL(*this, IoBitFieldWrite8).WillByDefault([this] (UINTN  Port, UINTN  StartBit, UINTN  EndBit, UINT8  Value) {
+  ON_CALL(*this, IoBitFieldWrite8).WillByDefault([] (UINTN  Port, UINTN  StartBit, UINTN  EndBit, UINT8  Value) {
     return FakeIoBitFieldWrite8(Port, StartBit, EndBit, Value);
   });
 
-  ON_CALL(*this, IoBitFieldOr8).WillByDefault([this] (UINTN  Port, UINTN  StartBit, UINTN  EndBit, UINT8  OrData){
+  ON_CALL(*this, IoBitFieldOr8).WillByDefault([] (UINTN  Port, UINTN  StartBit, UINTN  EndBit, UINT8  OrData){
     return FakeIoBitFieldOr8(Port, StartBit, EndBit, OrData);
   });
 
-  ON_CALL(*this, IoBitFieldAnd8).WillByDefault([this] (UINTN  Port, UINTN  StartBit, UINTN  EndBit, UINT8  AndData) {
+  ON_CALL(*this, IoBitFieldAnd8).WillByDefault([] (UINTN  Port, UINTN  StartBit, UINTN  EndBit, UINT8  AndData) {
     return FakeIoBitFieldAnd8 (Port, StartBit, EndBit, AndData);
   });
 
-  ON_CALL(*this, IoBitFieldAndThenOr8).WillByDefault([this] (UINTN  Port, UINTN  StartBit, UINTN  EndBit, UINT8  AndData, UINT8  OrData){
+  ON_CALL(*this, IoBitFieldAndThenOr8).WillByDefault([] (UINTN  Port, UINTN  StartBit, UINTN  EndBit, UINT8  AndData, UINT8  OrData){
     return FakeIoBitFieldAndThenOr8 (Port, StartBit, EndBit, AndData, OrData);
   });
 
-  ON_CALL(*this, IoOr16).WillByDefault([this] (UINTN Port, UINT16  OrData) {
+  ON_CALL(*this, IoOr16).WillByDefault([] (UINTN Port, UINT16  OrData) {
     return FakeIoOr16 (Port, OrData);
   });
 
-  ON_CALL(*this, IoAnd16).WillByDefault([this] (UINTN  Port, UINT16  AndData) {
+  ON_CALL(*this, IoAnd16).WillByDefault([] (UINTN  Port, UINT16  AndData) {
     return FakeIoAnd16(Port, AndData);
   });
 
-  ON_CALL(*this, IoAndThenOr16).WillByDefault([this] (UINTN  Port, UINT16  AndData, UINT16  OrData) {
+  ON_CALL(*this, IoAndThenOr16).WillByDefault([] (UINTN  Port, UINT16  AndData, UINT16  OrData) {
     return FakeIoAndThenOr16(Port, AndData, OrData);
   });
 
-  ON_CALL(*this, IoBitFieldRead16).WillByDefault([this] (UINTN  Port,UINTN  StartBit,UINTN  EndBit) {
+  ON_CALL(*this, IoBitFieldRead16).WillByDefault([] (UINTN  Port,UINTN  StartBit,UINTN  EndBit) {
     return FakeIoBitFieldRead16(Port, StartBit, EndBit);
   });
 
-  ON_CALL(*this, IoBitFieldWrite16).WillByDefault([this] (UINTN  Port, UINTN  StartBit, UINTN  EndBit, UINT16  Value) {
+  ON_CALL(*this, IoBitFieldWrite16).WillByDefault([] (UINTN  Port, UINTN  StartBit, UINTN  EndBit, UINT16  Value) {
     return FakeIoBitFieldWrite16(Port, StartBit, EndBit, Value);
   });
 
-  ON_CALL(*this, IoBitFieldOr16).WillByDefault([this] (UINTN  Port, UINTN  StartBit, UINTN  EndBit, UINT16  OrData){
+  ON_CALL(*this, IoBitFieldOr16).WillByDefault([] (UINTN  Port, UINTN  StartBit, UINTN  EndBit, UINT16  OrData){
     return FakeIoBitFieldOr16(Port, StartBit, EndBit, OrData);
   });
 
-  ON_CALL(*this, IoBitFieldAnd16).WillByDefault([this] (UINTN  Port, UINTN  StartBit, UINTN  EndBit, UINT16  AndData) {
+  ON_CALL(*this, IoBitFieldAnd16).WillByDefault([] (UINTN  Port, UINTN  StartBit, UINTN  EndBit, UINT16  AndData) {
     return FakeIoBitFieldAnd16 (Port, StartBit, EndBit, AndData);
   });
 
-  ON_CALL(*this, IoBitFieldAndThenOr16).WillByDefault([this] (UINTN  Port, UINTN  StartBit, UINTN  EndBit, UINT16  AndData, UINT16  OrData){
+  ON_CALL(*this, IoBitFieldAndThenOr16).WillByDefault([] (UINTN  Port, UINTN  StartBit, UINTN  EndBit, UINT16  AndData, UINT16  OrData){
     return FakeIoBitFieldAndThenOr16 (Port, StartBit, EndBit, AndData, OrData);
   });
 
-  ON_CALL(*this, IoOr32).WillByDefault([this] (UINTN Port, UINT32  OrData) {
+  ON_CALL(*this, IoOr32).WillByDefault([] (UINTN Port, UINT32  OrData) {
     return FakeIoOr32 (Port, OrData);
   });
 
-  ON_CALL(*this, IoAnd32).WillByDefault([this] (UINTN  Port, UINT32  AndData) {
+  ON_CALL(*this, IoAnd32).WillByDefault([] (UINTN  Port, UINT32  AndData) {
     return FakeIoAnd32(Port, AndData);
   });
 
-  ON_CALL(*this, IoAndThenOr32).WillByDefault([this] (UINTN  Port, UINT32  AndData, UINT32  OrData) {
+  ON_CALL(*this, IoAndThenOr32).WillByDefault([] (UINTN  Port, UINT32  AndData, UINT32  OrData) {
     return FakeIoAndThenOr32(Port, AndData, OrData);
   });
 
-  ON_CALL(*this, IoBitFieldRead32).WillByDefault([this] (UINTN  Port,UINTN  StartBit,UINTN  EndBit) {
+  ON_CALL(*this, IoBitFieldRead32).WillByDefault([] (UINTN  Port,UINTN  StartBit,UINTN  EndBit) {
     return FakeIoBitFieldRead32(Port, StartBit, EndBit);
   });
 
-  ON_CALL(*this, IoBitFieldWrite32).WillByDefault([this] (UINTN  Port, UINTN  StartBit, UINTN  EndBit, UINT32  Value) {
+  ON_CALL(*this, IoBitFieldWrite32).WillByDefault([] (UINTN  Port, UINTN  StartBit, UINTN  EndBit, UINT32  Value) {
     return FakeIoBitFieldWrite32(Port, StartBit, EndBit, Value);
   });
 
-  ON_CALL(*this, IoBitFieldOr32).WillByDefault([this] (UINTN  Port, UINTN  StartBit, UINTN  EndBit, UINT32  OrData){
+  ON_CALL(*this, IoBitFieldOr32).WillByDefault([] (UINTN  Port, UINTN  StartBit, UINTN  EndBit, UINT32  OrData){
     return FakeIoBitFieldOr32(Port, StartBit, EndBit, OrData);
   });
 
-  ON_CALL(*this, IoBitFieldAnd32).WillByDefault([this] (UINTN  Port, UINTN  StartBit, UINTN  EndBit, UINT32  AndData) {
+  ON_CALL(*this, IoBitFieldAnd32).WillByDefault([] (UINTN  Port, UINTN  StartBit, UINTN  EndBit, UINT32  AndData) {
     return FakeIoBitFieldAnd32 (Port, StartBit, EndBit, AndData);
   });
 
-  ON_CALL(*this, IoBitFieldAndThenOr32).WillByDefault([this] (UINTN  Port, UINTN  StartBit, UINTN  EndBit, UINT32  AndData, UINT32  OrData){
+  ON_CALL(*this, IoBitFieldAndThenOr32).WillByDefault([] (UINTN  Port, UINTN  StartBit, UINTN  EndBit, UINT32  AndData, UINT32  OrData){
     return FakeIoBitFieldAndThenOr32 (Port, StartBit, EndBit, AndData, OrData);
   });
 
-  ON_CALL(*this, IoOr64).WillByDefault([this] (UINTN Port, UINT64  OrData) {
+  ON_CALL(*this, IoOr64).WillByDefault([] (UINTN Port, UINT64  OrData) {
     return FakeIoOr64 (Port, OrData);
   });
 
-  ON_CALL(*this, IoAnd64).WillByDefault([this] (UINTN  Port, UINT64  AndData) {
+  ON_CALL(*this, IoAnd64).WillByDefault([] (UINTN  Port, UINT64  AndData) {
     return FakeIoAnd64(Port, AndData);
   });
 
-  ON_CALL(*this, IoAndThenOr64).WillByDefault([this] (UINTN  Port, UINT64  AndData, UINT64  OrData) {
+  ON_CALL(*this, IoAndThenOr64).WillByDefault([] (UINTN  Port, UINT64  AndData, UINT64  OrData) {
     return FakeIoAndThenOr64(Port, AndData, OrData);
   });
 
-  ON_CALL(*this, IoBitFieldRead64).WillByDefault([this] (UINTN  Port,UINTN  StartBit,UINTN  EndBit) {
+  ON_CALL(*this, IoBitFieldRead64).WillByDefault([] (UINTN  Port,UINTN  StartBit,UINTN  EndBit) {
     return FakeIoBitFieldRead64(Port, StartBit, EndBit);
   });
 
-  ON_CALL(*this, IoBitFieldWrite64).WillByDefault([this] (UINTN  Port, UINTN  StartBit, UINTN  EndBit, UINT64  Value) {
+  ON_CALL(*this, IoBitFieldWrite64).WillByDefault([] (UINTN  Port, UINTN  StartBit, UINTN  EndBit, UINT64  Value) {
     return FakeIoBitFieldWrite64(Port, StartBit, EndBit, Value);
   });
 
-  ON_CALL(*this, IoBitFieldOr64).WillByDefault([this] (UINTN  Port, UINTN  StartBit, UINTN  EndBit, UINT64  OrData){
+  ON_CALL(*this, IoBitFieldOr64).WillByDefault([] (UINTN  Port, UINTN  StartBit, UINTN  EndBit, UINT64  OrData){
     return FakeIoBitFieldOr64(Port, StartBit, EndBit, OrData);
   });
 
-  ON_CALL(*this, IoBitFieldAnd64).WillByDefault([this] (UINTN  Port, UINTN  StartBit, UINTN  EndBit, UINT64  AndData) {
+  ON_CALL(*this, IoBitFieldAnd64).WillByDefault([] (UINTN  Port, UINTN  StartBit, UINTN  EndBit, UINT64  AndData) {
     return FakeIoBitFieldAnd64 (Port, StartBit, EndBit, AndData);
   });
 
-  ON_CALL(*this, IoBitFieldAndThenOr64).WillByDefault([this] (UINTN  Port, UINTN  StartBit, UINTN  EndBit, UINT64  AndData, UINT64  OrData){
+  ON_CALL(*this, IoBitFieldAndThenOr64).WillByDefault([] (UINTN  Port, UINTN  StartBit, UINTN  EndBit, UINT64  AndData, UINT64  OrData){
     return FakeIoBitFieldAndThenOr64 (Port, StartBit, EndBit, AndData, OrData);
   });
 
-  ON_CALL(*this, MmioOr8).WillByDefault([this] (UINTN Address, UINT8  OrData) {
+  ON_CALL(*this, MmioOr8).WillByDefault([] (UINTN Address, UINT8  OrData) {
     return FakeMmioOr8 (Address, OrData);
   });
 
-  ON_CALL(*this, MmioAnd8).WillByDefault([this] (UINTN  Address, UINT8  AndData) {
+  ON_CALL(*this, MmioAnd8).WillByDefault([] (UINTN  Address, UINT8  AndData) {
     return FakeMmioAnd8(Address, AndData);
   });
 
-  ON_CALL(*this, MmioAndThenOr8).WillByDefault([this] (UINTN  Address, UINT8  AndData, UINT8  OrData) {
+  ON_CALL(*this, MmioAndThenOr8).WillByDefault([] (UINTN  Address, UINT8  AndData, UINT8  OrData) {
     return FakeMmioAndThenOr8(Address, AndData, OrData);
   });
 
-  ON_CALL(*this, MmioBitFieldRead8).WillByDefault([this] (UINTN  Address,UINTN  StartBit,UINTN  EndBit) {
+  ON_CALL(*this, MmioBitFieldRead8).WillByDefault([] (UINTN  Address,UINTN  StartBit,UINTN  EndBit) {
     return FakeMmioBitFieldRead8(Address, StartBit, EndBit);
   });
 
-  ON_CALL(*this, MmioBitFieldWrite8).WillByDefault([this] (UINTN  Address, UINTN  StartBit, UINTN  EndBit, UINT8  Value) {
+  ON_CALL(*this, MmioBitFieldWrite8).WillByDefault([] (UINTN  Address, UINTN  StartBit, UINTN  EndBit, UINT8  Value) {
     return FakeMmioBitFieldWrite8(Address, StartBit, EndBit, Value);
   });
 
-  ON_CALL(*this, MmioBitFieldOr8).WillByDefault([this] (UINTN  Address, UINTN  StartBit, UINTN  EndBit, UINT8  OrData){
+  ON_CALL(*this, MmioBitFieldOr8).WillByDefault([] (UINTN  Address, UINTN  StartBit, UINTN  EndBit, UINT8  OrData){
     return FakeMmioBitFieldOr8(Address, StartBit, EndBit, OrData);
   });
 
-  ON_CALL(*this, MmioBitFieldAnd8).WillByDefault([this] (UINTN  Address, UINTN  StartBit, UINTN  EndBit, UINT8  AndData) {
+  ON_CALL(*this, MmioBitFieldAnd8).WillByDefault([] (UINTN  Address, UINTN  StartBit, UINTN  EndBit, UINT8  AndData) {
     return FakeMmioBitFieldAnd8 (Address, StartBit, EndBit, AndData);
   });
 
-  ON_CALL(*this, MmioBitFieldAndThenOr8).WillByDefault([this] (UINTN  Address, UINTN  StartBit, UINTN  EndBit, UINT8  AndData, UINT8  OrData){
+  ON_CALL(*this, MmioBitFieldAndThenOr8).WillByDefault([] (UINTN  Address, UINTN  StartBit, UINTN  EndBit, UINT8  AndData, UINT8  OrData){
     return FakeMmioBitFieldAndThenOr8 (Address, StartBit, EndBit, AndData, OrData);
   });
 
-  ON_CALL(*this, MmioOr16).WillByDefault([this] (UINTN Address, UINT16  OrData) {
+  ON_CALL(*this, MmioOr16).WillByDefault([] (UINTN Address, UINT16  OrData) {
     return FakeMmioOr16 (Address, OrData);
   });
 
-  ON_CALL(*this, MmioAnd16).WillByDefault([this] (UINTN  Address, UINT16  AndData) {
+  ON_CALL(*this, MmioAnd16).WillByDefault([] (UINTN  Address, UINT16  AndData) {
     return FakeMmioAnd16(Address, AndData);
   });
 
-  ON_CALL(*this, MmioAndThenOr16).WillByDefault([this] (UINTN  Address, UINT16  AndData, UINT16  OrData) {
+  ON_CALL(*this, MmioAndThenOr16).WillByDefault([] (UINTN  Address, UINT16  AndData, UINT16  OrData) {
     return FakeMmioAndThenOr16(Address, AndData, OrData);
   });
 
-  ON_CALL(*this, MmioBitFieldRead16).WillByDefault([this] (UINTN  Address,UINTN  StartBit,UINTN  EndBit) {
+  ON_CALL(*this, MmioBitFieldRead16).WillByDefault([] (UINTN  Address,UINTN  StartBit,UINTN  EndBit) {
     return FakeMmioBitFieldRead16(Address, StartBit, EndBit);
   });
 
-  ON_CALL(*this, MmioBitFieldWrite16).WillByDefault([this] (UINTN  Address, UINTN  StartBit, UINTN  EndBit, UINT16  Value) {
+  ON_CALL(*this, MmioBitFieldWrite16).WillByDefault([] (UINTN  Address, UINTN  StartBit, UINTN  EndBit, UINT16  Value) {
     return FakeMmioBitFieldWrite16(Address, StartBit, EndBit, Value);
   });
 
-  ON_CALL(*this, MmioBitFieldOr16).WillByDefault([this] (UINTN  Address, UINTN  StartBit, UINTN  EndBit, UINT16  OrData){
+  ON_CALL(*this, MmioBitFieldOr16).WillByDefault([] (UINTN  Address, UINTN  StartBit, UINTN  EndBit, UINT16  OrData){
     return FakeMmioBitFieldOr16(Address, StartBit, EndBit, OrData);
   });
 
-  ON_CALL(*this, MmioBitFieldAnd16).WillByDefault([this] (UINTN  Address, UINTN  StartBit, UINTN  EndBit, UINT16  AndData) {
+  ON_CALL(*this, MmioBitFieldAnd16).WillByDefault([] (UINTN  Address, UINTN  StartBit, UINTN  EndBit, UINT16  AndData) {
     return FakeMmioBitFieldAnd16 (Address, StartBit, EndBit, AndData);
   });
 
-  ON_CALL(*this, MmioBitFieldAndThenOr16).WillByDefault([this] (UINTN  Address, UINTN  StartBit, UINTN  EndBit, UINT16  AndData, UINT16  OrData){
+  ON_CALL(*this, MmioBitFieldAndThenOr16).WillByDefault([] (UINTN  Address, UINTN  StartBit, UINTN  EndBit, UINT16  AndData, UINT16  OrData){
     return FakeMmioBitFieldAndThenOr16 (Address, StartBit, EndBit, AndData, OrData);
   });
 
-  ON_CALL(*this, MmioOr32).WillByDefault([this] (UINTN Address, UINT32  OrData) {
+  ON_CALL(*this, MmioOr32).WillByDefault([] (UINTN Address, UINT32  OrData) {
     return FakeMmioOr32 (Address, OrData);
   });
 
-  ON_CALL(*this, MmioAnd32).WillByDefault([this] (UINTN  Address, UINT32  AndData) {
+  ON_CALL(*this, MmioAnd32).WillByDefault([] (UINTN  Address, UINT32  AndData) {
     return FakeMmioAnd32(Address, AndData);
   });
 
-  ON_CALL(*this, MmioAndThenOr32).WillByDefault([this] (UINTN  Address, UINT32  AndData, UINT32  OrData) {
+  ON_CALL(*this, MmioAndThenOr32).WillByDefault([] (UINTN  Address, UINT32  AndData, UINT32  OrData) {
     return FakeMmioAndThenOr32(Address, AndData, OrData);
   });
 
-  ON_CALL(*this, MmioBitFieldRead32).WillByDefault([this] (UINTN  Address,UINTN  StartBit,UINTN  EndBit) {
+  ON_CALL(*this, MmioBitFieldRead32).WillByDefault([] (UINTN  Address,UINTN  StartBit,UINTN  EndBit) {
     return FakeMmioBitFieldRead32(Address, StartBit, EndBit);
   });
 
-  ON_CALL(*this, MmioBitFieldWrite32).WillByDefault([this] (UINTN  Address, UINTN  StartBit, UINTN  EndBit, UINT32  Value) {
+  ON_CALL(*this, MmioBitFieldWrite32).WillByDefault([] (UINTN  Address, UINTN  StartBit, UINTN  EndBit, UINT32  Value) {
     return FakeMmioBitFieldWrite32(Address, StartBit, EndBit, Value);
   });
 
-  ON_CALL(*this, MmioBitFieldOr32).WillByDefault([this] (UINTN  Address, UINTN  StartBit, UINTN  EndBit, UINT32  OrData){
+  ON_CALL(*this, MmioBitFieldOr32).WillByDefault([] (UINTN  Address, UINTN  StartBit, UINTN  EndBit, UINT32  OrData){
     return FakeMmioBitFieldOr32(Address, StartBit, EndBit, OrData);
   });
 
-  ON_CALL(*this, MmioBitFieldAnd32).WillByDefault([this] (UINTN  Address, UINTN  StartBit, UINTN  EndBit, UINT32  AndData) {
+  ON_CALL(*this, MmioBitFieldAnd32).WillByDefault([] (UINTN  Address, UINTN  StartBit, UINTN  EndBit, UINT32  AndData) {
     return FakeMmioBitFieldAnd32 (Address, StartBit, EndBit, AndData);
   });
 
-  ON_CALL(*this, MmioBitFieldAndThenOr32).WillByDefault([this] (UINTN  Address, UINTN  StartBit, UINTN  EndBit, UINT32  AndData, UINT32  OrData){
+  ON_CALL(*this, MmioBitFieldAndThenOr32).WillByDefault([] (UINTN  Address, UINTN  StartBit, UINTN  EndBit, UINT32  AndData, UINT32  OrData){
     return FakeMmioBitFieldAndThenOr32 (Address, StartBit, EndBit, AndData, OrData);
   });
 
-  ON_CALL(*this, MmioOr64).WillByDefault([this] (UINTN Address, UINT64  OrData) {
+  ON_CALL(*this, MmioOr64).WillByDefault([] (UINTN Address, UINT64  OrData) {
     return FakeMmioOr64 (Address, OrData);
   });
 
-  ON_CALL(*this, MmioAnd64).WillByDefault([this] (UINTN  Address, UINT64  AndData) {
+  ON_CALL(*this, MmioAnd64).WillByDefault([] (UINTN  Address, UINT64  AndData) {
     return FakeMmioAnd64(Address, AndData);
   });
 
-  ON_CALL(*this, MmioAndThenOr64).WillByDefault([this] (UINTN  Address, UINT64  AndData, UINT64  OrData) {
+  ON_CALL(*this, MmioAndThenOr64).WillByDefault([] (UINTN  Address, UINT64  AndData, UINT64  OrData) {
     return FakeMmioAndThenOr64(Address, AndData, OrData);
   });
 
-  ON_CALL(*this, MmioBitFieldRead64).WillByDefault([this] (UINTN  Address,UINTN  StartBit,UINTN  EndBit) {
+  ON_CALL(*this, MmioBitFieldRead64).WillByDefault([] (UINTN  Address,UINTN  StartBit,UINTN  EndBit) {
     return FakeMmioBitFieldRead64(Address, StartBit, EndBit);
   });
 
-  ON_CALL(*this, MmioBitFieldWrite64).WillByDefault([this] (UINTN  Address, UINTN  StartBit, UINTN  EndBit, UINT64  Value) {
+  ON_CALL(*this, MmioBitFieldWrite64).WillByDefault([] (UINTN  Address, UINTN  StartBit, UINTN  EndBit, UINT64  Value) {
     return FakeMmioBitFieldWrite64(Address, StartBit, EndBit, Value);
   });
 
-  ON_CALL(*this, MmioBitFieldOr64).WillByDefault([this] (UINTN  Address, UINTN  StartBit, UINTN  EndBit, UINT64  OrData){
+  ON_CALL(*this, MmioBitFieldOr64).WillByDefault([] (UINTN  Address, UINTN  StartBit, UINTN  EndBit, UINT64  OrData){
     return FakeMmioBitFieldOr64(Address, StartBit, EndBit, OrData);
   });
 
-  ON_CALL(*this, MmioBitFieldAnd64).WillByDefault([this] (UINTN  Address, UINTN  StartBit, UINTN  EndBit, UINT64  AndData) {
+  ON_CALL(*this, MmioBitFieldAnd64).WillByDefault([] (UINTN  Address, UINTN  StartBit, UINTN  EndBit, UINT64  AndData) {
     return FakeMmioBitFieldAnd64 (Address, StartBit, EndBit, AndData);
   });
 
-  ON_CALL(*this, MmioBitFieldAndThenOr64).WillByDefault([this] (UINTN  Address, UINTN  StartBit, UINTN  EndBit, UINT64  AndData, UINT64  OrData){
+  ON_CALL(*this, MmioBitFieldAndThenOr64).WillByDefault([] (UINTN  Address, UINTN  StartBit, UINTN  EndBit, UINT64  AndData, UINT64  OrData){
     return FakeMmioBitFieldAndThenOr64 (Address, StartBit, EndBit, AndData, OrData);
   });
 }
