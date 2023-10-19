@@ -14,6 +14,11 @@
   BUILD_TARGETS           = NOOPT
   SKUID_IDENTIFIER        = DEFAULT
 
+[BuildOptions]
+
+*_GCC_*_CC_FLAGS  = --coverage
+*_GCC_*_LINK_FLAGS = --coverage
+
 [PcdsFixedAtBuild]
   gEfiMdePkgTokenSpaceGuid.PcdPciExpressBaseAddress|0xE0000000
   gDeviceSimPkgTokenSpaceGuid.PcdMmioLibWithGmock|FALSE
