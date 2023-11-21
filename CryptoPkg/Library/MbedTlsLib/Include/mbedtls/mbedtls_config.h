@@ -57,7 +57,7 @@
  *
  * Comment to disable the use of assembly code.
  */
-#define MBEDTLS_HAVE_ASM
+//#define MBEDTLS_HAVE_ASM
 
 /**
  * \def MBEDTLS_NO_UDBL_DIVISION
