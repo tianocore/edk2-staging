@@ -344,6 +344,12 @@
       DebugLib|MdePkg/Library/BaseDebugLibNull/BaseDebugLibNull.inf
   }
   OvmfPkg/Fdt/HighMemDxe/HighMemDxe.inf
+  OvmfPkg/IoMmuDxe/IoMmuDxe.inf {
+    <LibraryClasses>
+      MemEncryptTdxLib|OvmfPkg/Library/BaseMemEncryptTdxLib/BaseMemEncryptTdxLibNull.inf
+      MemEncryptSevLib|OvmfPkg/Library/BaseMemEncryptSevLib/BaseMemEncryptSevLibNull.inf
+      CcExitLib|UefiCpuPkg/Library/CcExitLibNull/CcExitLibNull.inf
+  }
   OvmfPkg/VirtioBlkDxe/VirtioBlk.inf
   OvmfPkg/VirtioScsiDxe/VirtioScsi.inf
   OvmfPkg/VirtioNetDxe/VirtioNet.inf
