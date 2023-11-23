@@ -1,0 +1,35 @@
+## @file
+#  Library for SEV Memory Encryption
+#
+#  Copyright (c) 2021, Intel Corporation. All rights reserved.<BR>
+#  SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+#
+##
+
+[Defines]
+  INF_VERSION                    = 1.25
+  BASE_NAME                      = MemEncryptSevLib
+  FILE_GUID                      = E7AC5629-5943-43E2-9811-FB1306E06A09
+  MODULE_TYPE                    = BASE
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = MemEncryptSevLib|DXE_CORE DXE_DRIVER DXE_RUNTIME_DRIVER DXE_SMM_DRIVER UEFI_DRIVER
+
+[Packages]
+  MdeModulePkg/MdeModulePkg.dec
+  MdePkg/MdePkg.dec
+  OvmfPkg/OvmfPkg.dec
+
+[Sources]
+  BaseMemEncryptSevLibNull.c
+
+[LibraryClasses]
+  BaseLib
+  CacheMaintenanceLib
+  CpuLib
+  DebugLib
+  MemoryAllocationLib
+  PcdLib
+
+[Pcd]
+  gEfiMdePkgTokenSpaceGuid.PcdConfidentialComputingGuestAttr
