@@ -12,6 +12,8 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 #include "CryptPkcs7Internal.h"
 #include <mbedtls/pkcs7.h>
+#include <mbedtls/pem.h>
+#include <mbedtls/error.h>
 
 /* Profile for backward compatibility. Allows RSA 1024, unlike the default
    profile. */
@@ -150,6 +152,38 @@ MbedTlsPkcs7GetDigestAlgorithmSet (
   return Ret;
 }
 
+int
+mod_mbedtls_x509_crt_ext_cb (void *p_ctx,
+                             mbedtls_x509_crt const *crt,
+                             mbedtls_x509_buf const *oid,
+                             int critical,
+                             const unsigned char *p,
+                             const unsigned char *end)
+{
+  INT32 Ret;
+  INT32 i;
+
+  UINT8 PkixPolicyQualifier[] = {0x06, 0x08, 0x2B, 0x06, 0x01, 
+                                 0x05, 0x05, 0x07, 0x02, 0x02,};
+
+  Ret = -1;
+
+  if (end - p <= sizeof(PkixPolicyQualifier)) {
+    return 0;
+  }
+
+  for (i = 0; i < end - p - sizeof(PkixPolicyQualifier); i++) {
+
+    if(memcmp(p+i, PkixPolicyQualifier, sizeof(PkixPolicyQualifier)) == 0) {
+      Ret = 0;
+      break;
+    }
+  }
+
+  return Ret;
+}
+
+
 /**
    certificates :: SET OF ExtendedCertificateOrCertificate,
    ExtendedCertificateOrCertificate ::= CHOICE {
@@ -164,9 +198,120 @@ MbedTlsPkcs7GetCertificates (
   mbedtls_x509_crt *Certs
   )
 {
-  INT32 Ret;
-  Ret = mbedtls_x509_crt_parse (Certs, *P, Plen);
-  return Ret;
+ mbedtls_x509_crt *chain = Certs;
+ const unsigned char *buf = *P;
+ size_t buflen = Plen;
+
+ mbedtls_x509_crt_ext_cb_t cb = mod_mbedtls_x509_crt_ext_cb;
+
+
+#if defined(MBEDTLS_PEM_PARSE_C)
+    int success = 0, first_error = 0, total_failed = 0;
+    int buf_format = MBEDTLS_X509_FORMAT_DER;
+#endif
+
+    /*
+     * Check for valid input
+     */
+    if( chain == NULL || buf == NULL )
+        return( MBEDTLS_ERR_X509_BAD_INPUT_DATA );
+
+    /*
+     * Determine buffer content. Buffer contains either one DER certificate or
+     * one or more PEM certificates.
+     */
+#if defined(MBEDTLS_PEM_PARSE_C)
+    if( buflen != 0 && buf[buflen - 1] == '\0' &&
+        strstr( (const char *) buf, "-----BEGIN CERTIFICATE-----" ) != NULL )
+    {
+        buf_format = MBEDTLS_X509_FORMAT_PEM;
+    }
+
+    if( buf_format == MBEDTLS_X509_FORMAT_DER )
+        return mbedtls_x509_crt_parse_der_with_ext_cb( chain, buf, buflen, 1, cb, NULL);
+#else
+    return mbedtls_x509_crt_parse_der( chain, buf, buflen );
+#endif
+
+#if defined(MBEDTLS_PEM_PARSE_C)
+    if( buf_format == MBEDTLS_X509_FORMAT_PEM )
+    {
+        int ret = MBEDTLS_ERR_ERROR_CORRUPTION_DETECTED;
+        mbedtls_pem_context pem;
+
+        /* 1 rather than 0 since the terminating NULL byte is counted in */
+        while( buflen > 1 )
+        {
+            size_t use_len;
+            mbedtls_pem_init( &pem );
+
+            /* If we get there, we know the string is null-terminated */
+            ret = mbedtls_pem_read_buffer( &pem,
+                           "-----BEGIN CERTIFICATE-----",
+                           "-----END CERTIFICATE-----",
+                           buf, NULL, 0, &use_len );
+
+            if( ret == 0 )
+            {
+                /*
+                 * Was PEM encoded
+                 */
+                buflen -= use_len;
+                buf += use_len;
+            }
+            else if( ret == MBEDTLS_ERR_PEM_BAD_INPUT_DATA )
+            {
+                return( ret );
+            }
+            else if( ret != MBEDTLS_ERR_PEM_NO_HEADER_FOOTER_PRESENT )
+            {
+                mbedtls_pem_free( &pem );
+
+                /*
+                 * PEM header and footer were found
+                 */
+                buflen -= use_len;
+                buf += use_len;
+
+                if( first_error == 0 )
+                    first_error = ret;
+
+                total_failed++;
+                continue;
+            }
+            else
+                break;
+
+            ret = mbedtls_x509_crt_parse_der( chain, pem.buf, pem.buflen );
+
+            mbedtls_pem_free( &pem );
+
+            if( ret != 0 )
+            {
+                /*
+                 * Quit parsing on a memory error
+                 */
+                if( ret == MBEDTLS_ERR_X509_ALLOC_FAILED )
+                    return( ret );
+
+                if( first_error == 0 )
+                    first_error = ret;
+
+                total_failed++;
+                continue;
+            }
+
+            success = 1;
+        }
+    }
+
+    if( success )
+        return( total_failed );
+    else if( first_error )
+        return( first_error );
+    else
+        return( MBEDTLS_ERR_X509_CERT_UNKNOWN_FORMAT );
+#endif /* MBEDTLS_PEM_PARSE_C */
 }
 
 /**
@@ -870,7 +1015,9 @@ Pkcs7Verify (
   MbedtlsPkcs7      Pkcs7;
   INT32             Ret;
   mbedtls_x509_crt  Crt;
+  mbedtls_x509_crt_ext_cb_t cb;
 
+  cb = mod_mbedtls_x509_crt_ext_cb;
   Status = WrapPkcs7Data (P7Data, P7Length, &Wrapped, &WrapData, &WrapDataSize);
 
   if (Status) {
@@ -888,7 +1035,7 @@ Pkcs7Verify (
   }
 
   if (Ret == 0) {
-    Ret = mbedtls_x509_crt_parse_der (&Crt, TrustedCert, CertLength);
+    Ret = mbedtls_x509_crt_parse_der_with_ext_cb(&Crt, TrustedCert, CertLength, 1, cb, NULL);
   }
 
   if (Ret == 0) {
