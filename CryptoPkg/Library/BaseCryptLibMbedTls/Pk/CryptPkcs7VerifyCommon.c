@@ -271,8 +271,6 @@ MbedTlsPkcs7GetSignersInfoSet (
 
       SignersSet->AuthAttr.len = Len + (TempP - *P);
       SignersSet->AuthAttr.p = *P;
-      *(SignersSet->AuthAttr.p) = 0x31;
-
       *P = TempP + Len;
    } else {
     SignersSet->AuthAttr.p = NULL;
@@ -531,6 +529,7 @@ MbedtlsPkcs7SignedDataVerifySigners (
   mbedtls_pk_context Pk;
   CONST mbedtls_md_info_t *MdInfo;
   INTN HashLen;
+  UINT8 TempAuthAttr;
 
   Pk = Cert->pk;
   ZeroMem(Hash, MBEDTLS_MD_MAX_SIZE);
@@ -541,7 +540,10 @@ MbedtlsPkcs7SignedDataVerifySigners (
   HashLen = mbedtls_md_get_size(MdInfo);
   mbedtls_md (MdInfo, Data, DataLen, Hash);
   if (SignerInfo->AuthAttr.p != NULL) {
+    TempAuthAttr = *(SignerInfo->AuthAttr.p);
+    *(SignerInfo->AuthAttr.p) = 0x31;
     mbedtls_md (MdInfo, SignerInfo->AuthAttr.p, SignerInfo->AuthAttr.len, Hash);
+    *(SignerInfo->AuthAttr.p) = TempAuthAttr;
   }
   Ret = mbedtls_pk_verify (&Pk, MBEDTLS_MD_SHA1, Hash, HashLen, SignerInfo->Sig.p, SignerInfo->Sig.len);
 
@@ -555,7 +557,11 @@ MbedtlsPkcs7SignedDataVerifySigners (
   ZeroMem(Hash, MBEDTLS_MD_MAX_SIZE);
   mbedtls_md (MdInfo, Data, DataLen, Hash);
   if (SignerInfo->AuthAttr.p != NULL) {
+    TempAuthAttr = *(SignerInfo->AuthAttr.p);
+    *(SignerInfo->AuthAttr.p) = 0x31;
     mbedtls_md (MdInfo, SignerInfo->AuthAttr.p, SignerInfo->AuthAttr.len, Hash);
+    *(SignerInfo->AuthAttr.p) = TempAuthAttr;
+    *(SignerInfo->AuthAttr.p) = 0xA0;
   }
   Ret = mbedtls_pk_verify (&Pk, MBEDTLS_MD_SHA256, Hash, HashLen, SignerInfo->Sig.p, SignerInfo->Sig.len);
   if (Ret == 0) {
@@ -567,7 +573,10 @@ MbedtlsPkcs7SignedDataVerifySigners (
   ZeroMem(Hash, MBEDTLS_MD_MAX_SIZE);
   mbedtls_md (MdInfo, Data, DataLen, Hash);
   if (SignerInfo->AuthAttr.p != NULL) {
+    TempAuthAttr = *(SignerInfo->AuthAttr.p);
+    *(SignerInfo->AuthAttr.p) = 0x31;
     mbedtls_md (MdInfo, SignerInfo->AuthAttr.p, SignerInfo->AuthAttr.len, Hash);
+    *(SignerInfo->AuthAttr.p) = TempAuthAttr;
   }
   Ret = mbedtls_pk_verify (&Pk, MBEDTLS_MD_SHA384, Hash, HashLen, SignerInfo->Sig.p, SignerInfo->Sig.len);
   if (Ret == 0) {
@@ -579,7 +588,10 @@ MbedtlsPkcs7SignedDataVerifySigners (
   ZeroMem(Hash, MBEDTLS_MD_MAX_SIZE);
   mbedtls_md (MdInfo, Data, DataLen, Hash);
   if (SignerInfo->AuthAttr.p != NULL) {
+    TempAuthAttr = *(SignerInfo->AuthAttr.p);
+    *(SignerInfo->AuthAttr.p) = 0x31;
     mbedtls_md (MdInfo, SignerInfo->AuthAttr.p, SignerInfo->AuthAttr.len, Hash);
+    *(SignerInfo->AuthAttr.p) = TempAuthAttr;
   }
   Ret = mbedtls_pk_verify (&Pk, MBEDTLS_MD_SHA512, Hash, HashLen, SignerInfo->Sig.p, SignerInfo->Sig.len);
   if (Ret == 0) {
