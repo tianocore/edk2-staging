@@ -57,8 +57,7 @@ For TlsLibMbedtls(Test is Unit_test in EDKII):
 | TlsConfig.c  | YES | YES |
 
 ### Known issues(Fixing in progress)
-1. UEFI secure boot have some issues, because the Pkcs7Verify have some issues;
-2. UEFI HTTTPS boot failed, because the TlsLibMbedtls have some issues;
+1. UEFI HTTTPS boot failed, because the TlsLibMbedtls have some issues;
 
 ## Build command
 
