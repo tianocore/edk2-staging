@@ -19,16 +19,16 @@ typedef enum {
 
 EFI_STATUS
 RegisterAccessIoRegisterMmioAtAddress (
-  IN REGISTER_ACCESS_INTERFACE *RegisterAccess,
+  IN REGISTER_ACCESS_INTERFACE       *RegisterAccess,
   IN REGISTER_ACCESS_IO_MEMORY_TYPE  Type,
-  IN UINT64               Address,
-  IN UINT64               Size
-);
+  IN UINT64                          Address,
+  IN UINT64                          Size
+  );
 
 EFI_STATUS
 RegisterAccessIoUnRegisterMmioAtAddress (
   IN REGISTER_ACCESS_IO_MEMORY_TYPE  Type,
-  IN UINT64               Address
+  IN UINT64                          Address
   );
 
 #ifdef REGISTER_ACCESS_IO_LIB_INCLUDE_FAKES
@@ -784,6 +784,7 @@ FakeMmioBitFieldAndThenOr64 (
   IN      UINT64  AndData,
   IN      UINT64  OrData
   );
+
 #endif
 
 #endif

@@ -19,26 +19,26 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #define UNIT_TEST_NAME     "RegisterAccessIoLib unit tests"
 #define UNIT_TEST_VERSION  "0.1"
 
-#define DEVICE_FROM_CONTEXT(Context) ((TEST_CONTEXT*)Context)->Device
+#define DEVICE_FROM_CONTEXT(Context)  ((TEST_CONTEXT*)Context)->Device
 
-#define REGISTER_ACCESS_IO_LIB_TEST_DEVICE_NAME  L"RegisterAccessIoLibTestDevice"
-#define REGISTER_ACCESS_IO_LIB_TEST_DEVICE_SIZE  0x100
-#define REGISTER_ACCESS_IO_LIB_TEST_DEVICE_MEM_ADDRESS 0x10000000
-#define REGISTER_ACCESS_IO_LIB_TEST_DEVICE_IO_ADDRESS 0x1000
+#define REGISTER_ACCESS_IO_LIB_TEST_DEVICE_NAME         L"RegisterAccessIoLibTestDevice"
+#define REGISTER_ACCESS_IO_LIB_TEST_DEVICE_SIZE         0x100
+#define REGISTER_ACCESS_IO_LIB_TEST_DEVICE_MEM_ADDRESS  0x10000000
+#define REGISTER_ACCESS_IO_LIB_TEST_DEVICE_IO_ADDRESS   0x1000
 
-#define REGISTER_ACCESS_IO_LIB_TEST_DEVICE_REG0_ADDRESS 0x0 // RO register for read test
-#define REGISTER_ACCESS_IO_LIB_TEST_DEVICE_REG0_VALUE   0x12348086
-#define REGISTER_ACCESS_IO_LIB_TEST_DEVICE_REG1_ADDRESS 0x4 // RW scratchpad for write tests
-#define REGISTER_ACCESS_IO_LIB_TEST_DEVICE_FIFO_TEST_REG_ADDRESS 0x8 // RW scratchpad for FIFO tests
-#define REGISTER_ACCESS_IO_LIB_TEST_DEVICE_BUFFER_REG_ADDRESS 0xC // RW scratchpad for buffer R/W tests. Ends at 0x20
-#define REGISTER_ACCESS_IO_LIB_TEST_DEVICE_BUFFER_NO_OF_DWORDS 5
-#define REGISTER_ACCESS_IO_TEST_FIFO_SIZE REGISTER_ACCESS_IO_LIB_TEST_DEVICE_BUFFER_NO_OF_DWORDS
+#define REGISTER_ACCESS_IO_LIB_TEST_DEVICE_REG0_ADDRESS           0x0// RO register for read test
+#define REGISTER_ACCESS_IO_LIB_TEST_DEVICE_REG0_VALUE             0x12348086
+#define REGISTER_ACCESS_IO_LIB_TEST_DEVICE_REG1_ADDRESS           0x4 // RW scratchpad for write tests
+#define REGISTER_ACCESS_IO_LIB_TEST_DEVICE_FIFO_TEST_REG_ADDRESS  0x8 // RW scratchpad for FIFO tests
+#define REGISTER_ACCESS_IO_LIB_TEST_DEVICE_BUFFER_REG_ADDRESS     0xC // RW scratchpad for buffer R/W tests. Ends at 0x20
+#define REGISTER_ACCESS_IO_LIB_TEST_DEVICE_BUFFER_NO_OF_DWORDS    5
+#define REGISTER_ACCESS_IO_TEST_FIFO_SIZE                         REGISTER_ACCESS_IO_LIB_TEST_DEVICE_BUFFER_NO_OF_DWORDS
 
-#define REGISTER_ACCESS_IO_LIB_WRITE_TEST_VAL8  0xAB
+#define REGISTER_ACCESS_IO_LIB_WRITE_TEST_VAL8   0xAB
 #define REGISTER_ACCESS_IO_LIB_WRITE_TEST_VAL16  0xDEAB
 #define REGISTER_ACCESS_IO_LIB_WRITE_TEST_VAL32  0xCF10DEAB
 
-GLOBAL_REMOVE_IF_UNREFERENCED  UINT8 gUint8TestBuffer[REGISTER_ACCESS_IO_LIB_TEST_DEVICE_BUFFER_NO_OF_DWORDS] = {
+GLOBAL_REMOVE_IF_UNREFERENCED  UINT8  gUint8TestBuffer[REGISTER_ACCESS_IO_LIB_TEST_DEVICE_BUFFER_NO_OF_DWORDS] = {
   REGISTER_ACCESS_IO_LIB_WRITE_TEST_VAL8,
   REGISTER_ACCESS_IO_LIB_WRITE_TEST_VAL8,
   REGISTER_ACCESS_IO_LIB_WRITE_TEST_VAL8,
@@ -46,7 +46,7 @@ GLOBAL_REMOVE_IF_UNREFERENCED  UINT8 gUint8TestBuffer[REGISTER_ACCESS_IO_LIB_TES
   REGISTER_ACCESS_IO_LIB_WRITE_TEST_VAL8
 };
 
-GLOBAL_REMOVE_IF_UNREFERENCED  UINT16 gUint16TestBuffer[REGISTER_ACCESS_IO_LIB_TEST_DEVICE_BUFFER_NO_OF_DWORDS] = {
+GLOBAL_REMOVE_IF_UNREFERENCED  UINT16  gUint16TestBuffer[REGISTER_ACCESS_IO_LIB_TEST_DEVICE_BUFFER_NO_OF_DWORDS] = {
   REGISTER_ACCESS_IO_LIB_WRITE_TEST_VAL16,
   REGISTER_ACCESS_IO_LIB_WRITE_TEST_VAL16,
   REGISTER_ACCESS_IO_LIB_WRITE_TEST_VAL16,
@@ -54,7 +54,7 @@ GLOBAL_REMOVE_IF_UNREFERENCED  UINT16 gUint16TestBuffer[REGISTER_ACCESS_IO_LIB_T
   REGISTER_ACCESS_IO_LIB_WRITE_TEST_VAL16
 };
 
-GLOBAL_REMOVE_IF_UNREFERENCED  UINT32 gUint32TestBuffer[REGISTER_ACCESS_IO_LIB_TEST_DEVICE_BUFFER_NO_OF_DWORDS] = {
+GLOBAL_REMOVE_IF_UNREFERENCED  UINT32  gUint32TestBuffer[REGISTER_ACCESS_IO_LIB_TEST_DEVICE_BUFFER_NO_OF_DWORDS] = {
   REGISTER_ACCESS_IO_LIB_WRITE_TEST_VAL32,
   REGISTER_ACCESS_IO_LIB_WRITE_TEST_VAL32,
   REGISTER_ACCESS_IO_LIB_WRITE_TEST_VAL32,
@@ -63,11 +63,11 @@ GLOBAL_REMOVE_IF_UNREFERENCED  UINT32 gUint32TestBuffer[REGISTER_ACCESS_IO_LIB_T
 };
 
 typedef struct {
-  UINT32  WriteRegister;
-  UINT32  FifoTestRegister;
-  UINT32  FifoCount;
-  UINT32  RwBuffer[REGISTER_ACCESS_IO_LIB_TEST_DEVICE_BUFFER_NO_OF_DWORDS];
-  REGISTER_ACCESS_INTERFACE  *RegisterAccess;
+  UINT32                       WriteRegister;
+  UINT32                       FifoTestRegister;
+  UINT32                       FifoCount;
+  UINT32                       RwBuffer[REGISTER_ACCESS_IO_LIB_TEST_DEVICE_BUFFER_NO_OF_DWORDS];
+  REGISTER_ACCESS_INTERFACE    *RegisterAccess;
 } REGISTER_ACCESS_IO_TEST_DEVICE_CONTEXT;
 
 VOID
@@ -78,11 +78,11 @@ TestRegisterAccessIoDeviceRead (
   OUT UINT32  *Value
   )
 {
-  UINT32                       ByteMask;
+  UINT32                                  ByteMask;
   REGISTER_ACCESS_IO_TEST_DEVICE_CONTEXT  *Device;
-  UINT8                        BufferIndex;
+  UINT8                                   BufferIndex;
 
-  Device = (REGISTER_ACCESS_IO_TEST_DEVICE_CONTEXT*) Context;
+  Device = (REGISTER_ACCESS_IO_TEST_DEVICE_CONTEXT *) Context;
   if (Device == NULL) {
     *Value = 0xFFFFFFFF;
     DEBUG ((DEBUG_ERROR, "Device can't be NULL\n"));
@@ -91,10 +91,11 @@ TestRegisterAccessIoDeviceRead (
 
   ByteMask = ByteEnableToBitMask (ByteEnable);
 
-  if (Address >= REGISTER_ACCESS_IO_LIB_TEST_DEVICE_BUFFER_REG_ADDRESS &&
-      Address <= REGISTER_ACCESS_IO_LIB_TEST_DEVICE_BUFFER_REG_ADDRESS + (4 * REGISTER_ACCESS_IO_LIB_TEST_DEVICE_BUFFER_NO_OF_DWORDS)) {
-    BufferIndex = (UINT8)((Address - REGISTER_ACCESS_IO_LIB_TEST_DEVICE_BUFFER_REG_ADDRESS) / 4);
-    *Value = (Device->RwBuffer[BufferIndex] & ByteMask);
+  if ((Address >= REGISTER_ACCESS_IO_LIB_TEST_DEVICE_BUFFER_REG_ADDRESS) &&
+      (Address <= REGISTER_ACCESS_IO_LIB_TEST_DEVICE_BUFFER_REG_ADDRESS + (4 * REGISTER_ACCESS_IO_LIB_TEST_DEVICE_BUFFER_NO_OF_DWORDS)))
+  {
+    BufferIndex = (UINT8) ((Address - REGISTER_ACCESS_IO_LIB_TEST_DEVICE_BUFFER_REG_ADDRESS) / 4);
+    *Value      = (Device->RwBuffer[BufferIndex] & ByteMask);
     return;
   }
 
@@ -119,20 +120,21 @@ TestRegisterAccessIoDeviceWrite (
   IN UINT32  Value
   )
 {
-  UINT32                       ByteMask;
+  UINT32                                  ByteMask;
   REGISTER_ACCESS_IO_TEST_DEVICE_CONTEXT  *Device;
-  UINT8                        BufferIndex;
+  UINT8                                   BufferIndex;
 
-  Device = (REGISTER_ACCESS_IO_TEST_DEVICE_CONTEXT*) Context;
+  Device = (REGISTER_ACCESS_IO_TEST_DEVICE_CONTEXT *) Context;
   if (Device == NULL) {
     DEBUG ((DEBUG_ERROR, "Device can't be NULL\n"));
     return;
   }
 
   ByteMask = ByteEnableToBitMask (ByteEnable);
-  if (Address >= REGISTER_ACCESS_IO_LIB_TEST_DEVICE_BUFFER_REG_ADDRESS &&
-      Address <= REGISTER_ACCESS_IO_LIB_TEST_DEVICE_BUFFER_REG_ADDRESS + (4 * REGISTER_ACCESS_IO_LIB_TEST_DEVICE_BUFFER_NO_OF_DWORDS)) {
-    BufferIndex = (UINT8)((Address - REGISTER_ACCESS_IO_LIB_TEST_DEVICE_BUFFER_REG_ADDRESS) / 4);
+  if ((Address >= REGISTER_ACCESS_IO_LIB_TEST_DEVICE_BUFFER_REG_ADDRESS) &&
+      (Address <= REGISTER_ACCESS_IO_LIB_TEST_DEVICE_BUFFER_REG_ADDRESS + (4 * REGISTER_ACCESS_IO_LIB_TEST_DEVICE_BUFFER_NO_OF_DWORDS)))
+  {
+    BufferIndex                    = (UINT8) ((Address - REGISTER_ACCESS_IO_LIB_TEST_DEVICE_BUFFER_REG_ADDRESS) / 4);
     Device->RwBuffer[BufferIndex] &= (~ByteMask);
     Device->RwBuffer[BufferIndex] |= (Value & ByteMask);
     return;
@@ -154,18 +156,19 @@ TestRegisterAccessIoDeviceWrite (
 }
 
 typedef struct {
-  REGISTER_ACCESS_IO_TEST_DEVICE_CONTEXT  *Device;
+  REGISTER_ACCESS_IO_TEST_DEVICE_CONTEXT    *Device;
 } TEST_CONTEXT;
 
 UNIT_TEST_STATUS
+EFIAPI
 RegisterAccessIoTestPrerequisite (
   IN UNIT_TEST_CONTEXT  Context
   )
 {
-  EFI_STATUS                   Status;
-  TEST_CONTEXT                 *TestContext;
+  EFI_STATUS    Status;
+  TEST_CONTEXT  *TestContext;
 
-  TestContext = (TEST_CONTEXT*) Context;
+  TestContext = (TEST_CONTEXT *) Context;
 
   TestContext->Device = AllocateZeroPool (sizeof (REGISTER_ACCESS_IO_TEST_DEVICE_CONTEXT));
   if (TestContext->Device == NULL) {
@@ -191,13 +194,14 @@ RegisterAccessIoTestPrerequisite (
 }
 
 VOID
+EFIAPI
 RegisterAccessIoTestCleanup (
   IN UNIT_TEST_CONTEXT  Context
   )
 {
   TEST_CONTEXT  *TestContext;
 
-  TestContext = (TEST_CONTEXT*) Context;
+  TestContext = (TEST_CONTEXT *) Context;
 
   RegisterAccessIoUnRegisterMmioAtAddress (RegisterAccessIoTypeMmio, REGISTER_ACCESS_IO_LIB_TEST_DEVICE_MEM_ADDRESS);
   RegisterAccessIoUnRegisterMmioAtAddress (RegisterAccessIoTypeIo, REGISTER_ACCESS_IO_LIB_TEST_DEVICE_IO_ADDRESS);
@@ -214,11 +218,11 @@ RegisterAccessIoRegistrationTest (
   IN UNIT_TEST_CONTEXT  Context
   )
 {
-  EFI_STATUS           Status;
+  EFI_STATUS                 Status;
   REGISTER_ACCESS_INTERFACE  *SampleSpace;
 
   SampleSpace = NULL;
-  Status = FakeRegisterSpaceCreate (REGISTER_ACCESS_IO_LIB_TEST_DEVICE_NAME, FakeRegisterSpaceAlignmentDword, TestRegisterAccessIoDeviceWrite, TestRegisterAccessIoDeviceRead, NULL, &SampleSpace);
+  Status      = FakeRegisterSpaceCreate (REGISTER_ACCESS_IO_LIB_TEST_DEVICE_NAME, FakeRegisterSpaceAlignmentDword, TestRegisterAccessIoDeviceWrite, TestRegisterAccessIoDeviceRead, NULL, &SampleSpace);
   if (EFI_ERROR (Status)) {
     return UNIT_TEST_ERROR_PREREQUISITE_NOT_MET;
   }
@@ -246,9 +250,9 @@ RegisterAccessIoIoRwTest (
   IN UNIT_TEST_CONTEXT  Context
   )
 {
-  UINT8                Val8;
-  UINT16               Val16;
-  UINT32               Val32;
+  UINT8                                   Val8;
+  UINT16                                  Val16;
+  UINT32                                  Val32;
   REGISTER_ACCESS_IO_TEST_DEVICE_CONTEXT  *Device;
 
   Device = DEVICE_FROM_CONTEXT (Context);
@@ -280,9 +284,9 @@ RegisterAccessIoMemRwTest (
   IN UNIT_TEST_CONTEXT  Context
   )
 {
-  UINT8                Val8;
-  UINT16               Val16;
-  UINT32               Val32;
+  UINT8                                   Val8;
+  UINT16                                  Val16;
+  UINT32                                  Val32;
   REGISTER_ACCESS_IO_TEST_DEVICE_CONTEXT  *Device;
 
   Device = DEVICE_FROM_CONTEXT (Context);
@@ -361,7 +365,7 @@ RegisterAccessIoBufferRw8Test (
   IN UNIT_TEST_CONTEXT  Context
   )
 {
-  UINT8                        Readback[REGISTER_ACCESS_IO_LIB_TEST_DEVICE_BUFFER_NO_OF_DWORDS];
+  UINT8                                   Readback[REGISTER_ACCESS_IO_LIB_TEST_DEVICE_BUFFER_NO_OF_DWORDS];
   REGISTER_ACCESS_IO_TEST_DEVICE_CONTEXT  *Device;
 
   Device = DEVICE_FROM_CONTEXT (Context);
@@ -381,7 +385,7 @@ RegisterAccessIoBufferRw16Test (
   IN UNIT_TEST_CONTEXT  Context
   )
 {
-  UINT16                        Readback[REGISTER_ACCESS_IO_LIB_TEST_DEVICE_BUFFER_NO_OF_DWORDS];
+  UINT16                                  Readback[REGISTER_ACCESS_IO_LIB_TEST_DEVICE_BUFFER_NO_OF_DWORDS];
   REGISTER_ACCESS_IO_TEST_DEVICE_CONTEXT  *Device;
 
   Device = DEVICE_FROM_CONTEXT (Context);
@@ -401,7 +405,7 @@ RegisterAccessIoBufferRw32Test (
   IN UNIT_TEST_CONTEXT  Context
   )
 {
-  UINT32                        Readback[REGISTER_ACCESS_IO_LIB_TEST_DEVICE_BUFFER_NO_OF_DWORDS];
+  UINT32                                  Readback[REGISTER_ACCESS_IO_LIB_TEST_DEVICE_BUFFER_NO_OF_DWORDS];
   REGISTER_ACCESS_IO_TEST_DEVICE_CONTEXT  *Device;
 
   Device = DEVICE_FROM_CONTEXT (Context);

@@ -1,3 +1,10 @@
+/** @file
+
+Copyright (c) 2023, Intel Corporation. All rights reserved.<BR>
+SPDX-License-Identifier: BSD-2-Clause-Patent
+
+**/
+
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 #include <exception>
@@ -41,7 +48,7 @@ class GmockIoLibTest : public ::testing::Test {
   protected:
   void SetUp() override {
     EFI_STATUS Status;
-  
+
     Status = FakeRegisterSpaceCreate ((CHAR16*) GMOCK_IO_LIB_TEST_DEVICE_NAME, FakeRegisterSpaceAlignmentDword, TestRegisterAccessIoDeviceWrite, TestRegisterAccessIoDeviceRead, NULL, &this->RegisterAccess);
     if (EFI_ERROR (Status)) {
       throw new std::bad_alloc();
@@ -66,20 +73,20 @@ class GmockIoLibTest : public ::testing::Test {
   IoLibMock  IoMock;
 };
 
-TEST_F(GmockIoLibTest, ExpectCallTest) {
+TEST_F (GmockIoLibTest, ExpectCallTest) {
   EXPECT_CALL(IoMock, IoRead8 (GMOCK_IO_LIB_TEST_DEVICE_MEM_ADDRESS));
   EXPECT_CALL(IoMock, IoWrite8 (GMOCK_IO_LIB_TEST_DEVICE_MEM_ADDRESS, _));
   IoRead8 (GMOCK_IO_LIB_TEST_DEVICE_MEM_ADDRESS);
   IoWrite8 (GMOCK_IO_LIB_TEST_DEVICE_MEM_ADDRESS, 0);
 }
 
-TEST_F(GmockIoLibTest, ExpectCallWithWillReturnTest) {
+TEST_F (GmockIoLibTest, ExpectCallWithWillReturnTest) {
   EXPECT_CALL(IoMock, IoRead8 (GMOCK_IO_LIB_TEST_DEVICE_MEM_ADDRESS)).WillOnce(Return(0xAA));
   UINT8 RetVal = IoRead8 (GMOCK_IO_LIB_TEST_DEVICE_MEM_ADDRESS);
   EXPECT_EQ (RetVal, 0xAA);
 }
 
-TEST_F(GmockIoLibTest, ExpectCallWithDelegateToFakeTest) {
+TEST_F (GmockIoLibTest, ExpectCallWithDelegateToFakeTest) {
   IoMock.DelegateToFake();
 
   EXPECT_CALL(IoMock, MmioRead8 (GMOCK_IO_LIB_TEST_DEVICE_MEM_ADDRESS)).Times(1);
@@ -87,7 +94,7 @@ TEST_F(GmockIoLibTest, ExpectCallWithDelegateToFakeTest) {
   EXPECT_EQ (RetVal, FAKE_RET_VAL);
 }
 
-TEST_F(GmockIoLibTest, DelegateToFakeNoExpectTest) {
+TEST_F (GmockIoLibTest, DelegateToFakeNoExpectTest) {
   IoMock.DelegateToFake();
 
   UINT8 RetVal = MmioRead8 (GMOCK_IO_LIB_TEST_DEVICE_MEM_ADDRESS);

@@ -11,9 +11,9 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #ifdef ENABLE_FAKE_NAME_DECORATOR
 #define REGISTER_ACCESS_IO_LIB_INCLUDE_FAKES
 #include <Library/RegisterAccessIoLib.h>
-#define FAKE_NAME_DECORATOR(Name) Fake##Name
+#define FAKE_NAME_DECORATOR(Name)  Fake##Name
 #else
-#define FAKE_NAME_DECORATOR(Name) Name
+#define FAKE_NAME_DECORATOR(Name)  Name
 #endif
 
 #endif

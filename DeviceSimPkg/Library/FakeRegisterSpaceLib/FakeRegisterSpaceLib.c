@@ -11,12 +11,12 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Library/MemoryAllocationLib.h>
 #include <Library/FakeRegisterSpaceLib.h>
 
-#define ALIGN_ADDR(Address, Alignment) (Address - (Address % Alignment))
+#define ALIGN_ADDR(Address, Alignment)  (Address - (Address % Alignment))
 
 STATIC
 UINT32
 SizeToByteEnable (
-  IN UINT32 Size
+  IN UINT32  Size
   )
 {
   switch (Size) {
@@ -35,11 +35,11 @@ SizeToByteEnable (
 STATIC
 UINT32
 ByteEnableToNoOfBytes (
-  IN UINT32 ByteEnable
+  IN UINT32  ByteEnable
   )
 {
-  UINT32 Index;
-  UINT32 NoOfBytes;
+  UINT32  Index;
+  UINT32  NoOfBytes;
 
   NoOfBytes = 0;
 
@@ -47,6 +47,7 @@ ByteEnableToNoOfBytes (
     if (ByteEnable & 0x1) {
       NoOfBytes++;
     }
+
     ByteEnable = ByteEnable >> 1;
   }
 
@@ -55,28 +56,28 @@ ByteEnableToNoOfBytes (
 
 EFI_STATUS
 FakeRegisterRead (
-  IN REGISTER_ACCESS_INTERFACE  *RegisterSpace,
-  IN UINT64               Address,
-  IN UINT32               Size,
-  OUT UINT64              *Value
+  IN  REGISTER_ACCESS_INTERFACE  *RegisterSpace,
+  IN  UINT64                     Address,
+  IN  UINT32                     Size,
+  OUT UINT64                     *Value
   )
 {
   FAKE_REGISTER_SPACE  *SimpleRegisterSpace;
-  UINT64      CurrentAddress;
-  INT32       RemainingSize;
-  UINT32      CurrentValue;
-  UINT32      ByteEnable;
-  UINT32      ShiftValue;
-  UINT64      TempValue;
-  UINT32      Position;
-  EFI_STATUS  Status;
+  UINT64               CurrentAddress;
+  INT32                RemainingSize;
+  UINT32               CurrentValue;
+  UINT32               ByteEnable;
+  UINT32               ShiftValue;
+  UINT64               TempValue;
+  UINT32               Position;
+  EFI_STATUS           Status;
 
-  SimpleRegisterSpace = (FAKE_REGISTER_SPACE*) RegisterSpace;
+  SimpleRegisterSpace = (FAKE_REGISTER_SPACE *) RegisterSpace;
 
-  Status = EFI_SUCCESS;
-  CurrentAddress = ALIGN_ADDR(Address, SimpleRegisterSpace->Alignment);
-  ByteEnable = SizeToByteEnable (Size);
-  ByteEnable = (ByteEnable << (Address % SimpleRegisterSpace->Alignment)) & 0xF;
+  Status         = EFI_SUCCESS;
+  CurrentAddress = ALIGN_ADDR (Address, SimpleRegisterSpace->Alignment);
+  ByteEnable     = SizeToByteEnable (Size);
+  ByteEnable     = (ByteEnable << (Address % SimpleRegisterSpace->Alignment)) & 0xF;
   switch (SimpleRegisterSpace->Alignment) {
     case 1:
       ByteEnable = ByteEnable & 0x1;
@@ -89,22 +90,23 @@ FakeRegisterRead (
       ByteEnable = ByteEnable & 0xF;
       break;
   }
+
   RemainingSize = Size;
-  ShiftValue = Address % SimpleRegisterSpace->Alignment;
-  *Value = 0;
-  Position = 0;
+  ShiftValue    = Address % SimpleRegisterSpace->Alignment;
+  *Value        = 0;
+  Position      = 0;
   while (RemainingSize > 0) {
-    SimpleRegisterSpace->Read(SimpleRegisterSpace->RwContext, CurrentAddress, ByteEnable, &CurrentValue);
+    SimpleRegisterSpace->Read (SimpleRegisterSpace->RwContext, CurrentAddress, ByteEnable, &CurrentValue);
     CurrentAddress += SimpleRegisterSpace->Alignment;
-    TempValue = CurrentValue;
-    TempValue = TempValue << Position;
-    TempValue = (TempValue >> (ShiftValue * 8));
-    *Value |= TempValue;
-    TempValue = 0;
-    ShiftValue = 0;
-    RemainingSize -= ByteEnableToNoOfBytes(ByteEnable);
-    Position += (ByteEnableToNoOfBytes(ByteEnable) * 8);
-    ByteEnable = SizeToByteEnable(RemainingSize);
+    TempValue       = CurrentValue;
+    TempValue       = TempValue << Position;
+    TempValue       = (TempValue >> (ShiftValue * 8));
+    *Value         |= TempValue;
+    TempValue       = 0;
+    ShiftValue      = 0;
+    RemainingSize  -= ByteEnableToNoOfBytes (ByteEnable);
+    Position       += (ByteEnableToNoOfBytes (ByteEnable) * 8);
+    ByteEnable      = SizeToByteEnable (RemainingSize);
   }
 
   return Status;
@@ -113,22 +115,22 @@ FakeRegisterRead (
 EFI_STATUS
 FakeRegisterWrite (
   IN REGISTER_ACCESS_INTERFACE  *RegisterSpace,
-  IN UINT64          Address,
-  IN UINT32          Size,
-  IN UINT64          Value
+  IN UINT64                     Address,
+  IN UINT32                     Size,
+  IN UINT64                     Value
   )
 {
   FAKE_REGISTER_SPACE  *SimpleRegisterSpace;
-  UINT64      CurrentAddress;
-  INT32       RemainingSize;
-  UINT32      CurrentValue;
-  UINT32      ByteEnable;
+  UINT64               CurrentAddress;
+  INT32                RemainingSize;
+  UINT32               CurrentValue;
+  UINT32               ByteEnable;
 
-  SimpleRegisterSpace = (FAKE_REGISTER_SPACE*) RegisterSpace;
+  SimpleRegisterSpace = (FAKE_REGISTER_SPACE *) RegisterSpace;
 
-  CurrentAddress = ALIGN_ADDR(Address, SimpleRegisterSpace->Alignment);
-  ByteEnable = SizeToByteEnable (Size);
-  ByteEnable = (ByteEnable << (Address % SimpleRegisterSpace->Alignment));
+  CurrentAddress = ALIGN_ADDR (Address, SimpleRegisterSpace->Alignment);
+  ByteEnable     = SizeToByteEnable (Size);
+  ByteEnable     = (ByteEnable << (Address % SimpleRegisterSpace->Alignment));
   switch (SimpleRegisterSpace->Alignment) {
     case 1:
       ByteEnable = ByteEnable & 0x1;
@@ -141,15 +143,16 @@ FakeRegisterWrite (
       ByteEnable = ByteEnable & 0xF;
       break;
   }
-  CurrentValue = (UINT32)(Value << ((Address % SimpleRegisterSpace->Alignment) * 8));
+
+  CurrentValue  = (UINT32) (Value << ((Address % SimpleRegisterSpace->Alignment) * 8));
   RemainingSize = Size;
   while (RemainingSize > 0) {
-    SimpleRegisterSpace->Write(SimpleRegisterSpace->RwContext, CurrentAddress, ByteEnable, CurrentValue);
-    RemainingSize -= ByteEnableToNoOfBytes(ByteEnable);
-    Value = Value >> (ByteEnableToNoOfBytes(ByteEnable) * 8);
-    ByteEnable = SizeToByteEnable(RemainingSize);
+    SimpleRegisterSpace->Write (SimpleRegisterSpace->RwContext, CurrentAddress, ByteEnable, CurrentValue);
+    RemainingSize  -= ByteEnableToNoOfBytes (ByteEnable);
+    Value           = Value >> (ByteEnableToNoOfBytes (ByteEnable) * 8);
+    ByteEnable      = SizeToByteEnable (RemainingSize);
     CurrentAddress += SimpleRegisterSpace->Alignment;
-    CurrentValue = (UINT32)Value;
+    CurrentValue    = (UINT32) Value;
   }
 
   return EFI_SUCCESS;
@@ -157,26 +160,26 @@ FakeRegisterWrite (
 
 EFI_STATUS
 FakeRegisterSpaceCreate (
-  IN CHAR16                          *RegisterSpaceDescription,
-  IN FAKE_REGISTER_SPACE_ALIGNMENT  Alignment,
-  IN REGISTER_WRITE_CALLBACK         Write,
-  IN REGISTER_READ_CALLBACK          Read,
-  IN VOID                            *RwContext,
-  OUT REGISTER_ACCESS_INTERFACE            **SimpleRegisterSpace
+  IN  CHAR16                         *RegisterSpaceDescription,
+  IN  FAKE_REGISTER_SPACE_ALIGNMENT  Alignment,
+  IN  REGISTER_WRITE_CALLBACK        Write,
+  IN  REGISTER_READ_CALLBACK         Read,
+  IN  VOID                           *RwContext,
+  OUT REGISTER_ACCESS_INTERFACE      **SimpleRegisterSpace
   )
 {
   FAKE_REGISTER_SPACE  *LocalRegisterSpace;
 
-  LocalRegisterSpace = AllocateZeroPool (sizeof (FAKE_REGISTER_SPACE));
-  LocalRegisterSpace->RegisterSpace.Name = RegisterSpaceDescription;
-  LocalRegisterSpace->RegisterSpace.Read = FakeRegisterRead;
+  LocalRegisterSpace                      = AllocateZeroPool (sizeof (FAKE_REGISTER_SPACE));
+  LocalRegisterSpace->RegisterSpace.Name  = RegisterSpaceDescription;
+  LocalRegisterSpace->RegisterSpace.Read  = FakeRegisterRead;
   LocalRegisterSpace->RegisterSpace.Write = FakeRegisterWrite;
-  LocalRegisterSpace->Alignment = Alignment;
-  LocalRegisterSpace->Read = Read;
-  LocalRegisterSpace->Write = Write;
-  LocalRegisterSpace->RwContext = RwContext;
+  LocalRegisterSpace->Alignment           = Alignment;
+  LocalRegisterSpace->Read                = Read;
+  LocalRegisterSpace->Write               = Write;
+  LocalRegisterSpace->RwContext           = RwContext;
 
-  *SimpleRegisterSpace = (REGISTER_ACCESS_INTERFACE*)LocalRegisterSpace;
+  *SimpleRegisterSpace = (REGISTER_ACCESS_INTERFACE *) LocalRegisterSpace;
 
   return EFI_SUCCESS;
 }
@@ -199,7 +202,7 @@ ByteEnableToBitMask (
   IN UINT32  ByteEnable
   )
 {
-  UINT8  Byte;
+  UINT8   Byte;
   UINT32  BitMask;
 
   BitMask = 0;

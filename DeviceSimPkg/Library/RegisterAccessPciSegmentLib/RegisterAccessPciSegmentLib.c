@@ -12,8 +12,8 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 EFI_STATUS
 RegisterAccessPciSegmentRegisterAtPciSegmentAddress (
-  IN REGISTER_ACCESS_INTERFACE *RegisterAccess,
-  IN UINT64              PciSegmentAddress
+  IN REGISTER_ACCESS_INTERFACE  *RegisterAccess,
+  IN UINT64                     PciSegmentAddress
   )
 {
   UINT64  Address;

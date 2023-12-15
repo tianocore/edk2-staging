@@ -2,7 +2,7 @@
   I/O Library MMIO Buffer Functions.
   The implementations are based on EFI_PEI_SERVICE->CpuIo interface.
 
-  Copyright (c) 2007 - 2018, Intel Corporation. All rights reserved.<BR>
+  Copyright (c) 2023, Intel Corporation. All rights reserved.<BR>
   SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/

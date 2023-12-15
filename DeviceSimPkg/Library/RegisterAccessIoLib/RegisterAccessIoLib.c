@@ -16,25 +16,25 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include "FakeNameDecorator.h"
 
 typedef struct {
-  UINT64               Address;
-  UINT64               Size;
-  REGISTER_ACCESS_INTERFACE  *RegisterAccess;
-  LIST_ENTRY           Link;
+  UINT64                       Address;
+  UINT64                       Size;
+  REGISTER_ACCESS_INTERFACE    *RegisterAccess;
+  LIST_ENTRY                   Link;
 } REGISTER_ACCESS_IO_MEMORY_MAP;
 
-REGISTER_ACCESS_IO_MEMORY_MAP  *mIoMap = NULL;
+REGISTER_ACCESS_IO_MEMORY_MAP  *mIoMap  = NULL;
 REGISTER_ACCESS_IO_MEMORY_MAP  *mMemMap = NULL;
 
-REGISTER_ACCESS_INTERFACE*
+REGISTER_ACCESS_INTERFACE *
 RegisterAccessIoGetRegisterSpace (
-  IN UINT64               Address,
-  IN REGISTER_ACCESS_IO_MEMORY_TYPE  MemoryType,
-  OUT UINT64              *Offset
-)
+  IN  UINT64                          Address,
+  IN  REGISTER_ACCESS_IO_MEMORY_TYPE  MemoryType,
+  OUT UINT64                          *Offset
+  )
 {
   REGISTER_ACCESS_IO_MEMORY_MAP  *MemoryMap;
-  LIST_ENTRY  *Entry;
-  LIST_ENTRY  *Next;
+  LIST_ENTRY                     *Entry;
+  LIST_ENTRY                     *Next;
   REGISTER_ACCESS_IO_MEMORY_MAP  *MapEntry;
 
   switch (MemoryType) {
@@ -42,6 +42,7 @@ RegisterAccessIoGetRegisterSpace (
       if (mIoMap == NULL) {
         return NULL;
       }
+
       MemoryMap = mIoMap;
       break;
     case RegisterAccessIoTypeMmio:
@@ -49,14 +50,16 @@ RegisterAccessIoGetRegisterSpace (
       if (mMemMap == NULL) {
         return NULL;
       }
+
       MemoryMap = mMemMap;
       break;
   }
 
   BASE_LIST_FOR_EACH_SAFE (Entry, Next, &MemoryMap->Link) {
     MapEntry = BASE_CR (Entry, REGISTER_ACCESS_IO_MEMORY_MAP, Link);
-    if (Address >= MapEntry->Address &&
-        Address < MapEntry->Address + MapEntry->Size) {
+    if ((Address >= MapEntry->Address) &&
+        (Address < MapEntry->Address + MapEntry->Size))
+    {
       *Offset = Address - MapEntry->Address;
       return MapEntry->RegisterAccess;
     }
@@ -67,10 +70,10 @@ RegisterAccessIoGetRegisterSpace (
 
 EFI_STATUS
 RegisterAccessIoRegisterMmioAtAddress (
-  IN REGISTER_ACCESS_INTERFACE *RegisterAccess,
+  IN REGISTER_ACCESS_INTERFACE       *RegisterAccess,
   IN REGISTER_ACCESS_IO_MEMORY_TYPE  Type,
-  IN UINT64               Address,
-  IN UINT64               Size
+  IN UINT64                          Address,
+  IN UINT64                          Size
   )
 {
   REGISTER_ACCESS_IO_MEMORY_MAP  **Map;
@@ -91,15 +94,17 @@ RegisterAccessIoRegisterMmioAtAddress (
     if (*Map == NULL) {
       return EFI_OUT_OF_RESOURCES;
     }
+
     InitializeListHead (&(*Map)->Link);
   }
 
-  MapEntry = AllocateZeroPool (sizeof (REGISTER_ACCESS_IO_MEMORY_MAP)); 
+  MapEntry = AllocateZeroPool (sizeof (REGISTER_ACCESS_IO_MEMORY_MAP));
   if (MapEntry == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
-  MapEntry->Address = Address;
-  MapEntry->Size = Size;
+
+  MapEntry->Address        = Address;
+  MapEntry->Size           = Size;
   MapEntry->RegisterAccess = RegisterAccess;
   InsertTailList (&(*Map)->Link, &MapEntry->Link);
 
@@ -109,12 +114,12 @@ RegisterAccessIoRegisterMmioAtAddress (
 EFI_STATUS
 RegisterAccessIoUnRegisterMmioAtAddress (
   IN REGISTER_ACCESS_IO_MEMORY_TYPE  MemoryType,
-  IN UINT64               Address
+  IN UINT64                          Address
   )
 {
   REGISTER_ACCESS_IO_MEMORY_MAP  *MemoryMap;
-  LIST_ENTRY  *Entry;
-  LIST_ENTRY  *Next;
+  LIST_ENTRY                     *Entry;
+  LIST_ENTRY                     *Next;
   REGISTER_ACCESS_IO_MEMORY_MAP  *MapEntry;
 
   switch (MemoryType) {
@@ -122,6 +127,7 @@ RegisterAccessIoUnRegisterMmioAtAddress (
       if (mIoMap == NULL) {
         return EFI_NOT_FOUND;
       }
+
       MemoryMap = mIoMap;
       break;
     case RegisterAccessIoTypeMmio:
@@ -129,6 +135,7 @@ RegisterAccessIoUnRegisterMmioAtAddress (
       if (mMemMap == NULL) {
         return EFI_NOT_FOUND;
       }
+
       MemoryMap = mMemMap;
       break;
   }
@@ -161,13 +168,13 @@ RegisterAccessIoUnRegisterMmioAtAddress (
 **/
 UINT8
 EFIAPI
-FAKE_NAME_DECORATOR(IoRead8) (
-  IN      UINTN  Port
+FAKE_NAME_DECORATOR (IoRead8) (
+  IN UINTN  Port
   )
 {
   REGISTER_ACCESS_INTERFACE  *RegisterAccess;
-  UINT64               Value;
-  UINT64               Offset;
+  UINT64                     Value;
+  UINT64                     Offset;
 
   RegisterAccess = RegisterAccessIoGetRegisterSpace (Port, RegisterAccessIoTypeIo, &Offset);
   if (RegisterAccess == NULL) {
@@ -177,7 +184,6 @@ FAKE_NAME_DECORATOR(IoRead8) (
   RegisterAccess->Read (RegisterAccess, Offset, 1, &Value);
   return (UINT8) Value;
 }
-
 
 /**
   Writes an 8-bit I/O port.
@@ -196,14 +202,14 @@ FAKE_NAME_DECORATOR(IoRead8) (
 **/
 UINT8
 EFIAPI
-FAKE_NAME_DECORATOR(IoWrite8) (
-  IN      UINTN  Port,
-  IN      UINT8  Value
+FAKE_NAME_DECORATOR (IoWrite8) (
+  IN UINTN  Port,
+  IN UINT8  Value
   )
 {
   REGISTER_ACCESS_INTERFACE  *RegisterAccess;
-  UINT64                Val;
-  UINT64               Offset;
+  UINT64                     Val;
+  UINT64                     Offset;
 
   RegisterAccess = RegisterAccessIoGetRegisterSpace (Port, RegisterAccessIoTypeIo, &Offset);
   if (RegisterAccess == NULL) {
@@ -232,13 +238,13 @@ FAKE_NAME_DECORATOR(IoWrite8) (
 **/
 UINT16
 EFIAPI
-FAKE_NAME_DECORATOR(IoRead16) (
-  IN      UINTN  Port
+FAKE_NAME_DECORATOR (IoRead16) (
+  IN UINTN  Port
   )
 {
   REGISTER_ACCESS_INTERFACE  *RegisterAccess;
-  UINT64               Value;
-  UINT64               Offset;
+  UINT64                     Value;
+  UINT64                     Offset;
 
   RegisterAccess = RegisterAccessIoGetRegisterSpace (Port, RegisterAccessIoTypeIo, &Offset);
   if (RegisterAccess == NULL) {
@@ -267,14 +273,14 @@ FAKE_NAME_DECORATOR(IoRead16) (
 **/
 UINT16
 EFIAPI
-FAKE_NAME_DECORATOR(IoWrite16) (
-  IN      UINTN   Port,
-  IN      UINT16  Value
+FAKE_NAME_DECORATOR (IoWrite16) (
+  IN UINTN   Port,
+  IN UINT16  Value
   )
 {
   REGISTER_ACCESS_INTERFACE  *RegisterAccess;
-  UINT64                Val;
-  UINT64                Offset;
+  UINT64                     Val;
+  UINT64                     Offset;
 
   RegisterAccess = RegisterAccessIoGetRegisterSpace (Port, RegisterAccessIoTypeIo, &Offset);
   if (RegisterAccess == NULL) {
@@ -303,13 +309,13 @@ FAKE_NAME_DECORATOR(IoWrite16) (
 **/
 UINT32
 EFIAPI
-FAKE_NAME_DECORATOR(IoRead32) (
-  IN      UINTN  Port
+FAKE_NAME_DECORATOR (IoRead32) (
+  IN UINTN  Port
   )
 {
   REGISTER_ACCESS_INTERFACE  *RegisterAccess;
-  UINT64               Value;
-  UINT64               Offset;
+  UINT64                     Value;
+  UINT64                     Offset;
 
   RegisterAccess = RegisterAccessIoGetRegisterSpace (Port, RegisterAccessIoTypeIo, &Offset);
   if (RegisterAccess == NULL) {
@@ -338,14 +344,14 @@ FAKE_NAME_DECORATOR(IoRead32) (
 **/
 UINT32
 EFIAPI
-FAKE_NAME_DECORATOR(IoWrite32) (
-  IN      UINTN   Port,
-  IN      UINT32  Value
+FAKE_NAME_DECORATOR (IoWrite32) (
+  IN UINTN   Port,
+  IN UINT32  Value
   )
 {
   REGISTER_ACCESS_INTERFACE  *RegisterAccess;
-  UINT64                Val;
-  UINT64               Offset;
+  UINT64                     Val;
+  UINT64                     Offset;
 
   RegisterAccess = RegisterAccessIoGetRegisterSpace (Port, RegisterAccessIoTypeIo, &Offset);
   if (RegisterAccess == NULL) {
@@ -374,13 +380,13 @@ FAKE_NAME_DECORATOR(IoWrite32) (
 **/
 UINT64
 EFIAPI
-FAKE_NAME_DECORATOR(IoRead64) (
-  IN      UINTN  Port
+FAKE_NAME_DECORATOR (IoRead64) (
+  IN UINTN  Port
   )
 {
   REGISTER_ACCESS_INTERFACE  *RegisterAccess;
-  UINT64               Value;
-  UINT64               Offset;
+  UINT64                     Value;
+  UINT64                     Offset;
 
   RegisterAccess = RegisterAccessIoGetRegisterSpace (Port, RegisterAccessIoTypeIo, &Offset);
   if (RegisterAccess == NULL) {
@@ -409,13 +415,13 @@ FAKE_NAME_DECORATOR(IoRead64) (
 **/
 UINT64
 EFIAPI
-FAKE_NAME_DECORATOR(IoWrite64) (
+FAKE_NAME_DECORATOR (IoWrite64) (
   IN      UINTN   Port,
   IN      UINT64  Value
   )
 {
   REGISTER_ACCESS_INTERFACE  *RegisterAccess;
-  UINT64               Offset;
+  UINT64                     Offset;
 
   RegisterAccess = RegisterAccessIoGetRegisterSpace (Port, RegisterAccessIoTypeIo, &Offset);
   if (RegisterAccess == NULL) {
@@ -442,13 +448,13 @@ FAKE_NAME_DECORATOR(IoWrite64) (
 **/
 UINT8
 EFIAPI
-FAKE_NAME_DECORATOR(MmioRead8) (
-  IN      UINTN  Address
+FAKE_NAME_DECORATOR (MmioRead8) (
+  IN UINTN  Address
   )
 {
   REGISTER_ACCESS_INTERFACE  *RegisterAccess;
-  UINT64               Value;
-  UINT64               Offset;
+  UINT64                     Value;
+  UINT64                     Offset;
 
   RegisterAccess = RegisterAccessIoGetRegisterSpace (Address, RegisterAccessIoTypeMmio, &Offset);
   if (RegisterAccess == NULL) {
@@ -476,14 +482,14 @@ FAKE_NAME_DECORATOR(MmioRead8) (
 **/
 UINT8
 EFIAPI
-FAKE_NAME_DECORATOR(MmioWrite8) (
-  IN      UINTN  Address,
-  IN      UINT8  Value
+FAKE_NAME_DECORATOR (MmioWrite8) (
+  IN UINTN  Address,
+  IN UINT8  Value
   )
 {
   REGISTER_ACCESS_INTERFACE  *RegisterAccess;
-  UINT64               Val;
-  UINT64               Offset;
+  UINT64                     Val;
+  UINT64                     Offset;
 
   RegisterAccess = RegisterAccessIoGetRegisterSpace (Address, RegisterAccessIoTypeMmio, &Offset);
   if (RegisterAccess == NULL) {
@@ -512,13 +518,13 @@ FAKE_NAME_DECORATOR(MmioWrite8) (
 **/
 UINT16
 EFIAPI
-FAKE_NAME_DECORATOR(MmioRead16) (
-  IN      UINTN  Address
+FAKE_NAME_DECORATOR (MmioRead16) (
+  IN UINTN  Address
   )
 {
   REGISTER_ACCESS_INTERFACE  *RegisterAccess;
-  UINT64               Value;
-  UINT64               Offset;
+  UINT64                     Value;
+  UINT64                     Offset;
 
   RegisterAccess = RegisterAccessIoGetRegisterSpace (Address, RegisterAccessIoTypeMmio, &Offset);
   if (RegisterAccess == NULL) {
@@ -547,14 +553,14 @@ FAKE_NAME_DECORATOR(MmioRead16) (
 **/
 UINT16
 EFIAPI
-FAKE_NAME_DECORATOR(MmioWrite16) (
-  IN      UINTN   Address,
-  IN      UINT16  Value
+FAKE_NAME_DECORATOR (MmioWrite16) (
+  IN UINTN   Address,
+  IN UINT16  Value
   )
 {
   REGISTER_ACCESS_INTERFACE  *RegisterAccess;
-  UINT64               Val;
-  UINT64               Offset;
+  UINT64                     Val;
+  UINT64                     Offset;
 
   RegisterAccess = RegisterAccessIoGetRegisterSpace (Address, RegisterAccessIoTypeMmio, &Offset);
   if (RegisterAccess == NULL) {
@@ -583,13 +589,13 @@ FAKE_NAME_DECORATOR(MmioWrite16) (
 **/
 UINT32
 EFIAPI
-FAKE_NAME_DECORATOR(MmioRead32) (
-  IN      UINTN  Address
+FAKE_NAME_DECORATOR (MmioRead32) (
+  IN UINTN  Address
   )
 {
   REGISTER_ACCESS_INTERFACE  *RegisterAccess;
-  UINT64               Value;
-  UINT64               Offset;
+  UINT64                     Value;
+  UINT64                     Offset;
 
   RegisterAccess = RegisterAccessIoGetRegisterSpace (Address, RegisterAccessIoTypeMmio, &Offset);
   if (RegisterAccess == NULL) {
@@ -618,14 +624,14 @@ FAKE_NAME_DECORATOR(MmioRead32) (
 **/
 UINT32
 EFIAPI
-FAKE_NAME_DECORATOR(MmioWrite32) (
-  IN      UINTN   Address,
-  IN      UINT32  Value
+FAKE_NAME_DECORATOR (MmioWrite32) (
+  IN UINTN   Address,
+  IN UINT32  Value
   )
 {
   REGISTER_ACCESS_INTERFACE  *RegisterAccess;
-  UINT64               Val;
-  UINT64               Offset;
+  UINT64                     Val;
+  UINT64                     Offset;
 
   RegisterAccess = RegisterAccessIoGetRegisterSpace (Address, RegisterAccessIoTypeMmio, &Offset);
   if (RegisterAccess == NULL) {
@@ -654,13 +660,13 @@ FAKE_NAME_DECORATOR(MmioWrite32) (
 **/
 UINT64
 EFIAPI
-FAKE_NAME_DECORATOR(MmioRead64) (
-  IN      UINTN  Address
+FAKE_NAME_DECORATOR (MmioRead64) (
+  IN UINTN  Address
   )
 {
   REGISTER_ACCESS_INTERFACE  *RegisterAccess;
-  UINT64               Value;
-  UINT64               Offset;
+  UINT64                     Value;
+  UINT64                     Offset;
 
   RegisterAccess = RegisterAccessIoGetRegisterSpace (Address, RegisterAccessIoTypeMmio, &Offset);
   if (RegisterAccess == NULL) {
@@ -687,14 +693,14 @@ FAKE_NAME_DECORATOR(MmioRead64) (
 **/
 UINT64
 EFIAPI
-FAKE_NAME_DECORATOR(MmioWrite64) (
-  IN      UINTN   Address,
-  IN      UINT64  Value
+FAKE_NAME_DECORATOR (MmioWrite64) (
+  IN UINTN   Address,
+  IN UINT64  Value
   )
 {
   REGISTER_ACCESS_INTERFACE  *RegisterAccess;
-  UINT64               Val;
-  UINT64               Offset;
+  UINT64                     Val;
+  UINT64                     Offset;
 
   RegisterAccess = RegisterAccessIoGetRegisterSpace (Address, RegisterAccessIoTypeMmio, &Offset);
   if (RegisterAccess == NULL) {
@@ -725,17 +731,17 @@ FAKE_NAME_DECORATOR(MmioWrite64) (
 **/
 VOID
 EFIAPI
-FAKE_NAME_DECORATOR(IoReadFifo8) (
-  IN      UINTN  Port,
-  IN      UINTN  Count,
-  OUT     VOID   *Buffer
+FAKE_NAME_DECORATOR (IoReadFifo8) (
+  IN  UINTN  Port,
+  IN  UINTN  Count,
+  OUT VOID   *Buffer
   )
 {
-  UINT8   *Uint8Buffer;
+  UINT8  *Uint8Buffer;
 
-  Uint8Buffer = (UINT8*) Buffer;
+  Uint8Buffer = (UINT8 *) Buffer;
   for (UINTN Index = 0; Index < Count; Index++) {
-    Uint8Buffer[Index] = FAKE_NAME_DECORATOR(IoRead8) (Port);
+    Uint8Buffer[Index] = FAKE_NAME_DECORATOR (IoRead8)(Port);
   }
 }
 
@@ -758,17 +764,17 @@ FAKE_NAME_DECORATOR(IoReadFifo8) (
 **/
 VOID
 EFIAPI
-FAKE_NAME_DECORATOR(IoWriteFifo8) (
-  IN      UINTN  Port,
-  IN      UINTN  Count,
-  IN      VOID   *Buffer
+FAKE_NAME_DECORATOR (IoWriteFifo8) (
+  IN UINTN  Port,
+  IN UINTN  Count,
+  IN VOID   *Buffer
   )
 {
-  UINT8   *Uint8Buffer;
+  UINT8  *Uint8Buffer;
 
-  Uint8Buffer = (UINT8*) Buffer;
+  Uint8Buffer = (UINT8 *) Buffer;
   for (UINTN Index = 0; Index < Count; Index++) {
-    FAKE_NAME_DECORATOR(IoWrite8) (Port, Uint8Buffer[Index]);
+    FAKE_NAME_DECORATOR (IoWrite8)(Port, Uint8Buffer[Index]);
   }
 }
 
@@ -791,17 +797,17 @@ FAKE_NAME_DECORATOR(IoWriteFifo8) (
 **/
 VOID
 EFIAPI
-FAKE_NAME_DECORATOR(IoReadFifo16) (
-  IN      UINTN  Port,
-  IN      UINTN  Count,
-  OUT     VOID   *Buffer
+FAKE_NAME_DECORATOR (IoReadFifo16) (
+  IN  UINTN  Port,
+  IN  UINTN  Count,
+  OUT VOID   *Buffer
   )
 {
-  UINT16   *Uint16Buffer;
+  UINT16  *Uint16Buffer;
 
-  Uint16Buffer = (UINT16*) Buffer;
+  Uint16Buffer = (UINT16 *) Buffer;
   for (UINTN Index = 0; Index < Count; Index++) {
-    Uint16Buffer[Index] = FAKE_NAME_DECORATOR(IoRead16) (Port);
+    Uint16Buffer[Index] = FAKE_NAME_DECORATOR (IoRead16)(Port);
   }
 }
 
@@ -824,17 +830,17 @@ FAKE_NAME_DECORATOR(IoReadFifo16) (
 **/
 VOID
 EFIAPI
-FAKE_NAME_DECORATOR(IoWriteFifo16) (
-  IN      UINTN  Port,
-  IN      UINTN  Count,
-  IN      VOID   *Buffer
+FAKE_NAME_DECORATOR (IoWriteFifo16) (
+  IN UINTN  Port,
+  IN UINTN  Count,
+  IN VOID   *Buffer
   )
 {
-  UINT16   *Uint16Buffer;
+  UINT16  *Uint16Buffer;
 
-  Uint16Buffer = (UINT16*) Buffer;
+  Uint16Buffer = (UINT16 *) Buffer;
   for (UINTN Index = 0; Index < Count; Index++) {
-    FAKE_NAME_DECORATOR(IoWrite16) (Port, Uint16Buffer[Index]);
+    FAKE_NAME_DECORATOR (IoWrite16)(Port, Uint16Buffer[Index]);
   }
 }
 
@@ -857,17 +863,17 @@ FAKE_NAME_DECORATOR(IoWriteFifo16) (
 **/
 VOID
 EFIAPI
-FAKE_NAME_DECORATOR(IoReadFifo32) (
-  IN      UINTN  Port,
-  IN      UINTN  Count,
-  OUT     VOID   *Buffer
+FAKE_NAME_DECORATOR (IoReadFifo32) (
+  IN  UINTN  Port,
+  IN  UINTN  Count,
+  OUT VOID   *Buffer
   )
 {
-  UINT32   *Uint32Buffer;
+  UINT32  *Uint32Buffer;
 
-  Uint32Buffer = (UINT32*) Buffer;
+  Uint32Buffer = (UINT32 *) Buffer;
   for (UINTN Index = 0; Index < Count; Index++) {
-    Uint32Buffer[Index] = FAKE_NAME_DECORATOR(IoRead32) (Port);
+    Uint32Buffer[Index] = FAKE_NAME_DECORATOR (IoRead32)(Port);
   }
 }
 
@@ -890,16 +896,16 @@ FAKE_NAME_DECORATOR(IoReadFifo32) (
 **/
 VOID
 EFIAPI
-FAKE_NAME_DECORATOR(IoWriteFifo32) (
-  IN      UINTN  Port,
-  IN      UINTN  Count,
-  IN      VOID   *Buffer
+FAKE_NAME_DECORATOR (IoWriteFifo32) (
+  IN UINTN  Port,
+  IN UINTN  Count,
+  IN VOID   *Buffer
   )
 {
-  UINT32   *Uint32Buffer;
+  UINT32  *Uint32Buffer;
 
-  Uint32Buffer = (UINT32*) Buffer;
+  Uint32Buffer = (UINT32 *) Buffer;
   for (UINTN Index = 0; Index < Count; Index++) {
-    FAKE_NAME_DECORATOR(IoWrite32) (Port, Uint32Buffer[Index]);
+    FAKE_NAME_DECORATOR (IoWrite32)(Port, Uint32Buffer[Index]);
   }
 }

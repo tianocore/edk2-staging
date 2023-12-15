@@ -17,21 +17,21 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #define UNIT_TEST_NAME     "FakeRegisterSpaceLib unit tests"
 #define UNIT_TEST_VERSION  "0.1"
 
-GLOBAL_REMOVE_IF_UNREFERENCED CHAR16 *TestDeviceName = L"TestDeviceRegisterSpace";
+GLOBAL_REMOVE_IF_UNREFERENCED CHAR16  *TestDeviceName = L"TestDeviceRegisterSpace";
 
-#define TEST_DEVICE_ERROR_UNALIGNED_ACCESS 0x0
-#define TEST_DEVICE_ERROR_OUT_OF_RANGE 0x1
-#define TEST_DEVICE_ERROR_WRONG_BYTE_ENABLE 0x2
+#define TEST_DEVICE_ERROR_UNALIGNED_ACCESS   0x0
+#define TEST_DEVICE_ERROR_OUT_OF_RANGE       0x1
+#define TEST_DEVICE_ERROR_WRONG_BYTE_ENABLE  0x2
 
-#define QWORD_TEST_VALUE 0xADBCACBDCADBCBDA
-#define DWORD_TEST_VALUE 0xAABBCCDD
-#define WORD_TEST_VALUE 0xABCD
-#define BYTE_TEST_VALUE 0xAC
+#define QWORD_TEST_VALUE  0xADBCACBDCADBCBDA
+#define DWORD_TEST_VALUE  0xAABBCCDD
+#define WORD_TEST_VALUE   0xABCD
+#define BYTE_TEST_VALUE   0xAC
 
 typedef struct {
-  CHAR16  *Name;
-  UINT32 Regs[5];
-  UINT32 ErrorFlags;
+  CHAR16    *Name;
+  UINT32    Regs[5];
+  UINT32    ErrorFlags;
 } TEST_DEVICE_CONTEXT;
 
 VOID
@@ -46,7 +46,7 @@ TestDeviceRegisterRead (
   UINT64               RegisterIndex;
   UINT32               ByteMask;
 
-  DeviceContext = (TEST_DEVICE_CONTEXT*) Context;
+  DeviceContext = (TEST_DEVICE_CONTEXT *) Context;
 
   if (DeviceContext == NULL) {
     *Value = 0xFFFFFFFF;
@@ -57,7 +57,7 @@ TestDeviceRegisterRead (
 
   DeviceContext->ErrorFlags = 0;
 
-  if (!(ByteEnable > 0 && ByteEnable <= 0xF)) {
+  if (!((ByteEnable > 0) && (ByteEnable <= 0xF))) {
     DeviceContext->ErrorFlags |= TEST_DEVICE_ERROR_WRONG_BYTE_ENABLE;
   }
 
@@ -67,7 +67,7 @@ TestDeviceRegisterRead (
 
   RegisterIndex = Address / 4;
 
-  if (RegisterIndex > ARRAY_SIZE(DeviceContext->Regs)) {
+  if (RegisterIndex > ARRAY_SIZE (DeviceContext->Regs)) {
     DeviceContext->ErrorFlags |= TEST_DEVICE_ERROR_OUT_OF_RANGE;
   }
 
@@ -95,7 +95,7 @@ TestDeviceRegisterWrite (
   UINT64               RegisterIndex;
   UINT32               ByteMask;
 
-  DeviceContext = (TEST_DEVICE_CONTEXT*) Context;
+  DeviceContext = (TEST_DEVICE_CONTEXT *) Context;
 
   if (DeviceContext == NULL) {
     return;
@@ -105,7 +105,7 @@ TestDeviceRegisterWrite (
 
   DeviceContext->ErrorFlags = 0;
 
-  if (!(ByteEnable > 0 && ByteEnable <= 0xF)) {
+  if (!((ByteEnable > 0) && (ByteEnable <= 0xF))) {
     DeviceContext->ErrorFlags |= TEST_DEVICE_ERROR_WRONG_BYTE_ENABLE;
   }
 
@@ -115,7 +115,7 @@ TestDeviceRegisterWrite (
 
   RegisterIndex = Address / 4;
 
-  if (RegisterIndex > ARRAY_SIZE(DeviceContext->Regs)) {
+  if (RegisterIndex > ARRAY_SIZE (DeviceContext->Regs)) {
     DeviceContext->ErrorFlags |= TEST_DEVICE_ERROR_OUT_OF_RANGE;
   }
 
@@ -130,8 +130,8 @@ TestDeviceRegisterWrite (
 }
 
 typedef struct {
-  UINT16  Regs[5];
-  UINT32  ErrorFlags;
+  UINT16    Regs[5];
+  UINT32    ErrorFlags;
 } TEST_DEVICE_WORD_ALIGNED_CONTEXT;
 
 VOID
@@ -143,10 +143,10 @@ TestDeviceWordAlignedRegisterRead (
   )
 {
   TEST_DEVICE_WORD_ALIGNED_CONTEXT  *DeviceContext;
-  UINT64               RegisterIndex;
-  UINT32               ByteMask;
+  UINT64                            RegisterIndex;
+  UINT32                            ByteMask;
 
-  DeviceContext = (TEST_DEVICE_WORD_ALIGNED_CONTEXT*) Context;
+  DeviceContext = (TEST_DEVICE_WORD_ALIGNED_CONTEXT *) Context;
 
   if (DeviceContext == NULL) {
     *Value = 0xFFFFFFFF;
@@ -157,7 +157,7 @@ TestDeviceWordAlignedRegisterRead (
 
   DeviceContext->ErrorFlags = 0;
 
-  if (!(ByteEnable > 0 && ByteEnable <= 0xF)) {
+  if (!((ByteEnable > 0) && (ByteEnable <= 0xF))) {
     DeviceContext->ErrorFlags |= TEST_DEVICE_ERROR_WRONG_BYTE_ENABLE;
   }
 
@@ -167,7 +167,7 @@ TestDeviceWordAlignedRegisterRead (
 
   RegisterIndex = Address / 2;
 
-  if (RegisterIndex > ARRAY_SIZE(DeviceContext->Regs)) {
+  if (RegisterIndex > ARRAY_SIZE (DeviceContext->Regs)) {
     DeviceContext->ErrorFlags |= TEST_DEVICE_ERROR_OUT_OF_RANGE;
   }
 
@@ -191,10 +191,10 @@ TestDeviceWordAlignedRegisterWrite (
   )
 {
   TEST_DEVICE_WORD_ALIGNED_CONTEXT  *DeviceContext;
-  UINT64               RegisterIndex;
-  UINT32               ByteMask;
+  UINT64                            RegisterIndex;
+  UINT32                            ByteMask;
 
-  DeviceContext = (TEST_DEVICE_WORD_ALIGNED_CONTEXT*) Context;
+  DeviceContext = (TEST_DEVICE_WORD_ALIGNED_CONTEXT *) Context;
 
   if (DeviceContext == NULL) {
     return;
@@ -204,7 +204,7 @@ TestDeviceWordAlignedRegisterWrite (
 
   DeviceContext->ErrorFlags = 0;
 
-  if (!(ByteEnable > 0 && ByteEnable <= 0xF)) {
+  if (!((ByteEnable > 0) && (ByteEnable <= 0xF))) {
     DeviceContext->ErrorFlags |= TEST_DEVICE_ERROR_WRONG_BYTE_ENABLE;
   }
 
@@ -214,7 +214,7 @@ TestDeviceWordAlignedRegisterWrite (
 
   RegisterIndex = Address / 2;
 
-  if (RegisterIndex > ARRAY_SIZE(DeviceContext->Regs)) {
+  if (RegisterIndex > ARRAY_SIZE (DeviceContext->Regs)) {
     DeviceContext->ErrorFlags |= TEST_DEVICE_ERROR_OUT_OF_RANGE;
   }
 
@@ -236,11 +236,11 @@ FakeRegisterSpaceCreateTest (
   IN UNIT_TEST_CONTEXT  Context
   )
 {
-  EFI_STATUS  Status;
-  TEST_DEVICE_CONTEXT  *DeviceContext;
+  EFI_STATUS                 Status;
+  TEST_DEVICE_CONTEXT        *DeviceContext;
   REGISTER_ACCESS_INTERFACE  *LocalRegisterSpace;
 
-  DeviceContext = (TEST_DEVICE_CONTEXT*) Context;
+  DeviceContext = (TEST_DEVICE_CONTEXT *) Context;
 
   if (DeviceContext == NULL) {
     return UNIT_TEST_ERROR_PREREQUISITE_NOT_MET;
@@ -249,9 +249,9 @@ FakeRegisterSpaceCreateTest (
   Status = FakeRegisterSpaceCreate (DeviceContext->Name, FakeRegisterSpaceAlignmentDword, TestDeviceRegisterWrite, TestDeviceRegisterRead, DeviceContext, &LocalRegisterSpace);
 
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
-  UT_ASSERT_MEM_EQUAL (LocalRegisterSpace->Name, DeviceContext->Name, sizeof(TestDeviceName));
-  UT_ASSERT_NOT_EQUAL ((uintptr_t)LocalRegisterSpace->Read, (uintptr_t)NULL);
-  UT_ASSERT_NOT_EQUAL ((uintptr_t)LocalRegisterSpace->Write, (uintptr_t)NULL);
+  UT_ASSERT_MEM_EQUAL (LocalRegisterSpace->Name, DeviceContext->Name, sizeof (TestDeviceName));
+  UT_ASSERT_NOT_EQUAL ((uintptr_t) LocalRegisterSpace->Read, (uintptr_t) NULL);
+  UT_ASSERT_NOT_EQUAL ((uintptr_t) LocalRegisterSpace->Write, (uintptr_t) NULL);
 
   Status = FakeRegisterSpaceDestroy (LocalRegisterSpace);
 
@@ -266,12 +266,12 @@ FakeRegisterSpaceAlignedByteAccessTest (
   IN UNIT_TEST_CONTEXT  Context
   )
 {
-  EFI_STATUS           Status;
+  EFI_STATUS                 Status;
   REGISTER_ACCESS_INTERFACE  *RegisterSpace;
-  UINT64               ReadBackValue;
-  TEST_DEVICE_CONTEXT  *DeviceContext;
-  
-  DeviceContext = (TEST_DEVICE_CONTEXT*) Context;
+  UINT64                     ReadBackValue;
+  TEST_DEVICE_CONTEXT        *DeviceContext;
+
+  DeviceContext = (TEST_DEVICE_CONTEXT *) Context;
 
   if (DeviceContext == NULL) {
     return UNIT_TEST_ERROR_PREREQUISITE_NOT_MET;
@@ -302,12 +302,12 @@ FakeRegisterSpaceAlignedWordAccessTest (
   IN UNIT_TEST_CONTEXT  Context
   )
 {
-  EFI_STATUS           Status;
+  EFI_STATUS                 Status;
   REGISTER_ACCESS_INTERFACE  *RegisterSpace;
-  UINT64               ReadBackValue;
-  TEST_DEVICE_CONTEXT  *DeviceContext;
-  
-  DeviceContext = (TEST_DEVICE_CONTEXT*) Context;
+  UINT64                     ReadBackValue;
+  TEST_DEVICE_CONTEXT        *DeviceContext;
+
+  DeviceContext = (TEST_DEVICE_CONTEXT *) Context;
 
   if (DeviceContext == NULL) {
     return UNIT_TEST_ERROR_PREREQUISITE_NOT_MET;
@@ -338,12 +338,12 @@ FakeRegisterSpaceAlignedDwordAccessTest (
   IN UNIT_TEST_CONTEXT  Context
   )
 {
-  EFI_STATUS           Status;
+  EFI_STATUS                 Status;
   REGISTER_ACCESS_INTERFACE  *RegisterSpace;
-  UINT64               ReadBackValue;
-  TEST_DEVICE_CONTEXT  *DeviceContext;
-  
-  DeviceContext = (TEST_DEVICE_CONTEXT*) Context;
+  UINT64                     ReadBackValue;
+  TEST_DEVICE_CONTEXT        *DeviceContext;
+
+  DeviceContext = (TEST_DEVICE_CONTEXT *) Context;
 
   if (DeviceContext == NULL) {
     return UNIT_TEST_ERROR_PREREQUISITE_NOT_MET;
@@ -374,13 +374,13 @@ FakeRegisterSpaceAlignedQwordAccessTest (
   IN UNIT_TEST_CONTEXT  Context
   )
 {
-  EFI_STATUS           Status;
+  EFI_STATUS                 Status;
   REGISTER_ACCESS_INTERFACE  *RegisterSpace;
-  UINT64               ReadBackValue;
-  TEST_DEVICE_CONTEXT  *DeviceContext;
-  UINT64               RegValue;
-  
-  DeviceContext = (TEST_DEVICE_CONTEXT*) Context;
+  UINT64                     ReadBackValue;
+  TEST_DEVICE_CONTEXT        *DeviceContext;
+  UINT64                     RegValue;
+
+  DeviceContext = (TEST_DEVICE_CONTEXT *) Context;
 
   if (DeviceContext == NULL) {
     return UNIT_TEST_ERROR_PREREQUISITE_NOT_MET;
@@ -392,8 +392,8 @@ FakeRegisterSpaceAlignedQwordAccessTest (
 
   RegisterSpace->Write (RegisterSpace, 12, 8, QWORD_TEST_VALUE);
   UT_ASSERT_EQUAL (DeviceContext->ErrorFlags, 0);
-  RegValue = DeviceContext->Regs[4];
-  RegValue = RegValue << 32;
+  RegValue  = DeviceContext->Regs[4];
+  RegValue  = RegValue << 32;
   RegValue |= DeviceContext->Regs[3];
   UT_ASSERT_EQUAL (RegValue, QWORD_TEST_VALUE);
 
@@ -414,12 +414,12 @@ FakeRegisterSpaceUnalignedByteAccessTest (
   IN UNIT_TEST_CONTEXT  Context
   )
 {
-  EFI_STATUS           Status;
+  EFI_STATUS                 Status;
   REGISTER_ACCESS_INTERFACE  *RegisterSpace;
-  UINT64               ReadBackValue;
-  TEST_DEVICE_CONTEXT  *DeviceContext;
-  
-  DeviceContext = (TEST_DEVICE_CONTEXT*) Context;
+  UINT64                     ReadBackValue;
+  TEST_DEVICE_CONTEXT        *DeviceContext;
+
+  DeviceContext = (TEST_DEVICE_CONTEXT *) Context;
 
   if (DeviceContext == NULL) {
     return UNIT_TEST_ERROR_PREREQUISITE_NOT_MET;
@@ -450,12 +450,12 @@ FakeRegisterSpaceUnalignedWordAccessTest (
   IN UNIT_TEST_CONTEXT  Context
   )
 {
-  EFI_STATUS           Status;
+  EFI_STATUS                 Status;
   REGISTER_ACCESS_INTERFACE  *RegisterSpace;
-  UINT64               ReadBackValue;
-  TEST_DEVICE_CONTEXT  *DeviceContext;
-  
-  DeviceContext = (TEST_DEVICE_CONTEXT*) Context;
+  UINT64                     ReadBackValue;
+  TEST_DEVICE_CONTEXT        *DeviceContext;
+
+  DeviceContext = (TEST_DEVICE_CONTEXT *) Context;
 
   if (DeviceContext == NULL) {
     return UNIT_TEST_ERROR_PREREQUISITE_NOT_MET;
@@ -486,13 +486,13 @@ FakeRegisterSpaceUnalignedBoundaryCrossingWordAccessTest (
   IN UNIT_TEST_CONTEXT  Context
   )
 {
-  EFI_STATUS           Status;
+  EFI_STATUS                 Status;
   REGISTER_ACCESS_INTERFACE  *RegisterSpace;
-  UINT64               ReadBackValue;
-  TEST_DEVICE_CONTEXT  *DeviceContext;
-  UINT64               RegValue;
-  
-  DeviceContext = (TEST_DEVICE_CONTEXT*) Context;
+  UINT64                     ReadBackValue;
+  TEST_DEVICE_CONTEXT        *DeviceContext;
+  UINT64                     RegValue;
+
+  DeviceContext = (TEST_DEVICE_CONTEXT *) Context;
 
   if (DeviceContext == NULL) {
     return UNIT_TEST_ERROR_PREREQUISITE_NOT_MET;
@@ -504,7 +504,7 @@ FakeRegisterSpaceUnalignedBoundaryCrossingWordAccessTest (
 
   RegisterSpace->Write (RegisterSpace, 3, 2, WORD_TEST_VALUE);
   UT_ASSERT_EQUAL (DeviceContext->ErrorFlags, 0);
-  RegValue = (DeviceContext->Regs[1] << 8) & 0xFF00;
+  RegValue  = (DeviceContext->Regs[1] << 8) & 0xFF00;
   RegValue |= (DeviceContext->Regs[0] >> 24);
   UT_ASSERT_EQUAL (RegValue, WORD_TEST_VALUE);
 
@@ -525,13 +525,13 @@ FakeRegisterSpaceUnalignedBoundaryCrossingDwordAccessTest (
   IN UNIT_TEST_CONTEXT  Context
   )
 {
-  EFI_STATUS           Status;
+  EFI_STATUS                 Status;
   REGISTER_ACCESS_INTERFACE  *RegisterSpace;
-  UINT64               ReadBackValue;
-  TEST_DEVICE_CONTEXT  *DeviceContext;
-  UINT64               RegValue;
-  
-  DeviceContext = (TEST_DEVICE_CONTEXT*) Context;
+  UINT64                     ReadBackValue;
+  TEST_DEVICE_CONTEXT        *DeviceContext;
+  UINT64                     RegValue;
+
+  DeviceContext = (TEST_DEVICE_CONTEXT *) Context;
 
   if (DeviceContext == NULL) {
     return UNIT_TEST_ERROR_PREREQUISITE_NOT_MET;
@@ -543,7 +543,7 @@ FakeRegisterSpaceUnalignedBoundaryCrossingDwordAccessTest (
 
   RegisterSpace->Write (RegisterSpace, 7, 4, DWORD_TEST_VALUE);
   UT_ASSERT_EQUAL (DeviceContext->ErrorFlags, 0);
-  RegValue = (DeviceContext->Regs[2] << 8) & 0xFFFFFF00;
+  RegValue  = (DeviceContext->Regs[2] << 8) & 0xFFFFFF00;
   RegValue |= (DeviceContext->Regs[1] >> 24);
   UT_ASSERT_EQUAL (RegValue, DWORD_TEST_VALUE);
 
@@ -564,14 +564,14 @@ FakeRegisterSpaceUnalignedBoundaryCrossingQwordAccessTest (
   IN UNIT_TEST_CONTEXT  Context
   )
 {
-  EFI_STATUS           Status;
+  EFI_STATUS                 Status;
   REGISTER_ACCESS_INTERFACE  *RegisterSpace;
-  UINT64               ReadBackValue;
-  TEST_DEVICE_CONTEXT  *DeviceContext;
-  UINT64               RegValue;
-  UINT64               TempValue;
-  
-  DeviceContext = (TEST_DEVICE_CONTEXT*) Context;
+  UINT64                     ReadBackValue;
+  TEST_DEVICE_CONTEXT        *DeviceContext;
+  UINT64                     RegValue;
+  UINT64                     TempValue;
+
+  DeviceContext = (TEST_DEVICE_CONTEXT *) Context;
 
   if (DeviceContext == NULL) {
     return UNIT_TEST_ERROR_PREREQUISITE_NOT_MET;
@@ -584,7 +584,7 @@ FakeRegisterSpaceUnalignedBoundaryCrossingQwordAccessTest (
   RegisterSpace->Write (RegisterSpace, 0xA, 8, QWORD_TEST_VALUE);
   UT_ASSERT_EQUAL (DeviceContext->ErrorFlags, 0);
   TempValue = DeviceContext->Regs[4];
-  RegValue = (((TempValue) & 0x0000FFFF) << 48);
+  RegValue  = (((TempValue) & 0x0000FFFF) << 48);
   TempValue = DeviceContext->Regs[3];
   RegValue |= (TempValue << 16);
   RegValue |= (DeviceContext->Regs[2] >> 16);
@@ -636,8 +636,8 @@ FakeRegisterSpaceWordAlignedDeviceTest (
   IN UNIT_TEST_CONTEXT  Context
   )
 {
-  EFI_STATUS           Status;
-  REGISTER_ACCESS_INTERFACE  *RegisterSpace;
+  EFI_STATUS                        Status;
+  REGISTER_ACCESS_INTERFACE         *RegisterSpace;
   TEST_DEVICE_WORD_ALIGNED_CONTEXT  *DeviceContext;
   UINT64                            ReadBackValue;
 
@@ -651,6 +651,7 @@ FakeRegisterSpaceWordAlignedDeviceTest (
   if (EFI_ERROR (Status)) {
     return UNIT_TEST_ERROR_PREREQUISITE_NOT_MET;
   }
+
   // Aligned access first
   RegisterSpace->Write (RegisterSpace, 4, 2, WORD_TEST_VALUE);
   UT_ASSERT_EQUAL (DeviceContext->ErrorFlags, 0);
@@ -697,7 +698,7 @@ UefiTestMain (
 
   DEBUG ((DEBUG_INFO, "%a v%a\n", UNIT_TEST_NAME, UNIT_TEST_VERSION));
 
-  DeviceContext = AllocateZeroPool (sizeof (TEST_DEVICE_CONTEXT));
+  DeviceContext       = AllocateZeroPool (sizeof (TEST_DEVICE_CONTEXT));
   DeviceContext->Name = TestDeviceName;
 
   Status = InitUnitTestFramework (&Framework, UNIT_TEST_NAME, gEfiCallerBaseName, UNIT_TEST_VERSION);
@@ -711,27 +712,27 @@ UefiTestMain (
     return Status;
   }
 
-  AddTestCase (FakeRegisterSpaceTest, "FakeRegisterSpaceCreateTest", "FakeRegisterSpaceCreateTest", FakeRegisterSpaceCreateTest, NULL, NULL, (UNIT_TEST_CONTEXT)DeviceContext);
+  AddTestCase (FakeRegisterSpaceTest, "FakeRegisterSpaceCreateTest", "FakeRegisterSpaceCreateTest", FakeRegisterSpaceCreateTest, NULL, NULL, (UNIT_TEST_CONTEXT) DeviceContext);
   //
   // Simple aligned access tests for all supported widths
   //
-  AddTestCase (FakeRegisterSpaceTest, "FakeRegisterSpaceAlignedByteAccessTest", "FakeRegisterSpaceAlignedByteAccessTest", FakeRegisterSpaceAlignedByteAccessTest, NULL, NULL, (UNIT_TEST_CONTEXT)DeviceContext);
-  AddTestCase (FakeRegisterSpaceTest, "FakeRegisterSpaceAlignedWordAccessTest", "FakeRegisterSpaceAlignedWordAccessTest", FakeRegisterSpaceAlignedWordAccessTest, NULL, NULL, (UNIT_TEST_CONTEXT)DeviceContext);
-  AddTestCase (FakeRegisterSpaceTest, "FakeRegisterSpaceAlignedDwordAccessTest", "FakeRegisterSpaceAlignedDwordAccessTest", FakeRegisterSpaceAlignedDwordAccessTest, NULL, NULL, (UNIT_TEST_CONTEXT)DeviceContext);
-  AddTestCase (FakeRegisterSpaceTest, "FakeRegisterSpaceAlignedQwordAccessTest", "FakeRegisterSpaceAlignedQwordAccessTest", FakeRegisterSpaceAlignedQwordAccessTest, NULL, NULL, (UNIT_TEST_CONTEXT)DeviceContext);
+  AddTestCase (FakeRegisterSpaceTest, "FakeRegisterSpaceAlignedByteAccessTest", "FakeRegisterSpaceAlignedByteAccessTest", FakeRegisterSpaceAlignedByteAccessTest, NULL, NULL, (UNIT_TEST_CONTEXT) DeviceContext);
+  AddTestCase (FakeRegisterSpaceTest, "FakeRegisterSpaceAlignedWordAccessTest", "FakeRegisterSpaceAlignedWordAccessTest", FakeRegisterSpaceAlignedWordAccessTest, NULL, NULL, (UNIT_TEST_CONTEXT) DeviceContext);
+  AddTestCase (FakeRegisterSpaceTest, "FakeRegisterSpaceAlignedDwordAccessTest", "FakeRegisterSpaceAlignedDwordAccessTest", FakeRegisterSpaceAlignedDwordAccessTest, NULL, NULL, (UNIT_TEST_CONTEXT) DeviceContext);
+  AddTestCase (FakeRegisterSpaceTest, "FakeRegisterSpaceAlignedQwordAccessTest", "FakeRegisterSpaceAlignedQwordAccessTest", FakeRegisterSpaceAlignedQwordAccessTest, NULL, NULL, (UNIT_TEST_CONTEXT) DeviceContext);
 
   //
   // Simple non-crossing unaligned tests for byte and word
   //
-  AddTestCase (FakeRegisterSpaceTest, "FakeRegisterSpaceUnalignedByteAccessTest", "FakeRegisterSpaceUnalignedByteAccessTest", FakeRegisterSpaceUnalignedByteAccessTest, NULL, NULL, (UNIT_TEST_CONTEXT)DeviceContext);
-  AddTestCase (FakeRegisterSpaceTest, "FakeRegisterSpaceUnalignedWordAccessTest", "FakeRegisterSpaceUnalignedWordAccessTest", FakeRegisterSpaceUnalignedWordAccessTest, NULL, NULL, (UNIT_TEST_CONTEXT)DeviceContext);
+  AddTestCase (FakeRegisterSpaceTest, "FakeRegisterSpaceUnalignedByteAccessTest", "FakeRegisterSpaceUnalignedByteAccessTest", FakeRegisterSpaceUnalignedByteAccessTest, NULL, NULL, (UNIT_TEST_CONTEXT) DeviceContext);
+  AddTestCase (FakeRegisterSpaceTest, "FakeRegisterSpaceUnalignedWordAccessTest", "FakeRegisterSpaceUnalignedWordAccessTest", FakeRegisterSpaceUnalignedWordAccessTest, NULL, NULL, (UNIT_TEST_CONTEXT) DeviceContext);
 
   //
   // Boundary crossing unaligned access test
   //
-  AddTestCase (FakeRegisterSpaceTest, "FakeRegisterSpaceUnalignedBoundaryCrossingWordAccessTest", "FakeRegisterSpaceUnalignedBoundaryCrossingWordAccessTest", FakeRegisterSpaceUnalignedBoundaryCrossingWordAccessTest, NULL, NULL, (UNIT_TEST_CONTEXT)DeviceContext);
-  AddTestCase (FakeRegisterSpaceTest, "FakeRegisterSpaceUnalignedBoundaryCrossingDwordAccessTest", "FakeRegisterSpaceUnalignedBoundaryCrossingDwordAccessTest", FakeRegisterSpaceUnalignedBoundaryCrossingDwordAccessTest, NULL, NULL, (UNIT_TEST_CONTEXT)DeviceContext);
-  AddTestCase (FakeRegisterSpaceTest, "FakeRegisterSpaceUnalignedBoundaryCrossingQwordAccessTest", "FakeRegisterSpaceUnalignedBoundaryCrossingQwordAccessTest", FakeRegisterSpaceUnalignedBoundaryCrossingQwordAccessTest, NULL, NULL, (UNIT_TEST_CONTEXT)DeviceContext);
+  AddTestCase (FakeRegisterSpaceTest, "FakeRegisterSpaceUnalignedBoundaryCrossingWordAccessTest", "FakeRegisterSpaceUnalignedBoundaryCrossingWordAccessTest", FakeRegisterSpaceUnalignedBoundaryCrossingWordAccessTest, NULL, NULL, (UNIT_TEST_CONTEXT) DeviceContext);
+  AddTestCase (FakeRegisterSpaceTest, "FakeRegisterSpaceUnalignedBoundaryCrossingDwordAccessTest", "FakeRegisterSpaceUnalignedBoundaryCrossingDwordAccessTest", FakeRegisterSpaceUnalignedBoundaryCrossingDwordAccessTest, NULL, NULL, (UNIT_TEST_CONTEXT) DeviceContext);
+  AddTestCase (FakeRegisterSpaceTest, "FakeRegisterSpaceUnalignedBoundaryCrossingQwordAccessTest", "FakeRegisterSpaceUnalignedBoundaryCrossingQwordAccessTest", FakeRegisterSpaceUnalignedBoundaryCrossingQwordAccessTest, NULL, NULL, (UNIT_TEST_CONTEXT) DeviceContext);
 
   //
   // ByteEnable conversions test
@@ -742,7 +743,7 @@ UefiTestMain (
   // WORD aligned test device
   //
   AddTestCase (FakeRegisterSpaceTest, "FakeRegisterSpaceWordAlignedDeviceTest", "FakeRegisterSpaceWordAlignedDeviceTest", FakeRegisterSpaceWordAlignedDeviceTest, NULL, NULL, NULL);
-  
+
   Status = RunAllTestSuites (Framework);
   if (Framework) {
     FreeUnitTestFramework (Framework);

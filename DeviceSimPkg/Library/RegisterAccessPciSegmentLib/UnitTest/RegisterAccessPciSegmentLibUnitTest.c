@@ -19,24 +19,23 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #define UNIT_TEST_NAME     "RegisterAccessPciSegmentLib unit tests"
 #define UNIT_TEST_VERSION  "0.1"
 
-#define PCI_SEGMENT_LIB_TEST_DEVICE_NAME  L"RegisterAccessPciSegmentLibTestDevice"
-#define PCI_SEGMENT_LIB_TEST_DEVICE_SEGMENT_NUM 0
-#define PCI_SEGMENT_LIB_TEST_DEVICE_BUS_NUM 0
-#define PCI_SEGMENT_LIB_TEST_DEVICE_DEV_NUM 0x1A
-#define PCI_SEGMENT_LIB_TEST_DEVICE_FUNC_NUM 0x0
+#define PCI_SEGMENT_LIB_TEST_DEVICE_NAME         L"RegisterAccessPciSegmentLibTestDevice"
+#define PCI_SEGMENT_LIB_TEST_DEVICE_SEGMENT_NUM  0
+#define PCI_SEGMENT_LIB_TEST_DEVICE_BUS_NUM      0
+#define PCI_SEGMENT_LIB_TEST_DEVICE_DEV_NUM      0x1A
+#define PCI_SEGMENT_LIB_TEST_DEVICE_FUNC_NUM     0x0
 
-#define REGISTER_ACCESS_PCI_SEGMENT_LIB_TEST_DEVICE_REG0_ADDRESS 0x0 // RO register for read test
-#define REGISTER_ACCESS_PCI_SEGMENT_LIB_TEST_DEVICE_REG0_VALUE   0x12348086
-#define REGISTER_ACCESS_PCI_SEGMENT_LIB_TEST_DEVICE_REG1_ADDRESS 0x4 // RW scratchpad for write tests
+#define REGISTER_ACCESS_PCI_SEGMENT_LIB_TEST_DEVICE_REG0_ADDRESS  0x0// RO register for read test
+#define REGISTER_ACCESS_PCI_SEGMENT_LIB_TEST_DEVICE_REG0_VALUE    0x12348086
+#define REGISTER_ACCESS_PCI_SEGMENT_LIB_TEST_DEVICE_REG1_ADDRESS  0x4// RW scratchpad for write tests
 
-#define REGISTER_ACCESS_PCI_SEGMENT_LIB_WRITE_TEST_VAL8  0xAB
+#define REGISTER_ACCESS_PCI_SEGMENT_LIB_WRITE_TEST_VAL8   0xAB
 #define REGISTER_ACCESS_PCI_SEGMENT_LIB_WRITE_TEST_VAL16  0xABDE
 #define REGISTER_ACCESS_PCI_SEGMENT_LIB_WRITE_TEST_VAL32  0xABDECF10
 
 typedef struct {
-  UINT32  WriteRegister;
+  UINT32    WriteRegister;
 } REGISTER_ACCESS_PCI_SEGMENT_TEST_DEVICE_CONTEXT;
-
 
 VOID
 TestRegisterAccessPciSegmentDeviceRead (
@@ -68,10 +67,10 @@ TestRegisterAccessPciSegmentDeviceWrite (
   IN UINT32  Value
   )
 {
-  UINT32  ByteMask;
+  UINT32                                           ByteMask;
   REGISTER_ACCESS_PCI_SEGMENT_TEST_DEVICE_CONTEXT  *Device;
 
-  Device = (REGISTER_ACCESS_PCI_SEGMENT_TEST_DEVICE_CONTEXT*) Context;
+  Device = (REGISTER_ACCESS_PCI_SEGMENT_TEST_DEVICE_CONTEXT *) Context;
 
   ByteMask = ByteEnableToBitMask (ByteEnable);
 
@@ -91,23 +90,23 @@ RegisterAccessPciSegmentRegistrationTest (
   IN UNIT_TEST_CONTEXT  Context
   )
 {
-  EFI_STATUS           Status;
+  EFI_STATUS                 Status;
   REGISTER_ACCESS_INTERFACE  *SampleSpace;
-  UINT64               PciSegmentBase;
+  UINT64                     PciSegmentBase;
 
   SampleSpace = NULL;
-  Status = FakeRegisterSpaceCreate (PCI_SEGMENT_LIB_TEST_DEVICE_NAME, FakeRegisterSpaceAlignmentDword, TestRegisterAccessPciSegmentDeviceWrite, TestRegisterAccessPciSegmentDeviceRead, NULL, &SampleSpace);
+  Status      = FakeRegisterSpaceCreate (PCI_SEGMENT_LIB_TEST_DEVICE_NAME, FakeRegisterSpaceAlignmentDword, TestRegisterAccessPciSegmentDeviceWrite, TestRegisterAccessPciSegmentDeviceRead, NULL, &SampleSpace);
   if (EFI_ERROR (Status)) {
     return UNIT_TEST_ERROR_PREREQUISITE_NOT_MET;
   }
 
   PciSegmentBase = PCI_SEGMENT_LIB_ADDRESS (
-    PCI_SEGMENT_LIB_TEST_DEVICE_SEGMENT_NUM,
-    PCI_SEGMENT_LIB_TEST_DEVICE_BUS_NUM,
-    PCI_SEGMENT_LIB_TEST_DEVICE_DEV_NUM,
-    PCI_SEGMENT_LIB_TEST_DEVICE_FUNC_NUM,
-    0
-  );
+                     PCI_SEGMENT_LIB_TEST_DEVICE_SEGMENT_NUM,
+                     PCI_SEGMENT_LIB_TEST_DEVICE_BUS_NUM,
+                     PCI_SEGMENT_LIB_TEST_DEVICE_DEV_NUM,
+                     PCI_SEGMENT_LIB_TEST_DEVICE_FUNC_NUM,
+                     0
+                     );
 
   Status = RegisterAccessPciSegmentRegisterAtPciSegmentAddress (SampleSpace, PciSegmentBase);
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
@@ -126,12 +125,12 @@ RegisterAccessPciSegmentRwTest (
   IN UNIT_TEST_CONTEXT  Context
   )
 {
-  EFI_STATUS           Status;
-  REGISTER_ACCESS_INTERFACE  *ConfigSpace;
-  UINT64               PciSegmentBase;
-  UINT8                Val8;
-  UINT16               Val16;
-  UINT32               Val32;
+  EFI_STATUS                                       Status;
+  REGISTER_ACCESS_INTERFACE                        *ConfigSpace;
+  UINT64                                           PciSegmentBase;
+  UINT8                                            Val8;
+  UINT16                                           Val16;
+  UINT32                                           Val32;
   REGISTER_ACCESS_PCI_SEGMENT_TEST_DEVICE_CONTEXT  Device;
 
   ZeroMem (&Device, sizeof (REGISTER_ACCESS_PCI_SEGMENT_TEST_DEVICE_CONTEXT));
@@ -141,12 +140,12 @@ RegisterAccessPciSegmentRwTest (
   }
 
   PciSegmentBase = PCI_SEGMENT_LIB_ADDRESS (
-    PCI_SEGMENT_LIB_TEST_DEVICE_SEGMENT_NUM,
-    PCI_SEGMENT_LIB_TEST_DEVICE_BUS_NUM,
-    PCI_SEGMENT_LIB_TEST_DEVICE_DEV_NUM,
-    PCI_SEGMENT_LIB_TEST_DEVICE_FUNC_NUM,
-    0
-  );
+                     PCI_SEGMENT_LIB_TEST_DEVICE_SEGMENT_NUM,
+                     PCI_SEGMENT_LIB_TEST_DEVICE_BUS_NUM,
+                     PCI_SEGMENT_LIB_TEST_DEVICE_DEV_NUM,
+                     PCI_SEGMENT_LIB_TEST_DEVICE_FUNC_NUM,
+                     0
+                     );
 
   Status = RegisterAccessPciSegmentRegisterAtPciSegmentAddress (ConfigSpace, PciSegmentBase);
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);

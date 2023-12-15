@@ -17,29 +17,29 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <IndustryStandard/Pci.h>
 #include <stdint.h>
 
-#define UNIT_TEST_NAME     "RegisterAccessPciIoLib unit tests"
-#define UNIT_TEST_VERSION  "0.1"
+#define UNIT_TEST_NAME        "RegisterAccessPciIoLib unit tests"
+#define UNIT_TEST_VERSION     "0.1"
 #define TEST_PCI_DEVICE_NAME  L"RegisterAccessPciLibTestDevice"
-#define TEST_PCI_DEVICE_VID  0xDEAD
-#define TEST_PCI_DEVICE_DID  0xBEEF
+#define TEST_PCI_DEVICE_VID   0xDEAD
+#define TEST_PCI_DEVICE_DID   0xBEEF
 
-#define TEST_PCI_DEVICE_BAR_ADDEND1_REG 0
-#define TEST_PCI_DEVICE_BAR_ADDEND2_REG 4
-#define TEST_PCI_DEVICE_BAR_RESULT_REG 8
-#define TEST_PCI_DEVICE_BAR_DMA_ADDR_REG 12
-#define TEST_PCI_DEVICE_BAR_DMA_CTRL_REG 16
-#define TEST_PCI_DEVICE_BAR_POLL_REGISTER 20
-#define TEST_PCI_DEVICE_BAR_DMA_CTRL_START_BIT BIT0
-#define TEST_PCI_DEVICE_BAR_DMA_CTRL_READ_BIT BIT1
+#define TEST_PCI_DEVICE_BAR_ADDEND1_REG         0
+#define TEST_PCI_DEVICE_BAR_ADDEND2_REG         4
+#define TEST_PCI_DEVICE_BAR_RESULT_REG          8
+#define TEST_PCI_DEVICE_BAR_DMA_ADDR_REG        12
+#define TEST_PCI_DEVICE_BAR_DMA_CTRL_REG        16
+#define TEST_PCI_DEVICE_BAR_POLL_REGISTER       20
+#define TEST_PCI_DEVICE_BAR_DMA_CTRL_START_BIT  BIT0
+#define TEST_PCI_DEVICE_BAR_DMA_CTRL_READ_BIT   BIT1
 
-#define TEST_PCI_DEVICE_BLOCK_SIZE 512
+#define TEST_PCI_DEVICE_BLOCK_SIZE  512
 
-#define TEST_PCI_DEVICE_IO_BAR_ADDEND1_REG 0
-#define TEST_PCI_DEVICE_IO_BAR_ADDEND2_REG 4
-#define TEST_PCI_DEVICE_IO_BAR_RESULT_REG  8
-#define TEST_PCI_DEVICE_IO_BAR_POLL_REG  12
+#define TEST_PCI_DEVICE_IO_BAR_ADDEND1_REG  0
+#define TEST_PCI_DEVICE_IO_BAR_ADDEND2_REG  4
+#define TEST_PCI_DEVICE_IO_BAR_RESULT_REG   8
+#define TEST_PCI_DEVICE_IO_BAR_POLL_REG     12
 
-GLOBAL_REMOVE_IF_UNREFERENCED UINT8 gPciTestBlock[TEST_PCI_DEVICE_BLOCK_SIZE] = {
+GLOBAL_REMOVE_IF_UNREFERENCED UINT8  gPciTestBlock[TEST_PCI_DEVICE_BLOCK_SIZE] = {
   0xAA, 0xBA, 0xBC, 0x18, 0x11, 0x02, 0xDF, 0x98, 0x12, 0x54, 0x88, 0xA1
 };
 
@@ -51,30 +51,30 @@ typedef struct {
   //
   // Config
   //
-  UINT16  Command;
+  UINT16                       Command;
   //
   // BAR
   //
-  UINT32  Addend1;
-  UINT32  Addend2;
-  UINT32  Result;
-  UINT32  DmaAddress;
-  UINT32  DmaControl;
-  UINT32  PollRegisterCount;
-  UINT8   MemoryBlock[512];
+  UINT32                       Addend1;
+  UINT32                       Addend2;
+  UINT32                       Result;
+  UINT32                       DmaAddress;
+  UINT32                       DmaControl;
+  UINT32                       PollRegisterCount;
+  UINT8                        MemoryBlock[512];
   //
   // IO BAR
   //
-  UINT32  IoAddend1;
-  UINT32  IoAddend2;
-  UINT32  IoResult;
-  UINT32  PollIoRegisterCount;
+  UINT32                       IoAddend1;
+  UINT32                       IoAddend2;
+  UINT32                       IoResult;
+  UINT32                       PollIoRegisterCount;
   //
   // Register spaces
   //
-  REGISTER_ACCESS_INTERFACE  *Config;
-  REGISTER_ACCESS_INTERFACE  *Bar;
-  REGISTER_ACCESS_INTERFACE  *IoBar;
+  REGISTER_ACCESS_INTERFACE    *Config;
+  REGISTER_ACCESS_INTERFACE    *Bar;
+  REGISTER_ACCESS_INTERFACE    *IoBar;
 } TEST_PCI_DEVICE_CONTEXT;
 
 VOID
@@ -85,10 +85,10 @@ TestPciDeviceConfigRead (
   OUT UINT32  *Value
   )
 {
-  UINT32  ByteMask;
+  UINT32                   ByteMask;
   TEST_PCI_DEVICE_CONTEXT  *Device;
 
-  Device = (TEST_PCI_DEVICE_CONTEXT*) Context;
+  Device = (TEST_PCI_DEVICE_CONTEXT *) Context;
   if (Device == NULL) {
     return;
   }
@@ -101,12 +101,13 @@ TestPciDeviceConfigRead (
       break;
     case PCI_COMMAND_OFFSET:
       if (ByteEnable <= 0x3) {
-        *Value = (UINT16)(Device->Command & ByteMask);
+        *Value = (UINT16) (Device->Command & ByteMask);
       }
+
       break;
     default:
       *Value = 0xFFFFFFFF;
-      break;    
+      break;
   }
 }
 
@@ -121,7 +122,7 @@ TestPciDeviceConfigWrite (
   UINT32                   ByteMask;
   TEST_PCI_DEVICE_CONTEXT  *Device;
 
-  Device = (TEST_PCI_DEVICE_CONTEXT*) Context;
+  Device = (TEST_PCI_DEVICE_CONTEXT *) Context;
   if (Device == NULL) {
     return;
   }
@@ -131,8 +132,9 @@ TestPciDeviceConfigWrite (
   switch (Address) {
     case PCI_COMMAND_OFFSET:
       if (ByteEnable >= 0x3) {
-        Device->Command = (UINT16)(Value & ByteMask);
+        Device->Command = (UINT16) (Value & ByteMask);
       }
+
       break;
     default:
       break;
@@ -149,7 +151,7 @@ TestPciDeviceBarRead (
 {
   TEST_PCI_DEVICE_CONTEXT  *Device;
 
-  Device = (TEST_PCI_DEVICE_CONTEXT*) Context;
+  Device = (TEST_PCI_DEVICE_CONTEXT *) Context;
   if (Device == NULL) {
     return;
   }
@@ -171,6 +173,7 @@ TestPciDeviceBarRead (
         *Value = 0;
         Device->PollRegisterCount--;
       }
+
       break;
     default:
       *Value = 0xFFFFFFFF;
@@ -189,7 +192,7 @@ TestPciDeviceBarWrite (
   TEST_PCI_DEVICE_CONTEXT  *Device;
   VOID                     *HostAddress;
 
-  Device = (TEST_PCI_DEVICE_CONTEXT*) Context;
+  Device = (TEST_PCI_DEVICE_CONTEXT *) Context;
   if (Device == NULL) {
     return;
   }
@@ -197,11 +200,11 @@ TestPciDeviceBarWrite (
   switch (Address) {
     case TEST_PCI_DEVICE_BAR_ADDEND1_REG:
       Device->Addend1 = Value;
-      Device->Result = Device->Addend1 + Device->Addend2;
+      Device->Result  = Device->Addend1 + Device->Addend2;
       break;
     case TEST_PCI_DEVICE_BAR_ADDEND2_REG:
       Device->Addend2 = Value;
-      Device->Result = Device->Addend1 + Device->Addend2;
+      Device->Result  = Device->Addend1 + Device->Addend2;
       break;
     case TEST_PCI_DEVICE_BAR_RESULT_REG:
       Device->Result = Value;
@@ -216,12 +219,14 @@ TestPciDeviceBarWrite (
         if (HostAddress == NULL) {
           return;
         }
+
         if (Device->DmaControl & TEST_PCI_DEVICE_BAR_DMA_CTRL_READ_BIT) {
           CopyMem (HostAddress, Device->MemoryBlock, sizeof (Device->MemoryBlock));
         } else {
           CopyMem (Device->MemoryBlock, HostAddress, sizeof (Device->MemoryBlock));
         }
       }
+
       break;
     default:
       break;
@@ -238,7 +243,7 @@ TestPciDeviceIoBarRead (
 {
   TEST_PCI_DEVICE_CONTEXT  *Device;
 
-  Device = (TEST_PCI_DEVICE_CONTEXT*) Context;
+  Device = (TEST_PCI_DEVICE_CONTEXT *) Context;
   if (Device == NULL) {
     return;
   }
@@ -260,6 +265,7 @@ TestPciDeviceIoBarRead (
         *Value = 0;
         Device->PollIoRegisterCount--;
       }
+
       break;
     default:
       *Value = 0xFFFFFFFF;
@@ -277,7 +283,7 @@ TestPciDeviceIoBarWrite (
 {
   TEST_PCI_DEVICE_CONTEXT  *Device;
 
-  Device = (TEST_PCI_DEVICE_CONTEXT*) Context;
+  Device = (TEST_PCI_DEVICE_CONTEXT *) Context;
   if (Device == NULL) {
     return;
   }
@@ -285,11 +291,11 @@ TestPciDeviceIoBarWrite (
   switch (Address) {
     case TEST_PCI_DEVICE_IO_BAR_ADDEND1_REG:
       Device->IoAddend1 = Value;
-      Device->IoResult = Device->IoAddend1 + Device->IoAddend2;
+      Device->IoResult  = Device->IoAddend1 + Device->IoAddend2;
       break;
     case TEST_PCI_DEVICE_IO_BAR_ADDEND2_REG:
       Device->IoAddend2 = Value;
-      Device->IoResult = Device->IoAddend1 + Device->IoAddend2;
+      Device->IoResult  = Device->IoAddend1 + Device->IoAddend2;
       break;
     case TEST_PCI_DEVICE_IO_BAR_RESULT_REG:
       Device->IoResult = Value;
@@ -305,10 +311,10 @@ PciDeviceCreateTest (
   IN UNIT_TEST_CONTEXT  Context
   )
 {
-  EFI_STATUS           Status;
-  REGISTER_ACCESS_INTERFACE  *ConfigSpace;
-  REGISTER_ACCESS_PCI_DEVICE      *PciDev;
-  REGISTER_ACCESS_INTERFACE  *Bar[REGISTER_SPACE_PCI_LIB_MAX_SUPPORTED_BARS];
+  EFI_STATUS                  Status;
+  REGISTER_ACCESS_INTERFACE   *ConfigSpace;
+  REGISTER_ACCESS_PCI_DEVICE  *PciDev;
+  REGISTER_ACCESS_INTERFACE   *Bar[REGISTER_SPACE_PCI_LIB_MAX_SUPPORTED_BARS];
 
   Status = FakeRegisterSpaceCreate (TEST_PCI_DEVICE_NAME, FakeRegisterSpaceAlignmentDword, TestPciDeviceConfigWrite, TestPciDeviceConfigRead, NULL, &ConfigSpace);
   if (EFI_ERROR (Status)) {
@@ -317,18 +323,18 @@ PciDeviceCreateTest (
 
   Status = RegisterAccessPciDeviceInitialize (ConfigSpace, 0, 0, 0, 0, &PciDev);
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
-  UT_ASSERT_NOT_EQUAL ((uintptr_t)PciDev, (uintptr_t)NULL);
-  UT_ASSERT_EQUAL ((uintptr_t)PciDev->ConfigSpace, (uintptr_t)ConfigSpace);
+  UT_ASSERT_NOT_EQUAL ((uintptr_t) PciDev, (uintptr_t) NULL);
+  UT_ASSERT_EQUAL ((uintptr_t) PciDev->ConfigSpace, (uintptr_t) ConfigSpace);
 
   for (UINT8 BarIndex = 0; BarIndex < REGISTER_SPACE_PCI_LIB_MAX_SUPPORTED_BARS; BarIndex++) {
     Status = FakeRegisterSpaceCreate (TEST_PCI_DEVICE_NAME, FakeRegisterSpaceAlignmentDword, TestPciDeviceBarWrite, TestPciDeviceBarRead, NULL, &Bar[BarIndex]);
     if (EFI_ERROR (Status)) {
-        return UNIT_TEST_ERROR_PREREQUISITE_NOT_MET;
+      return UNIT_TEST_ERROR_PREREQUISITE_NOT_MET;
     }
 
     Status = RegisterAccessPciDeviceRegisterBar (PciDev, Bar[BarIndex], BarIndex, RegisterAccessIoTypeMmio, 0x1000 * BarIndex, 0x1000);
     UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
-    UT_ASSERT_EQUAL ((uintptr_t)PciDev->Bar[BarIndex], (uintptr_t)Bar[BarIndex]);
+    UT_ASSERT_EQUAL ((uintptr_t) PciDev->Bar[BarIndex], (uintptr_t) Bar[BarIndex]);
   }
 
   Status = RegisterAccessPciDeviceDestroy (PciDev);
@@ -345,12 +351,12 @@ PciDeviceCreateTest (
 EFI_STATUS
 CreateTestPciDevice (
   OUT REGISTER_ACCESS_PCI_DEVICE  **PciDev,
-  IN TEST_PCI_DEVICE_CONTEXT  *Context
+  IN TEST_PCI_DEVICE_CONTEXT      *Context
   )
 {
   EFI_STATUS  Status;
 
-  ZeroMem (Context, sizeof(TEST_PCI_DEVICE_CONTEXT));
+  ZeroMem (Context, sizeof (TEST_PCI_DEVICE_CONTEXT));
 
   Status = FakeRegisterSpaceCreate (TEST_PCI_DEVICE_NAME, FakeRegisterSpaceAlignmentDword, TestPciDeviceConfigWrite, TestPciDeviceConfigRead, Context, &Context->Config);
   if (EFI_ERROR (Status)) {
@@ -388,7 +394,7 @@ CreateTestPciDevice (
 EFI_STATUS
 DestroyTestPciDevice (
   IN REGISTER_ACCESS_PCI_DEVICE  *PciDev,
-  IN TEST_PCI_DEVICE_CONTEXT  *Context
+  IN TEST_PCI_DEVICE_CONTEXT     *Context
   )
 {
   RegisterAccessPciDeviceDestroy (PciDev);
@@ -406,10 +412,10 @@ PciDevicePciIoCreateTest (
   IN UNIT_TEST_CONTEXT  Context
   )
 {
-  EFI_STATUS  Status;
-  REGISTER_ACCESS_PCI_DEVICE      *PciDev;
-  EFI_PCI_IO_PROTOCOL  *PciIo = NULL;
-  TEST_PCI_DEVICE_CONTEXT  DevContext;
+  EFI_STATUS                  Status;
+  REGISTER_ACCESS_PCI_DEVICE  *PciDev;
+  EFI_PCI_IO_PROTOCOL         *PciIo = NULL;
+  TEST_PCI_DEVICE_CONTEXT     DevContext;
 
   Status = CreateTestPciDevice (&PciDev, &DevContext);
   if (EFI_ERROR (Status)) {
@@ -418,30 +424,30 @@ PciDevicePciIoCreateTest (
 
   Status = RegisterAccessPciIoCreate (PciDev, &PciIo);
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
-  UT_ASSERT_NOT_EQUAL ((uintptr_t)PciIo, (uintptr_t)NULL);
+  UT_ASSERT_NOT_EQUAL ((uintptr_t) PciIo, (uintptr_t) NULL);
 
   // Member functions can't be NULL
-  UT_ASSERT_NOT_EQUAL ((uintptr_t)PciIo->Pci.Read, (uintptr_t)NULL);
-  UT_ASSERT_NOT_EQUAL ((uintptr_t)PciIo->Pci.Write, (uintptr_t)NULL);
-  UT_ASSERT_NOT_EQUAL ((uintptr_t)PciIo->PollMem, (uintptr_t)NULL);
-  UT_ASSERT_NOT_EQUAL ((uintptr_t)PciIo->PollIo, (uintptr_t)NULL);
-  UT_ASSERT_NOT_EQUAL ((uintptr_t)PciIo->Mem.Read, (uintptr_t)NULL);
-  UT_ASSERT_NOT_EQUAL ((uintptr_t)PciIo->Mem.Write, (uintptr_t)NULL);
-  UT_ASSERT_NOT_EQUAL ((uintptr_t)PciIo->Io.Read, (uintptr_t)NULL);
-  UT_ASSERT_NOT_EQUAL ((uintptr_t)PciIo->Io.Write, (uintptr_t)NULL);
-  UT_ASSERT_NOT_EQUAL ((uintptr_t)PciIo->CopyMem, (uintptr_t)NULL);
-  UT_ASSERT_NOT_EQUAL ((uintptr_t)PciIo->Map, (uintptr_t)NULL);
-  UT_ASSERT_NOT_EQUAL ((uintptr_t)PciIo->Unmap, (uintptr_t)NULL);
-  UT_ASSERT_NOT_EQUAL ((uintptr_t)PciIo->AllocateBuffer, (uintptr_t)NULL);
-  UT_ASSERT_NOT_EQUAL ((uintptr_t)PciIo->FreeBuffer, (uintptr_t)NULL);
-  UT_ASSERT_NOT_EQUAL ((uintptr_t)PciIo->Flush, (uintptr_t)NULL);
-  UT_ASSERT_NOT_EQUAL ((uintptr_t)PciIo->GetLocation, (uintptr_t)NULL);
-  UT_ASSERT_NOT_EQUAL ((uintptr_t)PciIo->Attributes, (uintptr_t)NULL);
-  UT_ASSERT_NOT_EQUAL ((uintptr_t)PciIo->GetBarAttributes, (uintptr_t)NULL);
-  UT_ASSERT_NOT_EQUAL ((uintptr_t)PciIo->SetBarAttributes, (uintptr_t)NULL);
+  UT_ASSERT_NOT_EQUAL ((uintptr_t) PciIo->Pci.Read, (uintptr_t) NULL);
+  UT_ASSERT_NOT_EQUAL ((uintptr_t) PciIo->Pci.Write, (uintptr_t) NULL);
+  UT_ASSERT_NOT_EQUAL ((uintptr_t) PciIo->PollMem, (uintptr_t) NULL);
+  UT_ASSERT_NOT_EQUAL ((uintptr_t) PciIo->PollIo, (uintptr_t) NULL);
+  UT_ASSERT_NOT_EQUAL ((uintptr_t) PciIo->Mem.Read, (uintptr_t) NULL);
+  UT_ASSERT_NOT_EQUAL ((uintptr_t) PciIo->Mem.Write, (uintptr_t) NULL);
+  UT_ASSERT_NOT_EQUAL ((uintptr_t) PciIo->Io.Read, (uintptr_t) NULL);
+  UT_ASSERT_NOT_EQUAL ((uintptr_t) PciIo->Io.Write, (uintptr_t) NULL);
+  UT_ASSERT_NOT_EQUAL ((uintptr_t) PciIo->CopyMem, (uintptr_t) NULL);
+  UT_ASSERT_NOT_EQUAL ((uintptr_t) PciIo->Map, (uintptr_t) NULL);
+  UT_ASSERT_NOT_EQUAL ((uintptr_t) PciIo->Unmap, (uintptr_t) NULL);
+  UT_ASSERT_NOT_EQUAL ((uintptr_t) PciIo->AllocateBuffer, (uintptr_t) NULL);
+  UT_ASSERT_NOT_EQUAL ((uintptr_t) PciIo->FreeBuffer, (uintptr_t) NULL);
+  UT_ASSERT_NOT_EQUAL ((uintptr_t) PciIo->Flush, (uintptr_t) NULL);
+  UT_ASSERT_NOT_EQUAL ((uintptr_t) PciIo->GetLocation, (uintptr_t) NULL);
+  UT_ASSERT_NOT_EQUAL ((uintptr_t) PciIo->Attributes, (uintptr_t) NULL);
+  UT_ASSERT_NOT_EQUAL ((uintptr_t) PciIo->GetBarAttributes, (uintptr_t) NULL);
+  UT_ASSERT_NOT_EQUAL ((uintptr_t) PciIo->SetBarAttributes, (uintptr_t) NULL);
 
   // ROM is not supported
-  UT_ASSERT_EQUAL ((uintptr_t)PciIo->RomImage, (uintptr_t)NULL);
+  UT_ASSERT_EQUAL ((uintptr_t) PciIo->RomImage, (uintptr_t) NULL);
   UT_ASSERT_EQUAL (PciIo->RomSize, 0);
 
   DestroyTestPciDevice (PciDev, &DevContext);
@@ -455,13 +461,13 @@ RegisterAccessPciIoConfigRwTest (
   IN UNIT_TEST_CONTEXT  Context
   )
 {
-  EFI_STATUS           Status;
-  REGISTER_ACCESS_PCI_DEVICE      *PciDev;
-  EFI_PCI_IO_PROTOCOL  *PciIo;
-  UINT16               VendorId;
-  UINT16               DeviceId;
-  UINT16               Command;
-  TEST_PCI_DEVICE_CONTEXT  DevContext;
+  EFI_STATUS                  Status;
+  REGISTER_ACCESS_PCI_DEVICE  *PciDev;
+  EFI_PCI_IO_PROTOCOL         *PciIo;
+  UINT16                      VendorId;
+  UINT16                      DeviceId;
+  UINT16                      Command;
+  TEST_PCI_DEVICE_CONTEXT     DevContext;
 
   Status = CreateTestPciDevice (&PciDev, &DevContext);
   if (EFI_ERROR (Status)) {
@@ -482,12 +488,12 @@ RegisterAccessPciIoConfigRwTest (
   UT_ASSERT_EQUAL (VendorId, TEST_PCI_DEVICE_VID);
 
   Command = EFI_PCI_COMMAND_MEMORY_SPACE;
-  Status = PciIo->Pci.Write (PciIo, EfiPciIoWidthUint16, PCI_COMMAND_OFFSET, 1, &Command);
+  Status  = PciIo->Pci.Write (PciIo, EfiPciIoWidthUint16, PCI_COMMAND_OFFSET, 1, &Command);
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
   UT_ASSERT_EQUAL (DevContext.Command, EFI_PCI_COMMAND_MEMORY_SPACE);
 
   Command = 0;
-  Status = PciIo->Pci.Read (PciIo, EfiPciIoWidthUint16, PCI_COMMAND_OFFSET, 1, &Command);
+  Status  = PciIo->Pci.Read (PciIo, EfiPciIoWidthUint16, PCI_COMMAND_OFFSET, 1, &Command);
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
   UT_ASSERT_EQUAL (Command, EFI_PCI_COMMAND_MEMORY_SPACE);
 
@@ -502,13 +508,13 @@ RegisterAccessPciIoBarRwTest (
   IN UNIT_TEST_CONTEXT  Context
   )
 {
-  EFI_STATUS           Status;
-  REGISTER_ACCESS_PCI_DEVICE      *PciDev;
-  EFI_PCI_IO_PROTOCOL  *PciIo;
-  TEST_PCI_DEVICE_CONTEXT  DevContext;
-  UINT32                   Addend1;
-  UINT32                   Addend2;
-  UINT32                   Result;
+  EFI_STATUS                  Status;
+  REGISTER_ACCESS_PCI_DEVICE  *PciDev;
+  EFI_PCI_IO_PROTOCOL         *PciIo;
+  TEST_PCI_DEVICE_CONTEXT     DevContext;
+  UINT32                      Addend1;
+  UINT32                      Addend2;
+  UINT32                      Result;
 
   Status = CreateTestPciDevice (&PciDev, &DevContext);
   if (EFI_ERROR (Status)) {
@@ -521,12 +527,12 @@ RegisterAccessPciIoBarRwTest (
   }
 
   Addend1 = 2;
-  Status = PciIo->Mem.Write (PciIo, EfiPciIoWidthUint32, 0, TEST_PCI_DEVICE_BAR_ADDEND1_REG, 1, &Addend1);
+  Status  = PciIo->Mem.Write (PciIo, EfiPciIoWidthUint32, 0, TEST_PCI_DEVICE_BAR_ADDEND1_REG, 1, &Addend1);
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
   UT_ASSERT_EQUAL (DevContext.Addend1, Addend1);
 
   Addend2 = 3;
-  Status = PciIo->Mem.Write (PciIo, EfiPciIoWidthUint32, 0, TEST_PCI_DEVICE_BAR_ADDEND2_REG, 1, &Addend2);
+  Status  = PciIo->Mem.Write (PciIo, EfiPciIoWidthUint32, 0, TEST_PCI_DEVICE_BAR_ADDEND2_REG, 1, &Addend2);
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
   UT_ASSERT_EQUAL (DevContext.Addend2, Addend2);
 
@@ -545,13 +551,13 @@ RegisterAccessPciIoIoBarRwTest (
   IN UNIT_TEST_CONTEXT  Context
   )
 {
-  EFI_STATUS           Status;
-  REGISTER_ACCESS_PCI_DEVICE      *PciDev;
-  EFI_PCI_IO_PROTOCOL  *PciIo;
-  TEST_PCI_DEVICE_CONTEXT  DevContext;
-  UINT32                   Addend1;
-  UINT32                   Addend2;
-  UINT32                   Result;
+  EFI_STATUS                  Status;
+  REGISTER_ACCESS_PCI_DEVICE  *PciDev;
+  EFI_PCI_IO_PROTOCOL         *PciIo;
+  TEST_PCI_DEVICE_CONTEXT     DevContext;
+  UINT32                      Addend1;
+  UINT32                      Addend2;
+  UINT32                      Result;
 
   Status = CreateTestPciDevice (&PciDev, &DevContext);
   if (EFI_ERROR (Status)) {
@@ -564,12 +570,12 @@ RegisterAccessPciIoIoBarRwTest (
   }
 
   Addend1 = 2;
-  Status = PciIo->Io.Write (PciIo, EfiPciIoWidthUint32, 1, TEST_PCI_DEVICE_IO_BAR_ADDEND1_REG, 1, &Addend1);
+  Status  = PciIo->Io.Write (PciIo, EfiPciIoWidthUint32, 1, TEST_PCI_DEVICE_IO_BAR_ADDEND1_REG, 1, &Addend1);
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
   UT_ASSERT_EQUAL (DevContext.IoAddend1, Addend1);
 
   Addend2 = 3;
-  Status = PciIo->Io.Write (PciIo, EfiPciIoWidthUint32, 1, TEST_PCI_DEVICE_IO_BAR_ADDEND2_REG, 1, &Addend2);
+  Status  = PciIo->Io.Write (PciIo, EfiPciIoWidthUint32, 1, TEST_PCI_DEVICE_IO_BAR_ADDEND2_REG, 1, &Addend2);
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
   UT_ASSERT_EQUAL (DevContext.IoAddend2, Addend2);
 
@@ -588,15 +594,15 @@ RegisterAccessPciIoDmaTest (
   IN UNIT_TEST_CONTEXT  Context
   )
 {
-  EFI_STATUS           Status;
-  REGISTER_ACCESS_PCI_DEVICE      *PciDev;
-  EFI_PCI_IO_PROTOCOL  *PciIo;
-  TEST_PCI_DEVICE_CONTEXT  DevContext;
-  UINTN                    NumberOfBytes;
-  EFI_PHYSICAL_ADDRESS     PhyAddress;
-  VOID                     *Mapping;
-  UINT32                   DmaControl;
-  UINT8                    *Block;
+  EFI_STATUS                  Status;
+  REGISTER_ACCESS_PCI_DEVICE  *PciDev;
+  EFI_PCI_IO_PROTOCOL         *PciIo;
+  TEST_PCI_DEVICE_CONTEXT     DevContext;
+  UINTN                       NumberOfBytes;
+  EFI_PHYSICAL_ADDRESS        PhyAddress;
+  VOID                        *Mapping;
+  UINT32                      DmaControl;
+  UINT8                       *Block;
 
   Status = CreateTestPciDevice (&PciDev, &DevContext);
   if (EFI_ERROR (Status)) {
@@ -609,40 +615,40 @@ RegisterAccessPciIoDmaTest (
   }
 
   NumberOfBytes = sizeof (gPciTestBlock);
-  PhyAddress = (EFI_PHYSICAL_ADDRESS)(uintptr_t)NULL;
-  Mapping = NULL;
-  Status = PciIo->Map (PciIo, EfiPciIoOperationBusMasterRead, &gPciTestBlock, &NumberOfBytes, &PhyAddress, &Mapping);
+  PhyAddress    = (EFI_PHYSICAL_ADDRESS) (uintptr_t) NULL;
+  Mapping       = NULL;
+  Status        = PciIo->Map (PciIo, EfiPciIoOperationBusMasterRead, &gPciTestBlock, &NumberOfBytes, &PhyAddress, &Mapping);
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
   UT_ASSERT_EQUAL (NumberOfBytes, sizeof (gPciTestBlock));
-  UT_ASSERT_NOT_EQUAL ((uintptr_t)PhyAddress, (uintptr_t)NULL);
-  UT_ASSERT_NOT_EQUAL ((uintptr_t)Mapping, (uintptr_t)NULL);
+  UT_ASSERT_NOT_EQUAL ((uintptr_t) PhyAddress, (uintptr_t) NULL);
+  UT_ASSERT_NOT_EQUAL ((uintptr_t) Mapping, (uintptr_t) NULL);
 
   Status = PciIo->Mem.Write (PciIo, EfiPciIoWidthUint32, 0, TEST_PCI_DEVICE_BAR_DMA_ADDR_REG, 1, &PhyAddress);
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
   UT_ASSERT_EQUAL (DevContext.DmaAddress, PhyAddress);
 
   DmaControl = TEST_PCI_DEVICE_BAR_DMA_CTRL_START_BIT;
-  Status = PciIo->Mem.Write (PciIo, EfiPciIoWidthUint32, 0, TEST_PCI_DEVICE_BAR_DMA_CTRL_REG, 1, &DmaControl);
+  Status     = PciIo->Mem.Write (PciIo, EfiPciIoWidthUint32, 0, TEST_PCI_DEVICE_BAR_DMA_CTRL_REG, 1, &DmaControl);
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
   UT_ASSERT_MEM_EQUAL (DevContext.MemoryBlock, gPciTestBlock, sizeof (gPciTestBlock));
 
-  Block = AllocateZeroPool (sizeof (gPciTestBlock));
+  Block         = AllocateZeroPool (sizeof (gPciTestBlock));
   NumberOfBytes = sizeof (gPciTestBlock);
-  PhyAddress = (EFI_PHYSICAL_ADDRESS)(uintptr_t)NULL;
-  Mapping = NULL;
-  UT_ASSERT_NOT_EQUAL ((uintptr_t)Block, (uintptr_t)NULL);
+  PhyAddress    = (EFI_PHYSICAL_ADDRESS) (uintptr_t) NULL;
+  Mapping       = NULL;
+  UT_ASSERT_NOT_EQUAL ((uintptr_t) Block, (uintptr_t) NULL);
   Status = PciIo->Map (PciIo, EfiPciIoOperationBusMasterWrite, Block, &NumberOfBytes, &PhyAddress, &Mapping);
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
   UT_ASSERT_EQUAL (NumberOfBytes, sizeof (gPciTestBlock));
-  UT_ASSERT_NOT_EQUAL ((uintptr_t)PhyAddress, (uintptr_t)NULL);
-  UT_ASSERT_NOT_EQUAL ((uintptr_t)Mapping, (uintptr_t)NULL);
+  UT_ASSERT_NOT_EQUAL ((uintptr_t) PhyAddress, (uintptr_t) NULL);
+  UT_ASSERT_NOT_EQUAL ((uintptr_t) Mapping, (uintptr_t) NULL);
 
   Status = PciIo->Mem.Write (PciIo, EfiPciIoWidthUint32, 0, TEST_PCI_DEVICE_BAR_DMA_ADDR_REG, 1, &PhyAddress);
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
   UT_ASSERT_EQUAL (DevContext.DmaAddress, PhyAddress);
 
   DmaControl = TEST_PCI_DEVICE_BAR_DMA_CTRL_START_BIT | TEST_PCI_DEVICE_BAR_DMA_CTRL_READ_BIT;
-  Status = PciIo->Mem.Write (PciIo, EfiPciIoWidthUint32, 0, TEST_PCI_DEVICE_BAR_DMA_CTRL_REG, 1, &DmaControl);
+  Status     = PciIo->Mem.Write (PciIo, EfiPciIoWidthUint32, 0, TEST_PCI_DEVICE_BAR_DMA_CTRL_REG, 1, &DmaControl);
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
   UT_ASSERT_MEM_EQUAL (Block, gPciTestBlock, sizeof (gPciTestBlock));
 
@@ -657,11 +663,11 @@ RegisterAccessPciIoPollTest (
   IN UNIT_TEST_CONTEXT  Context
   )
 {
-  EFI_STATUS           Status;
-  REGISTER_ACCESS_PCI_DEVICE      *PciDev;
-  EFI_PCI_IO_PROTOCOL  *PciIo;
-  TEST_PCI_DEVICE_CONTEXT  DevContext;
-  UINT64                   Result;
+  EFI_STATUS                  Status;
+  REGISTER_ACCESS_PCI_DEVICE  *PciDev;
+  EFI_PCI_IO_PROTOCOL         *PciIo;
+  TEST_PCI_DEVICE_CONTEXT     DevContext;
+  UINT64                      Result;
 
   Status = CreateTestPciDevice (&PciDev, &DevContext);
   if (EFI_ERROR (Status)) {
@@ -677,16 +683,16 @@ RegisterAccessPciIoPollTest (
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
 
   DevContext.PollRegisterCount = 2;
-  Status = PciIo->PollMem (PciIo, EfiPciIoWidthUint32, 0, TEST_PCI_DEVICE_BAR_POLL_REGISTER, 0xFF, 0x1, 4 * 100, &Result);
+  Status                       = PciIo->PollMem (PciIo, EfiPciIoWidthUint32, 0, TEST_PCI_DEVICE_BAR_POLL_REGISTER, 0xFF, 0x1, 4 * 100, &Result);
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
   UT_ASSERT_EQUAL (Result, 0x1);
 
   DevContext.PollRegisterCount = 5;
-  Status = PciIo->PollMem (PciIo, EfiPciIoWidthUint32, 0, TEST_PCI_DEVICE_BAR_POLL_REGISTER, 0xFF, 0x1, 4 * 100, &Result);
+  Status                       = PciIo->PollMem (PciIo, EfiPciIoWidthUint32, 0, TEST_PCI_DEVICE_BAR_POLL_REGISTER, 0xFF, 0x1, 4 * 100, &Result);
   UT_ASSERT_EQUAL (Status, EFI_TIMEOUT);
 
   DevContext.PollIoRegisterCount = 2;
-  Status = PciIo->PollIo (PciIo, EfiPciIoWidthUint32, 1, TEST_PCI_DEVICE_IO_BAR_POLL_REG, 0xFF, 0x1, 4 * 100, &Result);
+  Status                         = PciIo->PollIo (PciIo, EfiPciIoWidthUint32, 1, TEST_PCI_DEVICE_IO_BAR_POLL_REG, 0xFF, 0x1, 4 * 100, &Result);
   UT_ASSERT_EQUAL (Status, EFI_SUCCESS);
   UT_ASSERT_EQUAL (Result, 0x1);
 
@@ -701,14 +707,14 @@ RegisterAccessPciIoGetLocationTest (
   IN UNIT_TEST_CONTEXT  Context
   )
 {
-  EFI_STATUS           Status;
-  REGISTER_ACCESS_PCI_DEVICE      *PciDev;
-  EFI_PCI_IO_PROTOCOL  *PciIo;
-  TEST_PCI_DEVICE_CONTEXT  DevContext;
-  UINTN                    Segment;
-  UINTN                    Bus;
-  UINTN                    Device;
-  UINTN                    Function;
+  EFI_STATUS                  Status;
+  REGISTER_ACCESS_PCI_DEVICE  *PciDev;
+  EFI_PCI_IO_PROTOCOL         *PciIo;
+  TEST_PCI_DEVICE_CONTEXT     DevContext;
+  UINTN                       Segment;
+  UINTN                       Bus;
+  UINTN                       Device;
+  UINTN                       Function;
 
   Status = CreateTestPciDevice (&PciDev, &DevContext);
   if (EFI_ERROR (Status)) {
@@ -756,7 +762,7 @@ UefiTestMain (
   if (EFI_ERROR (Status)) {
     return Status;
   }
-  
+
   AddTestCase (RegisterAccessPciLibTest, "PciDeviceCreateTest", "PciDeviceCreateTest", PciDeviceCreateTest, NULL, NULL, NULL);
   AddTestCase (RegisterAccessPciLibTest, "PciDevicePciIoCreateTest", "PciDevicePciIoCreateTest", PciDevicePciIoCreateTest, NULL, NULL, NULL);
   AddTestCase (RegisterAccessPciLibTest, "RegisterAccessPciIoConfigRwTest", "RegisterAccessPciIoConfigRwTest", RegisterAccessPciIoConfigRwTest, NULL, NULL, NULL);

@@ -16,25 +16,25 @@ typedef struct _REGISTER_ACCESS_INTERFACE REGISTER_ACCESS_INTERFACE;
 typedef
 EFI_STATUS
 (*REGISTER_SPACE_READ) (
-  IN REGISTER_ACCESS_INTERFACE  *RegisterSpace,
-  IN UINT64               Address,
-  IN UINT32               Size,
-  OUT UINT64              *Value
+  IN  REGISTER_ACCESS_INTERFACE  *RegisterSpace,
+  IN  UINT64                     Address,
+  IN  UINT32                     Size,
+  OUT UINT64                     *Value
   );
 
 typedef
 EFI_STATUS
 (*REGISTER_SPACE_WRITE) (
   IN REGISTER_ACCESS_INTERFACE  *RegisterSpace,
-  IN UINT64               Address,
-  IN UINT32               Size,
-  IN UINT64               Value
+  IN UINT64                     Address,
+  IN UINT32                     Size,
+  IN UINT64                     Value
   );
 
 struct _REGISTER_ACCESS_INTERFACE {
-  CHAR16                *Name;
-  REGISTER_SPACE_READ   Read;
-  REGISTER_SPACE_WRITE  Write;
+  CHAR16                  *Name;
+  REGISTER_SPACE_READ     Read;
+  REGISTER_SPACE_WRITE    Write;
 };
 
 #endif

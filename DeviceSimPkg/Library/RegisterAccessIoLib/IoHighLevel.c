@@ -4,7 +4,7 @@
   All assertions for bit field operations are handled bit field functions in the
   Base Library.
 
-  Copyright (c) 2006 - 2018, Intel Corporation. All rights reserved.<BR>
+  Copyright (c) 2023, Intel Corporation. All rights reserved.<BR>
   SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
