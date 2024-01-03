@@ -501,7 +501,7 @@ TlsSetCaCertificate (
   )
 {
   TLS_CONNECTION  *TlsConn;
-  mbedtls_x509_crt Crt;
+  mbedtls_x509_crt *Crt;
   INT32 Ret;
 
   TlsConn = (TLS_CONNECTION *)Tls;
@@ -514,13 +514,14 @@ TlsSetCaCertificate (
     return EFI_INVALID_PARAMETER;
   }
 
-  mbedtls_x509_crt_init(&Crt);
+  Crt = malloc(sizeof(mbedtls_x509_crt));
+  mbedtls_x509_crt_init(Crt);
 
-  Ret = mbedtls_x509_crt_parse_der(&Crt, Data, DataSize);
+  Ret = mbedtls_x509_crt_parse_der(Crt, Data, DataSize);
 
   if (Ret == 0) {
-    mbedtls_ssl_conf_ca_chain((mbedtls_ssl_config *)TlsConn->Ssl->conf, &Crt, NULL);
-    mbedtls_x509_crt_free(&Crt);
+    mbedtls_ssl_conf_ca_chain((mbedtls_ssl_config *)TlsConn->Ssl->conf, Crt, NULL);
+    mbedtls_ssl_conf_cert_profile((mbedtls_ssl_config *)TlsConn->Ssl->conf, &mbedtls_x509_crt_profile_default);
   }
 
   return (Ret == 0) ? EFI_SUCCESS : EFI_ABORTED;
