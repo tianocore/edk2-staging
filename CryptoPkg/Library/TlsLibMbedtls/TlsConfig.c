@@ -606,6 +606,7 @@ TlsSetHostPrivateKeyEx (
   uint8_t *pem_data;
   uint8_t *new_pem_data;
   UINTN password_len;
+  UINTN ActualDataSize;
 
   TlsConn = (TLS_CONNECTION *)Tls;
 
@@ -613,6 +614,27 @@ TlsSetHostPrivateKeyEx (
     return EFI_INVALID_PARAMETER;
   }
 
+  ActualDataSize = DataSize;
+
+  mbedtls_pk_init(&pk);
+
+  if (Password != NULL) {
+      password_len = AsciiStrLen(Password);
+  } else {
+      password_len = 0;
+  }
+
+
+  // Try to parse the private key in DER format 
+  ret = mbedtls_pk_parse_key(&pk, Data, ActualDataSize,
+                             (const uint8_t *)Password, password_len,
+                             NULL, NULL);
+
+  if (ret == 0) {
+    goto SetKey;
+  }
+
+  // Try to parse the private key in PEM format 
   pem_data = (uint8_t *)Data;
 
   new_pem_data = NULL;
@@ -627,14 +649,6 @@ TlsSetHostPrivateKeyEx (
       DataSize += 1;
   }
 
-  mbedtls_pk_init(&pk);
-
-  if (Password != NULL) {
-      password_len = AsciiStrLen(Password);
-  } else {
-      password_len = 0;
-  }
-
   ret = mbedtls_pk_parse_key(&pk, pem_data, DataSize,
                              (const uint8_t *)Password, password_len,
                              NULL, NULL);
@@ -643,13 +657,16 @@ TlsSetHostPrivateKeyEx (
       new_pem_data = NULL;
   }
 
-  if (mbedtls_ssl_conf_own_cert((mbedtls_ssl_config *)TlsConn->Ssl->conf, NULL, &pk) != 0) {
-    ret = 1;
+  if (ret == 0) {
+    goto SetKey;
+  } else {
+    return EFI_ABORTED;
   }
 
-  if (ret != 0) {
-      mbedtls_pk_free(&pk);
-      return EFI_ABORTED;
+SetKey:
+
+  if (mbedtls_ssl_conf_own_cert((mbedtls_ssl_config *)TlsConn->Ssl->conf, &OwnCrt, &pk) != 0) {
+    return EFI_ABORTED;
   }
 
   return EFI_SUCCESS;
