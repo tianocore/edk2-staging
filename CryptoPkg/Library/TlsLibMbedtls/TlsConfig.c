@@ -341,6 +341,12 @@ TlsSetCipherList (
 
   This function handles TLS/SSL integrated compression methods.
 
+  For every TLS 1.3 ClientHello, this vector MUST contain exactly
+  one byte set to zero, which corresponds to the 'null' compression
+  method in prior versions of TLS.
+  For TLS 1.2 ClientHello, for security reasons we do not support
+  compression anymore, thus also just the 'null' compression method.
+
   @param[in]  CompMethod    The compression method ID.
 
   @retval  EFI_SUCCESS        The compression method for the communication was
@@ -354,7 +360,7 @@ TlsSetCompressionMethod (
   IN     UINT8  CompMethod
   )
 {
-  return EFI_UNSUPPORTED;
+  return EFI_SUCCESS;
 }
 
 /**
