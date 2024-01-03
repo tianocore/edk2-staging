@@ -84,6 +84,8 @@ STATIC CONST TLS_ALGO_TO_NAME  TlsSignatureAlgoToName[] = {
   { TlsSignatureAlgoEcdsa,     "ECDSA" },
 };
 
+mbedtls_x509_crt OwnCrt;
+
 /**
   Gets the Mbedtls cipher suite mapping for the supplied IANA TLS cipher suite.
 
@@ -550,7 +552,6 @@ TlsSetHostPublicCert (
   )
 {
   TLS_CONNECTION  *TlsConn;
-  mbedtls_x509_crt Crt;
   INT32 Ret;
 
   TlsConn = (TLS_CONNECTION *)Tls;
@@ -563,17 +564,12 @@ TlsSetHostPublicCert (
     return EFI_INVALID_PARAMETER;
   }
 
-  mbedtls_x509_crt_init(&Crt);
-
-  Ret = mbedtls_x509_crt_parse_der(&Crt, Data, DataSize);
-
-  if (Ret == 0) {
-    Ret = mbedtls_ssl_conf_own_cert((mbedtls_ssl_config *)TlsConn->Ssl->conf, &Crt, NULL);
+  Ret = mbedtls_x509_crt_parse_der(&OwnCrt, Data, DataSize);
+  if (Ret != 0) {
+    return EFI_ABORTED;
   }
 
-  mbedtls_x509_crt_free(&Crt);
-
-  return (Ret == 0) ? EFI_SUCCESS : EFI_ABORTED;
+  return EFI_SUCCESS;
 }
 
 /**
