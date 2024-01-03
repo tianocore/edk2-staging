@@ -94,7 +94,7 @@ STATIC CONST TLS_ALGO_TO_NAME  TlsSignatureAlgoToName[] = {
 
 **/
 STATIC
-CONST TLS_CIPHER_MAPPING *
+BOOLEAN
 TlsGetCipherMapping (
   IN     UINT16  CipherId
   )
@@ -116,7 +116,7 @@ TlsGetCipherMapping (
       //
       // Translate IANA cipher suite ID to Mbedtls name.
       //
-      return &TlsCipherMappingTable[Middle];
+      return TRUE;
     }
 
     if (CipherId < TlsCipherMappingTable[Middle].IanaCipher) {
@@ -129,7 +129,7 @@ TlsGetCipherMapping (
   //
   // No Cipher Mapping found, return NULL.
   //
-  return NULL;
+  return FALSE;
 }
 
 /**
@@ -270,50 +270,39 @@ TlsSetCipherList (
 {
   TLS_CONNECTION            *TlsConn;
   EFI_STATUS                Status;
-  CONST TLS_CIPHER_MAPPING  **MappedCipher;
-  UINTN                     MappedCipherBytes;
-  UINTN                     MappedCipherCount;
-  UINTN                     CipherStringSize;
   UINTN                     Index;
-  CONST TLS_CIPHER_MAPPING  *Mapping;
-  CHAR8                     *CipherString;
-  CHAR8                     *CipherStringPosition;
+  UINTN                     TotalSize;
+  INT32                     *FinalCipherId;
+  UINTN                     MappedCipherCount;
 
   TlsConn = (TLS_CONNECTION *)Tls;
   if ((TlsConn == NULL) || (TlsConn->Ssl == NULL) || (CipherId == NULL)) {
     return EFI_INVALID_PARAMETER;
   }
 
-  //
-  // Allocate the MappedCipher array for recording the mappings that we find
-  // for the input IANA identifiers in CipherId.
-  //
   Status = SafeUintnMult (
-             CipherNum,
-             sizeof (*MappedCipher),
-             &MappedCipherBytes
+             CipherNum + 1,
+             sizeof (INT32),
+             &TotalSize
              );
   if (EFI_ERROR (Status)) {
     return EFI_OUT_OF_RESOURCES;
   }
 
-  MappedCipher = AllocatePool (MappedCipherBytes);
-  if (MappedCipher == NULL) {
+  FinalCipherId = AllocatePool (TotalSize);
+  if (FinalCipherId == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
 
   //
-  // Map the cipher IDs, and count the number of bytes for the full
-  // CipherString.
+  // Map the cipher IDs, and count the number of bytes for the full CipherString.
   //
   MappedCipherCount = 0;
-  CipherStringSize  = 0;
   for (Index = 0; Index < CipherNum; Index++) {
     //
     // Look up the IANA-to-Mbedtls mapping.
     //
-    Mapping = TlsGetCipherMapping (CipherId[Index]);
-    if (Mapping == NULL) {
+    if (TlsGetCipherMapping (CipherId[Index]) == FALSE) {
       DEBUG ((
         DEBUG_VERBOSE,
         "%a:%a: skipping CipherId=0x%04x\n",
@@ -327,141 +316,22 @@ TlsSetCipherList (
       // don't change the relative order of elements on it.
       //
       continue;
+    } else {
+      //
+      // Record the CipherId.
+      //
+      FinalCipherId[MappedCipherCount++] = CipherId[Index];
     }
-
-    //
-    // Accumulate Mapping->MbedtlsCipherLength into CipherStringSize. If this
-    // is not the first successful mapping, account for a colon (":") prefix
-    // too.
-    //
-    if (MappedCipherCount > 0) {
-      Status = SafeUintnAdd (CipherStringSize, 1, &CipherStringSize);
-      if (EFI_ERROR (Status)) {
-        Status = EFI_OUT_OF_RESOURCES;
-        goto FreeMappedCipher;
-      }
-    }
-
-    Status = SafeUintnAdd (
-               CipherStringSize,
-               Mapping->MbedtlsCipherLength,
-               &CipherStringSize
-               );
-    if (EFI_ERROR (Status)) {
-      Status = EFI_OUT_OF_RESOURCES;
-      goto FreeMappedCipher;
-    }
-
-    //
-    // Record the mapping.
-    //
-    MappedCipher[MappedCipherCount++] = Mapping;
   }
 
-  //
-  // Verify that at least one IANA cipher ID could be mapped; account for the
-  // terminating NUL character in CipherStringSize; allocate CipherString.
-  //
-  if (MappedCipherCount == 0) {
-    DEBUG ((
-      DEBUG_ERROR,
-      "%a:%a: no CipherId could be mapped\n",
-      gEfiCallerBaseName,
-      __FUNCTION__
-      ));
-    Status = EFI_UNSUPPORTED;
-    goto FreeMappedCipher;
-  }
-
-  Status = SafeUintnAdd (CipherStringSize, 1, &CipherStringSize);
-  if (EFI_ERROR (Status)) {
-    Status = EFI_OUT_OF_RESOURCES;
-    goto FreeMappedCipher;
-  }
-
-  CipherString = AllocatePool (CipherStringSize);
-  if (CipherString == NULL) {
-    Status = EFI_OUT_OF_RESOURCES;
-    goto FreeMappedCipher;
-  }
-
-  //
-  // Go over the collected mappings and populate CipherString.
-  //
-  CipherStringPosition = CipherString;
-  for (Index = 0; Index < MappedCipherCount; Index++) {
-    Mapping = MappedCipher[Index];
-    //
-    // Append the colon (":") prefix except for the first mapping, then append
-    // Mapping->MbedtlsCipher.
-    //
-    if (Index > 0) {
-      *(CipherStringPosition++) = ':';
-    }
-
-    CopyMem (
-      CipherStringPosition,
-      Mapping->MbedtlsCipher,
-      Mapping->MbedtlsCipherLength
-      );
-    CipherStringPosition += Mapping->MbedtlsCipherLength;
-  }
-
-  //
-  // NUL-terminate CipherString.
-  //
-  *(CipherStringPosition++) = '\0';
-  ASSERT (CipherStringPosition == CipherString + CipherStringSize);
-
-  //
-  // Log CipherString for debugging. CipherString can be very long if the
-  // caller provided a large CipherId array, so log CipherString in segments of
-  // 79 non-newline characters. (MAX_DEBUG_MESSAGE_LENGTH is usually 0x100 in
-  // DebugLib instances.)
-  //
-  DEBUG_CODE_BEGIN ();
-  UINTN  FullLength;
-  UINTN  SegmentLength;
-
-  FullLength = CipherStringSize - 1;
-  DEBUG ((
-    DEBUG_VERBOSE,
-    "%a:%a: CipherString={\n",
-    gEfiCallerBaseName,
-    __FUNCTION__
-    ));
-  for (CipherStringPosition = CipherString;
-       CipherStringPosition < CipherString + FullLength;
-       CipherStringPosition += SegmentLength)
-  {
-    SegmentLength = FullLength - (CipherStringPosition - CipherString);
-    if (SegmentLength > 79) {
-      SegmentLength = 79;
-    }
-
-    DEBUG ((DEBUG_VERBOSE, "%.*a\n", SegmentLength, CipherStringPosition));
-  }
-
-  DEBUG ((DEBUG_VERBOSE, "}\n"));
-  //
-  // Restore the pre-debug value of CipherStringPosition by skipping over the
-  // trailing NUL.
-  //
-  CipherStringPosition++;
-  ASSERT (CipherStringPosition == CipherString + CipherStringSize);
-  DEBUG_CODE_END ();
+  FinalCipherId[MappedCipherCount] = 0;
 
   //
   // Sets the ciphers for use by the Tls object.
   //
-  mbedtls_ssl_conf_ciphersuites ((mbedtls_ssl_config *)TlsConn->Ssl->conf, (const int*)CipherString);
+  mbedtls_ssl_conf_ciphersuites ((mbedtls_ssl_config *)TlsConn->Ssl->conf, (const int*)FinalCipherId);
 
   Status = EFI_SUCCESS;
-
-  FreePool (CipherString);
-
-FreeMappedCipher:
-  FreePool ((VOID *)MappedCipher);
 
   return Status;
 }
