@@ -43,9 +43,9 @@ TlsInHandshake (
   state = mbedtls_ssl_is_handshake_over(TlsConn->Ssl);
 
   if (state == 1) {
-    return FALSE;
-  } else {
     return TRUE;
+  } else {
+    return FALSE;
   }
 }
 
