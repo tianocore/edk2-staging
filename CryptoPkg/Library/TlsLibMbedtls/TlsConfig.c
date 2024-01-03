@@ -1131,7 +1131,33 @@ TlsGetHostPublicCert (
   IN OUT UINTN  *DataSize
   )
 {
-  return EFI_UNSUPPORTED;
+  const mbedtls_x509_crt *Cert;
+  TLS_CONNECTION   *TlsConn;
+
+  Cert    = NULL;
+  TlsConn = (TLS_CONNECTION *)Tls;
+
+  if ((TlsConn == NULL) || (TlsConn->Ssl == NULL) || (DataSize == NULL) || ((*DataSize != 0) && (Data == NULL))) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  Cert = TlsConn->Ssl->conf->key_cert->cert;
+  if (Cert == NULL) {
+    return EFI_NOT_FOUND;
+  }
+
+  //
+  // Only DER encoding is supported currently.
+  //
+  if (*DataSize < Cert->raw.len) {
+    *DataSize = Cert->raw.len;
+    return EFI_BUFFER_TOO_SMALL;
+  }
+
+  memcpy(Data, Cert->raw.p, Cert->raw.len);
+  *DataSize = Cert->raw.len;
+
+  return EFI_SUCCESS;
 }
 
 /**
