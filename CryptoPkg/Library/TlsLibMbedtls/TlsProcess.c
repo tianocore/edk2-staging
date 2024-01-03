@@ -10,7 +10,6 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 #include "InternalTlsLib.h"
 
-#define MAX_BUFFER_SIZE  32768
 
 /**
   Checks if the TLS handshake was done.
@@ -254,7 +253,7 @@ TlsCtrlTrafficOut (
   TLS_CONNECTION  *TlsConn;
 
   TlsConn = (TLS_CONNECTION *)Tls;
-  if ((TlsConn == NULL) || (TlsConn->fd == NULL)) {
+  if ((TlsConn == NULL)) {
     return -1;
   }
 
@@ -262,7 +261,11 @@ TlsCtrlTrafficOut (
   // Read and return the amount of data from the BIO.
   //
   // return mbedtls_net_recv (TlsConn->fd, Buffer, (UINT32)BufferSize);
-  return BufferSize;
+
+  CopyMem(Buffer, TlsConn->TlsCipherBuffer.CipherTextBuffer,
+          TlsConn->TlsCipherBuffer.CipherTextBufferSize);
+
+  return TlsConn->TlsCipherBuffer.CipherTextBufferSize;
 }
 
 /**
@@ -290,7 +293,7 @@ TlsCtrlTrafficIn (
   TLS_CONNECTION  *TlsConn;
 
   TlsConn = (TLS_CONNECTION *)Tls;
-  if ((TlsConn == NULL) || (TlsConn->fd == NULL)) {
+  if ((TlsConn == NULL)) {
     return -1;
   }
 
@@ -298,6 +301,8 @@ TlsCtrlTrafficIn (
   // Write and return the amount of data to the BIO.
   //
   // return mbedtls_net_send (TlsConn->fd, Buffer, (UINT32)BufferSize);
+
+  CopyMem(TlsConn->TlsCipherBuffer.CipherTextBuffer, Buffer, BufferSize);
   return BufferSize;
 }
 

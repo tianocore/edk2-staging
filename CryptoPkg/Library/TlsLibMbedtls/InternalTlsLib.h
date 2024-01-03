@@ -25,6 +25,13 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <library/ssl_misc.h>
 #include <sys/socket.h>
 
+typedef struct
+{
+  UINTN CipherTextBufferSize;
+  UINT8 *CipherTextBuffer;
+  UINTN RemainderSize;
+} TLS_CIPHER_BUFFER;
+
 typedef struct {
   //
   // Main SSL Connection which is created by a server or a client
@@ -34,8 +41,9 @@ typedef struct {
   //
   // Memory BIO for the TLS/SSL Writing operations.
   //
-  mbedtls_net_context    *fd;
 
+
+  TLS_CIPHER_BUFFER TlsCipherBuffer;
   //
   // SSL/TLS configuration to be shared between mbedtls_ssl_context structures.
   //
