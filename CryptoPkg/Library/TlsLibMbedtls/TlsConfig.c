@@ -146,6 +146,8 @@ TlsGetCipherMapping (
   @retval  EFI_UNSUPPORTED       Unsupported TLS/SSL method.
 
 **/
+# define TLS1_VERSION                    0x0301
+# define TLS1_1_VERSION                  0x0302
 # define TLS1_2_VERSION                  0x0303
 # define TLS1_3_VERSION                  0x0304
 EFI_STATUS
@@ -170,6 +172,9 @@ TlsSetVersion (
   // Bound TLS method to the particular specified version.
   //
   switch (ProtoVersion) {
+    case TLS1_VERSION:
+    case TLS1_1_VERSION:
+      return EFI_UNSUPPORTED;
     case TLS1_2_VERSION:
       //
       // TLS 1.2
