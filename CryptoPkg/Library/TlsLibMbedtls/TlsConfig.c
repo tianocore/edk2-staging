@@ -802,7 +802,9 @@ TlsSetEcCurve (
   )
 {
   TLS_CONNECTION  *TlsConn;
-  mbedtls_ecp_group_id grp_id;
+  UINT16  *GroupList;
+
+  GroupList = malloc(sizeof(UINT16) * 2);
 
   TlsConn = (TLS_CONNECTION *)Tls;
 
@@ -814,22 +816,24 @@ TlsSetEcCurve (
     case TlsEcNamedCurveSecp256r1:
       return EFI_UNSUPPORTED;
     case TlsEcNamedCurveSecp384r1:
-      grp_id = MBEDTLS_ECP_DP_SECP384R1;
+      GroupList[0] = MBEDTLS_SSL_IANA_TLS_GROUP_SECP384R1;
       break;
     case TlsEcNamedCurveSecp521r1:
-      grp_id = MBEDTLS_ECP_DP_SECP521R1;
+      GroupList[0] = MBEDTLS_SSL_IANA_TLS_GROUP_SECP521R1;
       break;
     case TlsEcNamedCurveX25519:
-      grp_id = MBEDTLS_ECP_DP_CURVE25519;
+      GroupList[0] = MBEDTLS_SSL_IANA_TLS_GROUP_X25519;
       break;
     case TlsEcNamedCurveX448:
-      grp_id = MBEDTLS_ECP_DP_CURVE448;
+      GroupList[0] = MBEDTLS_SSL_IANA_TLS_GROUP_X448;
       break;
     default:
       return EFI_UNSUPPORTED;
   }
 
-  mbedtls_ssl_conf_curves((mbedtls_ssl_config *)TlsConn->Ssl->conf, &grp_id);
+  GroupList[1] =  MBEDTLS_SSL_IANA_TLS_GROUP_NONE;
+
+  mbedtls_ssl_conf_groups((mbedtls_ssl_config *)TlsConn->Ssl->conf, GroupList);
 
   return EFI_SUCCESS;
 }
