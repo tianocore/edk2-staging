@@ -183,4 +183,10 @@ extern EFI_GUID  gEfiGlobalVariableGuid;
 ///
 #define EFI_VENDOR_KEYS_VARIABLE_NAME  L"VendorKeys"
 
+///
+/// Whether the platform firmware is operating in device authentication boot mode (1) or not (0).
+/// The content is UINT8.
+///
+#define EFI_DEVICE_AUTH_BOOT_MODE_NAME  L"devAuthBoot"
+
 #endif
