@@ -41,6 +41,9 @@
 #define SETUP_MODE  1
 #define USER_MODE   0
 
+#define DEVICE_AUTH_BOOT_MODE_ENABLE 1
+#define DEVICE_AUTH_BOOT_MODE_DISABLE 0
+
 // ***********************************************************************
 // Signature Database
 // ***********************************************************************
