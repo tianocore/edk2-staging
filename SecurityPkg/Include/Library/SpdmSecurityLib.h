@@ -421,4 +421,17 @@ SpdmGetIoProtocolViaSpdmContext (
   IN VOID  *SpdmContext
   );
 
+/**
+  Helper function to quickly determine whether device authentication boot is enabled.
+
+  @retval     TRUE    device authentication boot is verifiably enabled.
+  @retval     FALSE   device authentication boot is either disabled or an error prevented checking.
+
+**/
+BOOLEAN
+EFIAPI
+IsDeviceAuthBootEnabled (
+  VOID
+  );
+
 #endif
