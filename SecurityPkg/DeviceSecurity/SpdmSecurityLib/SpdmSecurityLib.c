@@ -10,6 +10,45 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include "SpdmSecurityLibInternal.h"
 
 /**
+  Helper function to quickly determine whether device authentication boot is enabled.
+
+  @retval     TRUE    device authentication boot is verifiably enabled.
+  @retval     FALSE   device authentication boot is either disabled or an error prevented checking.
+
+**/
+BOOLEAN
+EFIAPI
+IsDeviceAuthBootEnabled (
+  VOID
+  )
+{
+  EFI_STATUS  Status;
+  UINT8       *DeviceAuthBootMode;
+
+  DeviceAuthBootMode = NULL;
+
+  Status = GetEfiGlobalVariable2 (EFI_DEVICE_AUTH_BOOT_MODE_NAME, (VOID **)&DeviceAuthBootMode, NULL);
+  //
+  // Skip verification if DeviceAuthBootMode variable doesn't exist.
+  //
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "Cannot check DeviceAuthBootMode variable %r \n ", Status));
+    return FALSE;
+  }
+
+  //
+  // Skip verification if DeviceAuthBootMode is disabled but not AuditMode
+  //
+  if (*DeviceAuthBootMode == DEVICE_AUTH_BOOT_MODE_DISABLE) {
+    FreePool (DeviceAuthBootMode);
+    return FALSE;
+  } else {
+    FreePool (DeviceAuthBootMode);
+    return TRUE;
+  }
+}
+
+/**
   The device driver uses this service to authenticate and measure an SPDM device.
 
   @param[in]  SpdmDeviceInfo            The SPDM context for the device.
@@ -58,7 +97,7 @@ SpdmDeviceAuthenticationAndMeasurement (
     }
   }
 
-  if ((SecurityPolicy->AuthenticationPolicy & EDKII_DEVICE_AUTHENTICATION_REQUIRED) != 0) {
+  if (((SecurityPolicy->AuthenticationPolicy & EDKII_DEVICE_AUTHENTICATION_REQUIRED) != 0) && (IsDeviceAuthBootEnabled ())) {
     Status = DoDeviceAuthentication (SpdmDeviceContext, &AuthState, SlotId, IsValidCertChain, RootCertMatch, SecurityState);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_ERROR, "DoDeviceAuthentication failed - %r\n", Status));

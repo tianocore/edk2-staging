@@ -10,13 +10,6 @@
 #define EDKII_DEVICE_AUTHENTICATION_GUID_H_
 
 /**
-  Whether the platform firmware is operating in device authentication boot mode (1) or not (0).
-
-  The content is UINT8.
-**/
-#define EDKII_DEVICE_AUTH_BOOT  L"devAuthBoot"
-
-/**
   This is a signature database for device authentication, instead of image authentication.
 
   The content of the signature database is same as the one in db/dbx. (a list of EFI_SIGNATURE_LIST)
