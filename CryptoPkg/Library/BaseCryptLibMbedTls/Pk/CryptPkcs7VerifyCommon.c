@@ -985,7 +985,6 @@ Pkcs7GetSigners (
   UINTN             WrapDataSize;
   BOOLEAN           Wrapped;
 
-  CHAR8 buf[4096];
   UINTN  CertSize;
   UINT8  Index;
   UINT8  *CertBuf;
@@ -1038,16 +1037,12 @@ Pkcs7GetSigners (
     // Find signers cert
     Cert = MbedTlsPkcs7FindSignerCert (SignerInfo, &(Pkcs7.SignedData.Certificates));
 
-    CertSize = mbedtls_x509_crt_info(buf, sizeof(buf), NULL, Cert);
-    if (CertSize < 0) {
-      goto _Exit;
-    }
-
+    CertSize = Cert->raw.len;
     OldSize    = BufferSize;
     OldBuf     = CertBuf;
     BufferSize = OldSize + CertSize + sizeof (UINT32);
-    CertBuf    = malloc (BufferSize);
 
+    CertBuf    = AllocateZeroPool (BufferSize);
     if (CertBuf == NULL) {
       goto _Exit;
     }
@@ -1075,7 +1070,7 @@ Pkcs7GetSigners (
     CertBuf[0] = Index;
 
     *CertLength  = BufferSize - OldSize - sizeof (UINT32);
-    *TrustedCert = malloc (*CertLength);
+    *TrustedCert = AllocateZeroPool (*CertLength);
     if (*TrustedCert == NULL) {
       goto _Exit;
     }
@@ -1091,12 +1086,12 @@ _Exit:
   // Release Resources
   //
   if (!Status && (CertBuf != NULL)) {
-    free (CertBuf);
+    FreePool (CertBuf);
     *CertStack = NULL;
   }
 
   if (OldBuf != NULL) {
-    free (OldBuf);
+    FreePool (OldBuf);
   }
 
   return Status;
