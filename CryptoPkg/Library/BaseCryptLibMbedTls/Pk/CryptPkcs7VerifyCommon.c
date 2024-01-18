@@ -1054,7 +1054,7 @@ Pkcs7GetSigners (
     }
 
     WriteUnaligned32 ((UINT32 *)(CertBuf + OldSize), (UINT32)CertSize);
-    CopyMem (CertBuf + OldSize + sizeof (UINT32), Cert, CertSize);
+    CopyMem (CertBuf + OldSize + sizeof (UINT32), Cert->raw.p, CertSize);
 
     Index++;
 
