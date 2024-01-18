@@ -25,10 +25,11 @@
  * @param[out]     find_extension_data_len matched extension data size.
  *
  **/
-static BOOLEAN
+STATIC
+BOOLEAN
 InternalX509FindExtensionData(uint8_t *start, uint8_t *end, const uint8_t *oid,
-                                          size_t oid_size, uint8_t **find_extension_data,
-                                          size_t *find_extension_data_len)
+                              size_t oid_size, uint8_t **find_extension_data,
+                              size_t *find_extension_data_len)
 {
     uint8_t *ptr;
     uint8_t *extension_ptr;
@@ -95,8 +96,6 @@ InternalX509FindExtensionData(uint8_t *start, uint8_t *end, const uint8_t *oid,
     return status;
 }
 
-
-
 /**
  * Retrieve Extension data from one X.509 certificate.
  *
@@ -116,10 +115,12 @@ InternalX509FindExtensionData(uint8_t *start, uint8_t *end, const uint8_t *oid,
  *                                 is returned in the extension_data_size parameter.
  * @retval RETURN_UNSUPPORTED       The operation is not supported.
  **/
-BOOLEAN GetExtensionData(const mbedtls_x509_crt  *cert,
-                                     const uint8_t *oid, size_t oid_size,
-                                     uint8_t *extension_data,
-                                     size_t *extension_data_size)
+STATIC
+BOOLEAN
+GetExtensionData(const mbedtls_x509_crt  *cert,
+                 const uint8_t *oid, size_t oid_size,
+                 uint8_t *extension_data,
+                 size_t *extension_data_size)
 {
   const mbedtls_x509_crt *crt;
   int32_t ret;
@@ -139,13 +140,13 @@ BOOLEAN GetExtensionData(const mbedtls_x509_crt  *cert,
 
   status = FALSE;
 
-   crt = cert;
+  crt = cert;
 
   ptr = crt->v3_ext.p;
   end = crt->v3_ext.p + crt->v3_ext.len;
   ret = mbedtls_asn1_get_tag(&ptr, end, &obj_len,
-                              MBEDTLS_ASN1_CONSTRUCTED |
-                              MBEDTLS_ASN1_SEQUENCE);
+                             MBEDTLS_ASN1_CONSTRUCTED |
+                             MBEDTLS_ASN1_SEQUENCE);
 
   if (ret == 0) {
       status = InternalX509FindExtensionData(
@@ -159,6 +160,9 @@ BOOLEAN GetExtensionData(const mbedtls_x509_crt  *cert,
           goto cleanup;
       }
       if (oid != NULL) {
+          if (extension_data == NULL) {
+            return FALSE;
+          }
           CopyMem(extension_data, ptr, obj_len);
       }
       *extension_data_size = obj_len;
@@ -194,9 +198,9 @@ IsEkuInCertificate (
   EFI_STATUS          Status;
   BOOLEAN Ret;
 
-  uint8_t Buffer[1024];
-  size_t index;
-  size_t len;
+  uint8_t *Buffer;
+  size_t Index;
+  size_t Len;
 
   uint8_t EkuOID[] = { 0x55, 0x1D, 0x25 };
 
@@ -205,29 +209,45 @@ IsEkuInCertificate (
     goto Exit;
   }
 
-  len = sizeof(Buffer);
+  Len = 0;
+  Buffer = NULL;
+  Ret = GetExtensionData(Cert,
+                         (const uint8_t *)EkuOID,
+                         sizeof(EkuOID),
+                         NULL,
+                         &Len);
+  if (Len == 0) {
+    Status = EFI_NOT_FOUND;
+    goto Exit;
+  }
+
+  Buffer = AllocateZeroPool(Len);
+  if (Buffer == NULL) {
+    Status = EFI_NOT_FOUND;
+    goto Exit;
+  }
 
   Ret = GetExtensionData(Cert,
                          (const uint8_t *)EkuOID,
                          sizeof(EkuOID),
                          Buffer,
-                         &len);
+                         &Len);
 
-    if ((len == 0) || (!Ret)) {
+    if ((Len == 0) || (!Ret)) {
       Status = EFI_NOT_FOUND;
       goto Exit;
     }
 
   Status = EFI_NOT_FOUND;
   /*find the spdm hardware identity OID*/
-  for(index = 0; index <= len - EkuLen; index++) {
-      if (!CompareMem(Buffer + index, EKU, EkuLen)) {
+  for(Index = 0; Index <= Len - EkuLen; Index++) {
+      if (!CompareMem(Buffer + Index, EKU, EkuLen)) {
         //check sub EKU
-        if (index == len - EkuLen) {
+        if (Index == Len - EkuLen) {
           Status = EFI_SUCCESS;
           break;
         //Ensure that the OID is complete
-        } else if (Buffer[index + EkuLen] == 0x06) {
+        } else if (Buffer[Index + EkuLen] == 0x06) {
           Status = EFI_SUCCESS;
           break;
         } else {
@@ -237,6 +257,9 @@ IsEkuInCertificate (
   }
 
 Exit:
+  if (Buffer != NULL) {
+    FreePool(Buffer);
+  }
 
   return Status;
 }
@@ -306,7 +329,12 @@ void GetOidFromTxt(
  *                                       2. cert basic_constraints CA is false;
  * @retval  false  verify fail
  **/
-static BOOLEAN IsCertSignerCert(uint8_t *Start, uint8_t *End)
+STATIC
+BOOLEAN
+IsCertSignerCert(
+  uint8_t *Start,
+  uint8_t *End
+  )
 {
   BOOLEAN status;
   /*leaf cert basic_constraints case1: CA: false and CA object is excluded */
@@ -315,8 +343,8 @@ static BOOLEAN IsCertSignerCert(uint8_t *Start, uint8_t *End)
   /*leaf cert basic_constraints case2: CA: false */
   uint8_t basic_constraints_case2[] = {0x30, 0x06, 0x01, 0x01, 0xFF, 0x02, 0x01, 0x00};
 
-  uint8_t Buffer[1024];
-  size_t len;
+  uint8_t *Buffer;
+  size_t Len;
   mbedtls_x509_crt   Cert;
   UINTN ObjLen;
 
@@ -330,33 +358,59 @@ static BOOLEAN IsCertSignerCert(uint8_t *Start, uint8_t *End)
 
   uint8_t m_libspdm_oid_basic_constraints[] = { 0x55, 0x1D, 0x13 };
 
-  len = sizeof(Buffer);
+  Len = 0;
+  Buffer = NULL;
+  status = GetExtensionData(&Cert,
+                            (const uint8_t *)m_libspdm_oid_basic_constraints,
+                            sizeof(m_libspdm_oid_basic_constraints),
+                            NULL,
+                            &Len);
+  if (Len == 0) {
+      /* basic constraints is not present in cert */
+      return TRUE;
+  }
+
+  Buffer = AllocateZeroPool(Len);
+  if (Buffer == NULL) {
+    return FALSE;
+  }
 
   status = GetExtensionData(&Cert,
                             (const uint8_t *)m_libspdm_oid_basic_constraints,
                             sizeof(m_libspdm_oid_basic_constraints),
                             Buffer,
-                            &len);
+                            &Len);
 
-  if (len == 0) {
+  if (Len == 0) {
       /* basic constraints is not present in cert */
-      return TRUE;
+      status = TRUE;
+      goto Exit;
   } else if (!status ) {
-      return FALSE;
+      status = FALSE;
+      goto Exit;
   }
 
-  if ((len == sizeof(basic_constraints_case1)) &&
+  if ((Len == sizeof(basic_constraints_case1)) &&
       (!CompareMem(Buffer, basic_constraints_case1, sizeof(basic_constraints_case1)))) {
-      return TRUE;
+      status = TRUE;
+      goto Exit;
   }
 
-  if ((len == sizeof(basic_constraints_case2)) &&
+  if ((Len == sizeof(basic_constraints_case2)) &&
       (!CompareMem(Buffer, basic_constraints_case2, sizeof(basic_constraints_case2)))) {
-      return TRUE;
+      status = TRUE;
+      goto Exit;
   }
 
+  status = FALSE;
+
+Exit:
   mbedtls_x509_crt_free(&Cert);
-  return FALSE;
+
+  if (Buffer != NULL) {
+    FreePool(Buffer);
+  }
+  return status;
 }
 
 
