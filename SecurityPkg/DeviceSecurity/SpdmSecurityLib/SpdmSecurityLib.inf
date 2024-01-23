@@ -48,3 +48,6 @@
   gEdkiiDeviceSignatureDatabaseGuid       ## CONSUMES
   gEfiCertX509Guid                        ## CONSUMES
   gEfiDeviceSecuritySpdmUidGuid           ## PRODUCES AND CONSUMES
+
+[Pcd]
+  gEfiMdeModulePkgTokenSpaceGuid.PcdTcgPfpMeasurementRevision            ## CONSUMES
