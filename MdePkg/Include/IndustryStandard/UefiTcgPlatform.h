@@ -386,6 +386,7 @@ typedef struct {
 #define TCG_EfiSpecIDEventStruct_SPEC_VERSION_MINOR_TPM2   0
 #define TCG_EfiSpecIDEventStruct_SPEC_ERRATA_TPM2          0
 #define TCG_EfiSpecIDEventStruct_SPEC_ERRATA_TPM2_REV_105  105
+#define TCG_EfiSpecIDEventStruct_SPEC_ERRATA_TPM2_REV_106  106
 
 typedef struct {
   UINT8     signature[16];
