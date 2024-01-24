@@ -517,11 +517,7 @@ typedef struct tdTCG_EfiStartupLocalityEvent {
 // ======================================================================================================================
 //
 
-//
-// current spec is using PCR 7, but it will cause bitlocker fail.
-// As such, we use PCR 1.
-//
-#define PCR_INDEX_FOR_SIGNATURE_DB  1
+#define PCR_INDEX_FOR_SIGNATURE_DB  7
 
 #pragma pack(1)
 
