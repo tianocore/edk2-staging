@@ -134,6 +134,7 @@ ExtendCertificate (
 
   SpdmContext = SpdmDeviceContext->SpdmContext;
 
+  EventLog = NULL;
   ZeroMem (&Parameter, sizeof (Parameter));
   Parameter.location = SpdmDataLocationConnection;
   DataSize           = sizeof (BaseHashAlgo);
@@ -201,7 +202,8 @@ ExtendCertificate (
         Status        = CreateDeviceMeasurementContext (SpdmDeviceContext, DeviceContext, DeviceContextSize);
         if (Status != EFI_SUCCESS) {
           SecurityState->AuthenticationState = EDKII_DEVICE_SECURITY_STATE_ERROR_DEVICE_ERROR;
-          return EFI_DEVICE_ERROR;
+          Status = EFI_DEVICE_ERROR;
+          goto Exit;
         }
       }
 
@@ -271,7 +273,8 @@ ExtendCertificate (
         Status        = CreateDeviceMeasurementContext (SpdmDeviceContext, DeviceContext, DeviceContextSize);
         if (Status != EFI_SUCCESS) {
           SecurityState->AuthenticationState = EDKII_DEVICE_SECURITY_STATE_ERROR_DEVICE_ERROR;
-          return EFI_DEVICE_ERROR;
+          Status = EFI_DEVICE_ERROR;
+          goto Exit;
         }
       }
 
@@ -289,7 +292,7 @@ ExtendCertificate (
 
       DEBUG ((DEBUG_INFO, "TpmMeasureAndLogData (Instance) - %r\n", Status));
 
-      return Status;
+      goto Exit;
     case TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_FAIL_NO_SIG:
     case TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_NO_SPDM:
       EventLogSize = (UINT32)(sizeof (TCG_NV_INDEX_INSTANCE_EVENT_LOG_STRUCT) +
@@ -334,7 +337,8 @@ ExtendCertificate (
         Status        = CreateDeviceMeasurementContext (SpdmDeviceContext, DeviceContext, DeviceContextSize);
         if (Status != EFI_SUCCESS) {
           SecurityState->AuthenticationState = EDKII_DEVICE_SECURITY_STATE_ERROR_DEVICE_ERROR;
-          return EFI_DEVICE_ERROR;
+          Status = EFI_DEVICE_ERROR;
+          goto Exit;
         }
       }
 
@@ -352,7 +356,7 @@ ExtendCertificate (
 
       DEBUG ((DEBUG_INFO, "TpmMeasureAndLogData (Instance) - %r\n", Status));
 
-      return Status;
+      goto Exit;
     default:
       SecurityState->AuthenticationState = EDKII_DEVICE_SECURITY_STATE_ERROR_UEFI_UNSUPPORTED;
       return EFI_UNSUPPORTED;
@@ -364,7 +368,8 @@ ExtendCertificate (
     if (SignatureData == NULL) {
       ASSERT (SignatureData != NULL);
       SecurityState->AuthenticationState = EDKII_DEVICE_SECURITY_STATE_ERROR_UEFI_OUT_OF_RESOURCE;
-      return EFI_OUT_OF_RESOURCES;
+      Status = EFI_OUT_OF_RESOURCES;
+      goto Exit;
     }
 
     CopyGuid (&SignatureData->SignatureOwner, &gEfiCallerIdGuid);
@@ -383,6 +388,11 @@ ExtendCertificate (
       SignatureDataSize
       );
     FreePool (SignatureData);
+  }
+
+Exit:
+  if (EventLog != NULL) {
+    FreePool(EventLog);
   }
 
   return Status;
