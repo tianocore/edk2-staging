@@ -207,6 +207,7 @@ ExtendMeasurement (
 
   SpdmContext = SpdmDeviceContext->SpdmContext;
 
+  EventLog = NULL;
   ZeroMem (&Parameter, sizeof (Parameter));
   Parameter.location = SpdmDataLocationConnection;
   DataSize           = sizeof (MeasurementHashAlgo);
@@ -345,7 +346,8 @@ ExtendMeasurement (
         Status        = CreateDeviceMeasurementContext (SpdmDeviceContext, DeviceContext, DeviceContextSize);
         if (Status != EFI_SUCCESS) {
           SecurityState->MeasurementState = EDKII_DEVICE_SECURITY_STATE_ERROR_DEVICE_ERROR;
-          return EFI_DEVICE_ERROR;
+          Status = EFI_DEVICE_ERROR;
+          goto Exit;
         }
       }
 
@@ -399,7 +401,8 @@ ExtendMeasurement (
         Status        = CreateDeviceMeasurementContext (SpdmDeviceContext, DeviceContext, DeviceContextSize);
         if (Status != EFI_SUCCESS) {
           SecurityState->MeasurementState = EDKII_DEVICE_SECURITY_STATE_ERROR_DEVICE_ERROR;
-          return EFI_DEVICE_ERROR;
+          Status = EFI_DEVICE_ERROR;
+          goto Exit;
         }
       }
 
@@ -416,7 +419,7 @@ ExtendMeasurement (
       }
 
       DEBUG ((DEBUG_INFO, "TpmMeasureAndLogData (Measurement) - %r\n", Status));
-      return Status;
+      goto Exit;
     default:
       SecurityState->MeasurementState = EDKII_DEVICE_SECURITY_STATE_ERROR_UEFI_UNSUPPORTED;
       return EFI_UNSUPPORTED;
@@ -474,6 +477,10 @@ ExtendMeasurement (
     }
 
     DEBUG ((DEBUG_INFO, "TpmMeasureAndLogData (Dynamic) - %r\n", Status));
+  }
+Exit:
+  if (EventLog != NULL) {
+    FreePool(EventLog);
   }
 
   return Status;
