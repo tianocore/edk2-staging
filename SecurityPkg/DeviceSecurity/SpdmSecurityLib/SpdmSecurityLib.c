@@ -74,7 +74,8 @@ SpdmDeviceAuthenticationAndMeasurement (
   BOOLEAN              IsValidCertChain;
   BOOLEAN              RootCertMatch;
 
-  if (PcdGet32 (PcdTcgPfpMeasurementRevision) < TCG_EfiSpecIDEventStruct_SPEC_ERRATA_TPM2_REV_106) {
+  if ((PcdGet32 (PcdTcgPfpMeasurementRevision) < TCG_EfiSpecIDEventStruct_SPEC_ERRATA_TPM2_REV_106) ||
+      (PcdGet8(PcdEnableSpdmDeviceAuthenticaion) == 0)) {
     return EFI_UNSUPPORTED;
   }
 
