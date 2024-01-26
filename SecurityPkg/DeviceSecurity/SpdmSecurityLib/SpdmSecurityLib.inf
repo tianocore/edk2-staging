@@ -51,3 +51,4 @@
 
 [Pcd]
   gEfiMdeModulePkgTokenSpaceGuid.PcdTcgPfpMeasurementRevision            ## CONSUMES
+  gEfiMdeModulePkgTokenSpaceGuid.PcdEnableSpdmDeviceAuthenticaion         ## CONSUMES
