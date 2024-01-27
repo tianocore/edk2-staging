@@ -111,7 +111,9 @@ typedef enum {
   SpdmDataAEADCipherSuite,
   SpdmDataReqBaseAsymAlg,
   SpdmDataKeySchedule,
-  SpdmDataOtherParamsSsupport,
+  SpdmDataOtherParamsSupport,
+  SpdmDataMelSpec,
+
   //
   // Connection State
   //
@@ -127,6 +129,10 @@ typedef enum {
   SpdmDataPeerPublicRootCert,
   SpdmDataPeerPublicKey,
   SpdmDataLocalPublicKey,
+  SpdmDataLocalSupportedSlotMask,
+  SpdmDataLocalKeyPairId,
+  SpdmDataLocalCertInfo,
+  SpdmDataLocalKeyUsageBitMask,
 
   SpdmDataBasicMutAuthRequested,
   SpdmDataMutAuthRequested,
@@ -136,7 +142,12 @@ typedef enum {
   //
   SpdmDataPeerUsedCertChainBuffer,
   SpdmDataPeerSlotMask,
+  SpdmDataPeerProvisionedSlotMask = SpdmDataPeerSlotMask,
+  SpdmDataPeerSupportedSlotMask,
   SpdmDataPeerTotalDigestBuffer,
+  SpdmDataPeerKeyPairId,
+  SpdmDataPeerCertInfo,
+  SpdmDataPeerKeyUsageBitMask,
 
   //
   // Pre-shared Key Hint
@@ -183,6 +194,14 @@ typedef enum {
   SpdmDataSessionSequenceNumberReqDir,
   SpdmDataMaxSessionSequenceNumber,
 
+  /* For SPDM 1.0 and 1.1, allow signature verification in big, little, or both endians. */
+  SpdmDataSpdmVersion1011VerifySigatureEndian,
+
+  SpdmDataSequenceNumberEndian,
+  SpdmDataSessionSequenceNumberEndian,
+
+  SpdmDataMultiKeyConnReq,
+  SpdmDataMultiKeyConnRsp,
   //
   // MAX
   //
