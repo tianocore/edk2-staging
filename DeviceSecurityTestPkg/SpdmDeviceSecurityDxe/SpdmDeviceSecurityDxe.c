@@ -461,7 +461,11 @@ CreateSpdmDriverContext (
   Data16 = SPDM_ALGORITHMS_KEY_SCHEDULE_HMAC_HASH;
   SpdmSetData (SpdmContext, SpdmDataKeySchedule, &Parameter, &Data16, sizeof (Data16));
   Data8 = SPDM_ALGORITHMS_OPAQUE_DATA_FORMAT_1;
-  SpdmSetData (SpdmContext, SpdmDataOtherParamsSsupport, &Parameter, &Data8, sizeof (Data8));
+  SpdmSetData (SpdmContext, SpdmDataOtherParamsSupport, &Parameter, &Data8, sizeof (Data8));
+  Data8 = SPDM_MEL_SPECIFICATION_DMTF;
+  SpdmSetData (SpdmContext, SpdmDataMelSpec, &Parameter, &Data8, sizeof (Data8));
+  Data8 = 0x3F;
+  SpdmSetData (SpdmContext, SpdmDataLocalSupportedSlotMask, &Parameter, &Data8, sizeof (Data8));
   IsRequrester = TRUE;
   SpdmReturn = SpdmSetData (SpdmContext, LIBSPDM_DATA_IS_REQUESTER, &Parameter, &IsRequrester, sizeof (IsRequrester));
   if (LIBSPDM_STATUS_IS_ERROR (SpdmReturn)) {
