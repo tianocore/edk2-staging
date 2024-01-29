@@ -107,7 +107,7 @@ typedef enum {
   SpdmDataMeasurementHashAlgo,
   SpdmDataBaseAsymAlgo,
   SpdmDataBaseHashAlgo,
-  SpdmDataDHENamedGroup,
+  SpdmDataDHENameGroup,
   SpdmDataAEADCipherSuite,
   SpdmDataReqBaseAsymAlg,
   SpdmDataKeySchedule,

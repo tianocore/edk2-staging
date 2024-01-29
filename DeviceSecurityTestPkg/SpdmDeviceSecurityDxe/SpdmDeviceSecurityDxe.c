@@ -453,7 +453,7 @@ CreateSpdmDriverContext (
   Data16 = SPDM_ALGORITHMS_DHE_NAMED_GROUP_SECP_256_R1 |
            SPDM_ALGORITHMS_DHE_NAMED_GROUP_SECP_384_R1 |
            SPDM_ALGORITHMS_DHE_NAMED_GROUP_SECP_521_R1;
-  SpdmSetData (SpdmContext, SpdmDataDHENamedGroup, &Parameter, &Data16, sizeof (Data16));
+  SpdmSetData (SpdmContext, SpdmDataDHENameGroup, &Parameter, &Data16, sizeof (Data16));
   Data16 = SPDM_ALGORITHMS_AEAD_CIPHER_SUITE_AES_128_GCM |
            SPDM_ALGORITHMS_AEAD_CIPHER_SUITE_AES_256_GCM |
            SPDM_ALGORITHMS_AEAD_CIPHER_SUITE_CHACHA20_POLY1305;
