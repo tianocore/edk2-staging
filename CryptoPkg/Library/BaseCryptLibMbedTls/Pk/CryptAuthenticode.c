@@ -77,43 +77,43 @@ AuthenticodeVerify (
   End = Ptr + Len;
 
   //ContentInfo
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x30) != 0) {
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE) != 0) {
     return FALSE;
   }
   //ContentType
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x06) != 0) {
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_OID) != 0) {
     return FALSE;
   }
 
   Ptr += ObjLen;
   //content
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0xA0) != 0) {
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_CONTEXT_SPECIFIC) != 0) {
     return FALSE;
   }
 
   End = Ptr + ObjLen;
   //signedData
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x30) != 0) {
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE) != 0) {
     return FALSE;
   }
   //version
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x02) != 0) {
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_INTEGER) != 0) {
     return FALSE;
   }
   Ptr += ObjLen;
   //digestAlgo
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x31) != 0) {
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SET) != 0) {
     return FALSE;
   }
   Ptr += ObjLen;
 
   //encapContentInfo
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x30) != 0) {
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE) != 0) {
     return FALSE;
   }
   End = Ptr + ObjLen;
   //eContentType
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x06) != 0) {
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_OID) != 0) {
     return FALSE;
   }
 
@@ -135,7 +135,7 @@ AuthenticodeVerify (
 
   Ptr += ObjLen;
   //eContent
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0xA0) != 0) {
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_CONTEXT_SPECIFIC) != 0) {
     return FALSE;
   }
 
