@@ -150,98 +150,98 @@ ImageTimestampVerify (
   End = Ptr + Len;
 
   //ContentInfo
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x30) != 0) {
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE) != 0) {
     return FALSE;
   }
   //ContentType
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x06) != 0) {
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_OID) != 0) {
     return FALSE;
   }
 
   Ptr += ObjLen;
   //content
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0xA0) != 0) {
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_CONTEXT_SPECIFIC) != 0) {
     return FALSE;
   }
 
   End = Ptr + ObjLen;
   //signedData
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x30) != 0) {
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE) != 0) {
     return FALSE;
   }
   //version
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x02) != 0) {
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_INTEGER) != 0) {
     return FALSE;
   }
   Ptr += ObjLen;
   //digestAlgo
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x31) != 0) {
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SET) != 0) {
     return FALSE;
   }
   Ptr += ObjLen;
 
   //encapContentInfo
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x30) != 0) {
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE) != 0) {
     return FALSE;
   }
   Ptr += ObjLen;
 
   //cert
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0xA0) != 0) {
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_CONTEXT_SPECIFIC) != 0) {
     return FALSE;
   }
   Ptr += ObjLen;
 
   TempPtr = Ptr;
   //OPTIONAL CRLs
-  if (mbedtls_asn1_get_tag(&TempPtr, End, &ObjLen, 0xA0) == 0) {
+  if (mbedtls_asn1_get_tag(&TempPtr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_CONTEXT_SPECIFIC) == 0) {
     Ptr = TempPtr + ObjLen;
   }
 
   //signerInfo
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x31) != 0) {
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SET) != 0) {
     return FALSE;
   }
 
   //sub parse
   //signerInfo
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x30) != 0) {
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE) != 0) {
     return FALSE;
   }
   End = Ptr + ObjLen;
 
   //version
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x02) != 0) {
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_INTEGER) != 0) {
     return FALSE;
   }
   Ptr += ObjLen;
 
   //sid
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x30) != 0) {
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE) != 0) {
     return FALSE;
   }
   Ptr += ObjLen;
 
   //digestalgo
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x30) != 0) {
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE) != 0) {
     return FALSE;
   }
   Ptr += ObjLen;
 
   //OPTIONAL AuthenticatedAttributes
   TempPtr = Ptr;
-  if (mbedtls_asn1_get_tag(&TempPtr, End, &ObjLen, 0xA0) == 0) {
+  if (mbedtls_asn1_get_tag(&TempPtr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_CONTEXT_SPECIFIC) == 0) {
     Ptr = TempPtr + ObjLen;
   }
 
   //signaturealgo
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x30) != 0) {
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE) != 0) {
     return FALSE;
   }
   Ptr += ObjLen;
 
   //signature
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x04) != 0) {
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_OCTET_STRING) != 0) {
     return FALSE;
   }
   Ptr += ObjLen;
@@ -252,12 +252,12 @@ ImageTimestampVerify (
   }
 
   //Attribute
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x30) != 0) {
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE) != 0) {
     return FALSE;
   }
 
   //type
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x06) != 0) {
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_OID) != 0) {
     return FALSE;
   }
 
@@ -267,84 +267,84 @@ ImageTimestampVerify (
   Ptr += ObjLen;
 
   //values
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x31) != 0) {
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SET) != 0) {
     return FALSE;
   }
 
   //values
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x30) != 0) {
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE) != 0) {
     return FALSE;
   }
 
   //signedData OID
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x06) != 0) {
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_OID) != 0) {
     return FALSE;
   }
   Ptr += ObjLen;
 
   //[0]
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0xA0) != 0) {
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_CONTEXT_SPECIFIC) != 0) {
     return FALSE;
   }
 
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x30) != 0) {
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE) != 0) {
     return FALSE;
   }
 
   //integer
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x02) != 0) {
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_INTEGER) != 0) {
     return FALSE;
   }
   Ptr += ObjLen;
   //SET
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x31) != 0) {
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SET) != 0) {
     return FALSE;
   }
   Ptr += ObjLen;
 
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x30) != 0) {
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE) != 0) {
     return FALSE;
   }
   //tST OID
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x06) != 0) {
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_OID) != 0) {
     return FALSE;
   }
   Ptr += ObjLen;
 
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0xA0) != 0) {
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_CONTEXT_SPECIFIC) != 0) {
     return FALSE;
   }
 
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x04) != 0) {
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_OCTET_STRING) != 0) {
     return FALSE;
   }
 
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x30) != 0) {
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE) != 0) {
     return FALSE;
   }
   //Integer
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x02) != 0) {
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_INTEGER) != 0) {
     return FALSE;
   }
   Ptr += ObjLen;
   //policy OID
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x06) != 0) {
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_OID) != 0) {
     return FALSE;
   }
   Ptr += ObjLen;
   //sequence
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x30) != 0) {
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE) != 0) {
     return FALSE;
   }
   Ptr += ObjLen;
   //Integer
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x02) != 0) {
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_INTEGER) != 0) {
     return FALSE;
   }
   Ptr += ObjLen;
 
   //GeneralizedTime
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x18) != 0) {
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_GENERALIZED_TIME) != 0) {
     return FALSE;
   }
 

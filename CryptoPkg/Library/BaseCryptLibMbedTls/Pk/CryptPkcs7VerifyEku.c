@@ -553,37 +553,37 @@ VerifyEKUsInPkcs7Signature (
   End = Ptr + Len;
 
   //cert
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x30) != 0) {
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE) != 0) {
     return FALSE;
   }
   //tbscert
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x02) != 0) {
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_INTEGER) != 0) {
     return FALSE;
   }
 
   Ptr += ObjLen;
   //signature algo
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x31) != 0) {
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SET) != 0) {
     return FALSE;
   }
 
   Ptr += ObjLen;
   //signature
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x30) != 0) {
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE) != 0) {
     return FALSE;
   }
 
   Ptr += ObjLen;
   OldEnd = Ptr;
   //cert
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0xA0) != 0) {
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_CONTEXT_SPECIFIC) != 0) {
     return FALSE;
   }
 
   End = Ptr + ObjLen;
 
   //leaf cert
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x30) != 0) {
+  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE) != 0) {
     return FALSE;
   }
   Ptr += ObjLen;
@@ -593,7 +593,7 @@ VerifyEKUsInPkcs7Signature (
       break;
     }
     OldEnd = Ptr;
-    if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0x30) != 0) {
+    if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE) != 0) {
       return FALSE;
     }
 
