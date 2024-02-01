@@ -14,11 +14,11 @@
 
   The content of the signature database is same as the one in db/dbx. (a list of EFI_SIGNATURE_LIST)
 **/
-#define EDKII_DEVICE_SIGNATURE_DATABASE_GUID \
+#define EFI_DEVICE_SIGNATURE_DATABASE_GUID \
   {0xb9c2b4f4, 0xbf5f, 0x462d, 0x8a, 0xdf, 0xc5, 0xc7, 0xa, 0xc3, 0x5d, 0xad}
-#define EDKII_DEVICE_SECURITY_DATABASE  L"devdb"
+#define EFI_DEVICE_SECURITY_DATABASE  L"devdb"
 
-extern EFI_GUID  gEdkiiDeviceSignatureDatabaseGuid;
+extern EFI_GUID  gEfiDeviceSignatureDatabaseGuid;
 
 /**
   Signature Database:
