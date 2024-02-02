@@ -53,7 +53,7 @@
   gEfiPeiReadOnlyVariable2PpiGuid         ## CONSUMES
 
 [Guids]
-  gEdkiiDeviceSignatureDatabaseGuid       ## CONSUMES
+  gEfiDeviceSignatureDatabaseGuid       ## CONSUMES
   gEdkiiCertSpdmCertChainGuid             ## CONSUMES
 
 [Protocols]

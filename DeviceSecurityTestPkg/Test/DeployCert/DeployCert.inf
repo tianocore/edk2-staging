@@ -44,7 +44,7 @@
   ShellLib
 
 [Guids]
-  gEdkiiDeviceSignatureDatabaseGuid       ## PRODUCE
+  gEfiDeviceSignatureDatabaseGuid       ## PRODUCE
   gEfiCertX509Guid
   gEfiDeviceSecurityPkgTestConfig         ## PRODUCE
   gEfiCertSha256Guid

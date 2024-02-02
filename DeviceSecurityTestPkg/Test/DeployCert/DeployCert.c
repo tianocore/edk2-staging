@@ -541,8 +541,8 @@ MainEntryPoint (
         );
     }
     Status = gRT->SetVariable (
-                    EDKII_DEVICE_SECURITY_DATABASE,
-                    &gEdkiiDeviceSignatureDatabaseGuid,
+                    EFI_DEVICE_SECURITY_DATABASE,
+                    &gEfiDeviceSignatureDatabaseGuid,
                     EFI_VARIABLE_NON_VOLATILE |
                     EFI_VARIABLE_BOOTSERVICE_ACCESS |
                     EFI_VARIABLE_RUNTIME_ACCESS,
@@ -631,8 +631,8 @@ MainEntryPoint (
     MeasureVariable (
       PCR_INDEX_FOR_SIGNATURE_DB,
       EV_EFI_SPDM_DEVICE_POLICY,
-      EDKII_DEVICE_SECURITY_DATABASE,
-      &gEdkiiDeviceSignatureDatabaseGuid,
+      EFI_DEVICE_SECURITY_DATABASE,
+      &gEfiDeviceSignatureDatabaseGuid,
       SignatureList,
       SignatureListSize
       );
@@ -641,7 +641,7 @@ MainEntryPoint (
 
   Status = gRT->SetVariable (
                   L"PrivDevKey",
-                  &gEdkiiDeviceSignatureDatabaseGuid,
+                  &gEfiDeviceSignatureDatabaseGuid,
                   EFI_VARIABLE_NON_VOLATILE |
                   EFI_VARIABLE_BOOTSERVICE_ACCESS |
                   EFI_VARIABLE_RUNTIME_ACCESS,

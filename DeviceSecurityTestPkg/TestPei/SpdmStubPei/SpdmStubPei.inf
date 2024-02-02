@@ -40,7 +40,7 @@
   SpdmTransportMctpLib
   
 [Guids]
-  gEdkiiDeviceSignatureDatabaseGuid  ## CONSUMES
+  gEfiDeviceSignatureDatabaseGuid  ## CONSUMES
   gEdkiiCertSpdmCertChainGuid        ## CONSUMES
 
 [Ppis]

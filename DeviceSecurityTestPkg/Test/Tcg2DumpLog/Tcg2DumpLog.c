@@ -711,7 +711,7 @@ typedef struct {
 VARIABLE_TYPE  mSecureBootDatabaseVariableType[] = {
   { EFI_IMAGE_SECURITY_DATABASE,    &gEfiImageSecurityDatabaseGuid     },
   { EFI_IMAGE_SECURITY_DATABASE1,   &gEfiImageSecurityDatabaseGuid     },
-  { EDKII_DEVICE_SECURITY_DATABASE, &gEdkiiDeviceSignatureDatabaseGuid },
+  { EFI_DEVICE_SECURITY_DATABASE, &gEfiDeviceSignatureDatabaseGuid },
 };
 
 BOOLEAN

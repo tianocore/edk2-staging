@@ -126,8 +126,8 @@ MainEntryPoint (
   SignatureList = AllocateZeroPool (SignatureListSize);
   Status = VariablePpi->GetVariable (
                           VariablePpi,
-                          EDKII_DEVICE_SECURITY_DATABASE,
-                          &gEdkiiDeviceSignatureDatabaseGuid,
+                          EFI_DEVICE_SECURITY_DATABASE,
+                          &gEfiDeviceSignatureDatabaseGuid,
                           NULL,
                           &SignatureListSize,
                           SignatureList

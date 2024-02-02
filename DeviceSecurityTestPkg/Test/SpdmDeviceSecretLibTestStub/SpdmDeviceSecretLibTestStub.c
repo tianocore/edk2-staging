@@ -776,7 +776,7 @@ SpdmResponderDataSignFunc (
 
   Status = GetVariable2 (
              L"PrivDevKey",
-             &gEdkiiDeviceSignatureDatabaseGuid,
+             &gEfiDeviceSignatureDatabaseGuid,
              &PrivatePem,
              &PrivatePemSize
              );
