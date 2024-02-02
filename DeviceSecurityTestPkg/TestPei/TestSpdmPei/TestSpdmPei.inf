@@ -33,7 +33,7 @@
   DebugLib
 
 [Guids]
-  gEdkiiDeviceSignatureDatabaseGuid       ## CONSUMES
+  gEfiDeviceSignatureDatabaseGuid       ## CONSUMES
 
 [Ppis]
   gSpdmPpiGuid                       ## CONSUME

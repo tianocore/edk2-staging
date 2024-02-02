@@ -52,7 +52,7 @@
 [Guids]
   gEfiAcpiTableGuid
   gEfiImageSecurityDatabaseGuid
-  gEdkiiDeviceSignatureDatabaseGuid
+  gEfiDeviceSignatureDatabaseGuid
 
 [Protocols]
   gEfiTcg2ProtocolGuid                           ## CONSUMES

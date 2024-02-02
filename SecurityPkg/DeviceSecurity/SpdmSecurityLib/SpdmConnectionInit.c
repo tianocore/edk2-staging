@@ -306,8 +306,8 @@ CreateSpdmDeviceContext (
   RecordSpdmDeviceContextInList (SpdmDeviceContext);
 
   Status = GetVariable2 (
-             EDKII_DEVICE_SECURITY_DATABASE,
-             &gEdkiiDeviceSignatureDatabaseGuid,
+             EFI_DEVICE_SECURITY_DATABASE,
+             &gEfiDeviceSignatureDatabaseGuid,
              (VOID **)&SpdmDeviceContext->SignatureList,
              &SpdmDeviceContext->SignatureListSize
              );

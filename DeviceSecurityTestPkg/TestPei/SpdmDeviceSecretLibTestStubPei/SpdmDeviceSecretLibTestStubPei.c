@@ -162,7 +162,7 @@ SpdmResponderDataSignFunc (
   Status = VariablePpi->GetVariable (
                           VariablePpi,
                           L"PrivDevKey",
-                          &gEdkiiDeviceSignatureDatabaseGuid,
+                          &gEfiDeviceSignatureDatabaseGuid,
                           NULL,
                           &PrivatePemSize,
                           (VOID *)PrivatePem

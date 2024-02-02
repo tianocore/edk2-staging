@@ -49,7 +49,7 @@
   CryptlibWrapper
 
 [Guids]
-  gEdkiiDeviceSignatureDatabaseGuid       ## CONSUMES
+  gEfiDeviceSignatureDatabaseGuid       ## CONSUMES
   gEfiDeviceSecurityPkgTestConfig         ## CONSUMES
 
 [Protocols]
