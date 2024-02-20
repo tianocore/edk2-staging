@@ -3,7 +3,7 @@
   hash handler registered, such as SHA1, SHA256.
   Platform can use PcdTpm2HashMask to mask some hash engines.
 
-Copyright (c) 2013 - 2021, Intel Corporation. All rights reserved. <BR>
+Copyright (c) 2013 - 2024, Intel Corporation. All rights reserved. <BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
@@ -129,30 +129,44 @@ HashUpdate (
   return EFI_SUCCESS;
 }
 
+/**
+  Extend to TPM NvIndex.
+
+  @param[in]  NvIndex            The NV Index of the area to extend.
+  @param[in]  DataSize           The data size to extend.
+  @param[in]  Data               The data to extend.
+
+  @retval EFI_SUCCESS            Operation completed successfully.
+  @retval EFI_DEVICE_ERROR       The command was unsuccessful.
+  @retval EFI_NOT_FOUND          The command was returned successfully, but NvIndex is not found.
+**/
 EFI_STATUS
 EFIAPI
 Tpm2ExtendNvIndex (
-  TPMI_RH_NV_INDEX NvIndex,
-  UINT16 DataSize,
-  BYTE *Data)
+  TPMI_RH_NV_INDEX  NvIndex,
+  UINT16            DataSize,
+  BYTE              *Data
+  )
 {
   EFI_STATUS        Status;
   TPMI_RH_NV_AUTH   AuthHandle;
   TPM2B_MAX_BUFFER  NvExtendData;
 
   AuthHandle = TPM_RH_PLATFORM;
-  ZeroMem (&NvExtendData, sizeof(NvExtendData));
+  ZeroMem (&NvExtendData, sizeof (NvExtendData));
   CopyMem (NvExtendData.buffer, Data, DataSize);
   NvExtendData.size = DataSize;
-  Status = Tpm2NvExtend (
-             AuthHandle,
-             NvIndex,
-             NULL,
-             &NvExtendData
-             );
-  if (EFI_ERROR(Status)) {
-    DEBUG ((DEBUG_ERROR, "Extend TPM NV index failed, Index: 0x%x Status: %d\n",
-            NvIndex, Status));
+  Status            = Tpm2NvExtend (
+                        AuthHandle,
+                        NvIndex,
+                        NULL,
+                        &NvExtendData
+                        );
+  if (EFI_ERROR (Status)) {
+    DEBUG (
+      (DEBUG_ERROR, "Extend TPM NV index failed, Index: 0x%x Status: %d\n",
+       NvIndex, Status)
+      );
   }
 
   return Status;
@@ -219,8 +233,8 @@ HashCompleteAndExtend (
     Status = Tpm2GetCapabilitySupportedAndActivePcrs (&TpmHashAlgorithmBitmap, &ActivePcrBanks);
     ASSERT_EFI_ERROR (Status);
     ActivePcrBanks = ActivePcrBanks & mSupportedHashMaskCurrent;
-    ZeroMem (&TcgPcrEvent2Digest, sizeof(TcgPcrEvent2Digest));
-    BufferPtr = CopyDigestListToBuffer (&TcgPcrEvent2Digest, DigestList, ActivePcrBanks);
+    ZeroMem (&TcgPcrEvent2Digest, sizeof (TcgPcrEvent2Digest));
+    BufferPtr         = CopyDigestListToBuffer (&TcgPcrEvent2Digest, DigestList, ActivePcrBanks);
     DigestListBinSize = (UINT32)((UINT8 *)BufferPtr - (UINT8 *)&TcgPcrEvent2Digest);
 
     //
@@ -232,6 +246,7 @@ HashCompleteAndExtend (
                (BYTE *)&TcgPcrEvent2Digest
                );
   }
+
   return Status;
 }
 

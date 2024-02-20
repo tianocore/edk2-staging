@@ -1,7 +1,7 @@
 /** @file
   Platform Device Security Policy Protocol definition
 
-  Copyright (c) 2022, Intel Corporation. All rights reserved.<BR>
+  Copyright (c) 2024, Intel Corporation. All rights reserved.<BR>
   SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
@@ -88,7 +88,7 @@ typedef struct {
   @retval EFI_UNSUPPORTED            The function is unsupported for the specific Device.
 **/
 typedef
-EFI_STATUS
+  EFI_STATUS
 (EFIAPI *EDKII_DEVICE_SECURITY_GET_DEVICE_POLICY)(
   IN  EDKII_DEVICE_SECURITY_POLICY_PROTOCOL  *This,
   IN  EDKII_DEVICE_IDENTIFIER                *DeviceId,
@@ -115,7 +115,7 @@ EFI_STATUS
   @retval EFI_UNSUPPORTED            The function is unsupported for the specific Device.
 **/
 typedef
-EFI_STATUS
+  EFI_STATUS
 (EFIAPI *EDKII_DEVICE_SECURITY_NOTIFY_DEVICE_STATE)(
   IN  EDKII_DEVICE_SECURITY_POLICY_PROTOCOL  *This,
   IN  EDKII_DEVICE_IDENTIFIER                *DeviceId,

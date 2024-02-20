@@ -27,12 +27,12 @@ typedef struct {
 } VARIABLE_TYPE;
 
 VARIABLE_TYPE  mVariableType[] = {
-  { EFI_SECURE_BOOT_MODE_NAME,    &gEfiGlobalVariableGuid        },
-  { EFI_PLATFORM_KEY_NAME,        &gEfiGlobalVariableGuid        },
-  { EFI_KEY_EXCHANGE_KEY_NAME,    &gEfiGlobalVariableGuid        },
-  { EFI_IMAGE_SECURITY_DATABASE,  &gEfiImageSecurityDatabaseGuid },
-  { EFI_IMAGE_SECURITY_DATABASE1, &gEfiImageSecurityDatabaseGuid },
-  { EFI_IMAGE_SECURITY_DATABASE2, &gEfiImageSecurityDatabaseGuid },
+  { EFI_SECURE_BOOT_MODE_NAME,    &gEfiGlobalVariableGuid          },
+  { EFI_PLATFORM_KEY_NAME,        &gEfiGlobalVariableGuid          },
+  { EFI_KEY_EXCHANGE_KEY_NAME,    &gEfiGlobalVariableGuid          },
+  { EFI_IMAGE_SECURITY_DATABASE,  &gEfiImageSecurityDatabaseGuid   },
+  { EFI_IMAGE_SECURITY_DATABASE1, &gEfiImageSecurityDatabaseGuid   },
+  { EFI_IMAGE_SECURITY_DATABASE2, &gEfiImageSecurityDatabaseGuid   },
   { EFI_DEVICE_SECURITY_DATABASE, &gEfiDeviceSignatureDatabaseGuid },
 };
 
@@ -126,18 +126,17 @@ MeasureVariable (
   }
 
   if (CompareGuid (VendorGuid, &gEfiDeviceSignatureDatabaseGuid)) {
-
     DEBUG ((DEBUG_INFO, "VariableDxe: MeasureVariable (Pcr - %x, EventType - %x, ", PCR_INDEX_FOR_SIGNATURE_DB, (UINTN)EV_EFI_SPDM_DEVICE_POLICY));
     DEBUG ((DEBUG_INFO, "VariableName - %s, VendorGuid - %g)\n", VarName, VendorGuid));
 
     Status = TpmMeasureAndLogData (
-              PCR_INDEX_FOR_SIGNATURE_DB,
-              EV_EFI_SPDM_DEVICE_POLICY,
-              VarLog,
-              VarLogSize,
-              VarLog,
-              VarLogSize
-              );
+               PCR_INDEX_FOR_SIGNATURE_DB,
+               EV_EFI_SPDM_DEVICE_POLICY,
+               VarLog,
+               VarLogSize,
+               VarLog,
+               VarLogSize
+               );
     FreePool (VarLog);
     return Status;
   }
@@ -249,8 +248,9 @@ SecureBootHook (
 
   if (CompareGuid (VendorGuid, &gEfiDeviceSignatureDatabaseGuid)) {
     if ((PcdGet32 (PcdTcgPfpMeasurementRevision) < TCG_EfiSpecIDEventStruct_SPEC_ERRATA_TPM2_REV_106) ||
-        (PcdGet8(PcdEnableSpdmDeviceAuthenticaion) == 0)) {
-      return ;
+        (PcdGet8 (PcdEnableSpdmDeviceAuthenticaion) == 0))
+    {
+      return;
     }
   }
 

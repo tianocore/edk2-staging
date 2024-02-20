@@ -1,6 +1,6 @@
 /** @file
 
-  Copyright (c) 2020, Intel Corporation. All rights reserved.<BR>
+  Copyright (c) 2024, Intel Corporation. All rights reserved.<BR>
   SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
@@ -259,12 +259,12 @@ typedef enum {
   // Other component is busy.
   //
   SpdmResponseStateBusy,
-  #if LIBSPDM_RESPOND_IF_READY_SUPPORT
+ #if LIBSPDM_RESPOND_IF_READY_SUPPORT
   //
   // Hardware is not ready.
   //
   SpdmResponseStateNotReady,
-  #endif /* LIBSPDM_RESPOND_IF_READY_SUPPORT */
+ #endif /* LIBSPDM_RESPOND_IF_READY_SUPPORT */
   //
   // Firmware Update is done. Need resync.
   //

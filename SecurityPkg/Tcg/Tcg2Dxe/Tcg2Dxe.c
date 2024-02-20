@@ -1,7 +1,7 @@
 /** @file
   This module implements Tcg2 Protocol.
 
-Copyright (c) 2015 - 2019, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2015 - 2024, Intel Corporation. All rights reserved.<BR>
 (C) Copyright 2016 Hewlett Packard Enterprise Development LP<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
@@ -1242,15 +1242,16 @@ TcgDxeHashLogExtendEvent (
       // Extend to NvIndex
       //
       Status = HashAndExtend (
-                NewEventHdr->PCRIndex,
-                HashData,
-                (UINTN)HashDataLen,
-                &DigestList
-                );
+                 NewEventHdr->PCRIndex,
+                 HashData,
+                 (UINTN)HashDataLen,
+                 &DigestList
+                 );
       if (!EFI_ERROR (Status)) {
         Status = TcgDxeLogHashEvent (&DigestList, NewEventHdr, NewEventData);
       }
     }
+
     return Status;
   }
 
@@ -2338,29 +2339,30 @@ MeasureAllSecureVariables (
   // Meaurement UEFI device signature database
   //
   if ((PcdGet32 (PcdTcgPfpMeasurementRevision) >= TCG_EfiSpecIDEventStruct_SPEC_ERRATA_TPM2_REV_106) &&
-      (PcdGet8 (PcdEnableSpdmDeviceAuthenticaion) != 0)) {
+      (PcdGet8 (PcdEnableSpdmDeviceAuthenticaion) != 0))
+  {
     Status = GetVariable2 (EFI_DEVICE_SECURITY_DATABASE, &gEfiDeviceSignatureDatabaseGuid, &Data, &DataSize);
     if (Status == EFI_SUCCESS) {
       Status = MeasureVariable (
-                PCR_INDEX_FOR_SIGNATURE_DB,
-                EV_EFI_SPDM_DEVICE_POLICY,
-                EFI_DEVICE_SECURITY_DATABASE,
-                &gEfiDeviceSignatureDatabaseGuid,
-                Data,
-                DataSize
-                );
+                 PCR_INDEX_FOR_SIGNATURE_DB,
+                 EV_EFI_SPDM_DEVICE_POLICY,
+                 EFI_DEVICE_SECURITY_DATABASE,
+                 &gEfiDeviceSignatureDatabaseGuid,
+                 Data,
+                 DataSize
+                 );
       FreePool (Data);
     } else if (Status == EFI_NOT_FOUND) {
-      Data = NULL;
+      Data     = NULL;
       DataSize = 0;
-      Status = MeasureVariable (
-                PCR_INDEX_FOR_SIGNATURE_DB,
-                EV_EFI_SPDM_DEVICE_POLICY,
-                EFI_DEVICE_SECURITY_DATABASE,
-                &gEfiDeviceSignatureDatabaseGuid,
-                Data,
-                DataSize
-                );
+      Status   = MeasureVariable (
+                   PCR_INDEX_FOR_SIGNATURE_DB,
+                   EV_EFI_SPDM_DEVICE_POLICY,
+                   EFI_DEVICE_SECURITY_DATABASE,
+                   &gEfiDeviceSignatureDatabaseGuid,
+                   Data,
+                   DataSize
+                   );
     }
   }
 

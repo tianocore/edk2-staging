@@ -2,7 +2,7 @@
 # CI configuration for SecurityPkg
 #
 # Copyright (c) Microsoft Corporation
-# Copyright (c) 2020, Intel Corporation. All rights reserved.<BR>
+# Copyright (c) 2020 - 2024, Intel Corporation. All rights reserved.<BR>
 # SPDX-License-Identifier: BSD-2-Clause-Patent
 ##
 {
@@ -25,6 +25,7 @@
             "Library/TcgStorageCoreLib/TcgStorageCore.c",
             "Library/Tpm2CommandLib/Tpm2NVStorage.c",
             "DeviceSecurity/SpdmLib/Include",
+            "DeviceSecurity/SpdmLib/libspdm",
             "DeviceSecurity/OsStub"
         ]
     },

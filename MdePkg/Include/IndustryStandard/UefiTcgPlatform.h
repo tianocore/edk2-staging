@@ -2,7 +2,7 @@
   TCG EFI Platform Definition in TCG_EFI_Platform_1_20_Final and
   TCG PC Client Platform Firmware Profile Specification, Revision 1.06
 
-  Copyright (c) 2006 - 2022, Intel Corporation. All rights reserved.<BR>
+  Copyright (c) 2006 - 2024, Intel Corporation. All rights reserved.<BR>
   SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/

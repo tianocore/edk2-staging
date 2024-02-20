@@ -2,7 +2,7 @@
   EDKII Device Security library for SPDM device.
   It follows the SPDM Specification.
 
-Copyright (c) 2022, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2024, Intel Corporation. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
@@ -75,7 +75,8 @@ SpdmDeviceAuthenticationAndMeasurement (
   BOOLEAN              RootCertMatch;
 
   if ((PcdGet32 (PcdTcgPfpMeasurementRevision) < TCG_EfiSpecIDEventStruct_SPEC_ERRATA_TPM2_REV_106) ||
-      (PcdGet8(PcdEnableSpdmDeviceAuthenticaion) == 0)) {
+      (PcdGet8 (PcdEnableSpdmDeviceAuthenticaion) == 0))
+  {
     return EFI_UNSUPPORTED;
   }
 
@@ -91,13 +92,15 @@ SpdmDeviceAuthenticationAndMeasurement (
   RootCertMatch    = FALSE;
 
   if (((SecurityPolicy->AuthenticationPolicy & EDKII_DEVICE_AUTHENTICATION_REQUIRED) != 0) ||
-      ((SecurityPolicy->MeasurementPolicy & EDKII_DEVICE_MEASUREMENT_REQUIRED) != 0)) {
+      ((SecurityPolicy->MeasurementPolicy & EDKII_DEVICE_MEASUREMENT_REQUIRED) != 0))
+  {
     Status = DoDeviceCertificate (SpdmDeviceContext, &AuthState, &SlotId, SecurityState, &IsValidCertChain, &RootCertMatch);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_ERROR, "DoDeviceCertificate failed - %r\n", Status));
       goto Ret;
     } else if ((AuthState == TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_FAIL_NO_SIG) ||
-               (AuthState == TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_FAIL_INVALID)) {
+               (AuthState == TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_FAIL_INVALID))
+    {
       goto Ret;
     }
   }
@@ -108,7 +111,8 @@ SpdmDeviceAuthenticationAndMeasurement (
       DEBUG ((DEBUG_ERROR, "DoDeviceAuthentication failed - %r\n", Status));
       goto Ret;
     } else if ((AuthState == TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_FAIL_NO_SIG) ||
-               (AuthState == TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_FAIL_INVALID)) {
+               (AuthState == TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_FAIL_INVALID))
+    {
       goto Ret;
     }
   }

@@ -2,7 +2,7 @@
   EDKII Device Security library for SPDM device.
   It follows the SPDM Specification.
 
-Copyright (c) 2022, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2024, Intel Corporation. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
@@ -303,6 +303,7 @@ CreateSpdmDeviceContext (
     DEBUG ((DEBUG_ERROR, "Fail to get UID - %r\n", Status));
     goto Error;
   }
+
   RecordSpdmDeviceContextInList (SpdmDeviceContext);
 
   Status = GetVariable2 (
@@ -318,9 +319,11 @@ CreateSpdmDeviceContext (
       if (DbList->SignatureListSize == 0) {
         break;
       }
-      if ((!CompareGuid (&DbList->SignatureType, &gEfiCertX509Guid))
-           || (DbList->SignatureHeaderSize != 0)
-           || (DbList->SignatureSize < sizeof (EFI_SIGNATURE_DATA))) {
+
+      if (  (!CompareGuid (&DbList->SignatureType, &gEfiCertX509Guid))
+         || (DbList->SignatureHeaderSize != 0)
+         || (DbList->SignatureSize < sizeof (EFI_SIGNATURE_DATA)))
+      {
         DbSize -= DbList->SignatureListSize;
         DbList  = (EFI_SIGNATURE_LIST *)((UINT8 *)DbList + DbList->SignatureListSize);
         continue;
@@ -376,6 +379,7 @@ CreateSpdmDeviceContext (
     ASSERT (FALSE);
     goto Error;
   }
+
   Data8      = SPDM_MEASUREMENT_SPECIFICATION_DMTF;
   SpdmReturn = SpdmSetData (SpdmContext, SpdmDataMeasurementSpec, &Parameter, &Data8, sizeof (Data8));
   if (LIBSPDM_STATUS_IS_ERROR (SpdmReturn)) {
@@ -418,12 +422,13 @@ CreateSpdmDeviceContext (
   if (LIBSPDM_STATUS_IS_ERROR (SpdmReturn)) {
     DEBUG ((DEBUG_ERROR, "SpdmInitConnection - %p\n", SpdmReturn));
 
-    AuthState = TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_NO_SPDM;
+    AuthState                          = TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_NO_SPDM;
     SecurityState->AuthenticationState = EDKII_DEVICE_SECURITY_STATE_ERROR_DEVICE_NO_CAPABILITIES;
     Status                             = ExtendCertificate (SpdmDeviceContext, AuthState, 0, NULL, NULL, 0, 0, SecurityState);
     if (Status != EFI_SUCCESS) {
       DEBUG ((DEBUG_ERROR, "ExtendCertificate  AUTH_STATE_NO_SPDM failed\n"));
     }
+
     goto Error;
   }
 

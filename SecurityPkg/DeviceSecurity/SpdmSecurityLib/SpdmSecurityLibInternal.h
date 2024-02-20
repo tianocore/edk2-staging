@@ -2,7 +2,7 @@
   EDKII Device Security library for SPDM device.
   It follows the SPDM Specification.
 
-Copyright (c) 2022, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2024, Intel Corporation. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
@@ -183,8 +183,6 @@ DoDeviceMeasurement (
   IN  UINT8                        SlotId,
   OUT EDKII_DEVICE_SECURITY_STATE  *SecurityState
   );
-
-
 
 /**
   This function gets SPDM digest and certificates.

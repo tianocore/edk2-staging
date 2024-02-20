@@ -2,7 +2,7 @@
   EDKII Device Security library for SPDM device.
   It follows the SPDM Specification.
 
-Copyright (c) 2022, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2024, Intel Corporation. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
@@ -45,7 +45,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
  *                                     to execute.
  **/
 typedef
-SPDM_RETURN
+  SPDM_RETURN
 (*SPDM_DEVICE_SEND_MESSAGE_FUNC)(
   IN VOID            *SpdmContext,
   IN UINTN           MessageSize,
@@ -88,7 +88,7 @@ SPDM_RETURN
  *                                     to execute.
  **/
 typedef
-SPDM_RETURN
+  SPDM_RETURN
 (*SPDM_DEVICE_RECEIVE_MESSAGE_FUNC)(
   IN VOID       *SpdmContext,
   IN OUT UINTN  *MessageSize,
@@ -126,7 +126,7 @@ SPDM_RETURN
  * @retval RETURN_INVALID_PARAMETER     The message is NULL or the message_size is zero.
  **/
 typedef
-SPDM_RETURN
+  SPDM_RETURN
 (*SPDM_TRANSPORT_ENCODE_MESSAGE_FUNC)(
   IN VOID              *SpdmContext,
   IN OUT CONST UINT32  *SessionId,
@@ -169,7 +169,7 @@ SPDM_RETURN
  * @retval RETURN_UNSUPPORTED           The transport_message is unsupported.
  **/
 typedef
-SPDM_RETURN
+  SPDM_RETURN
 (*SPDM_TRANSPORT_DECODE_MESSAGE_FUNC)(
   IN VOID        *SpdmContext,
   IN OUT UINT32  **SessionId,
@@ -219,10 +219,10 @@ SPDM_RETURN
  * @retval RETURN_SUCCESS               The sender buffer is acquired.
  **/
 typedef
-SPDM_RETURN
+  SPDM_RETURN
 (*SPDM_DEVICE_ACQUIRE_SENDER_BUFFER_FUNC)(
-  IN VOID       *SpdmContext,
-  IN OUT VOID   **MsgBufPtr
+  IN VOID      *SpdmContext,
+  IN OUT VOID  **MsgBufPtr
   );
 
 /**
@@ -234,7 +234,7 @@ SPDM_RETURN
  * @retval RETURN_SUCCESS               The sender buffer is Released.
  **/
 typedef
-VOID
+  VOID
 (*SPDM_DEVICE_RELEASE_SENDER_BUFFER_FUNC)(
   IN VOID        *SpdmContext,
   IN CONST VOID  *MsgBufPtr
@@ -278,10 +278,10 @@ VOID
  * @retval RETURN_SUCCESS               The receiver buffer is acquired.
  **/
 typedef
-SPDM_RETURN
+  SPDM_RETURN
 (*SPDM_DEVICE_ACQUIRE_RECEIVER_BUFFER_FUNC)(
-  IN VOID       *SpdmContext,
-  IN OUT VOID   **MsgBufPtr
+  IN VOID      *SpdmContext,
+  IN OUT VOID  **MsgBufPtr
   );
 
 /**
@@ -293,7 +293,7 @@ SPDM_RETURN
  * @retval RETURN_SUCCESS               The receiver buffer is Released.
  **/
 typedef
-VOID
+  VOID
 (*SPDM_DEVICE_RELEASE_RECEIVER_BUFFER_FUNC)(
   IN VOID        *SpdmContext,
   IN CONST VOID  *MsgBufPtr

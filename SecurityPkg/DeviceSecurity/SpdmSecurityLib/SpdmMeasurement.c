@@ -2,7 +2,7 @@
   EDKII Device Security library for SPDM device.
   It follows the SPDM Specification.
 
-Copyright (c) 2022, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2024, Intel Corporation. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
@@ -346,7 +346,7 @@ ExtendMeasurement (
         Status        = CreateDeviceMeasurementContext (SpdmDeviceContext, DeviceContext, DeviceContextSize);
         if (Status != EFI_SUCCESS) {
           SecurityState->MeasurementState = EDKII_DEVICE_SECURITY_STATE_ERROR_DEVICE_ERROR;
-          Status = EFI_DEVICE_ERROR;
+          Status                          = EFI_DEVICE_ERROR;
           goto Exit;
         }
       }
@@ -401,7 +401,7 @@ ExtendMeasurement (
         Status        = CreateDeviceMeasurementContext (SpdmDeviceContext, DeviceContext, DeviceContextSize);
         if (Status != EFI_SUCCESS) {
           SecurityState->MeasurementState = EDKII_DEVICE_SECURITY_STATE_ERROR_DEVICE_ERROR;
-          Status = EFI_DEVICE_ERROR;
+          Status                          = EFI_DEVICE_ERROR;
           goto Exit;
         }
       }
@@ -453,7 +453,7 @@ ExtendMeasurement (
   }
 
   if (ResponderNonce != NULL) {
-    TCG_NV_INDEX_DYNAMIC_EVENT_LOG_STRUCT_SPDM_MEASUREMENTS      DynamicEventLogSpdmMeasurementsEvent;
+    TCG_NV_INDEX_DYNAMIC_EVENT_LOG_STRUCT_SPDM_MEASUREMENTS  DynamicEventLogSpdmMeasurementsEvent;
 
     CopyMem (DynamicEventLogSpdmMeasurementsEvent.Header.Signature, TCG_NV_EXTEND_INDEX_FOR_DYNAMIC_SIGNATURE, sizeof (TCG_NV_EXTEND_INDEX_FOR_DYNAMIC_SIGNATURE));
     DynamicEventLogSpdmMeasurementsEvent.Header.Version = TCG_NV_INDEX_DYNAMIC_EVENT_LOG_STRUCT_VERSION;
@@ -478,9 +478,10 @@ ExtendMeasurement (
 
     DEBUG ((DEBUG_INFO, "TpmMeasureAndLogData (Dynamic) - %r\n", Status));
   }
+
 Exit:
   if (EventLog != NULL) {
-    FreePool(EventLog);
+    FreePool (EventLog);
   }
 
   return Status;
@@ -545,7 +546,7 @@ DoDeviceMeasurement (
     }
   }
 
-  RequestAttribute = 0;
+  RequestAttribute  = 0;
   RequestAttribute |= SPDM_GET_MEASUREMENTS_REQUEST_ATTRIBUTES_GENERATE_SIGNATURE;
 
   MeasurementRecordLength = sizeof (MeasurementRecord);
@@ -568,7 +569,8 @@ DoDeviceMeasurement (
                  NULL,
                  RequesterNonce,
                  ResponderNonce,
-                 NULL, 0
+                 NULL,
+                 0
                  );
   if (LIBSPDM_STATUS_IS_SUCCESS (SpdmReturn)) {
     DEBUG ((DEBUG_INFO, "NumberOfBlocks %d\n", NumberOfBlocks));
@@ -658,7 +660,8 @@ ContentChangedFlag:
                      NULL,
                      RequesterNonce,
                      ResponderNonce,
-                     NULL, 0
+                     NULL,
+                     0
                      );
       if (LIBSPDM_STATUS_IS_ERROR (SpdmReturn)) {
         if (SpdmReturn == LIBSPDM_STATUS_VERIF_FAIL) {
@@ -672,7 +675,8 @@ ContentChangedFlag:
       }
 
       if ((ReceivedNumberOfBlock == NumberOfBlocks - 1) &&
-          (ContentChanged == SPDM_MEASUREMENTS_RESPONSE_CONTENT_CHANGE_DETECTED)) {
+          (ContentChanged == SPDM_MEASUREMENTS_RESPONSE_CONTENT_CHANGE_DETECTED))
+      {
         if (ContentChangedCount == 0) {
           ContentChangedCount++;
           goto ContentChangedFlag;

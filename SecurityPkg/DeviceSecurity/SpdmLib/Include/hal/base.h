@@ -4,6 +4,15 @@
  *  License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/libspdm/blob/main/LICENSE.md
  **/
 
+/** @file
+  EDKII Device Security library for SPDM device.
+  It follows the SPDM Specification.
+
+Copyright (c) 2024, Intel Corporation. All rights reserved.<BR>
+SPDX-License-Identifier: BSD-2-Clause-Patent
+
+**/
+
 #ifndef BASE_H
 #define BASE_H
 
@@ -13,7 +22,7 @@
 
 #ifndef LIBSPDM_STDINT_ALT
 
-#include <stdint.h>
+  #include <stdint.h>
 
 /* LIBSPDM_OPENSSL_STDINT_WORKAROUND */
 
@@ -40,25 +49,25 @@
 /* In the future libspdm intends to use the Windows native compilation flags and defines,
  * in place of the UEFI profile / personality. */
 
-#ifdef LIBSPDM_OPENSSL_STDINT_WORKAROUND
-#undef _WIN32
-#undef _WIN64
-#endif
+  #ifdef LIBSPDM_OPENSSL_STDINT_WORKAROUND
+    #undef _WIN32
+    #undef _WIN64
+  #endif
 
 #else /* LIBSPDM_STDINT_ALT */
-#include LIBSPDM_STDINT_ALT
+  #include LIBSPDM_STDINT_ALT
 #endif /* LIBSPDM_STDINT_ALT */
 
 #ifndef LIBSPDM_STDBOOL_ALT
-#include <stdbool.h>
+  #include <stdbool.h>
 #else
-#include LIBSPDM_STDBOOL_ALT
+  #include LIBSPDM_STDBOOL_ALT
 #endif
 
 #ifndef LIBSPDM_STDDEF_ALT
-#include <stddef.h>
+  #include <stddef.h>
 #else
-#include LIBSPDM_STDDEF_ALT
+  #include LIBSPDM_STDDEF_ALT
 #endif
 
 /**
@@ -73,7 +82,7 @@
  * @return  Minimum of two operands.
  *
  **/
-#define LIBSPDM_MIN(a, b) (((a) < (b)) ? (a) : (b))
+#define LIBSPDM_MIN(a, b)  (((a) < (b)) ? (a) : (b))
 
 /**
  * Return the number of elements in an array.
@@ -86,6 +95,6 @@
  * @return The number of elements in Array. The result has type size_t.
  *
  **/
-#define LIBSPDM_ARRAY_SIZE(array) (sizeof(array) / sizeof((array)[0]))
+#define LIBSPDM_ARRAY_SIZE(array)  (sizeof(array) / sizeof((array)[0]))
 
 #endif /* BASE_H */

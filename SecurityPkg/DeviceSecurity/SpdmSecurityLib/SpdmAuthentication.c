@@ -2,7 +2,7 @@
   EDKII Device Security library for SPDM device.
   It follows the SPDM Specification.
 
-Copyright (c) 2022, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2024, Intel Corporation. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
@@ -202,7 +202,7 @@ ExtendCertificate (
         Status        = CreateDeviceMeasurementContext (SpdmDeviceContext, DeviceContext, DeviceContextSize);
         if (Status != EFI_SUCCESS) {
           SecurityState->AuthenticationState = EDKII_DEVICE_SECURITY_STATE_ERROR_DEVICE_ERROR;
-          Status = EFI_DEVICE_ERROR;
+          Status                             = EFI_DEVICE_ERROR;
           goto Exit;
         }
       }
@@ -273,7 +273,7 @@ ExtendCertificate (
         Status        = CreateDeviceMeasurementContext (SpdmDeviceContext, DeviceContext, DeviceContextSize);
         if (Status != EFI_SUCCESS) {
           SecurityState->AuthenticationState = EDKII_DEVICE_SECURITY_STATE_ERROR_DEVICE_ERROR;
-          Status = EFI_DEVICE_ERROR;
+          Status                             = EFI_DEVICE_ERROR;
           goto Exit;
         }
       }
@@ -337,7 +337,7 @@ ExtendCertificate (
         Status        = CreateDeviceMeasurementContext (SpdmDeviceContext, DeviceContext, DeviceContextSize);
         if (Status != EFI_SUCCESS) {
           SecurityState->AuthenticationState = EDKII_DEVICE_SECURITY_STATE_ERROR_DEVICE_ERROR;
-          Status = EFI_DEVICE_ERROR;
+          Status                             = EFI_DEVICE_ERROR;
           goto Exit;
         }
       }
@@ -368,7 +368,7 @@ ExtendCertificate (
     if (SignatureData == NULL) {
       ASSERT (SignatureData != NULL);
       SecurityState->AuthenticationState = EDKII_DEVICE_SECURITY_STATE_ERROR_UEFI_OUT_OF_RESOURCE;
-      Status = EFI_OUT_OF_RESOURCES;
+      Status                             = EFI_OUT_OF_RESOURCES;
       goto Exit;
     }
 
@@ -392,7 +392,7 @@ ExtendCertificate (
 
 Exit:
   if (EventLog != NULL) {
-    FreePool(EventLog);
+    FreePool (EventLog);
   }
 
   return Status;
@@ -403,7 +403,6 @@ Exit:
 
   @param[in]  SpdmDeviceContext        The SPDM context for the device.
   @param[in]  AuthState                The auth state of this deice.
-  @param[in]  MeasurementHash          A pointer to a destination buffer to store the measurement hash.
   @param[in]  RequesterNonce           A buffer to hold the requester nonce (32 bytes), if not NULL.
   @param[in]  ResponderNonce           A buffer to hold the responder nonce (32 bytes), if not NULL.
   @param[out]  SecurityState           A pointer to the security state of the requester.
@@ -529,9 +528,9 @@ DoDeviceCertificate (
     return EFI_DEVICE_ERROR;
   }
 
-  *IsValidCertChain        = FALSE;
-  *RootCertMatch           = FALSE;
-  CertChainSize            = sizeof (CertChain);
+  *IsValidCertChain = FALSE;
+  *RootCertMatch    = FALSE;
+  CertChainSize     = sizeof (CertChain);
   ZeroMem (CertChain, sizeof (CertChain));
   TrustAnchor     = NULL;
   TrustAnchorSize = 0;
@@ -539,10 +538,9 @@ DoDeviceCertificate (
   //
   // Init *ValidSlotId to invalid slot_id
   //
-  *ValidSlotId  = SPDM_MAX_SLOT_COUNT;
+  *ValidSlotId = SPDM_MAX_SLOT_COUNT;
 
-  if ((CapabilityFlags & SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_CERT_CAP) == 0)
-  {
+  if ((CapabilityFlags & SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_CERT_CAP) == 0) {
     *AuthState                         = TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_FAIL_NO_SIG;
     SecurityState->AuthenticationState = EDKII_DEVICE_SECURITY_STATE_ERROR_DEVICE_NO_CAPABILITIES;
     Status                             = ExtendCertificate (SpdmDeviceContext, *AuthState, 0, NULL, NULL, 0, 0, SecurityState);
@@ -553,7 +551,7 @@ DoDeviceCertificate (
     if ((LIBSPDM_STATUS_IS_ERROR (SpdmReturn)) || ((SlotMask & 0x01) == 0)) {
       *AuthState                         = TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_FAIL_INVALID;
       SecurityState->AuthenticationState = EDKII_DEVICE_SECURITY_STATE_ERROR_CERTIFIACTE_FAILURE;
-      SlotId = 0;
+      SlotId                             = 0;
       Status                             = ExtendCertificate (SpdmDeviceContext, *AuthState, 0, NULL, NULL, 0, SlotId, SecurityState);
       return Status;
     }
@@ -578,7 +576,7 @@ DoDeviceCertificate (
         *IsValidCertChain                  = TRUE;
         *AuthState                         = TCG_DEVICE_SECURITY_EVENT_DATA_DEVICE_AUTH_STATE_NO_AUTH;
         SecurityState->AuthenticationState = EDKII_DEVICE_SECURITY_STATE_ERROR_CERTIFIACTE_FAILURE;
-        *ValidSlotId = SlotId;
+        *ValidSlotId                       = SlotId;
       }
     }
 
@@ -606,6 +604,8 @@ DoDeviceCertificate (
   @param[in]  SpdmDeviceContext           The SPDM context for the device.
   @param[out]  AuthState                  The auth state of the devices.
   @param[in]  ValidSlotId                 The number of slot for the certificate chain.
+  @param[in]  IsValidCertChain            Indicate the validity of CertChain
+  @param[in]  RootCertMatch               Indicate the match or mismatch for Rootcert
   @param[out]  SecurityState              The security state of the requester.
 
   @retval EFI_SUCCESS           Operation completed successfully.
@@ -651,7 +651,7 @@ DoDeviceAuthentication (
 
   IsValidChallengeAuthSig = FALSE;
 
-  //get the valid CertChain
+  // get the valid CertChain
   CertChainSize = sizeof (CertChain);
   ZeroMem (CertChain, sizeof (CertChain));
   SpdmReturn = SpdmGetCertificateEx (SpdmContext, NULL, ValidSlotId, &CertChainSize, CertChain, (CONST VOID **)&TrustAnchor, &TrustAnchorSize);

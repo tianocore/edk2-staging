@@ -5,6 +5,15 @@
 **/
 
 /** @file
+  EDKII Device Security library for SPDM device.
+  It follows the SPDM Specification.
+
+Copyright (c) 2024, Intel Corporation. All rights reserved.<BR>
+SPDX-License-Identifier: BSD-2-Clause-Patent
+
+**/
+
+/** @file
   Provides services to print debug and assert messages to a debug output device.
 
   The Debug library supports debug print and asserts based on a combination of macros and code.
@@ -31,6 +40,6 @@
 #define LIBSPDM_DEBUG_CODE_BEGIN  DEBUG_CODE_BEGIN
 #define LIBSPDM_DEBUG_CODE_END    DEBUG_CODE_END
 
-#define LIBSPDM_DEBUG_CODE        DEBUG_CODE
+#define LIBSPDM_DEBUG_CODE  DEBUG_CODE
 
 #endif /* DEBUG_LIB_H */
