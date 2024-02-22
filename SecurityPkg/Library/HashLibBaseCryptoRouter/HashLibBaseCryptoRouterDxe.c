@@ -193,16 +193,16 @@ HashCompleteAndExtend (
   OUT TPML_DIGEST_VALUES  *DigestList
   )
 {
-  TPML_DIGEST_VALUES                Digest;
-  HASH_HANDLE                       *HashCtx;
-  UINTN                             Index;
-  EFI_STATUS                        Status;
-  UINT32                            HashMask;
-  TPML_DIGEST_VALUES                TcgPcrEvent2Digest;
-  EFI_TCG2_EVENT_ALGORITHM_BITMAP   TpmHashAlgorithmBitmap;
-  UINT32                            ActivePcrBanks;
-  UINT32                            *BufferPtr;
-  UINT32                            DigestListBinSize;
+  TPML_DIGEST_VALUES               Digest;
+  HASH_HANDLE                      *HashCtx;
+  UINTN                            Index;
+  EFI_STATUS                       Status;
+  UINT32                           HashMask;
+  TPML_DIGEST_VALUES               TcgPcrEvent2Digest;
+  EFI_TCG2_EVENT_ALGORITHM_BITMAP  TpmHashAlgorithmBitmap;
+  UINT32                           ActivePcrBanks;
+  UINT32                           *BufferPtr;
+  UINT32                           DigestListBinSize;
 
   if (mHashInterfaceCount == 0) {
     return EFI_UNSUPPORTED;
