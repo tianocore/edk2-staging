@@ -792,7 +792,7 @@ typedef struct {
   UINT8    RDTExponent;
   UINT8    RequestCode;
   UINT8    Token;
-  UINT8    RDTM;
+  UINT8    Rdtm;
 } SPDM_ERROR_DATA_RESPONSE_NOT_READY;
 
 typedef struct {
