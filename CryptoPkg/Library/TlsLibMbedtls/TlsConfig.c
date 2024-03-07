@@ -146,6 +146,8 @@ TlsGetCipherMapping (
   @retval  EFI_UNSUPPORTED       Unsupported TLS/SSL method.
 
 **/
+# define TLS1_VERSION                    0x0301
+# define TLS1_1_VERSION                  0x0302
 # define TLS1_2_VERSION                  0x0303
 # define TLS1_3_VERSION                  0x0304
 EFI_STATUS
@@ -170,6 +172,9 @@ TlsSetVersion (
   // Bound TLS method to the particular specified version.
   //
   switch (ProtoVersion) {
+    case TLS1_VERSION:
+    case TLS1_1_VERSION:
+      return EFI_UNSUPPORTED;
     case TLS1_2_VERSION:
       //
       // TLS 1.2
@@ -618,7 +623,7 @@ TlsSetCaCertificate (
   )
 {
   TLS_CONNECTION  *TlsConn;
-  mbedtls_x509_crt Crt;
+  mbedtls_x509_crt *Crt;
   INT32 Ret;
 
   TlsConn = (TLS_CONNECTION *)Tls;
@@ -631,13 +636,14 @@ TlsSetCaCertificate (
     return EFI_INVALID_PARAMETER;
   }
 
-  mbedtls_x509_crt_init(&Crt);
+  Crt = AllocateZeroPool(sizeof(mbedtls_x509_crt));
+  mbedtls_x509_crt_init(Crt);
 
-  Ret = mbedtls_x509_crt_parse_der(&Crt, Data, DataSize);
+  Ret = mbedtls_x509_crt_parse_der(Crt, Data, DataSize);
 
   if (Ret == 0) {
-    mbedtls_ssl_conf_ca_chain((mbedtls_ssl_config *)TlsConn->Ssl->conf, &Crt, NULL);
-    mbedtls_x509_crt_free(&Crt);
+    mbedtls_ssl_conf_ca_chain((mbedtls_ssl_config *)TlsConn->Ssl->conf, Crt, NULL);
+    mbedtls_ssl_conf_cert_profile((mbedtls_ssl_config *)TlsConn->Ssl->conf, &mbedtls_x509_crt_profile_default);
   }
 
   return (Ret == 0) ? EFI_SUCCESS : EFI_ABORTED;
@@ -921,7 +927,9 @@ TlsSetEcCurve (
   )
 {
   TLS_CONNECTION  *TlsConn;
-  mbedtls_ecp_group_id grp_id;
+  UINT16  *GroupList;
+
+  GroupList = AllocateZeroPool(sizeof(UINT16) * 2);
 
   TlsConn = (TLS_CONNECTION *)Tls;
 
@@ -933,22 +941,24 @@ TlsSetEcCurve (
     case TlsEcNamedCurveSecp256r1:
       return EFI_UNSUPPORTED;
     case TlsEcNamedCurveSecp384r1:
-      grp_id = MBEDTLS_ECP_DP_SECP384R1;
+      GroupList[0] = MBEDTLS_SSL_IANA_TLS_GROUP_SECP384R1;
       break;
     case TlsEcNamedCurveSecp521r1:
-      grp_id = MBEDTLS_ECP_DP_SECP521R1;
+      GroupList[0] = MBEDTLS_SSL_IANA_TLS_GROUP_SECP521R1;
       break;
     case TlsEcNamedCurveX25519:
-      grp_id = MBEDTLS_ECP_DP_CURVE25519;
+      GroupList[0] = MBEDTLS_SSL_IANA_TLS_GROUP_X25519;
       break;
     case TlsEcNamedCurveX448:
-      grp_id = MBEDTLS_ECP_DP_CURVE448;
+      GroupList[0] = MBEDTLS_SSL_IANA_TLS_GROUP_X448;
       break;
     default:
       return EFI_UNSUPPORTED;
   }
 
-  mbedtls_ssl_conf_curves((mbedtls_ssl_config *)TlsConn->Ssl->conf, &grp_id);
+  GroupList[1] =  MBEDTLS_SSL_IANA_TLS_GROUP_NONE;
+
+  mbedtls_ssl_conf_groups((mbedtls_ssl_config *)TlsConn->Ssl->conf, GroupList);
 
   return EFI_SUCCESS;
 }
@@ -1256,7 +1266,33 @@ TlsGetHostPublicCert (
   IN OUT UINTN  *DataSize
   )
 {
-  return EFI_UNSUPPORTED;
+  const mbedtls_x509_crt *Cert;
+  TLS_CONNECTION   *TlsConn;
+
+  Cert    = NULL;
+  TlsConn = (TLS_CONNECTION *)Tls;
+
+  if ((TlsConn == NULL) || (TlsConn->Ssl == NULL) || (DataSize == NULL) || ((*DataSize != 0) && (Data == NULL))) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  Cert = TlsConn->Ssl->conf->key_cert->cert;
+  if (Cert == NULL) {
+    return EFI_NOT_FOUND;
+  }
+
+  //
+  // Only DER encoding is supported currently.
+  //
+  if (*DataSize < Cert->raw.len) {
+    *DataSize = Cert->raw.len;
+    return EFI_BUFFER_TOO_SMALL;
+  }
+
+  CopyMem(Data, Cert->raw.p, Cert->raw.len);
+  *DataSize = Cert->raw.len;
+
+  return EFI_SUCCESS;
 }
 
 /**
