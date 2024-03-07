@@ -84,6 +84,8 @@ STATIC CONST TLS_ALGO_TO_NAME  TlsSignatureAlgoToName[] = {
   { TlsSignatureAlgoEcdsa,     "ECDSA" },
 };
 
+mbedtls_x509_crt OwnCrt;
+
 /**
   Gets the Mbedtls cipher suite mapping for the supplied IANA TLS cipher suite.
 
@@ -94,7 +96,7 @@ STATIC CONST TLS_ALGO_TO_NAME  TlsSignatureAlgoToName[] = {
 
 **/
 STATIC
-CONST TLS_CIPHER_MAPPING *
+BOOLEAN
 TlsGetCipherMapping (
   IN     UINT16  CipherId
   )
@@ -116,7 +118,7 @@ TlsGetCipherMapping (
       //
       // Translate IANA cipher suite ID to Mbedtls name.
       //
-      return &TlsCipherMappingTable[Middle];
+      return TRUE;
     }
 
     if (CipherId < TlsCipherMappingTable[Middle].IanaCipher) {
@@ -129,7 +131,7 @@ TlsGetCipherMapping (
   //
   // No Cipher Mapping found, return NULL.
   //
-  return NULL;
+  return FALSE;
 }
 
 /**
@@ -146,6 +148,8 @@ TlsGetCipherMapping (
   @retval  EFI_UNSUPPORTED       Unsupported TLS/SSL method.
 
 **/
+# define TLS1_VERSION                    0x0301
+# define TLS1_1_VERSION                  0x0302
 # define TLS1_2_VERSION                  0x0303
 # define TLS1_3_VERSION                  0x0304
 EFI_STATUS
@@ -170,6 +174,9 @@ TlsSetVersion (
   // Bound TLS method to the particular specified version.
   //
   switch (ProtoVersion) {
+    case TLS1_VERSION:
+    case TLS1_1_VERSION:
+      return EFI_UNSUPPORTED;
     case TLS1_2_VERSION:
       //
       // TLS 1.2
@@ -265,50 +272,39 @@ TlsSetCipherList (
 {
   TLS_CONNECTION            *TlsConn;
   EFI_STATUS                Status;
-  CONST TLS_CIPHER_MAPPING  **MappedCipher;
-  UINTN                     MappedCipherBytes;
-  UINTN                     MappedCipherCount;
-  UINTN                     CipherStringSize;
   UINTN                     Index;
-  CONST TLS_CIPHER_MAPPING  *Mapping;
-  CHAR8                     *CipherString;
-  CHAR8                     *CipherStringPosition;
+  UINTN                     TotalSize;
+  INT32                     *FinalCipherId;
+  UINTN                     MappedCipherCount;
 
   TlsConn = (TLS_CONNECTION *)Tls;
   if ((TlsConn == NULL) || (TlsConn->Ssl == NULL) || (CipherId == NULL)) {
     return EFI_INVALID_PARAMETER;
   }
 
-  //
-  // Allocate the MappedCipher array for recording the mappings that we find
-  // for the input IANA identifiers in CipherId.
-  //
   Status = SafeUintnMult (
-             CipherNum,
-             sizeof (*MappedCipher),
-             &MappedCipherBytes
+             CipherNum + 1,
+             sizeof (INT32),
+             &TotalSize
              );
   if (EFI_ERROR (Status)) {
     return EFI_OUT_OF_RESOURCES;
   }
 
-  MappedCipher = AllocatePool (MappedCipherBytes);
-  if (MappedCipher == NULL) {
+  FinalCipherId = AllocatePool (TotalSize);
+  if (FinalCipherId == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
 
   //
-  // Map the cipher IDs, and count the number of bytes for the full
-  // CipherString.
+  // Map the cipher IDs, and count the number of bytes for the full CipherString.
   //
   MappedCipherCount = 0;
-  CipherStringSize  = 0;
   for (Index = 0; Index < CipherNum; Index++) {
     //
     // Look up the IANA-to-Mbedtls mapping.
     //
-    Mapping = TlsGetCipherMapping (CipherId[Index]);
-    if (Mapping == NULL) {
+    if (TlsGetCipherMapping (CipherId[Index]) == FALSE) {
       DEBUG ((
         DEBUG_VERBOSE,
         "%a:%a: skipping CipherId=0x%04x\n",
@@ -322,141 +318,22 @@ TlsSetCipherList (
       // don't change the relative order of elements on it.
       //
       continue;
+    } else {
+      //
+      // Record the CipherId.
+      //
+      FinalCipherId[MappedCipherCount++] = CipherId[Index];
     }
-
-    //
-    // Accumulate Mapping->MbedtlsCipherLength into CipherStringSize. If this
-    // is not the first successful mapping, account for a colon (":") prefix
-    // too.
-    //
-    if (MappedCipherCount > 0) {
-      Status = SafeUintnAdd (CipherStringSize, 1, &CipherStringSize);
-      if (EFI_ERROR (Status)) {
-        Status = EFI_OUT_OF_RESOURCES;
-        goto FreeMappedCipher;
-      }
-    }
-
-    Status = SafeUintnAdd (
-               CipherStringSize,
-               Mapping->MbedtlsCipherLength,
-               &CipherStringSize
-               );
-    if (EFI_ERROR (Status)) {
-      Status = EFI_OUT_OF_RESOURCES;
-      goto FreeMappedCipher;
-    }
-
-    //
-    // Record the mapping.
-    //
-    MappedCipher[MappedCipherCount++] = Mapping;
   }
 
-  //
-  // Verify that at least one IANA cipher ID could be mapped; account for the
-  // terminating NUL character in CipherStringSize; allocate CipherString.
-  //
-  if (MappedCipherCount == 0) {
-    DEBUG ((
-      DEBUG_ERROR,
-      "%a:%a: no CipherId could be mapped\n",
-      gEfiCallerBaseName,
-      __FUNCTION__
-      ));
-    Status = EFI_UNSUPPORTED;
-    goto FreeMappedCipher;
-  }
-
-  Status = SafeUintnAdd (CipherStringSize, 1, &CipherStringSize);
-  if (EFI_ERROR (Status)) {
-    Status = EFI_OUT_OF_RESOURCES;
-    goto FreeMappedCipher;
-  }
-
-  CipherString = AllocatePool (CipherStringSize);
-  if (CipherString == NULL) {
-    Status = EFI_OUT_OF_RESOURCES;
-    goto FreeMappedCipher;
-  }
-
-  //
-  // Go over the collected mappings and populate CipherString.
-  //
-  CipherStringPosition = CipherString;
-  for (Index = 0; Index < MappedCipherCount; Index++) {
-    Mapping = MappedCipher[Index];
-    //
-    // Append the colon (":") prefix except for the first mapping, then append
-    // Mapping->MbedtlsCipher.
-    //
-    if (Index > 0) {
-      *(CipherStringPosition++) = ':';
-    }
-
-    CopyMem (
-      CipherStringPosition,
-      Mapping->MbedtlsCipher,
-      Mapping->MbedtlsCipherLength
-      );
-    CipherStringPosition += Mapping->MbedtlsCipherLength;
-  }
-
-  //
-  // NUL-terminate CipherString.
-  //
-  *(CipherStringPosition++) = '\0';
-  ASSERT (CipherStringPosition == CipherString + CipherStringSize);
-
-  //
-  // Log CipherString for debugging. CipherString can be very long if the
-  // caller provided a large CipherId array, so log CipherString in segments of
-  // 79 non-newline characters. (MAX_DEBUG_MESSAGE_LENGTH is usually 0x100 in
-  // DebugLib instances.)
-  //
-  DEBUG_CODE_BEGIN ();
-  UINTN  FullLength;
-  UINTN  SegmentLength;
-
-  FullLength = CipherStringSize - 1;
-  DEBUG ((
-    DEBUG_VERBOSE,
-    "%a:%a: CipherString={\n",
-    gEfiCallerBaseName,
-    __FUNCTION__
-    ));
-  for (CipherStringPosition = CipherString;
-       CipherStringPosition < CipherString + FullLength;
-       CipherStringPosition += SegmentLength)
-  {
-    SegmentLength = FullLength - (CipherStringPosition - CipherString);
-    if (SegmentLength > 79) {
-      SegmentLength = 79;
-    }
-
-    DEBUG ((DEBUG_VERBOSE, "%.*a\n", SegmentLength, CipherStringPosition));
-  }
-
-  DEBUG ((DEBUG_VERBOSE, "}\n"));
-  //
-  // Restore the pre-debug value of CipherStringPosition by skipping over the
-  // trailing NUL.
-  //
-  CipherStringPosition++;
-  ASSERT (CipherStringPosition == CipherString + CipherStringSize);
-  DEBUG_CODE_END ();
+  FinalCipherId[MappedCipherCount] = 0;
 
   //
   // Sets the ciphers for use by the Tls object.
   //
-  mbedtls_ssl_conf_ciphersuites ((mbedtls_ssl_config *)TlsConn->Ssl->conf, (const int*)CipherString);
+  mbedtls_ssl_conf_ciphersuites ((mbedtls_ssl_config *)TlsConn->Ssl->conf, (const int*)FinalCipherId);
 
   Status = EFI_SUCCESS;
-
-  FreePool (CipherString);
-
-FreeMappedCipher:
-  FreePool ((VOID *)MappedCipher);
 
   return Status;
 }
@@ -465,6 +342,12 @@ FreeMappedCipher:
   Set the compression method for TLS/SSL operations.
 
   This function handles TLS/SSL integrated compression methods.
+
+  For every TLS 1.3 ClientHello, this vector MUST contain exactly
+  one byte set to zero, which corresponds to the 'null' compression
+  method in prior versions of TLS.
+  For TLS 1.2 ClientHello, for security reasons we do not support
+  compression anymore, thus also just the 'null' compression method.
 
   @param[in]  CompMethod    The compression method ID.
 
@@ -479,7 +362,7 @@ TlsSetCompressionMethod (
   IN     UINT8  CompMethod
   )
 {
-  return EFI_UNSUPPORTED;
+  return EFI_SUCCESS;
 }
 
 /**
@@ -618,7 +501,7 @@ TlsSetCaCertificate (
   )
 {
   TLS_CONNECTION  *TlsConn;
-  mbedtls_x509_crt Crt;
+  mbedtls_x509_crt *Crt;
   INT32 Ret;
 
   TlsConn = (TLS_CONNECTION *)Tls;
@@ -631,13 +514,14 @@ TlsSetCaCertificate (
     return EFI_INVALID_PARAMETER;
   }
 
-  mbedtls_x509_crt_init(&Crt);
+  Crt = malloc(sizeof(mbedtls_x509_crt));
+  mbedtls_x509_crt_init(Crt);
 
-  Ret = mbedtls_x509_crt_parse_der(&Crt, Data, DataSize);
+  Ret = mbedtls_x509_crt_parse_der(Crt, Data, DataSize);
 
   if (Ret == 0) {
-    mbedtls_ssl_conf_ca_chain((mbedtls_ssl_config *)TlsConn->Ssl->conf, &Crt, NULL);
-    mbedtls_x509_crt_free(&Crt);
+    mbedtls_ssl_conf_ca_chain((mbedtls_ssl_config *)TlsConn->Ssl->conf, Crt, NULL);
+    mbedtls_ssl_conf_cert_profile((mbedtls_ssl_config *)TlsConn->Ssl->conf, &mbedtls_x509_crt_profile_default);
   }
 
   return (Ret == 0) ? EFI_SUCCESS : EFI_ABORTED;
@@ -669,7 +553,6 @@ TlsSetHostPublicCert (
   )
 {
   TLS_CONNECTION  *TlsConn;
-  mbedtls_x509_crt Crt;
   INT32 Ret;
 
   TlsConn = (TLS_CONNECTION *)Tls;
@@ -682,17 +565,12 @@ TlsSetHostPublicCert (
     return EFI_INVALID_PARAMETER;
   }
 
-  mbedtls_x509_crt_init(&Crt);
-
-  Ret = mbedtls_x509_crt_parse_der(&Crt, Data, DataSize);
-
-  if (Ret == 0) {
-    Ret = mbedtls_ssl_conf_own_cert((mbedtls_ssl_config *)TlsConn->Ssl->conf, &Crt, NULL);
+  Ret = mbedtls_x509_crt_parse_der(&OwnCrt, Data, DataSize);
+  if (Ret != 0) {
+    return EFI_ABORTED;
   }
 
-  mbedtls_x509_crt_free(&Crt);
-
-  return (Ret == 0) ? EFI_SUCCESS : EFI_ABORTED;
+  return EFI_SUCCESS;
 }
 
 /**
@@ -728,6 +606,7 @@ TlsSetHostPrivateKeyEx (
   uint8_t *pem_data;
   uint8_t *new_pem_data;
   UINTN password_len;
+  UINTN ActualDataSize;
 
   TlsConn = (TLS_CONNECTION *)Tls;
 
@@ -735,6 +614,27 @@ TlsSetHostPrivateKeyEx (
     return EFI_INVALID_PARAMETER;
   }
 
+  ActualDataSize = DataSize;
+
+  mbedtls_pk_init(&pk);
+
+  if (Password != NULL) {
+      password_len = AsciiStrLen(Password);
+  } else {
+      password_len = 0;
+  }
+
+
+  // Try to parse the private key in DER format 
+  ret = mbedtls_pk_parse_key(&pk, Data, ActualDataSize,
+                             (const uint8_t *)Password, password_len,
+                             NULL, NULL);
+
+  if (ret == 0) {
+    goto SetKey;
+  }
+
+  // Try to parse the private key in PEM format 
   pem_data = (uint8_t *)Data;
 
   new_pem_data = NULL;
@@ -749,14 +649,6 @@ TlsSetHostPrivateKeyEx (
       DataSize += 1;
   }
 
-  mbedtls_pk_init(&pk);
-
-  if (Password != NULL) {
-      password_len = AsciiStrLen(Password);
-  } else {
-      password_len = 0;
-  }
-
   ret = mbedtls_pk_parse_key(&pk, pem_data, DataSize,
                              (const uint8_t *)Password, password_len,
                              NULL, NULL);
@@ -765,13 +657,16 @@ TlsSetHostPrivateKeyEx (
       new_pem_data = NULL;
   }
 
-  if (mbedtls_ssl_conf_own_cert((mbedtls_ssl_config *)TlsConn->Ssl->conf, NULL, &pk) != 0) {
-    ret = 1;
+  if (ret == 0) {
+    goto SetKey;
+  } else {
+    return EFI_ABORTED;
   }
 
-  if (ret != 0) {
-      mbedtls_pk_free(&pk);
-      return EFI_ABORTED;
+SetKey:
+
+  if (mbedtls_ssl_conf_own_cert((mbedtls_ssl_config *)TlsConn->Ssl->conf, &OwnCrt, &pk) != 0) {
+    return EFI_ABORTED;
   }
 
   return EFI_SUCCESS;
@@ -921,7 +816,9 @@ TlsSetEcCurve (
   )
 {
   TLS_CONNECTION  *TlsConn;
-  mbedtls_ecp_group_id grp_id;
+  UINT16  *GroupList;
+
+  GroupList = malloc(sizeof(UINT16) * 2);
 
   TlsConn = (TLS_CONNECTION *)Tls;
 
@@ -933,22 +830,24 @@ TlsSetEcCurve (
     case TlsEcNamedCurveSecp256r1:
       return EFI_UNSUPPORTED;
     case TlsEcNamedCurveSecp384r1:
-      grp_id = MBEDTLS_ECP_DP_SECP384R1;
+      GroupList[0] = MBEDTLS_SSL_IANA_TLS_GROUP_SECP384R1;
       break;
     case TlsEcNamedCurveSecp521r1:
-      grp_id = MBEDTLS_ECP_DP_SECP521R1;
+      GroupList[0] = MBEDTLS_SSL_IANA_TLS_GROUP_SECP521R1;
       break;
     case TlsEcNamedCurveX25519:
-      grp_id = MBEDTLS_ECP_DP_CURVE25519;
+      GroupList[0] = MBEDTLS_SSL_IANA_TLS_GROUP_X25519;
       break;
     case TlsEcNamedCurveX448:
-      grp_id = MBEDTLS_ECP_DP_CURVE448;
+      GroupList[0] = MBEDTLS_SSL_IANA_TLS_GROUP_X448;
       break;
     default:
       return EFI_UNSUPPORTED;
   }
 
-  mbedtls_ssl_conf_curves((mbedtls_ssl_config *)TlsConn->Ssl->conf, &grp_id);
+  GroupList[1] =  MBEDTLS_SSL_IANA_TLS_GROUP_NONE;
+
+  mbedtls_ssl_conf_groups((mbedtls_ssl_config *)TlsConn->Ssl->conf, GroupList);
 
   return EFI_SUCCESS;
 }
@@ -1256,7 +1155,33 @@ TlsGetHostPublicCert (
   IN OUT UINTN  *DataSize
   )
 {
-  return EFI_UNSUPPORTED;
+  const mbedtls_x509_crt *Cert;
+  TLS_CONNECTION   *TlsConn;
+
+  Cert    = NULL;
+  TlsConn = (TLS_CONNECTION *)Tls;
+
+  if ((TlsConn == NULL) || (TlsConn->Ssl == NULL) || (DataSize == NULL) || ((*DataSize != 0) && (Data == NULL))) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  Cert = TlsConn->Ssl->conf->key_cert->cert;
+  if (Cert == NULL) {
+    return EFI_NOT_FOUND;
+  }
+
+  //
+  // Only DER encoding is supported currently.
+  //
+  if (*DataSize < Cert->raw.len) {
+    *DataSize = Cert->raw.len;
+    return EFI_BUFFER_TOO_SMALL;
+  }
+
+  memcpy(Data, Cert->raw.p, Cert->raw.len);
+  *DataSize = Cert->raw.len;
+
+  return EFI_SUCCESS;
 }
 
 /**

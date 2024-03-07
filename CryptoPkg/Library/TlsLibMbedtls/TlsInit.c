@@ -9,7 +9,42 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 #include "InternalTlsLib.h"
 
+#define MAX_BUFFER_SIZE  32768
+
 int myrand( void *rng_state, unsigned char *output, size_t len );
+
+
+int MbedtlsSend( void *ctx, const unsigned char *buf, size_t len )
+{
+  TLS_CIPHER_BUFFER * TlsCipherCtx;
+  UINTN CipherLen;
+
+  TlsCipherCtx = ctx;
+
+  CipherLen = len;
+
+  CopyMem(TlsCipherCtx->CipherTextBuffer + TlsCipherCtx->RemainderSize, buf, CipherLen);
+  TlsCipherCtx->RemainderSize += CipherLen;
+  return (int)(CipherLen);
+}
+
+int MbedtlsRecv( void *ctx, unsigned char *buf, size_t len )
+{
+  TLS_CIPHER_BUFFER * TlsCipherCtx;
+  UINTN CipherLen;
+
+  TlsCipherCtx = ctx;
+
+
+  CipherLen = len;
+
+  CopyMem(buf, TlsCipherCtx->CipherTextBuffer + (TlsCipherCtx->CipherTextBufferSize - TlsCipherCtx->RemainderSize) , CipherLen);
+
+  TlsCipherCtx->RemainderSize -= CipherLen;
+
+  return (int)(CipherLen);
+}
+
 /**
   Initializes the MbedTLS library.
 
@@ -121,6 +156,14 @@ TlsFree (
     mbedtls_ssl_free (TlsConn->Ssl);
   }
 
+  if (TlsConn->Conf != NULL) {
+    mbedtls_ssl_config_free (TlsConn->Conf);
+  }
+
+  if (TlsConn->TlsCipherBuffer.CipherTextBuffer != NULL) {
+    FreePool(TlsConn->TlsCipherBuffer.CipherTextBuffer);
+  }
+
   FreePool (Tls);
 }
 
@@ -168,11 +211,13 @@ TlsNew (
     return NULL;
   }
 
-  TlsConn->fd = AllocateZeroPool(sizeof(mbedtls_net_context));
-  mbedtls_net_init(TlsConn->fd);
+  TlsConn->Ssl->state = MBEDTLS_SSL_CLIENT_HELLO;
 
-  mbedtls_ssl_set_bio(TlsConn->Ssl, TlsConn->fd,
-                      mbedtls_net_send, mbedtls_net_recv, NULL);
+  TlsConn->TlsCipherBuffer.CipherTextBufferSize = MAX_BUFFER_SIZE;
+  TlsConn->TlsCipherBuffer.CipherTextBuffer = AllocateZeroPool(MAX_BUFFER_SIZE);
+
+  mbedtls_ssl_set_bio(TlsConn->Ssl, &(TlsConn->TlsCipherBuffer),
+                      MbedtlsSend, MbedtlsRecv, NULL);
 
   return (VOID *)TlsConn;
 }
