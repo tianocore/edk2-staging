@@ -22,4 +22,8 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 //
 #include <mbedtls/mbedtls_config.h>
 
+/**
+  The MbedTLS function f_rng, which myrand implements.
+**/
+int myrand( void *rng_state, unsigned char *output, size_t len );
 #endif
