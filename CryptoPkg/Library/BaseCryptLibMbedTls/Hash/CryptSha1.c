@@ -128,6 +128,9 @@ Sha1Update (
   if ((Data == NULL) && (DataSize != 0)) {
     return FALSE;
   }
+  if (DataSize > INT_MAX) {
+    return FALSE;
+  }
 
   Ret = mbedtls_sha1_update_ret (Sha1Context, Data, DataSize);
   if (Ret != 0) {
@@ -212,6 +215,9 @@ Sha1HashAll (
   }
 
   if ((Data == NULL) && (DataSize != 0)) {
+    return FALSE;
+  }
+  if (DataSize > INT_MAX) {
     return FALSE;
   }
 

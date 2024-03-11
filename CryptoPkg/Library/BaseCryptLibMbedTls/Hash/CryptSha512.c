@@ -125,6 +125,9 @@ Sha384Update (
   if ((Data == NULL) && (DataSize != 0)) {
     return FALSE;
   }
+  if (DataSize > INT_MAX) {
+    return FALSE;
+  }
 
   Ret = mbedtls_sha512_update_ret (Sha384Context, Data, DataSize);
   if (Ret != 0) {
@@ -209,6 +212,9 @@ Sha384HashAll (
   }
 
   if ((Data == NULL) && (DataSize != 0)) {
+    return FALSE;
+  }
+  if (DataSize > INT_MAX) {
     return FALSE;
   }
 
@@ -335,6 +341,9 @@ Sha512Update (
   if ((Data == NULL) && (DataSize != 0)) {
     return FALSE;
   }
+  if (DataSize > INT_MAX) {
+    return FALSE;
+  }
 
   Ret = mbedtls_sha512_update_ret (Sha512Context, Data, DataSize);
   if (Ret != 0) {
@@ -419,6 +428,9 @@ Sha512HashAll (
   }
 
   if ((Data == NULL) && (DataSize != 0)) {
+    return FALSE;
+  }
+  if (DataSize > INT_MAX) {
     return FALSE;
   }
 

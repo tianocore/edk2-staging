@@ -128,6 +128,9 @@ Md5Update (
   if ((Data == NULL) && (DataSize != 0)) {
     return FALSE;
   }
+  if (DataSize > INT_MAX) {
+    return FALSE;
+  }
 
   Ret = mbedtls_md5_update_ret (Md5Context, Data, DataSize);
   if (Ret != 0) {
@@ -212,6 +215,9 @@ Md5HashAll (
   }
 
   if ((Data == NULL) && (DataSize != 0)) {
+    return FALSE;
+  }
+  if (DataSize > INT_MAX) {
     return FALSE;
   }
 

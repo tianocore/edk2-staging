@@ -123,6 +123,9 @@ Sha256Update (
   if ((Data == NULL) && (DataSize != 0)) {
     return FALSE;
   }
+  if (DataSize > INT_MAX) {
+    return FALSE;
+  }
 
   Ret = mbedtls_sha256_update_ret (Sha256Context, Data, DataSize);
   if (Ret != 0) {
@@ -207,6 +210,9 @@ Sha256HashAll (
   }
 
   if ((Data == NULL) && (DataSize != 0)) {
+    return FALSE;
+  }
+  if (DataSize > INT_MAX) {
     return FALSE;
   }
 
