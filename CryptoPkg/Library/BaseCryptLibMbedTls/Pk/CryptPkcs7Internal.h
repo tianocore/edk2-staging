@@ -4,7 +4,7 @@
 
   RFC 2315 - PKCS #7: Cryptographic Message Syntax Version 1.5
 
-Copyright (c) 2023, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2023-2024, Intel Corporation. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
@@ -31,9 +31,9 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #define MBEDTLS_OID_PKCS7_DIGESTED_DATA              MBEDTLS_OID_PKCS7 "\x05"
 #define MBEDTLS_OID_PKCS7_ENCRYPTED_DATA             MBEDTLS_OID_PKCS7 "\x06"
 
-typedef mbedtls_asn1_buf         MBEDTLSPKCS7BUF;
-typedef mbedtls_asn1_named_data  MBEDTLSPKCS7NAME;
-typedef mbedtls_asn1_sequence    MBEDTLSPKCS7SEQUENCE;
+typedef mbedtls_asn1_buf        MbedtlsPkcs7Buf;
+typedef mbedtls_asn1_named_data MbedtlsPkcs7Name;
+typedef mbedtls_asn1_sequence   MbedtlsPkcs7Sequence;
 
 ///
 /// PKCS7 SignerInfo type
@@ -48,8 +48,9 @@ typedef struct MbedtlsPkcs7SignerInfo {
   mbedtls_x509_buf                 SigAlgIdentifier;
   mbedtls_x509_buf                 AuthAttr;
   mbedtls_x509_buf                 Sig;
-  struct MBEDTLSPKCS7SIGNERINFO    *Next;
-} MBEDTLSPKCS7SIGNERINFO;
+  struct MbedtlsPkcs7SignerInfo    *Next;
+} MbedtlsPkcs7SignerInfo;
+
 
 ///
 /// PKCS7 signed data attached data format
@@ -57,7 +58,7 @@ typedef struct MbedtlsPkcs7SignerInfo {
 typedef struct MbedtlsPkcs7Data {
   mbedtls_asn1_buf    Oid;
   mbedtls_asn1_buf    Data;
-} MBEDTLSPKCS7DATA;
+}  MbedtlsPkcs7Data;
 
 ///
 /// Signed Data
@@ -66,18 +67,18 @@ typedef struct MbedtlsPkcs7Data {
 typedef struct MbedtlsPkcs7SignedData {
   INT32                            Version;
   mbedtls_asn1_buf                 DigestAlgorithms;
-  struct MBEDTLSPKCS7DATA          ContentInfo;
+  struct MbedtlsPkcs7Data          ContentInfo;
   mbedtls_x509_crt                 Certificates;
   mbedtls_x509_crl                 Crls;
   struct MbedtlsPkcs7SignerInfo    SignerInfos;
-} MBEDTLSPKCS7SIGNEDDATA;
+} MbedtlsPkcs7SignedData;
 
 ///
 /// PKCS7 struct, only support SignedData
 ///
 typedef struct MbedtlsPkcs7 {
   mbedtls_asn1_buf                 ContentTypeOid;
-  struct MBEDTLSPKCS7SIGNEDDATA    SignedData;
-} MBEDTLSPKCS7;
+  struct MbedtlsPkcs7SignedData    SignedData;
+} MbedtlsPkcs7;
 
 #endif
