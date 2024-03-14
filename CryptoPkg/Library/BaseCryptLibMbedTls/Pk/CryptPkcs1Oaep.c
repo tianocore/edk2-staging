@@ -3,8 +3,7 @@
 
   SPDX-License-Identifier: BSD-2-Clause-Patent
 
-  Copyright (C) 2016 Microsoft Corporation. All Rights Reserved.
-  Copyright (c) 2019, Intel Corporation. All rights reserved.<BR>
+  Copyright (c) 2024, Intel Corporation. All rights reserved.<BR>
 
 **/
 
@@ -49,23 +48,26 @@ Pkcs1v2Encrypt (
   IN   UINTN        PublicKeySize,
   IN   UINT8        *InData,
   IN   UINTN        InDataSize,
-  IN   CONST UINT8  *PrngSeed,  OPTIONAL
-  IN   UINTN        PrngSeedSize,  OPTIONAL
+  IN   CONST UINT8  *PrngSeed,
+  OPTIONAL
+  IN   UINTN        PrngSeedSize,
+  OPTIONAL
   OUT  UINT8        **EncryptedData,
   OUT  UINTN        *EncryptedDataSize
   )
 {
-  BOOLEAN       Result;
-  UINT32        Ret;
-  UINT8         *OutData;
-  mbedtls_x509_crt CertContext;
-  mbedtls_rsa_context RsaContext;
+  BOOLEAN              Result;
+  UINT32               Ret;
+  UINT8                *OutData;
+  mbedtls_x509_crt     CertContext;
+  mbedtls_rsa_context  RsaContext;
 
   //
   // Check input parameters.
   //
-  if (PublicKey == NULL || InData == NULL ||
-      EncryptedData == NULL || EncryptedDataSize == NULL) {
+  if ((PublicKey == NULL) || (InData == NULL) ||
+      (EncryptedData == NULL) || (EncryptedDataSize == NULL))
+  {
     return FALSE;
   }
 
@@ -79,27 +81,27 @@ Pkcs1v2Encrypt (
     return FALSE;
   }
 
-  *EncryptedData        = NULL;
-  *EncryptedDataSize    = 0;
-  Result                = FALSE;
-  OutData               = NULL;
+  *EncryptedData     = NULL;
+  *EncryptedDataSize = 0;
+  Result             = FALSE;
+  OutData            = NULL;
 
-  mbedtls_x509_crt_init(&CertContext);
+  mbedtls_x509_crt_init (&CertContext);
 
-  if (mbedtls_x509_crt_parse_der(&CertContext, PublicKey, (UINT32)PublicKeySize) != 0) {
+  if (mbedtls_x509_crt_parse_der (&CertContext, PublicKey, (UINT32)PublicKeySize) != 0) {
     goto _Exit;
   }
 
-  if (mbedtls_pk_get_type(&CertContext.pk) != MBEDTLS_PK_RSA) {
+  if (mbedtls_pk_get_type (&CertContext.pk) != MBEDTLS_PK_RSA) {
     goto _Exit;
   }
 
-  mbedtls_rsa_init(&RsaContext);
-  if (mbedtls_rsa_set_padding(&RsaContext, MBEDTLS_RSA_PKCS_V21, MBEDTLS_MD_NONE) != 0) {
+  mbedtls_rsa_init (&RsaContext);
+  if (mbedtls_rsa_set_padding (&RsaContext, MBEDTLS_RSA_PKCS_V21, MBEDTLS_MD_NONE) != 0) {
     goto _Exit;
   }
 
-  Ret = mbedtls_rsa_copy(&RsaContext, mbedtls_pk_rsa(CertContext.pk));
+  Ret = mbedtls_rsa_copy (&RsaContext, mbedtls_pk_rsa (CertContext.pk));
   if (Ret != 0) {
     goto _Exit;
   }
@@ -117,26 +119,33 @@ Pkcs1v2Encrypt (
     goto _Exit;
   }
 
-  Ret = mbedtls_rsa_pkcs1_encrypt(&RsaContext, myrand,
-                                  NULL, InDataSize, InData, OutData);
+  Ret = mbedtls_rsa_pkcs1_encrypt (
+                                   &RsaContext,
+                                   myrand,
+                                   NULL,
+                                   InDataSize,
+                                   InData,
+                                   OutData
+                                   );
   if (Ret != 0) {
-    FreePool(OutData);
-    OutData     = NULL;
+    FreePool (OutData);
+    OutData = NULL;
     goto _Exit;
   }
 
   *EncryptedData = OutData;
-  Result = TRUE;
+  Result         = TRUE;
 
 _Exit:
   //
   // Release Resources
   //
   if (&CertContext != NULL) {
-    mbedtls_x509_crt_free(&CertContext);
+    mbedtls_x509_crt_free (&CertContext);
   }
+
   if (&RsaContext != NULL) {
-    mbedtls_rsa_free(&RsaContext);
+    mbedtls_rsa_free (&RsaContext);
   }
 
   return Result;

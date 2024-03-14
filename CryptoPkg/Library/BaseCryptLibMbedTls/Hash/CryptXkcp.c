@@ -1,10 +1,10 @@
 /** @file
   Encode realted functions from Xkcp.
 
-Copyright (c) 2023, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2024, Intel Corporation. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
-Copyright 2022 The eXtended Keccak Code Package (XKCP)
+Copyright 2024 The eXtended Keccak Code Package (XKCP)
 https://github.com/XKCP/XKCP
 Keccak, designed by Guido Bertoni, Joan Daemen, Michael Peeters and Gilles Van Assche.
 Implementation by the designers, hereby denoted as "the implementer".

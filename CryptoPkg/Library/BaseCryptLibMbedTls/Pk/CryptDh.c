@@ -3,7 +3,7 @@
 
   RFC 7919 - Negotiated Finite Field Diffie-Hellman Ephemeral (FFDHE) Parameters
 
-Copyright (c) 2023, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2024, Intel Corporation. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
@@ -25,9 +25,9 @@ DhNew (
   VOID
   )
 {
-  mbedtls_dhm_context *ctx;
+  mbedtls_dhm_context  *ctx;
 
-  ctx = AllocateZeroPool (sizeof(mbedtls_dhm_context));
+  ctx = AllocateZeroPool (sizeof (mbedtls_dhm_context));
   if (ctx == NULL) {
     return NULL;
   }
@@ -54,7 +54,7 @@ DhFree (
   mbedtls_dhm_free (DhContext);
 
   if (DhContext != NULL) {
-    FreePool(DhContext);
+    FreePool (DhContext);
   }
 }
 
@@ -89,47 +89,47 @@ DhGenerateParameter (
   OUT     UINT8  *Prime
   )
 {
-    mbedtls_dhm_context *ctx;
-    mbedtls_mpi BnP;
-    mbedtls_mpi BnG;
-    BOOLEAN Status;
-    size_t Nbits;
+  mbedtls_dhm_context  *ctx;
+  mbedtls_mpi          BnP;
+  mbedtls_mpi          BnG;
+  BOOLEAN              Status;
+  size_t               Nbits;
 
-    if ((DhContext == NULL) || (Prime == NULL) || (PrimeLength > INT_MAX)) {
-        return FALSE;
-    }
+  if ((DhContext == NULL) || (Prime == NULL) || (PrimeLength > INT_MAX)) {
+    return FALSE;
+  }
 
-    ctx  = (mbedtls_dhm_context *)DhContext;
-    mbedtls_mpi_init(&BnP);
-    mbedtls_mpi_init(&BnG);
-    Nbits = PrimeLength;
+  ctx = (mbedtls_dhm_context *)DhContext;
+  mbedtls_mpi_init (&BnP);
+  mbedtls_mpi_init (&BnG);
+  Nbits = PrimeLength;
 
-    if (mbedtls_mpi_gen_prime(&BnP, Nbits, 1, myrand, NULL) != 0) {
-        Status = FALSE;
-        goto Error;
-    }
+  if (mbedtls_mpi_gen_prime (&BnP, Nbits, 1, myrand, NULL) != 0) {
+    Status = FALSE;
+    goto Error;
+  }
 
-    if (mbedtls_mpi_read_binary(&BnG, (const unsigned char *)&Generator, 1) != 0) {
-        Status = FALSE;
-        goto Error;
-    }
+  if (mbedtls_mpi_read_binary (&BnG, (const unsigned char *)&Generator, 1) != 0) {
+    Status = FALSE;
+    goto Error;
+  }
 
-    if (mbedtls_dhm_set_group (ctx, &BnP, &BnG) != 0) {
-        Status = FALSE;
-        goto Error;
-    }
+  if (mbedtls_dhm_set_group (ctx, &BnP, &BnG) != 0) {
+    Status = FALSE;
+    goto Error;
+  }
 
-    if (mbedtls_mpi_write_binary(&BnP, Prime, PrimeLength) != 0){
-        Status = FALSE;
-        goto Error;
-    }
+  if (mbedtls_mpi_write_binary (&BnP, Prime, PrimeLength) != 0) {
+    Status = FALSE;
+    goto Error;
+  }
 
-    Status = TRUE;
+  Status = TRUE;
 
 Error:
-    mbedtls_mpi_free(&BnP);
-    mbedtls_mpi_free(&BnG);
-    return Status;
+  mbedtls_mpi_free (&BnP);
+  mbedtls_mpi_free (&BnG);
+  return Status;
 }
 
 /**
@@ -162,10 +162,10 @@ DhSetParameter (
   IN      CONST UINT8  *Prime
   )
 {
-  mbedtls_dhm_context *ctx;
-  mbedtls_mpi BnP;
-  mbedtls_mpi BnG;
-  BOOLEAN Status;
+  mbedtls_dhm_context  *ctx;
+  mbedtls_mpi          BnP;
+  mbedtls_mpi          BnG;
+  BOOLEAN              Status;
 
   //
   // Check input parameters.
@@ -177,16 +177,16 @@ DhSetParameter (
   //
   // Set the generator and prime parameters for DH object.
   //
-  ctx  = (mbedtls_dhm_context *)DhContext;
-  mbedtls_mpi_init(&BnP);
-  mbedtls_mpi_init(&BnG);
+  ctx = (mbedtls_dhm_context *)DhContext;
+  mbedtls_mpi_init (&BnP);
+  mbedtls_mpi_init (&BnG);
 
-  if (mbedtls_mpi_read_binary(&BnP, (const unsigned char *)Prime, (int)(PrimeLength)) !=0) {
+  if (mbedtls_mpi_read_binary (&BnP, (const unsigned char *)Prime, (int)(PrimeLength)) != 0) {
     Status = FALSE;
     goto Error;
   }
 
-  if (mbedtls_mpi_read_binary(&BnG, (const unsigned char *)&Generator, 1) !=0) {
+  if (mbedtls_mpi_read_binary (&BnG, (const unsigned char *)&Generator, 1) != 0) {
     Status = FALSE;
     goto Error;
   }
@@ -199,8 +199,8 @@ DhSetParameter (
   Status = TRUE;
 
 Error:
-    mbedtls_mpi_free(&BnP);
-    mbedtls_mpi_free(&BnG);
+  mbedtls_mpi_free (&BnP);
+  mbedtls_mpi_free (&BnG);
   return Status;
 }
 
@@ -238,42 +238,44 @@ DhGenerateKey (
   IN OUT  UINTN  *PublicKeySize
   )
 {
-  INT32               Ret;
-  mbedtls_dhm_context *ctx;
-  UINTN               FinalPubKeySize;
+  INT32                Ret;
+  mbedtls_dhm_context  *ctx;
+  UINTN                FinalPubKeySize;
 
   //
   // Check input parameters.
   //
-  if (DhContext == NULL || PublicKeySize == NULL) {
+  if ((DhContext == NULL) || (PublicKeySize == NULL)) {
     return FALSE;
   }
 
-  if (PublicKey == NULL && *PublicKeySize != 0) {
+  if ((PublicKey == NULL) && (*PublicKeySize != 0)) {
     return FALSE;
   }
 
   ctx = DhContext;
   switch (mbedtls_mpi_size (&ctx->P)) {
-  case 64:
-    FinalPubKeySize = 64;
-    break;
-  case 256:
-    FinalPubKeySize = 256;
-    break;
-  case 384:
-    FinalPubKeySize = 384;
-    break;
-  case 512:
-    FinalPubKeySize = 512;
-    break;
-  default:
-    return FALSE;
+    case 64:
+      FinalPubKeySize = 64;
+      break;
+    case 256:
+      FinalPubKeySize = 256;
+      break;
+    case 384:
+      FinalPubKeySize = 384;
+      break;
+    case 512:
+      FinalPubKeySize = 512;
+      break;
+    default:
+      return FALSE;
   }
+
   if (*PublicKeySize < FinalPubKeySize) {
     *PublicKeySize = FinalPubKeySize;
     return FALSE;
   }
+
   *PublicKeySize = FinalPubKeySize;
   ZeroMem (PublicKey, *PublicKeySize);
 
@@ -323,12 +325,12 @@ DhComputeKey (
   IN OUT  UINTN        *KeySize
   )
 {
-  INT32   Ret;
+  INT32  Ret;
 
   //
   // Check input parameters.
   //
-  if (DhContext == NULL || PeerPublicKey == NULL || KeySize == NULL || Key == NULL) {
+  if ((DhContext == NULL) || (PeerPublicKey == NULL) || (KeySize == NULL) || (Key == NULL)) {
     return FALSE;
   }
 

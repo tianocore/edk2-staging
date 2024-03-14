@@ -1,7 +1,7 @@
 /** @file
   Pseudorandom Number Generator Wrapper Implementation over MbedTLS.
 
-Copyright (c) 2023, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2024, Intel Corporation. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
@@ -32,7 +32,6 @@ RandomSeed (
   IN  UINTN         SeedSize
   )
 {
-  // TBD
   return TRUE;
 }
 
@@ -55,8 +54,8 @@ RandomBytes (
   IN   UINTN  Size
   )
 {
-  BOOLEAN     Ret;
-  UINT64      TempRand;
+  BOOLEAN  Ret;
+  UINT64   TempRand;
 
   Ret = FALSE;
 
@@ -67,12 +66,12 @@ RandomBytes (
     if (!Ret) {
       return Ret;
     }
+
     if (Size >= sizeof (TempRand)) {
-      *((UINT64*) Output) = TempRand;
-      Output += sizeof (UINT64);
-      Size -= sizeof (TempRand);
-    }
-    else {
+      *((UINT64 *)Output) = TempRand;
+      Output             += sizeof (UINT64);
+      Size               -= sizeof (TempRand);
+    } else {
       CopyMem (Output, &TempRand, Size);
       Size = 0;
     }
@@ -81,7 +80,15 @@ RandomBytes (
   return Ret;
 }
 
-int myrand( void *rng_state, unsigned char *output, size_t len )
+/**
+  The MbedTLS function f_rng, which myrand implements.
+**/
+int
+myrand (
+  void           *rng_state,
+  unsigned char  *output,
+  size_t         len
+  )
 {
   RandomBytes (output, len);
 

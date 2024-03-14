@@ -1,7 +1,7 @@
 /** @file
   Non-runtime specific implementation of PKCS#7 SignedData Verification Wrapper.
 
-Copyright (c) 2023, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2024, Intel Corporation. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
@@ -38,14 +38,14 @@ Pkcs7GetAttachedContent (
   OUT UINTN        *ContentSize
   )
 {
-  BOOLEAN            Status;
-  UINT8              *SignedData;
-  UINTN              SignedDataSize;
-  BOOLEAN            Wrapped;
-  INTN               Ret;
-  mbedtls_pkcs7      Pkcs7;
+  BOOLEAN        Status;
+  UINT8          *SignedData;
+  UINTN          SignedDataSize;
+  BOOLEAN        Wrapped;
+  INTN           Ret;
+  mbedtls_pkcs7  Pkcs7;
 
-  mbedtls_pkcs7_init(&Pkcs7);
+  mbedtls_pkcs7_init (&Pkcs7);
 
   //
   // Check input parameter.
@@ -64,7 +64,7 @@ Pkcs7GetAttachedContent (
 
   Status = FALSE;
 
-  Ret = mbedtls_pkcs7_parse_der(&Pkcs7, SignedData, (INT32)SignedDataSize);
+  Ret = mbedtls_pkcs7_parse_der (&Pkcs7, SignedData, (INT32)SignedDataSize);
 
   //
   // The type of Pkcs7 must be signedData
@@ -77,7 +77,7 @@ Pkcs7GetAttachedContent (
   // Check for detached or attached content
   //
 
-  mbedtls_pkcs7_data *MbedtlsContent;
+  mbedtls_pkcs7_data  *MbedtlsContent;
   MbedtlsContent = &(Pkcs7.signed_data.content);
 
   if (MbedtlsContent == NULL) {
@@ -97,9 +97,11 @@ Pkcs7GetAttachedContent (
         *ContentSize = 0;
         goto _Exit;
       }
+
       CopyMem (*Content, MbedtlsContent->data.p, *ContentSize);
     }
   }
+
   Status = TRUE;
 
 _Exit:

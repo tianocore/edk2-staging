@@ -2,14 +2,14 @@
 # CryptoPkgMbedTls DSC file used to build host-based unit tests.
 #
 # Copyright (c) Microsoft Corporation.<BR>
-# Copyright (c) 2023, Intel Corporation. All rights reserved.<BR>
+# Copyright (c) 2024, Intel Corporation. All rights reserved.<BR>
 # SPDX-License-Identifier: BSD-2-Clause-Patent
 #
 ##
 
 [Defines]
   PLATFORM_NAME           = CryptoMbedTlsPkgHostTest
-  PLATFORM_GUID           = C7F97D6D-54AC-45A9-8197-CC99B20CC7EC
+  PLATFORM_GUID           = 921DAD89-1B79-4B68-AFA5-CA53E677F8A3
   PLATFORM_VERSION        = 0.1
   DSC_SPECIFICATION       = 0x00010005
   OUTPUT_DIRECTORY        = Build/CryptoPkg/HostTestMbed

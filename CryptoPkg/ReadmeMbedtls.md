@@ -134,8 +134,7 @@ OpensslLib|CryptoPkg/Library/OpensslLib/OpensslLibFull.inf
 8. Replace the platform source code from `TlsLib|CryptoPkg/Library/TlsLib/TlsLib.inf` to `TlsLib|CryptoPkg/Library/TlsLibMbedtls/TlsLib.inf`
 9. build;
 
-## POC Timeline
-Target for 2023 Q1
+
 ## Owner
 The branch owner: Wenxing Hou <wenxing.hou@intel.com>  
 ## MbedTls Version

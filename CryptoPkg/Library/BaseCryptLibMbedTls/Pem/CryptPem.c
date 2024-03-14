@@ -1,7 +1,7 @@
 /** @file
   PEM (Privacy Enhanced Mail) Format Handler Wrapper Implementation over MbedTLS.
 
-Copyright (c) 2023, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2024, Intel Corporation. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
@@ -40,13 +40,13 @@ RsaGetPrivateKeyFromPem (
   OUT  VOID         **RsaContext
   )
 {
-  INT32               Ret;
-  mbedtls_pk_context  pk;
-  mbedtls_rsa_context *rsa;
-  UINT8               *NewPemData;
-  UINTN               PasswordLen;
+  INT32                Ret;
+  mbedtls_pk_context   pk;
+  mbedtls_rsa_context  *rsa;
+  UINT8                *NewPemData;
+  UINTN                PasswordLen;
 
-  if (PemData == NULL || RsaContext == NULL || PemSize > INT_MAX) {
+  if ((PemData == NULL) || (RsaContext == NULL) || (PemSize > INT_MAX)) {
     return FALSE;
   }
 
@@ -56,10 +56,11 @@ RsaGetPrivateKeyFromPem (
     if (NewPemData == NULL) {
       return FALSE;
     }
+
     CopyMem (NewPemData, PemData, PemSize + 1);
     NewPemData[PemSize] = 0;
-    PemData = NewPemData;
-    PemSize += 1;
+    PemData             = NewPemData;
+    PemSize            += 1;
   }
 
   mbedtls_pk_init (&pk);
@@ -71,7 +72,7 @@ RsaGetPrivateKeyFromPem (
   }
 
   Ret = mbedtls_pk_parse_key (&pk, PemData, PemSize, (CONST UINT8 *)Password, PasswordLen, NULL, NULL);
-  
+
   if (NewPemData != NULL) {
     FreePool (NewPemData);
     NewPemData = NULL;
@@ -81,7 +82,7 @@ RsaGetPrivateKeyFromPem (
     mbedtls_pk_free (&pk);
     return FALSE;
   }
-  
+
   if (mbedtls_pk_get_type (&pk) != MBEDTLS_PK_RSA) {
     mbedtls_pk_free (&pk);
     return FALSE;
@@ -92,13 +93,15 @@ RsaGetPrivateKeyFromPem (
     mbedtls_pk_free (&pk);
     return FALSE;
   }
-  Ret = mbedtls_rsa_copy (rsa, mbedtls_pk_rsa(pk));
+
+  Ret = mbedtls_rsa_copy (rsa, mbedtls_pk_rsa (pk));
   if (Ret != 0) {
-      RsaFree (rsa);
-      mbedtls_pk_free(&pk);
-      return FALSE;
+    RsaFree (rsa);
+    mbedtls_pk_free (&pk);
+    return FALSE;
   }
-  mbedtls_pk_free(&pk);
+
+  mbedtls_pk_free (&pk);
 
   *RsaContext = rsa;
   return TRUE;
@@ -136,7 +139,7 @@ EcGetPrivateKeyFromPem (
   UINT8                 *NewPemData;
   UINTN                 PasswordLen;
 
-  if (PemData == NULL || EcContext == NULL || PemSize > INT_MAX) {
+  if ((PemData == NULL) || (EcContext == NULL) || (PemSize > INT_MAX)) {
     return FALSE;
   }
 
@@ -146,10 +149,11 @@ EcGetPrivateKeyFromPem (
     if (NewPemData == NULL) {
       return FALSE;
     }
+
     CopyMem (NewPemData, PemData, PemSize + 1);
     NewPemData[PemSize] = 0;
-    PemData = NewPemData;
-    PemSize += 1;
+    PemData             = NewPemData;
+    PemSize            += 1;
   }
 
   mbedtls_pk_init (&pk);
@@ -177,21 +181,23 @@ EcGetPrivateKeyFromPem (
     return FALSE;
   }
 
-  ecdh = AllocateZeroPool (sizeof(mbedtls_ecdh_context));
+  ecdh = AllocateZeroPool (sizeof (mbedtls_ecdh_context));
   if (ecdh == NULL) {
-    mbedtls_pk_free(&pk);
+    mbedtls_pk_free (&pk);
     return FALSE;
   }
+
   mbedtls_ecdh_init (ecdh);
 
-  Ret = mbedtls_ecdh_get_params (ecdh, mbedtls_pk_ec(pk), MBEDTLS_ECDH_OURS);
+  Ret = mbedtls_ecdh_get_params (ecdh, mbedtls_pk_ec (pk), MBEDTLS_ECDH_OURS);
   if (Ret != 0) {
     mbedtls_ecdh_free (ecdh);
     FreePool (ecdh);
-    mbedtls_pk_free(&pk);
+    mbedtls_pk_free (&pk);
     return FALSE;
   }
-  mbedtls_pk_free(&pk);
+
+  mbedtls_pk_free (&pk);
 
   *EcContext = ecdh;
   return TRUE;

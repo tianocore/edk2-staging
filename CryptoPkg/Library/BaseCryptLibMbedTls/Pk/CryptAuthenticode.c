@@ -2,7 +2,7 @@
   Authenticode Portable Executable Signature Verification which does not provide
   real capabilities.
 
-Copyright (c) 2023, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2024, Intel Corporation. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
@@ -54,10 +54,10 @@ AuthenticodeVerify (
   UINT8        Asn1Byte;
   UINTN        ContentSize;
   CONST UINT8  *SpcIndirectDataOid;
-  UINT8 *Ptr;
-  UINT8 *End;
-  INT32 Len;
-  UINTN ObjLen;
+  UINT8        *Ptr;
+  UINT8        *End;
+  INT32        Len;
+  UINTN        ObjLen;
 
   OrigAuthData = AuthData;
 
@@ -72,48 +72,53 @@ AuthenticodeVerify (
     return FALSE;
   }
 
-  Ptr = (UINT8*)(UINTN)AuthData;
+  Ptr = (UINT8 *)(UINTN)AuthData;
   Len = (UINT32)DataSize;
   End = Ptr + Len;
 
-  //ContentInfo
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE) != 0) {
+  // ContentInfo
+  if (mbedtls_asn1_get_tag (&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE) != 0) {
     return FALSE;
   }
-  //ContentType
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_OID) != 0) {
+
+  // ContentType
+  if (mbedtls_asn1_get_tag (&Ptr, End, &ObjLen, MBEDTLS_ASN1_OID) != 0) {
     return FALSE;
   }
 
   Ptr += ObjLen;
-  //content
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_CONTEXT_SPECIFIC) != 0) {
+  // content
+  if (mbedtls_asn1_get_tag (&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_CONTEXT_SPECIFIC) != 0) {
     return FALSE;
   }
 
   End = Ptr + ObjLen;
-  //signedData
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE) != 0) {
+  // signedData
+  if (mbedtls_asn1_get_tag (&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE) != 0) {
     return FALSE;
   }
-  //version
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_INTEGER) != 0) {
+
+  // version
+  if (mbedtls_asn1_get_tag (&Ptr, End, &ObjLen, MBEDTLS_ASN1_INTEGER) != 0) {
     return FALSE;
   }
+
   Ptr += ObjLen;
-  //digestAlgo
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SET) != 0) {
+  // digestAlgo
+  if (mbedtls_asn1_get_tag (&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SET) != 0) {
     return FALSE;
   }
+
   Ptr += ObjLen;
 
-  //encapContentInfo
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE) != 0) {
+  // encapContentInfo
+  if (mbedtls_asn1_get_tag (&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE) != 0) {
     return FALSE;
   }
+
   End = Ptr + ObjLen;
-  //eContentType
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_OID) != 0) {
+  // eContentType
+  if (mbedtls_asn1_get_tag (&Ptr, End, &ObjLen, MBEDTLS_ASN1_OID) != 0) {
     return FALSE;
   }
 
@@ -122,10 +127,10 @@ AuthenticodeVerify (
   SpcIndirectDataOid = Ptr;
   if ((ObjLen != sizeof (mSpcIndirectOidValue)) ||
       (CompareMem (
-         SpcIndirectDataOid,
-         mSpcIndirectOidValue,
-         sizeof (mSpcIndirectOidValue)
-         ) != 0))
+                   SpcIndirectDataOid,
+                   mSpcIndirectOidValue,
+                   sizeof (mSpcIndirectOidValue)
+                   ) != 0))
   {
     //
     // Un-matched SPC_INDIRECT_DATA_OBJID.
@@ -134,12 +139,12 @@ AuthenticodeVerify (
   }
 
   Ptr += ObjLen;
-  //eContent
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_CONTEXT_SPECIFIC) != 0) {
+  // eContent
+  if (mbedtls_asn1_get_tag (&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_CONTEXT_SPECIFIC) != 0) {
     return FALSE;
   }
 
- SpcIndirectDataContent = Ptr;
+  SpcIndirectDataContent = Ptr;
 
   //
   // Retrieve the SEQUENCE data size from ASN.1-encoded SpcIndirectDataContent.

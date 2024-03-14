@@ -2,7 +2,7 @@
   SSL/TLS Process Library Wrapper Implementation over MbedTLS.
   The process includes the TLS handshake and packet I/O.
 
-Copyright (c) 2023, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2024, Intel Corporation. All rights reserved.<BR>
 (C) Copyright 2016 Hewlett Packard Enterprise Development LP<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
