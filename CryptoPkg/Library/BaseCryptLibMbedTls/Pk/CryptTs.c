@@ -2,7 +2,7 @@
   RFC3161 Timestamp Countersignature Verification Wrapper Implementation which does
   not provide real capabilities.
 
-Copyright (c) 2023, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2024, Intel Corporation. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
@@ -17,7 +17,6 @@ GLOBAL_REMOVE_IF_UNREFERENCED const UINT8  mSpcRFC3161OidValue[] = {
   0x2b, 0x06, 0x01, 0x04, 0x01, 0x82, 0x37, 0x03, 0x03, 0x01
 };
 
-
 /**
   Convert ASN.1 GeneralizedTime to EFI Time.
 
@@ -31,8 +30,8 @@ GLOBAL_REMOVE_IF_UNREFERENCED const UINT8  mSpcRFC3161OidValue[] = {
 STATIC
 BOOLEAN
 ConvertAsn1TimeToEfiTime (
-  IN  UINT8  *Ptr,
-  OUT EFI_TIME   *EfiTime
+  IN  UINT8     *Ptr,
+  OUT EFI_TIME  *EfiTime
   )
 {
   CONST CHAR8  *Str;
@@ -91,7 +90,6 @@ ConvertAsn1TimeToEfiTime (
   return TRUE;
 }
 
-
 /**
   Verifies the validity of a RFC3161 Timestamp CounterSignature embedded in PE/COFF Authenticode
   signature.
@@ -120,12 +118,12 @@ ImageTimestampVerify (
   OUT EFI_TIME     *SigningTime
   )
 {
-  BOOLEAN      Status;
-  UINT8 *Ptr;
-  UINT8 *End;
-  INT32 Len;
-  UINTN ObjLen;
-  UINT8 *TempPtr;
+  BOOLEAN  Status;
+  UINT8    *Ptr;
+  UINT8    *End;
+  INT32    Len;
+  UINTN    ObjLen;
+  UINT8    *TempPtr;
 
   //
   // Initializations
@@ -145,206 +143,229 @@ ImageTimestampVerify (
     return FALSE;
   }
 
-  Ptr = (UINT8*)(UINTN)AuthData;
+  Ptr = (UINT8 *)(UINTN)AuthData;
   Len = (UINT32)DataSize;
   End = Ptr + Len;
 
-  //ContentInfo
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE) != 0) {
+  // ContentInfo
+  if (mbedtls_asn1_get_tag (&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE) != 0) {
     return FALSE;
   }
-  //ContentType
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_OID) != 0) {
+
+  // ContentType
+  if (mbedtls_asn1_get_tag (&Ptr, End, &ObjLen, MBEDTLS_ASN1_OID) != 0) {
     return FALSE;
   }
 
   Ptr += ObjLen;
-  //content
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_CONTEXT_SPECIFIC) != 0) {
+  // content
+  if (mbedtls_asn1_get_tag (&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_CONTEXT_SPECIFIC) != 0) {
     return FALSE;
   }
 
   End = Ptr + ObjLen;
-  //signedData
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE) != 0) {
+  // signedData
+  if (mbedtls_asn1_get_tag (&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE) != 0) {
     return FALSE;
   }
-  //version
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_INTEGER) != 0) {
+
+  // version
+  if (mbedtls_asn1_get_tag (&Ptr, End, &ObjLen, MBEDTLS_ASN1_INTEGER) != 0) {
     return FALSE;
   }
+
   Ptr += ObjLen;
-  //digestAlgo
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SET) != 0) {
+  // digestAlgo
+  if (mbedtls_asn1_get_tag (&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SET) != 0) {
     return FALSE;
   }
+
   Ptr += ObjLen;
 
-  //encapContentInfo
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE) != 0) {
+  // encapContentInfo
+  if (mbedtls_asn1_get_tag (&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE) != 0) {
     return FALSE;
   }
+
   Ptr += ObjLen;
 
-  //cert
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_CONTEXT_SPECIFIC) != 0) {
+  // cert
+  if (mbedtls_asn1_get_tag (&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_CONTEXT_SPECIFIC) != 0) {
     return FALSE;
   }
+
   Ptr += ObjLen;
 
   TempPtr = Ptr;
-  //OPTIONAL CRLs
-  if (mbedtls_asn1_get_tag(&TempPtr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_CONTEXT_SPECIFIC) == 0) {
+  // OPTIONAL CRLs
+  if (mbedtls_asn1_get_tag (&TempPtr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_CONTEXT_SPECIFIC) == 0) {
     Ptr = TempPtr + ObjLen;
   }
 
-  //signerInfo
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SET) != 0) {
+  // signerInfo
+  if (mbedtls_asn1_get_tag (&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SET) != 0) {
     return FALSE;
   }
 
-  //sub parse
-  //signerInfo
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE) != 0) {
+  // sub parse
+  // signerInfo
+  if (mbedtls_asn1_get_tag (&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE) != 0) {
     return FALSE;
   }
+
   End = Ptr + ObjLen;
 
-  //version
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_INTEGER) != 0) {
+  // version
+  if (mbedtls_asn1_get_tag (&Ptr, End, &ObjLen, MBEDTLS_ASN1_INTEGER) != 0) {
     return FALSE;
   }
+
   Ptr += ObjLen;
 
-  //sid
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE) != 0) {
+  // sid
+  if (mbedtls_asn1_get_tag (&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE) != 0) {
     return FALSE;
   }
+
   Ptr += ObjLen;
 
-  //digestalgo
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE) != 0) {
+  // digestalgo
+  if (mbedtls_asn1_get_tag (&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE) != 0) {
     return FALSE;
   }
+
   Ptr += ObjLen;
 
-  //OPTIONAL AuthenticatedAttributes
+  // OPTIONAL AuthenticatedAttributes
   TempPtr = Ptr;
-  if (mbedtls_asn1_get_tag(&TempPtr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_CONTEXT_SPECIFIC) == 0) {
+  if (mbedtls_asn1_get_tag (&TempPtr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_CONTEXT_SPECIFIC) == 0) {
     Ptr = TempPtr + ObjLen;
   }
 
-  //signaturealgo
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE) != 0) {
+  // signaturealgo
+  if (mbedtls_asn1_get_tag (&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE) != 0) {
     return FALSE;
   }
+
   Ptr += ObjLen;
 
-  //signature
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_OCTET_STRING) != 0) {
+  // signature
+  if (mbedtls_asn1_get_tag (&Ptr, End, &ObjLen, MBEDTLS_ASN1_OCTET_STRING) != 0) {
     return FALSE;
   }
+
   Ptr += ObjLen;
 
-  //OPTIONAL UnauthenticatedAttributes
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, 0xA1) != 0) {
+  // OPTIONAL UnauthenticatedAttributes
+  if (mbedtls_asn1_get_tag (&Ptr, End, &ObjLen, 0xA1) != 0) {
     return FALSE;
   }
 
-  //Attribute
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE) != 0) {
+  // Attribute
+  if (mbedtls_asn1_get_tag (&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE) != 0) {
     return FALSE;
   }
 
-  //type
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_OID) != 0) {
+  // type
+  if (mbedtls_asn1_get_tag (&Ptr, End, &ObjLen, MBEDTLS_ASN1_OID) != 0) {
     return FALSE;
   }
 
-  if (CompareMem(Ptr, mSpcRFC3161OidValue, sizeof(mSpcRFC3161OidValue)) != 0) {
+  if (CompareMem (Ptr, mSpcRFC3161OidValue, sizeof (mSpcRFC3161OidValue)) != 0) {
     return FALSE;
   }
+
   Ptr += ObjLen;
 
-  //values
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SET) != 0) {
+  // values
+  if (mbedtls_asn1_get_tag (&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SET) != 0) {
     return FALSE;
   }
 
-  //values
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE) != 0) {
+  // values
+  if (mbedtls_asn1_get_tag (&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE) != 0) {
     return FALSE;
   }
 
-  //signedData OID
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_OID) != 0) {
+  // signedData OID
+  if (mbedtls_asn1_get_tag (&Ptr, End, &ObjLen, MBEDTLS_ASN1_OID) != 0) {
     return FALSE;
   }
+
   Ptr += ObjLen;
 
-  //[0]
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_CONTEXT_SPECIFIC) != 0) {
+  // [0]
+  if (mbedtls_asn1_get_tag (&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_CONTEXT_SPECIFIC) != 0) {
     return FALSE;
   }
 
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE) != 0) {
+  if (mbedtls_asn1_get_tag (&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE) != 0) {
     return FALSE;
   }
 
-  //integer
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_INTEGER) != 0) {
-    return FALSE;
-  }
-  Ptr += ObjLen;
-  //SET
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SET) != 0) {
-    return FALSE;
-  }
-  Ptr += ObjLen;
-
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE) != 0) {
-    return FALSE;
-  }
-  //tST OID
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_OID) != 0) {
-    return FALSE;
-  }
-  Ptr += ObjLen;
-
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_CONTEXT_SPECIFIC) != 0) {
+  // integer
+  if (mbedtls_asn1_get_tag (&Ptr, End, &ObjLen, MBEDTLS_ASN1_INTEGER) != 0) {
     return FALSE;
   }
 
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_OCTET_STRING) != 0) {
+  Ptr += ObjLen;
+  // SET
+  if (mbedtls_asn1_get_tag (&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SET) != 0) {
     return FALSE;
   }
 
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE) != 0) {
-    return FALSE;
-  }
-  //Integer
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_INTEGER) != 0) {
-    return FALSE;
-  }
-  Ptr += ObjLen;
-  //policy OID
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_OID) != 0) {
-    return FALSE;
-  }
-  Ptr += ObjLen;
-  //sequence
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE) != 0) {
-    return FALSE;
-  }
-  Ptr += ObjLen;
-  //Integer
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_INTEGER) != 0) {
-    return FALSE;
-  }
   Ptr += ObjLen;
 
-  //GeneralizedTime
-  if (mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_GENERALIZED_TIME) != 0) {
+  if (mbedtls_asn1_get_tag (&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE) != 0) {
+    return FALSE;
+  }
+
+  // tST OID
+  if (mbedtls_asn1_get_tag (&Ptr, End, &ObjLen, MBEDTLS_ASN1_OID) != 0) {
+    return FALSE;
+  }
+
+  Ptr += ObjLen;
+
+  if (mbedtls_asn1_get_tag (&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_CONTEXT_SPECIFIC) != 0) {
+    return FALSE;
+  }
+
+  if (mbedtls_asn1_get_tag (&Ptr, End, &ObjLen, MBEDTLS_ASN1_OCTET_STRING) != 0) {
+    return FALSE;
+  }
+
+  if (mbedtls_asn1_get_tag (&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE) != 0) {
+    return FALSE;
+  }
+
+  // Integer
+  if (mbedtls_asn1_get_tag (&Ptr, End, &ObjLen, MBEDTLS_ASN1_INTEGER) != 0) {
+    return FALSE;
+  }
+
+  Ptr += ObjLen;
+  // policy OID
+  if (mbedtls_asn1_get_tag (&Ptr, End, &ObjLen, MBEDTLS_ASN1_OID) != 0) {
+    return FALSE;
+  }
+
+  Ptr += ObjLen;
+  // sequence
+  if (mbedtls_asn1_get_tag (&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE) != 0) {
+    return FALSE;
+  }
+
+  Ptr += ObjLen;
+  // Integer
+  if (mbedtls_asn1_get_tag (&Ptr, End, &ObjLen, MBEDTLS_ASN1_INTEGER) != 0) {
+    return FALSE;
+  }
+
+  Ptr += ObjLen;
+
+  // GeneralizedTime
+  if (mbedtls_asn1_get_tag (&Ptr, End, &ObjLen, MBEDTLS_ASN1_GENERALIZED_TIME) != 0) {
     return FALSE;
   }
 

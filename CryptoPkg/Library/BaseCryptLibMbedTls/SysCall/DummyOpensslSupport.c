@@ -1,5 +1,5 @@
 /**
-Copyright (c) 2023, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2024, Intel Corporation. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 **/
 
@@ -12,7 +12,7 @@ FILE  *stdin  = NULL;
 FILE  *stdout = NULL;
 
 typedef
-int
+  int
 (*SORT_COMPARE)(
   IN  VOID  *Buffer1,
   IN  VOID  *Buffer2
@@ -85,20 +85,20 @@ QuickSortWorker (
   // IE list is sorted left half, pivot element, sorted right half...
   //
   QuickSortWorker (
-    BufferToSort,
-    NextSwapLocation,
-    ElementSize,
-    CompareFunction,
-    Buffer
-    );
+                   BufferToSort,
+                   NextSwapLocation,
+                   ElementSize,
+                   CompareFunction,
+                   Buffer
+                   );
 
   QuickSortWorker (
-    (UINT8 *)BufferToSort + (NextSwapLocation + 1) * ElementSize,
-    Count - NextSwapLocation - 1,
-    ElementSize,
-    CompareFunction,
-    Buffer
-    );
+                   (UINT8 *)BufferToSort + (NextSwapLocation + 1) * ElementSize,
+                   Count - NextSwapLocation - 1,
+                   ElementSize,
+                   CompareFunction,
+                   Buffer
+                   );
 
   return;
 }
@@ -463,10 +463,10 @@ fwrite (
 #ifdef __GNUC__
 
 typedef
-VOID
-(EFIAPI *NoReturnFuncPtr)(
   VOID
-  ) __attribute__ ((__noreturn__));
+(EFIAPI *NoReturnFuncPtr)(
+                          VOID
+                          ) __attribute__ ((__noreturn__));
 
 STATIC
 VOID
@@ -572,7 +572,7 @@ printf (
 
 void *
 malloc     (
-  size_t a
+  size_t  a
   )
 {
   return NULL;
@@ -580,8 +580,8 @@ malloc     (
 
 void *
 realloc    (
-  void * a,
-  size_t b
+  void    *a,
+  size_t  b
   )
 {
   return NULL;
@@ -589,6 +589,7 @@ realloc    (
 
 void
 free        (
-  void *b
+  void  *b
   )
-{}
+{
+}

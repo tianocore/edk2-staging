@@ -1,7 +1,7 @@
 ## @file
 #  library for the MbedTls.
 #
-#  Copyright (c) 2023, Intel Corporation. All rights reserved.<BR>
+#  Copyright (c) 2024, Intel Corporation. All rights reserved.<BR>
 #  SPDX-License-Identifier: BSD-2-Clause-Patent
 #  
 ##
@@ -9,7 +9,7 @@
 [Defines]
   INF_VERSION                    = 0x00010005
   BASE_NAME                      = MbedTlsLibFull
-  FILE_GUID                      = BE9B7BBC-F003-4D88-A7E3-EB73E951F5BF
+  FILE_GUID                      = 6C1C6067-F6EF-4944-AE72-7621BA02BD63
   MODULE_TYPE                    = BASE
   VERSION_STRING                 = 1.0
   LIBRARY_CLASS                  = MbedTlsLib

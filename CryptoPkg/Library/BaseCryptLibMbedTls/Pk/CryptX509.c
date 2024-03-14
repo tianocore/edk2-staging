@@ -1,7 +1,7 @@
 /** @file
   X.509 Certificate Handler Wrapper Implementation over MbedTLS.
 
-Copyright (c) 2023, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2024, Intel Corporation. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
@@ -17,39 +17,40 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 ///
 /// OID
 ///
-STATIC CONST UINT8 OID_commonName[] = {
+STATIC CONST UINT8  OID_commonName[] = {
   0x55, 0x04, 0x03
 };
-STATIC CONST UINT8 OID_organizationName[] = {
+STATIC CONST UINT8  OID_organizationName[] = {
   0x55, 0x04, 0x0A
 };
-STATIC CONST UINT8 OID_extKeyUsage[] = {
+STATIC CONST UINT8  OID_extKeyUsage[] = {
   0x55, 0x1D, 0x25
 };
-STATIC CONST UINT8 OID_BasicConstraints[] = {
+STATIC CONST UINT8  OID_BasicConstraints[] = {
   0x55, 0x1D, 0x13
 };
 
 /* Profile for backward compatibility. Allows RSA 1024, unlike the default
    profile. */
-STATIC mbedtls_x509_crt_profile compat_profile =
+STATIC mbedtls_x509_crt_profile  compat_profile =
 {
-    /* Hashes from SHA-256 and above. Note that this selection
-     * should be aligned with ssl_preset_default_hashes in ssl_tls.c. */
-    MBEDTLS_X509_ID_FLAG( MBEDTLS_MD_SHA256 ) |
-    MBEDTLS_X509_ID_FLAG( MBEDTLS_MD_SHA384 ) |
-    MBEDTLS_X509_ID_FLAG( MBEDTLS_MD_SHA512 ),
-    0xFFFFFFF, /* Any PK alg    */
-    /* Curves at or above 128-bit security level. Note that this selection
-     * should be aligned with ssl_preset_default_curves in ssl_tls.c. */
-    MBEDTLS_X509_ID_FLAG( MBEDTLS_ECP_DP_SECP256R1 ) |
-    MBEDTLS_X509_ID_FLAG( MBEDTLS_ECP_DP_SECP384R1 ) |
-    MBEDTLS_X509_ID_FLAG( MBEDTLS_ECP_DP_SECP521R1 ) |
-    MBEDTLS_X509_ID_FLAG( MBEDTLS_ECP_DP_BP256R1 ) |
-    MBEDTLS_X509_ID_FLAG( MBEDTLS_ECP_DP_BP384R1 ) |
-    MBEDTLS_X509_ID_FLAG( MBEDTLS_ECP_DP_BP512R1 ) |
-    0,
-    1024,
+  /* Hashes from SHA-256 and above. Note that this selection
+   * should be aligned with ssl_preset_default_hashes in ssl_tls.c. */
+  MBEDTLS_X509_ID_FLAG (MBEDTLS_MD_SHA256) |
+  MBEDTLS_X509_ID_FLAG (MBEDTLS_MD_SHA384) |
+  MBEDTLS_X509_ID_FLAG (MBEDTLS_MD_SHA512),
+  0xFFFFFFF,   /* Any PK alg    */
+
+  /* Curves at or above 128-bit security level. Note that this selection
+   * should be aligned with ssl_preset_default_curves in ssl_tls.c. */
+  MBEDTLS_X509_ID_FLAG (MBEDTLS_ECP_DP_SECP256R1) |
+  MBEDTLS_X509_ID_FLAG (MBEDTLS_ECP_DP_SECP384R1) |
+  MBEDTLS_X509_ID_FLAG (MBEDTLS_ECP_DP_SECP521R1) |
+  MBEDTLS_X509_ID_FLAG (MBEDTLS_ECP_DP_BP256R1) |
+  MBEDTLS_X509_ID_FLAG (MBEDTLS_ECP_DP_BP384R1) |
+  MBEDTLS_X509_ID_FLAG (MBEDTLS_ECP_DP_BP512R1) |
+  0,
+  1024,
 };
 
 /**
@@ -75,25 +76,44 @@ X509ConstructCertificate (
   )
 {
   mbedtls_x509_crt  *MbedTlsCert;
-  INT32            Ret;
+  INT32             Ret;
 
-  if (Cert == NULL || SingleX509Cert == NULL || CertSize == 0) {
+  if ((Cert == NULL) || (SingleX509Cert == NULL) || (CertSize == 0)) {
     return FALSE;
   }
 
-  MbedTlsCert = AllocatePool (sizeof(mbedtls_x509_crt));
+  MbedTlsCert = AllocatePool (sizeof (mbedtls_x509_crt));
   if (MbedTlsCert == NULL) {
     return FALSE;
   }
 
-  mbedtls_x509_crt_init(MbedTlsCert);
+  mbedtls_x509_crt_init (MbedTlsCert);
 
   *SingleX509Cert = (UINT8 *)(VOID *)MbedTlsCert;
-  Ret = mbedtls_x509_crt_parse_der(MbedTlsCert, Cert, CertSize);
+  Ret             = mbedtls_x509_crt_parse_der (MbedTlsCert, Cert, CertSize);
 
   return Ret == 0;
 }
 
+/**
+  Construct a X509 stack object from a list of DER-encoded certificate data.
+
+  If X509Stack is NULL, then return FALSE.
+  If this interface is not supported, then return FALSE.
+
+  @param[in, out]  X509Stack  On input, pointer to an existing or NULL X509 stack object.
+                              On output, pointer to the X509 stack object with new
+                              inserted X509 certificate.
+  @param[in]       Args       VA_LIST marker for the variable argument list.
+                              A list of DER-encoded single certificate data followed
+                              by certificate size. A NULL terminates the list. The
+                              pairs are the arguments to X509ConstructCertificate().
+
+  @retval     TRUE            The X509 stack construction succeeded.
+  @retval     FALSE           The construction operation failed.
+  @retval     FALSE           This interface is not supported.
+
+**/
 BOOLEAN
 EFIAPI
 X509ConstructCertificateStackV (
@@ -101,23 +121,24 @@ X509ConstructCertificateStackV (
   IN      VA_LIST  Args
   )
 {
-  UINT8* Cert;
-  UINTN CertSize;
-  INT32 Index;
-  INT32 Ret;
+  UINT8  *Cert;
+  UINTN  CertSize;
+  INT32  Index;
+  INT32  Ret;
 
   if (X509Stack == NULL) {
     return FALSE;
   }
 
   Ret = 0;
-  mbedtls_x509_crt *Crt = (mbedtls_x509_crt *)*X509Stack;
+  mbedtls_x509_crt  *Crt = (mbedtls_x509_crt *)*X509Stack;
   if (Crt == NULL) {
-    Crt = AllocatePool(sizeof(mbedtls_x509_crt));
+    Crt = AllocatePool (sizeof (mbedtls_x509_crt));
     if (Crt == NULL) {
       return FALSE;
     }
-    mbedtls_x509_crt_init(Crt);
+
+    mbedtls_x509_crt_init (Crt);
     *X509Stack = (UINT8 *)Crt;
   }
 
@@ -135,12 +156,13 @@ X509ConstructCertificateStackV (
       break;
     }
 
-    Ret = mbedtls_x509_crt_parse_der(Crt, Cert, CertSize);
+    Ret = mbedtls_x509_crt_parse_der (Crt, Cert, CertSize);
 
     if (Ret != 0) {
       break;
     }
   }
+
   return Ret == 0;
 }
 
@@ -191,8 +213,8 @@ X509Free (
   )
 {
   if (X509Cert) {
-    mbedtls_x509_crt_free(X509Cert);
-    FreePool(X509Cert);
+    mbedtls_x509_crt_free (X509Cert);
+    FreePool (X509Cert);
   }
 }
 
@@ -211,10 +233,10 @@ X509StackFree (
   )
 {
   if (X509Stack == NULL) {
-    return ;
+    return;
   }
 
-  mbedtls_x509_crt_free(X509Stack);
+  mbedtls_x509_crt_free (X509Stack);
 }
 
 /**
@@ -270,49 +292,82 @@ X509GetSubjectName (
   IN OUT  UINTN        *SubjectSize
   )
 {
-  mbedtls_x509_crt Crt;
-  INT32 Ret;
+  mbedtls_x509_crt  Crt;
+  INT32             Ret;
+
   if (Cert == NULL) {
     return FALSE;
   }
 
+  mbedtls_x509_crt_init (&Crt);
 
-  mbedtls_x509_crt_init(&Crt);
-
-  Ret = mbedtls_x509_crt_parse_der(&Crt, Cert, CertSize);
+  Ret = mbedtls_x509_crt_parse_der (&Crt, Cert, CertSize);
 
   if (Ret == 0) {
     if (CertSubject != NULL) {
-      CopyMem(CertSubject, Crt.subject_raw.p, Crt.subject_raw.len);
+      CopyMem (CertSubject, Crt.subject_raw.p, Crt.subject_raw.len);
     }
+
     *SubjectSize = Crt.subject_raw.len;
   }
-  mbedtls_x509_crt_free(&Crt);
+
+  mbedtls_x509_crt_free (&Crt);
 
   return Ret == 0;
 }
 
+/**
+  Retrieve a string from one X.509 certificate base on the Request_NID.
+
+  @param[in]      Cert             Pointer to the DER-encoded X509 certificate.
+  @param[in]      CertSize         Size of the X509 certificate in bytes.
+  @param[in]      Request_NID      NID of string to obtain
+  @param[out]     CommonName       Buffer to contain the retrieved certificate common
+                                   name string (UTF8). At most CommonNameSize bytes will be
+                                   written and the string will be null terminated. May be
+                                   NULL in order to determine the size buffer needed.
+  @param[in,out]  CommonNameSize   The size in bytes of the CommonName buffer on input,
+                                   and the size of buffer returned CommonName on output.
+                                   If CommonName is NULL then the amount of space needed
+                                   in buffer (including the final null) is returned.
+
+  @retval RETURN_SUCCESS           The certificate CommonName retrieved successfully.
+  @retval RETURN_INVALID_PARAMETER If Cert is NULL.
+                                   If CommonNameSize is NULL.
+                                   If CommonName is not NULL and *CommonNameSize is 0.
+                                   If Certificate is invalid.
+  @retval RETURN_NOT_FOUND         If no NID Name entry exists.
+  @retval RETURN_BUFFER_TOO_SMALL  If the CommonName is NULL. The required buffer size
+                                   (including the final null) is returned in the
+                                   CommonNameSize parameter.
+  @retval RETURN_UNSUPPORTED       The operation is not supported.
+
+**/
 RETURN_STATUS
 EFIAPI
 InternalX509GetNIDName (
-  IN      mbedtls_x509_name     *Name,
-  IN      CHAR8         *Oid,
-  IN      UINTN         OidSize,
-  IN OUT  CHAR8         *CommonName,  OPTIONAL
-  IN OUT  UINTN         *CommonNameSize)
+  IN      mbedtls_x509_name  *Name,
+  IN      CHAR8              *Oid,
+  IN      UINTN              OidSize,
+  IN OUT  CHAR8              *CommonName,
+  OPTIONAL
+  IN OUT  UINTN              *CommonNameSize
+  )
 {
-  const mbedtls_asn1_named_data *data;
-  data = mbedtls_asn1_find_named_data(Name, Oid, OidSize);
-  if (data != NULL) {
+  const mbedtls_asn1_named_data  *data;
 
+  data = mbedtls_asn1_find_named_data (Name, Oid, OidSize);
+  if (data != NULL) {
     if (*CommonNameSize <= data->val.len) {
       *CommonNameSize = data->val.len + 1;
       return RETURN_BUFFER_TOO_SMALL;
     }
+
     if (CommonName != NULL) {
-      CopyMem(CommonName, data->val.p, data->val.len);
+      CopyMem (CommonName, data->val.p, data->val.len);
       CommonName[data->val.len] = '\0';
     }
+
     *CommonNameSize = data->val.len + 1;
     return RETURN_SUCCESS;
   } else {
@@ -323,18 +378,19 @@ InternalX509GetNIDName (
 RETURN_STATUS
 EFIAPI
 InternalX509GetSubjectNIDName (
-  IN      CONST UINT8   *Cert,
-  IN      UINTN         CertSize,
-  IN      CHAR8         *Oid,
-  IN      UINTN         OidSize,
-  OUT     CHAR8         *CommonName,  OPTIONAL
-  IN OUT  UINTN         *CommonNameSize
+  IN      CONST UINT8  *Cert,
+  IN      UINTN        CertSize,
+  IN      CHAR8        *Oid,
+  IN      UINTN        OidSize,
+  OUT     CHAR8        *CommonName,
+  OPTIONAL
+  IN OUT  UINTN        *CommonNameSize
   )
 {
-  mbedtls_x509_crt Crt;
-  INT32 Ret;
-  mbedtls_x509_name *Name;
-  RETURN_STATUS ReturnStatus;
+  mbedtls_x509_crt   Crt;
+  INT32              Ret;
+  mbedtls_x509_name  *Name;
+  RETURN_STATUS      ReturnStatus;
 
   if (Cert == NULL) {
     return FALSE;
@@ -342,16 +398,16 @@ InternalX509GetSubjectNIDName (
 
   ReturnStatus = RETURN_INVALID_PARAMETER;
 
-  mbedtls_x509_crt_init(&Crt);
+  mbedtls_x509_crt_init (&Crt);
 
-  Ret = mbedtls_x509_crt_parse_der(&Crt, Cert, CertSize);
+  Ret = mbedtls_x509_crt_parse_der (&Crt, Cert, CertSize);
 
   if (Ret == 0) {
-    Name = &(Crt.subject);
-    ReturnStatus = InternalX509GetNIDName(Name, Oid, OidSize, CommonName, CommonNameSize);
+    Name         = &(Crt.subject);
+    ReturnStatus = InternalX509GetNIDName (Name, Oid, OidSize, CommonName, CommonNameSize);
   }
 
-  mbedtls_x509_crt_free(&Crt);
+  mbedtls_x509_crt_free (&Crt);
 
   return ReturnStatus;
 }
@@ -359,18 +415,19 @@ InternalX509GetSubjectNIDName (
 RETURN_STATUS
 EFIAPI
 InternalX509GetIssuerNIDName (
-  IN      CONST UINT8   *Cert,
-  IN      UINTN         CertSize,
-  IN      CHAR8         *Oid,
-  IN      UINTN         OidSize,
-  OUT     CHAR8         *CommonName,  OPTIONAL
-  IN OUT  UINTN         *CommonNameSize
+  IN      CONST UINT8  *Cert,
+  IN      UINTN        CertSize,
+  IN      CHAR8        *Oid,
+  IN      UINTN        OidSize,
+  OUT     CHAR8        *CommonName,
+  OPTIONAL
+  IN OUT  UINTN        *CommonNameSize
   )
 {
-  mbedtls_x509_crt Crt;
-  INT32 Ret;
-  mbedtls_x509_name *Name;
-  RETURN_STATUS ReturnStatus;
+  mbedtls_x509_crt   Crt;
+  INT32              Ret;
+  mbedtls_x509_name  *Name;
+  RETURN_STATUS      ReturnStatus;
 
   if (Cert == NULL) {
     return FALSE;
@@ -378,20 +435,19 @@ InternalX509GetIssuerNIDName (
 
   ReturnStatus = RETURN_INVALID_PARAMETER;
 
-  mbedtls_x509_crt_init(&Crt);
+  mbedtls_x509_crt_init (&Crt);
 
-  Ret = mbedtls_x509_crt_parse_der(&Crt, Cert, CertSize);
+  Ret = mbedtls_x509_crt_parse_der (&Crt, Cert, CertSize);
 
   if (Ret == 0) {
-    Name = &(Crt.issuer);
-    ReturnStatus = InternalX509GetNIDName(Name, Oid, OidSize, CommonName, CommonNameSize);
+    Name         = &(Crt.issuer);
+    ReturnStatus = InternalX509GetNIDName (Name, Oid, OidSize, CommonName, CommonNameSize);
   }
 
-  mbedtls_x509_crt_free(&Crt);
+  mbedtls_x509_crt_free (&Crt);
 
   return ReturnStatus;
 }
-
 
 /**
   Retrieve the common name (CN) string from one X.509 certificate.
@@ -424,7 +480,8 @@ EFIAPI
 X509GetCommonName (
   IN      CONST UINT8  *Cert,
   IN      UINTN        CertSize,
-  OUT     CHAR8        *CommonName,  OPTIONAL
+  OUT     CHAR8        *CommonName,
+  OPTIONAL
   IN OUT  UINTN        *CommonNameSize
   )
 {
@@ -460,10 +517,11 @@ X509GetCommonName (
 RETURN_STATUS
 EFIAPI
 X509GetOrganizationName (
-  IN      CONST UINT8   *Cert,
-  IN      UINTN         CertSize,
-  OUT     CHAR8         *NameBuffer,  OPTIONAL
-  IN OUT  UINTN         *NameBufferSize
+  IN      CONST UINT8  *Cert,
+  IN      UINTN        CertSize,
+  OUT     CHAR8        *NameBuffer,
+  OPTIONAL
+  IN OUT  UINTN        *NameBufferSize
   )
 {
   return InternalX509GetSubjectNIDName (Cert, CertSize, (CHAR8 *)OID_organizationName, sizeof (OID_organizationName), NameBuffer, NameBufferSize);
@@ -493,9 +551,9 @@ RsaGetPublicKeyFromX509 (
   OUT  VOID         **RsaContext
   )
 {
-  mbedtls_x509_crt    crt;
-  mbedtls_rsa_context *rsa;
-  INT32               Ret;
+  mbedtls_x509_crt     crt;
+  mbedtls_rsa_context  *rsa;
+  INT32                Ret;
 
   mbedtls_x509_crt_init (&crt);
 
@@ -513,12 +571,14 @@ RsaGetPublicKeyFromX509 (
     mbedtls_x509_crt_free (&crt);
     return FALSE;
   }
+
   Ret = mbedtls_rsa_copy (rsa, mbedtls_pk_rsa (crt.pk));
   if (Ret != 0) {
-      RsaFree (rsa);
-      mbedtls_x509_crt_free (&crt);
-      return FALSE;
+    RsaFree (rsa);
+    mbedtls_x509_crt_free (&crt);
+    return FALSE;
   }
+
   mbedtls_x509_crt_free (&crt);
 
   *RsaContext = rsa;
@@ -549,93 +609,41 @@ EcGetPublicKeyFromX509 (
   OUT  VOID         **EcContext
   )
 {
-  mbedtls_x509_crt       crt;
-  mbedtls_ecdh_context   *ecdh;
-  INT32                  Ret;
+  mbedtls_x509_crt      crt;
+  mbedtls_ecdh_context  *ecdh;
+  INT32                 Ret;
 
-  mbedtls_x509_crt_init(&crt);
+  mbedtls_x509_crt_init (&crt);
 
-  if (mbedtls_x509_crt_parse_der(&crt, Cert, CertSize) != 0) {
+  if (mbedtls_x509_crt_parse_der (&crt, Cert, CertSize) != 0) {
     return FALSE;
   }
 
-  if (mbedtls_pk_get_type(&crt.pk) != MBEDTLS_PK_ECKEY) {
-    mbedtls_x509_crt_free(&crt);
+  if (mbedtls_pk_get_type (&crt.pk) != MBEDTLS_PK_ECKEY) {
+    mbedtls_x509_crt_free (&crt);
     return FALSE;
   }
 
-  ecdh = AllocateZeroPool(sizeof(mbedtls_ecdh_context));
+  ecdh = AllocateZeroPool (sizeof (mbedtls_ecdh_context));
   if (ecdh == NULL) {
-    mbedtls_x509_crt_free(&crt);
+    mbedtls_x509_crt_free (&crt);
     return FALSE;
   }
-  mbedtls_ecdh_init(ecdh);
 
-  Ret = mbedtls_ecdh_get_params (ecdh, mbedtls_pk_ec(crt.pk), MBEDTLS_ECDH_OURS);
+  mbedtls_ecdh_init (ecdh);
+
+  Ret = mbedtls_ecdh_get_params (ecdh, mbedtls_pk_ec (crt.pk), MBEDTLS_ECDH_OURS);
   if (Ret != 0) {
-    mbedtls_ecdh_free(ecdh);
-    FreePool(ecdh);
-    mbedtls_x509_crt_free(&crt);
+    mbedtls_ecdh_free (ecdh);
+    FreePool (ecdh);
+    mbedtls_x509_crt_free (&crt);
     return FALSE;
   }
-  mbedtls_x509_crt_free(&crt);
+
+  mbedtls_x509_crt_free (&crt);
 
   *EcContext = ecdh;
   return TRUE;
-}
-
-/**
-  Retrieve the Ed Public Key from one DER-encoded X509 certificate.
-
-  @param[in]  Cert         Pointer to the DER-encoded X509 certificate.
-  @param[in]  CertSize     Size of the X509 certificate in bytes.
-  @param[out] EdContext    Pointer to new-generated Ed DSA context which contain the retrieved
-                           Ed public key component. Use EdFree() function to free the
-                           resource.
-
-  If Cert is NULL, then return FALSE.
-  If EdContext is NULL, then return FALSE.
-
-  @retval  TRUE   Ed Public Key was retrieved successfully.
-  @retval  FALSE  Fail to retrieve Ed public key from X509 certificate.
-
-**/
-BOOLEAN
-EFIAPI
-EdGetPublicKeyFromX509 (
-  IN   CONST UINT8  *Cert,
-  IN   UINTN        CertSize,
-  OUT  VOID         **EdContext
-  )
-{
-  return FALSE;
-}
-
-/**
-  Retrieve the Sm2 Public Key from one DER-encoded X509 certificate.
-
-  @param[in]  Cert         Pointer to the DER-encoded X509 certificate.
-  @param[in]  CertSize     Size of the X509 certificate in bytes.
-  @param[out] Sm2Context   Pointer to new-generated Sm2 context which contain the retrieved
-                           Sm2 public key component. Use Sm2Free() function to free the
-                           resource.
-
-  If Cert is NULL, then return FALSE.
-  If EdContext is NULL, then return FALSE.
-
-  @retval  TRUE   Sm2 Public Key was retrieved successfully.
-  @retval  FALSE  Fail to retrieve Sm2 public key from X509 certificate.
-
-**/
-BOOLEAN
-EFIAPI
-Sm2GetPublicKeyFromX509 (
-  IN   CONST UINT8  *Cert,
-  IN   UINTN        CertSize,
-  OUT  VOID         **Sm2Context
-  )
-{
-  return FALSE;
 }
 
 /**
@@ -663,32 +671,32 @@ X509VerifyCert (
   IN  UINTN        CACertSize
   )
 {
-  INT32 Ret;
-  mbedtls_x509_crt Ca, End;
-  UINT32  VFlag = 0;
-  mbedtls_x509_crt_profile Profile = {0};
+  INT32                     Ret;
+  mbedtls_x509_crt          Ca, End;
+  UINT32                    VFlag   = 0;
+  mbedtls_x509_crt_profile  Profile = { 0 };
 
-  if (Cert == NULL || CACert == NULL) {
+  if ((Cert == NULL) || (CACert == NULL)) {
     return FALSE;
   }
 
-  CopyMem(&Profile, &compat_profile, sizeof(mbedtls_x509_crt_profile));
+  CopyMem (&Profile, &compat_profile, sizeof (mbedtls_x509_crt_profile));
 
-  mbedtls_x509_crt_init(&Ca);
-  mbedtls_x509_crt_init(&End);
+  mbedtls_x509_crt_init (&Ca);
+  mbedtls_x509_crt_init (&End);
 
-  Ret = mbedtls_x509_crt_parse_der(&Ca, CACert, CACertSize);
+  Ret = mbedtls_x509_crt_parse_der (&Ca, CACert, CACertSize);
 
   if (Ret == 0) {
-    Ret = mbedtls_x509_crt_parse_der(&End, Cert, CertSize);
+    Ret = mbedtls_x509_crt_parse_der (&End, Cert, CertSize);
   }
 
   if (Ret == 0) {
-    Ret = mbedtls_x509_crt_verify_with_profile(&End, &Ca, NULL, &Profile, NULL, &VFlag, NULL, NULL);
+    Ret = mbedtls_x509_crt_verify_with_profile (&End, &Ca, NULL, &Profile, NULL, &VFlag, NULL, NULL);
   }
 
-  mbedtls_x509_crt_free(&Ca);
-  mbedtls_x509_crt_free(&End);
+  mbedtls_x509_crt_free (&Ca);
+  mbedtls_x509_crt_free (&End);
 
   return Ret == 0;
 }
@@ -720,17 +728,17 @@ X509VerifyCertChain (
   IN UINTN        CertChainLength
   )
 {
-  UINTN   Asn1Len;
-  UINTN   PrecedingCertLen;
-  CONST UINT8   *PrecedingCert;
-  UINTN   CurrentCertLen;
-  CONST UINT8   *CurrentCert;
-  CONST UINT8   *TmpPtr;
-  UINT32  Ret;
-  BOOLEAN VerifyFlag;
+  UINTN        Asn1Len;
+  UINTN        PrecedingCertLen;
+  CONST UINT8  *PrecedingCert;
+  UINTN        CurrentCertLen;
+  CONST UINT8  *CurrentCert;
+  CONST UINT8  *TmpPtr;
+  UINT32       Ret;
+  BOOLEAN      VerifyFlag;
 
-  VerifyFlag = FALSE;
-  PrecedingCert = RootCert;
+  VerifyFlag       = FALSE;
+  PrecedingCert    = RootCert;
   PrecedingCertLen = RootCertLength;
 
   CurrentCert = CertChain;
@@ -740,7 +748,7 @@ X509VerifyCertChain (
   //
   do {
     TmpPtr = CurrentCert;
-    Ret = mbedtls_asn1_get_tag ((UINT8 **)&TmpPtr, CertChain + CertChainLength, &Asn1Len, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE);
+    Ret    = mbedtls_asn1_get_tag ((UINT8 **)&TmpPtr, CertChain + CertChainLength, &Asn1Len, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE);
     if (Ret != 0) {
       break;
     }
@@ -757,7 +765,7 @@ X509VerifyCertChain (
     //
     // Save preceding certificate
     //
-    PrecedingCert = CurrentCert;
+    PrecedingCert    = CurrentCert;
     PrecedingCertLen = CurrentCertLen;
 
     //
@@ -768,7 +776,6 @@ X509VerifyCertChain (
 
   return VerifyFlag;
 }
-
 
 /**
   Get one X509 certificate from CertChain.
@@ -798,23 +805,23 @@ X509GetCertFromCertChain (
   OUT UINTN        *CertLength
   )
 {
-
-  UINTN Asn1Len;
-  INT32 CurrentIndex;
-  UINTN CurrentCertLen;
-  CONST UINT8 *CurrentCert;
-  CONST UINT8 *TmpPtr;
-  INT32 Ret;
+  UINTN        Asn1Len;
+  INT32        CurrentIndex;
+  UINTN        CurrentCertLen;
+  CONST UINT8  *CurrentCert;
+  CONST UINT8  *TmpPtr;
+  INT32        Ret;
 
   //
   // Check input parameters.
   //
   if ((CertChain == NULL) || (Cert == NULL) ||
-      (CertIndex < -1) || (CertLength == NULL)) {
+      (CertIndex < -1) || (CertLength == NULL))
+  {
     return FALSE;
   }
 
-  CurrentCert = CertChain;
+  CurrentCert  = CertChain;
   CurrentIndex = -1;
 
   //
@@ -825,16 +832,16 @@ X509GetCertFromCertChain (
     // Get asn1 tag len
     //
     TmpPtr = CurrentCert;
-    Ret = mbedtls_asn1_get_tag ((UINT8 **)&TmpPtr, CertChain + CertChainLength, &Asn1Len, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE);
+    Ret    = mbedtls_asn1_get_tag ((UINT8 **)&TmpPtr, CertChain + CertChainLength, &Asn1Len, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE);
     if (Ret != 0) {
       break;
     }
 
     CurrentCertLen = Asn1Len + (TmpPtr - CurrentCert);
-    CurrentIndex ++;
+    CurrentIndex++;
 
     if (CurrentIndex == CertIndex) {
-      *Cert = CurrentCert;
+      *Cert       = CurrentCert;
       *CertLength = CurrentCertLen;
       return TRUE;
     }
@@ -848,8 +855,8 @@ X509GetCertFromCertChain (
   //
   // If CertIndex is -1, Return the last certificate
   //
-  if (CertIndex == -1 && CurrentIndex >= 0) {
-    *Cert = CurrentCert - CurrentCertLen;
+  if ((CertIndex == -1) && (CurrentIndex >= 0)) {
+    *Cert       = CurrentCert - CurrentCertLen;
     *CertLength = CurrentCertLen;
     return TRUE;
   }
@@ -885,8 +892,8 @@ X509GetTBSCert (
   UINTN        Length;
   UINTN        Ret;
   UINT8        *Ptr;
-  CONST UINT8        *Temp;
-  CONST UINT8        *End;
+  CONST UINT8  *Temp;
+  CONST UINT8  *End;
 
   //
   // Check input parameters.
@@ -920,19 +927,19 @@ X509GetTBSCert (
   Ptr = (UINT8 *)Cert;
   End = Cert + CertSize;
 
-  Ret = mbedtls_asn1_get_tag(&Ptr, End, &Length, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE);
+  Ret = mbedtls_asn1_get_tag (&Ptr, End, &Length, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE);
   if (Ret != 0) {
     return FALSE;
   }
 
   Temp = Ptr;
-  End = Ptr + Length;
-  Ret = mbedtls_asn1_get_tag(&Ptr, End, &Length, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE);
+  End  = Ptr + Length;
+  Ret  = mbedtls_asn1_get_tag (&Ptr, End, &Length, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE);
   if (Ret != 0) {
     return FALSE;
   }
 
-  *TBSCert = (UINT8 *)Temp;
+  *TBSCert     = (UINT8 *)Temp;
   *TBSCertSize = Length + (Ptr - Temp);
 
   return TRUE;
@@ -962,9 +969,9 @@ X509GetVersion (
   OUT     UINTN        *Version
   )
 {
-  mbedtls_x509_crt Crt;
-  INT32 Ret;
-  BOOLEAN ReturnStatus;
+  mbedtls_x509_crt  Crt;
+  INT32             Ret;
+  BOOLEAN           ReturnStatus;
 
   if (Cert == NULL) {
     return FALSE;
@@ -972,16 +979,16 @@ X509GetVersion (
 
   ReturnStatus = FALSE;
 
-  mbedtls_x509_crt_init(&Crt);
+  mbedtls_x509_crt_init (&Crt);
 
-  Ret = mbedtls_x509_crt_parse_der(&Crt, Cert, CertSize);
+  Ret = mbedtls_x509_crt_parse_der (&Crt, Cert, CertSize);
 
   if (Ret == 0) {
-    *Version = Crt.version - 1;
+    *Version     = Crt.version - 1;
     ReturnStatus = TRUE;
   }
 
-  mbedtls_x509_crt_free(&Crt);
+  mbedtls_x509_crt_free (&Crt);
 
   return ReturnStatus;
 }
@@ -1012,15 +1019,16 @@ X509GetVersion (
 BOOLEAN
 EFIAPI
 X509GetSerialNumber (
-  IN      CONST UINT8 *Cert,
-  IN      UINTN CertSize,
-  OUT     UINT8 *SerialNumber, OPTIONAL
-  IN OUT  UINTN         *SerialNumberSize
+  IN      CONST UINT8  *Cert,
+  IN      UINTN        CertSize,
+  OUT     UINT8        *SerialNumber,
+  OPTIONAL
+  IN OUT  UINTN        *SerialNumberSize
   )
 {
-  mbedtls_x509_crt Crt;
-  INT32 Ret;
-  BOOLEAN ReturnStatus;
+  mbedtls_x509_crt  Crt;
+  INT32             Ret;
+  BOOLEAN           ReturnStatus;
 
   if (Cert == NULL) {
     return FALSE;
@@ -1028,25 +1036,28 @@ X509GetSerialNumber (
 
   ReturnStatus = FALSE;
 
-  mbedtls_x509_crt_init(&Crt);
+  mbedtls_x509_crt_init (&Crt);
 
-  Ret = mbedtls_x509_crt_parse_der(&Crt, Cert, CertSize);
+  Ret = mbedtls_x509_crt_parse_der (&Crt, Cert, CertSize);
 
   if (Ret == 0) {
     if (*SerialNumberSize <= Crt.serial.len) {
       *SerialNumberSize = Crt.serial.len + 1;
-      ReturnStatus = FALSE;
+      ReturnStatus      = FALSE;
       goto Cleanup;
     }
+
     if (SerialNumber != NULL) {
-      CopyMem(SerialNumber, Crt.serial.p, Crt.serial.len);
+      CopyMem (SerialNumber, Crt.serial.p, Crt.serial.len);
       SerialNumber[Crt.serial.len] = '\0';
     }
+
     *SerialNumberSize = Crt.serial.len + 1;
-    ReturnStatus = TRUE;
+    ReturnStatus      = TRUE;
   }
+
 Cleanup:
-  mbedtls_x509_crt_free(&Crt);
+  mbedtls_x509_crt_free (&Crt);
 
   return ReturnStatus;
 }
@@ -1079,9 +1090,9 @@ X509GetIssuerName (
   IN OUT  UINTN        *CertIssuerSize
   )
 {
-  mbedtls_x509_crt Crt;
-  INT32 Ret;
-  BOOLEAN Status;
+  mbedtls_x509_crt  Crt;
+  INT32             Ret;
+  BOOLEAN           Status;
 
   if (Cert == NULL) {
     return FALSE;
@@ -1089,25 +1100,27 @@ X509GetIssuerName (
 
   Status = FALSE;
 
-  mbedtls_x509_crt_init(&Crt);
+  mbedtls_x509_crt_init (&Crt);
 
-  Ret = mbedtls_x509_crt_parse_der(&Crt, Cert, CertSize);
+  Ret = mbedtls_x509_crt_parse_der (&Crt, Cert, CertSize);
 
   if (Ret == 0) {
     if (*CertIssuerSize < Crt.serial.len) {
       *CertIssuerSize = Crt.serial.len;
-      Status = FALSE;
+      Status          = FALSE;
       goto Cleanup;
     }
+
     if (CertIssuer != NULL) {
-      CopyMem(CertIssuer, Crt.serial.p, Crt.serial.len);
+      CopyMem (CertIssuer, Crt.serial.p, Crt.serial.len);
     }
+
     *CertIssuerSize = Crt.serial.len;
-    Status = TRUE;
+    Status          = TRUE;
   }
 
 Cleanup:
-  mbedtls_x509_crt_free(&Crt);
+  mbedtls_x509_crt_free (&Crt);
 
   return Status;
 }
@@ -1143,7 +1156,8 @@ EFIAPI
 X509GetIssuerCommonName (
   IN      CONST UINT8  *Cert,
   IN      UINTN        CertSize,
-  OUT     CHAR8        *CommonName,  OPTIONAL
+  OUT     CHAR8        *CommonName,
+  OPTIONAL
   IN OUT  UINTN        *CommonNameSize
   )
 {
@@ -1179,10 +1193,11 @@ X509GetIssuerCommonName (
 RETURN_STATUS
 EFIAPI
 X509GetIssuerOrganizationName (
-  IN      CONST UINT8   *Cert,
-  IN      UINTN         CertSize,
-  OUT     CHAR8         *NameBuffer,  OPTIONAL
-  IN OUT  UINTN         *NameBufferSize
+  IN      CONST UINT8  *Cert,
+  IN      UINTN        CertSize,
+  OUT     CHAR8        *NameBuffer,
+  OPTIONAL
+  IN OUT  UINTN        *NameBufferSize
   )
 {
   return InternalX509GetIssuerNIDName (Cert, CertSize, (CHAR8 *)OID_organizationName, sizeof (OID_organizationName), NameBuffer, NameBufferSize);
@@ -1209,45 +1224,47 @@ X509GetIssuerOrganizationName (
 BOOLEAN
 EFIAPI
 X509GetSignatureAlgorithm (
-  IN CONST UINT8       *Cert,
-  IN       UINTN       CertSize,
-     OUT   UINT8       *Oid,  OPTIONAL
-  IN OUT   UINTN       *OidSize
+  IN CONST UINT8  *Cert,
+  IN       UINTN  CertSize,
+  OUT   UINT8     *Oid,
+  OPTIONAL
+  IN OUT   UINTN  *OidSize
   )
 {
-  mbedtls_x509_crt    Crt;
-  INT32               Ret;
-  BOOLEAN       ReturnStatus;
+  mbedtls_x509_crt  Crt;
+  INT32             Ret;
+  BOOLEAN           ReturnStatus;
 
-  if (Cert == NULL || CertSize == 0 || OidSize == NULL) {
+  if ((Cert == NULL) || (CertSize == 0) || (OidSize == NULL)) {
     return FALSE;
   }
 
   ReturnStatus = FALSE;
 
-  mbedtls_x509_crt_init(&Crt);
+  mbedtls_x509_crt_init (&Crt);
 
-  Ret = mbedtls_x509_crt_parse_der(&Crt, Cert, CertSize);
+  Ret = mbedtls_x509_crt_parse_der (&Crt, Cert, CertSize);
 
   if (Ret == 0) {
     if (*OidSize < Crt.sig_oid.len) {
-      *OidSize = Crt.serial.len;
+      *OidSize     = Crt.serial.len;
       ReturnStatus = FALSE;
       goto Cleanup;
     }
+
     if (Oid != NULL) {
-      CopyMem(Oid, Crt.sig_oid.p, Crt.sig_oid.len);
+      CopyMem (Oid, Crt.sig_oid.p, Crt.sig_oid.len);
     }
-    *OidSize = Crt.sig_oid.len;
+
+    *OidSize     = Crt.sig_oid.len;
     ReturnStatus = TRUE;
   }
 
 Cleanup:
-  mbedtls_x509_crt_free(&Crt);
+  mbedtls_x509_crt_free (&Crt);
 
   return ReturnStatus;
 }
-
 
 /**
  Find first Extension data match with given OID
@@ -1263,24 +1280,24 @@ Cleanup:
 STATIC
 RETURN_STATUS
 InternalX509FindExtensionData (
-  UINT8 *Start,
-  UINT8 *End,
-  CONST UINT8 *Oid,
-  UINTN OidSize,
-  UINT8 **FindExtensionData,
-  UINTN *FindExtensionDataLen
+  UINT8        *Start,
+  UINT8        *End,
+  CONST UINT8  *Oid,
+  UINTN        OidSize,
+  UINT8        **FindExtensionData,
+  UINTN        *FindExtensionDataLen
   )
 {
-  UINT8   *Ptr;
-  UINT8   *ExtensionPtr;
-  size_t  ObjLen;
-  INT32   Ret;
-  RETURN_STATUS ReturnStatus;
-  size_t FindExtensionLen;
-  size_t HeaderLen;
+  UINT8          *Ptr;
+  UINT8          *ExtensionPtr;
+  size_t         ObjLen;
+  INT32          Ret;
+  RETURN_STATUS  ReturnStatus;
+  size_t         FindExtensionLen;
+  size_t         HeaderLen;
 
   ReturnStatus = RETURN_INVALID_PARAMETER;
-  Ptr = Start;
+  Ptr          = Start;
 
   Ret = 0;
 
@@ -1292,33 +1309,33 @@ InternalX509FindExtensionData (
     *      extnValue   OCTET STRING  }
     */
     ExtensionPtr = Ptr;
-    Ret = mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE);
+    Ret          = mbedtls_asn1_get_tag (&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE);
     if (Ret == 0) {
-      HeaderLen = (size_t)(Ptr - ExtensionPtr);
+      HeaderLen        = (size_t)(Ptr - ExtensionPtr);
       FindExtensionLen = ObjLen;
       // Get Object Identifier
-      Ret = mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_OID);
+      Ret = mbedtls_asn1_get_tag (&Ptr, End, &ObjLen, MBEDTLS_ASN1_OID);
     } else {
       break;
     }
 
-    if (Ret == 0 && CompareMem(Ptr, Oid, OidSize) == 0) {
+    if ((Ret == 0) && (CompareMem (Ptr, Oid, OidSize) == 0)) {
       Ptr += ObjLen;
 
-      Ret = mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_BOOLEAN);
+      Ret = mbedtls_asn1_get_tag (&Ptr, End, &ObjLen, MBEDTLS_ASN1_BOOLEAN);
       if (Ret == 0) {
         Ptr += ObjLen;
       }
 
-      Ret = mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_OCTET_STRING);
+      Ret = mbedtls_asn1_get_tag (&Ptr, End, &ObjLen, MBEDTLS_ASN1_OCTET_STRING);
     } else {
       Ret = 1;
     }
 
     if (Ret == 0) {
-      *FindExtensionData = Ptr;
+      *FindExtensionData    = Ptr;
       *FindExtensionDataLen = ObjLen;
-      ReturnStatus = RETURN_SUCCESS;
+      ReturnStatus          = RETURN_SUCCESS;
       break;
     }
 
@@ -1353,62 +1370,65 @@ InternalX509FindExtensionData (
 BOOLEAN
 EFIAPI
 X509GetExtensionData (
-  IN     CONST UINT8 *Cert,
-  IN     UINTN       CertSize,
+  IN     CONST UINT8  *Cert,
+  IN     UINTN        CertSize,
   IN     CONST UINT8  *Oid,
-  IN     UINTN       OidSize,
-     OUT UINT8       *ExtensionData,
-  IN OUT UINTN       *ExtensionDataSize
+  IN     UINTN        OidSize,
+  OUT UINT8           *ExtensionData,
+  IN OUT UINTN        *ExtensionDataSize
   )
 {
-  mbedtls_x509_crt Crt;
-  INT32 Ret;
-  RETURN_STATUS ReturnStatus;
-  BOOLEAN Status;
-  UINT8         *Ptr;
-  UINT8         *End;
-  size_t        ObjLen;
+  mbedtls_x509_crt  Crt;
+  INT32             Ret;
+  RETURN_STATUS     ReturnStatus;
+  BOOLEAN           Status;
+  UINT8             *Ptr;
+  UINT8             *End;
+  size_t            ObjLen;
 
-  if (Cert == NULL ||
-    CertSize == 0 ||
-    Oid == NULL ||
-    OidSize == 0 ||
-    ExtensionDataSize == NULL) {
+  if ((Cert == NULL) ||
+      (CertSize == 0) ||
+      (Oid == NULL) ||
+      (OidSize == 0) ||
+      (ExtensionDataSize == NULL))
+  {
     return FALSE;
   }
 
   ReturnStatus = RETURN_INVALID_PARAMETER;
-  Status = FALSE;
+  Status       = FALSE;
 
-  mbedtls_x509_crt_init(&Crt);
+  mbedtls_x509_crt_init (&Crt);
 
-  Ret = mbedtls_x509_crt_parse_der(&Crt, Cert, CertSize);
+  Ret = mbedtls_x509_crt_parse_der (&Crt, Cert, CertSize);
 
   if (Ret == 0) {
     Ptr = Crt.v3_ext.p;
     End = Crt.v3_ext.p + Crt.v3_ext.len;
-    Ret = mbedtls_asn1_get_tag(&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE);
+    Ret = mbedtls_asn1_get_tag (&Ptr, End, &ObjLen, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE);
   }
 
   if (Ret == 0) {
-      ReturnStatus = InternalX509FindExtensionData(Ptr, End, Oid, OidSize, &Ptr, &ObjLen);
+    ReturnStatus = InternalX509FindExtensionData (Ptr, End, Oid, OidSize, &Ptr, &ObjLen);
   }
 
   if (ReturnStatus == RETURN_SUCCESS) {
     if (*ExtensionDataSize < ObjLen) {
       *ExtensionDataSize = ObjLen;
-      Status = FALSE;
+      Status             = FALSE;
       goto Cleanup;
     }
+
     if (Oid != NULL) {
-      CopyMem(ExtensionData, Ptr, ObjLen);
+      CopyMem (ExtensionData, Ptr, ObjLen);
     }
+
     *ExtensionDataSize = ObjLen;
-    Status = TRUE;
+    Status             = TRUE;
   }
 
 Cleanup:
-  mbedtls_x509_crt_free(&Crt);
+  mbedtls_x509_crt_free (&Crt);
 
   return Status;
 }
@@ -1437,19 +1457,19 @@ Cleanup:
 BOOLEAN
 EFIAPI
 X509GetValidity  (
-  IN     CONST UINT8 *Cert,
-  IN     UINTN       CertSize,
-  IN     UINT8       *From,
-  IN OUT UINTN       *FromSize,
-  IN     UINT8       *To,
-  IN OUT UINTN       *ToSize
+  IN     CONST UINT8  *Cert,
+  IN     UINTN        CertSize,
+  IN     UINT8        *From,
+  IN OUT UINTN        *FromSize,
+  IN     UINT8        *To,
+  IN OUT UINTN        *ToSize
   )
 {
-  mbedtls_x509_crt Crt;
-  INT32      Ret;
-  BOOLEAN    Status;
-  UINTN      TSize;
-  UINTN      FSize;
+  mbedtls_x509_crt  Crt;
+  INT32             Ret;
+  BOOLEAN           Status;
+  UINTN             TSize;
+  UINTN             FSize;
 
   if (Cert == NULL) {
     return FALSE;
@@ -1457,20 +1477,20 @@ X509GetValidity  (
 
   Status = FALSE;
 
-  mbedtls_x509_crt_init(&Crt);
+  mbedtls_x509_crt_init (&Crt);
 
-  Ret = mbedtls_x509_crt_parse_der(&Crt, Cert, CertSize);
+  Ret = mbedtls_x509_crt_parse_der (&Crt, Cert, CertSize);
 
   if (Ret == 0) {
-
     FSize = sizeof (mbedtls_x509_time);
     if (*FromSize < FSize) {
       *FromSize = FSize;
       goto _Exit;
     }
+
     *FromSize = FSize;
     if (From != NULL) {
-      CopyMem(From, &(Crt.valid_from), FSize);
+      CopyMem (From, &(Crt.valid_from), FSize);
     }
 
     TSize = sizeof (mbedtls_x509_time);
@@ -1478,15 +1498,17 @@ X509GetValidity  (
       *ToSize = TSize;
       goto _Exit;
     }
+
     *ToSize = TSize;
     if (To != NULL) {
-      CopyMem(To, &(Crt.valid_to), sizeof (mbedtls_x509_time));
+      CopyMem (To, &(Crt.valid_to), sizeof (mbedtls_x509_time));
     }
+
     Status = TRUE;
   }
 
 _Exit:
-  mbedtls_x509_crt_free(&Crt);
+  mbedtls_x509_crt_free (&Crt);
 
   return Status;
 }
@@ -1505,14 +1527,14 @@ _Exit:
 BOOLEAN
 EFIAPI
 X509GetKeyUsage (
-  IN    CONST UINT8 *Cert,
+  IN    CONST UINT8  *Cert,
   IN    UINTN        CertSize,
   OUT   UINTN        *Usage
   )
 {
-  mbedtls_x509_crt Crt;
-  INT32         Ret;
-  BOOLEAN       Status;
+  mbedtls_x509_crt  Crt;
+  INT32             Ret;
+  BOOLEAN           Status;
 
   if (Cert == NULL) {
     return FALSE;
@@ -1520,15 +1542,16 @@ X509GetKeyUsage (
 
   Status = FALSE;
 
-  mbedtls_x509_crt_init(&Crt);
+  mbedtls_x509_crt_init (&Crt);
 
-  Ret = mbedtls_x509_crt_parse_der(&Crt, Cert, CertSize);
+  Ret = mbedtls_x509_crt_parse_der (&Crt, Cert, CertSize);
 
   if (Ret == 0) {
     *Usage = Crt.key_usage;
     Status = TRUE;
   }
-  mbedtls_x509_crt_free(&Crt);
+
+  mbedtls_x509_crt_free (&Crt);
 
   return Status;
 }
@@ -1553,19 +1576,19 @@ X509GetKeyUsage (
 BOOLEAN
 EFIAPI
 X509GetExtendedKeyUsage (
-  IN     CONST UINT8   *Cert,
-  IN     UINTN         CertSize,
-     OUT UINT8         *Usage,
-  IN OUT UINTN         *UsageSize
+  IN     CONST UINT8  *Cert,
+  IN     UINTN        CertSize,
+  OUT UINT8           *Usage,
+  IN OUT UINTN        *UsageSize
   )
 {
-  BOOLEAN ReturnStatus;
+  BOOLEAN  ReturnStatus;
 
-  if (Cert == NULL || CertSize == 0 || UsageSize == NULL) {
+  if ((Cert == NULL) || (CertSize == 0) || (UsageSize == NULL)) {
     return FALSE;
   }
 
-  ReturnStatus = X509GetExtensionData((UINT8 *)Cert, CertSize, (UINT8*)OID_extKeyUsage, sizeof (OID_extKeyUsage), Usage, UsageSize);
+  ReturnStatus = X509GetExtensionData ((UINT8 *)Cert, CertSize, (UINT8 *)OID_extKeyUsage, sizeof (OID_extKeyUsage), Usage, UsageSize);
 
   return ReturnStatus;
 }
@@ -1576,51 +1599,67 @@ X509GetExtendedKeyUsage (
 STATIC
 INTN
 InternalX509CheckTime (
-  CONST mbedtls_x509_time *Before,
-  const mbedtls_x509_time *After
+  CONST mbedtls_x509_time  *Before,
+  const mbedtls_x509_time  *After
   )
 {
-  if( Before->year  > After->year )
-    return( 1 );
+  if ( Before->year  > After->year ) {
+    return (1);
+  }
 
-  if( Before->year == After->year &&
-    Before->mon   > After->mon )
-    return( 1 );
+  if ((Before->year == After->year) &&
+      (Before->mon   > After->mon))
+  {
+    return (1);
+  }
 
-  if( Before->year == After->year &&
-    Before->mon  == After->mon  &&
-    Before->day   > After->day )
-    return( 1 );
+  if ((Before->year == After->year) &&
+      (Before->mon  == After->mon) &&
+      (Before->day   > After->day))
+  {
+    return (1);
+  }
 
-  if( Before->year == After->year &&
-    Before->mon  == After->mon  &&
-    Before->day  == After->day  &&
-    Before->hour  > After->hour )
-    return( 1 );
+  if ((Before->year == After->year) &&
+      (Before->mon  == After->mon) &&
+      (Before->day  == After->day) &&
+      (Before->hour  > After->hour))
+  {
+    return (1);
+  }
 
-  if( Before->year == After->year &&
-    Before->mon  == After->mon  &&
-    Before->day  == After->day  &&
-    Before->hour == After->hour &&
-    Before->min   > After->min  )
-    return( 1 );
+  if ((Before->year == After->year) &&
+      (Before->mon  == After->mon) &&
+      (Before->day  == After->day) &&
+      (Before->hour == After->hour) &&
+      (Before->min   > After->min))
+  {
+    return (1);
+  }
 
-  if( Before->year == After->year &&
-    Before->mon  == After->mon  &&
-    Before->day  == After->day  &&
-    Before->hour == After->hour &&
-    Before->min  == After->min  &&
-    Before->sec   > After->sec  )
-    return( 1 );
+  if ((Before->year == After->year) &&
+      (Before->mon  == After->mon) &&
+      (Before->day  == After->day) &&
+      (Before->hour == After->hour) &&
+      (Before->min  == After->min) &&
+      (Before->sec   > After->sec))
+  {
+    return (1);
+  }
 
-  return( 0 );
+  return (0);
 }
 
 STATIC
 INT32
-InternalAtoI(CHAR8 *PStart, CHAR8 *PEnd) {
-  CHAR8 *P = PStart;
-  INT32 K = 0;
+InternalAtoI (
+  CHAR8  *PStart,
+  CHAR8  *PEnd
+  )
+{
+  CHAR8  *P = PStart;
+  INT32  K  = 0;
+
   while (P < PEnd) {
     ///
     /// k = k * 2³ + k * 2¹ = k * 8 + k * 2 = k * 10
@@ -1628,6 +1667,7 @@ InternalAtoI(CHAR8 *PStart, CHAR8 *PEnd) {
     K = (K << 3) + (K << 1) + (*P) - '0';
     P++;
   }
+
   return K;
 }
 
@@ -1662,48 +1702,50 @@ X509SetDateTime (
   IN OUT UINTN  *DateTimeSize
   )
 {
-  mbedtls_x509_time Dt;
+  mbedtls_x509_time  Dt;
 
-  INT32 Year;
-  INT32 Month;
-  INT32 Day;
-  INT32 Hour;
-  INT32 Minute;
-  INT32 Second;
-  RETURN_STATUS ReturnStatus;
-  CHAR8 *P;
+  INT32          Year;
+  INT32          Month;
+  INT32          Day;
+  INT32          Hour;
+  INT32          Minute;
+  INT32          Second;
+  RETURN_STATUS  ReturnStatus;
+  CHAR8          *P;
 
   P = DateTimeStr;
 
-  Year = InternalAtoI(P, P + 4);
-  P += 4;
-  Month = InternalAtoI(P, P + 2);
-  P += 2;
-  Day = InternalAtoI(P, P + 2);
-  P += 2;
-  Hour = InternalAtoI(P, P + 2);
-  P += 2;
-  Minute = InternalAtoI(P, P + 2);
-  P += 2;
-  Second = InternalAtoI(P, P + 2);
-  P += 2;
+  Year    = InternalAtoI (P, P + 4);
+  P      += 4;
+  Month   = InternalAtoI (P, P + 2);
+  P      += 2;
+  Day     = InternalAtoI (P, P + 2);
+  P      += 2;
+  Hour    = InternalAtoI (P, P + 2);
+  P      += 2;
+  Minute  = InternalAtoI (P, P + 2);
+  P      += 2;
+  Second  = InternalAtoI (P, P + 2);
+  P      += 2;
   Dt.year = (int)Year;
-  Dt.mon = (int)Month;
-  Dt.day = (int)Day;
+  Dt.mon  = (int)Month;
+  Dt.day  = (int)Day;
   Dt.hour = (int)Hour;
-  Dt.min = (int)Minute;
-  Dt.sec = (int)Second;
+  Dt.min  = (int)Minute;
+  Dt.sec  = (int)Second;
 
   if (*DateTimeSize < sizeof (mbedtls_x509_time)) {
     *DateTimeSize = sizeof (mbedtls_x509_time);
-    ReturnStatus = RETURN_BUFFER_TOO_SMALL;
+    ReturnStatus  = RETURN_BUFFER_TOO_SMALL;
     goto Cleanup;
   }
+
   if (DateTime != NULL) {
-    CopyMem(DateTime, &Dt, sizeof (mbedtls_x509_time));
+    CopyMem (DateTime, &Dt, sizeof (mbedtls_x509_time));
   }
+
   *DateTimeSize = sizeof (mbedtls_x509_time);
-  ReturnStatus = RETURN_SUCCESS;
+  ReturnStatus  = RETURN_SUCCESS;
 Cleanup:
   return ReturnStatus;
 }
@@ -1731,13 +1773,15 @@ X509CompareDateTime (
   IN  CONST  VOID  *DateTime2
   )
 {
-  if (DateTime1 == NULL || DateTime2 == NULL) {
+  if ((DateTime1 == NULL) || (DateTime2 == NULL)) {
     return -2;
   }
+
   if (CompareMem (DateTime2, DateTime1, sizeof (mbedtls_x509_time)) == 0) {
     return 0;
   }
-  if(InternalX509CheckTime ((mbedtls_x509_time*)DateTime1, (mbedtls_x509_time*)DateTime2) == 0) {
+
+  if (InternalX509CheckTime ((mbedtls_x509_time *)DateTime1, (mbedtls_x509_time *)DateTime2) == 0) {
     return -1;
   } else {
     return 1;
@@ -1764,7 +1808,7 @@ X509CompareDateTime (
  **/
 BOOLEAN
 EFIAPI
-X509GetExtendedBasicConstraints(
+X509GetExtendedBasicConstraints (
   CONST UINT8  *Cert,
   UINTN        CertSize,
   UINT8        *BasicConstraints,
@@ -1778,13 +1822,13 @@ X509GetExtendedBasicConstraints(
   }
 
   Status = X509GetExtensionData (
-             (UINT8 *)Cert,
-             CertSize,
-             OID_BasicConstraints,
-             sizeof (OID_BasicConstraints),
-             BasicConstraints,
-             BasicConstraintsSize
-             );
+                                 (UINT8 *)Cert,
+                                 CertSize,
+                                 OID_BasicConstraints,
+                                 sizeof (OID_BasicConstraints),
+                                 BasicConstraints,
+                                 BasicConstraintsSize
+                                 );
 
   return Status;
 }
@@ -1820,9 +1864,9 @@ X509FormatDateTime (
   IN OUT UINTN      *DateTimeSize
   )
 {
-  mbedtls_x509_time *tm;
+  mbedtls_x509_time  *tm;
 
-  if (*DateTimeSize < sizeof(mbedtls_x509_time)){
+  if (*DateTimeSize < sizeof (mbedtls_x509_time)) {
     return FALSE;
   }
 
@@ -1833,7 +1877,7 @@ X509FormatDateTime (
   tm = (mbedtls_x509_time *)DateTime;
 
   tm->year = (DateTimeStr[0] + '0') * 1000 + (DateTimeStr[1] + '0') * 100 +
-    (DateTimeStr[2] + '0') * 10 + (DateTimeStr[3] + '0') * 1;
+             (DateTimeStr[2] + '0') * 10 + (DateTimeStr[3] + '0') * 1;
 
   tm->mon = (DateTimeStr[4] + '0') * 10 + (DateTimeStr[5] + '0') * 1;
 

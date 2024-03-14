@@ -1,7 +1,7 @@
 /** @file
   Big number API implementation based on MbedTLS
 
-  Copyright (c) 2023, Intel Corporation. All rights reserved.<BR>
+  Copyright (c) 2024, Intel Corporation. All rights reserved.<BR>
   SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
@@ -18,11 +18,11 @@ EFIAPI
 BigNumInit (
   )
 {
-  mbedtls_mpi *X;
+  mbedtls_mpi  *X;
 
-  X = AllocateZeroPool(sizeof(mbedtls_mpi));
+  X = AllocateZeroPool (sizeof (mbedtls_mpi));
 
-  mbedtls_mpi_init(X);
+  mbedtls_mpi_init (X);
 
   return X;
 }
@@ -42,7 +42,7 @@ BigNumFromBin (
   IN UINTN        Len
   )
 {
-  mbedtls_mpi *X;
+  mbedtls_mpi  *X;
 
   //
   // Check input parameters.
@@ -51,14 +51,13 @@ BigNumFromBin (
     return NULL;
   }
 
-  X = AllocateZeroPool(sizeof(mbedtls_mpi));
+  X = AllocateZeroPool (sizeof (mbedtls_mpi));
 
- if(mbedtls_mpi_read_binary(X, Buf, Len) == 0 ) {
-  return X;
- } else {
-  return NULL;
- }
-
+  if (mbedtls_mpi_read_binary (X, Buf, Len) == 0 ) {
+    return X;
+  } else {
+    return NULL;
+  }
 }
 
 /**
@@ -77,17 +76,18 @@ BigNumToBin (
   OUT UINT8      *Buf
   )
 {
-  size_t Len;
+  size_t  Len;
 
   if ((Bn == NULL) || (Buf == NULL)) {
     return -1;
   }
 
-  Len = mbedtls_mpi_size(Bn);
+  Len = mbedtls_mpi_size (Bn);
 
-  if (mbedtls_mpi_write_binary(Bn, Buf, Len) != 0){
+  if (mbedtls_mpi_write_binary (Bn, Buf, Len) != 0) {
     return -1;
   }
+
   return Len;
 }
 
@@ -105,7 +105,7 @@ BigNumFree (
   )
 {
   if (Bn != NULL) {
-    mbedtls_mpi_free(Bn);
+    mbedtls_mpi_free (Bn);
   }
 }
 
@@ -133,7 +133,7 @@ BigNumAdd (
     return FALSE;
   }
 
-  if (mbedtls_mpi_add_mpi(BnRes, BnA, BnB) == 0){
+  if (mbedtls_mpi_add_mpi (BnRes, BnA, BnB) == 0) {
     return TRUE;
   } else {
     return FALSE;
@@ -164,7 +164,7 @@ BigNumSub (
     return FALSE;
   }
 
-  if (mbedtls_mpi_sub_mpi(BnRes, BnA, BnB) == 0) {
+  if (mbedtls_mpi_sub_mpi (BnRes, BnA, BnB) == 0) {
     return TRUE;
   } else {
     return FALSE;
@@ -195,7 +195,7 @@ BigNumMod (
     return FALSE;
   }
 
-  if (mbedtls_mpi_mod_mpi(BnRes, BnA, BnB) == 0) {
+  if (mbedtls_mpi_mod_mpi (BnRes, BnA, BnB) == 0) {
     return TRUE;
   } else {
     return FALSE;
@@ -228,7 +228,7 @@ BigNumExpMod (
     return FALSE;
   }
 
-  if (mbedtls_mpi_exp_mod(BnRes, BnA, BnP, BnM, NULL) == 0) {
+  if (mbedtls_mpi_exp_mod (BnRes, BnA, BnP, BnM, NULL) == 0) {
     return TRUE;
   } else {
     return FALSE;
@@ -259,7 +259,7 @@ BigNumInverseMod (
     return FALSE;
   }
 
-  if (mbedtls_mpi_inv_mod(BnRes, BnA, BnM) == 0) {
+  if (mbedtls_mpi_inv_mod (BnRes, BnA, BnM) == 0) {
     return TRUE;
   } else {
     return FALSE;
@@ -290,7 +290,7 @@ BigNumDiv (
     return FALSE;
   }
 
-  if (mbedtls_mpi_div_mpi(BnRes, NULL, BnA, BnB) == 0) {
+  if (mbedtls_mpi_div_mpi (BnRes, NULL, BnA, BnB) == 0) {
     return TRUE;
   } else {
     return FALSE;
@@ -323,11 +323,11 @@ BigNumMulMod (
     return FALSE;
   }
 
-  if (mbedtls_mpi_mul_mpi(BnRes, BnA, BnB) != 0) {
+  if (mbedtls_mpi_mul_mpi (BnRes, BnA, BnB) != 0) {
     return FALSE;
   }
 
-  if (mbedtls_mpi_mod_mpi(BnRes, BnRes, BnM) == 0) {
+  if (mbedtls_mpi_mod_mpi (BnRes, BnRes, BnM) == 0) {
     return TRUE;
   } else {
     return FALSE;
@@ -351,7 +351,7 @@ BigNumCmp (
   IN CONST VOID  *BnB
   )
 {
-  return mbedtls_mpi_cmp_mpi(BnA, BnB);
+  return mbedtls_mpi_cmp_mpi (BnA, BnB);
 }
 
 /**
@@ -367,7 +367,7 @@ BigNumBits (
   IN CONST VOID  *Bn
   )
 {
-  return mbedtls_mpi_bitlen(Bn);
+  return mbedtls_mpi_bitlen (Bn);
 }
 
 /**
@@ -383,7 +383,7 @@ BigNumBytes (
   IN CONST VOID  *Bn
   )
 {
-  return mbedtls_mpi_size(Bn);
+  return mbedtls_mpi_size (Bn);
 }
 
 /**
@@ -406,7 +406,7 @@ BigNumIsWord (
     return FALSE;
   }
 
-  if (mbedtls_mpi_cmp_int(Bn, Num) == 0) {
+  if (mbedtls_mpi_cmp_int (Bn, Num) == 0) {
     return TRUE;
   } else {
     return FALSE;
@@ -427,9 +427,9 @@ BigNumIsOdd (
   IN CONST VOID  *Bn
   )
 {
-  mbedtls_mpi X;
-  mbedtls_mpi TemBn;
-  BOOLEAN Result;
+  mbedtls_mpi  X;
+  mbedtls_mpi  TemBn;
+  BOOLEAN      Result;
 
   //
   // Check input parameters.
@@ -437,37 +437,38 @@ BigNumIsOdd (
   if ((Bn == NULL) ||
       (((mbedtls_mpi *)Bn)->n == 0) || (((mbedtls_mpi *)Bn)->n > UINT_MAX) ||
       (((mbedtls_mpi *)Bn)->p == NULL) ||
-      ((((mbedtls_mpi *)Bn)->s != 1) && (((mbedtls_mpi *)Bn)->s != -1))) {
+      ((((mbedtls_mpi *)Bn)->s != 1) && (((mbedtls_mpi *)Bn)->s != -1)))
+  {
     return FALSE;
   }
 
-  mbedtls_mpi_init(&X);
-  mbedtls_mpi_init(&TemBn);
+  mbedtls_mpi_init (&X);
+  mbedtls_mpi_init (&TemBn);
 
-  if (mbedtls_mpi_copy(&TemBn, Bn) != 0) {
+  if (mbedtls_mpi_copy (&TemBn, Bn) != 0) {
     Result =  FALSE;
     goto Done;
   }
 
-  if (mbedtls_mpi_lset(&X, 2) != 0){
+  if (mbedtls_mpi_lset (&X, 2) != 0) {
     Result =  FALSE;
     goto Done;
   }
 
-  if (mbedtls_mpi_mod_mpi(&TemBn, &TemBn, &X) != 0) {
+  if (mbedtls_mpi_mod_mpi (&TemBn, &TemBn, &X) != 0) {
     Result =  FALSE;
     goto Done;
   }
 
-  if (mbedtls_mpi_cmp_int(&TemBn, 1) == 0) {
+  if (mbedtls_mpi_cmp_int (&TemBn, 1) == 0) {
     Result =  TRUE;
   } else {
     Result =  FALSE;
   }
 
 Done:
-  mbedtls_mpi_free(&X);
-  mbedtls_mpi_free(&TemBn);
+  mbedtls_mpi_free (&X);
+  mbedtls_mpi_free (&TemBn);
   return Result;
 }
 
@@ -491,7 +492,7 @@ BigNumCopy (
     return NULL;
   }
 
-  if (mbedtls_mpi_copy(BnDst, BnSrc) != 0) {
+  if (mbedtls_mpi_copy (BnDst, BnSrc) != 0) {
     return NULL;
   }
 
@@ -510,16 +511,15 @@ BigNumValueOne (
   VOID
   )
 {
-  mbedtls_mpi *X;
+  mbedtls_mpi  *X;
 
-  X = AllocateZeroPool(sizeof(mbedtls_mpi));
+  X = AllocateZeroPool (sizeof (mbedtls_mpi));
 
- if(mbedtls_mpi_lset(X, 1) == 0 ) {
-  return X;
- } else {
-  return NULL;
- }
-
+  if (mbedtls_mpi_lset (X, 1) == 0 ) {
+    return X;
+  } else {
+    return NULL;
+  }
 }
 
 /**
@@ -542,7 +542,7 @@ BigNumRShift (
   OUT VOID       *BnRes
   )
 {
-  mbedtls_mpi TempBn;
+  mbedtls_mpi  TempBn;
 
   //
   // Check input parameters.
@@ -550,27 +550,29 @@ BigNumRShift (
   if ((Bn == NULL) || (BnRes == NULL) ||
       (((mbedtls_mpi *)Bn)->n == 0) || (((mbedtls_mpi *)Bn)->n > UINT_MAX) ||
       (((mbedtls_mpi *)Bn)->p == NULL) ||
-      ((((mbedtls_mpi *)Bn)->s != 1) && (((mbedtls_mpi *)Bn)->s != -1))) {
+      ((((mbedtls_mpi *)Bn)->s != 1) && (((mbedtls_mpi *)Bn)->s != -1)))
+  {
     return FALSE;
   }
 
-  mbedtls_mpi_init(&TempBn);
+  mbedtls_mpi_init (&TempBn);
 
-  if (mbedtls_mpi_copy(&TempBn, Bn) != 0) {
-    mbedtls_mpi_free(&TempBn);
-    return FALSE;
-  }
-  if (mbedtls_mpi_shift_r(&TempBn, N) != 0) {
-    mbedtls_mpi_free(&TempBn);
+  if (mbedtls_mpi_copy (&TempBn, Bn) != 0) {
+    mbedtls_mpi_free (&TempBn);
     return FALSE;
   }
 
-  if (mbedtls_mpi_copy(BnRes, &TempBn) != 0) {
-    mbedtls_mpi_free(&TempBn);
+  if (mbedtls_mpi_shift_r (&TempBn, N) != 0) {
+    mbedtls_mpi_free (&TempBn);
     return FALSE;
   }
 
-  mbedtls_mpi_free(&TempBn);
+  if (mbedtls_mpi_copy (BnRes, &TempBn) != 0) {
+    mbedtls_mpi_free (&TempBn);
+    return FALSE;
+  }
+
+  mbedtls_mpi_free (&TempBn);
   return TRUE;
 }
 
@@ -614,11 +616,11 @@ BigNumSqrMod (
     return FALSE;
   }
 
-  if (mbedtls_mpi_mul_mpi(BnRes, BnA, BnA) != 0) {
+  if (mbedtls_mpi_mul_mpi (BnRes, BnA, BnA) != 0) {
     return FALSE;
   }
 
-  if (mbedtls_mpi_mod_mpi(BnRes, BnRes, BnM) == 0) {
+  if (mbedtls_mpi_mod_mpi (BnRes, BnRes, BnM) == 0) {
     return TRUE;
   } else {
     return FALSE;
@@ -638,11 +640,11 @@ BigNumNewContext (
   VOID
   )
 {
-  mbedtls_mpi *X;
+  mbedtls_mpi  *X;
 
-  X = AllocateZeroPool(sizeof(mbedtls_mpi));
+  X = AllocateZeroPool (sizeof (mbedtls_mpi));
 
-  mbedtls_mpi_init(X);
+  mbedtls_mpi_init (X);
 
   return X;
 }
@@ -658,10 +660,10 @@ BigNumContextFree (
   IN VOID  *BnCtx
   )
 {
-  mbedtls_mpi_free(BnCtx);
+  mbedtls_mpi_free (BnCtx);
 
   if (BnCtx != NULL) {
-    FreePool(BnCtx);
+    FreePool (BnCtx);
   }
 }
 
@@ -685,7 +687,7 @@ BigNumSetUint (
     return FALSE;
   }
 
-  if (mbedtls_mpi_lset(Bn, Val) == 0){
+  if (mbedtls_mpi_lset (Bn, Val) == 0) {
     return TRUE;
   } else {
     return FALSE;
@@ -716,11 +718,11 @@ BigNumAddMod (
     return FALSE;
   }
 
-  if (mbedtls_mpi_add_mpi(BnRes, BnA, BnB) != 0){
+  if (mbedtls_mpi_add_mpi (BnRes, BnA, BnB) != 0) {
     return FALSE;
   }
 
-  if (mbedtls_mpi_mod_mpi(BnRes, BnRes, BnM) == 0) {
+  if (mbedtls_mpi_mod_mpi (BnRes, BnRes, BnM) == 0) {
     return TRUE;
   } else {
     return FALSE;

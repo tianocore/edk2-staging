@@ -4,7 +4,7 @@
   This file implements following APIs which provide basic capabilities for RSA:
   1) RsaPssSign
 
-Copyright (c) 2023, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2024, Intel Corporation. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
@@ -56,12 +56,12 @@ RsaPssSign (
   IN OUT  UINTN        *SigSize
   )
 {
-  INT32             Ret;
-  mbedtls_md_type_t md_alg;
-  UINT8             HashValue[SHA512_DIGEST_SIZE];
-  BOOLEAN           Status;
-  UINTN             ShaCtxSize;
-  VOID              *ShaCtx;
+  INT32              Ret;
+  mbedtls_md_type_t  md_alg;
+  UINT8              HashValue[SHA512_DIGEST_SIZE];
+  BOOLEAN            Status;
+  UINTN              ShaCtxSize;
+  VOID               *ShaCtx;
 
   if (RsaContext == NULL) {
     return FALSE;
@@ -78,74 +78,83 @@ RsaPssSign (
   ZeroMem (HashValue, DigestLen);
 
   switch (DigestLen) {
-  case SHA256_DIGEST_SIZE:
-    md_alg = MBEDTLS_MD_SHA256;
-    ShaCtxSize = Sha256GetContextSize ();
-    ShaCtx = AllocatePool (ShaCtxSize);
+    case SHA256_DIGEST_SIZE:
+      md_alg     = MBEDTLS_MD_SHA256;
+      ShaCtxSize = Sha256GetContextSize ();
+      ShaCtx     = AllocatePool (ShaCtxSize);
 
-    Status  = Sha256Init (ShaCtx);
-    if (!Status) {
-      return FALSE;
-    }
-    Status  = Sha256Update (ShaCtx, Message, MsgSize);
-    if (!Status) {
-      FreePool (ShaCtx);
-      return FALSE;
-    }
-    Status  = Sha256Final (ShaCtx, HashValue);
-    if (!Status) {
-      FreePool (ShaCtx);
-      return FALSE;
-    }
-    FreePool (ShaCtx);
-    break;
+      Status = Sha256Init (ShaCtx);
+      if (!Status) {
+        return FALSE;
+      }
 
-  case SHA384_DIGEST_SIZE:
-    md_alg = MBEDTLS_MD_SHA384;
-    ShaCtxSize = Sha384GetContextSize ();
-    ShaCtx = AllocatePool (ShaCtxSize);
+      Status = Sha256Update (ShaCtx, Message, MsgSize);
+      if (!Status) {
+        FreePool (ShaCtx);
+        return FALSE;
+      }
 
-    Status  = Sha384Init (ShaCtx);
-    if (!Status) {
-      return FALSE;
-    }
-    Status  = Sha384Update (ShaCtx, Message, MsgSize);
-    if (!Status) {
-      FreePool (ShaCtx);
-      return FALSE;
-    }
-    Status  = Sha384Final (ShaCtx, HashValue);
-    if (!Status) {
-      FreePool (ShaCtx);
-      return FALSE;
-    }
-    FreePool (ShaCtx);
-    break;
+      Status = Sha256Final (ShaCtx, HashValue);
+      if (!Status) {
+        FreePool (ShaCtx);
+        return FALSE;
+      }
 
-  case SHA512_DIGEST_SIZE:
-    md_alg = MBEDTLS_MD_SHA512;
-    ShaCtxSize = Sha512GetContextSize ();
-    ShaCtx = AllocatePool (ShaCtxSize);
-
-    Status  = Sha512Init (ShaCtx);
-    if (!Status) {
-      return FALSE;
-    }
-    Status  = Sha512Update (ShaCtx, Message, MsgSize);
-    if (!Status) {
       FreePool (ShaCtx);
-      return FALSE;
-    }
-    Status  = Sha512Final (ShaCtx, HashValue);
-    if (!Status) {
-      FreePool (ShaCtx);
-      return FALSE;
-    }
-    FreePool (ShaCtx);
-    break;
+      break;
 
-  default:
-    return FALSE;
+    case SHA384_DIGEST_SIZE:
+      md_alg     = MBEDTLS_MD_SHA384;
+      ShaCtxSize = Sha384GetContextSize ();
+      ShaCtx     = AllocatePool (ShaCtxSize);
+
+      Status = Sha384Init (ShaCtx);
+      if (!Status) {
+        return FALSE;
+      }
+
+      Status = Sha384Update (ShaCtx, Message, MsgSize);
+      if (!Status) {
+        FreePool (ShaCtx);
+        return FALSE;
+      }
+
+      Status = Sha384Final (ShaCtx, HashValue);
+      if (!Status) {
+        FreePool (ShaCtx);
+        return FALSE;
+      }
+
+      FreePool (ShaCtx);
+      break;
+
+    case SHA512_DIGEST_SIZE:
+      md_alg     = MBEDTLS_MD_SHA512;
+      ShaCtxSize = Sha512GetContextSize ();
+      ShaCtx     = AllocatePool (ShaCtxSize);
+
+      Status = Sha512Init (ShaCtx);
+      if (!Status) {
+        return FALSE;
+      }
+
+      Status = Sha512Update (ShaCtx, Message, MsgSize);
+      if (!Status) {
+        FreePool (ShaCtx);
+        return FALSE;
+      }
+
+      Status = Sha512Final (ShaCtx, HashValue);
+      if (!Status) {
+        FreePool (ShaCtx);
+        return FALSE;
+      }
+
+      FreePool (ShaCtx);
+      break;
+
+    default:
+      return FALSE;
   }
 
   if (Signature == NULL) {
@@ -159,18 +168,18 @@ RsaPssSign (
   mbedtls_rsa_set_padding (RsaContext, MBEDTLS_RSA_PKCS_V21, md_alg);
 
   Ret = mbedtls_rsa_rsassa_pss_sign (
-          RsaContext,
-          myrand,
-          NULL,
-          md_alg,
-          (UINT32)DigestLen,
-          HashValue,
-          Signature
-          );
+                                     RsaContext,
+                                     myrand,
+                                     NULL,
+                                     md_alg,
+                                     (UINT32)DigestLen,
+                                     HashValue,
+                                     Signature
+                                     );
   if (Ret != 0) {
     return FALSE;
   }
 
-  *SigSize = ((mbedtls_rsa_context*)RsaContext)->len;
+  *SigSize = ((mbedtls_rsa_context *)RsaContext)->len;
   return TRUE;
 }

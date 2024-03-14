@@ -4,7 +4,7 @@
   RFC 5116 - An Interface and Algorithms for Authenticated Encryption
   NIST SP800-38d - Cipher Modes of Operation: Galois / Counter Mode(GCM) and GMAC
 
-Copyright (c) 2023, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2024, Intel Corporation. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
@@ -53,29 +53,34 @@ AeadAesGcmEncrypt (
   OUT  UINTN        *DataOutSize
   )
 {
-  mbedtls_gcm_context ctx;
-  INT32               Ret;
+  mbedtls_gcm_context  ctx;
+  INT32                Ret;
 
   if (DataInSize > INT_MAX) {
     return FALSE;
   }
+
   if (ADataSize > INT_MAX) {
     return FALSE;
   }
+
   if (IvSize != 12) {
     return FALSE;
   }
+
   switch (KeySize) {
-  case 16:
-  case 24:
-  case 32:
-    break;
-  default:
-    return FALSE;
+    case 16:
+    case 24:
+    case 32:
+      break;
+    default:
+      return FALSE;
   }
+
   if ((TagSize != 12) && (TagSize != 13) && (TagSize != 14) && (TagSize != 15) && (TagSize != 16)) {
     return FALSE;
   }
+
   if (DataOutSize != NULL) {
     if ((*DataOutSize > INT_MAX) || (*DataOutSize < DataInSize)) {
       return FALSE;
@@ -89,13 +94,24 @@ AeadAesGcmEncrypt (
     return FALSE;
   }
 
-  Ret = mbedtls_gcm_crypt_and_tag (&ctx, MBEDTLS_GCM_ENCRYPT, (UINT32)DataInSize,
-                                   Iv, (UINT32)IvSize, AData, (UINT32)ADataSize, DataIn, DataOut,
-                                   TagSize, TagOut);
+  Ret = mbedtls_gcm_crypt_and_tag (
+                                   &ctx,
+                                   MBEDTLS_GCM_ENCRYPT,
+                                   (UINT32)DataInSize,
+                                   Iv,
+                                   (UINT32)IvSize,
+                                   AData,
+                                   (UINT32)ADataSize,
+                                   DataIn,
+                                   DataOut,
+                                   TagSize,
+                                   TagOut
+                                   );
   mbedtls_gcm_free (&ctx);
   if (Ret != 0) {
     return FALSE;
   }
+
   if (DataOutSize != NULL) {
     *DataOutSize = DataInSize;
   }
@@ -105,7 +121,7 @@ AeadAesGcmEncrypt (
 
 /**
   Performs AEAD AES-GCM authenticated decryption on a data buffer and additional authenticated data (AAD).
-  
+
   IvSize must be 12, otherwise FALSE is returned.
   KeySize must be 16, 24 or 32, otherwise FALSE is returned.
   TagSize must be 12, 13, 14, 15, 16, otherwise FALSE is returned.
@@ -145,29 +161,34 @@ AeadAesGcmDecrypt (
   OUT  UINTN        *DataOutSize
   )
 {
-  mbedtls_gcm_context ctx;
-  INT32               Ret;
+  mbedtls_gcm_context  ctx;
+  INT32                Ret;
 
   if (DataInSize > INT_MAX) {
     return FALSE;
   }
+
   if (ADataSize > INT_MAX) {
     return FALSE;
   }
+
   if (IvSize != 12) {
     return FALSE;
   }
+
   switch (KeySize) {
-  case 16:
-  case 24:
-  case 32:
-    break;
-  default:
-    return FALSE;
+    case 16:
+    case 24:
+    case 32:
+      break;
+    default:
+      return FALSE;
   }
+
   if ((TagSize != 12) && (TagSize != 13) && (TagSize != 14) && (TagSize != 15) && (TagSize != 16)) {
     return FALSE;
   }
+
   if (DataOutSize != NULL) {
     if ((*DataOutSize > INT_MAX) || (*DataOutSize < DataInSize)) {
       return FALSE;
@@ -181,18 +202,26 @@ AeadAesGcmDecrypt (
     return FALSE;
   }
 
-  Ret = mbedtls_gcm_auth_decrypt (&ctx, (UINT32)DataInSize,
-                                  Iv, (UINT32)IvSize, AData, (UINT32)ADataSize,
-                                  Tag, (UINT32)TagSize, DataIn, DataOut);
+  Ret = mbedtls_gcm_auth_decrypt (
+                                  &ctx,
+                                  (UINT32)DataInSize,
+                                  Iv,
+                                  (UINT32)IvSize,
+                                  AData,
+                                  (UINT32)ADataSize,
+                                  Tag,
+                                  (UINT32)TagSize,
+                                  DataIn,
+                                  DataOut
+                                  );
   mbedtls_gcm_free (&ctx);
   if (Ret != 0) {
     return FALSE;
   }
+
   if (DataOutSize != NULL) {
     *DataOutSize = DataInSize;
   }
 
   return TRUE;
 }
-
-
