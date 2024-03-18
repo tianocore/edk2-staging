@@ -37,6 +37,7 @@
   Hash/CryptMd5.c
   Hash/CryptSha1.c
   Hash/CryptXkcp.c
+  Hash/CryptParallelHashNull.c
   Hmac/CryptHmac.c
   Kdf/CryptHkdf.c
   Pem/CryptPem.c
