@@ -14,7 +14,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <mbedtls/ecdh.h>
 #include <mbedtls/ecdsa.h>
 #include <mbedtls/bignum.h>
-#include <library/bignum_core.h>
+#include <bignum_core.h>
 
 // =====================================================================================
 //    Basic Elliptic Curve Primitives
