@@ -19,7 +19,7 @@
   INF_VERSION                    = 0x00010005
   BASE_NAME                      = SmmCryptLib
   MODULE_UNI_FILE                = SmmCryptLib.uni
-  FILE_GUID                      = 028080a3-8958-4a62-a1a8-0fa1da162007
+  FILE_GUID                      = CF104633-9901-4504-AD7A-91690926A253
   MODULE_TYPE                    = DXE_SMM_DRIVER
   VERSION_STRING                 = 1.0
   PI_SPECIFICATION_VERSION       = 0x0001000A

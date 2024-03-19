@@ -375,10 +375,11 @@ X509GetVersion (
 BOOLEAN
 EFIAPI
 X509GetSerialNumber (
-  IN      CONST UINT8 *Cert,
-  IN      UINTN CertSize,
-  OUT     UINT8 *SerialNumber, OPTIONAL
-  IN OUT  UINTN         *SerialNumberSize
+  IN      CONST UINT8  *Cert,
+  IN      UINTN        CertSize,
+  OUT     UINT8        *SerialNumber,
+  OPTIONAL
+  IN OUT  UINTN        *SerialNumberSize
   )
 {
   ASSERT (FALSE);
@@ -438,10 +439,11 @@ X509GetIssuerName (
 BOOLEAN
 EFIAPI
 X509GetSignatureAlgorithm (
-  IN CONST UINT8 *Cert,
-  IN       UINTN CertSize,
-  OUT   UINT8 *Oid, OPTIONAL
-  IN OUT   UINTN       *OidSize
+  IN CONST UINT8  *Cert,
+  IN       UINTN  CertSize,
+  OUT   UINT8     *Oid,
+  OPTIONAL
+  IN OUT   UINTN  *OidSize
   )
 {
   ASSERT (FALSE);

@@ -42,12 +42,13 @@ RsaPssVerify (
   IN  UINT16       SaltLen
   )
 {
-  INT32             Ret;
-  mbedtls_md_type_t md_alg;
-  UINT8             HashValue[SHA512_DIGEST_SIZE];
-  BOOLEAN           Status;
-  UINTN             ShaCtxSize;
-  VOID              *ShaCtx;
+  INT32                Ret;
+  mbedtls_md_type_t    md_alg;
+  UINT8                HashValue[SHA512_DIGEST_SIZE];
+  BOOLEAN              Status;
+  UINTN                ShaCtxSize;
+  VOID                 *ShaCtx;
+  mbedtls_rsa_context  *RsaKey;
 
   if (RsaContext == NULL) {
     return FALSE;
@@ -65,76 +66,94 @@ RsaPssVerify (
     return FALSE;
   }
 
+  RsaKey = (mbedtls_rsa_context *)RsaContext;
+  if (mbedtls_rsa_complete (RsaKey) != 0) {
+    return FALSE;
+  }
+
   ZeroMem (HashValue, DigestLen);
 
   switch (DigestLen) {
-  case SHA256_DIGEST_SIZE:
-    md_alg = MBEDTLS_MD_SHA256;
-    ShaCtxSize = Sha256GetContextSize ();
-    ShaCtx = AllocatePool (ShaCtxSize);
+    case SHA256_DIGEST_SIZE:
+      md_alg     = MBEDTLS_MD_SHA256;
+      ShaCtxSize = Sha256GetContextSize ();
+      ShaCtx     = AllocateZeroPool (ShaCtxSize);
 
-    Status  = Sha256Init (ShaCtx);
-    if (!Status) {
-      return FALSE;
-    }
-    Status  = Sha256Update (ShaCtx, Message, MsgSize);
-    if (!Status) {
-      FreePool (ShaCtx);
-      return FALSE;
-    }
-    Status  = Sha256Final (ShaCtx, HashValue);
-    if (!Status) {
-      FreePool (ShaCtx);
-      return FALSE;
-    }
-    FreePool (ShaCtx);
-    break;
+      Status = Sha256Init (ShaCtx);
+      if (!Status) {
+        return FALSE;
+      }
 
-  case SHA384_DIGEST_SIZE:
-    md_alg = MBEDTLS_MD_SHA384;
-    ShaCtxSize = Sha384GetContextSize ();
-    ShaCtx = AllocatePool (ShaCtxSize);
+      Status = Sha256Update (ShaCtx, Message, MsgSize);
+      if (!Status) {
+        FreePool (ShaCtx);
+        return FALSE;
+      }
 
-    Status  = Sha384Init (ShaCtx);
-    if (!Status) {
-      return FALSE;
-    }
-    Status  = Sha384Update (ShaCtx, Message, MsgSize);
-    if (!Status) {
-      FreePool (ShaCtx);
-      return FALSE;
-    }
-    Status  = Sha384Final (ShaCtx, HashValue);
-    if (!Status) {
-      FreePool (ShaCtx);
-      return FALSE;
-    }
-    FreePool (ShaCtx);
-    break;
+      Status = Sha256Final (ShaCtx, HashValue);
+      if (!Status) {
+        FreePool (ShaCtx);
+        return FALSE;
+      }
 
-  case SHA512_DIGEST_SIZE:
-    md_alg = MBEDTLS_MD_SHA512;
-    ShaCtxSize = Sha512GetContextSize ();
-    ShaCtx = AllocatePool (ShaCtxSize);
-
-    Status  = Sha512Init (ShaCtx);
-    if (!Status) {
-      return FALSE;
-    }
-    Status  = Sha512Update (ShaCtx, Message, MsgSize);
-    if (!Status) {
       FreePool (ShaCtx);
-      return FALSE;
-    }
-    Status  = Sha512Final (ShaCtx, HashValue);
-    if (!Status) {
-      FreePool (ShaCtx);
-      return FALSE;
-    }
-    FreePool (ShaCtx);
-    break;
+      break;
 
-  default:
+    case SHA384_DIGEST_SIZE:
+      md_alg     = MBEDTLS_MD_SHA384;
+      ShaCtxSize = Sha384GetContextSize ();
+      ShaCtx     = AllocateZeroPool (ShaCtxSize);
+
+      Status = Sha384Init (ShaCtx);
+      if (!Status) {
+        return FALSE;
+      }
+
+      Status = Sha384Update (ShaCtx, Message, MsgSize);
+      if (!Status) {
+        FreePool (ShaCtx);
+        return FALSE;
+      }
+
+      Status = Sha384Final (ShaCtx, HashValue);
+      if (!Status) {
+        FreePool (ShaCtx);
+        return FALSE;
+      }
+
+      FreePool (ShaCtx);
+      break;
+
+    case SHA512_DIGEST_SIZE:
+      md_alg     = MBEDTLS_MD_SHA512;
+      ShaCtxSize = Sha512GetContextSize ();
+      ShaCtx     = AllocateZeroPool (ShaCtxSize);
+
+      Status = Sha512Init (ShaCtx);
+      if (!Status) {
+        return FALSE;
+      }
+
+      Status = Sha512Update (ShaCtx, Message, MsgSize);
+      if (!Status) {
+        FreePool (ShaCtx);
+        return FALSE;
+      }
+
+      Status = Sha512Final (ShaCtx, HashValue);
+      if (!Status) {
+        FreePool (ShaCtx);
+        return FALSE;
+      }
+
+      FreePool (ShaCtx);
+      break;
+
+    default:
+      return FALSE;
+  }
+
+  if (mbedtls_rsa_get_len (RsaContext) != SigSize) {
     return FALSE;
   }
 
@@ -150,5 +169,6 @@ RsaPssVerify (
   if (Ret != 0) {
     return FALSE;
   }
+
   return TRUE;
 }

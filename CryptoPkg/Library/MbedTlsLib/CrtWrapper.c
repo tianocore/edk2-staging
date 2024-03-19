@@ -15,36 +15,39 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 #include <Library/MemoryAllocationLib.h>
 
-int my_snprintf(char *str, size_t size, const char *format, ...)
+int
+my_snprintf (
+  char        *str,
+  size_t      size,
+  const char  *format,
+  ...
+  )
 {
-  return 0;
-}
-
-/*work around to support OpenSSL dummy API*/
-int EC_KEY_set_public_key(void *key, const void *pub)
-{
-  ASSERT (FALSE);
   return 0;
 }
 
 //
 // Extra header to record the memory buffer size from malloc routine.
 //
-#define CRYPTMEM_HEAD_SIGNATURE    SIGNATURE_32('c','m','h','d')
+#define CRYPTMEM_HEAD_SIGNATURE  SIGNATURE_32('c','m','h','d')
 typedef struct {
   UINT32    Signature;
   UINT32    Reserved;
   UINTN     Size;
 } CRYPTMEM_HEAD;
 
-#define CRYPTMEM_OVERHEAD      sizeof(CRYPTMEM_HEAD)
+#define CRYPTMEM_OVERHEAD  sizeof(CRYPTMEM_HEAD)
 
 //
 // -- Memory-Allocation Routines --
 //
 
 /* Allocates memory blocks */
-void *mbedtls_calloc (size_t num, size_t size)
+void *
+mbedtls_calloc (
+  size_t  num,
+  size_t  size
+  )
 {
   CRYPTMEM_HEAD  *PoolHdr;
   UINTN          NewSize;
@@ -55,7 +58,7 @@ void *mbedtls_calloc (size_t num, size_t size)
   //
   NewSize = (UINTN)(size * num) + CRYPTMEM_OVERHEAD;
 
-  Data  = AllocateZeroPool (NewSize);
+  Data = AllocateZeroPool (NewSize);
   if (Data != NULL) {
     PoolHdr = (CRYPTMEM_HEAD *)Data;
     //
@@ -74,7 +77,10 @@ void *mbedtls_calloc (size_t num, size_t size)
 }
 
 /* De-allocates or frees a memory block */
-void mbedtls_free (void *ptr)
+void
+mbedtls_free (
+  void  *ptr
+  )
 {
   CRYPTMEM_HEAD  *PoolHdr;
 

@@ -22,7 +22,7 @@ Sha256GetContextSize (
   VOID
   )
 {
-  return (UINTN) (sizeof (mbedtls_sha256_context));
+  return (UINTN)(sizeof (mbedtls_sha256_context));
 }
 
 /**
@@ -43,7 +43,7 @@ Sha256Init (
   OUT  VOID  *Sha256Context
   )
 {
-  INT32 Ret;
+  INT32  Ret;
 
   if (Sha256Context == NULL) {
     return FALSE;
@@ -55,6 +55,7 @@ Sha256Init (
   if (Ret != 0) {
     return FALSE;
   }
+
   return TRUE;
 }
 
@@ -78,7 +79,7 @@ Sha256Duplicate (
   OUT  VOID        *NewSha256Context
   )
 {
-  if (Sha256Context == NULL || NewSha256Context == NULL) {
+  if ((Sha256Context == NULL) || (NewSha256Context == NULL)) {
     return FALSE;
   }
 
@@ -113,13 +114,13 @@ Sha256Update (
   IN      UINTN       DataSize
   )
 {
-  INT32 Ret;
+  INT32  Ret;
 
   if (Sha256Context == NULL) {
     return FALSE;
   }
 
-  if (Data == NULL && DataSize != 0) {
+  if ((Data == NULL) && (DataSize != 0)) {
     return FALSE;
   }
   if (DataSize > INT_MAX) {
@@ -130,6 +131,7 @@ Sha256Update (
   if (Ret != 0) {
     return FALSE;
   }
+
   return TRUE;
 }
 
@@ -160,9 +162,9 @@ Sha256Final (
   OUT     UINT8  *HashValue
   )
 {
-  INT32 Ret;
+  INT32  Ret;
 
-  if (Sha256Context == NULL || HashValue == NULL) {
+  if ((Sha256Context == NULL) || (HashValue == NULL)) {
     return FALSE;
   }
 
@@ -171,6 +173,7 @@ Sha256Final (
   if (Ret != 0) {
     return FALSE;
   }
+
   return TRUE;
 }
 
@@ -200,21 +203,23 @@ Sha256HashAll (
   OUT  UINT8       *HashValue
   )
 {
-  INT32 Ret;
+  INT32  Ret;
 
   if (HashValue == NULL) {
     return FALSE;
   }
-  if (Data == NULL && DataSize != 0) {
+
+  if ((Data == NULL) && (DataSize != 0)) {
     return FALSE;
   }
   if (DataSize > INT_MAX) {
     return FALSE;
   }
 
-  Ret= mbedtls_sha256_ret (Data, DataSize, HashValue, FALSE);
+  Ret = mbedtls_sha256_ret (Data, DataSize, HashValue, FALSE);
   if (Ret != 0) {
     return FALSE;
   }
+
   return TRUE;
 }

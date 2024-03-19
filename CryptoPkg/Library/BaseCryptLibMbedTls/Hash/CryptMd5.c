@@ -27,7 +27,7 @@ Md5GetContextSize (
   //
   // Retrieves the MD5 Context Size
   //
-  return (UINTN) (sizeof (mbedtls_md5_context));
+  return (UINTN)(sizeof (mbedtls_md5_context));
 }
 
 /**
@@ -48,7 +48,7 @@ Md5Init (
   OUT  VOID  *Md5Context
   )
 {
-  INT32 Ret;
+  INT32  Ret;
 
   if (Md5Context == NULL) {
     return FALSE;
@@ -60,6 +60,7 @@ Md5Init (
   if (Ret != 0) {
     return FALSE;
   }
+
   return TRUE;
 }
 
@@ -83,7 +84,7 @@ Md5Duplicate (
   OUT  VOID        *NewMd5Context
   )
 {
-  if (Md5Context == NULL || NewMd5Context == NULL) {
+  if ((Md5Context == NULL) || (NewMd5Context == NULL)) {
     return FALSE;
   }
 
@@ -118,13 +119,13 @@ Md5Update (
   IN      UINTN       DataSize
   )
 {
-  INT32 Ret;
+  INT32  Ret;
 
   if (Md5Context == NULL) {
     return FALSE;
   }
 
-  if (Data == NULL && DataSize != 0) {
+  if ((Data == NULL) && (DataSize != 0)) {
     return FALSE;
   }
   if (DataSize > INT_MAX) {
@@ -135,6 +136,7 @@ Md5Update (
   if (Ret != 0) {
     return FALSE;
   }
+
   return TRUE;
 }
 
@@ -165,9 +167,9 @@ Md5Final (
   OUT     UINT8  *HashValue
   )
 {
-  INT32 Ret;
+  INT32  Ret;
 
-  if (Md5Context == NULL || HashValue == NULL) {
+  if ((Md5Context == NULL) || (HashValue == NULL)) {
     return FALSE;
   }
 
@@ -176,6 +178,7 @@ Md5Final (
   if (Ret != 0) {
     return FALSE;
   }
+
   return TRUE;
 }
 
@@ -205,22 +208,24 @@ Md5HashAll (
   OUT  UINT8       *HashValue
   )
 {
-  INT32 Ret;
+  INT32  Ret;
 
   if (HashValue == NULL) {
     return FALSE;
   }
-  if (Data == NULL && DataSize != 0) {
+
+  if ((Data == NULL) && (DataSize != 0)) {
     return FALSE;
   }
   if (DataSize > INT_MAX) {
     return FALSE;
   }
 
-  Ret= mbedtls_md5_ret (Data, DataSize, HashValue);
+  Ret = mbedtls_md5_ret (Data, DataSize, HashValue);
   if (Ret != 0) {
     return FALSE;
   }
+
   return TRUE;
 }
 

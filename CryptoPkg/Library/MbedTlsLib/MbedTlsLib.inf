@@ -3,7 +3,7 @@
 #
 #  Copyright (c) 2023, Intel Corporation. All rights reserved.<BR>
 #  SPDX-License-Identifier: BSD-2-Clause-Patent
-#  
+#
 ##
 
 [Defines]
@@ -104,7 +104,7 @@
   BaseMemoryLib
   DebugLib
   MemoryAllocationLib
-  
+
 [BuildOptions]
   #
   # Disables the following Visual Studio compiler warnings brought by Mbedtls source,
@@ -118,7 +118,7 @@
   MSFT:*_*_X64_CC_FLAGS   =  /DEFI32 /wd4244 /wd4132 /wd4245 /wd4310 /wd4204
 
   #
-  # Disable following Visual Studio 2015 compiler warnings brought by openssl source,
+  # Disable following Visual Studio 2015 compiler warnings brought by mbedtls source,
   # so we do not break the build with /WX option:
   #   C4718: recursive call has no side effects, deleting
   #
@@ -129,7 +129,7 @@
   INTEL:*_*_X64_CC_FLAGS   = -U_WIN32 -U_WIN64  /w
 
   #
-  # Suppress the following build warnings in openssl so we don't break the build with -Werror
+  # Suppress the following build warnings in mbedtls so we don't break the build with -Werror
   #   -Werror=maybe-uninitialized: there exist some other paths for which the variable is not initialized.
   #   -Werror=format: Check calls to printf and scanf, etc., to make sure that the arguments supplied have
   #                   types appropriate to the format string specified.
@@ -145,7 +145,7 @@
   GCC:*_CLANG38_*_CC_FLAGS = -std=c99 -Wno-error=uninitialized
   GCC:*_CLANGPDB_*_CC_FLAGS = -std=c99 -Wno-error=uninitialized -Wno-error=incompatible-pointer-types -Wno-error=pointer-sign -Wno-error=implicit-function-declaration -Wno-error=ignored-pragma-optimize
 
-  # suppress the following warnings in openssl so we don't break the build with warnings-as-errors:
+  # suppress the following warnings in mbedtls so we don't break the build with warnings-as-errors:
   # 1295: Deprecated declaration <entity> - give arg types
   #  550: <entity> was set but never used
   # 1293: assignment in condition
@@ -162,8 +162,6 @@
   #  546: transfer of control bypasses initialization - may be emitted inappropriately if the uninitialized
   #       variable is never referenced after the jump
   #    1: ignore "#1-D: last line of file ends without a newline"
-  # 3017: <entity> may be used before being set (NOTE: This was fixed in OpenSSL 1.1 HEAD with
-  #       commit d9b8b89bec4480de3a10bdaf9425db371c19145b, and can be dropped then.)
   XCODE:*_*_IA32_CC_FLAGS   = -mmmx -msse -U_WIN32 -U_WIN64   -w -std=c99 -Wno-error=uninitialized
   XCODE:*_*_X64_CC_FLAGS    = -mmmx -msse -U_WIN32 -U_WIN64   -w -std=c99 -Wno-error=uninitialized
 
@@ -173,7 +171,7 @@
   # libraries, given that they may be included into such modules.
   # This library, even though of the BASE type, is never used in such cases, and
   # avoiding the SIMD register file (which is shared with the FPU) prevents the
-  # compiler from successfully building some of the OpenSSL source files that
+  # compiler from successfully building some of the mbedtls source files that
   # use floating point types, so clear the flags here.
   #
   GCC:*_*_AARCH64_CC_XIPFLAGS ==

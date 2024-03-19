@@ -1085,6 +1085,9 @@ Pkcs7GetSigners (
   while (SignerInfo != NULL) {
     // Find signers cert
     Cert = MbedTlsPkcs7FindSignerCert (SignerInfo, &(Pkcs7.SignedData.Certificates));
+    if (Cert == NULL) {
+      goto _Exit;
+    }
 
     CertSize   = Cert->raw.len;
     OldSize    = BufferSize;

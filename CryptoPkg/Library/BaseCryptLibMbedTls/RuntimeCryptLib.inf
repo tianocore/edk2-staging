@@ -20,7 +20,7 @@
   INF_VERSION                    = 0x00010005
   BASE_NAME                      = RuntimeCryptLib
   MODULE_UNI_FILE                = RuntimeCryptLib.uni
-  FILE_GUID                      = 78189cc0-727d-46a4-84ea-f7dd860de64a
+  FILE_GUID                      = D263B580-D9FC-4DC4-B445-578AAEFF530E
   MODULE_TYPE                    = DXE_RUNTIME_DRIVER
   VERSION_STRING                 = 1.0
   LIBRARY_CLASS                  = BaseCryptLib|DXE_RUNTIME_DRIVER

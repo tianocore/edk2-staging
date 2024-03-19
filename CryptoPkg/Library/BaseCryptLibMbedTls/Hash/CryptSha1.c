@@ -27,7 +27,7 @@ Sha1GetContextSize (
   //
   // Retrieves MbedTLS SHA Context Size
   //
-  return (UINTN) (sizeof (mbedtls_sha1_context));
+  return (UINTN)(sizeof (mbedtls_sha1_context));
 }
 
 /**
@@ -48,7 +48,7 @@ Sha1Init (
   OUT  VOID  *Sha1Context
   )
 {
-  INT32 Ret;
+  INT32  Ret;
 
   if (Sha1Context == NULL) {
     return FALSE;
@@ -60,6 +60,7 @@ Sha1Init (
   if (Ret != 0) {
     return FALSE;
   }
+
   return TRUE;
 }
 
@@ -83,7 +84,7 @@ Sha1Duplicate (
   OUT  VOID        *NewSha1Context
   )
 {
-  if (Sha1Context == NULL || NewSha1Context == NULL) {
+  if ((Sha1Context == NULL) || (NewSha1Context == NULL)) {
     return FALSE;
   }
 
@@ -118,13 +119,13 @@ Sha1Update (
   IN      UINTN       DataSize
   )
 {
-  INT32 Ret;
+  INT32  Ret;
 
   if (Sha1Context == NULL) {
     return FALSE;
   }
 
-  if (Data == NULL && DataSize != 0) {
+  if ((Data == NULL) && (DataSize != 0)) {
     return FALSE;
   }
   if (DataSize > INT_MAX) {
@@ -135,6 +136,7 @@ Sha1Update (
   if (Ret != 0) {
     return FALSE;
   }
+
   return TRUE;
 }
 
@@ -165,9 +167,9 @@ Sha1Final (
   OUT     UINT8  *HashValue
   )
 {
-  INT32 Ret;
+  INT32  Ret;
 
-  if (Sha1Context == NULL || HashValue == NULL) {
+  if ((Sha1Context == NULL) || (HashValue == NULL)) {
     return FALSE;
   }
 
@@ -176,6 +178,7 @@ Sha1Final (
   if (Ret != 0) {
     return FALSE;
   }
+
   return TRUE;
 }
 
@@ -205,22 +208,24 @@ Sha1HashAll (
   OUT  UINT8       *HashValue
   )
 {
-  INT32 Ret;
+  INT32  Ret;
 
   if (HashValue == NULL) {
     return FALSE;
   }
-  if (Data == NULL && DataSize != 0) {
+
+  if ((Data == NULL) && (DataSize != 0)) {
     return FALSE;
   }
   if (DataSize > INT_MAX) {
     return FALSE;
   }
 
-  Ret= mbedtls_sha1_ret (Data, DataSize, HashValue);
+  Ret = mbedtls_sha1_ret (Data, DataSize, HashValue);
   if (Ret != 0) {
     return FALSE;
   }
+
   return TRUE;
 }
 

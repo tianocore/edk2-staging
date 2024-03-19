@@ -22,7 +22,7 @@ Sha384GetContextSize (
   VOID
   )
 {
-  return (UINTN) (sizeof (mbedtls_sha512_context));
+  return (UINTN)(sizeof (mbedtls_sha512_context));
 }
 
 /**
@@ -43,7 +43,7 @@ Sha384Init (
   OUT  VOID  *Sha384Context
   )
 {
-  INT32 Ret;
+  INT32  Ret;
 
   if (Sha384Context == NULL) {
     return FALSE;
@@ -55,6 +55,7 @@ Sha384Init (
   if (Ret != 0) {
     return FALSE;
   }
+
   return TRUE;
 }
 
@@ -80,7 +81,7 @@ Sha384Duplicate (
   OUT  VOID        *NewSha384Context
   )
 {
-  if (Sha384Context == NULL || NewSha384Context == NULL) {
+  if ((Sha384Context == NULL) || (NewSha384Context == NULL)) {
     return FALSE;
   }
 
@@ -115,13 +116,13 @@ Sha384Update (
   IN      UINTN       DataSize
   )
 {
-  INT32 Ret;
+  INT32  Ret;
 
   if (Sha384Context == NULL) {
     return FALSE;
   }
 
-  if (Data == NULL && DataSize != 0) {
+  if ((Data == NULL) && (DataSize != 0)) {
     return FALSE;
   }
   if (DataSize > INT_MAX) {
@@ -132,6 +133,7 @@ Sha384Update (
   if (Ret != 0) {
     return FALSE;
   }
+
   return TRUE;
 }
 
@@ -162,9 +164,9 @@ Sha384Final (
   OUT     UINT8  *HashValue
   )
 {
-  INT32 Ret;
+  INT32  Ret;
 
-  if (Sha384Context == NULL || HashValue == NULL) {
+  if ((Sha384Context == NULL) || (HashValue == NULL)) {
     return FALSE;
   }
 
@@ -173,6 +175,7 @@ Sha384Final (
   if (Ret != 0) {
     return FALSE;
   }
+
   return TRUE;
 }
 
@@ -202,22 +205,24 @@ Sha384HashAll (
   OUT  UINT8       *HashValue
   )
 {
-  INT32 Ret;
+  INT32  Ret;
 
   if (HashValue == NULL) {
     return FALSE;
   }
-  if (Data == NULL && DataSize != 0) {
+
+  if ((Data == NULL) && (DataSize != 0)) {
     return FALSE;
   }
   if (DataSize > INT_MAX) {
     return FALSE;
   }
 
-  Ret= mbedtls_sha512_ret (Data, DataSize, HashValue, TRUE);
+  Ret = mbedtls_sha512_ret (Data, DataSize, HashValue, TRUE);
   if (Ret != 0) {
     return FALSE;
   }
+
   return TRUE;
 }
 
@@ -233,7 +238,7 @@ Sha512GetContextSize (
   VOID
   )
 {
-  return (UINTN) (sizeof (mbedtls_sha512_context));
+  return (UINTN)(sizeof (mbedtls_sha512_context));
 }
 
 /**
@@ -254,7 +259,7 @@ Sha512Init (
   OUT  VOID  *Sha512Context
   )
 {
-  INT32 Ret;
+  INT32  Ret;
 
   if (Sha512Context == NULL) {
     return FALSE;
@@ -266,6 +271,7 @@ Sha512Init (
   if (Ret != 0) {
     return FALSE;
   }
+
   return TRUE;
 }
 
@@ -291,7 +297,7 @@ Sha512Duplicate (
   OUT  VOID        *NewSha512Context
   )
 {
-  if (Sha512Context == NULL || NewSha512Context == NULL) {
+  if ((Sha512Context == NULL) || (NewSha512Context == NULL)) {
     return FALSE;
   }
 
@@ -326,13 +332,13 @@ Sha512Update (
   IN      UINTN       DataSize
   )
 {
-  INT32 Ret;
+  INT32  Ret;
 
   if (Sha512Context == NULL) {
     return FALSE;
   }
 
-  if (Data == NULL && DataSize != 0) {
+  if ((Data == NULL) && (DataSize != 0)) {
     return FALSE;
   }
   if (DataSize > INT_MAX) {
@@ -343,6 +349,7 @@ Sha512Update (
   if (Ret != 0) {
     return FALSE;
   }
+
   return TRUE;
 }
 
@@ -373,9 +380,9 @@ Sha512Final (
   OUT     UINT8  *HashValue
   )
 {
-  INT32 Ret;
+  INT32  Ret;
 
-  if (Sha512Context == NULL || HashValue == NULL) {
+  if ((Sha512Context == NULL) || (HashValue == NULL)) {
     return FALSE;
   }
 
@@ -384,6 +391,7 @@ Sha512Final (
   if (Ret != 0) {
     return FALSE;
   }
+
   return TRUE;
 }
 
@@ -413,21 +421,23 @@ Sha512HashAll (
   OUT  UINT8       *HashValue
   )
 {
-  INT32 Ret;
+  INT32  Ret;
 
   if (HashValue == NULL) {
     return FALSE;
   }
-  if (Data == NULL && DataSize != 0) {
+
+  if ((Data == NULL) && (DataSize != 0)) {
     return FALSE;
   }
   if (DataSize > INT_MAX) {
     return FALSE;
   }
 
-  Ret= mbedtls_sha512_ret (Data, DataSize, HashValue, FALSE);
+  Ret = mbedtls_sha512_ret (Data, DataSize, HashValue, FALSE);
   if (Ret != 0) {
     return FALSE;
   }
+
   return TRUE;
 }

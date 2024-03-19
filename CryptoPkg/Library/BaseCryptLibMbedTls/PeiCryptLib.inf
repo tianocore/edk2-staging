@@ -22,7 +22,7 @@
   INF_VERSION                    = 0x00010005
   BASE_NAME                      = PeiCryptLib
   MODULE_UNI_FILE                = PeiCryptLib.uni
-  FILE_GUID                      = 9a2a4375-194c-4e97-9f67-547ec98d96ca
+  FILE_GUID                      = 91E0A3C3-37A7-4AEE-8689-C5B0AD2C8E63
   MODULE_TYPE                    = PEIM
   VERSION_STRING                 = 1.0
   LIBRARY_CLASS                  = BaseCryptLib|PEIM PEI_CORE

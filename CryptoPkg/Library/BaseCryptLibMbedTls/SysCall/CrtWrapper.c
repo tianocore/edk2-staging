@@ -13,18 +13,31 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Library/BaseMemoryLib.h>
 #include <stdio.h>
 
-int mbedtls_printf (char const *fmt, ...)
+/**dummy mbedtls_printf function. **/
+int
+mbedtls_printf (
+  char const  *fmt,
+  ...
+  )
 {
-  ASSERT(FALSE);
+  ASSERT (FALSE);
   return 0;
 }
 
-int mbedtls_vsnprintf(char *str, size_t size, const char *format, ...)
+/**dummy mbedtls_vsnprintf function. **/
+int
+mbedtls_vsnprintf (
+  char        *str,
+  size_t      size,
+  const char  *format,
+  ...
+  )
 {
-  ASSERT(FALSE);
+  ASSERT (FALSE);
   return 0;
 }
 
+/**strchr function. **/
 char *
 strchr (
   const char  *str,
@@ -34,6 +47,7 @@ strchr (
   return ScanMem8 (str, AsciiStrSize (str), (char)ch);
 }
 
+/**strcmp function. **/
 int
 strcmp (
   const char  *s1,
