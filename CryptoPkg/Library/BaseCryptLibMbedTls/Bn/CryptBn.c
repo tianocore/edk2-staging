@@ -47,7 +47,7 @@ BigNumFromBin (
   //
   // Check input parameters.
   //
-  if ((Buf == NULL) || (Len > UINT_MAX)) {
+  if ((Buf == NULL) || (Len > INT_MAX)) {
     return NULL;
   }
 
@@ -402,7 +402,7 @@ BigNumIsWord (
   IN UINTN       Num
   )
 {
-  if ((Bn == NULL) || (Num > UINT_MAX)) {
+  if ((Bn == NULL) || (Num > INT_MAX)) {
     return FALSE;
   }
 
@@ -435,7 +435,7 @@ BigNumIsOdd (
   // Check input parameters.
   //
   if ((Bn == NULL) ||
-      (((mbedtls_mpi *)Bn)->n == 0) || (((mbedtls_mpi *)Bn)->n > UINT_MAX) ||
+      (((mbedtls_mpi *)Bn)->n == 0) || (((mbedtls_mpi *)Bn)->n > INT_MAX) ||
       (((mbedtls_mpi *)Bn)->p == NULL) ||
       ((((mbedtls_mpi *)Bn)->s != 1) && (((mbedtls_mpi *)Bn)->s != -1)))
   {
@@ -548,7 +548,7 @@ BigNumRShift (
   // Check input parameters.
   //
   if ((Bn == NULL) || (BnRes == NULL) ||
-      (((mbedtls_mpi *)Bn)->n == 0) || (((mbedtls_mpi *)Bn)->n > UINT_MAX) ||
+      (((mbedtls_mpi *)Bn)->n == 0) || (((mbedtls_mpi *)Bn)->n > INT_MAX) ||
       (((mbedtls_mpi *)Bn)->p == NULL) ||
       ((((mbedtls_mpi *)Bn)->s != 1) && (((mbedtls_mpi *)Bn)->s != -1)))
   {
@@ -683,7 +683,7 @@ BigNumSetUint (
   IN UINTN  Val
   )
 {
-  if ((Bn == NULL) || (Val > UINT_MAX)) {
+  if ((Bn == NULL) || (Val > INT_MAX)) {
     return FALSE;
   }
 
