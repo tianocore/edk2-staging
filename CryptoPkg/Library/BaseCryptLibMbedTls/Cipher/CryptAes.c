@@ -118,7 +118,7 @@ AesCbcEncrypt (
   )
 {
   mbedtls_aes_context  *AesCtx;
-  UINT8    IvecBuffer[AES_BLOCK_SIZE];
+  UINT8                IvecBuffer[AES_BLOCK_SIZE];
 
   //
   // Check input parameters.
@@ -137,13 +137,19 @@ AesCbcEncrypt (
   //
   // Perform AES data encryption with CBC mode
   //
-  if (mbedtls_aes_crypt_cbc (AesCtx, MBEDTLS_AES_ENCRYPT,
-                             (UINT32)InputSize, IvecBuffer, Input, Output) != 0) {
+  if (mbedtls_aes_crypt_cbc (
+        AesCtx,
+        MBEDTLS_AES_ENCRYPT,
+        (UINT32)InputSize,
+        IvecBuffer,
+        Input,
+        Output
+        ) != 0)
+  {
     return FALSE;
   } else {
     return TRUE;
   }
-
 }
 
 /**
@@ -184,7 +190,7 @@ AesCbcDecrypt (
   )
 {
   mbedtls_aes_context  *AesCtx;
-  UINT8    IvecBuffer[AES_BLOCK_SIZE];
+  UINT8                IvecBuffer[AES_BLOCK_SIZE];
 
   //
   // Check input parameters.
@@ -203,8 +209,15 @@ AesCbcDecrypt (
   //
   // Perform AES data encryption with CBC mode
   //
-  if (mbedtls_aes_crypt_cbc (AesCtx + 1, MBEDTLS_AES_DECRYPT,
-                             (UINT32)InputSize, IvecBuffer, Input, Output) != 0) {
+  if (mbedtls_aes_crypt_cbc (
+        AesCtx + 1,
+        MBEDTLS_AES_DECRYPT,
+        (UINT32)InputSize,
+        IvecBuffer,
+        Input,
+        Output
+        ) != 0)
+  {
     return FALSE;
   } else {
     return TRUE;

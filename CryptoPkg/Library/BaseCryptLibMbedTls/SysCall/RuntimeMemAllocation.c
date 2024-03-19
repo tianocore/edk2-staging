@@ -268,7 +268,7 @@ RuntimeAllocateMem (
   ZeroMem (AllocPtr, AllocationSize);
 
   //
-  // Returns a void pointer to the allocated space
+  // Returns a VOID pointer to the allocated space
   //
   return AllocPtr;
 }
@@ -385,8 +385,8 @@ RuntimeCryptLibConstructor (
 // -- Memory-Allocation Routines Wrapper for UEFI-MbedTLS Library --
 //
 
-/* Allocates memory blocks */
-void *
+/** Allocates memory blocks. **/
+VOID *
 malloc (
   size_t  size
   )
@@ -394,10 +394,10 @@ malloc (
   return RuntimeAllocateMem ((UINTN)size);
 }
 
-/* Reallocate memory blocks */
-void *
+/** Reallocate memory blocks. **/
+VOID *
 realloc (
-  void    *ptr,
+  VOID    *ptr,
   size_t  size
   )
 {
@@ -446,10 +446,10 @@ realloc (
   return NewPtr;
 }
 
-/* Deallocates or frees a memory block */
-void
+/** Deallocates or frees a memory block. **/
+VOID
 free (
-  void  *ptr
+  VOID  *ptr
   )
 {
   //

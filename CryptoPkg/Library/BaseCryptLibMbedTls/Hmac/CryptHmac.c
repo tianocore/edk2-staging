@@ -24,7 +24,7 @@ HmacMdNew (
 {
   VOID  *HmacMdCtx;
 
-  HmacMdCtx = AllocateZeroPool (sizeof(mbedtls_md_context_t));
+  HmacMdCtx = AllocateZeroPool (sizeof (mbedtls_md_context_t));
   if (HmacMdCtx == NULL) {
     return NULL;
   }
@@ -67,24 +67,24 @@ HmacMdFree (
 STATIC
 BOOLEAN
 HmacMdSetKey (
-  IN   mbedtls_md_type_t MdType,
-  OUT  VOID         *HmacMdContext,
-  IN   CONST UINT8  *Key,
-  IN   UINTN        KeySize
+  IN   mbedtls_md_type_t  MdType,
+  OUT  VOID               *HmacMdContext,
+  IN   CONST UINT8        *Key,
+  IN   UINTN              KeySize
   )
 {
-  const mbedtls_md_info_t *md_info;
-  INT32                   Ret;
+  const mbedtls_md_info_t  *md_info;
+  INT32                    Ret;
 
-  if (HmacMdContext == NULL || KeySize > INT_MAX) {
+  if ((HmacMdContext == NULL) || (KeySize > INT_MAX)) {
     return FALSE;
   }
 
-  ZeroMem (HmacMdContext, sizeof(mbedtls_md_context_t));
+  ZeroMem (HmacMdContext, sizeof (mbedtls_md_context_t));
   mbedtls_md_init (HmacMdContext);
 
   md_info = mbedtls_md_info_from_type (MdType);
-  ASSERT(md_info != NULL);
+  ASSERT (md_info != NULL);
 
   Ret = mbedtls_md_setup (HmacMdContext, md_info, 1);
   if (Ret != 0) {
@@ -95,7 +95,32 @@ HmacMdSetKey (
   if (Ret != 0) {
     return FALSE;
   }
+
   return TRUE;
+}
+
+/**
+  Return block size in md_type.
+
+  @param[in]  MdType            message digest Type.
+
+  @retval blocksize in md_type.
+
+**/
+int
+HmacMdGetBlockSize (
+  mbedtls_md_type_t  MdType
+  )
+{
+  switch (MdType) {
+    case MBEDTLS_MD_SHA256:
+      return 64;
+    case MBEDTLS_MD_SHA384:
+      return 128;
+    default:
+      ASSERT (FALSE);
+      return 0;
+  }
 }
 
 /**
@@ -104,6 +129,7 @@ HmacMdSetKey (
   If HmacMdContext is NULL, then return FALSE.
   If NewHmacMdContext is NULL, then return FALSE.
 
+  @param[in]  MdType            message digest Type.
   @param[in]  HmacMdContext     Pointer to HMAC-MD context being copied.
   @param[out] NewHmacMdContext  Pointer to new HMAC-MD context.
 
@@ -114,20 +140,50 @@ HmacMdSetKey (
 STATIC
 BOOLEAN
 HmacMdDuplicate (
-  IN   CONST VOID  *HmacMdContext,
-  OUT  VOID        *NewHmacMdContext
+  IN   CONST mbedtls_md_type_t  MdType,
+  IN   CONST VOID               *HmacMdContext,
+  OUT  VOID                     *NewHmacMdContext
   )
 {
-  INT32                   Ret;
+  INT32                    Ret;
+  CONST mbedtls_md_info_t  *md_info;
+  mbedtls_md_context_t     *MdContext;
 
-  if (HmacMdContext == NULL || NewHmacMdContext == NULL) {
+  if ((HmacMdContext == NULL) || (NewHmacMdContext == NULL)) {
     return FALSE;
   }
 
-  Ret = mbedtls_md_clone (NewHmacMdContext, HmacMdContext);
+  ZeroMem (NewHmacMdContext, sizeof (mbedtls_md_context_t));
+  mbedtls_md_init (NewHmacMdContext);
+  md_info = mbedtls_md_info_from_type (MdType);
+  ASSERT (md_info != NULL);
+
+  Ret = mbedtls_md_setup (NewHmacMdContext, md_info, 1);
   if (Ret != 0) {
     return FALSE;
   }
+
+  MdContext = (mbedtls_md_context_t *)NewHmacMdContext;
+
+  Ret = mbedtls_md_clone (NewHmacMdContext, HmacMdContext);
+  if (Ret != 0) {
+    if (MdContext->md_ctx != NULL) {
+      mbedtls_free (MdContext->md_ctx);
+    }
+
+    if (MdContext->hmac_ctx != NULL) {
+      mbedtls_free (MdContext->hmac_ctx);
+    }
+
+    return FALSE;
+  }
+
+  CopyMem (
+    ((mbedtls_md_context_t *)NewHmacMdContext)->hmac_ctx,
+    ((CONST mbedtls_md_context_t *)HmacMdContext)->hmac_ctx,
+    HmacMdGetBlockSize (MdType) * 2
+    );
+
   return TRUE;
 }
 
@@ -157,15 +213,16 @@ HmacMdUpdate (
   IN      UINTN       DataSize
   )
 {
-  INT32                   Ret;
+  INT32  Ret;
 
   if (HmacMdContext == NULL) {
     return FALSE;
   }
 
-  if (Data == NULL && DataSize != 0) {
+  if ((Data == NULL) && (DataSize != 0)) {
     return FALSE;
   }
+
   if (DataSize > INT_MAX) {
     return FALSE;
   }
@@ -174,6 +231,7 @@ HmacMdUpdate (
   if (Ret != 0) {
     return FALSE;
   }
+
   return TRUE;
 }
 
@@ -204,17 +262,22 @@ HmacMdFinal (
   OUT     UINT8  *HmacValue
   )
 {
-  INT32                   Ret;
+  INT32  Ret;
 
-  if (HmacMdContext == NULL || HmacValue == NULL) {
+  if ((HmacMdContext == NULL) || (HmacValue == NULL)) {
     return FALSE;
   }
 
   Ret = mbedtls_md_hmac_finish (HmacMdContext, HmacValue);
-  mbedtls_md_free(HmacMdContext);
   if (Ret != 0) {
     return FALSE;
   }
+
+  Ret = mbedtls_md_hmac_reset (HmacMdContext);
+  if (Ret != 0) {
+    return FALSE;
+  }
+
   return TRUE;
 }
 
@@ -225,13 +288,13 @@ HmacMdFinal (
   the digest value into the specified memory.
 
   If this interface is not supported, then return FALSE.
-  
+
   @param[in]   MdType      Message Digest Type.
   @param[in]   Data        Pointer to the buffer containing the data to be digested.
   @param[in]   DataSize    Size of Data buffer in bytes.
   @param[in]   Key         Pointer to the user-supplied key.
   @param[in]   KeySize     Key size in bytes.
-  @param[out]  HashValue   Pointer to a buffer that receives the HMAC-MD digest
+  @param[out]  HmacValue   Pointer to a buffer that receives the HMAC-MD digest
                            value.
 
   @retval TRUE   HMAC-MD digest computation succeeded.
@@ -242,24 +305,25 @@ HmacMdFinal (
 STATIC
 BOOLEAN
 HmacMdAll (
-  IN   mbedtls_md_type_t MdType,
-  IN   CONST VOID   *Data,
-  IN   UINTN        DataSize,
-  IN   CONST UINT8  *Key,
-  IN   UINTN        KeySize,
-  OUT  UINT8       *HmacValue
+  IN   mbedtls_md_type_t  MdType,
+  IN   CONST VOID         *Data,
+  IN   UINTN              DataSize,
+  IN   CONST UINT8        *Key,
+  IN   UINTN              KeySize,
+  OUT  UINT8              *HmacValue
   )
 {
-  const mbedtls_md_info_t *md_info;
-  INT32                   Ret;
+  const mbedtls_md_info_t  *md_info;
+  INT32                    Ret;
 
   md_info = mbedtls_md_info_from_type (MdType);
-  ASSERT(md_info != NULL);
+  ASSERT (md_info != NULL);
 
   Ret = mbedtls_md_hmac (md_info, Key, KeySize, Data, DataSize, HmacValue);
   if (Ret != 0) {
     return FALSE;
   }
+
   return TRUE;
 }
 
@@ -339,7 +403,7 @@ HmacSha256Duplicate (
   OUT  VOID        *NewHmacSha256Context
   )
 {
-  return HmacMdDuplicate (HmacSha256Context, NewHmacSha256Context);
+  return HmacMdDuplicate (MBEDTLS_MD_SHA256, HmacSha256Context, NewHmacSha256Context);
 }
 
 /**
@@ -408,12 +472,12 @@ HmacSha256Final (
   the digest value into the specified memory.
 
   If this interface is not supported, then return FALSE.
-  
+
   @param[in]   Data        Pointer to the buffer containing the data to be digested.
   @param[in]   DataSize    Size of Data buffer in bytes.
   @param[in]   Key         Pointer to the user-supplied key.
   @param[in]   KeySize     Key size in bytes.
-  @param[out]  HashValue   Pointer to a buffer that receives the HMAC-SHA256 digest
+  @param[out]  HmacValue   Pointer to a buffer that receives the HMAC-SHA256 digest
                            value (32 bytes).
 
   @retval TRUE   HMAC-SHA256 digest computation succeeded.
@@ -428,7 +492,7 @@ HmacSha256All (
   IN   UINTN        DataSize,
   IN   CONST UINT8  *Key,
   IN   UINTN        KeySize,
-  OUT  UINT8       *HmacValue
+  OUT  UINT8        *HmacValue
   )
 {
   return HmacMdAll (MBEDTLS_MD_SHA256, Data, DataSize, Key, KeySize, HmacValue);
@@ -514,7 +578,7 @@ HmacSha384Duplicate (
   OUT  VOID        *NewHmacSha384Context
   )
 {
-  return HmacMdDuplicate (HmacSha384Context, NewHmacSha384Context);
+  return HmacMdDuplicate (MBEDTLS_MD_SHA384, HmacSha384Context, NewHmacSha384Context);
 }
 
 /**
@@ -592,7 +656,7 @@ HmacSha384Final (
   @param[in]   DataSize    Size of Data buffer in bytes.
   @param[in]   Key         Pointer to the user-supplied key.
   @param[in]   KeySize     Key size in bytes.
-  @param[out]  HashValue   Pointer to a buffer that receives the HMAC-SHA384 digest
+  @param[out]  HmacValue   Pointer to a buffer that receives the HMAC-SHA384 digest
                            value (48 bytes).
 
   @retval TRUE   HMAC-SHA384 digest computation succeeded.

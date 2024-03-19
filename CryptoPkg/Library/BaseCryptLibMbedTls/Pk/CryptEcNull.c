@@ -40,8 +40,7 @@ EcGroupInit (
   @param[out] BnPrime    Group prime number.
   @param[out] BnA        A coefficient.
   @param[out] BnB        B coefficient..
-  @param[in]  BnCtx      This paramter is not used in Mbedtls. It is only compatible for Openssl implementation.
-                         The pointer can be NULL or ohter value.
+  @param[in]  BnCtx      BN context.
 
   @retval TRUE          On success.
   @retval FALSE         Otherwise.
@@ -142,8 +141,7 @@ EcPointDeInit (
   @param[in]  EcPoint    EC point object.
   @param[out] BnX        X coordinate.
   @param[out] BnY        Y coordinate.
-  @param[in]  BnCtx      This paramter is not used in Mbedtls. It is only compatible for Openssl implementation.
-                         The pointer can be NULL or ohter value.
+  @param[in]  BnCtx      BN context, created with BigNumNewContext().
 
   @retval TRUE          On success.
   @retval FALSE         Otherwise.
@@ -169,8 +167,7 @@ EcPointGetAffineCoordinates (
   @param[in]  EcPoint    EC point object.
   @param[in]  BnX        X coordinate.
   @param[in]  BnY        Y coordinate.
-  @param[in]  BnCtx      This paramter is not used in Mbedtls. It is only compatible for Openssl implementation.
-                         The pointer can be NULL or ohter value.
+  @param[in]  BnCtx      BN context, created with BigNumNewContext().
 
   @retval TRUE          On success.
   @retval FALSE         Otherwise.
@@ -197,8 +194,7 @@ EcPointSetAffineCoordinates (
                                be properly initialized.
   @param[in]  EcPointA         EC Point.
   @param[in]  EcPointB         EC Point.
-  @param[in]  BnCtx            This paramter is not used in Mbedtls. It is only compatible for Openssl implementation.
-                               The pointer can be NULL or ohter value.
+  @param[in]  BnCtx            BN context, created with BigNumNewContext().
 
   @retval TRUE          On success.
   @retval FALSE         Otherwise.
@@ -225,8 +221,7 @@ EcPointAdd (
                                be properly initialized.
   @param[in]  EcPoint          EC Point.
   @param[in]  BnPScalar        P Scalar.
-  @param[in]  BnCtx            This paramter is not used in Mbedtls. It is only compatible for Openssl implementation.
-                               The pointer can be NULL or ohter value.
+  @param[in]  BnCtx            BN context, created with BigNumNewContext().
 
   @retval TRUE          On success.
   @retval FALSE         Otherwise.
@@ -250,8 +245,7 @@ EcPointMul (
 
   @param[in]     EcGroup   EC group object.
   @param[in,out] EcPoint   EC point to invert.
-  @param[in]  BnCtx        This paramter is not used in Mbedtls. It is only compatible for Openssl implementation.
-                           The pointer can be NULL or ohter value.
+  @param[in]     BnCtx     BN context, created with BigNumNewContext().
 
   @retval TRUE          On success.
   @retval FALSE         Otherwise.
@@ -273,8 +267,7 @@ EcPointInvert (
 
   @param[in]  EcGroup   EC group object.
   @param[in]  EcPoint   EC point to check.
-  @param[in]  BnCtx     This paramter is not used in Mbedtls. It is only compatible for Openssl implementation.
-                        The pointer can be NULL or ohter value.
+  @param[in]  BnCtx     BN context, created with BigNumNewContext().
 
   @retval TRUE          On curve.
   @retval FALSE         Otherwise.
@@ -317,8 +310,7 @@ EcPointIsAtInfinity (
   @param[in]  EcGroup   EC group object.
   @param[in]  EcPointA  EC point A.
   @param[in]  EcPointB  EC point B.
-  @param[in]  BnCtx     This paramter is not used in Mbedtls. It is only compatible for Openssl implementation.
-                        The pointer can be NULL or ohter value.
+  @param[in]  BnCtx     BN context, created with BigNumNewContext().
 
   @retval TRUE          A == B.
   @retval FALSE         Otherwise.
@@ -348,8 +340,7 @@ EcPointEqual (
   @param[in]  EcPoint    EC Point.
   @param[in]  BnX        X coordinate.
   @param[in]  YBit       0 or 1 to identify which Y value is used.
-  @param[in]  BnCtx      This paramter is not used in Mbedtls. It is only compatible for Openssl implementation.
-                         The pointer can be NULL or ohter value.
+  @param[in]  BnCtx      BN context, created with BigNumNewContext().
 
   @retval TRUE          On success.
   @retval FALSE         Otherwise.

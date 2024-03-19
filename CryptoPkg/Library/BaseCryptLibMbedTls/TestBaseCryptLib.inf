@@ -14,7 +14,7 @@
 [Defines]
   INF_VERSION                    = 0x00010005
   BASE_NAME                      = BaseCryptLib
-  FILE_GUID                      = be3bb803-91b6-4da0-bd91-a8b21c18ca5d
+  FILE_GUID                      = 9DD60CFE-9D05-41E2-8B9E-958E2A4C1913
   MODULE_TYPE                    = DXE_DRIVER
   VERSION_STRING                 = 1.0
   LIBRARY_CLASS                  = BaseCryptLib|DXE_DRIVER DXE_CORE UEFI_APPLICATION UEFI_DRIVER

@@ -6,8 +6,8 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#ifndef __INTERNAL_CRYPT_LIB_H__
-#define __INTERNAL_CRYPT_LIB_H__
+#ifndef INTERNAL_CRYPT_LIB_H_
+#define INTERNAL_CRYPT_LIB_H_
 
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>

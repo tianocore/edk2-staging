@@ -31,17 +31,18 @@ RsaNew (
   VOID
   )
 {
-  VOID *RsaContext;
+  VOID  *RsaContext;
 
-  RsaContext = AllocateZeroPool (sizeof(mbedtls_rsa_context));
+  RsaContext = AllocateZeroPool (sizeof (mbedtls_rsa_context));
   if (RsaContext == NULL) {
     return RsaContext;
   }
 
-  mbedtls_rsa_init(RsaContext);
-  if (mbedtls_rsa_set_padding(RsaContext, MBEDTLS_RSA_PKCS_V15, MBEDTLS_MD_NONE) != 0) {
+  mbedtls_rsa_init (RsaContext);
+  if (mbedtls_rsa_set_padding (RsaContext, MBEDTLS_RSA_PKCS_V15, MBEDTLS_MD_NONE) != 0) {
     return NULL;
   }
+
   return RsaContext;
 }
 
@@ -94,90 +95,90 @@ RsaSetKey (
   IN      UINTN        BnSize
   )
 {
-  mbedtls_rsa_context *RsaKey;
-  INT32               Ret;
-  mbedtls_mpi         Value;
+  mbedtls_rsa_context  *RsaKey;
+  INT32                Ret;
+  mbedtls_mpi          Value;
 
   //
   // Check input parameters.
   //
-  if (RsaContext == NULL || BnSize > INT_MAX) {
+  if ((RsaContext == NULL) || (BnSize > INT_MAX)) {
     return FALSE;
   }
 
-  mbedtls_mpi_init(&Value);
+  mbedtls_mpi_init (&Value);
 
   RsaKey = (mbedtls_rsa_context *)RsaContext;
 
   // if BigNumber is Null clear
-  if (BigNumber) {
-    Ret = mbedtls_mpi_read_binary(&Value, BigNumber, BnSize);
+  if (BigNumber != NULL) {
+    Ret = mbedtls_mpi_read_binary (&Value, BigNumber, BnSize);
     if (Ret != 0) {
+      mbedtls_mpi_free (&Value);
       return FALSE;
     }
   }
 
   switch (KeyTag) {
-  case RsaKeyN:
-    Ret = mbedtls_rsa_import(
-      RsaKey,
-      &Value,
-      NULL,
-      NULL,
-      NULL,
-      NULL
-    );
-    break;
-  case RsaKeyE:
-    Ret = mbedtls_rsa_import(
-      RsaKey,
-      NULL,
-      NULL,
-      NULL,
-      NULL,
-      &Value
-    );
-    break;
-  case RsaKeyD:
-    Ret = mbedtls_rsa_import(
-      RsaKey,
-      NULL,
-      NULL,
-      NULL,
-      &Value,
-      NULL
-    );
-    break;
-  case RsaKeyQ:
-    Ret = mbedtls_rsa_import(
-      RsaKey,
-      NULL,
-      NULL,
-      &Value,
-      NULL,
-      NULL
-    );
-    break;
-  case RsaKeyP:
-  Ret = mbedtls_rsa_import(
-      RsaKey,
-      NULL,
-      &Value,
-      NULL,
-      NULL,
-      NULL
-    );
-    break;
-  case RsaKeyDp:
-  case RsaKeyDq:
-  case RsaKeyQInv:
-  default:
-    Ret = -1;
-    break;
+    case RsaKeyN:
+      Ret = mbedtls_rsa_import (
+              RsaKey,
+              &Value,
+              NULL,
+              NULL,
+              NULL,
+              NULL
+              );
+      break;
+    case RsaKeyE:
+      Ret = mbedtls_rsa_import (
+              RsaKey,
+              NULL,
+              NULL,
+              NULL,
+              NULL,
+              &Value
+              );
+      break;
+    case RsaKeyD:
+      Ret = mbedtls_rsa_import (
+              RsaKey,
+              NULL,
+              NULL,
+              NULL,
+              &Value,
+              NULL
+              );
+      break;
+    case RsaKeyQ:
+      Ret = mbedtls_rsa_import (
+              RsaKey,
+              NULL,
+              NULL,
+              &Value,
+              NULL,
+              NULL
+              );
+      break;
+    case RsaKeyP:
+      Ret = mbedtls_rsa_import (
+              RsaKey,
+              NULL,
+              &Value,
+              NULL,
+              NULL,
+              NULL
+              );
+      break;
+    case RsaKeyDp:
+    case RsaKeyDq:
+    case RsaKeyQInv:
+    default:
+      Ret = -1;
+      break;
   }
 
-  mbedtls_rsa_complete(RsaKey);
-  mbedtls_mpi_free(&Value);
+  mbedtls_mpi_free (&Value);
   return Ret == 0;
 }
 
@@ -210,40 +211,50 @@ RsaPkcs1Verify (
   IN  UINTN        SigSize
   )
 {
-  INT32             Ret;
-  mbedtls_md_type_t md_alg;
+  INT32                Ret;
+  mbedtls_md_type_t    md_alg;
+  mbedtls_rsa_context  *RsaKey;
 
-  if (RsaContext == NULL || MessageHash == NULL || Signature == NULL) {
+  if ((RsaContext == NULL) || (MessageHash == NULL) || (Signature == NULL)) {
     return FALSE;
   }
 
-  if (SigSize > INT_MAX || SigSize == 0) {
+  if ((SigSize > INT_MAX) || (SigSize == 0)) {
+    return FALSE;
+  }
+
+  RsaKey = (mbedtls_rsa_context *)RsaContext;
+  if (mbedtls_rsa_complete (RsaKey) != 0) {
     return FALSE;
   }
 
   switch (HashSize) {
-  case MD5_DIGEST_SIZE:
-    md_alg = MBEDTLS_MD_MD5;
-    break;
+ #ifdef ENABLE_MD5_DEPRECATED_INTERFACES
+    case MD5_DIGEST_SIZE:
+      md_alg = MBEDTLS_MD_MD5;
+      break;
+ #endif
 
-  case SHA1_DIGEST_SIZE:
-    md_alg = MBEDTLS_MD_SHA1;
-    break;
+ #ifndef DISABLE_SHA1_DEPRECATED_INTERFACES
+    case SHA1_DIGEST_SIZE:
+      md_alg = MBEDTLS_MD_SHA1;
+      break;
+ #endif
 
-  case SHA256_DIGEST_SIZE:
-    md_alg = MBEDTLS_MD_SHA256;
-    break;
+    case SHA256_DIGEST_SIZE:
+      md_alg = MBEDTLS_MD_SHA256;
+      break;
 
-  case SHA384_DIGEST_SIZE:
-    md_alg = MBEDTLS_MD_SHA384;
-    break;
+    case SHA384_DIGEST_SIZE:
+      md_alg = MBEDTLS_MD_SHA384;
+      break;
 
-  case SHA512_DIGEST_SIZE:
-    md_alg = MBEDTLS_MD_SHA512;
-    break;
+    case SHA512_DIGEST_SIZE:
+      md_alg = MBEDTLS_MD_SHA512;
+      break;
 
-  default:
-    return FALSE;
+    default:
+      return FALSE;
   }
 
   if (mbedtls_rsa_get_len (RsaContext) != SigSize) {
@@ -262,5 +273,6 @@ RsaPkcs1Verify (
   if (Ret != 0) {
     return FALSE;
   }
+
   return TRUE;
 }
