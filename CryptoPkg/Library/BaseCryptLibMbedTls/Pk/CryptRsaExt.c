@@ -288,6 +288,10 @@ RsaPkcs1Sign (
     return FALSE;
   }
 
+  if (mbedtls_rsa_complete((mbedtls_rsa_context *)RsaContext) != 0) {
+    return FALSE;
+  }
+
   switch (HashSize) {
     case MD5_DIGEST_SIZE:
       break;
