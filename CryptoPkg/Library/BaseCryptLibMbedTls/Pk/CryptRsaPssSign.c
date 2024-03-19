@@ -67,6 +67,10 @@ RsaPssSign (
     return FALSE;
   }
 
+  if (mbedtls_rsa_complete((mbedtls_rsa_context *)RsaContext) != 0) {
+    return FALSE;
+  }
+
   if ((Message == NULL) || (MsgSize == 0) || (MsgSize > INT_MAX)) {
     return FALSE;
   }
