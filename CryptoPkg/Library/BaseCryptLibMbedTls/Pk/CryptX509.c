@@ -349,8 +349,7 @@ InternalX509GetNIDName (
   IN      mbedtls_x509_name  *Name,
   IN      CHAR8              *Oid,
   IN      UINTN              OidSize,
-  IN OUT  CHAR8              *CommonName,
-  OPTIONAL
+  IN OUT  CHAR8              *CommonName  OPTIONAL,
   IN OUT  UINTN              *CommonNameSize
   )
 {
@@ -382,8 +381,7 @@ InternalX509GetSubjectNIDName (
   IN      UINTN        CertSize,
   IN      CHAR8        *Oid,
   IN      UINTN        OidSize,
-  OUT     CHAR8        *CommonName,
-  OPTIONAL
+  OUT     CHAR8        *CommonName  OPTIONAL,
   IN OUT  UINTN        *CommonNameSize
   )
 {
@@ -419,8 +417,7 @@ InternalX509GetIssuerNIDName (
   IN      UINTN        CertSize,
   IN      CHAR8        *Oid,
   IN      UINTN        OidSize,
-  OUT     CHAR8        *CommonName,
-  OPTIONAL
+  OUT     CHAR8        *CommonName  OPTIONAL,
   IN OUT  UINTN        *CommonNameSize
   )
 {
@@ -480,8 +477,7 @@ EFIAPI
 X509GetCommonName (
   IN      CONST UINT8  *Cert,
   IN      UINTN        CertSize,
-  OUT     CHAR8        *CommonName,
-  OPTIONAL
+  OUT     CHAR8        *CommonName  OPTIONAL,
   IN OUT  UINTN        *CommonNameSize
   )
 {
@@ -519,8 +515,7 @@ EFIAPI
 X509GetOrganizationName (
   IN      CONST UINT8  *Cert,
   IN      UINTN        CertSize,
-  OUT     CHAR8        *NameBuffer,
-  OPTIONAL
+  OUT     CHAR8        *NameBuffer  OPTIONAL,
   IN OUT  UINTN        *NameBufferSize
   )
 {
@@ -1021,8 +1016,7 @@ EFIAPI
 X509GetSerialNumber (
   IN      CONST UINT8  *Cert,
   IN      UINTN        CertSize,
-  OUT     UINT8        *SerialNumber,
-  OPTIONAL
+  OUT     UINT8        *SerialNumber  OPTIONAL,
   IN OUT  UINTN        *SerialNumberSize
   )
 {
@@ -1156,8 +1150,7 @@ EFIAPI
 X509GetIssuerCommonName (
   IN      CONST UINT8  *Cert,
   IN      UINTN        CertSize,
-  OUT     CHAR8        *CommonName,
-  OPTIONAL
+  OUT     CHAR8        *CommonName  OPTIONAL,
   IN OUT  UINTN        *CommonNameSize
   )
 {
@@ -1195,8 +1188,7 @@ EFIAPI
 X509GetIssuerOrganizationName (
   IN      CONST UINT8  *Cert,
   IN      UINTN        CertSize,
-  OUT     CHAR8        *NameBuffer,
-  OPTIONAL
+  OUT     CHAR8        *NameBuffer  OPTIONAL,
   IN OUT  UINTN        *NameBufferSize
   )
 {
@@ -1226,8 +1218,7 @@ EFIAPI
 X509GetSignatureAlgorithm (
   IN CONST UINT8  *Cert,
   IN       UINTN  CertSize,
-  OUT   UINT8     *Oid,
-  OPTIONAL
+  OUT   UINT8     *Oid  OPTIONAL,
   IN OUT   UINTN  *OidSize
   )
 {
