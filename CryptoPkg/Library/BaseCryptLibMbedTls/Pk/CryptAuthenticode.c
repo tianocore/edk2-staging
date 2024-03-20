@@ -72,6 +72,10 @@ AuthenticodeVerify (
     return FALSE;
   }
 
+  if (DataSize <= HashSize) {
+    return FALSE;
+  }
+
   Ptr = (UINT8 *)(UINTN)AuthData;
   Len = (UINT32)DataSize;
   End = Ptr + Len;
@@ -188,6 +192,10 @@ AuthenticodeVerify (
   // defined in Authenticode
   // NOTE: Need to double-check HashLength here!
   //
+  if (ContentSize < HashSize) {
+    return FALSE;
+  }
+
   if (CompareMem (SpcIndirectDataContent + ContentSize - HashSize, ImageHash, HashSize) != 0) {
     //
     // Un-matched PE/COFF Hash Value
