@@ -470,6 +470,10 @@ Pkcs7GetSignedData (
     goto End;
   }
 
+  if (CertNum != 0) {
+    FreePool (MoreCert);
+  }
+
   LastCert = &(SignedData->Certificates);
 
   while (CertNum--) {
@@ -487,8 +491,10 @@ Pkcs7GetSignedData (
     Ret = MbedTlsPkcs7GetSignersInfoSet (&P, End, &SignedData->SignerInfos);
   }
 
+  return Ret;
+
 End:
-  if (MoreCert != NULL) {
+  if ((MoreCert != NULL) && (CertNum !=0)) {
     FreePool (MoreCert);
     MoreCert = NULL;
   }
