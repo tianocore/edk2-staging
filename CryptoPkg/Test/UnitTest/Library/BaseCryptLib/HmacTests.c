@@ -82,19 +82,19 @@ GLOBAL_REMOVE_IF_UNREFERENCED CONST UINT8  HmacSha384Digest[] = {
 };
 
 typedef
-  VOID *
+VOID *
 (EFIAPI *EFI_HMAC_NEW)(
   VOID
   );
 
 typedef
-  VOID
+VOID
 (EFIAPI *EFI_HMAC_FREE)(
   IN VOID  *HashContext
   );
 
 typedef
-  BOOLEAN
+BOOLEAN
 (EFIAPI *EFI_HMAC_INIT)(
   IN OUT  VOID        *HashContext,
   IN   CONST UINT8    *Key,
@@ -102,14 +102,14 @@ typedef
   );
 
 typedef
-  BOOLEAN
+BOOLEAN
 (EFIAPI *EFI_HMAC_DUP)(
   IN   CONST  VOID    *HashContext,
   OUT  VOID           *NewHashContext
   );
 
 typedef
-  BOOLEAN
+BOOLEAN
 (EFIAPI *EFI_HMAC_UPDATE)(
   IN OUT  VOID        *HashContext,
   IN      CONST VOID  *Data,
@@ -117,14 +117,14 @@ typedef
   );
 
 typedef
-  BOOLEAN
+BOOLEAN
 (EFIAPI *EFI_HMAC_FINAL)(
   IN OUT  VOID   *HashContext,
   OUT     UINT8  *HashValue
   );
 
 typedef
-  BOOLEAN
+BOOLEAN
 (EFIAPI *EFI_HMAC_ALL)(
   IN   CONST VOID     *Data,
   IN   UINTN          DataSize,
