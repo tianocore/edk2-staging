@@ -14,6 +14,7 @@
   SUPPORTED_ARCHITECTURES        = IA32|X64
   BUILD_TARGETS                  = DEBUG|RELEASE|NOOPT
   SKUID_IDENTIFIER               = DEFAULT
+  MBEDTLS_FUZZ                   = edk2-staging/HBFA/UefiHostFuzzTestCasePkg/TestCase/CryptoPkg
 
   DEFINE TEST_WITH_INSTRUMENT = FALSE
 
@@ -355,6 +356,238 @@
    CcProbeLib|OvmfPkg/Library/CcProbeLib/SecPeiCcProbeLib.inf
    TdxLib|MdePkg/Library/TdxLib/TdxLib.inf  
    PlatformInitLib|OvmfPkg/Library/PlatformInitLib/PlatformInitLib.inf
+  }
+
+ $(MBEDTLS_FUZZ)/TestBigNumIsOdd/TestBigNumIsOdd.inf{
+  <LibraryClasses>
+    BaseCryptLib|CryptoPkg/Library/BaseCryptLibMbedTls/BaseCryptLib.inf
+    MbedTlsLib|CryptoPkg/Library/MbedTlsLib/MbedTlsLibFull.inf
+    IntrinsicLib|CryptoPkg/Library/IntrinsicLib/IntrinsicLib.inf
+    RngLib|MdePkg/Library/BaseRngLibTimerLib/BaseRngLibTimerLib.inf
+  }
+
+  $(MBEDTLS_FUZZ)/TestBigNumRShift/TestBigNumRShift.inf{
+  <LibraryClasses>
+    BaseCryptLib|CryptoPkg/Library/BaseCryptLibMbedTls/BaseCryptLib.inf
+    MbedTlsLib|CryptoPkg/Library/MbedTlsLib/MbedTlsLibFull.inf
+    IntrinsicLib|CryptoPkg/Library/IntrinsicLib/IntrinsicLib.inf
+    RngLib|MdePkg/Library/BaseRngLibTimerLib/BaseRngLibTimerLib.inf
+  }
+
+  $(MBEDTLS_FUZZ)/TestAeadAesGcmEncrypt/TestAeadAesGcmEncryptKye.inf{
+  <LibraryClasses>
+    BaseCryptLib|CryptoPkg/Library/BaseCryptLibMbedTls/BaseCryptLib.inf
+    MbedTlsLib|CryptoPkg/Library/MbedTlsLib/MbedTlsLibFull.inf
+    IntrinsicLib|CryptoPkg/Library/IntrinsicLib/IntrinsicLib.inf
+    RngLib|MdePkg/Library/BaseRngLibTimerLib/BaseRngLibTimerLib.inf
+  }
+
+  $(MBEDTLS_FUZZ)/TestAeadAesGcmEncrypt/TestAeadAesGcmEncryptIv.inf{
+  <LibraryClasses>
+    BaseCryptLib|CryptoPkg/Library/BaseCryptLibMbedTls/BaseCryptLib.inf
+    MbedTlsLib|CryptoPkg/Library/MbedTlsLib/MbedTlsLibFull.inf
+    IntrinsicLib|CryptoPkg/Library/IntrinsicLib/IntrinsicLib.inf
+    RngLib|MdePkg/Library/BaseRngLibTimerLib/BaseRngLibTimerLib.inf
+  }
+
+  $(MBEDTLS_FUZZ)/TestAeadAesGcmEncrypt/TestAeadAesGcmEncryptAData.inf{
+  <LibraryClasses>
+    BaseCryptLib|CryptoPkg/Library/BaseCryptLibMbedTls/BaseCryptLib.inf
+    MbedTlsLib|CryptoPkg/Library/MbedTlsLib/MbedTlsLibFull.inf
+    IntrinsicLib|CryptoPkg/Library/IntrinsicLib/IntrinsicLib.inf
+    RngLib|MdePkg/Library/BaseRngLibTimerLib/BaseRngLibTimerLib.inf
+  }
+
+  $(MBEDTLS_FUZZ)/TestAeadAesGcmEncrypt/TestAeadAesGcmEncryptDataIn.inf{
+  <LibraryClasses>
+    BaseCryptLib|CryptoPkg/Library/BaseCryptLibMbedTls/BaseCryptLib.inf
+    MbedTlsLib|CryptoPkg/Library/MbedTlsLib/MbedTlsLibFull.inf
+    IntrinsicLib|CryptoPkg/Library/IntrinsicLib/IntrinsicLib.inf
+    RngLib|MdePkg/Library/BaseRngLibTimerLib/BaseRngLibTimerLib.inf
+  }
+
+  $(MBEDTLS_FUZZ)/TestAeadAesGcmEncrypt/TestAeadAesGcmEncryptTagSize.inf{
+  <LibraryClasses>
+    BaseCryptLib|CryptoPkg/Library/BaseCryptLibMbedTls/BaseCryptLib.inf
+    MbedTlsLib|CryptoPkg/Library/MbedTlsLib/MbedTlsLibFull.inf
+    IntrinsicLib|CryptoPkg/Library/IntrinsicLib/IntrinsicLib.inf
+    RngLib|MdePkg/Library/BaseRngLibTimerLib/BaseRngLibTimerLib.inf
+  }
+
+  $(MBEDTLS_FUZZ)/TestAeadAesGcmDecrypt/TestAeadAesGcmDecryptKye.inf{
+  <LibraryClasses>
+    BaseCryptLib|CryptoPkg/Library/BaseCryptLibMbedTls/BaseCryptLib.inf
+    MbedTlsLib|CryptoPkg/Library/MbedTlsLib/MbedTlsLibFull.inf
+    IntrinsicLib|CryptoPkg/Library/IntrinsicLib/IntrinsicLib.inf
+    RngLib|MdePkg/Library/BaseRngLibTimerLib/BaseRngLibTimerLib.inf
+  }
+
+  $(MBEDTLS_FUZZ)/TestAeadAesGcmDecrypt/TestAeadAesGcmDecryptIv.inf{
+  <LibraryClasses>
+    BaseCryptLib|CryptoPkg/Library/BaseCryptLibMbedTls/BaseCryptLib.inf
+    MbedTlsLib|CryptoPkg/Library/MbedTlsLib/MbedTlsLibFull.inf
+    IntrinsicLib|CryptoPkg/Library/IntrinsicLib/IntrinsicLib.inf
+    RngLib|MdePkg/Library/BaseRngLibTimerLib/BaseRngLibTimerLib.inf
+  }
+
+  $(MBEDTLS_FUZZ)/TestAeadAesGcmDecrypt/TestAeadAesGcmDecryptDataIn.inf{
+  <LibraryClasses>
+    BaseCryptLib|CryptoPkg/Library/BaseCryptLibMbedTls/BaseCryptLib.inf
+    MbedTlsLib|CryptoPkg/Library/MbedTlsLib/MbedTlsLibFull.inf
+    IntrinsicLib|CryptoPkg/Library/IntrinsicLib/IntrinsicLib.inf
+    RngLib|MdePkg/Library/BaseRngLibTimerLib/BaseRngLibTimerLib.inf
+  }
+
+ $(MBEDTLS_FUZZ)/TestAeadAesGcmDecrypt/TestAeadAesGcmDecryptAData.inf{
+  <LibraryClasses>
+    BaseCryptLib|CryptoPkg/Library/BaseCryptLibMbedTls/BaseCryptLib.inf
+    MbedTlsLib|CryptoPkg/Library/MbedTlsLib/MbedTlsLibFull.inf
+    IntrinsicLib|CryptoPkg/Library/IntrinsicLib/IntrinsicLib.inf
+    RngLib|MdePkg/Library/BaseRngLibTimerLib/BaseRngLibTimerLib.inf
+  }
+
+ $(MBEDTLS_FUZZ)/TestAeadAesGcmDecrypt/TestAeadAesGcmDecryptTag.inf{
+  <LibraryClasses>
+    BaseCryptLib|CryptoPkg/Library/BaseCryptLibMbedTls/BaseCryptLib.inf
+    MbedTlsLib|CryptoPkg/Library/MbedTlsLib/MbedTlsLibFull.inf
+    IntrinsicLib|CryptoPkg/Library/IntrinsicLib/IntrinsicLib.inf
+    RngLib|MdePkg/Library/BaseRngLibTimerLib/BaseRngLibTimerLib.inf
+  }
+
+ $(MBEDTLS_FUZZ)/TestAuthenticodeVerify/TestAuthenticodeVerifyAuthData.inf{
+  <LibraryClasses>
+    BaseCryptLib|CryptoPkg/Library/BaseCryptLibMbedTls/BaseCryptLib.inf
+    MbedTlsLib|CryptoPkg/Library/MbedTlsLib/MbedTlsLibFull.inf
+    IntrinsicLib|CryptoPkg/Library/IntrinsicLib/IntrinsicLib.inf
+    RngLib|MdePkg/Library/BaseRngLibTimerLib/BaseRngLibTimerLib.inf
+  }
+
+ $(MBEDTLS_FUZZ)/TestAuthenticodeVerify/TestAuthenticodeVerifyImageHash.inf{
+  <LibraryClasses>
+    BaseCryptLib|CryptoPkg/Library/BaseCryptLibMbedTls/BaseCryptLib.inf
+    MbedTlsLib|CryptoPkg/Library/MbedTlsLib/MbedTlsLibFull.inf
+    IntrinsicLib|CryptoPkg/Library/IntrinsicLib/IntrinsicLib.inf
+    RngLib|MdePkg/Library/BaseRngLibTimerLib/BaseRngLibTimerLib.inf
+  }
+
+ $(MBEDTLS_FUZZ)/TestAuthenticodeVerify/TestAuthenticodeVerifyTrustedCert.inf{
+  <LibraryClasses>
+    BaseCryptLib|CryptoPkg/Library/BaseCryptLibMbedTls/BaseCryptLib.inf
+    MbedTlsLib|CryptoPkg/Library/MbedTlsLib/MbedTlsLibFull.inf
+    IntrinsicLib|CryptoPkg/Library/IntrinsicLib/IntrinsicLib.inf
+    RngLib|MdePkg/Library/BaseRngLibTimerLib/BaseRngLibTimerLib.inf
+  }
+
+ $(MBEDTLS_FUZZ)/TestEcPointAdd/TestEcPointAdd.inf{
+  <LibraryClasses>
+    BaseCryptLib|CryptoPkg/Library/BaseCryptLibMbedTls/BaseCryptLib.inf
+    MbedTlsLib|CryptoPkg/Library/MbedTlsLib/MbedTlsLibFull.inf
+    IntrinsicLib|CryptoPkg/Library/IntrinsicLib/IntrinsicLib.inf
+    RngLib|MdePkg/Library/BaseRngLibTimerLib/BaseRngLibTimerLib.inf
+  }
+
+ $(MBEDTLS_FUZZ)/TestEcPointInvert/TestEcPointInvert.inf{
+  <LibraryClasses>
+    BaseCryptLib|CryptoPkg/Library/BaseCryptLibMbedTls/BaseCryptLib.inf
+    MbedTlsLib|CryptoPkg/Library/MbedTlsLib/MbedTlsLibFull.inf
+    IntrinsicLib|CryptoPkg/Library/IntrinsicLib/IntrinsicLib.inf
+    RngLib|MdePkg/Library/BaseRngLibTimerLib/BaseRngLibTimerLib.inf
+  }
+
+ $(MBEDTLS_FUZZ)/TestEcPointSetCompressedCoordinates/TestEcPointSetCompressedCoordinates.inf{
+  <LibraryClasses>
+    BaseCryptLib|CryptoPkg/Library/BaseCryptLibMbedTls/BaseCryptLib.inf
+    MbedTlsLib|CryptoPkg/Library/MbedTlsLib/MbedTlsLibFull.inf
+    IntrinsicLib|CryptoPkg/Library/IntrinsicLib/IntrinsicLib.inf
+    RngLib|MdePkg/Library/BaseRngLibTimerLib/BaseRngLibTimerLib.inf
+  }
+
+ $(MBEDTLS_FUZZ)/TestEcPointSetCompressedCoordinates/TestEcPointSetCompressedCoordinatesBnX.inf{
+  <LibraryClasses>
+    BaseCryptLib|CryptoPkg/Library/BaseCryptLibMbedTls/BaseCryptLib.inf
+    MbedTlsLib|CryptoPkg/Library/MbedTlsLib/MbedTlsLibFull.inf
+    IntrinsicLib|CryptoPkg/Library/IntrinsicLib/IntrinsicLib.inf
+    RngLib|MdePkg/Library/BaseRngLibTimerLib/BaseRngLibTimerLib.inf
+ }
+
+ $(MBEDTLS_FUZZ)/TestPkcs7Sign/TestPkcs7SignPrivateKey.inf{
+  <LibraryClasses>
+   BaseCryptLib|CryptoPkg/Library/BaseCryptLibMbedTls/BaseCryptLib.inf
+   MbedTlsLib|CryptoPkg/Library/MbedTlsLib/MbedTlsLibFull.inf
+   IntrinsicLib|CryptoPkg/Library/IntrinsicLib/IntrinsicLib.inf
+   RngLib|MdePkg/Library/BaseRngLibTimerLib/BaseRngLibTimerLib.inf
+  }
+
+  $(MBEDTLS_FUZZ)/TestPkcs7Sign/TestPkcs7SignKeyPassword.inf{
+  <LibraryClasses>
+   BaseCryptLib|CryptoPkg/Library/BaseCryptLibMbedTls/BaseCryptLib.inf
+   MbedTlsLib|CryptoPkg/Library/MbedTlsLib/MbedTlsLibFull.inf
+   IntrinsicLib|CryptoPkg/Library/IntrinsicLib/IntrinsicLib.inf
+   RngLib|MdePkg/Library/BaseRngLibTimerLib/BaseRngLibTimerLib.inf
+  }
+
+  $(MBEDTLS_FUZZ)/TestPkcs7Sign/TestPkcs7SignInData.inf{
+  <LibraryClasses>
+   BaseCryptLib|CryptoPkg/Library/BaseCryptLibMbedTls/BaseCryptLib.inf
+   MbedTlsLib|CryptoPkg/Library/MbedTlsLib/MbedTlsLibFull.inf
+   IntrinsicLib|CryptoPkg/Library/IntrinsicLib/IntrinsicLib.inf
+   RngLib|MdePkg/Library/BaseRngLibTimerLib/BaseRngLibTimerLib.inf
+  }
+
+  $(MBEDTLS_FUZZ)/TestPkcs7Sign/TestPkcs7SignCert.inf{
+  <LibraryClasses>
+   BaseCryptLib|CryptoPkg/Library/BaseCryptLibMbedTls/BaseCryptLib.inf
+   MbedTlsLib|CryptoPkg/Library/MbedTlsLib/MbedTlsLibFull.inf
+   IntrinsicLib|CryptoPkg/Library/IntrinsicLib/IntrinsicLib.inf
+   RngLib|MdePkg/Library/BaseRngLibTimerLib/BaseRngLibTimerLib.inf
+  }
+
+  $(MBEDTLS_FUZZ)/TestPkcs7GetAttachedContent/TestPkcs7GetAttachedContent.inf{
+  <LibraryClasses>
+   BaseCryptLib|CryptoPkg/Library/BaseCryptLibMbedTls/BaseCryptLib.inf
+   MbedTlsLib|CryptoPkg/Library/MbedTlsLib/MbedTlsLibFull.inf
+   IntrinsicLib|CryptoPkg/Library/IntrinsicLib/IntrinsicLib.inf
+   RngLib|MdePkg/Library/BaseRngLibTimerLib/BaseRngLibTimerLib.inf
+  }
+
+  $(MBEDTLS_FUZZ)/TestPkcs7Verify/TestPkcs7Verify.inf{
+  <LibraryClasses>
+   BaseCryptLib|CryptoPkg/Library/BaseCryptLibMbedTls/BaseCryptLib.inf
+   MbedTlsLib|CryptoPkg/Library/MbedTlsLib/MbedTlsLibFull.inf
+   IntrinsicLib|CryptoPkg/Library/IntrinsicLib/IntrinsicLib.inf
+   RngLib|MdePkg/Library/BaseRngLibTimerLib/BaseRngLibTimerLib.inf
+  }
+
+  $(MBEDTLS_FUZZ)/TestPkcs7GetSigners/TestPkcs7GetSigners.inf{
+  <LibraryClasses>
+   BaseCryptLib|CryptoPkg/Library/BaseCryptLibMbedTls/BaseCryptLib.inf
+   MbedTlsLib|CryptoPkg/Library/MbedTlsLib/MbedTlsLibFull.inf
+   IntrinsicLib|CryptoPkg/Library/IntrinsicLib/IntrinsicLib.inf
+   RngLib|MdePkg/Library/BaseRngLibTimerLib/BaseRngLibTimerLib.inf
+  }
+
+  $(MBEDTLS_FUZZ)/TestVerifyEKUsInPkcs7Signature/TestVerifyEKUsInPkcs7Signature.inf{
+  <LibraryClasses>
+   BaseCryptLib|CryptoPkg/Library/BaseCryptLibMbedTls/BaseCryptLib.inf
+   MbedTlsLib|CryptoPkg/Library/MbedTlsLib/MbedTlsLibFull.inf
+   IntrinsicLib|CryptoPkg/Library/IntrinsicLib/IntrinsicLib.inf
+   RngLib|MdePkg/Library/BaseRngLibTimerLib/BaseRngLibTimerLib.inf
+  }
+
+  $(MBEDTLS_FUZZ)/TestImageTimestampVerify/TestImageTimestampVerifyTsaCert.inf{
+  <LibraryClasses>
+   BaseCryptLib|CryptoPkg/Library/BaseCryptLibMbedTls/BaseCryptLib.inf
+   MbedTlsLib|CryptoPkg/Library/MbedTlsLib/MbedTlsLibFull.inf
+   IntrinsicLib|CryptoPkg/Library/IntrinsicLib/IntrinsicLib.inf
+   RngLib|MdePkg/Library/BaseRngLibTimerLib/BaseRngLibTimerLib.inf
+  }
+
+  $(MBEDTLS_FUZZ)/TestImageTimestampVerify/TestImageTimestampVerifyAuthData.inf{
+  <LibraryClasses>
+   BaseCryptLib|CryptoPkg/Library/BaseCryptLibMbedTls/BaseCryptLib.inf
+   MbedTlsLib|CryptoPkg/Library/MbedTlsLib/MbedTlsLibFull.inf
+   IntrinsicLib|CryptoPkg/Library/IntrinsicLib/IntrinsicLib.inf
+   RngLib|MdePkg/Library/BaseRngLibTimerLib/BaseRngLibTimerLib.inf
   }
 
   [PcdsDynamicDefault]

@@ -1,0 +1,39 @@
+## @file
+# Component description file for TestImageTimestampVerifyTsaCert module.
+#
+# Copyright (c) 2023, Intel Corporation. All rights reserved.<BR>
+# SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = TestImageTimestampVerifyTsaCert
+  FILE_GUID                      = 1B04F75F-BA5A-4A73-B1AD-81FFCBD12622
+  MODULE_TYPE                    = USER_DEFINED
+  VERSION_STRING                 = 1.0
+
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = IA32 X64
+#
+
+[Sources]
+  TestImageTimestampVerifyTsaCert.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  CryptoPkg/CryptoPkg.dec
+  SecurityPkg/SecurityPkg.dec
+  UefiHostTestPkg/UefiHostTestPkg.dec
+  UefiHostFuzzTestCasePkg/UefiHostFuzzTestCasePkg.dec
+
+[LibraryClasses]
+  BaseLib
+  BaseMemoryLib
+  MemoryAllocationLib
+  DebugLib
+  ToolChainHarnessLib
+  BaseCryptLib
