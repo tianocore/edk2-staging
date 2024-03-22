@@ -461,7 +461,7 @@ Pkcs7GetSignedData (
     }
 
     CertNum++;
-    MoreCert->next = AllocatePool (sizeof (mbedtls_x509_crt));
+    MoreCert->next = AllocateZeroPool (sizeof (mbedtls_x509_crt));
     MoreCert       = MoreCert->next;
   }
 

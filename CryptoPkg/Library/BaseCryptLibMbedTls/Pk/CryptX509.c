@@ -82,7 +82,7 @@ X509ConstructCertificate (
     return FALSE;
   }
 
-  MbedTlsCert = AllocatePool (sizeof (mbedtls_x509_crt));
+  MbedTlsCert = AllocateZeroPool (sizeof (mbedtls_x509_crt));
   if (MbedTlsCert == NULL) {
     return FALSE;
   }
@@ -133,7 +133,7 @@ X509ConstructCertificateStackV (
   Ret = 0;
   mbedtls_x509_crt  *Crt = (mbedtls_x509_crt *)*X509Stack;
   if (Crt == NULL) {
-    Crt = AllocatePool (sizeof (mbedtls_x509_crt));
+    Crt = AllocateZeroPool (sizeof (mbedtls_x509_crt));
     if (Crt == NULL) {
       return FALSE;
     }

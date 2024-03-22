@@ -147,7 +147,7 @@ ParallelHash256HashAll (
   CombinedInputSize = EncSizeB + EncSizeN + EncSizeL + mBlockNum * mBlockResultSize;
   CombinedInput     = AllocateZeroPool (CombinedInputSize);
   mBlockIsCompleted = AllocateZeroPool (mBlockNum * sizeof (BOOLEAN));
-  mSpinLockList     = AllocatePool (mBlockNum * sizeof (SPIN_LOCK));
+  mSpinLockList     = AllocateZeroPool (mBlockNum * sizeof (SPIN_LOCK));
   if ((CombinedInput == NULL) || (mBlockIsCompleted == NULL) || (mSpinLockList == NULL)) {
     ReturnValue = FALSE;
     goto Exit;

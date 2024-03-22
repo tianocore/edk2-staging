@@ -52,7 +52,7 @@ RsaGetPrivateKeyFromPem (
 
   NewPemData = NULL;
   if (PemData[PemSize - 1] != 0) {
-    NewPemData = AllocatePool (PemSize + 1);
+    NewPemData = AllocateZeroPool (PemSize + 1);
     if (NewPemData == NULL) {
       return FALSE;
     }
@@ -145,7 +145,7 @@ EcGetPrivateKeyFromPem (
 
   NewPemData = NULL;
   if (PemData[PemSize - 1] != 0) {
-    NewPemData = AllocatePool (PemSize + 1);
+    NewPemData = AllocateZeroPool (PemSize + 1);
     if (NewPemData == NULL) {
       return FALSE;
     }

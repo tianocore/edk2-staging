@@ -92,7 +92,7 @@ Pkcs7GetAttachedContent (
     //
     if ((MbedtlsContent->data.len > 0) && (MbedtlsContent->data.p != NULL)) {
       *ContentSize = MbedtlsContent->data.len;
-      *Content     = AllocatePool (*ContentSize);
+      *Content     = AllocateZeroPool (*ContentSize);
       if (*Content == NULL) {
         *ContentSize = 0;
         goto _Exit;
