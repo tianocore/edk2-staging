@@ -11,6 +11,8 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 #include "InternalCryptLib.h"
 #include <mbedtls/rsa.h>
+#include <mbedtls/sha256.h>
+#include <mbedtls/sha512.h>
 
 /**
   Carries out the RSA-SSA signature generation with EMSA-PSS encoding scheme.
@@ -57,11 +59,8 @@ RsaPssSign (
   )
 {
   INT32              Ret;
-  mbedtls_md_type_t  md_alg;
+  mbedtls_md_type_t  MdAlg;
   UINT8              HashValue[SHA512_DIGEST_SIZE];
-  BOOLEAN            Status;
-  UINTN              ShaCtxSize;
-  VOID               *ShaCtx;
 
   if (RsaContext == NULL) {
     return FALSE;
@@ -83,78 +82,24 @@ RsaPssSign (
 
   switch (DigestLen) {
     case SHA256_DIGEST_SIZE:
-      md_alg     = MBEDTLS_MD_SHA256;
-      ShaCtxSize = Sha256GetContextSize ();
-      ShaCtx     = AllocatePool (ShaCtxSize);
-
-      Status = Sha256Init (ShaCtx);
-      if (!Status) {
+      MdAlg     = MBEDTLS_MD_SHA256;
+      if (mbedtls_sha256 (Message, MsgSize, HashValue, FALSE) != 0) {
         return FALSE;
       }
-
-      Status = Sha256Update (ShaCtx, Message, MsgSize);
-      if (!Status) {
-        FreePool (ShaCtx);
-        return FALSE;
-      }
-
-      Status = Sha256Final (ShaCtx, HashValue);
-      if (!Status) {
-        FreePool (ShaCtx);
-        return FALSE;
-      }
-
-      FreePool (ShaCtx);
       break;
 
     case SHA384_DIGEST_SIZE:
-      md_alg     = MBEDTLS_MD_SHA384;
-      ShaCtxSize = Sha384GetContextSize ();
-      ShaCtx     = AllocatePool (ShaCtxSize);
-
-      Status = Sha384Init (ShaCtx);
-      if (!Status) {
+      MdAlg     = MBEDTLS_MD_SHA384;
+      if (mbedtls_sha512 (Message, MsgSize, HashValue, TRUE) != 0) {
         return FALSE;
       }
-
-      Status = Sha384Update (ShaCtx, Message, MsgSize);
-      if (!Status) {
-        FreePool (ShaCtx);
-        return FALSE;
-      }
-
-      Status = Sha384Final (ShaCtx, HashValue);
-      if (!Status) {
-        FreePool (ShaCtx);
-        return FALSE;
-      }
-
-      FreePool (ShaCtx);
       break;
 
     case SHA512_DIGEST_SIZE:
-      md_alg     = MBEDTLS_MD_SHA512;
-      ShaCtxSize = Sha512GetContextSize ();
-      ShaCtx     = AllocatePool (ShaCtxSize);
-
-      Status = Sha512Init (ShaCtx);
-      if (!Status) {
+      MdAlg     = MBEDTLS_MD_SHA512;
+      if (mbedtls_sha512 (Message, MsgSize, HashValue, FALSE) != 0) {
         return FALSE;
       }
-
-      Status = Sha512Update (ShaCtx, Message, MsgSize);
-      if (!Status) {
-        FreePool (ShaCtx);
-        return FALSE;
-      }
-
-      Status = Sha512Final (ShaCtx, HashValue);
-      if (!Status) {
-        FreePool (ShaCtx);
-        return FALSE;
-      }
-
-      FreePool (ShaCtx);
       break;
 
     default:
@@ -169,13 +114,13 @@ RsaPssSign (
     return FALSE;
   }
 
-  mbedtls_rsa_set_padding (RsaContext, MBEDTLS_RSA_PKCS_V21, md_alg);
+  mbedtls_rsa_set_padding (RsaContext, MBEDTLS_RSA_PKCS_V21, MdAlg);
 
   Ret = mbedtls_rsa_rsassa_pss_sign (
                                      RsaContext,
                                      myrand,
                                      NULL,
-                                     md_alg,
+                                     MdAlg,
                                      (UINT32)DigestLen,
                                      HashValue,
                                      Signature
