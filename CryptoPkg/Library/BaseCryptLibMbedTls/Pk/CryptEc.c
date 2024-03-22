@@ -403,39 +403,27 @@ EcPointAdd (
   IN VOID        *BnCtx
   )
 {
-  mbedtls_mpi  *m;
-  mbedtls_mpi  *n;
+  mbedtls_mpi  BnOne;
 
-  m = AllocateZeroPool (sizeof (mbedtls_mpi));
-  n = AllocateZeroPool (sizeof (mbedtls_mpi));
-
-  if (mbedtls_mpi_lset (m, 1) != 0 ) {
-    FreePool (m);
-    FreePool (n);
-    return FALSE;
-  }
-
-  if (mbedtls_mpi_lset (n, 1) != 0 ) {
-    FreePool (m);
-    FreePool (n);
+  mbedtls_mpi_init(&BnOne);
+  if (mbedtls_mpi_lset (&BnOne, 1) != 0 ) {
     return FALSE;
   }
 
   if (mbedtls_ecp_muladd (
                           (mbedtls_ecp_group *)EcGroup,
                           (mbedtls_ecp_point *)EcPointResult,
-                          (const mbedtls_mpi *)m,
+                          (const mbedtls_mpi *)&BnOne,
                           (const mbedtls_ecp_point *)EcPointA,
-                          (const mbedtls_mpi *)n,
+                          (const mbedtls_mpi *)&BnOne,
                           (const mbedtls_ecp_point *)EcPointB
                           ) != 0)
   {
+    mbedtls_mpi_free(&BnOne);
     return FALSE;
   }
 
-  FreePool (m);
-  FreePool (n);
-
+  mbedtls_mpi_free(&BnOne);
   return TRUE;
 }
 
