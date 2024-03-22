@@ -109,7 +109,7 @@ Pkcs1v2Encrypt (
   //
   // Allocate a buffer for the output data.
   //
-  OutData = AllocatePool (*EncryptedDataSize);
+  OutData = AllocateZeroPool (*EncryptedDataSize);
   if (OutData == NULL) {
     //
     // Fail to allocate the output buffer.

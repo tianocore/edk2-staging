@@ -397,7 +397,7 @@ Pkcs7Sign (
 
   NewPrivateKey = NULL;
   if (PrivateKey[PrivateKeySize - 1] != 0) {
-    NewPrivateKey = AllocatePool (PrivateKeySize + 1);
+    NewPrivateKey = AllocateZeroPool (PrivateKeySize + 1);
     if (NewPrivateKey == NULL) {
       return FALSE;
     }
@@ -406,7 +406,7 @@ Pkcs7Sign (
     NewPrivateKey[PrivateKeySize] = 0;
     PrivateKeySize++;
   } else {
-    NewPrivateKey = AllocatePool (PrivateKeySize);
+    NewPrivateKey = AllocateZeroPool (PrivateKeySize);
     if (NewPrivateKey == NULL) {
       return FALSE;
     }
