@@ -104,8 +104,9 @@ BigNumFree (
   IN BOOLEAN  Clear
   )
 {
+  mbedtls_mpi_free (Bn);
   if (Bn != NULL) {
-    mbedtls_mpi_free (Bn);
+    FreePool (Bn);
   }
 }
 
