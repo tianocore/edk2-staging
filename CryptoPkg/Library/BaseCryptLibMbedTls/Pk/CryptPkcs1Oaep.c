@@ -72,7 +72,7 @@ Pkcs1v2Encrypt (
   //
   // Check public key size.
   //
-  if (PublicKeySize > 0xFFFFFFFF) {
+  if (PublicKeySize > UINT_MAX) {
     //
     // Public key size is too large for implementation.
     //
