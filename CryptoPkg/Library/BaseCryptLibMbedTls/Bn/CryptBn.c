@@ -632,6 +632,9 @@ BigNumSqrMod (
   which should be passed to any function that requires it. The BN context is
   needed to optimize calculations and expensive allocations.
 
+  This API is not used in Mbedtls.
+  It is only compatible for Openssl implementation.
+
   @retval Big Number context struct or NULL on failure.
 **/
 VOID *
@@ -651,6 +654,9 @@ BigNumNewContext (
 
 /**
   Free Big Number context that was allocated with BigNumNewContext().
+
+  This API is not used in Mbedtls.
+  It is only compatible for Openssl implementation.
 
   @param[in]   BnCtx     Big number context to free.
 **/
