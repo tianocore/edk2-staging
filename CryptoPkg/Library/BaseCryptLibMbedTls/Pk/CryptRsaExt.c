@@ -171,8 +171,7 @@ RsaGenerateKey (
 {
   INT32                Ret = 0;
   mbedtls_rsa_context  *Rsa;
-  INT32                PE;
-  mbedtls_mpi          E;
+  INT32                E;
 
   //
   // Check input parameters.
@@ -183,14 +182,31 @@ RsaGenerateKey (
 
   Rsa = (mbedtls_rsa_context *)RsaContext;
 
-  mbedtls_mpi_init (&E);
-
   if (PublicExponent == NULL) {
-    PE = 0x10001;
+    E = 0x10001;
   } else {
-    // TBD
-    Ret = mbedtls_mpi_read_binary (&E, PublicExponent, PublicExponentSize);
-    PE  = 0x10001;
+    if (PublicExponentSize == 0) {
+        return FALSE;
+    }
+
+    switch (PublicExponentSize) {
+    case 1:
+        E = PublicExponent[0];
+        break;
+    case 2:
+        E = PublicExponent[0] << 8 | PublicExponent[1];
+        break;
+    case 3:
+        E = PublicExponent[0] << 16 | PublicExponent[1] << 8 |
+            PublicExponent[2];
+        break;
+    case 4:
+        E = PublicExponent[0] << 24 | PublicExponent[1] << 16 |
+            PublicExponent[2] << 8 | PublicExponent[3];
+        break;
+    default:
+        return FALSE;
+    }
   }
 
   if (Ret == 0) {
@@ -199,11 +215,10 @@ RsaGenerateKey (
                                myrand,
                                NULL,
                                (UINT32)ModulusLength,
-                               PE
+                               E
                                );
   }
 
-  mbedtls_mpi_free (&E);
   return Ret == 0;
 }
 
