@@ -477,6 +477,7 @@ EcPointInvert (
   mbedtls_ecp_group  *grp;
   mbedtls_mpi        InvBnY;
   mbedtls_mpi        P;
+  BOOLEAN            Status;
 
   pt  = (mbedtls_ecp_point *)EcPoint;
   grp = (mbedtls_ecp_group *)EcGroup;
@@ -497,34 +498,33 @@ EcPointInvert (
   mbedtls_mpi_init (&P);
 
   if (mbedtls_mpi_copy (&InvBnY, &pt->Y) != 0) {
-    mbedtls_mpi_free (&P);
-    mbedtls_mpi_free (&InvBnY);
-    return FALSE;
+    Status = FALSE;
+    goto Clean;
   }
 
   if (mbedtls_mpi_copy (&P, &grp->P) != 0) {
-    mbedtls_mpi_free (&P);
-    mbedtls_mpi_free (&InvBnY);
-    return FALSE;
+    Status = FALSE;
+    goto Clean;
   }
 
   InvBnY.s = 0 - InvBnY.s;
 
   if (mbedtls_mpi_mod_mpi (&InvBnY, &InvBnY, &P) != 0) {
-    mbedtls_mpi_free (&P);
-    mbedtls_mpi_free (&InvBnY);
-    return FALSE;
+    Status = FALSE;
+    goto Clean;
   }
 
   if (mbedtls_mpi_copy (&pt->Y, &InvBnY) != 0) {
-    mbedtls_mpi_free (&P);
-    mbedtls_mpi_free (&InvBnY);
-    return FALSE;
+    Status = FALSE;
+    goto Clean;
   }
 
+  Status = TRUE;
+
+Clean:
   mbedtls_mpi_free (&P);
   mbedtls_mpi_free (&InvBnY);
-  return TRUE;
+  return Status;
 }
 
 /**
@@ -1312,6 +1312,7 @@ EcDsaSign (
   UINTN                 RSize;
   UINTN                 SSize;
   UINTN                 HalfSize;
+  BOOLEAN               Status;
 
   if ((EcContext == NULL) || (MessageHash == NULL)) {
     return FALSE;
@@ -1384,7 +1385,8 @@ EcDsaSign (
                             NULL
                             );
   if (Ret != 0) {
-    return FALSE;
+    Status = FALSE;
+    goto Clean;
   }
 
   RSize = mbedtls_mpi_size (&R);
@@ -1393,22 +1395,23 @@ EcDsaSign (
 
   Ret = mbedtls_mpi_write_binary (&R, &Signature[0 + HalfSize - RSize], RSize);
   if (Ret != 0) {
-    mbedtls_mpi_free (&R);
-    mbedtls_mpi_free (&S);
-    return FALSE;
+    Status = FALSE;
+    goto Clean;
   }
 
   Ret = mbedtls_mpi_write_binary (&S, &Signature[HalfSize + HalfSize - SSize], SSize);
   if (Ret != 0) {
-    mbedtls_mpi_free (&R);
-    mbedtls_mpi_free (&S);
-    return FALSE;
+    Status = FALSE;
+    goto Clean;
   }
 
+  Status = TRUE;
+
+Clean:
   mbedtls_mpi_free (&R);
   mbedtls_mpi_free (&S);
 
-  return TRUE;
+  return Status;
 }
 
 /**
@@ -1450,6 +1453,7 @@ EcDsaVerify (
   mbedtls_mpi           R;
   mbedtls_mpi           S;
   UINTN                 HalfSize;
+  BOOLEAN               Status;
 
   if ((EcContext == NULL) || (MessageHash == NULL) || (Signature == NULL)) {
     return FALSE;
@@ -1509,16 +1513,14 @@ EcDsaVerify (
 
   Ret = mbedtls_mpi_read_binary (&R, Signature, HalfSize);
   if (Ret != 0) {
-    mbedtls_mpi_free (&R);
-    mbedtls_mpi_free (&S);
-    return FALSE;
+    Status = FALSE;
+    goto Clean;
   }
 
   Ret = mbedtls_mpi_read_binary (&S, Signature + HalfSize, HalfSize);
   if (Ret != 0) {
-    mbedtls_mpi_free (&R);
-    mbedtls_mpi_free (&S);
-    return FALSE;
+    Status = FALSE;
+    goto Clean;
   }
 
   Ret = mbedtls_ecdsa_verify (
@@ -1529,12 +1531,16 @@ EcDsaVerify (
                               &R,
                               &S
                               );
+  if (Ret != 0) {
+    Status = FALSE;
+    goto Clean;
+  }
+
+  Status = TRUE;
+
+Clean:
   mbedtls_mpi_free (&R);
   mbedtls_mpi_free (&S);
 
-  if (Ret != 0) {
-    return FALSE;
-  }
-
-  return TRUE;
+  return Status;
 }
