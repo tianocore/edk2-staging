@@ -29,12 +29,10 @@ The core function of the original C VfrCompiler tool is to convert VFR files int
 - Future extension
   - The tool will extend new functions, which is able to compile yaml files. This feature will be added in future update.
 
-### Use with Build System
-To use the VfrCompiler Python Tool with Build System,  please do the following steps in the build command.
+### Implementation method
+
+To apply the VfrCompiler python tool with Build System, the code modifies the following steps in the build command.
 1. Locate the **VfrCompiler** folder to path **'\edk2\BaseTools\Source\Python'.**
-1. Open  **'build_rule.template'**  file  in path **'\edk2\BaseTools\Conf\'.**
-  - Find the C VFR command line `$(VFR)" $(VFR_FLAGS) --string-db $(OUTPUT_DIR)(+)$(MODULE_NAME)StrDefs.hpk --output-directory ${d_path} $(OUTPUT_DIR)(+)${s_base}.i` in **build_rule.template** file. There are two C VFR commands in it.
-  - Add new command line `"$(PYVFR)" ${src} --string-db $(OUTPUT_DIR)(+)$(MODULE_NAME)StrDefs.hpk -w $(WORKSPACE) -m $(MODULE_NAME) -o $(OUTPUT_DIR) --vfr` after each VFR command lines.
 2. Open  **'tools_def.template'**  file  in path **'\edk2\BaseTools\Conf\'.**
   - Find the C VFR_PATH command line `*_*_*_VFR_PATH                      = VfrCompile` in **tools_def.template** file.
   - Add new command line `*_*_*_PYVFR_PATH                    = PyVfrCompile` after the VFR_PATH command line.
@@ -51,7 +49,7 @@ To use the VfrCompiler Python Tool with Build System,  please do the following s
     ```
     #!/usr/bin/env bash
     #python `dirname $0`/RunToolFromSource.py `basename $0` $*
-
+    
     # If a ${PYTHON_COMMAND} command is available, use it in preference to python
     if command -v ${PYTHON_COMMAND} >/dev/null 2>&1; then
         python_exe=${PYTHON_COMMAND}
@@ -59,10 +57,19 @@ To use the VfrCompiler Python Tool with Build System,  please do the following s
     full_cmd=${BASH_SOURCE:-$0} # see http://mywiki.wooledge.org/BashFAQ/028 for a discussion of why $0 is not a good choice here
     dir=$(dirname "$full_cmd")
     cmd=${full_cmd##*/}
-
+    
     export PYTHONPATH="$dir/../../Source/Python:$dir/../../Source/Python/VfrCompiler:$dir/../../Source/Python${PYTHONPATH:+:"$PYTHONPATH"}"
     exec "${python_exe:-python}" -m IfrCompiler "$@"
     ```
-5. Add Env: run `pip install antlr4-python3-runtime==4.7.1` based on the original build environment.
-6. Run Build Command: `build -p OvmfPkg\OvmfPkgIa32X64.dsc -a IA32 -a X64 -j build.log`
-`
+### How to use
+
+1. Add Env: run `pip install antlr4-python3-runtime==4.7.1` based on the original build environment.
+2. Open  **'build_rule.template'**  file  in path **'\edk2\BaseTools\Conf\'.**
+   - Find the C VFR command line `$(VFR)" $(VFR_FLAGS) --string-db $(OUTPUT_DIR)(+)$(MODULE_NAME)StrDefs.hpk --output-directory ${d_path} $(OUTPUT_DIR)(+)${s_base}.i` in **build_rule.template** file. There are two C VFR commands in it.
+   - Add new command line `"$(PYVFR)" ${src} --string-db $(OUTPUT_DIR)(+)$(MODULE_NAME)StrDefs.hpk -w $(WORKSPACE) -m $(MODULE_NAME) -o $(OUTPUT_DIR) --vfr` after each VFR command lines.
+3. Run Build Command: `build -p OvmfPkg\OvmfPkgIa32X64.dsc -a IA32 -a X64 -j build.log` to have a try.
+
+### Tips
+
+1. The output of the python tool will not override the output of the original C tool. Instead, it will be prefixed with "PyVfr".
+2. If you want to activate/deactivate the python tool, please locate and add/delete all `"$(PYVFR)" ${src} --string-db $(OUTPUT_DIR)(+)$(MODULE_NAME)StrDefs.hpk -w $(WORKSPACE) -m $(MODULE_NAME) -o $(OUTPUT_DIR) --vfr` command lines in **'build_rule.template'**.
