@@ -552,11 +552,9 @@ LibGetFvSize (
   )
 {
 
-  UINTN                          BytesRead;
   UINT32                         Size;
   EFI_FV_BLOCK_MAP_ENTRY         BlockMap;
 
-  BytesRead = 0;
   Size      = 0;
 
   if (InputFile == NULL || FvSize == NULL) {
@@ -567,7 +565,6 @@ LibGetFvSize (
   fseek (InputFile, sizeof (EFI_FIRMWARE_VOLUME_HEADER) - sizeof (EFI_FV_BLOCK_MAP_ENTRY), SEEK_CUR);
   do {
     fread (&BlockMap, sizeof (EFI_FV_BLOCK_MAP_ENTRY), 1, InputFile);
-    BytesRead += sizeof (EFI_FV_BLOCK_MAP_ENTRY);
 
     if (BlockMap.NumBlocks != 0) {
       Size += BlockMap.NumBlocks * BlockMap.Length;
@@ -813,7 +810,6 @@ LibParseSection (
   CHAR16              *UIName;
   UINT32              UINameSize;
   BOOLEAN             HasDepexSection;
-  UINT32              NumberOfSections;
   ENCAP_INFO_DATA     *LocalEncapData;
   ENCAP_INFO_DATA     *LocalEncapDataTemp;
   CHAR8               *BlankChar;
@@ -846,7 +842,6 @@ LibParseSection (
   ParsedLength               = 0;
   ToolOutputLength           = 0;
   UINameSize                 = 0;
-  NumberOfSections           = 0;
   UncompressedLength         = 0;
   CompressedLength           = 0;
   CompressionType            = 0;
@@ -910,7 +905,6 @@ LibParseSection (
       HasUiSection = TRUE;
 
       Level ++;
-      NumberOfSections ++;
 
       CurrentFv->FfsAttuibutes[*FfsCount].IsLeaf = FALSE;
       CurrentFv->FfsAttuibutes[*FfsCount].IsFvStart = TRUE;
@@ -1021,7 +1015,6 @@ LibParseSection (
           Level ++;
         }
       }
-      NumberOfSections ++;
 
       EncapDataNeedUpdata = TRUE;
       HasUiSection = TRUE;
@@ -1211,7 +1204,6 @@ LibParseSection (
           Level ++;
         }
       }
-      NumberOfSections++;
       EncapDataNeedUpdata = TRUE;
       HasUiSection = TRUE;
       //
@@ -1559,7 +1551,6 @@ LibParseSection (
     //Leaf sections
     //
     case EFI_SECTION_RAW:
-      NumberOfSections ++;
       CurrentFv->FfsAttuibutes[*FfsCount].Level = Level;
       if (!ViewFlag) {
         if (!*IsFfsGenerated) {
@@ -1570,7 +1561,6 @@ LibParseSection (
 
       break;
     case EFI_SECTION_PE32:
-      NumberOfSections ++;
       CurrentFv->FfsAttuibutes[*FfsCount].Level = Level;
       if (!ViewFlag) {
         if (!*IsFfsGenerated) {
@@ -1581,7 +1571,6 @@ LibParseSection (
 
       break;
     case EFI_SECTION_PIC:
-      NumberOfSections ++;
       CurrentFv->FfsAttuibutes[*FfsCount].Level = Level;
       if (!ViewFlag) {
         if (!*IsFfsGenerated) {
@@ -1592,7 +1581,6 @@ LibParseSection (
 
       break;
     case EFI_SECTION_TE:
-      NumberOfSections ++;
       CurrentFv->FfsAttuibutes[*FfsCount].Level = Level;
       if (!ViewFlag) {
         if (!*IsFfsGenerated) {
@@ -1603,7 +1591,6 @@ LibParseSection (
       break;
 
     case EFI_SECTION_COMPATIBILITY16:
-      NumberOfSections ++;
       CurrentFv->FfsAttuibutes[*FfsCount].Level = Level;
       if (!ViewFlag) {
         if (!*IsFfsGenerated) {
@@ -1614,7 +1601,6 @@ LibParseSection (
       break;
 
     case EFI_SECTION_FREEFORM_SUBTYPE_GUID:
-      NumberOfSections ++;
       CurrentFv->FfsAttuibutes[*FfsCount].Level = Level;
       if (!ViewFlag) {
         if (!*IsFfsGenerated) {
@@ -1625,11 +1611,9 @@ LibParseSection (
       break;
 
     case EFI_SECTION_VERSION:
-      NumberOfSections ++;
       CurrentFv->FfsAttuibutes[*FfsCount].Level = Level;
       break;
     case EFI_SECTION_PEI_DEPEX:
-      NumberOfSections ++;
       CurrentFv->FfsAttuibutes[*FfsCount].Level = Level;
       HasDepexSection = TRUE;
       CurrentFv->FfsAttuibutes[*FfsCount].PeiDepex = malloc (SectionLength);
@@ -1637,7 +1621,6 @@ LibParseSection (
       CurrentFv->FfsAttuibutes[*FfsCount].PeiDepexLen = SectionLength;
       break;
     case EFI_SECTION_DXE_DEPEX:
-      NumberOfSections ++;
       CurrentFv->FfsAttuibutes[*FfsCount].Level = Level;
       HasDepexSection = TRUE;
       CurrentFv->FfsAttuibutes[*FfsCount].DxeDepex = malloc (SectionLength);
@@ -1645,7 +1628,6 @@ LibParseSection (
       CurrentFv->FfsAttuibutes[*FfsCount].DxeDepexLen = SectionLength;
       break;
     case EFI_SECTION_SMM_DEPEX:
-      NumberOfSections ++;
       CurrentFv->FfsAttuibutes[*FfsCount].Level = Level;
       HasDepexSection = TRUE;
       CurrentFv->FfsAttuibutes[*FfsCount].SmmDepex = malloc (SectionLength);
@@ -1655,7 +1637,6 @@ LibParseSection (
 
     case EFI_SECTION_USER_INTERFACE:
       HasUiSection = TRUE;
-      NumberOfSections ++;
       CurrentFv->FfsAttuibutes[*FfsCount].Level = Level;
 
       UiSectionLength = GetLength (((EFI_USER_INTERFACE_SECTION *) Ptr)->CommonHeader.Size);
@@ -2186,7 +2167,6 @@ LibGetFvInfo (
   )
 {
   EFI_STATUS                  Status;
-  UINTN                       NumberOfFiles;
   BOOLEAN                     ErasePolarity;
   UINTN                       FvSize;
   EFI_FFS_FILE_HEADER2        *CurrentFile;
@@ -2196,7 +2176,6 @@ LibGetFvInfo (
   EFI_FIRMWARE_VOLUME_HEADER *FvHdr;
   UINT8                      PreFvId;
 
-  NumberOfFiles  = 0;
   Key            = 0;
   LocalEncapData = NULL;
   CurrentFile    = NULL;
@@ -2381,11 +2360,6 @@ LibGetFvInfo (
   PreFvId = *FvCount;
 
   while (CurrentFile != NULL) {
-
-    //
-    // Increment the number of files counter
-    //
-    NumberOfFiles++;
 
     //
     // Store FFS file Header information
