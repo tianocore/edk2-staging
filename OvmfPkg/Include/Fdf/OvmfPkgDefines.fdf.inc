@@ -36,6 +36,7 @@ DEFINE CODE_BLOCKS       = 0xE0
 DEFINE FVMAIN_SIZE       = 0x000CC000
 DEFINE SECFV_OFFSET      = 0x000EC000
 DEFINE SECFV_SIZE        = 0x14000
+DEFINE SECFV_ADDRESS     = 0xFFFEC000
 !endif
 
 !if $(FD_SIZE_IN_KB) == 2048
@@ -48,6 +49,7 @@ DEFINE CODE_BLOCKS       = 0x1E0
 DEFINE FVMAIN_SIZE       = 0x001AC000
 DEFINE SECFV_OFFSET      = 0x001CC000
 DEFINE SECFV_SIZE        = 0x34000
+DEFINE SECFV_ADDRESS     = 0xFFFCC000
 !endif
 
 !if $(FD_SIZE_IN_KB) == 4096
@@ -65,6 +67,7 @@ DEFINE CODE_BLOCKS       = 0x37C
 DEFINE FVMAIN_SIZE       = 0x00348000
 DEFINE SECFV_OFFSET      = 0x003CC000
 DEFINE SECFV_SIZE        = 0x34000
+DEFINE SECFV_ADDRESS     = 0xFFFCC000
 !endif
 
 SET gUefiOvmfPkgTokenSpaceGuid.PcdOvmfFdBaseAddress     = $(FW_BASE_ADDRESS)
@@ -96,6 +99,9 @@ SET gUefiOvmfPkgTokenSpaceGuid.PcdCfvRawDataSize    = $(VARS_SIZE)
 SET gUefiOvmfPkgTokenSpaceGuid.PcdBfvBase           = $(CODE_BASE_ADDRESS)
 SET gUefiOvmfPkgTokenSpaceGuid.PcdBfvRawDataOffset  = $(VARS_SIZE)
 SET gUefiOvmfPkgTokenSpaceGuid.PcdBfvRawDataSize    = $(CODE_SIZE)
+
+SET gUefiOvmfPkgTokenSpaceGuid.PcdOvmfSecFvBase         = $(SECFV_ADDRESS)
+SET gUefiOvmfPkgTokenSpaceGuid.PcdOvmfSecFvRawDataSize  = $(SECFV_SIZE)
 
 !if $(SMM_REQUIRE) == TRUE
 SET gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageVariableBase64 = gUefiOvmfPkgTokenSpaceGuid.PcdOvmfFlashNvStorageVariableBase

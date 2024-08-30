@@ -210,6 +210,7 @@
   TpmMeasurementLib|SecurityPkg/Library/DxeTpmMeasurementLib/DxeTpmMeasurementLib.inf
 
 !include OvmfPkg/Include/Dsc/ShellLibs.dsc.inc
+!include OvmfPkg/Include/Dsc/OvmfTpmLibs.dsc.inc
 
 [LibraryClasses.common]
   AmdSvsmLib|UefiCpuPkg/Library/AmdSvsmLibNull/AmdSvsmLibNull.inf
@@ -529,6 +530,8 @@
 
   gEfiMdePkgTokenSpaceGuid.PcdFSBClock|1000000000
 
+!include OvmfPkg/Include/Dsc/OvmfTpmPcds.dsc.inc
+
 ################################################################################
 #
 # Components Section - list of all EDK II Modules needed by this Platform.
@@ -727,7 +730,10 @@
   OvmfPkg/PlatformDxe/Platform.inf
   OvmfPkg/IoMmuDxe/IoMmuDxe.inf
 
-  OvmfPkg/TdxDxe/TdxDxe.inf
+  OvmfPkg/TdxDxe/TdxDxe.inf {
+    <LibraryClasses>
+      Tpm2DeviceLib|SecurityPkg/Library/Tpm2DeviceLibDTpm/Tpm2DeviceLibDTpm.inf
+  }
 
   #
   # Variable driver stack (non-SMM)
@@ -751,3 +757,8 @@
       HashLib|OvmfPkg/Library/HashLibTdx/HashLibTdx.inf
       NULL|SecurityPkg/Library/HashInstanceLibSha384/HashInstanceLibSha384.inf
   }
+  
+  #
+  # TPM support
+  #
+  !include OvmfPkg/Include/Dsc/OvmfTpmComponentsDxe.dsc.inc

@@ -32,6 +32,9 @@
 #include <Library/TdxLib.h>
 #include <TdxAcpiTable.h>
 #include <Library/MemEncryptTdxLib.h>
+#include <WorkArea.h>
+#include <Library/Tpm2CommandLib.h>
+#include <Library/Tpm2DeviceLib.h>
 
 #define ALIGNED_2MB_MASK  0x1fffff
 EFI_HANDLE  mTdxDxeHandle = NULL;
@@ -301,6 +304,58 @@ SetMmioSharedBit (
   return EFI_SUCCESS;
 }
 
+#ifdef TDX_PEI_LESS_BOOT
+STATIC
+EFI_STATUS
+SetVtpmDeviceInstance (
+  VOID
+  )
+{
+  EFI_STATUS            Status;
+  OVMF_WORK_AREA        *WorkArea;
+  UINTN                 Size;
+  UINT32                TpmHashAlgorithmBitmap;
+  UINT32                TpmActivePcrBanks;
+
+  DEBUG ((DEBUG_INFO, ">>%a\n", __func__));
+
+  WorkArea = (OVMF_WORK_AREA *)FixedPcdGet32 (PcdOvmfWorkAreaBase);
+  if (WorkArea == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  if (WorkArea->TdxWorkArea.SecTdxWorkArea.MeasurementType == TDX_MEASUREMENT_TYPE_VTPM)
+  {
+    // Set PcdTpmInstanceGuid
+    Size   = sizeof (gEfiTpmDeviceInstanceTpm20DtpmGuid);
+    Status = PcdSetPtrS (
+                PcdTpmInstanceGuid,
+                &Size,
+                &gEfiTpmDeviceInstanceTpm20DtpmGuid
+                );
+    ASSERT_EFI_ERROR (Status);
+    if (EFI_ERROR(Status)) {
+      DEBUG((DEBUG_ERROR, "Set PcdTpmInstanceGuid failed with %r\n", Status));
+    }
+
+    Status = Tpm2RequestUseTpm ();
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_ERROR, "TPM2 not detected!\n"));
+      return Status;
+    }
+
+    // Determine the current TPM support and the Platform PCR mask.
+    Status = Tpm2GetCapabilitySupportedAndActivePcrs (&TpmHashAlgorithmBitmap, &TpmActivePcrBanks);
+    ASSERT_EFI_ERROR (Status);
+    // Set active pcr banks
+    Status = PcdSet32S (PcdTpm2HashMask, TpmActivePcrBanks);
+    ASSERT_RETURN_ERROR (Status);
+  }
+
+  return EFI_SUCCESS;
+}
+#endif
+
 EFI_STATUS
 EFIAPI
 TdxDxeEntryPoint (
@@ -339,6 +394,9 @@ TdxDxeEntryPoint (
   // need to set PCDs based on these information.
   //
   SetPcdSettings (PlatformInfo);
+  // In Pei-less boot, the `TpmInstance` Pcd shall be set if virtual TPM
+  // is detected.
+  SetVtpmDeviceInstance();
  #endif
 
   if (!TdIsEnabled () || TdpIsEnabled ()) {

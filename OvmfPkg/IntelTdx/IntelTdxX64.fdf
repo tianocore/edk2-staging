@@ -257,6 +257,11 @@ INF  MdeModulePkg/Universal/Variable/RuntimeDxe/VariableRuntimeDxe.inf
 #
 INF OvmfPkg/Tcg/TdTcg2Dxe/TdTcg2Dxe.inf
 
+#
+# TPM support
+#
+!include OvmfPkg/Include/Fdf/OvmfTpmDxe.fdf.inc
+
 ################################################################################
 
 [FV.NCCFV]

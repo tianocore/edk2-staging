@@ -78,6 +78,17 @@ PeiFvInitialization (
   }
 
   //
+  // Let PEI measure the SEC FV
+  //
+  PeiServicesInstallFvInfoPpi (
+    NULL,
+    (VOID *)(UINTN)PcdGet32 (PcdOvmfSecFvBase),
+    PcdGet32 (PcdOvmfSecFvRawDataSize),
+    NULL,
+    NULL
+    );
+
+  //
   // Let PEI know about the DXE FV so it can find the DXE Core
   //
   PeiServicesInstallFvInfoPpi (

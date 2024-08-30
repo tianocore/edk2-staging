@@ -25,6 +25,7 @@
 [Sources]
   SecTdxHelper.c
   TdxMeasurementHob.c
+  TdxVirtualTpmDetection.c
 
 [Packages]
   CryptoPkg/CryptoPkg.dec
@@ -41,6 +42,7 @@
   PcdLib
   TdxMailboxLib
   TdxLib
+  MemoryAllocationLib
 
 [FixedPcd]
   gUefiOvmfPkgTokenSpaceGuid.PcdOvmfWorkAreaBase
@@ -51,3 +53,4 @@
 
 [Guids]
   gCcEventEntryHobGuid
+  gTcgEvent2EntryHobGuid              ## PRODUCES  ## HOB

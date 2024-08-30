@@ -23,6 +23,7 @@
 #include <WorkArea.h>
 #include <ConfidentialComputingGuestAttr.h>
 #include <Library/TdxHelperLib.h>
+#include <Library/MemoryAllocationLib.h>
 
 #define ALIGNED_2MB_MASK  0x1fffff
 #define MEGABYTE_SHIFT    20
@@ -40,6 +41,17 @@
 **/
 EFI_STATUS
 InternalBuildGuidHobForTdxMeasurement (
+  VOID
+  );
+
+/**
+ * Build the GUIDed HOB of the SVSM events
+ *
+ * @retval EFI_SUCCESS    Successfully detect vTPM and build the events HOB
+ * @retval Others         Other errors as indicated
+ */
+EFI_STATUS
+BuildSvsmEventsHob (
   VOID
   );
 
@@ -972,6 +984,11 @@ TdxHelperBuildGuidHobForTdxMeasurement (
   )
 {
  #ifdef TDX_PEI_LESS_BOOT
+  EFI_STATUS  Status;
+  Status = BuildSvsmEventsHob();
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
   return InternalBuildGuidHobForTdxMeasurement ();
  #else
   return EFI_UNSUPPORTED;

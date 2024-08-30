@@ -26,6 +26,7 @@
   MdePkg/MdePkg.dec
   UefiCpuPkg/UefiCpuPkg.dec
   OvmfPkg/OvmfPkg.dec
+  SecurityPkg/SecurityPkg.dec
 
 [LibraryClasses]
   BaseLib
@@ -39,12 +40,14 @@
   HobLib
   TdxMailboxLib
   MemEncryptTdxLib
+  Tpm2CommandLib
 
 [Depex]
   TRUE
 
 [Guids]
   gUefiOvmfPkgPlatformInfoGuid                      ## CONSUMES
+  gEfiTpmDeviceInstanceTpm20DtpmGuid                ## CONSUMES
 
 [Protocols]
   gQemuAcpiTableNotifyProtocolGuid                 ## CONSUMES
@@ -71,3 +74,6 @@
   gEfiMdeModulePkgTokenSpaceGuid.PcdSetNxForStack
   gEfiMdeModulePkgTokenSpaceGuid.PcdEmuVariableNvStoreReserved
   gUefiOvmfPkgTokenSpaceGuid.PcdTdxAcceptPageSize
+  gUefiOvmfPkgTokenSpaceGuid.PcdOvmfWorkAreaBase
+  gEfiSecurityPkgTokenSpaceGuid.PcdTpmInstanceGuid
+  gEfiSecurityPkgTokenSpaceGuid.PcdTpm2HashMask
