@@ -26,6 +26,8 @@
   DynamicTableManagerDxe.h
   SmbiosTableDispatcher.c
   SmbiosTableDispatcher.h
+  AcpiTableBuilder.c
+  SmbiosTableBuilder.c
 
 [Sources.ARM, Sources.AARCH64]
   Arm/ArmDynamicTableManager.c
@@ -52,13 +54,10 @@
   gEfiAcpiTableProtocolGuid                     # PROTOCOL ALWAYS_CONSUMED
   gEfiAcpiSdtProtocolGuid                       # PROTOCOL ALWAYS_CONSUMED
   gEfiSmbiosProtocolGuid                        # PROTOCOL ALWAYS_CONSUMED
-
   gEdkiiConfigurationManagerProtocolGuid        # PROTOCOL ALWAYS_CONSUMED
   gEdkiiDynamicTableFactoryProtocolGuid         # PROTOCOL ALWAYS_CONSUMED
 
 [Depex]
-  gEfiAcpiTableProtocolGuid AND
-  gEfiSmbiosProtocolGuid AND
   gEdkiiConfigurationManagerProtocolGuid AND
   gEdkiiDynamicTableFactoryProtocolGuid
 
