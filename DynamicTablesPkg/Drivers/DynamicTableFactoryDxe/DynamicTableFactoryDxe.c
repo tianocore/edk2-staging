@@ -44,6 +44,9 @@ EDKII_DYNAMIC_TABLE_FACTORY_PROTOCOL  DynamicTableFactoryProtocol = {
   GetDtTableGenerator,
   RegisterDtTableGenerator,
   DeregisterDtTableGenerator,
+  AddSmbiosHandle,
+  FindSmbiosHandle,
+  FindSmbiosHandleEx,
   &TableFactoryInfo
 };
 
@@ -65,6 +68,12 @@ DynamicTableFactoryDxeInitialize (
   )
 {
   EFI_STATUS  Status;
+  UINTN       Idx;
+
+  for (Idx = 0; Idx < FixedPcdGet16(PcdMaxSmbiosHandleMapEntries); Idx++) {
+    TableFactoryInfo.SmbiosHandleMap[Idx].SmbiosTblHandle = SMBIOS_HANDLE_PI_RESERVED;
+    TableFactoryInfo.SmbiosHandleMap[Idx].SmbiosCmToken   = 0;
+  }
 
   Status = gBS->InstallProtocolInterface (
                   &ImageHandle,
