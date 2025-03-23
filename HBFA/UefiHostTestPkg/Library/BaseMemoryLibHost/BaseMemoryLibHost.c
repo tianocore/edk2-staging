@@ -32,6 +32,7 @@ SetMem16 (
   IN UINT16  Value
   )
 {
+  Length /= sizeof (Value);
   for (; Length != 0; Length--) {
     ((UINT16*)Buffer)[Length - 1] = Value;
   }
@@ -46,6 +47,7 @@ SetMem32 (
   IN UINT32  Value
   )
 {
+  Length /= sizeof (Value);
   for (; Length != 0; Length--) {
     ((UINT32*)Buffer)[Length - 1] = Value;
   }
@@ -60,6 +62,7 @@ SetMem64 (
   IN UINT64  Value
   )
 {
+  Length /= sizeof (Value);
   for (; Length != 0; Length--) {
     ((UINT64*)Buffer)[Length - 1] = Value;
   }
