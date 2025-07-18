@@ -42,6 +42,9 @@
   ##  @libraryclass  Defines a set of SMBIOS string helper methods.
   SmbiosStringTableLib|Include/Library/SmbiosStringTableLib.h
 
+  ##  @libraryclass  Defines a set of SMBIOS releated SMC helper methods.
+  SmcbiosSmbLib|Include/Library/SmbiosSmcLib.h
+
 [LibraryClasses.AARCH64]
   ##  @libraryclass  Defines a set of APIs to populate CmObj using SCMI.
   DynamicTablesScmiInfoLib|Include/Library/DynamicTablesScmiInfoLib.h
