@@ -390,6 +390,45 @@ RampCloseAperture (
   return Status;
 }
 
+/** Empty RAMP protocol function
+**/
+STATIC
+EFI_STATUS
+EFIAPI
+RampOpenApertureNull (
+  IN  CONST EFI_PHYSICAL_ADDRESS                    Memory,
+  IN  CONST UINTN                                   Pages,
+  OUT       EFI_HANDLE                      *CONST  ApertureReference
+  )
+{
+  /*
+   * The empty protocol is only used to unblock loading the ArmCcaIoMmuDxe
+   * driver. It should never be called.
+   */
+  ASSERT(FALSE);
+
+  return EFI_UNSUPPORTED;
+}
+
+/** Empty RAMP protocol function
+**/
+STATIC
+EFI_STATUS
+EFIAPI
+RampCloseApertureNull (
+  IN  CONST EFI_HANDLE  ApertureReference,
+  IN        BOOLEAN     MemoryMapLocked
+  )
+{
+  /*
+   * The empty protocol is only used to unblock loading the ArmCcaIoMmuDxe
+   * driver. It should never be called.
+   */
+  ASSERT(FALSE);
+
+  return EFI_UNSUPPORTED;
+}
+
 /** Closes all open apertures.
   @param [in] MemoryMapLocked     The function is executing on the stack of
                                   gBS->ExitBootServices(); changes to the UEFI
@@ -509,6 +548,16 @@ EDKII_REALM_APERTURE_MANAGEMENT_PROTOCOL  Ramp = {
   RampCloseAperture
 };
 
+/** Empty RAMP when not in a Realm
+*/
+STATIC
+CONST
+EDKII_REALM_APERTURE_MANAGEMENT_PROTOCOL  RampNull = {
+  EDKII_REALM_APERTURE_MANAGEMENT_PROTOCOL_REVISION,
+  RampOpenApertureNull,
+  RampCloseApertureNull,
+};
+
 /**
   This routine is called to close all apertures before system reset.
 
@@ -597,16 +646,23 @@ RealmApertureManagementProtocolDxeInitialize (
   )
 {
   EFI_STATUS  Status;
-  EFI_HANDLE  Handle;
   EFI_EVENT   CloseAllAperturesEvent;
   EFI_EVENT   ExitBootEvent;
   VOID        *Registration;
+  EFI_HANDLE  Handle = NULL;
 
   // When the execution context is a Realm, install the Realm Aperture
-  // Management protocol otherwise return success so that other modules
-  // can run.
+  // Management protocol otherwise install the empty protocol and return success
+  // so that other modules can run.
   if (!IsRealm ()) {
-    return EFI_SUCCESS;
+    Status = gBS->InstallMultipleProtocolInterfaces (
+                    &Handle,
+                    &gEfiRealmApertureManagementProtocolGuid,
+                    &RampNull,
+                    NULL
+                    );
+    ASSERT_EFI_ERROR (Status);
+    return Status;
   }
 
   // Retrieve the IPA Width of the Realm for subsequent use to configure
@@ -652,7 +708,6 @@ RealmApertureManagementProtocolDxeInitialize (
     goto error_handler1;
   }
 
-  Handle = NULL;
   Status = gBS->InstallMultipleProtocolInterfaces (
                   &Handle,
                   &gEfiRealmApertureManagementProtocolGuid,

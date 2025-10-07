@@ -15,6 +15,7 @@
 #include <Library/ArmCcaRsiLib.h>
 #include <Library/ArmMmuLib.h>
 #include <Library/BaseLib.h>
+#include <Library/DebugLib.h>
 
 #include <Uefi/UefiMultiPhase.h>
 #include <Uefi/UefiSpec.h>
@@ -38,11 +39,12 @@ IsRealm (
   UINT32          UefiImpl;
   UINT32          RmmImplLow;
   UINT32          RmmImplHigh;
-  STATIC BOOLEAN  RealmWorld       = FALSE;
-  STATIC BOOLEAN  FlagsInitialised = FALSE;
+  VOID            *Hob;
+  UINT64          *IsRealmHobData;
+  BOOLEAN         RealmWorld       = FALSE;
 
-  if (!FlagsInitialised) {
-    FlagsInitialised = TRUE;
+  Hob = GetFirstGuidHob (&gArmCcaIsRealmGuid);
+  if (Hob == NULL) {
     if (ArmHasRme ()) {
       Status = RsiGetVersion (
                  &UefiImpl,
@@ -53,9 +55,26 @@ IsRealm (
         RealmWorld = TRUE;
       }
     }
+
+    IsRealmHobData = BuildGuidHob (&gArmCcaIsRealmGuid,
+                                   sizeof (*IsRealmHobData));
+    ASSERT (IsRealmHobData != NULL);
+    if (IsRealmHobData == NULL) {
+      return FALSE;
+    }
+    *IsRealmHobData = RealmWorld;
+
+    Hob = GetFirstGuidHob (&gArmCcaIsRealmGuid);
+
+  } else {
+    if (GET_GUID_HOB_DATA_SIZE (Hob) != sizeof (*IsRealmHobData)) {
+      ASSERT (0);
+      return FALSE;
+    }
+    IsRealmHobData = GET_GUID_HOB_DATA (Hob);
   }
 
-  return RealmWorld;
+  return *IsRealmHobData;
 }
 
 /**

@@ -35,15 +35,17 @@ ArmCcaIoMmuDxeEntryPoint (
   // When the execution context is a Realm, install ArmCcaIoMmu protocol
   // otherwise install the placeholder protocol so that other dependent
   // module can run.
-  Status = gBS->LocateProtocol (
-                  &gEfiRealmApertureManagementProtocolGuid,
-                  NULL,
-                  (VOID **)&mRamp
-                  );
-  if (!EFI_ERROR (Status)) {
-    // If the Realm Aperture Management Protocol is present
-    // then the execution context is a Realm.
-    Status = ArmCcaInstallIoMmuProtocol ();
+  if (IsRealm ()) {
+    Status = gBS->LocateProtocol (
+                    &gEfiRealmApertureManagementProtocolGuid,
+                    NULL,
+                    (VOID **)&mRamp
+                    );
+    if (!EFI_ERROR (Status)) {
+      // If the Realm Aperture Management Protocol is present
+      // then the execution context is a Realm.
+      Status = ArmCcaInstallIoMmuProtocol ();
+    }
   } else {
     DEBUG ((DEBUG_INFO, "Execution context is not a Realm.\n"));
     Handle = NULL;

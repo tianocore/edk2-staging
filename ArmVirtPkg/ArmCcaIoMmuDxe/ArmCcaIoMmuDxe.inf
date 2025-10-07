@@ -29,6 +29,7 @@
   ArmVirtPkg/ArmVirtPkg.dec
 
 [LibraryClasses]
+  ArmCcaLib
   BaseLib
   BaseMemoryLib
   DebugLib

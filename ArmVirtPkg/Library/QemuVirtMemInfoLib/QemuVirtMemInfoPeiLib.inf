@@ -31,6 +31,7 @@
 [LibraryClasses]
   ArmLib
   BaseLib
+  ArmCcaLib
   BaseMemoryLib
   DebugLib
   FdtLib

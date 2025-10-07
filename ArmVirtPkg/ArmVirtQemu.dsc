@@ -104,6 +104,9 @@
 
 [LibraryClasses.AARCH64]
   ArmPlatformLib|ArmVirtPkg/Library/ArmPlatformLibQemu/ArmPlatformLibQemu.inf
+  ArmCcaLib|ArmVirtPkg/Library/ArmCcaLib/ArmCcaLib.inf
+  ArmCcaRsiLib|ArmVirtPkg/Library/ArmCcaRsiLib/ArmCcaRsiLib.inf
+  BlobVerifierLib|ArmVirtPkg/Library/BlobVerifierLibArmCca/BlobVerifierLibArmCca.inf
 
 [LibraryClasses.ARM]
   ArmPlatformLib|ArmPlatformPkg/Library/ArmPlatformLibNull/ArmPlatformLibNull.inf
@@ -120,6 +123,9 @@
 
 [LibraryClasses.ARM.PEIM]
   BaseCryptLib|CryptoPkg/Library/BaseCryptLibMbedTls/PeiCryptLib.inf
+
+[LibraryClasses.AARCH64.SEC, LibraryClasses.AARCH64.PEI_CORE, LibraryClasses.AARCH64.PEIM]
+  ArmCcaInitPeiLib|ArmVirtPkg/Library/ArmCcaInitPeiLib/ArmCcaInitPeiLib.inf
 
 [LibraryClasses.common.DXE_DRIVER]
   AcpiPlatformLib|OvmfPkg/Library/AcpiPlatformLib/DxeAcpiPlatformLib.inf
@@ -276,6 +282,9 @@
   gArmTokenSpaceGuid.PcdArmArchTimerHypIntrNum|0x0
   gArmTokenSpaceGuid.PcdArmArchTimerHypVirtIntrNum|0x0
 
+  # Define PCD for emulating runtime variable storage when CFI flash is absent
+  gEfiMdeModulePkgTokenSpaceGuid.PcdEmuVariableNvModeEnable|FALSE
+
   #
   # ARM General Interrupt Controller
   #
@@ -346,6 +355,7 @@
   ArmPlatformPkg/Sec/Sec.inf
   MdeModulePkg/Core/Pei/PeiMain.inf
   ArmPlatformPkg/PlatformPei/PlatformPeim.inf
+  ArmVirtPkg/ArmCcaInitPei/ArmCcaInitPei.inf
   ArmVirtPkg/MemoryInitPei/MemoryInitPeim.inf
   ArmPkg/Drivers/CpuPei/CpuPei.inf
 
@@ -460,6 +470,10 @@
   #
   # Platform Driver
   #
+  ArmVirtPkg/QemuPlatformDxe/QemuPlatformDxe.inf {
+    <LibraryClasses>
+    NULL|OvmfPkg/Library/FdtNorFlashQemuLib/FdtNorFlashQemuLib.inf
+  }
   OvmfPkg/Fdt/VirtioFdtDxe/VirtioFdtDxe.inf
   EmbeddedPkg/Drivers/FdtClientDxe/FdtClientDxe.inf
   OvmfPkg/Fdt/HighMemDxe/HighMemDxe.inf
@@ -505,7 +519,11 @@
   MdeModulePkg/Application/BootManagerMenuApp/BootManagerMenuApp.inf
   OvmfPkg/QemuKernelLoaderFsDxe/QemuKernelLoaderFsDxe.inf {
     <LibraryClasses>
+!if $(ARCH) == AARCH64
+      NULL|ArmVirtPkg/Library/BlobVerifierLibArmCca/BlobVerifierLibArmCca.inf
+!else
       NULL|OvmfPkg/Library/BlobVerifierLibNull/BlobVerifierLibNull.inf
+!endif
   }
 
   #
@@ -594,3 +612,13 @@
     <LibraryClasses>
       NULL|OvmfPkg/Fdt/FdtPciPcdProducerLib/FdtPciPcdProducerLib.inf
   }
+
+  #
+  # Realm Aperture Management
+  #
+  ArmVirtPkg/RealmApertureManagementProtocolDxe/RealmApertureManagementProtocolDxe.inf
+
+  #
+  # IoMMU support for Arm CCA
+  #
+  ArmVirtPkg/ArmCcaIoMmuDxe/ArmCcaIoMmuDxe.inf

@@ -60,6 +60,9 @@
 [LibraryClasses.common]
   ArmLib|ArmPkg/Library/ArmLib/ArmBaseLib.inf
   ArmMmuLib|ArmPkg/Library/ArmMmuLib/ArmMmuBaseLib.inf
+  ArmCcaLib|ArmVirtPkg/Library/ArmCcaLib/ArmCcaLib.inf
+  ArmCcaRsiLib|ArmVirtPkg/Library/ArmCcaRsiLib/ArmCcaRsiLib.inf
+  BlobVerifierLib|ArmVirtPkg/Library/BlobVerifierLibArmCca/BlobVerifierLibArmCca.inf
 
   # Virtio Support
   VirtioLib|OvmfPkg/Library/VirtioLib/VirtioLib.inf
@@ -98,6 +101,9 @@
 
 [LibraryClasses.common.UEFI_DRIVER]
   UefiScsiLib|MdePkg/Library/UefiScsiLib/UefiScsiLib.inf
+
+[LibraryClasses.AARCH64.SEC, LibraryClasses.AARCH64.PEI_CORE, LibraryClasses.AARCH64.PEIM]
+  ArmCcaInitPeiLib|ArmVirtPkg/Library/ArmCcaInitPeiLib/ArmCcaInitPeiLib.inf
 
 [BuildOptions]
 !include NetworkPkg/NetworkBuildOptions.dsc.inc
@@ -274,6 +280,10 @@
 
 !include NetworkPkg/NetworkDynamicPcds.dsc.inc
 
+  # Define PCD for emulating runtime variable storage when CFI flash is absent
+  gEfiMdeModulePkgTokenSpaceGuid.PcdEmuVariableNvModeEnable|FALSE
+
+
 ################################################################################
 #
 # Components Section - list of all EDK II Modules needed by this Platform
@@ -378,6 +388,10 @@
   #
   # Platform Driver
   #
+  ArmVirtPkg/QemuPlatformDxe/QemuPlatformDxe.inf {
+    <LibraryClasses>
+    NULL|ArmVirtPkg/Library/NorFlashQemuLib/NorFlashQemuLib.inf
+  }
   OvmfPkg/Fdt/VirtioFdtDxe/VirtioFdtDxe.inf
   EmbeddedPkg/Drivers/FdtClientDxe/FdtClientDxe.inf
   OvmfPkg/Fdt/HighMemDxe/HighMemDxe.inf
@@ -419,7 +433,11 @@
   MdeModulePkg/Application/BootManagerMenuApp/BootManagerMenuApp.inf
   OvmfPkg/QemuKernelLoaderFsDxe/QemuKernelLoaderFsDxe.inf {
     <LibraryClasses>
+!if $(ARCH) == AARCH64
+      NULL|ArmVirtPkg/Library/BlobVerifierLibArmCca/BlobVerifierLibArmCca.inf
+!else
       NULL|OvmfPkg/Library/BlobVerifierLibNull/BlobVerifierLibNull.inf
+!endif
   }
 
   #
@@ -488,3 +506,13 @@
     <LibraryClasses>
       NULL|OvmfPkg/Fdt/FdtPciPcdProducerLib/FdtPciPcdProducerLib.inf
   }
+
+  #
+  # Realm Aperture Management
+  #
+  ArmVirtPkg/RealmApertureManagementProtocolDxe/RealmApertureManagementProtocolDxe.inf
+
+  #
+  # IoMMU support for Arm CCA
+  #
+  ArmVirtPkg/ArmCcaIoMmuDxe/ArmCcaIoMmuDxe.inf

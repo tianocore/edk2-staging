@@ -33,6 +33,7 @@
 
 [Packages]
   MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
   OvmfPkg/OvmfPkg.dec
   EmbeddedPkg/EmbeddedPkg.dec
 
@@ -43,12 +44,14 @@
   HobLib
   IoLib
   UefiBootServicesTableLib
+  UefiLib
 
 [Protocols]
   gFdtClientProtocolGuid                                ## CONSUMES
+  gEdkiiIoMmuProtocolGuid                               ## SOMETIMES_CONSUMES
 
 [Guids]
   gQemuFirmwareResourceHobGuid
 
 [Depex]
-  gFdtClientProtocolGuid
+  gFdtClientProtocolGuid AND ( gEdkiiIoMmuProtocolGuid OR gIoMmuAbsentProtocolGuid )

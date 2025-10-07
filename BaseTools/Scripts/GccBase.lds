@@ -26,7 +26,7 @@ SECTIONS {
    */
   . = PECOFF_HEADER_SIZE;
 
-  .text : ALIGN(CONSTANT(COMMONPAGESIZE)) {
+  .text : ALIGN(0x1000) {
     KEEP(*(.entry))
     *(.text .text.* .stub .gnu.linkonce.t.*)
     *(.rodata .rodata.* .gnu.linkonce.r.*)
@@ -49,7 +49,7 @@ SECTIONS {
    * between these sections is the same in the ELF and the PE/COFF versions of
    * this binary.
    */
-  .data ALIGN(ALIGNOF(.text)) : ALIGN(CONSTANT(COMMONPAGESIZE)) {
+  .data ALIGN(ALIGNOF(.text)) : ALIGN(0x1000) {
     *(.data .data.* .gnu.linkonce.d.*)
     *(.bss .bss.*)
   } :data
