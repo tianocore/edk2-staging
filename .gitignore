@@ -1,0 +1,12 @@
+.vs/
+build/
+nasm-2.13.03/
+nasm-2.13.03-win64.zip 
+openssl-1.0.2r-x64_86-win64/
+openssl-1.0.2r-x64_86-win64.zip 
+vc140.pdb
+./x64/
+./Release/
+CdeValidationPkg/library/ 
+./CdeValidationPkg/_CdeMofineLibrary/x64
+./CdeValidationPkg/_CdeMofineLibrary/Win32
