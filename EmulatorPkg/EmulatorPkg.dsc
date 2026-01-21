@@ -38,7 +38,7 @@
   DEFINE NETWORK_HTTP_BOOT_ENABLE = FALSE
   DEFINE NETWORK_HTTP_ENABLE      = FALSE
   DEFINE NETWORK_ISCSI_ENABLE     = FALSE
-  DEFINE SECURE_BOOT_ENABLE       = FALSE
+  DEFINE SECURE_BOOT_ENABLE       = TRUE
 
   #
   # Redfish definition
@@ -138,7 +138,7 @@
   ImagePropertiesRecordLib|MdeModulePkg/Library/ImagePropertiesRecordLib/ImagePropertiesRecordLib.inf
   RngLib|MdeModulePkg/Library/BaseRngLibTimerLib/BaseRngLibTimerLib.inf
   IntrinsicLib|CryptoPkg/Library/IntrinsicLib/IntrinsicLib.inf
-  OpensslLib|CryptoPkg/Library/OpensslLib/OpensslLib.inf
+  OpensslLib|CryptoPkg/Library/OpensslLib/OpensslLibFullAccel.inf
   BaseCryptLib|CryptoPkg/Library/BaseCryptLib/BaseCryptLib.inf
   TlsLib|CryptoPkg/Library/TlsLib/TlsLib.inf
 
@@ -701,7 +701,11 @@
   #
   # Must ovveride DLINK_FLAGS to remove /DLL when linking .exe
   #
+!if $(ARCH) in "X64"
+  MSFT:*_*_*_DLINK_FLAGS    == /out:"$(BIN_DIR)\$(BASE_NAME).exe" /NOLOGO /SUBSYSTEM:CONSOLE /IGNORE:4086 /MAP /OPT:REF /LTCG /MACHINE:X64
+!else
   MSFT:*_*_*_DLINK_FLAGS    == /out:"$(BIN_DIR)\$(BASE_NAME).exe" /NOLOGO /SUBSYSTEM:CONSOLE /IGNORE:4086 /MAP /OPT:REF /LTCG
+!endif
   MSFT:*_*_IA32_DLINK_FLAGS  = $(VISUAL_STUDIO_IA32_LIB_PATHS) $(VISUAL_STUDIO_LIBS)
   MSFT:*_*_X64_DLINK_FLAGS   = $(VISUAL_STUDIO_X64_LIB_PATHS)  $(VISUAL_STUDIO_LIBS)
   MSFT:DEBUG_*_*_DLINK_FLAGS = /DEBUG /pdb:"$(BIN_DIR)\$(BASE_NAME).pdb"
