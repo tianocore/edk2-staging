@@ -791,6 +791,15 @@ Pkcs7Verify (
   CONST UINT8  *Temp;
   UINTN        SignedDataSize;
   BOOLEAN      Wrapped;
+  EVP_PKEY     *PKey;
+  BOOLEAN      IsMlDsa;
+  EVP_PKEY_CTX *PCtx;
+  CONST UINT8  *Sig;
+  UINTN        SigLen;
+  STACK_OF(PKCS7_SIGNER_INFO) *SiStack;
+  PKCS7_SIGNER_INFO *Si;
+  UINT8        *AttrDer;
+  UINTN        AttrDerLen;
 
   //
   // Check input parameters.
@@ -805,6 +814,10 @@ Pkcs7Verify (
   DataBio   = NULL;
   Cert      = NULL;
   CertStore = NULL;
+  PCtx      = NULL;
+  PKey      = NULL;
+  IsMlDsa   = FALSE;
+  AttrDer   = NULL;
 
   //
   // Register & Initialize necessary digest algorithms for PKCS#7 Handling
@@ -869,6 +882,36 @@ Pkcs7Verify (
     goto _Exit;
   }
 
+  PKey = X509_get0_pubkey (Cert);
+  if (PKey == NULL) {
+    goto _Exit;
+  }
+
+  if ((AsciiStrCmp (EVP_PKEY_get0_type_name (PKey), "ML-DSA-87") == 0)) {
+    IsMlDsa = TRUE;
+    PCtx = EVP_PKEY_CTX_new_from_pkey (NULL, PKey, NULL);
+    if (PCtx == NULL) {
+      goto _Exit;
+    }
+    SiStack = PKCS7_get_signer_info(Pkcs7);
+    if (SiStack == NULL || sk_PKCS7_SIGNER_INFO_num(SiStack) == 0) {
+      goto _Exit;
+    }
+    //
+    // Assume only 1 signature in signer info
+    //
+    Si = sk_PKCS7_SIGNER_INFO_value(SiStack, 0);
+    //
+    // Get signature from signer info
+    //
+    Sig = Si->enc_digest->data;
+    SigLen = Si->enc_digest->length;
+    //
+    // Get auth attr from signer info
+    //
+    AttrDerLen = ASN1_item_i2d((ASN1_VALUE *)Si->auth_attr, &AttrDer, ASN1_ITEM_rptr(PKCS7_ATTR_VERIFY));
+  }
+
   //
   // Setup X509 Store for trusted certificate
   //
@@ -909,7 +952,25 @@ Pkcs7Verify (
   //
   // Verifies the PKCS#7 signedData structure
   //
-  Status = (BOOLEAN)PKCS7_verify (Pkcs7, NULL, CertStore, DataBio, NULL, PKCS7_BINARY);
+  if (IsMlDsa) {
+    //
+    // ML-DSA-87 key type is not supported by PKCS7_verify, Need to verify signature manually
+    // So only check the formatting of the PKCS7 and X509 structure by PKCS7_NOSIGS flag.
+    //
+    Status = (BOOLEAN)PKCS7_verify (Pkcs7, NULL, CertStore, DataBio, NULL, PKCS7_BINARY | PKCS7_NOSIGS);
+    if (Status) {
+      if (EVP_PKEY_verify_message_init(PCtx, NULL, NULL) <= 0) {
+        Status = FALSE;
+        goto _Exit;
+      }
+      if (EVP_PKEY_verify(PCtx, Sig, SigLen, AttrDer, AttrDerLen) <= 0) {
+        Status = FALSE;
+        goto _Exit;
+      }
+    }
+  } else {
+    Status = (BOOLEAN)PKCS7_verify (Pkcs7, NULL, CertStore, DataBio, NULL, PKCS7_BINARY);
+  }
 
 _Exit:
   //
@@ -919,6 +980,7 @@ _Exit:
   X509_free (Cert);
   X509_STORE_free (CertStore);
   PKCS7_free (Pkcs7);
+  EVP_PKEY_CTX_free (PCtx);
 
   if (!Wrapped) {
     OPENSSL_free (SignedData);
