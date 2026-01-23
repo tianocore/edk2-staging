@@ -1814,6 +1814,25 @@ RsaGetPublicKeyFromX509 (
   );
 
 /**
+  Retrieve the ML-DSA Public Key from one DER-encoded X509 certificate.
+
+  @param[in]  Cert         Pointer to the DER-encoded X509 certificate.
+  @param[in]  CertSize     Size of the X509 certificate in bytes.
+
+  If Cert is NULL, then return FALSE.
+
+  @retval  TRUE   ML-DSA Public Key was retrieved successfully.
+  @retval  FALSE  Fail to retrieve ML-DSA public key from X509 certificate.
+
+**/
+BOOLEAN
+EFIAPI
+MlDsaGetPublicKeyFromX509 (
+  IN   CONST UINT8  *Cert,
+  IN   UINTN        CertSize
+  );
+
+/**
   Retrieve the subject bytes from one X.509 certificate.
 
   If Cert is NULL, then return FALSE.

@@ -525,6 +525,7 @@ CheckSignatureListFormat (
   VOID                *RsaContext;
   EFI_SIGNATURE_DATA  *CertData;
   UINTN               CertLen;
+  BOOLEAN             IsValidAlg;
 
   if (DataSize == 0) {
     return EFI_SUCCESS;
@@ -591,11 +592,21 @@ CheckSignatureListFormat (
       CertData   = (EFI_SIGNATURE_DATA *)((UINT8 *)SigList + sizeof (EFI_SIGNATURE_LIST) + SigList->SignatureHeaderSize);
       CertLen    = SigList->SignatureSize - sizeof (EFI_GUID);
       RsaContext = NULL;
-      if (!RsaGetPublicKeyFromX509 (CertData->SignatureData, CertLen, &RsaContext)) {
-        return EFI_INVALID_PARAMETER;
+      IsValidAlg = FALSE;
+
+      if (RsaGetPublicKeyFromX509 (CertData->SignatureData, CertLen, &RsaContext)) {
+        IsValidAlg = TRUE;
+        DEBUG ((DEBUG_INFO, "CheckSignatureListFormat - X509 RSA check succ\n"));
+      } else if (MlDsaGetPublicKeyFromX509 (CertData->SignatureData, CertLen)) {
+        IsValidAlg = TRUE;
+        DEBUG ((DEBUG_INFO, "CheckSignatureListFormat - X509 ML-DSA check succ\n"));
       }
 
       RsaFree (RsaContext);
+      if (!IsValidAlg) {
+        DEBUG ((DEBUG_ERROR, "CheckSignatureListFormat - X509 Cert invalid\n"));
+        return EFI_INVALID_PARAMETER;
+      }
     }
 
     if ((SigList->SignatureListSize - sizeof (EFI_SIGNATURE_LIST) - SigList->SignatureHeaderSize) % SigList->SignatureSize != 0) {
