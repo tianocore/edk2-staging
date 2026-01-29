@@ -1,0 +1,48 @@
+## @file
+#  UEFI Application to update Secure Boot variables (PK, KEK, DB, DBX) in Emulator environment.
+#
+#  Copyright (c) 2026, Intel Corporation. All rights reserved.<BR>
+#  SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = SecureBootUpdate
+  FILE_GUID                      = A7C5D7E1-8F2B-4D3C-9E4F-1A2B3C4D5E6F
+  MODULE_TYPE                    = UEFI_APPLICATION
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = UefiMain
+
+[Sources]
+  SecureBootUpdate.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  SecurityPkg/SecurityPkg.dec
+  ShellPkg/ShellPkg.dec
+
+[LibraryClasses]
+  UefiApplicationEntryPoint
+  UefiLib
+  UefiBootServicesTableLib
+  UefiRuntimeServicesTableLib
+  MemoryAllocationLib
+  BaseMemoryLib
+  DebugLib
+  PrintLib
+  ShellLib
+  FileHandleLib
+
+[Guids]
+  gEfiGlobalVariableGuid                ## CONSUMES
+  gEfiImageSecurityDatabaseGuid         ## CONSUMES
+  gEfiCertX509Guid                      ## CONSUMES
+  gEfiCertRsa2048Guid                   ## CONSUMES
+  gEfiCertSha256Guid                    ## CONSUMES
+  gEfiCertPkcs7Guid
+
+[Protocols]
+
+[BuildOptions]

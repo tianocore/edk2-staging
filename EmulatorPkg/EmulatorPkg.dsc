@@ -528,6 +528,7 @@
   EmulatorPkg/Application/RedfishPlatformConfig/RedfishPlatformConfig.inf
 !endif
 
+  EmulatorPkg/Test/SecureBootPQC/Driver/SecureBootUpdate.inf
 #
 # Fail with error message if the OS/Compiler combination is not supported
 #
