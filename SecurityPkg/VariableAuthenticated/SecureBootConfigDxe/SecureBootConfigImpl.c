@@ -366,6 +366,12 @@ CheckX509Certificate (
   //
   // Parse the public key context.
   //
+  if (MlDsaGetPublicKeyFromX509 (X509Data, X509DataSize) == TRUE) {
+    DEBUG ((DEBUG_INFO, "CheckX509Certificate: Detected MlDsa87 pubkey from certificate.\n"));
+    Status = EFI_SUCCESS;
+    goto ON_EXIT;
+  }
+
   if (RsaGetPublicKeyFromX509 (X509Data, X509DataSize, &X509PubKey) == FALSE) {
     DEBUG ((DEBUG_ERROR, "Error occurred while parsing the pubkey from certificate.\n"));
     Status = EFI_INVALID_PARAMETER;
