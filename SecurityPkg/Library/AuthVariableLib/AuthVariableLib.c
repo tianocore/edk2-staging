@@ -413,10 +413,13 @@ AuthVariableLibProcessVariable (
   )
 {
   EFI_STATUS  Status;
+  DEBUG ((DEBUG_INFO, "AuthVariableLibProcessVariable - Entry\n"));
 
   if (CompareGuid (VendorGuid, &gEfiGlobalVariableGuid) && (StrCmp (VariableName, EFI_PLATFORM_KEY_NAME) == 0)) {
+    DEBUG ((DEBUG_INFO, "AuthVariableLibProcessVariable - PK Update\n"));
     Status = ProcessVarWithPk (VariableName, VendorGuid, Data, DataSize, Attributes, TRUE);
   } else if (CompareGuid (VendorGuid, &gEfiGlobalVariableGuid) && (StrCmp (VariableName, EFI_KEY_EXCHANGE_KEY_NAME) == 0)) {
+    DEBUG ((DEBUG_INFO, "AuthVariableLibProcessVariable - KEK Update\n"));
     Status = ProcessVarWithPk (VariableName, VendorGuid, Data, DataSize, Attributes, FALSE);
   } else if (CompareGuid (VendorGuid, &gEfiImageSecurityDatabaseGuid) &&
              ((StrCmp (VariableName, EFI_IMAGE_SECURITY_DATABASE)  == 0) ||
@@ -424,6 +427,7 @@ AuthVariableLibProcessVariable (
               (StrCmp (VariableName, EFI_IMAGE_SECURITY_DATABASE2) == 0)
              ))
   {
+    DEBUG ((DEBUG_INFO, "AuthVariableLibProcessVariable - DB Update\n"));
     Status = ProcessVarWithPk (VariableName, VendorGuid, Data, DataSize, Attributes, FALSE);
     if (EFI_ERROR (Status)) {
       Status = ProcessVarWithKek (VariableName, VendorGuid, Data, DataSize, Attributes);

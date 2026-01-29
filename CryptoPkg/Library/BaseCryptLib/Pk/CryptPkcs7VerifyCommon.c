@@ -888,6 +888,7 @@ Pkcs7Verify (
   }
 
   if ((AsciiStrCmp (EVP_PKEY_get0_type_name (PKey), "ML-DSA-87") == 0)) {
+    DEBUG ((DEBUG_INFO, "Pkcs7Verify - ML-DSA-87 Signature\n"));
     IsMlDsa = TRUE;
     PCtx = EVP_PKEY_CTX_new_from_pkey (NULL, PKey, NULL);
     if (PCtx == NULL) {
@@ -973,6 +974,9 @@ Pkcs7Verify (
   }
 
 _Exit:
+  if (!Status) {
+    DEBUG ((DEBUG_INFO, "Pkcs7Verify - PKCS7 verify failed!\n"));
+  }
   //
   // Release Resources
   //

@@ -1713,6 +1713,11 @@ UpdateVariable (
   AUTHENTICATED_VARIABLE_HEADER       *AuthVariable;
   BOOLEAN                             AuthFormat;
 
+  DEBUG ((DEBUG_INFO, "[UpdateVariable] ========== ENTRY ==========\n"));
+  DEBUG ((DEBUG_INFO, "[UpdateVariable] VariableName: %s\n", VariableName));
+  DEBUG ((DEBUG_INFO, "[UpdateVariable] DataSize: 0x%x (%d bytes)\n", DataSize, DataSize));
+  DEBUG ((DEBUG_INFO, "[UpdateVariable] Attributes: 0x%08x\n", Attributes));
+  DEBUG ((DEBUG_INFO, "[UpdateVariable] KeyIndex: 0x%x\n", KeyIndex));
   if ((mVariableModuleGlobal->FvbInstance == NULL) && !mVariableModuleGlobal->VariableGlobal.EmuNvMode) {
     //
     // The FVB protocol is not ready, so the EFI_VARIABLE_WRITE_ARCH_PROTOCOL is not installed.
@@ -1818,6 +1823,7 @@ UpdateVariable (
       // Only variable that have NV attributes can be updated/deleted in Runtime.
       //
       if ((CacheVariable->CurrPtr->Attributes & EFI_VARIABLE_NON_VOLATILE) == 0) {
+        DEBUG ((DEBUG_ERROR, "[UpdateVariable] Runtime: Variable must have NV attribute - %r\n", EFI_INVALID_PARAMETER));
         Status = EFI_INVALID_PARAMETER;
         goto Done;
       }
@@ -1826,6 +1832,7 @@ UpdateVariable (
       // Only variable that have RT attributes can be updated/deleted in Runtime.
       //
       if ((CacheVariable->CurrPtr->Attributes & EFI_VARIABLE_RUNTIME_ACCESS) == 0) {
+        DEBUG ((DEBUG_ERROR, "[UpdateVariable] Runtime: Variable must have RT attribute - %r\n", EFI_INVALID_PARAMETER));
         Status = EFI_INVALID_PARAMETER;
         goto Done;
       }
@@ -1944,6 +1951,10 @@ UpdateVariable (
           //
           // Existing data size + new data size exceed maximum variable size limitation.
           //
+          DEBUG ((DEBUG_ERROR, "[UpdateVariable] ===== APPEND_WRITE SIZE EXCEEDED =====\n"));
+          DEBUG ((DEBUG_ERROR, "[UpdateVariable] Existing(0x%x) + New(0x%x) = 0x%x > MaxDataSize(0x%x)\n",
+                  DataSizeOfVariable (CacheVariable->CurrPtr, AuthFormat), DataSize,
+                  DataSizeOfVariable (CacheVariable->CurrPtr, AuthFormat) + DataSize, MaxDataSize));
           Status = EFI_INVALID_PARAMETER;
           goto Done;
         }
@@ -2101,6 +2112,7 @@ UpdateVariable (
   // include pad size.
   //
   VarSize = VarDataOffset + DataSize + GET_PAD_SIZE (DataSize);
+  
   if ((Attributes & EFI_VARIABLE_NON_VOLATILE) != 0) {
     //
     // Create a nonvolatile variable.
@@ -2120,12 +2132,18 @@ UpdateVariable (
        || (IsCommonVariable && AtRuntime () && ((VarSize + mVariableModuleGlobal->CommonVariableTotalSize) > mVariableModuleGlobal->CommonRuntimeVariableSpace))
        || (IsCommonUserVariable && ((VarSize + mVariableModuleGlobal->CommonUserVariableTotalSize) > mVariableModuleGlobal->CommonMaxUserVariableSpace)))
     {
+      DEBUG ((DEBUG_INFO, "[UpdateVariable] ===== NOT ENOUGH SPACE =====\n"));
+      
       if (AtRuntime ()) {
+        DEBUG ((DEBUG_ERROR, "[UpdateVariable] At Runtime - cannot reclaim, returning OUT_OF_RESOURCES\n"));
+        
         if (IsCommonUserVariable && ((VarSize + mVariableModuleGlobal->CommonUserVariableTotalSize) > mVariableModuleGlobal->CommonMaxUserVariableSpace)) {
+          DEBUG ((DEBUG_ERROR, "[UpdateVariable] User variable space exceeded\n"));
           RecordVarErrorFlag (VAR_ERROR_FLAG_USER_ERROR, VariableName, VendorGuid, Attributes, VarSize);
         }
 
         if (IsCommonVariable && ((VarSize + mVariableModuleGlobal->CommonVariableTotalSize) > mVariableModuleGlobal->CommonRuntimeVariableSpace)) {
+          DEBUG ((DEBUG_ERROR, "[UpdateVariable] Runtime variable space exceeded\n"));
           RecordVarErrorFlag (VAR_ERROR_FLAG_SYSTEM_ERROR, VariableName, VendorGuid, Attributes, VarSize);
         }
 
@@ -2167,6 +2185,7 @@ UpdateVariable (
 
       goto Done;
     }
+    DEBUG ((DEBUG_INFO, "[UpdateVariable] ===== ENOUGH SPACE - Proceeding to write =====\n"));
 
     if (!mVariableModuleGlobal->VariableGlobal.EmuNvMode) {
       //

@@ -2484,6 +2484,8 @@ VerifyTimeBasedPayloadAndUpdate (
   AUTH_VARIABLE_INFO             OrgVariableInfo;
   BOOLEAN                        IsDel;
 
+  DEBUG ((DEBUG_INFO, "[VerifyTimeBasedPayloadAndUpdate] ========== ENTRY ==========\n"));
+
   ZeroMem (&OrgVariableInfo, sizeof (OrgVariableInfo));
   FindStatus = mAuthVarLibContextIn->FindVariable (
                                        VariableName,
@@ -2503,8 +2505,12 @@ VerifyTimeBasedPayloadAndUpdate (
              &PayloadSize
              );
   if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "[VerifyTimeBasedPayloadAndUpdate] *** VERIFICATION FAILED ***\n"));
+    DEBUG ((DEBUG_ERROR, "[VerifyTimeBasedPayloadAndUpdate] Status: %r\n", Status));
     return Status;
   }
+
+  DEBUG ((DEBUG_INFO, "[VerifyTimeBasedPayloadAndUpdate] *** VERIFICATION SUCCESS ***\n"));
 
   if (  !EFI_ERROR (FindStatus)
      && (PayloadSize == 0)
@@ -2529,6 +2535,14 @@ VerifyTimeBasedPayloadAndUpdate (
              &CertData->TimeStamp
              );
 
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "[VerifyTimeBasedPayloadAndUpdate] AuthServiceInternalUpdateVariableWithTimeStamp FAILED: %r\n", Status));
+    DEBUG ((DEBUG_ERROR, "[VerifyTimeBasedPayloadAndUpdate] ========== EXIT (UPDATE FAILED) ==========\n"));
+    return Status;
+  }
+
+  DEBUG ((DEBUG_INFO, "[VerifyTimeBasedPayloadAndUpdate] Variable update SUCCESS\n"));
+
   //
   // Delete signer's certificates when delete the common authenticated variable.
   //
@@ -2544,5 +2558,6 @@ VerifyTimeBasedPayloadAndUpdate (
     }
   }
 
+  DEBUG ((DEBUG_INFO, "[VerifyTimeBasedPayloadAndUpdate] ========== EXIT (SUCCESS) ==========\n"));
   return Status;
 }
