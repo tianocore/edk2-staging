@@ -13,23 +13,23 @@ Branch maintainer: Jiewen Yao <jiewen.yao@intel.com>
 
 https://learn.microsoft.com/zh-cn/windows/apps/windows-sdk/downloads
 
-2. ML-DSA-87 and RSA test keys
+2. SecureBootPQC test suite
+```
+    EmulatorPkg\Test\SecureBootPQC\
+    |
+    +-- Key/                          # Certificate and Key Storage
+    +-- AuthVars/                     # Authenticated Variable Update Files
+    +-- Tools/                        # Authenticated Variable Generation Tools
+    |   +-- generate_auth_var.py        # Python script to create .auth files
+    |   +-- example_generate_auth.bat   # Batch automation for all .auth generation
+    +-- Driver/                       # UEFI Application to enroll keys in both setup/user mode
+    +-- Images/                       # Test EFI Executable images
+    +-- EnableSecureBoot.nsh          # Initialization Script
+    |   +-- Purpose: Clear vars -> Enroll db-tool -> Enroll PK -> Enable Secure Boot
+    +-- RunAllTests.nsh               # Master Test Suite Runner
+        +-- Purpose: Execute all test cases sequentially
+```
 
-Demo to generate test key by openssl app:
-
-openssl genpkey -algorithm mldsa87 -out pqc_private.key
-
-openssl req -new -x509 -key pqc_private.key -out pqc_cert.crt -days 365 -sha384 -subj "/CN=PQC ML-DSA Test Sign"
-
-openssl pkcs12 -export -out pqc_codesign.pfx -inkey pqc_private.key -in pqc_cert.crt -name "PQC-CodeSign" -passout pass:123456
-
-openssl x509 -in pqc_cert.crt -outform der -out pqc_cert.der
-
-3. Test image
-
-MdeModulePkg\Application\HelloWorld\HelloWorld.inf
-
-Sign it with test key: signtool sign /f Key/pqc_codesign.pfx /p 123456 /fd sha384 /tr http://timestamp.digicert.com /td sha384 /v HelloWorld.efi
 ### 2. Verification for PQC signed image
 
 \*Only support ML-DSA-87 currently
@@ -37,13 +37,7 @@ Sign it with test key: signtool sign /f Key/pqc_codesign.pfx /p 123456 /fd sha38
 #### Test steps
 
 1. build -p EmulatorPkg\EmulatorPkg.dsc -t VS2019 -a X64
-2. Copy RSA cert, ML-DSA cert, signed and unsigned images to Build\EmulatorX64\DEBUG_VS2019\X64
-3. Run WinHost.exe to setup page -> Device Manager -> Secure Boot Configuration
-4. Change Secure Boot Mode to Custom Mode and Enroll PK KEK to enable secure boot.(Any certificate will work, they won't actually be used because we are running in setup mode.)
-5. Verify below cases:
-
-When enrolling the RSA cert to DB, RSA image can be run in shell but ML-DSA signed image will be forbidden.
-
-When enrolling the ML-DSA cert to DB, ML-DSA image can be run in shell but RSA signed image will be forbidden.
-
-When enrolling the both certs to DB, all images can be run in shell.
+2. Copy EmulatorPkg\Test\SecureBootPQC\ folder to Build\EmulatorX64\DEBUG_VS2019\X64
+3. Run `EnableSecureBoot.nsh` to enable secure boot
+4. Run `RunAllTests.nsh > testreport.log` to test verification for PQC signed images
+5. `[FAIL]`should not be found in testreport.log, which indicates that the test case failed.
