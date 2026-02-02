@@ -19,12 +19,25 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <openssl/objects.h>
 #include <openssl/x509.h>
 #include <openssl/pkcs7.h>
+#include <crypto/asn1.h>
 
 //
 // OID ASN.1 Value for SPC_INDIRECT_DATA_OBJID
 //
 GLOBAL_REMOVE_IF_UNREFERENCED const UINT8  mSpcIndirectOidValue[] = {
   0x2B, 0x06, 0x01, 0x04, 0x01, 0x82, 0x37, 0x02, 0x01, 0x04
+};
+
+//
+// OID ASN.1 Value for MICROSOFT_NESTED_SIGNATURE
+// Reference:
+// https://signify.readthedocs.io/en/latest/authenticode.html#nested-signatures
+// https://oid-base.com/get/1.3.6.1.4.1.311.2.4.1
+// In Authenticode signatures, this is an unsigned attribute containing a PKCS#7
+// that also signs the Portable Executable (PE) file signed by the PKCS#7 containing the unsigned attribute.
+//
+GLOBAL_REMOVE_IF_UNREFERENCED const UINT8  mMicrosoftNestedSignatureOidValue[] = {
+  0x2B, 0x06, 0x01, 0x04, 0x01, 0x82, 0x37, 0x02, 0x04, 0x01
 };
 
 /**
@@ -64,14 +77,23 @@ AuthenticodeVerify (
   IN  UINTN        HashSize
   )
 {
-  BOOLEAN      Status;
-  PKCS7        *Pkcs7;
-  CONST UINT8  *Temp;
-  CONST UINT8  *OrigAuthData;
-  UINT8        *SpcIndirectDataContent;
-  UINT8        Asn1Byte;
-  UINTN        ContentSize;
-  CONST UINT8  *SpcIndirectDataOid;
+  BOOLEAN                     Status;
+  PKCS7                       *Pkcs7;
+  CONST UINT8                 *Temp;
+  CONST UINT8                 *OrigAuthData;
+  UINT8                       *SpcIndirectDataContent;
+  UINT8                       Asn1Byte;
+  UINTN                       ContentSize;
+  CONST UINT8                 *SpcIndirectDataOid;
+  STACK_OF(PKCS7_SIGNER_INFO) *SiStack;
+  PKCS7_SIGNER_INFO           *Si;
+  UINT8                       *NextSig;
+  UINTN                       NextSigLen;
+  STACK_OF(X509_ATTRIBUTE)    *AttrStack;
+  INT32                       Index;
+  X509_ATTRIBUTE              *Attr;
+  ASN1_OBJECT                 *Asn1Obj;
+  ASN1_TYPE                   *Asn1Type;
 
   //
   // Check input parameters.
@@ -176,6 +198,72 @@ AuthenticodeVerify (
     // Un-matched PE/COFF Hash Value
     //
     goto _Exit;
+  }
+
+  //
+  // Try to extract Nested Signature for multiple signature case 
+  //
+  SiStack    = NULL;
+  Si         = NULL;
+  NextSig    = NULL;
+  NextSigLen = 0;
+  AttrStack  = NULL;
+  Attr       = NULL;
+  Asn1Obj    = NULL;
+  Asn1Type   = NULL;
+
+  SiStack = PKCS7_get_signer_info(Pkcs7);
+  if (SiStack == NULL || sk_PKCS7_SIGNER_INFO_num(SiStack) != 1) {
+    //
+    // Only single Singer Info is supported in Authenticode Verification
+    //
+    DEBUG ((DEBUG_INFO, "AuthenticodeVerify - Fail due to None or Mutiple signer info found! Number = 0x%x\n", sk_PKCS7_SIGNER_INFO_num(SiStack)));
+    goto _Exit;
+  }
+
+  Si = sk_PKCS7_SIGNER_INFO_value(SiStack, 0);
+  if (Si->unauth_attr == NULL) {
+    DEBUG ((DEBUG_INFO, "AuthenticodeVerify - Not found unauth_attr, go to single sig path!\n"));
+  } else {
+    AttrStack = Si->unauth_attr;
+    for (Index = 0; Index < sk_X509_ATTRIBUTE_num(AttrStack); Index++) {
+        Attr    = sk_X509_ATTRIBUTE_value(AttrStack, Index);
+        Asn1Obj = X509_ATTRIBUTE_get0_object(Attr);
+
+        if (Asn1Obj->length == sizeof(mMicrosoftNestedSignatureOidValue) &&
+            CompareMem(Asn1Obj->data, mMicrosoftNestedSignatureOidValue, Asn1Obj->length) == 0) {
+
+            Asn1Type = X509_ATTRIBUTE_get0_type(Attr, 0);
+            if (Asn1Type != NULL && ((Asn1Type->type == V_ASN1_SET) || (Asn1Type->type == V_ASN1_SEQUENCE))) {
+              DEBUG ((DEBUG_INFO, "AuthenticodeVerify - Nested sig found!\n"));
+              NextSig    = Asn1Type->value.set->data;
+              NextSigLen = Asn1Type->value.set->length;
+              break;
+            }
+        }
+    }
+    //
+    // Process the Nested Signature recursively
+    //
+    if (NextSig != NULL && NextSigLen != 0) {
+      Status = AuthenticodeVerify (
+                NextSig,
+                NextSigLen,
+                TrustedCert,
+                CertSize,
+                ImageHash,
+                HashSize
+                );
+      if (Status) {
+        DEBUG ((DEBUG_INFO, "AuthenticodeVerify - Nested signature verification Succ!\n"));
+        DEBUG ((DEBUG_INFO, "Then interrupt the process because any valid signature represents successful Authenticode verification.\n"));
+        goto _Exit;
+      } else {
+        DEBUG ((DEBUG_INFO, "AuthenticodeVerify - Nested signature verification Fail!\n"));
+      }
+    } else {
+      DEBUG ((DEBUG_INFO, "AuthenticodeVerify - Not found nested sig, go to single sig path!\n"));
+    }
   }
 
   //
