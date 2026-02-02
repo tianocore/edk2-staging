@@ -69,6 +69,13 @@ else
     echo "[PASS] Test 10: Clear db and then run MLDSA signed image (correctly failed) (error: %lasterror%)"
 endif
 
+Test8-DualSign.nsh
+if %lasterror% eq 0 then
+    echo "[PASS] Test 11: Enroll RSA or MLDSA key to db and run dual signed image"
+else
+    echo "[FAIL] Test 11: Fail to enroll RSA or MLDSA key to db and run dual signed image (error: %lasterror%)"
+endif
+
 echo " "
 echo "========================================="
 echo "  All Tests Completed"
