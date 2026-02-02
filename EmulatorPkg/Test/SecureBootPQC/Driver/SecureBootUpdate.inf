@@ -42,6 +42,7 @@
   gEfiCertRsa2048Guid                   ## CONSUMES
   gEfiCertSha256Guid                    ## CONSUMES
   gEfiCertPkcs7Guid
+  gEfiCustomModeEnableGuid
 
 [Protocols]
 

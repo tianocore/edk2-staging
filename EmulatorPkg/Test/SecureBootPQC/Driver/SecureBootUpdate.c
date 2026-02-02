@@ -22,6 +22,11 @@
 #define SECURE_BOOT_MODE_ENABLE   1
 #define SECURE_BOOT_MODE_DISABLE  0
 
+//
+// Custom Mode GUID and Variable Name
+//
+#define EFI_CUSTOM_MODE_NAME  L"CustomMode"
+
 /**
   Read file content into buffer.
 
@@ -297,10 +302,8 @@ UpdateSecureBootVariable (
   if (UseAppend) {
     Attributes |= EFI_VARIABLE_APPEND_WRITE;
     DEBUG ((DEBUG_INFO, "UpdateSecureBootVariable: Using APPEND mode for variable '%s'\n", VariableName));
-    Print (L"Using APPEND mode for variable '%s'...\n", VariableName);
   } else {
     DEBUG ((DEBUG_INFO, "UpdateSecureBootVariable: Using REPLACE mode for variable '%s'\n", VariableName));
-    Print (L"Using REPLACE mode for variable '%s'...\n", VariableName);
   }
 
   DEBUG ((DEBUG_INFO, "UpdateSecureBootVariable: Updating variable '%s', size=%u, attributes=0x%x\n", 
@@ -328,6 +331,10 @@ UpdateSecureBootVariable (
 
 /**
   Clear Secure Boot variable (delete it).
+  
+  This function handles clearing both in Setup Mode and User Mode:
+  - Setup Mode: Direct deletion (no auth required)
+  - User Mode: Use empty EFI_VARIABLE_AUTHENTICATION_2 header
 
   @param[in]  VariableName  Variable name to clear.
   @param[in]  VendorGuid    Vendor GUID.
@@ -343,21 +350,88 @@ ClearSecureBootVariable (
   )
 {
   EFI_STATUS  Status;
+  UINT8       SetupMode;
+  UINTN       DataSize;
 
   DEBUG ((DEBUG_INFO, "ClearSecureBootVariable: Clearing variable '%s'\n", VariableName));
   Print (L"Clearing variable '%s'...\n", VariableName);
 
-  Status = gRT->SetVariable (
-                  VariableName,
-                  VendorGuid,
-                  0,
-                  0,
-                  NULL
+  //
+  // Check if we're in Setup Mode
+  //
+  DataSize = sizeof (SetupMode);
+  Status = gRT->GetVariable (
+                  EFI_SETUP_MODE_NAME,
+                  &gEfiGlobalVariableGuid,
+                  NULL,
+                  &DataSize,
+                  &SetupMode
                   );
+  
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_WARN, "ClearSecureBootVariable: Cannot read SetupMode, assuming Setup Mode\n"));
+    SetupMode = 1;  // Assume Setup Mode if can't read
+  }
+
+  if (SetupMode == 1) {
+    //
+    // In Setup Mode: Direct deletion without authentication
+    //
+    DEBUG ((DEBUG_INFO, "ClearSecureBootVariable: Setup Mode detected, using direct delete\n"));
+    
+    Status = gRT->SetVariable (
+                    VariableName,
+                    VendorGuid,
+                    0,
+                    0,
+                    NULL
+                    );
+  } else {
+    //
+    // In User Mode: Need to provide empty EFI_VARIABLE_AUTHENTICATION_2 header
+    //
+    EFI_VARIABLE_AUTHENTICATION_2  AuthHeader;
+    EFI_TIME                       Time;
+    UINTN                          AuthSize;
+    
+    //
+    // Fill timestamp
+    //
+    ZeroMem (&Time, sizeof (EFI_TIME));
+    Time.Year = 2025;
+    Time.Month = 1;
+    Time.Day = 1;
+    CopyMem (&AuthHeader.TimeStamp, &Time, sizeof (EFI_TIME));
+    
+    //
+    // Fill WIN_CERTIFICATE_UEFI_GUID with minimal size (no CertData)
+    //
+    AuthHeader.AuthInfo.Hdr.dwLength = OFFSET_OF (WIN_CERTIFICATE_UEFI_GUID, CertData);
+    AuthHeader.AuthInfo.Hdr.wRevision = 0x0200;
+    AuthHeader.AuthInfo.Hdr.wCertificateType = WIN_CERT_TYPE_EFI_GUID;
+    CopyGuid (&AuthHeader.AuthInfo.CertType, &gEfiCertPkcs7Guid);
+    
+    //
+    // Calculate size: timestamp + WIN_CERTIFICATE header (no payload)
+    //
+    AuthSize = OFFSET_OF (EFI_VARIABLE_AUTHENTICATION_2, AuthInfo) +
+               OFFSET_OF (WIN_CERTIFICATE_UEFI_GUID, CertData);
+    
+    Status = gRT->SetVariable (
+                    VariableName,
+                    VendorGuid,
+                    EFI_VARIABLE_NON_VOLATILE | 
+                    EFI_VARIABLE_BOOTSERVICE_ACCESS | 
+                    EFI_VARIABLE_RUNTIME_ACCESS |
+                    EFI_VARIABLE_TIME_BASED_AUTHENTICATED_WRITE_ACCESS,
+                    AuthSize,
+                    &AuthHeader
+                    );
+  }
 
   if (EFI_ERROR (Status) && Status != EFI_NOT_FOUND) {
     DEBUG ((DEBUG_ERROR, "ClearSecureBootVariable: Failed to clear '%s': %r\n", VariableName, Status));
-    Print (L"Error: Failed to clear variable '%s'\n", VariableName);
+    Print (L"Error: Failed to clear variable '%s': %r\n", VariableName, Status);
   } else {
     DEBUG ((DEBUG_INFO, "ClearSecureBootVariable: Successfully cleared '%s'\n", VariableName));
     Print (L"Success: Variable '%s' cleared\n", VariableName);
@@ -504,11 +578,6 @@ UefiMain (
 
   DEBUG ((DEBUG_INFO, "SecureBootUpdate: Application started\n"));
 
-  Print (L"\n");
-  Print (L"====================================\n");
-  Print (L"  Secure Boot Variable Update Tool  \n");
-  Print (L"====================================\n");
-
   //
   // Parse command line arguments using Shell protocol
   // Must provide a valid parameter list (even if empty)
@@ -588,15 +657,75 @@ UefiMain (
   //
   if (StrCmp (Command, L"clear") == 0) {
     DEBUG ((DEBUG_INFO, "SecureBootUpdate: Executing clear command\n"));
-    Print (L"Clearing all Secure Boot variables...\n");
+    Print (L"========================================\n");
+    Print (L"  Clear All Secure Boot Variables\n");
+    Print (L"========================================\n");
+    Print (L"\n");
     
-    ClearSecureBootVariable (EFI_PLATFORM_KEY_NAME, &gEfiGlobalVariableGuid);
+    UINT8  SetupMode;
+    UINT8  CustomMode;
+    UINTN  DataSize;
+    BOOLEAN EnteredCustomMode = FALSE;
+    
+    //
+    // Check if we're in User Mode
+    //
+    DataSize = sizeof (SetupMode);
+    Status = gRT->GetVariable (
+                    EFI_SETUP_MODE_NAME,
+                    &gEfiGlobalVariableGuid,
+                    NULL,
+                    &DataSize,
+                    &SetupMode
+                    );
+    
+    if (!EFI_ERROR (Status) && SetupMode == 0) {
+      //
+      // In User Mode: Enter Custom Mode first
+      //
+      CustomMode = 1;
+      Status = gRT->SetVariable (
+                      EFI_CUSTOM_MODE_NAME,
+                      &gEfiCustomModeEnableGuid,
+                      EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_BOOTSERVICE_ACCESS,
+                      sizeof (CustomMode),
+                      &CustomMode
+                      );
+      
+      if (EFI_ERROR (Status)) {
+        Print (L"Warning: Failed to enter Custom Mode: %r\n", Status);
+        Print (L"Attempting to clear variables anyway...\n\n");
+      } else {
+        Print (L"Successfully entered Custom Mode\n\n");
+        EnteredCustomMode = TRUE;
+      }
+    }
+    
+    //
+    // Clear all variables
+    //
+    Print (L"Clearing all Secure Boot variables...\n");
     ClearSecureBootVariable (EFI_KEY_EXCHANGE_KEY_NAME, &gEfiGlobalVariableGuid);
     ClearSecureBootVariable (EFI_IMAGE_SECURITY_DATABASE, &gEfiImageSecurityDatabaseGuid);
     ClearSecureBootVariable (EFI_IMAGE_SECURITY_DATABASE1, &gEfiImageSecurityDatabaseGuid);
+    ClearSecureBootVariable (EFI_PLATFORM_KEY_NAME, &gEfiGlobalVariableGuid);
+
+    //
+    // Exit Custom Mode if we entered it
+    //
+    if (EnteredCustomMode) {
+      CustomMode = 0;
+      gRT->SetVariable (
+             EFI_CUSTOM_MODE_NAME,
+             &gEfiCustomModeEnableGuid,
+             EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_BOOTSERVICE_ACCESS,
+             sizeof (CustomMode),
+             &CustomMode
+             );
+      Print (L"Exited Custom Mode\n");
+    }
     
-    Print (L"All variables cleared\n");
-    Status = DisplaySecureBootStatus ();
+    Print (L"\nAll variables cleared\n");
     goto Done;
   }
 
@@ -623,8 +752,6 @@ UefiMain (
     goto Done;
   }
 
-  Print (L"Certificate file loaded: %d bytes\n", CertSize);
-
   //
   // Check if file is .auth format (contains EFI_VARIABLE_AUTHENTICATION_2)
   // or plain certificate format (.cer/.der)
@@ -637,7 +764,6 @@ UefiMain (
     CHAR16 *Ext = FileName + FileNameLen - 5;
     if (StrCmp (Ext, L".auth") == 0) {
       IsAuthFile = TRUE;
-      Print (L"Detected .auth file format (authenticated variable update)\n");
       DEBUG ((DEBUG_INFO, "SecureBootUpdate: Using .auth file, will write directly\n"));
     }
   }
@@ -662,7 +788,6 @@ UefiMain (
     // Plain certificate file (.cer/.der)
     // Need to wrap in EFI_SIGNATURE_LIST
     //
-    Print (L"Detected plain certificate format, creating signature list...\n");
     DEBUG ((DEBUG_INFO, "SecureBootUpdate: Plain certificate, creating signature list\n"));
     
     SignatureType = &gEfiCertX509Guid;
@@ -674,8 +799,6 @@ UefiMain (
       FreePool (CertData);
       goto Done;
     }
-    
-    Print (L"Signature list created: %d bytes\n", SigListSize);
     
     VOID *AuthData;
     UINTN AuthDataSize;
@@ -750,7 +873,9 @@ UefiMain (
   // Display updated status
   //
   if (!EFI_ERROR (Status)) {
-    DisplaySecureBootStatus ();
+    if (StrCmp (Command, L"update-pk") == 0) {
+      DisplaySecureBootStatus ();
+    }
   }
 
 Done:

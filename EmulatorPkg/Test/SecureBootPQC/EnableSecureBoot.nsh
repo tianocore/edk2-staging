@@ -3,7 +3,7 @@
 # EnableSecureBoot.nsh
 #
 # UEFI Shell script to enable Secure Boot by enrolling certificates.
-# This script enrolls db-tool.der and PK.der using SecureBootUpdate.efi.
+# This script enrolls db-tool.der and PK.der using SecureBootUpdateSigned.efi.
 #
 # Usage:
 #   fs0:
@@ -20,13 +20,13 @@ echo "=========================================="
 echo " "
 
 # Define file paths (relative to current directory)
-set TOOL_PATH Images\SecureBootUpdate.efi
+set TOOL_PATH Images\SecureBootUpdateSigned.efi
 set DB_CERT_PATH Key\db-tool.der
 set PK_CERT_PATH Key\PK.der
 
-# Check if SecureBootUpdate.efi exists
+# Check if SecureBootUpdateSigned.efi exists
 if not exist %TOOL_PATH% then
-    echo "Error: SecureBootUpdate.efi not found at %TOOL_PATH%"
+    echo "Error: SecureBootUpdateSigned.efi not found at %TOOL_PATH%"
     echo "Please run this script from Test\SecureBootPQC directory"
     echo "Current directory should contain: Images\ and Key\ subdirectories"
     goto End

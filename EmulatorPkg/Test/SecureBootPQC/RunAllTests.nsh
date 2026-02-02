@@ -62,6 +62,13 @@ else
     echo "[PASS] Test 9: Run unsigned HelloWorld failed (correctly failed)"
 endif
 
+Test7-Clear-db.nsh
+if %lasterror% eq 0 then
+    echo "[FAIL] Test 10: Fail to clear db"
+else
+    echo "[PASS] Test 10: Clear db and then run MLDSA signed image (correctly failed) (error: %lasterror%)"
+endif
+
 echo " "
 echo "========================================="
 echo "  All Tests Completed"
