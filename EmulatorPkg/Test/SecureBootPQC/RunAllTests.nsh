@@ -4,7 +4,7 @@
 # Master script to run all Secure Boot PQC tests
 #
 # Prerequisites:
-#   1. Run EnableSecureBoot.nsh first (enrolls PK and db-tool)
+#   1. Run EnableSecureBoot.nsh first (enrolls PK and RSA-DB-TOOL)
 #   2. Run from Test\SecureBootPQC directory
 #
 # Usage:

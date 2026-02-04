@@ -3,7 +3,7 @@
 # EnableSecureBoot.nsh
 #
 # UEFI Shell script to enable Secure Boot by enrolling certificates.
-# This script enrolls db-tool.der and PK.der using SecureBootUpdateSigned.efi.
+# This script enrolls RSA-DB-TOOL.der and MLDSA-PK.der using SecureBootUpdateSigned.efi.
 #
 # Usage:
 #   fs0:
@@ -21,8 +21,8 @@ echo " "
 
 # Define file paths (relative to current directory)
 set TOOL_PATH Images\SecureBootUpdateSigned.efi
-set DB_CERT_PATH Key\db-tool.der
-set PK_CERT_PATH Key\PK.der
+set DB_CERT_PATH Key\RSA-DB-TOOL.der
+set PK_CERT_PATH Key\MLDSA-PK.der
 
 # Check if SecureBootUpdateSigned.efi exists
 if not exist %TOOL_PATH% then
@@ -32,16 +32,16 @@ if not exist %TOOL_PATH% then
     goto End
 endif
 
-# Check if db-tool.der exists
+# Check if RSA-DB-TOOL.der exists
 if not exist %DB_CERT_PATH% then
-    echo "Error: db-tool.der not found at %DB_CERT_PATH%"
+    echo "Error: RSA-DB-TOOL.der not found at %DB_CERT_PATH%"
     echo "Please run this script from Test\SecureBootPQC directory"
     goto End
 endif
 
-# Check if PK.der exists
+# Check if MLDSA-PK.der exists
 if not exist %PK_CERT_PATH% then
-    echo "Error: PK.der not found at %PK_CERT_PATH%"
+    echo "Error: MLDSA-PK.der not found at %PK_CERT_PATH%"
     echo "Please run this script from Test\SecureBootPQC directory"
     goto End
 endif
@@ -78,7 +78,7 @@ echo " "
 
 # Step 4: Enroll DB certificate
 echo "=========================================="
-echo "Step 4: Enrolling DB certificate (db-tool.der)"
+echo "Step 4: Enrolling DB certificate (RSA-DB-TOOL.der)"
 echo "=========================================="
 %TOOL_PATH% update-db %DB_CERT_PATH%
 if %lasterror% ne 0 then
@@ -90,7 +90,7 @@ echo " "
 
 # Step 5: Enroll PK certificate
 echo "=========================================="
-echo "Step 5: Enrolling PK certificate (PK.der)"
+echo "Step 5: Enrolling PK certificate (MLDSA-PK.der)"
 echo "=========================================="
 echo "Note: This will enable Secure Boot and transition to User Mode"
 %TOOL_PATH% update-pk %PK_CERT_PATH%
@@ -109,7 +109,7 @@ echo "Expected status:"
 echo "  - SecureBoot: 1 (Enabled)"
 echo "  - SetupMode: 0 (User Mode)"
 echo " "
-echo "Only applications signed with db-tool key will now execute."
+echo "Only applications signed with RSA-DB-TOOL key will now execute."
 echo " "
 
 :End

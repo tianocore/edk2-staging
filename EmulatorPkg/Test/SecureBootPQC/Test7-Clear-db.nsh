@@ -12,8 +12,8 @@ echo " "
 set TOOL Images\SecureBootUpdateSigned.efi
 
 %TOOL% clear
-%TOOL% update-db Key\db-tool.der
-%TOOL% update-pk Key\PK.der
+%TOOL% update-db Key\RSA-DB-TOOL.der
+%TOOL% update-pk Key\MLDSA-PK.der
 Images\HelloWorld-MLDSA.efi
 
 echo " "

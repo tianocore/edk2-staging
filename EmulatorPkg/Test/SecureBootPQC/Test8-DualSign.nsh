@@ -12,17 +12,17 @@ echo " "
 set TOOL Images\SecureBootUpdateSigned.efi
 
 %TOOL% clear
-%TOOL% update-db Key\db-tool.der
-%TOOL% update-pk Key\PK.der
-%TOOL% update-kek AuthVars\KEK.auth
-%TOOL% update-db AuthVars\db-pqc.auth
-Images\HelloWorld-DualSig.efi
+%TOOL% update-db Key\RSA-DB-TOOL.der
+%TOOL% update-pk Key\MLDSA-PK.der
+%TOOL% update-kek AuthVars\MLDSA-KEK-MLDSA.auth
+%TOOL% update-db AuthVars\MLDSA-DB-MLDSA.auth
+Images\HelloWorld-RSA-MLDSA.efi
 
 %TOOL% clear
-%TOOL% update-db Key\db-tool.der
-%TOOL% update-pk Key\PK.DER
-%TOOL% update-kek AuthVars\KEK.auth
-%TOOL% update-db AuthVars\db-rsa.auth
-Images\HelloWorld-DualSig.efi
+%TOOL% update-db Key\RSA-DB-TOOL.der
+%TOOL% update-pk Key\MLDSA-PK.DER
+%TOOL% update-kek AuthVars\MLDSA-KEK-MLDSA.auth
+%TOOL% update-db AuthVars\RSA-DB-MLDSA.auth
+Images\HelloWorld-RSA-MLDSA.efi
 
 echo " "

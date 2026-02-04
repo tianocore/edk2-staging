@@ -48,7 +48,7 @@ typedef struct {
 |   |   │                                                                         | |
 |   |   │  SignTool Command:                                                     | |
 |   |   │    signtool sign /fd SHA256 /p7 <dir> /p7co 1.2.840.113549.1.7.1 \   | |
-|   |   │             /p7ce DetachedSignedData /f <PK.pfx> /p <password> <data> | |
+|   |   │             /p7ce DetachedSignedData /f <MLDSA-PK.pfx> /p <password> <data> | |
 |   |   │                                                                         | |
 |   |   │  Input to SignTool (data to sign):                                    | |
 |   |   │    - VariableName (UTF-16LE, null-terminated)                         | |

@@ -2,7 +2,7 @@
 
 ### 1. PK
 ```
-openssl genpkey -algorithm mldsa87 -out PK.key
+openssl genpkey -algorithm mldsa87 -out MLDSA-PK.key
 
 (
   echo [req]
@@ -12,9 +12,9 @@ openssl genpkey -algorithm mldsa87 -out PK.key
   echo basicConstraints=critical,CA:TRUE
 ) > tmp_pk.cnf
 
-openssl req -x509 -new -key PK.key -out PK.crt -nodes -days 3650 -subj "/CN=Secure Boot PK/" -config tmp_pk.cnf -extensions v3_ca
+openssl req -x509 -new -key MLDSA-PK.key -out MLDSA-PK.crt -nodes -days 3650 -subj "/CN=Secure Boot MLDSA PK/" -config tmp_pk.cnf -extensions v3_ca
 
-openssl x509 -in PK.crt -outform DER -out PK.der
+openssl x509 -in MLDSA-PK.crt -outform DER -out MLDSA-PK.der
 
 del tmp_pk.cnf
 ```
@@ -22,21 +22,21 @@ del tmp_pk.cnf
 #### Valid KEK
 
 ```
-openssl genpkey -algorithm mldsa87 -out KEK.key
+openssl genpkey -algorithm mldsa87 -out MLDSA-KEK.key
 
-openssl req -new -key KEK.key -out KEK.csr -subj "/CN=Secure Boot KEK/"
+openssl req -new -key MLDSA-KEK.key -out MLDSA-KEK.csr -subj "/CN=Secure Boot MLDSA KEK/"
 
 echo basicConstraints=CA:TRUE > kek_ext.cnf
 
-openssl x509 -req -in KEK.csr -CA PK.crt -CAkey PK.key -CAcreateserial -out KEK.crt -days 3650 -extfile kek_ext.cnf
+openssl x509 -req -in MLDSA-KEK.csr -CA MLDSA-PK.crt -CAkey MLDSA-PK.key -CAcreateserial -out MLDSA-KEK.crt -days 3650 -extfile kek_ext.cnf
 
-openssl x509 -in KEK.crt -outform DER -out KEK.der
+openssl x509 -in MLDSA-KEK.crt -outform DER -out MLDSA-KEK.der
 
 del kek_ext.cnf
 ```
 #### Invalid KEK
 ```
-openssl genpkey -algorithm mldsa87 -out KEK-invalid.key
+openssl genpkey -algorithm mldsa87 -out MLDSA-KEK-invalid.key
 
 (
   echo [req]
@@ -46,57 +46,57 @@ openssl genpkey -algorithm mldsa87 -out KEK-invalid.key
   echo basicConstraints=critical,CA:TRUE
 ) > tmp_kek.cnf
 
-openssl req -x509 -new -key KEK-invalid.key -out KEK-invalid.crt -nodes -days 3650 -subj "/CN=Secure Boot KEK-invalid/" -config tmp_kek.cnf -extensions v3_ca
+openssl req -x509 -new -key MLDSA-KEK-invalid.key -out MLDSA-KEK-invalid.crt -nodes -days 3650 -subj "/CN=Secure Boot MLDSA-KEK-invalid/" -config tmp_kek.cnf -extensions v3_ca
 
-openssl x509 -in KEK-invalid.crt -outform DER -out KEK-invalid.der
+openssl x509 -in MLDSA-KEK-invalid.crt -outform DER -out MLDSA-KEK-invalid.der
 
 del tmp_kek.cnf
 ```
 #### 3. PQC DB
 ```
-openssl genpkey -algorithm mldsa87 -out db-pqc.key
+openssl genpkey -algorithm mldsa87 -out MLDSA-DB.key
 
-openssl req -new -key db-pqc.key -out db-pqc.csr -subj "/CN=Secure Boot DB (Leaf)/"
+openssl req -new -key MLDSA-DB.key -out MLDSA-DB.csr -subj "/CN=Secure Boot DB (Leaf)/"
 
-openssl x509 -req -in db-pqc.csr -CA KEK.crt -CAkey KEK.key -CAcreateserial -out db-pqc.crt -days 3650 -sha384
+openssl x509 -req -in MLDSA-DB.csr -CA MLDSA-KEK.crt -CAkey MLDSA-KEK.key -CAcreateserial -out MLDSA-DB.crt -days 3650 -sha384
 
-openssl x509 -in db-pqc.crt -outform DER -out db-pqc.der
+openssl x509 -in MLDSA-DB.crt -outform DER -out MLDSA-DB.der
 
-openssl verify -CAfile PK.crt KEK.crt
+openssl verify -CAfile MLDSA-PK.crt MLDSA-KEK.crt
 
-openssl verify -CAfile PK.crt -untrusted KEK.crt db-pqc.crt
+openssl verify -CAfile MLDSA-PK.crt -untrusted MLDSA-KEK.crt MLDSA-DB.crt
 ```
 #### 4. RSA DB
 ```
-openssl genrsa -out db-rsa.key 2048
+openssl genrsa -out RSA-DB.key 2048
 
-openssl req -new -key db-rsa.key -out db-rsa.csr -subj "/CN=RSA2048 Secure Boot DB (Leaf)/"
+openssl req -new -key RSA-DB.key -out RSA-DB.csr -subj "/CN=RSA2048 Secure Boot DB (Leaf)/"
 
-openssl x509 -req -in db-rsa.csr -CA KEK.crt -CAkey KEK.key -CAcreateserial -out db-rsa.crt -days 3650 -sha384
+openssl x509 -req -in RSA-DB.csr -CA MLDSA-KEK.crt -CAkey MLDSA-KEK.key -CAcreateserial -out RSA-DB.crt -days 3650 -sha384
 
-openssl x509 -in db-rsa.crt -outform DER -out db-rsa.der
+openssl x509 -in RSA-DB.crt -outform DER -out RSA-DB.der
 ```
 #### 5. PFX
 ```
-openssl pkcs12 -export -out PK.pfx -inkey PK.key -in PK.crt -name "PK-Sign" -passout pass:123456
+openssl pkcs12 -export -out MLDSA-PK.pfx -inkey MLDSA-PK.key -in MLDSA-PK.crt -name "PK-Sign" -passout pass:123456
 
-openssl pkcs12 -export -out KEK.pfx -inkey KEK.key -in KEK.crt -name "KEK-Sign" -passout pass:123456
+openssl pkcs12 -export -out MLDSA-KEK.pfx -inkey MLDSA-KEK.key -in MLDSA-KEK.crt -name "MLDSA-KEK-Sign" -passout pass:123456
 
-openssl pkcs12 -export -out KEK-invalid.pfx -inkey KEK-invalid.key -in KEK-invalid.crt -name "KEK-invalid-Sign" -passout pass:123456
+openssl pkcs12 -export -out MLDSA-KEK-invalid.pfx -inkey MLDSA-KEK-invalid.key -in MLDSA-KEK-invalid.crt -name "MLDSA-MLDSA-KEK-invalid-Sign" -passout pass:123456
 
-openssl pkcs12 -export -out db-rsa.pfx -inkey db-rsa.key -in db-rsa.crt -name "db-rsa-ImageSign" -passout pass:123456
+openssl pkcs12 -export -out RSA-DB.pfx -inkey RSA-DB.key -in RSA-DB.crt -name "RSA-DB-ImageSign" -passout pass:123456
 
-openssl pkcs12 -export -out db-pqc.pfx -inkey db-pqc.key -in db-pqc.crt -name "db-pqc-ImageSign" -passout pass:123456
+openssl pkcs12 -export -out MLDSA-DB.pfx -inkey MLDSA-DB.key -in MLDSA-DB.crt -name "MLDSA-DB-ImageSign" -passout pass:123456
 ```
 #### 6. Tool DB
 ```
-openssl genrsa -out db-tool.key 2048
+openssl genrsa -out RSA-DB-TOOL.key 2048
 
-openssl req -new -key db-tool.key -out db-tool.csr -subj "/CN=RSA2048 Secure Boot DB for tools/"
+openssl req -new -key RSA-DB-TOOL.key -out RSA-DB-TOOL.csr -subj "/CN=RSA2048 Secure Boot DB for tools/"
 
-openssl x509 -req -in db-tool.csr -CA KEK.crt -CAkey KEK.key -CAcreateserial -out db-tool.crt -days 3650 -sha384
+openssl x509 -req -in RSA-DB-TOOL.csr -CA MLDSA-KEK.crt -CAkey MLDSA-KEK.key -CAcreateserial -out RSA-DB-TOOL.crt -days 3650 -sha384
 
-openssl x509 -in db-tool.crt -outform DER -out db-tool.der
+openssl x509 -in RSA-DB-TOOL.crt -outform DER -out RSA-DB-TOOL.der
 
-openssl pkcs12 -export -out db-tool.pfx -inkey db-tool.key -in db-tool.crt -name "db-tool-ImageSign" -passout pass:123456
+openssl pkcs12 -export -out RSA-DB-TOOL.pfx -inkey RSA-DB-TOOL.key -in RSA-DB-TOOL.crt -name "RSA-DB-TOOL-ImageSign" -passout pass:123456
 ```

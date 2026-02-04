@@ -22,7 +22,7 @@ Workflow:
     4. Assemble EFI_VARIABLE_AUTHENTICATION_2 structure
 
 Usage:
-    python generate_auth_var.py --cert KEK.cer --key PK.pfx --password <pwd> --var-name KEK --output KEK.auth
+    python generate_auth_var.py --cert MLDSA-KEK.cer --key MLDSA-PK.pfx --password <pwd> --var-name KEK --output MLDSA-KEK-MLDSA.auth
     
 Requirements:
     - Python 3.7+
@@ -354,11 +354,11 @@ assembles them into EFI_VARIABLE_AUTHENTICATION_2 structures.
 PREREQUISITE: SignTool.exe must be in PATH environment variable!
 
 Examples:
-  # Generate KEK.auth from KEK certificate, signed by PK
-  python generate_auth_var.py --cert KEK.der --key PK.pfx --password mypass --var-name KEK --output KEK.auth
+  # Generate MLDSA-KEK-MLDSA.auth from KEK certificate, signed by PK
+  python generate_auth_var.py --cert MLDSA-KEK.der --key MLDSA-PK.pfx --password mypass --var-name KEK --output MLDSA-KEK-MLDSA.auth
   
   # Generate db.auth, signed by KEK
-  python generate_auth_var.py --cert db.der --key KEK.pfx --password mypass --var-name db --output db.auth
+  python generate_auth_var.py --cert db.der --key MLDSA-KEK.pfx --password mypass --var-name db --output db.auth
 
 Requirements:
   - Python 3.7+

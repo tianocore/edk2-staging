@@ -7,7 +7,7 @@ This tool is used to generate EFI Authenticated Variable Update files (.auth), a
 ## How It Works
 
 ```
-Certificate File (KEK.cer)
+Certificate File (MLDSA-KEK.cer)
     ↓
 Create EFI_SIGNATURE_LIST
     ↓
@@ -50,13 +50,13 @@ The generated `.auth` file contains a complete `EFI_VARIABLE_AUTHENTICATION_2` s
 ### Required Files
 
 1. **Certificate files** (.cer, DER format)
-   - KEK.cer - KEK certificate
+   - MLDSA-KEK.cer - KEK certificate
    - db.cer - DB certificate
    - etc.
 
 2. **Signing keys** (.pfx, PKCS#12 format)
-   - PK.pfx - Used to sign KEK updates
-   - KEK.pfx - Used to sign DB updates
+   - MLDSA-PK.pfx - Used to sign KEK updates
+   - MLDSA-KEK.pfx - Used to sign DB updates
    - Must contain both private key and certificate
 
 ## Usage
@@ -71,28 +71,28 @@ python generate_auth_var.py --cert <cert_file> --key <pfx_file> --password <pwd>
 
 | Parameter | Description | Example |
 |-----------|-------------|---------|
-| `--cert` | Certificate file (DER format) | `KEK.cer` |
-| `--key` | Signing key (PKCS#12) | `PK.pfx` |
+| `--cert` | Certificate file (DER format) | `MLDSA-KEK.cer` |
+| `--key` | Signing key (PKCS#12) | `MLDSA-PK.pfx` |
 | `--password` | Key password (optional) | `mypassword` |
 | `--var-name` | Variable name | `KEK`, `db`, `PK`, `dbx` |
-| `--output` | Output file | `KEK.auth` |
+| `--output` | Output file | `MLDSA-KEK-MLDSA.auth` |
 
-### Example 1: Generate KEK.auth
+### Example 1: Generate MLDSA-KEK-MLDSA.auth
 
 Update KEK variable, signed with PK:
 
 ```powershell
 python generate_auth_var.py ^
-    --cert ..\Key\KEK.cer ^
-    --key ..\Key\PK.pfx ^
+    --cert ..\Key\MLDSA-KEK.cer ^
+    --key ..\Key\MLDSA-PK.pfx ^
     --password "your_pk_password" ^
     --var-name KEK ^
-    --output ..\AuthVars\KEK.auth
+    --output ..\AuthVars\MLDSA-KEK-MLDSA.auth
 ```
 
 **Explanation**:
-- KEK.cer is the new KEK certificate to be written
-- PK.pfx contains the currently installed PK private key
+- MLDSA-KEK.cer is the new KEK certificate to be written
+- MLDSA-PK.pfx contains the currently installed PK private key
 - In User Mode, only PK can sign KEK updates
 
 ### Example 2: Generate db.auth
@@ -102,7 +102,7 @@ Update DB variable, signed with KEK:
 ```powershell
 python generate_auth_var.py ^
     --cert ..\Key\db.cer ^
-    --key ..\Key\KEK.pfx ^
+    --key ..\Key\MLDSA-KEK.pfx ^
     --password "your_kek_password" ^
     --var-name db ^
     --output ..\AuthVars\db.auth
@@ -112,7 +112,7 @@ python generate_auth_var.py ^
 - DB can be signed by either KEK or PK
 - Typically KEK is used to sign DB updates
 
-### Example 3: Generate PK.auth
+### Example 3: Generate MLDSA-PK.auth
 
 Update PK variable, signed with old PK:
 
@@ -122,7 +122,7 @@ python generate_auth_var.py ^
     --key ..\Key\PK_old.pfx ^
     --password "your_old_pk_password" ^
     --var-name PK ^
-    --output ..\AuthVars\PK.auth
+    --output ..\AuthVars\MLDSA-PK.auth
 ```
 
 **Explanation**:
