@@ -4,6 +4,8 @@
 ```
 openssl genpkey -algorithm mldsa87 -out MLDSA-PK.key
 
+openssl genrsa -out RSA-PK.key 2048
+
 (
   echo [req]
   echo distinguished_name=dn
@@ -16,21 +18,33 @@ openssl req -x509 -new -key MLDSA-PK.key -out MLDSA-PK.crt -nodes -days 3650 -su
 
 openssl x509 -in MLDSA-PK.crt -outform DER -out MLDSA-PK.der
 
+openssl req -x509 -new -key RSA-PK.key -out RSA-PK.crt -nodes -days 3650 -subj "/CN=Secure Boot RSA PK/" -config tmp_pk.cnf -extensions v3_ca
+
+openssl x509 -in RSA-PK.crt -outform DER -out RSA-PK.der
+
 del tmp_pk.cnf
 ```
 ### 2. KEK
 #### Valid KEK
 
 ```
+echo basicConstraints=CA:TRUE > kek_ext.cnf
+
 openssl genpkey -algorithm mldsa87 -out MLDSA-KEK.key
 
 openssl req -new -key MLDSA-KEK.key -out MLDSA-KEK.csr -subj "/CN=Secure Boot MLDSA KEK/"
 
-echo basicConstraints=CA:TRUE > kek_ext.cnf
-
 openssl x509 -req -in MLDSA-KEK.csr -CA MLDSA-PK.crt -CAkey MLDSA-PK.key -CAcreateserial -out MLDSA-KEK.crt -days 3650 -extfile kek_ext.cnf
 
 openssl x509 -in MLDSA-KEK.crt -outform DER -out MLDSA-KEK.der
+
+openssl genrsa -out RSA-KEK.key 2048
+
+openssl req -new -key RSA-KEK.key -out RSA-KEK.csr -subj "/CN=Secure Boot RSA KEK/"
+
+openssl x509 -req -in RSA-KEK.csr -CA RSA-PK.crt -CAkey RSA-PK.key -CAcreateserial -out RSA-KEK.crt -days 3650 -extfile kek_ext.cnf
+
+openssl x509 -in RSA-KEK.crt -outform DER -out RSA-KEK.der
 
 del kek_ext.cnf
 ```
@@ -80,7 +94,11 @@ openssl x509 -in RSA-DB.crt -outform DER -out RSA-DB.der
 ```
 openssl pkcs12 -export -out MLDSA-PK.pfx -inkey MLDSA-PK.key -in MLDSA-PK.crt -name "PK-Sign" -passout pass:123456
 
+openssl pkcs12 -export -out RSA-PK.pfx -inkey RSA-PK.key -in RSA-PK.crt -name "RSA-PK-Sign" -passout pass:123456
+
 openssl pkcs12 -export -out MLDSA-KEK.pfx -inkey MLDSA-KEK.key -in MLDSA-KEK.crt -name "MLDSA-KEK-Sign" -passout pass:123456
+
+openssl pkcs12 -export -out RSA-KEK.pfx -inkey RSA-KEK.key -in RSA-KEK.crt -name "RSA-KEK-Sign" -passout pass:123456
 
 openssl pkcs12 -export -out MLDSA-KEK-invalid.pfx -inkey MLDSA-KEK-invalid.key -in MLDSA-KEK-invalid.crt -name "MLDSA-MLDSA-KEK-invalid-Sign" -passout pass:123456
 

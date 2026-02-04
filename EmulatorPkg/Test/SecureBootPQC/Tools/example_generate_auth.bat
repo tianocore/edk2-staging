@@ -126,6 +126,50 @@ if %errorlevel% neq 0 (
 )
 echo.
 
+REM ----------------------------------------------------------------------------
+REM Example 5: Generate RSA-KEK-RSA.auth (signed by PK)
+REM ----------------------------------------------------------------------------
+echo [1] Generating RSA-KEK-RSA.auth (for updating KEK variable)...
+echo         Certificate: RSA-KEK.der
+echo         Signing with: RSA-PK.pfx
+echo.
+
+python "%TOOLS_DIR%generate_auth_var.py" ^
+    --cert "%KEY_DIR%\RSA-KEK.der" ^
+    --key "%KEY_DIR%\RSA-PK.pfx" ^
+    --password "%PK_PASSWORD%" ^
+    --var-name KEK ^
+    --output "%OUTPUT_DIR%\RSA-KEK-RSA.auth"
+
+if %errorlevel% neq 0 (
+    echo.
+    echo [ERROR] Failed to generate RSA-KEK-RSA.auth
+    goto :error
+)
+echo.
+
+REM ----------------------------------------------------------------------------
+REM Example 6: Generate RSA-DB-RSA.auth (signed by KEK)
+REM ----------------------------------------------------------------------------
+echo [4] Generating RSA-DB-RSA.auth (for updating DB variable)...
+echo         Certificate: RSA-DB.der
+echo         Signing with: RSA-KEK.pfx
+echo.
+
+python "%TOOLS_DIR%generate_auth_var.py" ^
+    --cert "%KEY_DIR%\RSA-DB.der" ^
+    --key "%KEY_DIR%\RSA-KEK.pfx" ^
+    --password "%KEK_PASSWORD%" ^
+    --var-name db ^
+    --output "%OUTPUT_DIR%\RSA-DB-RSA.auth"
+
+if %errorlevel% neq 0 (
+    echo.
+    echo [ERROR] Failed to generate MLDSA-DB-MLDSA.auth
+    goto :error
+)
+echo.
+
 echo ============================================================================
 echo [SUCCESS] All .auth files generated successfully!
 echo ============================================================================
