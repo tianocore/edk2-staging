@@ -10,7 +10,7 @@ echo "  Test 7: ML-DSA (PQC) Certificate Enrollment"
 echo "==========================================="
 echo " "
 
-set TOOL Images\SecureBootUpdateSigned.efi
+set TOOL Images\SecureBootUpdate-RSA-MLDSA.efi
 
 echo "[INFO] Enrolling MLDSA-DB-MLDSA.auth (ML-DSA certificate)..."
 %TOOL% update-db AuthVars\MLDSA-DB-MLDSA.auth

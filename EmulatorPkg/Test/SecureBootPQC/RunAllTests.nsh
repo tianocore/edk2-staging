@@ -21,13 +21,13 @@ echo "==========================================="
 echo " "
 
 # Check prerequisites
-if not exist Images\SecureBootUpdateSigned.efi then
+if not exist Images\SecureBootUpdate-RSA-MLDSA.efi then
     echo "[FAIL] Required files not found!"
     goto End
 endif
 
 echo "[INFO] Prerequisites check..."
-Images\SecureBootUpdateSigned.efi status
+Images\SecureBootUpdate-RSA-MLDSA.efi status
 echo " "
 
 Test1-EnrollKeys.nsh

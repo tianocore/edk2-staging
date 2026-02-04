@@ -9,10 +9,10 @@ echo "==========================================="
 echo "  Test 10: Clear db and then run MLDSA signed image (Expected FAIL)"
 echo "==========================================="
 echo " "
-set TOOL Images\SecureBootUpdateSigned.efi
+set TOOL Images\SecureBootUpdate-RSA-MLDSA.efi
 
 %TOOL% clear
-%TOOL% update-db Key\RSA-DB-TOOL.der
+%TOOL% update-db Key\MLDSA-DB-TOOL.der
 %TOOL% update-pk Key\MLDSA-PK.der
 Images\HelloWorld-MLDSA.efi
 

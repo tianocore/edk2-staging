@@ -9,17 +9,17 @@ echo "==========================================="
 echo "  Test 11: Test enroll RSA or MLDSA key to db and run dual signed image (Expected SUCC)"
 echo "==========================================="
 echo " "
-set TOOL Images\SecureBootUpdateSigned.efi
+set TOOL Images\SecureBootUpdate-RSA-MLDSA.efi
 
 %TOOL% clear
-%TOOL% update-db Key\RSA-DB-TOOL.der
+%TOOL% update-db Key\MLDSA-DB-TOOL.der
 %TOOL% update-pk Key\MLDSA-PK.der
 %TOOL% update-kek AuthVars\MLDSA-KEK-MLDSA.auth
 %TOOL% update-db AuthVars\MLDSA-DB-MLDSA.auth
 Images\HelloWorld-RSA-MLDSA.efi
 
 %TOOL% clear
-%TOOL% update-db Key\RSA-DB-TOOL.der
+%TOOL% update-db Key\MLDSA-DB-TOOL.der
 %TOOL% update-pk Key\MLDSA-PK.DER
 %TOOL% update-kek AuthVars\MLDSA-KEK-MLDSA.auth
 %TOOL% update-db AuthVars\RSA-DB-MLDSA.auth

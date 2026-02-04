@@ -3,7 +3,7 @@
 # EnableSecureBoot.nsh
 #
 # UEFI Shell script to enable Secure Boot by enrolling certificates.
-# This script enrolls RSA-DB-TOOL.der and MLDSA-PK.der using SecureBootUpdateSigned.efi.
+# This script enrolls MLDSA-DB-TOOL.der and MLDSA-PK.der using SecureBootUpdate-RSA-MLDSA.efi.
 #
 # Usage:
 #   fs0:
@@ -20,21 +20,21 @@ echo "=========================================="
 echo " "
 
 # Define file paths (relative to current directory)
-set TOOL_PATH Images\SecureBootUpdateSigned.efi
-set DB_CERT_PATH Key\RSA-DB-TOOL.der
+set TOOL_PATH Images\SecureBootUpdate-RSA-MLDSA.efi
+set DB_CERT_PATH Key\MLDSA-DB-TOOL.der
 set PK_CERT_PATH Key\MLDSA-PK.der
 
-# Check if SecureBootUpdateSigned.efi exists
+# Check if SecureBootUpdate-RSA-MLDSA.efi exists
 if not exist %TOOL_PATH% then
-    echo "Error: SecureBootUpdateSigned.efi not found at %TOOL_PATH%"
+    echo "Error: SecureBootUpdate-RSA-MLDSA.efi not found at %TOOL_PATH%"
     echo "Please run this script from Test\SecureBootPQC directory"
     echo "Current directory should contain: Images\ and Key\ subdirectories"
     goto End
 endif
 
-# Check if RSA-DB-TOOL.der exists
+# Check if MLDSA-DB-TOOL.der exists
 if not exist %DB_CERT_PATH% then
-    echo "Error: RSA-DB-TOOL.der not found at %DB_CERT_PATH%"
+    echo "Error: MLDSA-DB-TOOL.der not found at %DB_CERT_PATH%"
     echo "Please run this script from Test\SecureBootPQC directory"
     goto End
 endif
@@ -78,7 +78,7 @@ echo " "
 
 # Step 4: Enroll DB certificate
 echo "=========================================="
-echo "Step 4: Enrolling DB certificate (RSA-DB-TOOL.der)"
+echo "Step 4: Enrolling DB certificate (MLDSA-DB-TOOL.der)"
 echo "=========================================="
 %TOOL_PATH% update-db %DB_CERT_PATH%
 if %lasterror% ne 0 then
@@ -109,7 +109,7 @@ echo "Expected status:"
 echo "  - SecureBoot: 1 (Enabled)"
 echo "  - SetupMode: 0 (User Mode)"
 echo " "
-echo "Only applications signed with RSA-DB-TOOL key will now execute."
+echo "Only applications signed with MLDSA-DB-TOOL key will now execute."
 echo " "
 
 :End

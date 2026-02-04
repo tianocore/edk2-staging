@@ -99,4 +99,14 @@ openssl x509 -req -in RSA-DB-TOOL.csr -CA MLDSA-KEK.crt -CAkey MLDSA-KEK.key -CA
 openssl x509 -in RSA-DB-TOOL.crt -outform DER -out RSA-DB-TOOL.der
 
 openssl pkcs12 -export -out RSA-DB-TOOL.pfx -inkey RSA-DB-TOOL.key -in RSA-DB-TOOL.crt -name "RSA-DB-TOOL-ImageSign" -passout pass:123456
+
+openssl genpkey -algorithm mldsa87 -out MLDSA-DB-TOOL.key
+
+openssl req -new -key MLDSA-DB-TOOL.key -out MLDSA-DB-TOOL.csr -subj "/CN=MLDSA Secure Boot DB for tools/"
+
+openssl x509 -req -in MLDSA-DB-TOOL.csr -CA MLDSA-KEK.crt -CAkey MLDSA-KEK.key -CAcreateserial -out MLDSA-DB-TOOL.crt -days 3650 -sha384
+
+openssl x509 -in MLDSA-DB-TOOL.crt -outform DER -out MLDSA-DB-TOOL.der
+
+openssl pkcs12 -export -out MLDSA-DB-TOOL.pfx -inkey MLDSA-DB-TOOL.key -in MLDSA-DB-TOOL.crt -name "MLDSA-DB-TOOL-ImageSign" -passout pass:123456
 ```

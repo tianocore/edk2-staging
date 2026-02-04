@@ -22,8 +22,11 @@ signtool sign /as /f ../Key/MLDSA-DB.pfx /p 123456 /fd sha384 /tr http://timesta
 
 ### 2. DB tool key signed SecureBootUpdate.efi
 MUST enroll tool key to db before enrolling PK(enabling secure boot), to make sure SecureBootUpdate can be run in standard mode.
+SecureBootUpdate.efi should be dual signed to make sure it can be run in both PQC/Traditional mode.
 ```
-copy SecureBootUpdate.efi SecureBootUpdateSigned.efi
+copy SecureBootUpdate.efi SecureBootUpdate-RSA-MLDSA.efi
 
-signtool sign /f ../Key/RSA-DB-TOOL.pfx /p 123456 /fd sha384 /tr http://timestamp.digicert.com /td sha384 /v SecureBootUpdateSigned.efi
+signtool sign /f ../Key/RSA-DB-TOOL.pfx /p 123456 /fd sha384 /tr http://timestamp.digicert.com /td sha384 /v SecureBootUpdate-RSA-MLDSA.efi
+
+signtool sign /as /f ../Key/MLDSA-DB-TOOL.pfx /p 123456 /fd sha384 /tr http://timestamp.digicert.com /td sha384 /v SecureBootUpdate-RSA-MLDSA.efi
 ```

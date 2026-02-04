@@ -4,7 +4,7 @@
 # Tests 1-4: Key enrollment scenarios
 #
 
-set TOOL Images\SecureBootUpdateSigned.efi
+set TOOL Images\SecureBootUpdate-RSA-MLDSA.efi
 
 #============================================
 # Test Case 1: Try to enroll DB directly without KEK (should fail)
