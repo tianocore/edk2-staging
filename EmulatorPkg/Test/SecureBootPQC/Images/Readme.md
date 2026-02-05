@@ -24,6 +24,11 @@ signtool sign /f ../Key/RSA-DB.pfx /p 123456 /fd sha384 /tr http://timestamp.dig
 # Then sign again with pqc key by /as flag
 # /as  Append this signature. If no primary signature is present, this signature will be made the primary signature instead.
 signtool sign /as /f ../Key/MLDSA-DB.pfx /p 123456 /fd sha384 /tr http://timestamp.digicert.com /td sha384 /v HelloWorld-RSA-MLDSA.efi
+
+# Sign with leaf of cert chain, should enroll CA to DB only when test
+copy HelloWorld.efi HelloWorld-LEAF-MLDSA.efi
+
+signtool sign /f ../Key/MLDSA-DB-LEAF.pfx /p 123456 /fd sha384 /tr http://timestamp.digicert.com /td sha384 /v HelloWorld-LEAF-MLDSA.efi
 ```
 
 ### 2. DB tool key signed SecureBootUpdate.efi

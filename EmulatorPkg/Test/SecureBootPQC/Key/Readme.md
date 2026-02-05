@@ -85,6 +85,26 @@ openssl x509 -in MLDSA-DB.crt -outform DER -out MLDSA-DB.der
 openssl verify -CAfile MLDSA-PK.crt MLDSA-KEK.crt
 
 openssl verify -CAfile MLDSA-PK.crt -untrusted MLDSA-KEK.crt MLDSA-DB.crt
+
+(
+  echo [req]
+  echo distinguished_name=dn
+  echo [dn]
+  echo [v3_ca]
+  echo basicConstraints=critical,CA:TRUE
+) > db_ext.cnf
+
+openssl genpkey -algorithm mldsa87 -out MLDSA-DB-CA.key
+
+openssl req -x509 -new -key MLDSA-DB-CA.key -out MLDSA-DB-CA.crt -nodes -days 3650 -subj "/CN=Secure Boot MLDSA DB CA/" -config db_ext.cnf -extensions v3_ca
+
+openssl req -new -key MLDSA-DB.key -out MLDSA-DB-LEAF.csr -subj "/CN=Secure Boot MLDSA DB Leaf"
+
+openssl x509 -req -in MLDSA-DB-LEAF.csr -CA MLDSA-DB-CA.crt -CAkey MLDSA-DB-CA.key -CAcreateserial -out MLDSA-DB-LEAF.crt -days 3650
+
+openssl x509 -in MLDSA-DB-CA.crt -outform DER -out MLDSA-DB-CA.der
+
+del db_ext.cnf
 ```
 #### 4. RSA DB
 ```
@@ -111,6 +131,8 @@ openssl pkcs12 -export -out MLDSA-KEK-invalid.pfx -inkey MLDSA-KEK-invalid.key -
 openssl pkcs12 -export -out RSA-DB.pfx -inkey RSA-DB.key -in RSA-DB.crt -name "RSA-DB-ImageSign" -passout pass:123456
 
 openssl pkcs12 -export -out MLDSA-DB.pfx -inkey MLDSA-DB.key -in MLDSA-DB.crt -name "MLDSA-DB-ImageSign" -passout pass:123456
+
+openssl pkcs12 -export -out MLDSA-DB-LEAF.pfx -inkey MLDSA-DB.key -in MLDSA-DB-LEAF.crt -certfile MLDSA-DB-CA.crt -name "MLDSA-DB-LEAF-ImageSign" -passout pass:123456
 ```
 #### 6. Tool DB
 ```

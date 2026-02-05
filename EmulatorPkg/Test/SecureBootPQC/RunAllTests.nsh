@@ -76,6 +76,12 @@ else
     echo "[FAIL] Test 11: Fail to enroll RSA or MLDSA key to db and run dual signed image (error: %lasterror%)"
 endif
 
+Test9-Certchain.nsh
+if %lasterror% eq 0 then
+    echo "[PASS] Test 12: Enroll MLDSA CA key to db and run image signed by leaf"
+else
+    echo "[FAIL] Test 12: Fail to enroll MLDSA CA key to db and run image signed by leaf (error: %lasterror%)"
+endif
 echo " "
 echo "========================================="
 echo "  All Tests Completed"
