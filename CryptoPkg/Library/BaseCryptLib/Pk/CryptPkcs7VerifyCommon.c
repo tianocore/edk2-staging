@@ -800,6 +800,7 @@ Pkcs7Verify (
   PKCS7_SIGNER_INFO *Si;
   UINT8        *AttrDer;
   UINTN        AttrDerLen;
+  X509         *SignerCert;
 
   //
   // Check input parameters.
@@ -882,7 +883,20 @@ Pkcs7Verify (
     goto _Exit;
   }
 
-  PKey = X509_get0_pubkey (Cert);
+  SiStack = PKCS7_get_signer_info(Pkcs7);
+  if (SiStack == NULL || sk_PKCS7_SIGNER_INFO_num(SiStack) == 0) {
+    goto _Exit;
+  }
+  //
+  // Assume only 1 signer info in stack
+  //
+  Si = sk_PKCS7_SIGNER_INFO_value(SiStack, 0);
+  SignerCert = PKCS7_cert_from_signer_info (Pkcs7, Si);
+  if (SignerCert == NULL) {
+    goto _Exit;
+  }
+
+  PKey = X509_get0_pubkey (SignerCert);
   if (PKey == NULL) {
     goto _Exit;
   }
@@ -894,14 +908,6 @@ Pkcs7Verify (
     if (PCtx == NULL) {
       goto _Exit;
     }
-    SiStack = PKCS7_get_signer_info(Pkcs7);
-    if (SiStack == NULL || sk_PKCS7_SIGNER_INFO_num(SiStack) == 0) {
-      goto _Exit;
-    }
-    //
-    // Assume only 1 signature in signer info
-    //
-    Si = sk_PKCS7_SIGNER_INFO_value(SiStack, 0);
     //
     // Get signature from signer info
     //
