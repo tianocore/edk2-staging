@@ -1,3 +1,9 @@
+## Naming Rule
+
+prefix == content algo, suffix == signature algo.
+Multiple algorithms can be concatenated with "-". Algorithm order does not matter.
+Composite Algo name should not include "-".
+
 ## Steps to generate test images:
 
 ### 1. DB signed EFI image
