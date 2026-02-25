@@ -991,6 +991,7 @@ _Exit:
   X509_STORE_free (CertStore);
   PKCS7_free (Pkcs7);
   EVP_PKEY_CTX_free (PCtx);
+  OPENSSL_free (AttrDer);
 
   if (!Wrapped) {
     OPENSSL_free (SignedData);
