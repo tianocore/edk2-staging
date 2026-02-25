@@ -373,61 +373,43 @@ ClearSecureBootVariable (
     SetupMode = 1;  // Assume Setup Mode if can't read
   }
 
-  if (SetupMode == 1) {
-    //
-    // In Setup Mode: Direct deletion without authentication
-    //
-    DEBUG ((DEBUG_INFO, "ClearSecureBootVariable: Setup Mode detected, using direct delete\n"));
-    
-    Status = gRT->SetVariable (
-                    VariableName,
-                    VendorGuid,
-                    0,
-                    0,
-                    NULL
-                    );
-  } else {
-    //
-    // In User Mode: Need to provide empty EFI_VARIABLE_AUTHENTICATION_2 header
-    //
-    EFI_VARIABLE_AUTHENTICATION_2  AuthHeader;
-    EFI_TIME                       Time;
-    UINTN                          AuthSize;
-    
-    //
-    // Fill timestamp
-    //
-    ZeroMem (&Time, sizeof (EFI_TIME));
-    Time.Year = 2025;
-    Time.Month = 1;
-    Time.Day = 1;
-    CopyMem (&AuthHeader.TimeStamp, &Time, sizeof (EFI_TIME));
-    
-    //
-    // Fill WIN_CERTIFICATE_UEFI_GUID with minimal size (no CertData)
-    //
-    AuthHeader.AuthInfo.Hdr.dwLength = OFFSET_OF (WIN_CERTIFICATE_UEFI_GUID, CertData);
-    AuthHeader.AuthInfo.Hdr.wRevision = 0x0200;
-    AuthHeader.AuthInfo.Hdr.wCertificateType = WIN_CERT_TYPE_EFI_GUID;
-    CopyGuid (&AuthHeader.AuthInfo.CertType, &gEfiCertPkcs7Guid);
-    
-    //
-    // Calculate size: timestamp + WIN_CERTIFICATE header (no payload)
-    //
-    AuthSize = OFFSET_OF (EFI_VARIABLE_AUTHENTICATION_2, AuthInfo) +
-               OFFSET_OF (WIN_CERTIFICATE_UEFI_GUID, CertData);
-    
-    Status = gRT->SetVariable (
-                    VariableName,
-                    VendorGuid,
-                    EFI_VARIABLE_NON_VOLATILE | 
-                    EFI_VARIABLE_BOOTSERVICE_ACCESS | 
-                    EFI_VARIABLE_RUNTIME_ACCESS |
-                    EFI_VARIABLE_TIME_BASED_AUTHENTICATED_WRITE_ACCESS,
-                    AuthSize,
-                    &AuthHeader
-                    );
-  }
+  EFI_VARIABLE_AUTHENTICATION_2  AuthHeader;
+  EFI_TIME                       Time;
+  UINTN                          AuthSize;
+  
+  //
+  // Fill timestamp
+  //
+  ZeroMem (&Time, sizeof (EFI_TIME));
+  Time.Year = 2025;
+  Time.Month = 1;
+  Time.Day = 1;
+  CopyMem (&AuthHeader.TimeStamp, &Time, sizeof (EFI_TIME));
+  
+  //
+  // Fill WIN_CERTIFICATE_UEFI_GUID with minimal size (no CertData)
+  //
+  AuthHeader.AuthInfo.Hdr.dwLength = OFFSET_OF (WIN_CERTIFICATE_UEFI_GUID, CertData);
+  AuthHeader.AuthInfo.Hdr.wRevision = 0x0200;
+  AuthHeader.AuthInfo.Hdr.wCertificateType = WIN_CERT_TYPE_EFI_GUID;
+  CopyGuid (&AuthHeader.AuthInfo.CertType, &gEfiCertPkcs7Guid);
+  
+  //
+  // Calculate size: timestamp + WIN_CERTIFICATE header (no payload)
+  //
+  AuthSize = OFFSET_OF (EFI_VARIABLE_AUTHENTICATION_2, AuthInfo) +
+              OFFSET_OF (WIN_CERTIFICATE_UEFI_GUID, CertData);
+  
+  Status = gRT->SetVariable (
+                  VariableName,
+                  VendorGuid,
+                  EFI_VARIABLE_NON_VOLATILE | 
+                  EFI_VARIABLE_BOOTSERVICE_ACCESS | 
+                  EFI_VARIABLE_RUNTIME_ACCESS |
+                  EFI_VARIABLE_TIME_BASED_AUTHENTICATED_WRITE_ACCESS,
+                  AuthSize,
+                  &AuthHeader
+                  );
 
   if (EFI_ERROR (Status) && Status != EFI_NOT_FOUND) {
     DEBUG ((DEBUG_ERROR, "ClearSecureBootVariable: Failed to clear '%s': %r\n", VariableName, Status));
@@ -679,7 +661,7 @@ UefiMain (
                     &SetupMode
                     );
     
-    if (!EFI_ERROR (Status) && SetupMode == 0) {
+    if (!EFI_ERROR (Status)) {
       //
       // In User Mode: Enter Custom Mode first
       //
