@@ -30,14 +30,26 @@ https://learn.microsoft.com/zh-cn/windows/apps/windows-sdk/downloads
         +-- Purpose: Execute all test cases sequentially
 ```
 
+3. QEMU
+https://www.qemu.org/download/#windows
+
 ### 2. Verification for PQC signed image
 
 \*Only support ML-DSA-87 currently
 
-#### Test steps
+#### Test steps with EmulatorPkg
 
 1. build -p EmulatorPkg\EmulatorPkg.dsc -t VS2019 -a X64
 2. Copy EmulatorPkg\Test\SecureBootPQC\ folder to Build\EmulatorX64\DEBUG_VS2019\X64
+3. Run `EnableSecureBoot.nsh` to enable secure boot
+4. Run `RunAllTests.nsh > testreport.log` to test verification for PQC signed images
+5. `[FAIL]`should not be found in testreport.log, which indicates that the test case failed.
+
+#### Test steps with QEMU
+
+1. build -p OvmfPkg/OvmfPkgX64.dsc -a X64 -t VS2019
+2. Install QEMU
+3. Run `qemu-system-x86_64 -machine q35 -cpu qemu64 -smp 1 -m 2048 -drive if=pflash,format=raw,unit=0,file=\path\to\OVMF.fd,readonly=on -net none -debugcon stdio -global isa-debugcon.iobase=0x402 -drive file=fat:rw:\path\to\SecureBootPQC,format=raw`
 3. Run `EnableSecureBoot.nsh` to enable secure boot
 4. Run `RunAllTests.nsh > testreport.log` to test verification for PQC signed images
 5. `[FAIL]`should not be found in testreport.log, which indicates that the test case failed.
