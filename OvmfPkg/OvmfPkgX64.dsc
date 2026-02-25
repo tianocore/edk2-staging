@@ -29,7 +29,7 @@
   # Defines for default states.  These can be changed on the command line.
   # -D FLAG=VALUE
   #
-  DEFINE SECURE_BOOT_ENABLE      = FALSE
+  DEFINE SECURE_BOOT_ENABLE      = TRUE
   DEFINE SMM_REQUIRE             = FALSE
   DEFINE QEMU_PV_VARS            = FALSE
   DEFINE STANDALONE_MM_ENABLE    = FALSE

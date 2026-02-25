@@ -12,5 +12,5 @@
 !endif
   TlsLib|CryptoPkg/Library/TlsLib/TlsLib.inf
 !else
-  OpensslLib|CryptoPkg/Library/OpensslLib/OpensslLibCrypto.inf
+  OpensslLib|CryptoPkg/Library/OpensslLib/OpensslLibFull.inf
 !endif
