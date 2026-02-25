@@ -170,6 +170,40 @@ if %errorlevel% neq 0 (
 )
 echo.
 
+REM ----------------------------------------------------------------------------
+REM Example 7: Generate self-signed PK auth
+REM ----------------------------------------------------------------------------
+echo [5] Generating RSA-PK-RSA.auth (for updating PK variable)...
+echo         Certificate: RSA-PK.der
+echo         Signing with: RSA-PK.pfx
+echo.
+
+python "%TOOLS_DIR%generate_auth_var.py" ^
+    --cert "%KEY_DIR%\RSA-PK.der" ^
+    --key "%KEY_DIR%\RSA-PK.pfx" ^
+    --password "%KEK_PASSWORD%" ^
+    --var-name PK ^
+    --output "%OUTPUT_DIR%\RSA-PK-RSA.auth"
+
+echo [6] Generating MLDSA-PK-MLDSA.auth (for updating PK variable)...
+echo         Certificate: MLDSA-PK.der
+echo         Signing with: MLDSA-PK.pfx
+echo.
+
+python "%TOOLS_DIR%generate_auth_var.py" ^
+    --cert "%KEY_DIR%\MLDSA-PK.der" ^
+    --key "%KEY_DIR%\MLDSA-PK.pfx" ^
+    --password "%KEK_PASSWORD%" ^
+    --var-name PK ^
+    --output "%OUTPUT_DIR%\MLDSA-PK-MLDSA.auth"
+
+if %errorlevel% neq 0 (
+    echo.
+    echo [ERROR] Failed to generate MLDSA-DB-MLDSA.auth
+    goto :error
+)
+echo.
+
 echo ============================================================================
 echo [SUCCESS] All .auth files generated successfully!
 echo ============================================================================

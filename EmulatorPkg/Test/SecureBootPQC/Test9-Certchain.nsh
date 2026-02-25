@@ -14,7 +14,7 @@ set TOOL Images\SecureBootUpdate-RSA-MLDSA.efi
 %TOOL% clear
 %TOOL% update-db Key\MLDSA-DB-CA.der
 %TOOL% update-db Key\MLDSA-DB-TOOL.der
-%TOOL% update-pk Key\MLDSA-PK.der
+%TOOL% update-pk AuthVars\MLDSA-PK-MLDSA.auth
 Images\HelloWorld-LEAF-MLDSA.efi
 
 echo " "

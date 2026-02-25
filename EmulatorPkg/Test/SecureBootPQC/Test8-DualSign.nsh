@@ -13,14 +13,14 @@ set TOOL Images\SecureBootUpdate-RSA-MLDSA.efi
 
 %TOOL% clear
 %TOOL% update-db Key\MLDSA-DB-TOOL.der
-%TOOL% update-pk Key\MLDSA-PK.der
+%TOOL% update-pk AuthVars\MLDSA-PK-MLDSA.auth
 %TOOL% update-kek AuthVars\MLDSA-KEK-MLDSA.auth
 %TOOL% update-db AuthVars\MLDSA-DB-MLDSA.auth
 Images\HelloWorld-RSA-MLDSA.efi
 
 %TOOL% clear
 %TOOL% update-db Key\MLDSA-DB-TOOL.der
-%TOOL% update-pk Key\MLDSA-PK.DER
+%TOOL% update-pk AuthVars\MLDSA-PK-MLDSA.auth
 %TOOL% update-kek AuthVars\MLDSA-KEK-MLDSA.auth
 %TOOL% update-db AuthVars\RSA-DB-MLDSA.auth
 Images\HelloWorld-RSA-MLDSA.efi
