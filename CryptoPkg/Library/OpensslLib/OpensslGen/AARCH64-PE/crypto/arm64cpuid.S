@@ -118,6 +118,16 @@ _armv8_sve2_probe:
         ret
 
 
+.globl  _armv8_sve_get_vl_bytes
+.def _armv8_sve_get_vl_bytes
+   .type 32
+.endef
+_armv8_sve_get_vl_bytes:
+        AARCH64_VALID_CALL_TARGET
+.long   0x0420e3e0      // cntb x0
+        ret
+
+
 .globl  _armv8_cpuid_probe
 .def _armv8_cpuid_probe
    .type 32
