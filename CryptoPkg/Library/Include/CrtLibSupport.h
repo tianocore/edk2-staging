@@ -17,6 +17,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Library/DebugLib.h>
 #include <Library/PrintLib.h>
 #include <Library/TimerLib.h>
+#include <Library/MemoryAllocationLib.h>
 
 #define OPENSSLDIR  ""
 #define ENGINESDIR  ""
@@ -58,6 +59,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #define va_arg    VA_ARG
 #define va_start  VA_START
 #define va_end    VA_END
+#define va_copy   VA_COPY
 
 //
 // Definitions for global constants used by CRT library routines
@@ -431,6 +433,31 @@ strpbrk (
   const char  *accept
   );
 
+/**
+  This is the Crypto version of CRT vsnprintf function, this function replaces "%s" to
+  "%a" before invoking AsciiVSPrint(). That is because "%s" is unicode base on edk2
+  environment however "%s" is ascii code base on vsnprintf().
+  See definitions of AsciiVSPrint() for the details.
+
+  @param  StartOfBuffer   A pointer to the output buffer for the produced Null-terminated
+                          ASCII string.
+  @param  BufferSize      The size, in bytes, of the output buffer specified by StartOfBuffer.
+  @param  FormatString    A Null-terminated ASCII format string.
+  @param  Marker          VA_LIST marker for the variable argument list.
+
+  @return The number of ASCII characters in the produced output buffer not including the
+          Null-terminator.
+
+**/
+UINTN
+EFIAPI
+CryptoAsciiVSPrint (
+  OUT CHAR8        *StartOfBuffer,
+  IN  UINTN        BufferSize,
+  IN  CONST CHAR8  *FormatString,
+  IN  VA_LIST      Marker
+  );
+
 //
 // Macros that directly map functions to BaseLib, BaseMemoryLib, and DebugLib functions
 //
@@ -448,6 +475,7 @@ strpbrk (
 #define assert(expression)
 #define offsetof(type, member)  OFFSET_OF(type,member)
 #define atoi(nptr)              AsciiStrDecimalToUintn(nptr)
+#define vsnprintf(buf, len, format, marker)           CryptoAsciiVSPrint((buf),(len),(format),(marker))
 
 #ifndef _BYTESWAP_DEFINED
 #define _BYTESWAP_DEFINED
@@ -485,4 +513,7 @@ strpbrk (
 #else
 #define UINTPTR_MAX  0xFFFFFFFFUL
 #endif
+
+#define INT64_C(c)	c ## L
+
 #endif

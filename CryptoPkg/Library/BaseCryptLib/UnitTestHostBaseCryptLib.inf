@@ -52,6 +52,7 @@
   Pk/CryptEc.c
 
   SysCall/UnitTestHostCrtWrapper.c
+  SysCall/VsprintWrapper.c
 
 [Sources.Ia32]
   Rand/CryptRandTsc.c
