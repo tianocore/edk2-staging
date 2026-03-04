@@ -187,7 +187,7 @@ IsEkuInCertificate (
     goto Exit;
   }
 
-  Extension = X509_get_ext (ClonedCert, ExtensionIndex);
+  Extension = (X509_EXTENSION *)X509_get_ext (ClonedCert, ExtensionIndex);
   if (Extension == NULL) {
     //
     // Fail to get Extension form cert.

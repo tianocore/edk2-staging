@@ -127,7 +127,7 @@ AuthenticodeVerify (
     goto _Exit;
   }
 
-  SpcIndirectDataContent = (UINT8 *)(Pkcs7->d.sign->contents->d.other->value.asn1_string->data);
+  SpcIndirectDataContent = (UINT8 *) ASN1_STRING_get0_data (Pkcs7->d.sign->contents->d.other->value.asn1_string);
 
   //
   // Retrieve the SEQUENCE data size from ASN.1-encoded SpcIndirectDataContent.

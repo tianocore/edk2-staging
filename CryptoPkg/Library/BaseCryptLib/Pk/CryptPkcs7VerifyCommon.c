@@ -558,7 +558,7 @@ Pkcs7GetCertificatesList (
   // Initialize Chained & Untrusted stack
   //
   CtxChain = X509_STORE_CTX_get0_chain (CertCtx);
-  CtxCert  = X509_STORE_CTX_get0_cert (CertCtx);
+  CtxCert  = (X509 *)X509_STORE_CTX_get0_cert (CertCtx);
   if (CtxChain == NULL) {
     if (((CtxChain = sk_X509_new_null ()) == NULL) ||
         (!sk_X509_push (CtxChain, CtxCert)))
@@ -592,8 +592,8 @@ Pkcs7GetCertificatesList (
     //
     if (CtxUntrusted != NULL) {
       Issuer     = NULL;
-      IssuerName = X509_get_issuer_name (Cert);
-      Issuer     = X509_find_by_subject (CtxUntrusted, IssuerName);
+      IssuerName = (X509_NAME *)X509_get_issuer_name (Cert);
+      Issuer     = (X509 *)X509_find_by_subject (CtxUntrusted, IssuerName);
       if (Issuer != NULL) {
         if (!sk_X509_push (CtxChain, Issuer)) {
           goto _Error;

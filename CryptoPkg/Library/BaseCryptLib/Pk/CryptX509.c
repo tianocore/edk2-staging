@@ -309,7 +309,7 @@ X509GetSubjectName (
   //
   // Retrieve subject name from certificate object.
   //
-  X509Name = X509_get_subject_name (X509Cert);
+  X509Name = (X509_NAME *)X509_get_subject_name (X509Cert);
   if (X509Name == NULL) {
     goto _Exit;
   }
@@ -415,7 +415,7 @@ InternalX509GetNIDName (
   //
   // Retrieve subject name from certificate object.
   //
-  X509Name = X509_get_subject_name (X509Cert);
+  X509Name = (X509_NAME *)X509_get_subject_name (X509Cert);
   if (X509Name == NULL) {
     //
     // Fail to retrieve subject name content
@@ -436,7 +436,7 @@ InternalX509GetNIDName (
     goto _Exit;
   }
 
-  Entry = X509_NAME_get_entry (X509Name, Index);
+  Entry = (X509_NAME_ENTRY *)X509_NAME_get_entry (X509Name, Index);
   if (Entry == NULL) {
     //
     // Fail to retrieve name entry data
@@ -446,7 +446,7 @@ InternalX509GetNIDName (
     goto _Exit;
   }
 
-  EntryData = X509_NAME_ENTRY_get_data (Entry);
+  EntryData = (ASN1_STRING *)X509_NAME_ENTRY_get_data (Entry);
   if (EntryData == NULL) {
     //
     // Fail to retrieve name entry data
@@ -1139,7 +1139,7 @@ X509GetIssuerName (
   //
   // Retrieve subject name from certificate object.
   //
-  X509Name = X509_get_subject_name (X509Cert);
+  X509Name = (X509_NAME *)X509_get_subject_name (X509Cert);
   if (X509Name == NULL) {
     goto _Exit;
   }
@@ -1341,12 +1341,12 @@ X509GetExtensionData (
       continue;
     }
 
-    Asn1Obj = X509_EXTENSION_get_object (Ext);
+    Asn1Obj = (ASN1_OBJECT *)X509_EXTENSION_get_object (Ext);
     if (Asn1Obj == NULL) {
       continue;
     }
 
-    Asn1Oct = X509_EXTENSION_get_data (Ext);
+    Asn1Oct = (ASN1_OCTET_STRING *)X509_EXTENSION_get_data (Ext);
     if (Asn1Oct == NULL) {
       continue;
     }

@@ -164,64 +164,23 @@ ConvertAsn1TimeToEfiTime (
   OUT EFI_TIME   *EfiTime
   )
 {
-  CONST CHAR8  *Str;
-  UINTN        Index;
+  struct tm Tm;
 
   if ((Asn1Time == NULL) || (EfiTime == NULL)) {
     return FALSE;
   }
 
-  Str = (CONST CHAR8 *)Asn1Time->data;
+  if (ASN1_TIME_to_tm(Asn1Time, &Tm) != 1) {
+    return FALSE;
+  }
+
   SetMem (EfiTime, sizeof (EFI_TIME), 0);
-
-  Index = 0;
-  if (Asn1Time->type == V_ASN1_UTCTIME) {
-    /* two digit year */
-    EfiTime->Year  = (Str[Index++] - '0') * 10;
-    EfiTime->Year += (Str[Index++] - '0');
-    if (EfiTime->Year < 70) {
-      EfiTime->Year += 100;
-    }
-  } else if (Asn1Time->type == V_ASN1_GENERALIZEDTIME) {
-    /* four digit year */
-    EfiTime->Year  = (Str[Index++] - '0') * 1000;
-    EfiTime->Year += (Str[Index++] - '0') * 100;
-    EfiTime->Year += (Str[Index++] - '0') * 10;
-    EfiTime->Year += (Str[Index++] - '0');
-    if ((EfiTime->Year < 1900) || (EfiTime->Year > 9999)) {
-      return FALSE;
-    }
-  }
-
-  EfiTime->Month  = (Str[Index++] - '0') * 10;
-  EfiTime->Month += (Str[Index++] - '0');
-  if ((EfiTime->Month < 1) || (EfiTime->Month > 12)) {
-    return FALSE;
-  }
-
-  EfiTime->Day  = (Str[Index++] - '0') * 10;
-  EfiTime->Day += (Str[Index++] - '0');
-  if ((EfiTime->Day < 1) || (EfiTime->Day > 31)) {
-    return FALSE;
-  }
-
-  EfiTime->Hour  = (Str[Index++] - '0') * 10;
-  EfiTime->Hour += (Str[Index++] - '0');
-  if (EfiTime->Hour > 23) {
-    return FALSE;
-  }
-
-  EfiTime->Minute  = (Str[Index++] - '0') * 10;
-  EfiTime->Minute += (Str[Index++] - '0');
-  if (EfiTime->Minute > 59) {
-    return FALSE;
-  }
-
-  EfiTime->Second  = (Str[Index++] - '0') * 10;
-  EfiTime->Second += (Str[Index++] - '0');
-  if (EfiTime->Second > 59) {
-    return FALSE;
-  }
+  EfiTime->Year   = (UINT16)(Tm.tm_year + 1900);
+  EfiTime->Month  = (UINT8)(Tm.tm_mon + 1);
+  EfiTime->Day    = (UINT8)Tm.tm_mday;
+  EfiTime->Hour   = (UINT8)Tm.tm_hour;
+  EfiTime->Minute = (UINT8)Tm.tm_min;
+  EfiTime->Second = (UINT8)Tm.tm_sec;
 
   /* Note: we did not adjust the time based on time zone information */
 
@@ -660,7 +619,7 @@ ImageTimestampVerify (
       continue;
     }
 
-    XaObj = X509_ATTRIBUTE_get0_object (Xa);
+    XaObj = (ASN1_OBJECT *)X509_ATTRIBUTE_get0_object (Xa);
     if (XaObj == NULL) {
       continue;
     }
@@ -671,7 +630,7 @@ ImageTimestampVerify (
       continue;
     }
 
-    Asn1Type = X509_ATTRIBUTE_get0_type (Xa, 0);
+    Asn1Type = (ASN1_TYPE *)X509_ATTRIBUTE_get0_type (Xa, 0);
   }
 
   if (Asn1Type == NULL) {
@@ -679,8 +638,8 @@ ImageTimestampVerify (
     goto _Exit;
   }
 
-  TSToken   = Asn1Type->value.octet_string->data;
-  TokenSize = Asn1Type->value.octet_string->length;
+  TSToken   = (UINT8 *)ASN1_STRING_get0_data (Asn1Type->value.octet_string);
+  TokenSize = ASN1_STRING_length (Asn1Type->value.octet_string);
 
   //
   // TimeStamp counterSignature (Token) verification.
@@ -690,8 +649,8 @@ ImageTimestampVerify (
              TokenSize,
              TsaCert,
              CertSize,
-             EncDigest->data,
-             EncDigest->length,
+             ASN1_STRING_get0_data (EncDigest),
+             ASN1_STRING_length (EncDigest),
              SigningTime
              );
 

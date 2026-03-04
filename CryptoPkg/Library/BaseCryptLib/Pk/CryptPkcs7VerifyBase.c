@@ -165,15 +165,15 @@ Pkcs7GetAttachedContent (
       goto _Exit;
     }
 
-    if ((OctStr->length > 0) && (OctStr->data != NULL)) {
-      *ContentSize = OctStr->length;
+    if ((ASN1_STRING_length (OctStr) > 0) && (ASN1_STRING_get0_data (OctStr) != NULL)) {
+      *ContentSize = ASN1_STRING_length (OctStr);
       *Content     = AllocatePool (*ContentSize);
       if (*Content == NULL) {
         *ContentSize = 0;
         goto _Exit;
       }
 
-      CopyMem (*Content, OctStr->data, *ContentSize);
+      CopyMem (*Content, ASN1_STRING_get0_data (OctStr), *ContentSize);
     }
   }
 

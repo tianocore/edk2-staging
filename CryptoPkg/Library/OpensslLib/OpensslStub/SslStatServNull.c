@@ -263,6 +263,7 @@ tls_construct_new_session_ticket (
 int
 tls_construct_cert_status_body (
   SSL_CONNECTION  *s,
+  OCSP_RESPONSE   *resp,
   WPACKET         *pkt
   )
 {

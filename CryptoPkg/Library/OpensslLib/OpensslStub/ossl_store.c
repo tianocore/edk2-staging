@@ -161,7 +161,7 @@ OSSL_STORE_INFO_free (
 
 OSSL_STORE_SEARCH *
 OSSL_STORE_SEARCH_by_name (
-  X509_NAME  *name
+  const X509_NAME  *name
   )
 {
   return NULL;
