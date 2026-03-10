@@ -373,3 +373,11 @@ ossl_bio_print_labeled_buf (
 {
   return -1;
 }
+
+int
+encode_base64_avx2(EVP_ENCODE_CTX *ctx,
+    unsigned char *out, const unsigned char *src, int srclen,
+    int newlines, int *wrap_cnt)
+{
+  return 0;
+}

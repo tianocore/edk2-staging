@@ -267,6 +267,7 @@ def sources_filter_fn(filename):
         'ecp_nistz256.c',
         'x86_64-gcc.c',
         'armcap.c',
+        'enc_b64_avx2.c',
     ]
     for item in exclude:
         if item in filename:
