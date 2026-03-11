@@ -28,3 +28,12 @@
 
 [LibraryClasses]
   BaseMemoryLib
+
+[BuildOptions]
+  MSFT:*_*_IA32_CC_FLAGS   = /U_WIN32 /U_WIN64
+  MSFT:*_*_X64_CC_FLAGS    = /U_WIN32 /U_WIN64
+  INTEL:*_*_IA32_CC_FLAGS  = -U_WIN32 -U_WIN64
+  INTEL:*_*_X64_CC_FLAGS   = -U_WIN32 -U_WIN64
+  GCC:*_*_IA32_CC_FLAGS    = -U_WIN32 -U_WIN64
+  GCC:*_*_X64_CC_FLAGS     = -U_WIN32 -U_WIN64
+  GCC:*_*_AARCH64_CC_FLAGS = -U_WIN32 -U_WIN64
