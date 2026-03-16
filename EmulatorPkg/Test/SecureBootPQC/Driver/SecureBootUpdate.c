@@ -491,6 +491,173 @@ DisplaySecureBootStatus (
 }
 
 /**
+  Test setting a common variable with time-based authentication.
+  
+  This function creates a test variable with TIME_BASED_AUTHENTICATED_WRITE_ACCESS
+  attribute using an empty authentication header (no actual signature).
+
+  @param[in]  NewValue      Value to set (0 or 1).
+
+  @retval EFI_SUCCESS       Test completed successfully.
+  @retval Others            Error occurred during test.
+
+**/
+EFI_STATUS
+TestSetCommonVarWithTimeBasedAuth (
+  IN UINT8  NewValue
+  )
+{
+  EFI_STATUS                     Status;
+  CHAR16                         *TestVarName;
+  EFI_GUID                       TestVarGuid;
+  UINT8                          OldValue;
+  UINTN                          OldSize;
+  UINT32                         OldAttributes;
+  EFI_VARIABLE_AUTHENTICATION_2  *AuthData;
+  EFI_TIME                       Time;
+  UINTN                          AuthSize;
+  UINT8                          *Buffer;
+  UINT32                         Attributes;
+
+  Print (L"========================================\n");
+  Print (L"  Set Common Variable with Time-Based Auth\n");
+  Print (L"========================================\n");
+  Print (L"\n");
+  
+  //
+  // Define test variable name and GUID
+  //
+  TestVarName = L"TestVar";
+  TestVarGuid = (EFI_GUID){0x12345678, 0x1234, 0x5678, {0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0}};
+  
+  //
+  // Read original value
+  //
+  OldValue = 0xFF;
+  OldSize = sizeof (OldValue);
+  OldAttributes = 0;
+  
+  Status = gRT->GetVariable (
+                  TestVarName,
+                  &TestVarGuid,
+                  &OldAttributes,
+                  &OldSize,
+                  &OldValue
+                  );
+  
+  if (Status == EFI_NOT_FOUND) {
+    Print (L"Original value: <not set>\n");
+    DEBUG ((DEBUG_INFO, "TestVar does not exist\n"));
+  } else if (EFI_ERROR (Status)) {
+    Print (L"Warning: Failed to read original value: %r (0x%lx)\n", Status, (UINT64)Status);
+    DEBUG ((DEBUG_WARN, "Failed to read TestVar: %r\n", Status));
+  } else {
+    Print (L"Original value: %d (0x%02x)\n", OldValue, OldValue);
+    Print (L"Original attributes: 0x%08x\n", OldAttributes);
+    DEBUG ((DEBUG_INFO, "Original TestVar value: %d, attributes: 0x%x\n", OldValue, OldAttributes));
+  }
+  
+  Print (L"\n");
+  
+  //
+  // Prepare authentication header with empty signature
+  //
+  AuthSize = OFFSET_OF (EFI_VARIABLE_AUTHENTICATION_2, AuthInfo) +
+             OFFSET_OF (WIN_CERTIFICATE_UEFI_GUID, CertData) +
+             sizeof (UINT8);
+  
+  Buffer = AllocateZeroPool (AuthSize);
+  if (Buffer == NULL) {
+    Print (L"Error: Failed to allocate memory for authentication data\n");
+    DEBUG ((DEBUG_ERROR, "Failed to allocate %u bytes\n", AuthSize));
+    return EFI_OUT_OF_RESOURCES;
+  }
+  
+  AuthData = (EFI_VARIABLE_AUTHENTICATION_2 *)Buffer;
+  
+  //
+  // Fill timestamp
+  //
+  ZeroMem (&Time, sizeof (EFI_TIME));
+  Time.Year = 2025;
+  Time.Month = 1;
+  Time.Day = 1;
+  Time.Hour = 0;
+  Time.Minute = 0;
+  Time.Second = 0;
+  CopyMem (&AuthData->TimeStamp, &Time, sizeof (EFI_TIME));
+  
+  //
+  // Fill WIN_CERTIFICATE_UEFI_GUID with minimal size (no signature data)
+  //
+  AuthData->AuthInfo.Hdr.dwLength = OFFSET_OF (WIN_CERTIFICATE_UEFI_GUID, CertData);
+  AuthData->AuthInfo.Hdr.wRevision = 0x0200;
+  AuthData->AuthInfo.Hdr.wCertificateType = WIN_CERT_TYPE_EFI_GUID;
+  CopyGuid (&AuthData->AuthInfo.CertType, &gEfiCertPkcs7Guid);
+  
+  //
+  // Copy the new value after the authentication header
+  //
+  CopyMem (
+    Buffer + OFFSET_OF (EFI_VARIABLE_AUTHENTICATION_2, AuthInfo) + 
+             OFFSET_OF (WIN_CERTIFICATE_UEFI_GUID, CertData),
+    &NewValue,
+    sizeof (UINT8)
+    );
+  
+  //
+  // Set variable with TIME_BASED_AUTHENTICATED_WRITE_ACCESS attribute
+  //
+  Attributes = EFI_VARIABLE_NON_VOLATILE |
+               EFI_VARIABLE_BOOTSERVICE_ACCESS |
+               EFI_VARIABLE_RUNTIME_ACCESS |
+               EFI_VARIABLE_TIME_BASED_AUTHENTICATED_WRITE_ACCESS;
+  
+  Print (L"Setting new value: %d (0x%02x)\n", NewValue, NewValue);
+  DEBUG ((DEBUG_INFO, "Setting TestVar with value %d, attributes 0x%x\n", NewValue, Attributes));
+  
+  Status = gRT->SetVariable (
+                  TestVarName,
+                  &TestVarGuid,
+                  Attributes,
+                  AuthSize,
+                  Buffer
+                  );
+  
+  FreePool (Buffer);
+  
+  Print (L"\n");
+  
+  if (EFI_ERROR (Status)) {
+    Print (L"Error: Failed to set variable\n");
+    Print (L"Status: %r (0x%lx)\n", Status, (UINT64)Status);
+    
+    //
+    // Print detailed error information
+    //
+    switch (Status) {
+      case EFI_INVALID_PARAMETER:
+        Print (L"  Reason: Invalid parameter\n");
+        break;
+      case EFI_UNSUPPORTED:
+        Print (L"  Reason: Operation not supported\n");
+        break;
+      default:
+        Print (L"  Reason: Unknown error\n");
+        break;
+    }
+    
+    DEBUG ((DEBUG_ERROR, "SetVariable failed with status: %r\n", Status));
+    return Status;
+  }
+  
+  Print (L"Success: Variable set successfully\n");
+  DEBUG ((DEBUG_INFO, "TestVar set successfully\n"));
+  
+  return EFI_SUCCESS;
+}
+
+/**
   Print usage information.
 
 **/
@@ -509,6 +676,7 @@ PrintUsage (
   Print (L"  update-kek <cert_file>     - Update KEK from certificate file\n");
   Print (L"  update-db <cert_file>      - Update DB from certificate file\n");
   Print (L"  update-dbx <cert_file>     - Update DBX from certificate file\n");
+  Print (L"  setcommonvar-with-timebasedauth <0|1>  - Set TestVar with time-based auth (0 or 1)\n");
   Print (L"\n");
   Print (L"Examples:\n");
   Print (L"  SecureBootUpdate.efi status\n");
@@ -516,6 +684,7 @@ PrintUsage (
   Print (L"  SecureBootUpdate.efi update-pk fs0:\\PK.cer\n");
   Print (L"  SecureBootUpdate.efi update-kek fs0:\\KEK.cer\n");
   Print (L"  SecureBootUpdate.efi update-db fs0:\\db.cer\n");
+  Print (L"  SecureBootUpdate.efi setcommonvar-with-timebasedauth 1\n");
   Print (L"\n");
 }
 
@@ -708,6 +877,37 @@ UefiMain (
     }
     
     Print (L"\nAll variables cleared\n");
+    goto Done;
+  }
+
+  //
+  // Handle 'setcommonvar-with-timebasedauth' command
+  //
+  if (StrCmp (Command, L"setcommonvar-with-timebasedauth") == 0) {
+    DEBUG ((DEBUG_INFO, "SecureBootUpdate: Executing setcommonvar-with-timebasedauth command\n"));
+    
+    if (Argc < 2) {
+      DEBUG ((DEBUG_ERROR, "SecureBootUpdate: Missing value parameter (0 or 1)\n"));
+      Print (L"Error: Missing value parameter. Usage: setcommonvar-with-timebasedauth <0|1>\n");
+      Status = EFI_INVALID_PARAMETER;
+      goto Done;
+    }
+    
+    CHAR16 *ValueStr = Argv[1];
+    UINT8  NewValue;
+    
+    if (StrCmp (ValueStr, L"0") == 0) {
+      NewValue = 0;
+    } else if (StrCmp (ValueStr, L"1") == 0) {
+      NewValue = 1;
+    } else {
+      DEBUG ((DEBUG_ERROR, "SecureBootUpdate: Invalid value '%s', must be 0 or 1\n", ValueStr));
+      Print (L"Error: Invalid value '%s'. Must be 0 or 1\n", ValueStr);
+      Status = EFI_INVALID_PARAMETER;
+      goto Done;
+    }
+    
+    Status = TestSetCommonVarWithTimeBasedAuth (NewValue);
     goto Done;
   }
 
