@@ -801,6 +801,9 @@ Pkcs7Verify (
   UINT8        *AttrDer;
   UINTN        AttrDerLen;
   X509         *SignerCert;
+  UINT8        InDataHash[64];
+  UINTN        InDataHashLen;
+  ASN1_OCTET_STRING *DigestAttribute;
 
   //
   // Check input parameters.
@@ -906,6 +909,31 @@ Pkcs7Verify (
     IsMlDsa = TRUE;
     PCtx = EVP_PKEY_CTX_new_from_pkey (NULL, PKey, NULL);
     if (PCtx == NULL) {
+      goto _Exit;
+    }
+    //
+    // messageDigest check
+    //
+    switch (OBJ_obj2nid (Si->digest_alg->algorithm)) {
+      case NID_sha384:
+        Sha384HashAll (InData, DataLength, InDataHash);
+        InDataHashLen = 48;
+        break;
+      case NID_sha512:
+        Sha512HashAll (InData, DataLength, InDataHash);
+        InDataHashLen = 64;
+        break;
+      default:
+        DEBUG ((DEBUG_ERROR, "Pkcs7Verify - Hash alg of ML-DSA-87 Signature is not supported\n"));
+        goto _Exit;
+    }
+    DigestAttribute = PKCS7_digest_from_attributes(Si->auth_attr);
+    if (ASN1_STRING_length (DigestAttribute) != InDataHashLen) {
+      DEBUG ((DEBUG_ERROR, "Pkcs7Verify - Invalid hash length in ML-DSA-87 Signature\n"));
+      goto _Exit;
+    }
+    if (CompareMem (ASN1_STRING_get0_data (DigestAttribute), InDataHash, InDataHashLen) != 0) {
+      DEBUG ((DEBUG_ERROR, "Pkcs7Verify - The hash of InData not match to ML-DSA-87 Signature\n"));
       goto _Exit;
     }
     //
