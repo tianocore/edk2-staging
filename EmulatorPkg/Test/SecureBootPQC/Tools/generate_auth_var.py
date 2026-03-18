@@ -39,6 +39,8 @@ import os
 from datetime import datetime, timezone
 from pathlib import Path
 
+DEBUG = False
+
 # GUID definitions
 EFI_CERT_X509_GUID = uuid.UUID('a5c059a1-94e4-4aa7-87b5-ab155c2bf072')
 EFI_CERT_PKCS7_GUID = uuid.UUID('4aafd29d-68df-49ee-8aa9-347d375665a7')
@@ -64,7 +66,7 @@ EFI_VARIABLE_NON_VOLATILE = 0x00000001
 EFI_VARIABLE_BOOTSERVICE_ACCESS = 0x00000002
 EFI_VARIABLE_RUNTIME_ACCESS = 0x00000004
 EFI_VARIABLE_TIME_BASED_AUTHENTICATED_WRITE_ACCESS = 0x00000020
-
+EFI_VARIABLE_APPEND_WRITE = 0x00000040
 
 def create_efi_time(dt=None):
     """
@@ -181,6 +183,15 @@ def sign_with_signtool(data_to_sign, pfx_path, password):
     Returns: PKCS#7 DER-encoded signature data
     """
     print(f"[*] Using SignTool from PATH")
+
+    if DEBUG:
+        # Print data_to_sign content
+        print(f"[*] data_to_sign ({len(data_to_sign)} bytes):")
+        for i in range(0, len(data_to_sign), 16):
+            chunk = data_to_sign[i:i+16]
+            hex_str = ' '.join(f'{b:02X}' for b in chunk)
+            ascii_str = ''.join(chr(b) if 32 <= b < 127 else '.' for b in chunk)
+            print(f"    {i:08X}  {hex_str:<47}")
     
     with tempfile.TemporaryDirectory() as tmpdir:
         # Write data to temporary file
@@ -284,11 +295,12 @@ def generate_auth_variable(cert_path, key_path, key_password, var_name, output_p
     # According to UEFI Spec 2.10 Section 8.2.2:
     # SignedData = VariableName + VendorGuid + Attributes + TimeStamp + Data
     print(f"\n[*] Preparing data to sign")
-    var_name_utf16 = (var_name_str + '\0').encode('utf-16le')
+    var_name_utf16 = (var_name_str).encode('utf-16le')
     attributes = (EFI_VARIABLE_NON_VOLATILE | 
                   EFI_VARIABLE_BOOTSERVICE_ACCESS | 
                   EFI_VARIABLE_RUNTIME_ACCESS |
-                  EFI_VARIABLE_TIME_BASED_AUTHENTICATED_WRITE_ACCESS)
+                  EFI_VARIABLE_TIME_BASED_AUTHENTICATED_WRITE_ACCESS |
+                  EFI_VARIABLE_APPEND_WRITE)
     
     data_to_sign = (
         var_name_utf16 +
