@@ -204,6 +204,28 @@ if %errorlevel% neq 0 (
 )
 echo.
 
+REM ----------------------------------------------------------------------------
+REM Example 8: Generate RSA-KEK-SignedByKEK-MLDSA.auth (RSA KEK signed by MLDSA KEK)
+REM ----------------------------------------------------------------------------
+echo [7] Generating RSA-KEK-SignedByKEK-MLDSA.auth (for updating KEK variable)...
+echo         Certificate: RSA-KEK.der
+echo         Signing with: MLDSA-KEK.pfx
+echo.
+
+python "%TOOLS_DIR%generate_auth_var.py" ^
+    --cert "%KEY_DIR%\RSA-KEK.der" ^
+    --key "%KEY_DIR%\MLDSA-KEK.pfx" ^
+    --password "%PK_PASSWORD%" ^
+    --var-name KEK ^
+    --output "%OUTPUT_DIR%\RSA-KEK-SignedByKEK-MLDSA.auth"
+
+if %errorlevel% neq 0 (
+    echo.
+    echo [ERROR] Failed to generate RSA-KEK-SignedByKEK-MLDSA.auth
+    goto :error
+)
+echo.
+
 echo ============================================================================
 echo [SUCCESS] All .auth files generated successfully!
 echo ============================================================================

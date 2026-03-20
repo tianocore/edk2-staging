@@ -82,6 +82,14 @@ if %lasterror% eq 0 then
 else
     echo "[FAIL] Test 12: Fail to enroll MLDSA CA key to db and run image signed by leaf (error: %lasterror%)"
 endif
+
+Test10-AppendKekByKek.nsh
+if %lasterror% eq 0 then
+    echo "[PASS] Test 13: Append KEK which signed by another KEK"
+else
+    echo "[FAIL] Test 13: Append KEK which signed by another KEK (error: %lasterror%)"
+endif
+
 echo " "
 echo "========================================="
 echo "  All Tests Completed"
