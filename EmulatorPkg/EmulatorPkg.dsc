@@ -427,6 +427,9 @@
   SecurityPkg/VariableAuthenticated/SecureBootConfigDxe/SecureBootConfigDxe.inf
 !endif
 
+  SecurityPkg/CryptoIndicatorTableDxe/CryptoIndicatorTableDxe.inf
+  SecurityPkg/Application/DumpCryptoIndicatorTable/DumpCryptoIndicatorTable.inf
+
   MdeModulePkg/Universal/Variable/RuntimeDxe/VariableRuntimeDxe.inf {
     <LibraryClasses>
       NULL|MdeModulePkg/Library/VarCheckUefiLib/VarCheckUefiLib.inf

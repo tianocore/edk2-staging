@@ -210,6 +210,9 @@ INF  SecurityPkg/Hash2DxeCrypto/Hash2DxeCrypto.inf
 INF SecurityPkg/VariableAuthenticated/SecureBootConfigDxe/SecureBootConfigDxe.inf
 !endif
 
+INF  SecurityPkg/CryptoIndicatorTableDxe/CryptoIndicatorTableDxe.inf
+INF  SecurityPkg/Application/DumpCryptoIndicatorTable/DumpCryptoIndicatorTable.inf
+
 #
 # Network stack drivers
 #

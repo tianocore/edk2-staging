@@ -1,0 +1,54 @@
+## @file
+#  UEFI Shell application to dump the EFI Crypto Indicator Table (ECIT).
+#
+#  This application locates the EFI_CRYPTO_INDICATOR_TABLE from the EFI
+#  Configuration Table and prints each entry with human-readable feature
+#  names, OID lists, and signature type GUIDs.
+#
+#  Copyright (c) 2026, Intel Corporation. All rights reserved.<BR>
+#  SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = DumpCryptoIndicatorTable
+  FILE_GUID                      = A3B7E4D1-9C2F-4816-BE5A-1F7D3A8C6E02
+  MODULE_TYPE                    = UEFI_APPLICATION
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = DumpCryptoIndicatorTableMain
+
+#
+#  VALID_ARCHITECTURES           = IA32 X64 AARCH64
+#
+
+[Sources]
+  DumpCryptoIndicatorTable.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  SecurityPkg/SecurityPkg.dec
+
+[LibraryClasses]
+  BaseMemoryLib
+  DebugLib
+  PrintLib
+  UefiApplicationEntryPoint
+  UefiBootServicesTableLib
+  UefiLib
+
+[Guids]
+  gEfiCryptoIndicatorTableGuid               ## CONSUMES  ## Configuration Table
+  gEfiEcitFeatureImageVerificationGuid       ## CONSUMES  ## GUID  # Feature identifier
+  gEfiEcitFeatureSecureBootAuthorizationGuid ## CONSUMES  ## GUID  # Feature identifier
+  gEfiEcitFeatureImageRevocationGuid         ## CONSUMES  ## GUID  # Feature identifier
+  gEfiEcitFeatureAuthenticatedVariableGuid   ## CONSUMES  ## GUID  # Feature identifier
+  gEfiEcitFeatureSystemFirmwareUpdateGuid    ## CONSUMES  ## GUID  # Feature identifier
+  gEfiEcitFeatureEsrtFirmwareUpdateGuid      ## CONSUMES  ## GUID  # Feature identifier
+  gEfiCertX509Guid                           ## CONSUMES  ## GUID  # Signature type
+  gEfiCertSha256Guid                         ## CONSUMES  ## GUID  # Signature type
+  gEfiCertSha384Guid                         ## CONSUMES  ## GUID  # Signature type
+  gEfiCertSha512Guid                         ## CONSUMES  ## GUID  # Signature type
+  gEfiCertX509Sha256Guid                     ## CONSUMES  ## GUID  # Signature type
+  gEfiCertX509Sha384Guid                     ## CONSUMES  ## GUID  # Signature type
+  gEfiCertX509Sha512Guid                     ## CONSUMES  ## GUID  # Signature type
