@@ -904,8 +904,10 @@ Pkcs7Verify (
     goto _Exit;
   }
 
-  if ((AsciiStrCmp (EVP_PKEY_get0_type_name (PKey), "ML-DSA-87") == 0)) {
-    DEBUG ((DEBUG_INFO, "Pkcs7Verify - ML-DSA-87 Signature\n"));
+  if ((AsciiStrCmp (EVP_PKEY_get0_type_name (PKey), "ML-DSA-44") == 0) ||
+      (AsciiStrCmp (EVP_PKEY_get0_type_name (PKey), "ML-DSA-65") == 0) ||
+      (AsciiStrCmp (EVP_PKEY_get0_type_name (PKey), "ML-DSA-87") == 0)) {
+    DEBUG ((DEBUG_INFO, "Pkcs7Verify - %a Signature\n", EVP_PKEY_get0_type_name (PKey)));
     IsMlDsa = TRUE;
     PCtx = EVP_PKEY_CTX_new_from_pkey (NULL, PKey, NULL);
     if (PCtx == NULL) {
@@ -915,6 +917,10 @@ Pkcs7Verify (
     // messageDigest check
     //
     switch (OBJ_obj2nid (Si->digest_alg->algorithm)) {
+      case NID_sha256:
+        Sha256HashAll (InData, DataLength, InDataHash);
+        InDataHashLen = 32;
+        break;
       case NID_sha384:
         Sha384HashAll (InData, DataLength, InDataHash);
         InDataHashLen = 48;
@@ -924,16 +930,16 @@ Pkcs7Verify (
         InDataHashLen = 64;
         break;
       default:
-        DEBUG ((DEBUG_ERROR, "Pkcs7Verify - Hash alg of ML-DSA-87 Signature is not supported\n"));
+        DEBUG ((DEBUG_ERROR, "Pkcs7Verify - Hash alg of %a Signature is not supported\n", EVP_PKEY_get0_type_name (PKey)));
         goto _Exit;
     }
     DigestAttribute = PKCS7_digest_from_attributes(Si->auth_attr);
-    if (ASN1_STRING_length (DigestAttribute) != InDataHashLen) {
-      DEBUG ((DEBUG_ERROR, "Pkcs7Verify - Invalid hash length in ML-DSA-87 Signature\n"));
+    if ((UINTN)ASN1_STRING_length (DigestAttribute) != InDataHashLen) {
+      DEBUG ((DEBUG_ERROR, "Pkcs7Verify - Invalid hash length in %a Signature\n", EVP_PKEY_get0_type_name (PKey)));
       goto _Exit;
     }
     if (CompareMem (ASN1_STRING_get0_data (DigestAttribute), InDataHash, InDataHashLen) != 0) {
-      DEBUG ((DEBUG_ERROR, "Pkcs7Verify - The hash of InData not match to ML-DSA-87 Signature\n"));
+      DEBUG ((DEBUG_ERROR, "Pkcs7Verify - The hash of InData not match to %a Signature\n", EVP_PKEY_get0_type_name (PKey)));
       goto _Exit;
     }
     //
@@ -989,7 +995,7 @@ Pkcs7Verify (
   //
   if (IsMlDsa) {
     //
-    // ML-DSA-87 key type is not supported by PKCS7_verify, Need to verify signature manually
+    // ML-DSA key types are not supported by PKCS7_verify, Need to verify signature manually
     // So only check the formatting of the PKCS7 and X509 structure by PKCS7_NOSIGS flag.
     //
     Status = (BOOLEAN)PKCS7_verify (Pkcs7, NULL, CertStore, DataBio, NULL, PKCS7_BINARY | PKCS7_NOSIGS);
