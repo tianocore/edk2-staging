@@ -1104,3 +1104,73 @@ _Exit:
   DEBUG ((DEBUG_INFO, "Pkcs7VerifyPkcs7GetSignerInfoNum - The number of SingerInfo is: 0x%02x\n", SignerInfoNum));
   return SignerInfoNum;
 }
+
+//
+// Static OID strings for each signing algorithm family supported by
+// the OpenSSL-based Pkcs7Verify() implementation.
+//
+// RSA PKCS#1 v1.5:
+//   1.2.840.113549.1.1.11  sha256WithRSAEncryption
+//   1.2.840.113549.1.1.12  sha384WithRSAEncryption
+//   1.2.840.113549.1.1.13  sha512WithRSAEncryption
+//
+STATIC CONST CHAR8  mPkcs7VerifyRsaOids[] =
+  "1.2.840.113549.1.1.11,1.2.840.113549.1.1.12,1.2.840.113549.1.1.13";
+
+//
+// ECDSA (available when OpensslLibFull is linked):
+//   1.2.840.10045.4.3.2    ecdsa-with-SHA256
+//   1.2.840.10045.4.3.3    ecdsa-with-SHA384
+//   1.2.840.10045.4.3.4    ecdsa-with-SHA512
+//
+STATIC CONST CHAR8  mPkcs7VerifyEcOids[] =
+  "1.2.840.10045.4.3.2,1.2.840.10045.4.3.3,1.2.840.10045.4.3.4";
+
+//
+// ML-DSA (available when OpensslLibFull is linked, UEFI_PQC):
+//   2.16.840.1.101.3.4.3.17  id-ml-dsa-44
+//   2.16.840.1.101.3.4.3.18  id-ml-dsa-65
+//   2.16.840.1.101.3.4.3.19  id-ml-dsa-87
+//
+STATIC CONST CHAR8  mPkcs7VerifyMlDsaOids[] =
+  "2.16.840.1.101.3.4.3.17,2.16.840.1.101.3.4.3.18,2.16.840.1.101.3.4.3.19";
+
+//
+// All supported signing algorithm OIDs (RSA + ECDSA + ML-DSA).
+//
+STATIC CONST CHAR8  mPkcs7VerifyAllOids[] =
+  "1.2.840.113549.1.1.11,1.2.840.113549.1.1.12,1.2.840.113549.1.1.13,"
+  "1.2.840.10045.4.3.2,1.2.840.10045.4.3.3,1.2.840.10045.4.3.4,"
+  "2.16.840.1.101.3.4.3.17,2.16.840.1.101.3.4.3.18,2.16.840.1.101.3.4.3.19";
+
+/**
+  Get the list of signing algorithm OIDs supported by Pkcs7Verify().
+
+  Returns a pointer to a static, null-terminated ASCII string containing
+  comma-separated OIDs for the requested key family. The returned string
+  must NOT be freed by the caller.
+
+  @param[in]  KeyFamily  The key family to query.
+
+  @return  Null-terminated ASCII OID string, or NULL if the requested
+           key family is not supported.
+**/
+CONST CHAR8 *
+EFIAPI
+Pkcs7GetVerifyOidList (
+  IN  PKCS7_SIGNATURE_ALGO_KEY_FAMILY  KeyFamily
+  )
+{
+  switch (KeyFamily) {
+    case Pkcs7SignatureAlgoAll:
+      return mPkcs7VerifyAllOids;
+    case Pkcs7SignatureAlgoRsa:
+      return mPkcs7VerifyRsaOids;
+    case Pkcs7SignatureAlgoEc:
+      return mPkcs7VerifyEcOids;
+    case Pkcs7SignatureAlgoMlDsa:
+      return mPkcs7VerifyMlDsaOids;
+    default:
+      return NULL;
+  }
+}

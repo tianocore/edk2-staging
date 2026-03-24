@@ -134,6 +134,25 @@ Pkcs7Verify (
 }
 
 /**
+  Get the list of signing algorithm OIDs supported by Pkcs7Verify().
+
+  Return NULL to indicate this interface is not supported.
+
+  @param[in]  KeyFamily  The key family to query.
+
+  @retval NULL  This interface is not supported.
+**/
+CONST CHAR8 *
+EFIAPI
+Pkcs7GetVerifyOidList (
+  IN  PKCS7_SIGNATURE_ALGO_KEY_FAMILY  KeyFamily
+  )
+{
+  ASSERT (FALSE);
+  return NULL;
+}
+
+/**
   Extracts the attached content from a PKCS#7 signed data if existed. The input signed
   data could be wrapped in a ContentInfo structure.
 

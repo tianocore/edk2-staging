@@ -3961,6 +3961,28 @@ CryptoServiceVerifyEKUsInPkcs7Signature (
 }
 
 /**
+  Get the list of signing algorithm OIDs supported by Pkcs7Verify().
+
+  Returns a pointer to a static, null-terminated ASCII string containing
+  comma-separated OIDs for the requested key family. The returned string
+  must NOT be freed by the caller.
+
+  @param[in]  KeyFamily  The key family to query.  Use Pkcs7SignatureAlgoAll
+                         to retrieve every supported signing algorithm OID.
+
+  @return  Null-terminated ASCII OID string, or NULL if the requested
+           key family is not supported or the parameter is invalid.
+**/
+CONST CHAR8 *
+EFIAPI
+CryptoServicePkcs7GetVerifyOidList (
+  IN  PKCS7_SIGNATURE_ALGO_KEY_FAMILY  KeyFamily
+  )
+{
+  return CALL_BASECRYPTLIB (Pkcs.Services.Pkcs7GetVerifyOidList, Pkcs7GetVerifyOidList, (KeyFamily), NULL);
+}
+
+/**
   Extracts the attached content from a PKCS#7 signed data if existed. The input signed
   data could be wrapped in a ContentInfo structure.
 
@@ -7194,4 +7216,5 @@ const EDKII_CRYPTO_PROTOCOL  mEdkiiCrypto = {
   CryptoServiceTlsSetSecurityLevel,
   /// Pkcs (Continued)
   CryptoServicePkcs7GetSignerInfoNum,
+  CryptoServicePkcs7GetVerifyOidList,
 };

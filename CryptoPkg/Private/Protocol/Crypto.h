@@ -921,6 +921,25 @@ EFI_STATUS
   );
 
 /**
+  Get the list of signing algorithm OIDs supported by Pkcs7Verify().
+
+  Returns a pointer to a static, null-terminated ASCII string containing
+  comma-separated OIDs for the requested key family. The returned string
+  must NOT be freed by the caller.
+
+  @param[in]  KeyFamily  The key family to query.  Use Pkcs7SignatureAlgoAll
+                         to retrieve every supported signing algorithm OID.
+
+  @return  Null-terminated ASCII OID string, or NULL if the requested
+           key family is not supported or the parameter is invalid.
+**/
+typedef
+CONST CHAR8 *
+(EFIAPI *EDKII_CRYPTO_PKCS7_GET_VERIFY_OID_LIST)(
+  IN  PKCS7_SIGNATURE_ALGO_KEY_FAMILY  KeyFamily
+  );
+
+/**
   Get the signer's certificates from PKCS#7 signed data as described in "PKCS #7:
   Cryptographic Message Syntax Standard". The input signed data could be wrapped
   in a ContentInfo structure.
@@ -5778,6 +5797,7 @@ struct _EDKII_CRYPTO_PROTOCOL {
   EDKII_CRYPTO_TLS_SET_SECURITY_LEVEL                 TlsSetSecurityLevel;
   /// Pkcs (Continued)
   EDKII_CRYPTO_PKCS7_GET_SIGNERINFO_NUM               Pkcs7GetSignerInfoNum;
+  EDKII_CRYPTO_PKCS7_GET_VERIFY_OID_LIST              Pkcs7GetVerifyOidList;
 };
 
 extern GUID  gEdkiiCryptoProtocolGuid;

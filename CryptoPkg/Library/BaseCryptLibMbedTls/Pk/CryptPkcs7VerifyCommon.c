@@ -1381,3 +1381,60 @@ Pkcs7GetSignerInfoNum (
   ASSERT (FALSE);
   return 0;
 }
+
+//
+// Static OID strings for each signing algorithm family supported by
+// the MbedTLS-based Pkcs7Verify() implementation.
+//
+// RSA PKCS#1 v1.5:
+//   1.2.840.113549.1.1.11  sha256WithRSAEncryption
+//   1.2.840.113549.1.1.12  sha384WithRSAEncryption
+//   1.2.840.113549.1.1.13  sha512WithRSAEncryption
+//
+STATIC CONST CHAR8  mPkcs7VerifyRsaOids[] =
+  "1.2.840.113549.1.1.11,1.2.840.113549.1.1.12,1.2.840.113549.1.1.13";
+
+//
+// All supported signing algorithm OIDs.
+// MbedTLS does not support ECDSA or ML-DSA in the PKCS#7 verification path.
+//
+STATIC CONST CHAR8  mPkcs7VerifyAllOids[] =
+  "1.2.840.113549.1.1.11,1.2.840.113549.1.1.12,1.2.840.113549.1.1.13";
+
+/**
+  Get the list of signing algorithm OIDs supported by Pkcs7Verify().
+
+  Returns a pointer to a static, null-terminated ASCII string containing
+  comma-separated OIDs for the requested key family. The returned string
+  must NOT be freed by the caller.
+
+  @param[in]  KeyFamily  The key family to query.
+
+  @return  Null-terminated ASCII OID string, or NULL if the requested
+           key family is not supported.
+**/
+CONST CHAR8 *
+EFIAPI
+Pkcs7GetVerifyOidList (
+  IN  PKCS7_SIGNATURE_ALGO_KEY_FAMILY  KeyFamily
+  )
+{
+  switch (KeyFamily) {
+    case Pkcs7SignatureAlgoAll:
+      return mPkcs7VerifyAllOids;
+    case Pkcs7SignatureAlgoRsa:
+      return mPkcs7VerifyRsaOids;
+    case Pkcs7SignatureAlgoEc:
+      //
+      // MbedTLS PKCS#7 verification does not support ECDSA.
+      //
+      return NULL;
+    case Pkcs7SignatureAlgoMlDsa:
+      //
+      // MbedTLS does not support ML-DSA.
+      //
+      return NULL;
+    default:
+      return NULL;
+  }
+}

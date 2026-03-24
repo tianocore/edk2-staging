@@ -2499,6 +2499,35 @@ Pkcs7Verify (
   IN  UINTN        DataLength
   );
 
+///
+/// Signing algorithm key family identifiers for Pkcs7GetVerifyOidList().
+///
+typedef enum {
+  Pkcs7SignatureAlgoAll,     ///< All supported signing algorithm OIDs
+  Pkcs7SignatureAlgoRsa,     ///< RSA PKCS#1 v1.5 signing algorithm OIDs
+  Pkcs7SignatureAlgoEc,      ///< ECDSA signing algorithm OIDs
+  Pkcs7SignatureAlgoMlDsa,   ///< ML-DSA signing algorithm OIDs
+} PKCS7_SIGNATURE_ALGO_KEY_FAMILY;
+
+/**
+  Get the list of signing algorithm OIDs supported by Pkcs7Verify().
+
+  Returns a pointer to a static, null-terminated ASCII string containing
+  comma-separated OIDs for the requested key family. The returned string
+  must NOT be freed by the caller.
+
+  @param[in]  KeyFamily  The key family to query.  Use Pkcs7SignatureAlgoAll
+                         to retrieve every supported signing algorithm OID.
+
+  @return  Null-terminated ASCII OID string, or NULL if the requested
+           key family is not supported or the parameter is invalid.
+**/
+CONST CHAR8 *
+EFIAPI
+Pkcs7GetVerifyOidList (
+  IN  PKCS7_SIGNATURE_ALGO_KEY_FAMILY  KeyFamily
+  );
+
 /**
   This function receives a PKCS7 formatted signature, and then verifies that
   the specified Enhanced or Extended Key Usages (EKU's) are present in the end-entity
