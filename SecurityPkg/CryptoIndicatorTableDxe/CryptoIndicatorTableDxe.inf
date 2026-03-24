@@ -1,0 +1,58 @@
+## @file
+#  Produces the EFI Crypto Indicator Table (ECIT) as a Configuration Table.
+#
+#  This DXE driver builds and installs the EFI_CRYPTO_INDICATOR_TABLE to
+#  advertise the cryptographic algorithms supported by the firmware for
+#  Secure Boot image verification, secure boot authorization, and
+#  authenticated variable updates.
+#
+#  Copyright (c) 2026, Intel Corporation. All rights reserved.<BR>
+#  SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = CryptoIndicatorTableDxe
+  FILE_GUID                      = 7A3D2E1C-5F8B-4A91-B6D4-3E7C9F0A1D52
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = CryptoIndicatorTableDxeEntryPoint
+
+#
+#  VALID_ARCHITECTURES           = IA32 X64 AARCH64
+#
+
+[Sources]
+  CryptoIndicatorTableDxe.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  CryptoPkg/CryptoPkg.dec
+  SecurityPkg/SecurityPkg.dec
+
+[LibraryClasses]
+  BaseLib
+  BaseCryptLib
+  BaseMemoryLib
+  DebugLib
+  MemoryAllocationLib
+  UefiBootServicesTableLib
+  UefiDriverEntryPoint
+
+[Guids]
+  gEfiCryptoIndicatorTableGuid               ## PRODUCES  ## Configuration Table
+  gEfiEcitFeatureImageVerificationGuid       ## CONSUMES  ## GUID  # Feature identifier
+  gEfiEcitFeatureSecureBootAuthorizationGuid ## CONSUMES  ## GUID  # Feature identifier
+  gEfiEcitFeatureImageRevocationGuid         ## CONSUMES  ## GUID  # Feature identifier
+  gEfiEcitFeatureAuthenticatedVariableGuid   ## CONSUMES  ## GUID  # Feature identifier
+  gEfiCertX509Guid                           ## CONSUMES  ## GUID  # Signature list type
+  gEfiCertSha256Guid                         ## CONSUMES  ## GUID  # Signature list type
+  gEfiCertSha384Guid                         ## CONSUMES  ## GUID  # Signature list type
+  gEfiCertSha512Guid                         ## CONSUMES  ## GUID  # Signature list type
+  gEfiCertX509Sha256Guid                     ## CONSUMES  ## GUID  # Signature list type
+  gEfiCertX509Sha384Guid                     ## CONSUMES  ## GUID  # Signature list type
+  gEfiCertX509Sha512Guid                     ## CONSUMES  ## GUID  # Signature list type
+
+[Depex]
+  TRUE
