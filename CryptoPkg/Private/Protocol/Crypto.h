@@ -21,7 +21,7 @@
 /// the EDK II Crypto Protocol is extended, this version define must be
 /// increased.
 ///
-#define EDKII_CRYPTO_VERSION  19
+#define EDKII_CRYPTO_VERSION  20
 
 ///
 /// EDK II Crypto Protocol forward declaration
@@ -1138,6 +1138,31 @@ BOOLEAN
   IN  CONST UINT8  *TsaCert,
   IN  UINTN        CertSize,
   OUT EFI_TIME     *SigningTime
+  );
+
+/**
+  Get the number of signer info from PKCS#7 signed data.
+
+  This function retrieves the number of signer info structures from the PKCS#7
+  signed data as described in "PKCS #7: Cryptographic Message Syntax Standard".
+  The input signed data could be wrapped in a ContentInfo structure.
+
+  If P7Data is NULL, then return 0.
+  If P7Length is 0, then return 0.
+  If this interface is not supported, then return 0.
+
+  @param[in]  P7Data       Pointer to the PKCS#7 message.
+  @param[in]  P7Length     Length of the PKCS#7 message in bytes.
+
+  @retval  >0              The number of signer info structures.
+  @retval  0               Error occurs or no signer info found.
+
+**/
+typedef
+UINTN
+(EFIAPI *EDKII_CRYPTO_PKCS7_GET_SIGNERINFO_NUM)(
+  IN  CONST UINT8  *P7Data,
+  IN  UINTN        P7Length
   );
 
 // =====================================================================================
@@ -5751,6 +5776,8 @@ struct _EDKII_CRYPTO_PROTOCOL {
   /// TLS Set (Continued)
   EDKII_CRYPTO_TLS_SET_SERVER_NAME                    TlsSetServerName;
   EDKII_CRYPTO_TLS_SET_SECURITY_LEVEL                 TlsSetSecurityLevel;
+  /// Pkcs (Continued)
+  EDKII_CRYPTO_PKCS7_GET_SIGNERINFO_NUM               Pkcs7GetSignerInfoNum;
 };
 
 extern GUID  gEdkiiCryptoProtocolGuid;

@@ -1027,3 +1027,86 @@ _Exit:
 
   return Status;
 }
+
+/**
+  Get the number of signer info from PKCS#7 signed data.
+
+  This function retrieves the number of signer info structures from the PKCS#7
+  signed data as described in "PKCS #7: Cryptographic Message Syntax Standard".
+  The input signed data could be wrapped in a ContentInfo structure.
+
+  If P7Data is NULL, then return 0.
+  If P7Length is 0, then return 0.
+  If this interface is not supported, then return 0.
+
+  @param[in]  P7Data       Pointer to the PKCS#7 message.
+  @param[in]  P7Length     Length of the PKCS#7 message in bytes.
+
+  @retval  >0              The number of signer info structures.
+  @retval  0               Error occurs or no signer info found.
+
+**/
+UINTN
+EFIAPI
+Pkcs7GetSignerInfoNum (
+  IN  CONST UINT8  *P7Data,
+  IN  UINTN        P7Length
+  )
+{
+  PKCS7        *Pkcs7;
+  BOOLEAN      Status;
+  UINT8        *SignedData;
+  CONST UINT8  *Temp;
+  UINTN        SignedDataSize;
+  BOOLEAN      Wrapped;
+  UINTN        SignerInfoNum;
+
+  if ((P7Data == NULL) || (P7Length == 0) || (P7Length > INT_MAX))
+  {
+    return 0;
+  }
+
+  Status = WrapPkcs7Data (P7Data, P7Length, &Wrapped, &SignedData, &SignedDataSize);
+  if (!Status) {
+    return 0;
+  }
+
+  Status        = FALSE;
+  Pkcs7         = NULL;
+  SignerInfoNum = 0;
+  //
+  // Retrieve PKCS#7 Data (DER encoding)
+  //
+  if (SignedDataSize > INT_MAX) {
+    goto _Exit;
+  }
+
+  Temp  = SignedData;
+  Pkcs7 = d2i_PKCS7 (NULL, (const unsigned char **)&Temp, (int)SignedDataSize);
+  if (Pkcs7 == NULL) {
+    goto _Exit;
+  }
+
+  //
+  // Check if it's PKCS#7 Signed Data (for Authenticode Scenario)
+  //
+  if (!PKCS7_type_is_signed (Pkcs7)) {
+    goto _Exit;
+  }
+
+  SignerInfoNum = sk_PKCS7_SIGNER_INFO_num (PKCS7_get_signer_info (Pkcs7));
+
+_Exit:
+  //
+  // Release Resources
+  //
+  if (!Wrapped) {
+    free (SignedData);
+  }
+
+  if (Pkcs7 != NULL) {
+    PKCS7_free (Pkcs7);
+  }
+  DEBUG ((DEBUG_INFO, "Pkcs7VerifyPkcs7GetSignerInfoNum - The number of SingerInfo is: 0x%02x\n", SignerInfoNum));
+  return SignerInfoNum;
+}

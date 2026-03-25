@@ -196,6 +196,7 @@ also configured.
 | Pkcs.Pkcs7GetCertificatesList   |     N      |     N     |             |      C      |      C       |      C      |        C        |
 | Pkcs.AuthenticodeVerify         |     N      |     N     |             |             |      C       |             |                 |
 | Pkcs.ImageTimestampVerify       |     N      |     N     |             |             |      C       |             |                 |
+| Pkcs.Pkcs7GetSignerInfoNum      |     N      |     N     |             |      C      |      C       |      C      |        C        |
 | Dh                              |     N      |     N     |             |             |      C       |             |                 |
 | Random                          |     N      |     N     |             |             |      C       |      C      |        C        |
 | Rsa.VerifyPkcs1                 |     Y      |     Y     |             |             |              |             |                 |
