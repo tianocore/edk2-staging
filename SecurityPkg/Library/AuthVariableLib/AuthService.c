@@ -1404,6 +1404,11 @@ VerifyTimeBasedPayload (
     }
   }
 
+  if (Pkcs7GetSignerInfoNum (SigData, SigDataSize) != 1) {
+    DEBUG ((DEBUG_ERROR, "[VerifyTimeBasedPayload] Only one SignerInfo shall be present\n"));
+    return EFI_SECURITY_VIOLATION;
+  }
+
   //
   // Find out the new data payload which follows Pkcs7 SignedData directly.
   //
