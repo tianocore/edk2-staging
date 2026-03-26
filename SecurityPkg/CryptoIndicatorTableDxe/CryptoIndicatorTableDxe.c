@@ -117,15 +117,18 @@
 //   - HashPeImage(): sets mCertType to the corresponding GUID.
 //   - IsSignatureFoundInDatabase(): matches the PE image hash in db.
 //
-// NOTE: EFI_CERT_X509_SHA256/384/512_GUID are NOT included here because
-// those types are only used by IsCertHashFoundInDbx() for certificate
-// revocation in dbx, not for authorization in db.
+// EFI_CERT_X509_SHA256_GUID, EFI_CERT_X509_SHA384_GUID, EFI_CERT_X509_SHA512_GUID
+//   - IsAllowedByDb(): match certificate TBS hash in db via
+//     IsCertHashFoundInDbx() + AuthenticodeVerify().
 //
 STATIC EFI_GUID  mSecureBootAuthTypes[] = {
   EFI_CERT_X509_GUID,
   EFI_CERT_SHA256_GUID,
   EFI_CERT_SHA384_GUID,
   EFI_CERT_SHA512_GUID,
+  EFI_CERT_X509_SHA256_GUID,
+  EFI_CERT_X509_SHA384_GUID,
+  EFI_CERT_X509_SHA512_GUID,
 };
 
 //
