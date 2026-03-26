@@ -50,7 +50,6 @@ CONST UINT8  mRsaE[] = { 0x01, 0x00, 0x01 };
 // OID ASN.1 Value for Hash Algorithms
 //
 UINT8  mHashOidValue[] = {
-  0x2B, 0x0E, 0x03, 0x02, 0x1A,                         // OBJ_sha1
   0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x04, // OBJ_sha224
   0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x01, // OBJ_sha256
   0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x02, // OBJ_sha384
@@ -58,15 +57,10 @@ UINT8  mHashOidValue[] = {
 };
 
 HASH_TABLE  mHash[] = {
- #ifndef DISABLE_SHA1_DEPRECATED_INTERFACES
-  { L"SHA1",   20, &mHashOidValue[0],  5, Sha1GetContextSize,   Sha1Init,   Sha1Update,   Sha1Final   },
- #else
-  { L"SHA1",   20, &mHashOidValue[0],  5, NULL,                 NULL,       NULL,         NULL        },
- #endif
-  { L"SHA224", 28, &mHashOidValue[5],  9, NULL,                 NULL,       NULL,         NULL        },
-  { L"SHA256", 32, &mHashOidValue[14], 9, Sha256GetContextSize, Sha256Init, Sha256Update, Sha256Final },
-  { L"SHA384", 48, &mHashOidValue[23], 9, Sha384GetContextSize, Sha384Init, Sha384Update, Sha384Final },
-  { L"SHA512", 64, &mHashOidValue[32], 9, Sha512GetContextSize, Sha512Init, Sha512Update, Sha512Final }
+  { L"SHA224", 28, &mHashOidValue[0],  9, NULL,                 NULL,       NULL,         NULL        },
+  { L"SHA256", 32, &mHashOidValue[9],  9, Sha256GetContextSize, Sha256Init, Sha256Update, Sha256Final },
+  { L"SHA384", 48, &mHashOidValue[18], 9, Sha384GetContextSize, Sha384Init, Sha384Update, Sha384Final },
+  { L"SHA512", 64, &mHashOidValue[27], 9, Sha512GetContextSize, Sha512Init, Sha512Update, Sha512Final }
 };
 
 EFI_STRING  mHashTypeStr;
@@ -320,13 +314,6 @@ HashPeImage (
   ZeroMem (mImageDigest, MAX_DIGEST_SIZE);
 
   switch (HashAlg) {
- #ifndef DISABLE_SHA1_DEPRECATED_INTERFACES
-    case HASHALG_SHA1:
-      mImageDigestSize = SHA1_DIGEST_SIZE;
-      mCertType        = gEfiCertSha1Guid;
-      break;
- #endif
-
     case HASHALG_SHA256:
       mImageDigestSize = SHA256_DIGEST_SIZE;
       mCertType        = gEfiCertSha256Guid;

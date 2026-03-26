@@ -48,10 +48,6 @@
 
   ## SOMETIMES_CONSUMES   ## GUID       # Unique ID for the type of the signature.
   ## SOMETIMES_PRODUCES   ## GUID       # Unique ID for the type of the signature.
-  gEfiCertSha1Guid
-
-  ## SOMETIMES_CONSUMES   ## GUID       # Unique ID for the type of the signature.
-  ## SOMETIMES_PRODUCES   ## GUID       # Unique ID for the type of the signature.
   gEfiCertSha256Guid
 
   ## SOMETIMES_CONSUMES   ## GUID       # Unique ID for the type of the signature.
