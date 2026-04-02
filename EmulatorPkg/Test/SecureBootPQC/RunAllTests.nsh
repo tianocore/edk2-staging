@@ -90,6 +90,20 @@ else
     echo "[FAIL] Test 13: Append KEK which signed by another KEK (error: %lasterror%)"
 endif
 
+Test11-MLDSA-Hash-Success.nsh
+if %lasterror% eq 0 then
+    echo "[PASS] Test 14: Enroll MLDSA cert hash to db and run ML-DSA-signed image"
+else
+    echo "[FAIL] Test 14: Enroll MLDSA cert hash to db and run ML-DSA-signed image (error: %lasterror%)"
+endif
+
+Test12-MLDSA-Hash-RSA-Fail.nsh
+if %lasterror% eq 0 then
+    echo "[FAIL] Test 15: Enroll MLDSA cert hash to db and run RSA-signed image should fail but succ"
+else
+    echo "[PASS] Test 15: Enroll MLDSA cert hash to db and run RSA-signed image (correctly failed)"
+endif
+
 echo " "
 echo "========================================="
 echo "  All Tests Completed"

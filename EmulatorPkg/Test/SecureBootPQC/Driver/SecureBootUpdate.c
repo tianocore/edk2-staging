@@ -18,9 +18,15 @@
 #include <Library/FileHandleLib.h>
 #include <Guid/ImageAuthentication.h>
 #include <Guid/GlobalVariable.h>
+#include <Library/BaseCryptLib.h>
 
 #define SECURE_BOOT_MODE_ENABLE   1
 #define SECURE_BOOT_MODE_DISABLE  0
+
+//
+// SHA-384 digest size in bytes
+//
+#define SHA384_DIGEST_SIZE_BYTES  48
 
 //
 // Custom Mode GUID and Variable Name
@@ -169,6 +175,110 @@ CreateSignatureList (
   *SigList = Buffer;
 
   DEBUG ((DEBUG_INFO, "CreateSignatureList: Signature list created successfully\n"));
+  return EFI_SUCCESS;
+}
+
+/**
+  Create an EFI_CERT_X509_SHA384 EFI_SIGNATURE_LIST by extracting the
+  TBSCertificate from a DER-encoded X.509 certificate and computing its
+  SHA-384 hash.  The TimeOfRevocation field is zeroed (always revoked /
+  never-expiry semantics when used in db for allow-listing).
+
+  @param[in]  CertData      DER-encoded X.509 certificate.
+  @param[in]  CertSize      Size of CertData in bytes.
+  @param[out] SigListSize   Size of the created EFI_SIGNATURE_LIST.
+  @param[out] SigList       Allocated buffer containing the EFI_SIGNATURE_LIST.
+
+  @retval EFI_SUCCESS             Signature list created successfully.
+  @retval EFI_INVALID_PARAMETER   A required pointer is NULL or CertSize is 0.
+  @retval EFI_OUT_OF_RESOURCES    Memory allocation failed.
+  @retval EFI_ABORTED             TBSCertificate extraction or hash failed.
+
+**/
+EFI_STATUS
+CreateCertHashSignatureList (
+  IN  VOID   *CertData,
+  IN  UINTN  CertSize,
+  OUT UINTN  *SigListSize,
+  OUT VOID   **SigList
+  )
+{
+  EFI_SIGNATURE_LIST   *SigListHdr;
+  EFI_SIGNATURE_DATA   *SigData;
+  EFI_CERT_X509_SHA384 *CertHash;
+  UINT8                *TBSCert;
+  UINTN                TBSCertSize;
+  UINT8                Sha384Digest[SHA384_DIGEST_SIZE_BYTES];
+  UINTN                TotalSize;
+  UINT8                *Buffer;
+
+  if ((CertData == NULL) || (CertSize == 0) || (SigListSize == NULL) || (SigList == NULL)) {
+    DEBUG ((DEBUG_ERROR, "CreateCertHashSignatureList: Invalid parameter\n"));
+    return EFI_INVALID_PARAMETER;
+  }
+
+  //
+  // Extract TBSCertificate from the DER-encoded X.509 certificate.
+  //
+  if (!X509GetTBSCert ((CONST UINT8 *)CertData, CertSize, &TBSCert, &TBSCertSize)) {
+    DEBUG ((DEBUG_ERROR, "CreateCertHashSignatureList: Failed to extract TBSCertificate\n"));
+    Print (L"Error: Failed to extract TBSCertificate from certificate\n");
+    return EFI_ABORTED;
+  }
+
+  DEBUG ((DEBUG_INFO, "CreateCertHashSignatureList: TBSCertificate size = %u bytes\n", TBSCertSize));
+
+  //
+  // Compute SHA-384 hash of TBSCertificate.
+  //
+  if (!Sha384HashAll (TBSCert, TBSCertSize, Sha384Digest)) {
+    DEBUG ((DEBUG_ERROR, "CreateCertHashSignatureList: SHA-384 hash computation failed\n"));
+    Print (L"Error: Failed to compute SHA-384 hash of TBSCertificate\n");
+    return EFI_ABORTED;
+  }
+
+  DEBUG ((DEBUG_INFO, "CreateCertHashSignatureList: SHA-384 hash computed successfully\n"));
+
+  //
+  // Build EFI_SIGNATURE_LIST:
+  //   EFI_SIGNATURE_LIST header
+  //   EFI_SIGNATURE_DATA  (SignatureOwner GUID + EFI_CERT_X509_SHA384)
+  //
+  // EFI_CERT_X509_SHA384 = 48-byte hash + 16-byte EFI_TIME (zeroed)
+  //
+  TotalSize = sizeof (EFI_SIGNATURE_LIST) +
+              sizeof (EFI_GUID) +
+              sizeof (EFI_CERT_X509_SHA384);
+
+  Buffer = AllocateZeroPool (TotalSize);
+  if (Buffer == NULL) {
+    DEBUG ((DEBUG_ERROR, "CreateCertHashSignatureList: Cannot allocate %u bytes\n", TotalSize));
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  //
+  // Fill EFI_SIGNATURE_LIST header.
+  //
+  SigListHdr = (EFI_SIGNATURE_LIST *)Buffer;
+  CopyGuid (&SigListHdr->SignatureType, &gEfiCertX509Sha384Guid);
+  SigListHdr->SignatureListSize   = (UINT32)TotalSize;
+  SigListHdr->SignatureHeaderSize = 0;
+  SigListHdr->SignatureSize       = (UINT32)(sizeof (EFI_GUID) + sizeof (EFI_CERT_X509_SHA384));
+
+  //
+  // Fill EFI_SIGNATURE_DATA: zero GUID owner, then EFI_CERT_X509_SHA384.
+  //
+  SigData = (EFI_SIGNATURE_DATA *)(Buffer + sizeof (EFI_SIGNATURE_LIST));
+  ZeroMem (&SigData->SignatureOwner, sizeof (EFI_GUID));
+
+  CertHash = (EFI_CERT_X509_SHA384 *)SigData->SignatureData;
+  CopyMem (&CertHash->ToBeSignedHash, Sha384Digest, SHA384_DIGEST_SIZE_BYTES);
+  ZeroMem (&CertHash->TimeOfRevocation, sizeof (EFI_TIME)); // Zeroed: always trusted
+
+  *SigListSize = TotalSize;
+  *SigList     = Buffer;
+
+  DEBUG ((DEBUG_INFO, "CreateCertHashSignatureList: Signature list created successfully (%u bytes)\n", TotalSize));
   return EFI_SUCCESS;
 }
 
@@ -675,6 +785,7 @@ PrintUsage (
   Print (L"  update-pk <cert_file>      - Update PK from certificate file\n");
   Print (L"  update-kek <cert_file>     - Update KEK from certificate file\n");
   Print (L"  update-db <cert_file>      - Update DB from certificate file\n");
+  Print (L"  update-db-hash <cert_file> - Update DB with SHA-384 hash of certificate's TBSCertificate\n");
   Print (L"  update-dbx <cert_file>     - Update DBX from certificate file\n");
   Print (L"  setcommonvar-with-timebasedauth <0|1>  - Set TestVar with time-based auth (0 or 1)\n");
   Print (L"\n");
@@ -684,6 +795,7 @@ PrintUsage (
   Print (L"  SecureBootUpdate.efi update-pk fs0:\\PK.cer\n");
   Print (L"  SecureBootUpdate.efi update-kek fs0:\\KEK.cer\n");
   Print (L"  SecureBootUpdate.efi update-db fs0:\\db.cer\n");
+  Print (L"  SecureBootUpdate.efi update-db-hash fs0:\\db.cer\n");
   Print (L"  SecureBootUpdate.efi setcommonvar-with-timebasedauth 1\n");
   Print (L"\n");
 }
@@ -1027,6 +1139,50 @@ UefiMain (
                DataSizeToWrite,
                TRUE
                );
+  } else if (StrCmp (Command, L"update-db-hash") == 0) {
+    //
+    // Build an EFI_CERT_X509_SHA384 signature list from the DER certificate:
+    // extract TBSCertificate, compute SHA-384, and enroll in db.
+    // .auth files are not supported for this command; always use raw DER.
+    //
+    DEBUG ((DEBUG_INFO, "SecureBootUpdate: Updating DB with cert TBS SHA-384 hash\n"));
+
+    VOID   *HashSigList     = NULL;
+    UINTN  HashSigListSize  = 0;
+    VOID   *HashAuthData    = NULL;
+    UINTN  HashAuthDataSize = 0;
+
+    if (IsAuthFile) {
+      Print (L"Error: update-db-hash does not support .auth files. Please provide a DER certificate.\n");
+      Status = EFI_INVALID_PARAMETER;
+    } else {
+      Status = CreateCertHashSignatureList (CertData, CertSize, &HashSigListSize, &HashSigList);
+      if (EFI_ERROR (Status)) {
+        DEBUG ((DEBUG_ERROR, "SecureBootUpdate: Failed to create cert hash signature list: %r\n", Status));
+        Print (L"Error: Failed to create cert hash signature list\n");
+      } else {
+        Status = WrapWithAuthHeader (HashSigList, HashSigListSize, &HashAuthDataSize, &HashAuthData);
+        FreePool (HashSigList);
+        if (EFI_ERROR (Status)) {
+          DEBUG ((DEBUG_ERROR, "SecureBootUpdate: Failed to wrap cert hash with auth header: %r\n", Status));
+          Print (L"Error: Failed to wrap cert hash with auth header\n");
+        } else {
+          Status = UpdateSecureBootVariable (
+                     EFI_IMAGE_SECURITY_DATABASE,
+                     &gEfiImageSecurityDatabaseGuid,
+                     HashAuthData,
+                     HashAuthDataSize,
+                     TRUE
+                     );
+          FreePool (HashAuthData);
+        }
+      }
+    }
+    //
+    // Skip the common DataToWrite path cleanup for this command.
+    //
+    FreePool (CertData);
+    goto Done;
   } else if (StrCmp (Command, L"update-dbx") == 0) {
     DEBUG ((DEBUG_INFO, "SecureBootUpdate: Updating DBX\n"));
     Status = UpdateSecureBootVariable (

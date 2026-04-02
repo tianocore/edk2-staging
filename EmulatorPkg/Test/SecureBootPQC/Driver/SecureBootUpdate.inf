@@ -22,6 +22,7 @@
   MdeModulePkg/MdeModulePkg.dec
   SecurityPkg/SecurityPkg.dec
   ShellPkg/ShellPkg.dec
+  CryptoPkg/CryptoPkg.dec
 
 [LibraryClasses]
   UefiApplicationEntryPoint
@@ -34,6 +35,7 @@
   PrintLib
   ShellLib
   FileHandleLib
+  BaseCryptLib
 
 [Guids]
   gEfiGlobalVariableGuid                ## CONSUMES
@@ -41,6 +43,7 @@
   gEfiCertX509Guid                      ## CONSUMES
   gEfiCertRsa2048Guid                   ## CONSUMES
   gEfiCertSha256Guid                    ## CONSUMES
+  gEfiCertX509Sha384Guid                ## CONSUMES
   gEfiCertPkcs7Guid
   gEfiCustomModeEnableGuid
 
