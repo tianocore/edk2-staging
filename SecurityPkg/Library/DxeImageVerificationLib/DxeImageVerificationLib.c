@@ -815,52 +815,59 @@ AddImageExeInfo (
 }
 
 /**
-  Check whether the hash of an given X.509 certificate is in forbidden database (DBX).
+  Check whether the hash of an given X.509 certificate is in the specified
+  signature list.
 
   @param[in]  Certificate       Pointer to X.509 Certificate that is searched for.
   @param[in]  CertSize          Size of X.509 Certificate.
-  @param[in]  SignatureList     Pointer to the Signature List in forbidden database.
+  @param[in]  SignatureList     Pointer to the Signature List to search.
   @param[in]  SignatureListSize Size of Signature List.
-  @param[out] RevocationTime    Return the time that the certificate was revoked.
+  @param[out] RevocationTime    Return the revocation time if available. Optional.
   @param[out] IsFound           Search result. Only valid if EFI_SUCCESS returned.
+  @param[out] MatchedSigData    Return the matched signature data node. Optional.
 
   @retval EFI_SUCCESS           Finished the search without any error.
-  @retval Others                Error occurred in the search of database.
+  @retval Others                Error occurred in the search of signature list.
 
 **/
 EFI_STATUS
-IsCertHashFoundInDbx (
+IsCertHashFoundInSigList (
   IN  UINT8               *Certificate,
   IN  UINTN               CertSize,
   IN  EFI_SIGNATURE_LIST  *SignatureList,
   IN  UINTN               SignatureListSize,
-  OUT EFI_TIME            *RevocationTime,
-  OUT BOOLEAN             *IsFound
+  OUT EFI_TIME            *RevocationTime OPTIONAL,
+  OUT BOOLEAN             *IsFound,
+  OUT EFI_SIGNATURE_DATA  **MatchedSigData OPTIONAL
   )
 {
   EFI_STATUS          Status;
-  EFI_SIGNATURE_LIST  *DbxList;
-  UINTN               DbxSize;
+  EFI_SIGNATURE_LIST  *SigList;
+  UINTN               SigSize;
   EFI_SIGNATURE_DATA  *CertHash;
   UINTN               CertHashCount;
   UINTN               Index;
   UINT32              HashAlg;
   VOID                *HashCtx;
   UINT8               CertDigest[MAX_DIGEST_SIZE];
-  UINT8               *DbxCertHash;
+  UINT8               *SigCertHash;
   UINTN               SiglistHeaderSize;
   UINT8               *TBSCert;
   UINTN               TBSCertSize;
 
   Status   = EFI_ABORTED;
   *IsFound = FALSE;
-  DbxList  = SignatureList;
-  DbxSize  = SignatureListSize;
+  SigList  = SignatureList;
+  SigSize  = SignatureListSize;
   HashCtx  = NULL;
   HashAlg  = HASHALG_MAX;
 
-  if ((RevocationTime == NULL) || (DbxList == NULL)) {
+  if (SigList == NULL) {
     return EFI_INVALID_PARAMETER;
+  }
+
+  if (MatchedSigData != NULL) {
+    *MatchedSigData = NULL;
   }
 
   //
@@ -870,19 +877,19 @@ IsCertHashFoundInDbx (
     return Status;
   }
 
-  while ((DbxSize > 0) && (SignatureListSize >= DbxList->SignatureListSize)) {
+  while ((SigSize > 0) && (SigSize >= SigList->SignatureListSize)) {
     //
-    // Determine Hash Algorithm of Certificate in the forbidden database.
+    // Determine Hash Algorithm of Certificate in the signature list.
     //
-    if (CompareGuid (&DbxList->SignatureType, &gEfiCertX509Sha256Guid)) {
+    if (CompareGuid (&SigList->SignatureType, &gEfiCertX509Sha256Guid)) {
       HashAlg = HASHALG_SHA256;
-    } else if (CompareGuid (&DbxList->SignatureType, &gEfiCertX509Sha384Guid)) {
+    } else if (CompareGuid (&SigList->SignatureType, &gEfiCertX509Sha384Guid)) {
       HashAlg = HASHALG_SHA384;
-    } else if (CompareGuid (&DbxList->SignatureType, &gEfiCertX509Sha512Guid)) {
+    } else if (CompareGuid (&SigList->SignatureType, &gEfiCertX509Sha512Guid)) {
       HashAlg = HASHALG_SHA512;
     } else {
-      DbxSize -= DbxList->SignatureListSize;
-      DbxList  = (EFI_SIGNATURE_LIST *)((UINT8 *)DbxList + DbxList->SignatureListSize);
+      SigSize -= SigList->SignatureListSize;
+      SigList  = (EFI_SIGNATURE_LIST *)((UINT8 *)SigList + SigList->SignatureListSize);
       continue;
     }
 
@@ -914,17 +921,17 @@ IsCertHashFoundInDbx (
     FreePool (HashCtx);
     HashCtx = NULL;
 
-    SiglistHeaderSize = sizeof (EFI_SIGNATURE_LIST) + DbxList->SignatureHeaderSize;
-    CertHash          = (EFI_SIGNATURE_DATA *)((UINT8 *)DbxList + SiglistHeaderSize);
-    CertHashCount     = (DbxList->SignatureListSize - SiglistHeaderSize) / DbxList->SignatureSize;
+    SiglistHeaderSize = sizeof (EFI_SIGNATURE_LIST) + SigList->SignatureHeaderSize;
+    CertHash          = (EFI_SIGNATURE_DATA *)((UINT8 *)SigList + SiglistHeaderSize);
+    CertHashCount     = (SigList->SignatureListSize - SiglistHeaderSize) / SigList->SignatureSize;
     for (Index = 0; Index < CertHashCount; Index++) {
       //
       // Iterate each Signature Data Node within this CertList for verify.
       //
-      DbxCertHash = CertHash->SignatureData;
-      if (CompareMem (DbxCertHash, CertDigest, mHash[HashAlg].DigestLength) == 0) {
+      SigCertHash = CertHash->SignatureData;
+      if (CompareMem (SigCertHash, CertDigest, mHash[HashAlg].DigestLength) == 0) {
         //
-        // Hash of Certificate is found in forbidden database.
+        // Hash of Certificate is found in signature list.
         //
         Status   = EFI_SUCCESS;
         *IsFound = TRUE;
@@ -932,22 +939,79 @@ IsCertHashFoundInDbx (
         //
         // Return the revocation time.
         //
-        CopyMem (RevocationTime, (EFI_TIME *)(DbxCertHash + mHash[HashAlg].DigestLength), sizeof (EFI_TIME));
+        if (RevocationTime != NULL)
+        {
+          CopyMem (RevocationTime, (EFI_TIME *)(SigCertHash + mHash[HashAlg].DigestLength), sizeof (EFI_TIME));
+        }
+
+        //
+        // Return the matched signature data node.
+        //
+        if (MatchedSigData != NULL) {
+          *MatchedSigData = CertHash;
+        }
+
         goto Done;
       }
 
-      CertHash = (EFI_SIGNATURE_DATA *)((UINT8 *)CertHash + DbxList->SignatureSize);
+      CertHash = (EFI_SIGNATURE_DATA *)((UINT8 *)CertHash + SigList->SignatureSize);
     }
 
-    DbxSize -= DbxList->SignatureListSize;
-    DbxList  = (EFI_SIGNATURE_LIST *)((UINT8 *)DbxList + DbxList->SignatureListSize);
+    SigSize -= SigList->SignatureListSize;
+    SigList  = (EFI_SIGNATURE_LIST *)((UINT8 *)SigList + SigList->SignatureListSize);
   }
 
-  Status = EFI_SUCCESS;
+  Status = EFI_NOT_FOUND;
 
 Done:
   if (HashCtx != NULL) {
     FreePool (HashCtx);
+  }
+
+  return Status;
+}
+
+/**
+  Check whether the hash of an given X.509 certificate is in forbidden database (DBX).
+
+  @param[in]  Certificate       Pointer to X.509 Certificate that is searched for.
+  @param[in]  CertSize          Size of X.509 Certificate.
+  @param[in]  SignatureList     Pointer to the Signature List in forbidden database.
+  @param[in]  SignatureListSize Size of Signature List.
+  @param[out] RevocationTime    Return the time that the certificate was revoked.
+  @param[out] IsFound           Search result. Only valid if EFI_SUCCESS returned.
+
+  @retval EFI_SUCCESS           Finished the search without any error.
+  @retval Others                Error occurred in the search of database.
+
+**/
+EFI_STATUS
+IsCertHashFoundInDbx (
+  IN  UINT8               *Certificate,
+  IN  UINTN               CertSize,
+  IN  EFI_SIGNATURE_LIST  *SignatureList,
+  IN  UINTN               SignatureListSize,
+  OUT EFI_TIME            *RevocationTime,
+  OUT BOOLEAN             *IsFound
+  )
+{
+  EFI_STATUS Status;
+
+  if ((RevocationTime == NULL) || (SignatureList == NULL)) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  Status = IsCertHashFoundInSigList (
+            Certificate,
+            CertSize,
+            SignatureList,
+            SignatureListSize,
+            RevocationTime,
+            IsFound,
+            NULL
+            );
+  if (Status == EFI_NOT_FOUND) {
+    return EFI_SUCCESS;
   }
 
   return Status;
@@ -1417,6 +1481,59 @@ Done:
 }
 
 /**
+  Check whether the certificate is not revoked by dbx, or passes timestamp check.
+
+  @param[in]  Certificate   Pointer to X.509 Certificate.
+  @param[in]  CertSize      Size of X.509 Certificate.
+  @param[in]  DbxData       Pointer to dbx variable contents, or NULL if dbx is absent.
+  @param[in]  DbxDataSize   Size of DbxData in bytes.
+  @param[in]  AuthData      Pointer to the Authenticode signature from the signed image.
+  @param[in]  AuthDataSize  Size of the Authenticode signature in bytes.
+
+  @retval TRUE   Certificate is not revoked, or revoked but passes timestamp check.
+  @retval FALSE  Certificate is revoked and timestamp check failed, or dbx search failed.
+
+**/
+BOOLEAN
+IsCertAllowedByDbx (
+  IN UINT8  *Certificate,
+  IN UINTN  CertSize,
+  IN UINT8  *DbxData,
+  IN UINTN  DbxDataSize,
+  IN UINT8  *AuthData,
+  IN UINTN  AuthDataSize
+  )
+{
+  EFI_STATUS  Status;
+  BOOLEAN     IsFound;
+  EFI_TIME    RevocationTime;
+
+  if (DbxData == NULL) {
+    return TRUE;
+  }
+
+  Status = IsCertHashFoundInDbx (
+             Certificate,
+             CertSize,
+             (EFI_SIGNATURE_LIST *)DbxData,
+             DbxDataSize,
+             &RevocationTime,
+             &IsFound
+             );
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "DxeImageVerificationLib: Error searching DBX.\n"));
+    return FALSE;
+  }
+
+  if (IsFound && !PassTimestampCheck (AuthData, AuthDataSize, &RevocationTime)) {
+    DEBUG ((DEBUG_INFO, "DxeImageVerificationLib: Certificate is revoked in DBX and failed the timestamp check.\n"));
+    return FALSE;
+  }
+
+  return TRUE;
+}
+
+/**
   Check whether the image signature can be verified by the trusted certificates in DB database.
 
   @param[in]  AuthData      Pointer to the Authenticode signature retrieved from signed image.
@@ -1441,19 +1558,34 @@ IsAllowedByDb (
   UINT8               *Data;
   UINT8               *RootCert;
   UINTN               RootCertSize;
+  UINT8               CertNumber;
+  UINT8               *CertPtr;
+  UINT8               *Cert;
+  UINTN               CertSize;
   UINTN               Index;
   UINTN               CertCount;
   UINTN               DbxDataSize;
   UINT8               *DbxData;
-  EFI_TIME            RevocationTime;
+  UINT8               *CertBuffer;
+  UINTN               BufferLength;
+  UINT8               *TrustedCert;
+  UINTN               TrustedCertLength;
 
-  Data         = NULL;
-  CertList     = NULL;
-  CertData     = NULL;
-  RootCert     = NULL;
-  DbxData      = NULL;
-  RootCertSize = 0;
-  VerifyStatus = FALSE;
+  Data              = NULL;
+  CertList          = NULL;
+  CertData          = NULL;
+  RootCert          = NULL;
+  DbxData           = NULL;
+  RootCertSize      = 0;
+  CertNumber        = 0;
+  CertPtr           = NULL;
+  Cert              = NULL;
+  CertSize          = 0;
+  VerifyStatus      = FALSE;
+  CertBuffer        = NULL;
+  BufferLength      = 0;
+  TrustedCert       = NULL;
+  TrustedCertLength = 0;
 
   //
   // Fetch 'db' content. If 'db' doesn't exist or encounters problem to get the
@@ -1508,6 +1640,23 @@ IsAllowedByDb (
   }
 
   //
+  // Retrieve the certificate stack from AuthData
+  // The output CertStack format will be:
+  //       UINT8  CertNumber;
+  //       UINT32 Cert1Length;
+  //       UINT8  Cert1[];
+  //       UINT32 Cert2Length;
+  //       UINT8  Cert2[];
+  //       ...
+  //       UINT32 CertnLength;
+  //       UINT8  Certn[];
+  //
+  Pkcs7GetSigners (AuthData, AuthDataSize, &CertBuffer, &BufferLength, &TrustedCert, &TrustedCertLength);
+  if ((BufferLength == 0) || (CertBuffer == NULL) || ((*CertBuffer) == 0)) {
+    goto Done;
+  }
+
+  //
   // Find X509 certificate in Signature List to verify the signature in pkcs7 signed data.
   //
   CertList = (EFI_SIGNATURE_LIST *)Data;
@@ -1538,27 +1687,7 @@ IsAllowedByDb (
           //
           // The image is signed and its signature is found in 'db'.
           //
-          if (DbxData != NULL) {
-            //
-            // Here We still need to check if this RootCert's Hash is revoked
-            //
-            Status = IsCertHashFoundInDbx (RootCert, RootCertSize, (EFI_SIGNATURE_LIST *)DbxData, DbxDataSize, &RevocationTime, &IsFound);
-            if (EFI_ERROR (Status)) {
-              //
-              // Error in searching dbx. Consider it as 'found'. RevocationTime might
-              // not be valid in such situation.
-              //
-              VerifyStatus = FALSE;
-            } else if (IsFound) {
-              //
-              // Check the timestamp signature and signing time to determine if the RootCert can be trusted.
-              //
-              VerifyStatus = PassTimestampCheck (AuthData, AuthDataSize, &RevocationTime);
-              if (!VerifyStatus) {
-                DEBUG ((DEBUG_INFO, "DxeImageVerificationLib: Image is signed and signature is accepted by DB, but its root cert failed the timestamp check.\n"));
-              }
-            }
-          }
+          VerifyStatus = IsCertAllowedByDbx (RootCert, RootCertSize, DbxData, DbxDataSize, AuthData, AuthDataSize);
 
           //
           // There's no 'dbx' to check revocation time against (must-be pass),
@@ -1570,6 +1699,74 @@ IsAllowedByDb (
         }
 
         CertData = (EFI_SIGNATURE_DATA *)((UINT8 *)CertData + CertList->SignatureSize);
+      }
+    } else if ((CompareGuid (&CertList->SignatureType, &gEfiCertX509Sha256Guid))
+            || (CompareGuid (&CertList->SignatureType, &gEfiCertX509Sha384Guid))
+            || (CompareGuid (&CertList->SignatureType, &gEfiCertX509Sha512Guid))) {
+      //
+      // Check whether any certificate hash in the image signing chain is allowed
+      // by this db entry and is not revoked in dbx.
+      //
+      CertNumber   = (UINT8)(*CertBuffer);
+      CertPtr      = CertBuffer + 1;
+      VerifyStatus = FALSE;
+
+      for (Index = 0; Index < CertNumber; Index++) {
+        CertSize = (UINTN)ReadUnaligned32 ((UINT32 *)CertPtr);
+        Cert     = (UINT8 *)CertPtr + sizeof (UINT32);
+        CertPtr  = CertPtr + sizeof (UINT32) + CertSize;
+
+        //
+        // Compare against each hash entry in this db CertList.
+        //
+        IsFound = FALSE;
+        Status  = IsCertHashFoundInSigList (
+                    Cert,
+                    CertSize,
+                    CertList,
+                    CertList->SignatureListSize,
+                    NULL,
+                    &IsFound,
+                    &CertData
+                  );
+        if (EFI_ERROR (Status) || !IsFound || (CertData == NULL)) {
+          continue;
+        }
+
+        //
+        // Certificate hash is found in db. Verify that the AuthData signature
+        // is actually signed by this certificate before trusting it.
+        //
+        if (!AuthenticodeVerify (
+               AuthData,
+               AuthDataSize,
+               Cert,
+               CertSize,
+               mImageDigest,
+               mImageDigestSize
+               ))
+        {
+          //
+          // The hash of TBSCertificate matched a db entry but AuthenticodeVerify failed.
+          // Since this cert is part of the image own signing chain (from
+          // Pkcs7GetSigners), a verification failure means the chain is broken
+          // or the signature is invalid. No further checking is needed.
+          //
+          DEBUG ((DEBUG_INFO, "DxeImageVerificationLib: Image cert hash is in DB but AuthenticodeVerify failed. Broken chain.\n"));
+          goto Done;
+        }
+
+        //
+        // Signature verified. Check if this certificate is revoked in dbx.
+        // Certificate is revoked in dbx. Check timestamp to determine
+        // if the image was signed before the revocation time.
+        //
+        if (!IsCertAllowedByDbx (Cert, CertSize, DbxData, DbxDataSize, AuthData, AuthDataSize)) {
+          goto Done;
+        }
+
+        VerifyStatus = TRUE;
+        goto Done;
       }
     }
 
@@ -1590,6 +1787,9 @@ Done:
   if (DbxData != NULL) {
     FreePool (DbxData);
   }
+
+  Pkcs7FreeSigners (CertBuffer);
+  Pkcs7FreeSigners (TrustedCert);
 
   return VerifyStatus;
 }
