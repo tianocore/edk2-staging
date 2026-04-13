@@ -498,6 +498,129 @@ UpdatePlatformMode (
 }
 
 /**
+  Check if an ASCII OID exactly exists in a CSV list.
+
+  @param[in]  OidCsv     Null-terminated comma-separated ASCII OID list.
+  @param[in]  AsciiOid   Null-terminated ASCII OID to match.
+
+  @retval TRUE           OID exists in the CSV list as an exact token.
+  @retval FALSE          OID does not exist, or input is invalid.
+**/
+STATIC
+BOOLEAN
+IsAsciiOidInCsvList (
+  IN  CONST CHAR8  *OidCsv,
+  IN  CONST CHAR8  *AsciiOid
+  )
+{
+  CONST CHAR8  *TokenStart;
+  CONST CHAR8  *TokenEnd;
+  UINTN        OidLen;
+  UINTN        TokenLen;
+
+  if ((OidCsv == NULL) || (AsciiOid == NULL) || (*AsciiOid == '\0')) {
+    return FALSE;
+  }
+
+  DEBUG ((DEBUG_INFO, "IsAsciiOidInCsvList - OidCsv=%a\n", OidCsv));
+  DEBUG ((DEBUG_INFO, "IsAsciiOidInCsvList - AsciiOid=%a\n", AsciiOid));
+
+  OidLen     = AsciiStrLen (AsciiOid);
+  TokenStart = OidCsv;
+  while (*TokenStart != '\0') {
+    while (*TokenStart == ',') {
+      TokenStart++;
+    }
+
+    if (*TokenStart == '\0') {
+      //
+      // End with comma
+      //
+      break;
+    }
+
+    TokenEnd = TokenStart;
+    while ((*TokenEnd != '\0') && (*TokenEnd != ',')) {
+      TokenEnd++;
+    }
+
+    TokenLen = (UINTN)(TokenEnd - TokenStart);
+    if ((TokenLen == OidLen) && (CompareMem (TokenStart, AsciiOid, OidLen) == 0)) {
+      DEBUG ((DEBUG_INFO, "IsAsciiOidInCsvList - OID matched successfully\n"));
+      return TRUE;
+    }
+
+    if (*TokenEnd == '\0') {
+      break;
+    }
+
+    TokenStart = TokenEnd + 1;
+  }
+
+  DEBUG ((DEBUG_INFO, "IsAsciiOidInCsvList - OID not found in CSV list\n"));
+  return FALSE;
+}
+
+/**
+  Check if X.509 certificate signing algorithm is supported or not.
+
+  Extracts the signature algorithm OID from an X.509 certificate and verifies
+  it is present in the supported OID list returned by Pkcs7GetVerifyOidList().
+
+  @param[in]  CertData     Pointer to the DER-encoded X.509 certificate.
+  @param[in]  CertDataLen  Length of the certificate data in bytes.
+
+  @retval TRUE             The certificate's signing algorithm is supported.
+  @retval FALSE            The certificate's signing algorithm is not supported,
+                           or an error occurred.
+**/
+STATIC
+BOOLEAN
+IsX509SigningAlgSupported (
+  IN  CONST UINT8  *CertData,
+  IN  UINTN        CertDataLen
+  )
+{
+  CONST CHAR8  *SupportedOidCsv;
+  CHAR8        *AsciiOid;
+  UINTN        AsciiOidSize;
+  BOOLEAN      IsSupported;
+
+  if ((CertData == NULL) || (CertDataLen == 0)) {
+    return FALSE;
+  }
+
+  SupportedOidCsv = Pkcs7GetVerifyOidList (Pkcs7SignatureAlgoAll);
+  if (SupportedOidCsv == NULL) {
+    return FALSE;
+  }
+
+  AsciiOidSize = 0;
+  if (X509GetSignatureAlgorithmAscii (CertData, CertDataLen, NULL, &AsciiOidSize) || (AsciiOidSize == 0)) {
+    return FALSE;
+  }
+
+  AsciiOid = AllocateZeroPool (AsciiOidSize);
+  if (AsciiOid == NULL) {
+    return FALSE;
+  }
+
+  if (!X509GetSignatureAlgorithmAscii (CertData, CertDataLen, AsciiOid, &AsciiOidSize)) {
+    FreePool (AsciiOid);
+    return FALSE;
+  }
+
+  //
+  // OID list is one continuous NULL-terminated CSV (Comma-Separated Values) string.
+  //
+  IsSupported = IsAsciiOidInCsvList (SupportedOidCsv, AsciiOid);
+
+  FreePool (AsciiOid);
+
+  return IsSupported;
+}
+
+/**
   Check input data form to make sure it is a valid EFI_SIGNATURE_LIST for PK/KEK/db/dbx/dbt variable.
 
   @param[in]  VariableName                Name of Variable to be check.
@@ -606,6 +729,14 @@ CheckSignatureListFormat (
       if (!IsValidAlg) {
         DEBUG ((DEBUG_ERROR, "CheckSignatureListFormat - X509 Cert invalid\n"));
         return EFI_INVALID_PARAMETER;
+      }
+
+      //
+      // Check if the certificate's signing algorithm is in the supported OID list.
+      //
+      if (!IsX509SigningAlgSupported (CertData->SignatureData, CertLen)) {
+        DEBUG ((DEBUG_ERROR, "CheckSignatureListFormat - X509 signing alg not in supported list\n"));
+        return EFI_UNSUPPORTED;
       }
     }
 
