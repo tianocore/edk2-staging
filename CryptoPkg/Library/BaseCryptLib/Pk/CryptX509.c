@@ -1333,6 +1333,100 @@ _Exit:
 }
 
 /**
+  Retrieve the Signature Algorithm OID string from one X.509 certificate.
+
+  @param[in]      Cert             Pointer to the DER-encoded X509 certificate.
+  @param[in]      CertSize         Size of the X509 certificate in bytes.
+  @param[out]     AsciiOid         Null-terminated ASCII dotted-decimal OID buffer.
+  @param[in,out]  AsciiOidSize     On input, the size in bytes of AsciiOid.
+                                   On output, the size of the ASCII OID string,
+                                   including the null terminator.
+
+  @retval TRUE                     The certificate Signature Algorithm OID string was
+                                   retrieved successfully.
+  @retval FALSE                    If Cert is NULL.
+  @retval FALSE                    If AsciiOidSize is NULL.
+  @retval FALSE                    If the certificate is invalid.
+  @retval FALSE                    If no SignatureType exists.
+  @retval FALSE                    If AsciiOid is NULL or the buffer is too small.
+                                   The required size is returned in AsciiOidSize.
+  @retval FALSE                    The operation is not supported.
+**/
+BOOLEAN
+EFIAPI
+X509GetSignatureAlgorithmAscii (
+  IN      CONST UINT8  *Cert,
+  IN      UINTN        CertSize,
+  OUT     CHAR8        *AsciiOid   OPTIONAL,
+  IN OUT  UINTN        *AsciiOidSize
+  )
+{
+  BOOLEAN      Status;
+  X509         *X509Cert;
+  INT32        Nid;
+  ASN1_OBJECT  *Asn1Obj;
+  INT32        TextLength;
+  UINTN        RequiredSize;
+
+  if ((Cert == NULL) || (AsciiOidSize == NULL) || (CertSize == 0)) {
+    return FALSE;
+  }
+
+  X509Cert = NULL;
+  Status   = FALSE;
+
+  Status = X509ConstructCertificate (Cert, CertSize, (UINT8 **)&X509Cert);
+  if ((X509Cert == NULL) || !Status) {
+    Status = FALSE;
+    goto _Exit;
+  }
+
+  Nid = X509_get_signature_nid (X509Cert);
+  if (Nid == NID_undef) {
+    *AsciiOidSize = 0;
+    Status        = FALSE;
+    goto _Exit;
+  }
+
+  Asn1Obj = OBJ_nid2obj (Nid);
+  if (Asn1Obj == NULL) {
+    *AsciiOidSize = 0;
+    Status        = FALSE;
+    goto _Exit;
+  }
+
+  TextLength = OBJ_obj2txt (NULL, 0, Asn1Obj, 1);
+  if (TextLength <= 0) {
+    *AsciiOidSize = 0;
+    Status        = FALSE;
+    goto _Exit;
+  }
+
+  RequiredSize = (UINTN)TextLength + 1;
+  if ((AsciiOid == NULL) || (*AsciiOidSize < RequiredSize)) {
+    *AsciiOidSize = RequiredSize;
+    Status        = FALSE;
+    goto _Exit;
+  }
+
+  if (OBJ_obj2txt (AsciiOid, (INT32)(*AsciiOidSize), Asn1Obj, 1) != TextLength) {
+    *AsciiOidSize = 0;
+    Status        = FALSE;
+    goto _Exit;
+  }
+
+  *AsciiOidSize = RequiredSize;
+  Status        = TRUE;
+
+_Exit:
+  if (X509Cert != NULL) {
+    X509_free (X509Cert);
+  }
+
+  return Status;
+}
+
+/**
   Retrieve Extension data from one X.509 certificate.
 
   @param[in]      Cert             Pointer to the DER-encoded X509 certificate.

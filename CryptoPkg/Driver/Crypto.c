@@ -3210,6 +3210,38 @@ CryptoServiceX509GetSignatureAlgorithm (
 }
 
 /**
+  Retrieve the Signature Algorithm OID string from one X.509 certificate.
+
+  @param[in]      Cert             Pointer to the DER-encoded X509 certificate.
+  @param[in]      CertSize         Size of the X509 certificate in bytes.
+  @param[out]     AsciiOid         Null-terminated ASCII dotted-decimal OID buffer.
+  @param[in,out]  AsciiOidSize     On input, the size in bytes of AsciiOid.
+                                   On output, the size of the ASCII OID string,
+                                   including the null terminator.
+
+  @retval TRUE                     The certificate Signature Algorithm OID string was
+                                   retrieved successfully.
+  @retval FALSE                    If Cert is NULL.
+  @retval FALSE                    If AsciiOidSize is NULL.
+  @retval FALSE                    If the certificate is invalid.
+  @retval FALSE                    If no SignatureType exists.
+  @retval FALSE                    If AsciiOid is NULL or the buffer is too small.
+                                   The required size is returned in AsciiOidSize.
+  @retval FALSE                    The operation is not supported.
+**/
+BOOLEAN
+EFIAPI
+CryptoServiceX509GetSignatureAlgorithmAscii (
+  IN      CONST UINT8  *Cert,
+  IN      UINTN        CertSize,
+  OUT     CHAR8        *AsciiOid   OPTIONAL,
+  IN OUT  UINTN        *AsciiOidSize
+  )
+{
+  return CALL_BASECRYPTLIB (X509.Services.GetSignatureAlgorithmAscii, X509GetSignatureAlgorithmAscii, (Cert, CertSize, AsciiOid, AsciiOidSize), FALSE);
+}
+
+/**
   Retrieve Extension data from one X.509 certificate.
 
   @param[in]      Cert             Pointer to the DER-encoded X509 certificate.
@@ -7217,4 +7249,6 @@ const EDKII_CRYPTO_PROTOCOL  mEdkiiCrypto = {
   /// Pkcs (Continued)
   CryptoServicePkcs7GetSignerInfoNum,
   CryptoServicePkcs7GetVerifyOidList,
+  /// X509 (Continued)
+  CryptoServiceX509GetSignatureAlgorithmAscii,
 };
