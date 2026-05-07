@@ -45,6 +45,7 @@
   gEfiEcitFeatureImageVerificationGuid       ## CONSUMES  ## GUID  # Feature identifier
   gEfiEcitFeatureSecureBootAuthorizationGuid ## CONSUMES  ## GUID  # Feature identifier
   gEfiEcitFeatureImageRevocationGuid         ## CONSUMES  ## GUID  # Feature identifier
+  gEfiEcitFeatureSecureBootServicingAuthorizationGuid ## CONSUMES  ## GUID  # Feature identifier
   gEfiEcitFeatureAuthenticatedVariableGuid   ## CONSUMES  ## GUID  # Feature identifier
   gEfiCertX509Guid                           ## CONSUMES  ## GUID  # Signature list type
   gEfiCertSha256Guid                         ## CONSUMES  ## GUID  # Signature list type

@@ -74,6 +74,20 @@
   }
 
 ///
+/// Secure Boot Servicing Authorization feature - indicates which
+/// EFI_SIGNATURE_LIST types are accepted in the Platform Key (PK) and
+/// Key Exchange Key (KEK) databases that authorize updates to the
+/// Secure Boot signature databases (db/dbx).
+///
+/// {a2c84d56-2e04-4f3a-b7d1-3c9e5a6f8b12}
+///
+#define EFI_ECIT_FEATURE_SECURE_BOOT_SERVICING_AUTHORIZATION_GUID \
+  { \
+    0xa2c84d56, 0x2e04, 0x4f3a, \
+    { 0xb7, 0xd1, 0x3c, 0x9e, 0x5a, 0x6f, 0x8b, 0x12 } \
+  }
+
+///
 /// Authenticated Variable Signed Update feature - indicates algorithms
 /// for signing/verifying authenticated variable update payloads.
 ///
@@ -177,6 +191,7 @@ extern EFI_GUID  gEfiCryptoIndicatorTableGuid;
 extern EFI_GUID  gEfiEcitFeatureImageVerificationGuid;
 extern EFI_GUID  gEfiEcitFeatureSecureBootAuthorizationGuid;
 extern EFI_GUID  gEfiEcitFeatureImageRevocationGuid;
+extern EFI_GUID  gEfiEcitFeatureSecureBootServicingAuthorizationGuid;
 extern EFI_GUID  gEfiEcitFeatureAuthenticatedVariableGuid;
 extern EFI_GUID  gEfiEcitFeatureSystemFirmwareUpdateGuid;
 extern EFI_GUID  gEfiEcitFeatureEsrtFirmwareUpdateGuid;

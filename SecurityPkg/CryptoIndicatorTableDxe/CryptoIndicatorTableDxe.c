@@ -153,6 +153,20 @@ STATIC EFI_GUID  mImageRevocationTypes[] = {
   EFI_CERT_X509_SHA512_GUID,
 };
 
+//
+// Supported EFI_SIGNATURE_LIST types for Secure Boot servicing authorization.
+//
+// This list represents the key types accepted in the Platform Key (PK) and
+// Key Exchange Key (KEK) databases, which authorize updates to db/dbx.
+//
+// EFI_CERT_X509_GUID
+//   - X.509 certificates used in PK and KEK for authenticating
+//     Secure Boot database updates via signed variable payloads.
+//
+STATIC EFI_GUID  mSecureBootServicingAuthTypes[] = {
+  EFI_CERT_X509_GUID,
+};
+
 /**
   Calculate the padded entry length aligned to 8 bytes.
 
@@ -200,9 +214,11 @@ CryptoIndicatorTableDxeEntryPoint (
   UINT16                       OidEntrySize;
   UINT16                       SecBootAuthEntrySize;
   UINT16                       ImageRevocEntrySize;
+  UINT16                       ServicingAuthEntrySize;
   UINTN                        AllOidLen;
   UINTN                        SecBootAuthDataSize;
   UINTN                        ImageRevocDataSize;
+  UINTN                        ServicingAuthDataSize;
   CONST CHAR8                  *AllOids;
 
   //
@@ -236,12 +252,19 @@ CryptoIndicatorTableDxeEntryPoint (
   ImageRevocEntrySize = EcitEntrySize (ImageRevocDataSize);
 
   //
-  // Total table size: header + 4 entries.
+  // Secure Boot Servicing Authorization entry: array of EFI_GUID.
+  //
+  ServicingAuthDataSize  = sizeof (mSecureBootServicingAuthTypes);
+  ServicingAuthEntrySize = EcitEntrySize (ServicingAuthDataSize);
+
+  //
+  // Total table size: header + 5 entries.
   //
   TableSize = sizeof (EFI_CRYPTO_INDICATOR_TABLE) +
               OidEntrySize +
               SecBootAuthEntrySize +
               ImageRevocEntrySize +
+              ServicingAuthEntrySize +
               OidEntrySize;
 
   Table = AllocateZeroPool (TableSize);
@@ -254,7 +277,7 @@ CryptoIndicatorTableDxeEntryPoint (
   // Fill table header.
   //
   Table->Version         = EFI_CRYPTO_INDICATOR_TABLE_VERSION;
-  Table->NumberOfEntries = 4;
+  Table->NumberOfEntries = 5;
   Table->Reserved        = 0;
 
   Buffer = (UINT8 *)Table + sizeof (EFI_CRYPTO_INDICATOR_TABLE);
@@ -302,7 +325,21 @@ CryptoIndicatorTableDxeEntryPoint (
   Buffer += ImageRevocEntrySize;
 
   //
-  // Entry 4: Authenticated Variable
+  // Entry 4: Secure Boot Servicing Authorization
+  //
+  Entry = (EFI_CRYPTO_INDICATOR_ENTRY *)Buffer;
+  CopyGuid (&Entry->FeatureIdentifier, &gEfiEcitFeatureSecureBootServicingAuthorizationGuid);
+  Entry->EntryLength = ServicingAuthEntrySize;
+  ZeroMem (Entry->Reserved, sizeof (Entry->Reserved));
+  CopyMem (
+    Buffer + sizeof (EFI_CRYPTO_INDICATOR_ENTRY),
+    mSecureBootServicingAuthTypes,
+    ServicingAuthDataSize
+    );
+  Buffer += ServicingAuthEntrySize;
+
+  //
+  // Entry 5: Authenticated Variable
   //
   Entry = (EFI_CRYPTO_INDICATOR_ENTRY *)Buffer;
   CopyGuid (&Entry->FeatureIdentifier, &gEfiEcitFeatureAuthenticatedVariableGuid);

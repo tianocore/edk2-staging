@@ -30,6 +30,7 @@ STATIC ECIT_FEATURE_INFO  mKnownFeatures[] = {
   { &gEfiEcitFeatureImageVerificationGuid,       L"Image Verification",          TRUE  },
   { &gEfiEcitFeatureSecureBootAuthorizationGuid,  L"Secure Boot Authorization",   FALSE },
   { &gEfiEcitFeatureImageRevocationGuid,          L"Image Revocation",            FALSE },
+  { &gEfiEcitFeatureSecureBootServicingAuthorizationGuid, L"Secure Boot Servicing Authorization", FALSE },
   { &gEfiEcitFeatureAuthenticatedVariableGuid,    L"Authenticated Variable",      TRUE  },
   { &gEfiEcitFeatureSystemFirmwareUpdateGuid,     L"System Firmware Update",      TRUE  },
   { &gEfiEcitFeatureEsrtFirmwareUpdateGuid,       L"ESRT Firmware Update",        TRUE  },
