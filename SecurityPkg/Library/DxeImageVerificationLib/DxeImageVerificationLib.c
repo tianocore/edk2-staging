@@ -1305,12 +1305,6 @@ IsForbiddenByDbx (
   BOOLEAN             IsFound;
   UINT8               *Data;
   UINTN               DataSize;
-  EFI_SIGNATURE_LIST  *CertList;
-  UINTN               CertListSize;
-  EFI_SIGNATURE_DATA  *CertData;
-  UINT8               *RootCert;
-  UINTN               RootCertSize;
-  UINTN               CertCount;
   UINTN               Index;
   UINT8               *CertBuffer;
   UINTN               BufferLength;
@@ -1327,10 +1321,6 @@ IsForbiddenByDbx (
   //
   IsForbidden       = TRUE;
   Data              = NULL;
-  CertList          = NULL;
-  CertData          = NULL;
-  RootCert          = NULL;
-  RootCertSize      = 0;
   Cert              = NULL;
   CertBuffer        = NULL;
   BufferLength      = 0;
@@ -1362,48 +1352,6 @@ IsForbiddenByDbx (
   Status = gRT->GetVariable (EFI_IMAGE_SECURITY_DATABASE1, &gEfiImageSecurityDatabaseGuid, NULL, &DataSize, (VOID *)Data);
   if (EFI_ERROR (Status)) {
     goto Done;
-  }
-
-  //
-  // Verify image signature with RAW X509 certificates in DBX database.
-  // If passed, the image will be forbidden.
-  //
-  CertList     = (EFI_SIGNATURE_LIST *)Data;
-  CertListSize = DataSize;
-  while ((CertListSize > 0) && (CertListSize >= CertList->SignatureListSize)) {
-    if (CompareGuid (&CertList->SignatureType, &gEfiCertX509Guid)) {
-      CertData  = (EFI_SIGNATURE_DATA *)((UINT8 *)CertList + sizeof (EFI_SIGNATURE_LIST) + CertList->SignatureHeaderSize);
-      CertCount = (CertList->SignatureListSize - sizeof (EFI_SIGNATURE_LIST) - CertList->SignatureHeaderSize) / CertList->SignatureSize;
-
-      for (Index = 0; Index < CertCount; Index++) {
-        //
-        // Iterate each Signature Data Node within this CertList for verify.
-        //
-        RootCert     = CertData->SignatureData;
-        RootCertSize = CertList->SignatureSize - sizeof (EFI_GUID);
-
-        //
-        // Call AuthenticodeVerify library to Verify Authenticode struct.
-        //
-        IsForbidden = AuthenticodeVerify (
-                        AuthData,
-                        AuthDataSize,
-                        RootCert,
-                        RootCertSize,
-                        mImageDigest,
-                        mImageDigestSize
-                        );
-        if (IsForbidden) {
-          DEBUG ((DEBUG_INFO, "DxeImageVerificationLib: Image is signed but signature is forbidden by DBX.\n"));
-          goto Done;
-        }
-
-        CertData = (EFI_SIGNATURE_DATA *)((UINT8 *)CertData + CertList->SignatureSize);
-      }
-    }
-
-    CertListSize -= CertList->SignatureListSize;
-    CertList      = (EFI_SIGNATURE_LIST *)((UINT8 *)CertList + CertList->SignatureListSize);
   }
 
   //
