@@ -707,6 +707,19 @@ CheckSignatureListFormat (
       return EFI_INVALID_PARAMETER;
     }
 
+    //
+    // PK and KEK only accept EFI_CERT_X509_GUID signature lists.
+    //
+    if (CompareGuid (VendorGuid, &gEfiGlobalVariableGuid) &&
+        ((StrCmp (VariableName, EFI_PLATFORM_KEY_NAME) == 0) ||
+         (StrCmp (VariableName, EFI_KEY_EXCHANGE_KEY_NAME) == 0)))
+    {
+      if (!CompareGuid (&SigList->SignatureType, &gEfiCertX509Guid)) {
+        DEBUG ((DEBUG_ERROR, "CheckSignatureListFormat - Only EFI_CERT_X509_GUID is allowed in PK/KEK\n"));
+        return EFI_INVALID_PARAMETER;
+      }
+    }
+
     if (CompareGuid (&SigList->SignatureType, &gEfiCertX509Guid)) {
       //
       // Reject EFI_CERT_X509_GUID in dbx. Raw X.509 certificates are not
