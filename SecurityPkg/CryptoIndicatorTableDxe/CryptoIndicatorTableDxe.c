@@ -134,9 +134,6 @@ STATIC EFI_GUID  mSecureBootAuthTypes[] = {
 // This list is derived from the revocation types consumed by
 // DxeImageVerificationLib (SecurityPkg/Library/DxeImageVerificationLib):
 //
-// EFI_CERT_X509_GUID
-//   - IsForbiddenByDbx(): match raw X.509 certs in dbx via AuthenticodeVerify().
-//
 // EFI_CERT_SHA256_GUID, EFI_CERT_SHA384_GUID, EFI_CERT_SHA512_GUID
 //   - IsSignatureFoundInDatabase(): matches the PE image hash in dbx.
 //
@@ -145,7 +142,6 @@ STATIC EFI_GUID  mSecureBootAuthTypes[] = {
 //     certificate revocation by hash.
 //
 STATIC EFI_GUID  mImageRevocationTypes[] = {
-  EFI_CERT_X509_GUID,
   EFI_CERT_SHA256_GUID,
   EFI_CERT_SHA384_GUID,
   EFI_CERT_SHA512_GUID,
