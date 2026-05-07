@@ -709,6 +709,17 @@ CheckSignatureListFormat (
 
     if (CompareGuid (&SigList->SignatureType, &gEfiCertX509Guid)) {
       //
+      // Reject EFI_CERT_X509_GUID in dbx. Raw X.509 certificates are not
+      // supported for image revocation.
+      //
+      if (CompareGuid (VendorGuid, &gEfiImageSecurityDatabaseGuid) &&
+          (StrCmp (VariableName, EFI_IMAGE_SECURITY_DATABASE1) == 0))
+      {
+        DEBUG ((DEBUG_ERROR, "CheckSignatureListFormat - EFI_CERT_X509_GUID is not allowed in dbx\n"));
+        return EFI_INVALID_PARAMETER;
+      }
+
+      //
       // Try to retrieve the RSA public key from the X.509 certificate.
       // If this operation fails, it's not a valid certificate.
       //
