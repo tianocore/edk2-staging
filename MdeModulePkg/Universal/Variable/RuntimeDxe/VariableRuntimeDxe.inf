@@ -123,7 +123,6 @@
 
   ## SOMETIMES_CONSUMES   ## Variable:L"db"
   ## SOMETIMES_CONSUMES   ## Variable:L"dbx"
-  ## SOMETIMES_CONSUMES   ## Variable:L"dbt"
   gEfiImageSecurityDatabaseGuid
   gEfiDeviceSignatureDatabaseGuid
 

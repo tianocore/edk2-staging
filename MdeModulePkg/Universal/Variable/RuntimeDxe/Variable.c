@@ -2629,13 +2629,12 @@ IsSecureBootPolicyVariables (
   }
 
   //
-  // Check for db, dbx, dbt
+  // Check for db, dbx
   // These are under EFI_IMAGE_SECURITY_DATABASE_GUID
   //
   if (CompareGuid (VendorGuid, &gEfiImageSecurityDatabaseGuid)) {
     if ((StrCmp (VariableName, EFI_IMAGE_SECURITY_DATABASE) == 0) ||
-        (StrCmp (VariableName, EFI_IMAGE_SECURITY_DATABASE1) == 0) ||
-        (StrCmp (VariableName, EFI_IMAGE_SECURITY_DATABASE2) == 0))
+        (StrCmp (VariableName, EFI_IMAGE_SECURITY_DATABASE1) == 0))
     {
       return TRUE;
     }

@@ -65,7 +65,6 @@
   ## SOMETIMES_CONSUMES   ## Variable:L"PKDefault"
   ## SOMETIMES_CONSUMES   ## Variable:L"dbDefault"
   ## SOMETIMES_CONSUMES   ## Variable:L"dbxDefault"
-  ## SOMETIMES_CONSUMES   ## Variable:L"dbtDefault"
   ## SOMETIMES_CONSUMES   ## Variable:L"OsIndicationsSupported"
   ## SOMETIMES_CONSUMES   ## Variable:L"OsIndications"
   ## SOMETIMES_CONSUMES   ## Variable:L"VendorKeys"
@@ -76,6 +75,5 @@
   gEfiGlobalVariableGuid
   ## SOMETIMES_CONSUMES   ## Variable:L"DB"
   ## SOMETIMES_CONSUMES   ## Variable:L"DBX"
-  ## SOMETIMES_CONSUMES   ## Variable:L"DBT"
   gEfiImageSecurityDatabaseGuid
   gEfiHardwareErrorVariableGuid  ## SOMETIMES_CONSUMES    ## Variable:L"HwErrRec####"

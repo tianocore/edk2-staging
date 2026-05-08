@@ -32,7 +32,6 @@ VARIABLE_TYPE  mVariableType[] = {
   { EFI_KEY_EXCHANGE_KEY_NAME,    &gEfiGlobalVariableGuid          },
   { EFI_IMAGE_SECURITY_DATABASE,  &gEfiImageSecurityDatabaseGuid   },
   { EFI_IMAGE_SECURITY_DATABASE1, &gEfiImageSecurityDatabaseGuid   },
-  { EFI_IMAGE_SECURITY_DATABASE2, &gEfiImageSecurityDatabaseGuid   },
   { EFI_DEVICE_SECURITY_DATABASE, &gEfiDeviceSignatureDatabaseGuid },
 };
 
@@ -266,18 +265,8 @@ SecureBootHook (
              &VariableDataSize
              );
   if (EFI_ERROR (Status)) {
-    //
-    // Measure DBT only if present and not empty
-    //
-    if ((StrCmp (VariableName, EFI_IMAGE_SECURITY_DATABASE2) == 0) &&
-        CompareGuid (VendorGuid, &gEfiImageSecurityDatabaseGuid))
-    {
-      DEBUG ((DEBUG_INFO, "Skip measuring variable %s since it's deleted\n", EFI_IMAGE_SECURITY_DATABASE2));
-      return;
-    } else {
-      VariableData     = NULL;
-      VariableDataSize = 0;
-    }
+    VariableData     = NULL;
+    VariableDataSize = 0;
   }
 
   Status = MeasureVariable (
