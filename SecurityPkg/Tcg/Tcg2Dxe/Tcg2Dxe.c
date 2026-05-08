@@ -2353,24 +2353,6 @@ MeasureAllSecureVariables (
   }
 
   //
-  // Measure DBT if present and not empty
-  //
-  Status = GetVariable2 (EFI_IMAGE_SECURITY_DATABASE2, &gEfiImageSecurityDatabaseGuid, &Data, &DataSize);
-  if (!EFI_ERROR (Status)) {
-    Status = MeasureVariable (
-               7,
-               EV_EFI_VARIABLE_DRIVER_CONFIG,
-               EFI_IMAGE_SECURITY_DATABASE2,
-               &gEfiImageSecurityDatabaseGuid,
-               Data,
-               DataSize
-               );
-    FreePool (Data);
-  } else {
-    DEBUG ((DEBUG_INFO, "Skip measuring variable %s since it's deleted\n", EFI_IMAGE_SECURITY_DATABASE2));
-  }
-
-  //
   // Meaurement UEFI device signature database
   //
   if ((PcdGet32 (PcdTcgPfpMeasurementRevision) >= TCG_EfiSpecIDEventStruct_SPEC_ERRATA_TPM2_REV_106) &&
