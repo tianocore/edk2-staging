@@ -52,12 +52,10 @@
   ## CONSUMES            ## Variable:L"KEKDefault"
   ## CONSUMES            ## Variable:L"dbDefault"
   ## CONSUMES            ## Variable:L"dbxDefault"
-  ## CONSUMES            ## Variable:L"dbtDefault"
   gEfiGlobalVariableGuid
 
   ## SOMETIMES_CONSUMES  ## Variable:L"DB"
   ## SOMETIMES_CONSUMES  ## Variable:L"DBX"
-  ## SOMETIMES_CONSUMES  ## Variable:L"DBT"
   gEfiImageSecurityDatabaseGuid
 
   ## CONSUMES            ## Variable:L"SecureBootEnable"
@@ -76,4 +74,3 @@
   gDefaultKEKFileGuid
   gDefaultdbFileGuid
   gDefaultdbxFileGuid
-  gDefaultdbtFileGuid

@@ -39,19 +39,6 @@ EnrollDbxFromDefault (
   );
 
 /**
-  Sets the content of the 'dbt' variable based on 'dbtDefault' variable content.
-
-  @retval EFI_OUT_OF_RESOURCES      If memory allocation for EFI_VARIABLE_AUTHENTICATION_2 fails
-                                    while VendorGuid is NULL.
-  @retval other                     Errors from GetVariable2(), GetTime() and SetVariable()
---*/
-EFI_STATUS
-EFIAPI
-EnrollDbtFromDefault (
-  VOID
-  );
-
-/**
   Sets the content of the 'KEK' variable based on 'KEKDefault' variable content.
 
   @retval EFI_OUT_OF_RESOURCES      If memory allocation for EFI_VARIABLE_AUTHENTICATION_2 fails
@@ -107,17 +94,6 @@ SecureBootInitKEKDefault (
 --*/
 EFI_STATUS
 SecureBootInitDbDefault (
-  IN VOID
-  );
-
-/**
-  Initializes dbtDefault variable with data from FFS section.
-
-  @retval  EFI_SUCCESS           Variable was initialized successfully.
-  @retval  EFI_UNSUPPORTED       Variable already exists.
---*/
-EFI_STATUS
-SecureBootInitDbtDefault (
   IN VOID
   );
 

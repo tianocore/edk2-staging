@@ -390,62 +390,6 @@ SecureBootInitDbxDefault (
   return Status;
 }
 
-/** Initializes dbtDefault variable with data from FFS section.
-
-  @retval  EFI_SUCCESS           Variable was initialized successfully.
-  @retval  EFI_UNSUPPORTED       Variable already exists.
-**/
-EFI_STATUS
-SecureBootInitDbtDefault (
-  IN VOID
-  )
-{
-  EFI_SIGNATURE_LIST  *EfiSig;
-  UINTN               SigListsSize;
-  EFI_STATUS          Status;
-  UINT8               *Data;
-  UINTN               DataSize;
-
-  //
-  // Check if variable exists, if so do not change it
-  //
-  Status = GetVariable2 (EFI_DBT_DEFAULT_VARIABLE_NAME, &gEfiGlobalVariableGuid, (VOID **)&Data, &DataSize);
-  if (Status == EFI_SUCCESS) {
-    DEBUG ((DEBUG_INFO, "Variable %s exists. Old value is preserved\n", EFI_DBT_DEFAULT_VARIABLE_NAME));
-    FreePool (Data);
-    return EFI_UNSUPPORTED;
-  }
-
-  if (EFI_ERROR (Status) && (Status != EFI_NOT_FOUND)) {
-    return Status;
-  }
-
-  //
-  // Variable does not exist, can be initialized
-  //
-  DEBUG ((DEBUG_INFO, "Variable %s does not exist.\n", EFI_DBT_DEFAULT_VARIABLE_NAME));
-
-  Status = SecureBootFetchData (&gDefaultdbtFileGuid, &SigListsSize, &EfiSig);
-  if (EFI_ERROR (Status)) {
-    return Status;
-  }
-
-  Status = gRT->SetVariable (
-                  EFI_DBT_DEFAULT_VARIABLE_NAME,
-                  &gEfiGlobalVariableGuid,
-                  EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_BOOTSERVICE_ACCESS,
-                  SigListsSize,
-                  (VOID *)EfiSig
-                  );
-  if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "Failed to set %s\n", EFI_DBT_DEFAULT_VARIABLE_NAME));
-  }
-
-  FreePool (EfiSig);
-
-  return EFI_SUCCESS;
-}
-
 /**
   Sets the content of the 'db' variable based on 'dbDefault' variable content.
 
@@ -488,30 +432,6 @@ EnrollDbxFromDefault (
   Status = EnrollFromDefault (
              EFI_IMAGE_SECURITY_DATABASE1,
              EFI_DBX_DEFAULT_VARIABLE_NAME,
-             &gEfiImageSecurityDatabaseGuid
-             );
-
-  return Status;
-}
-
-/**
-  Sets the content of the 'dbt' variable based on 'dbtDefault' variable content.
-
-  @retval EFI_OUT_OF_RESOURCES      If memory allocation for EFI_VARIABLE_AUTHENTICATION_2 fails
-                                    while VendorGuid is NULL.
-  @retval other                     Errors from GetVariable2 (), GetTime () and SetVariable ()
-**/
-EFI_STATUS
-EFIAPI
-EnrollDbtFromDefault (
-  VOID
-  )
-{
-  EFI_STATUS  Status;
-
-  Status = EnrollFromDefault (
-             EFI_IMAGE_SECURITY_DATABASE2,
-             EFI_DBT_DEFAULT_VARIABLE_NAME,
              &gEfiImageSecurityDatabaseGuid
              );
 
