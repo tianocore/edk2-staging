@@ -181,8 +181,7 @@ CreateSignatureList (
 /**
   Create an EFI_CERT_X509_SHA384 EFI_SIGNATURE_LIST by extracting the
   TBSCertificate from a DER-encoded X.509 certificate and computing its
-  SHA-384 hash.  The TimeOfRevocation field is zeroed (always revoked /
-  never-expiry semantics when used in db for allow-listing).
+  SHA-384 hash.
 
   @param[in]  CertData      DER-encoded X.509 certificate.
   @param[in]  CertSize      Size of CertData in bytes.
@@ -272,8 +271,8 @@ CreateCertHashSignatureList (
   ZeroMem (&SigData->SignatureOwner, sizeof (EFI_GUID));
 
   CertHash = (EFI_CERT_X509_SHA384 *)SigData->SignatureData;
+  ZeroMem (CertHash, sizeof (EFI_CERT_X509_SHA384));
   CopyMem (&CertHash->ToBeSignedHash, Sha384Digest, SHA384_DIGEST_SIZE_BYTES);
-  ZeroMem (&CertHash->TimeOfRevocation, sizeof (EFI_TIME)); // Zeroed: always trusted
 
   *SigListSize = TotalSize;
   *SigList     = Buffer;
