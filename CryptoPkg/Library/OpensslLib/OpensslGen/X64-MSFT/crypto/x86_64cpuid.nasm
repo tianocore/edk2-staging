@@ -5,6 +5,9 @@ default rel
 
 EXTERN  OPENSSL_cpuid_setup
 
+section .CRT$XCU rdata align=8
+                DQ      OPENSSL_cpuid_setup
+
 
 common  OPENSSL_ia32cap_P 40
 section .text code align=64

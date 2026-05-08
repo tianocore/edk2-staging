@@ -97,8 +97,8 @@ DB      243,15,30,250
         and     al,0x0F
 
         lea     r11,[r8*1+r11]
-        vmovdqu8        xmm0,XMMWORD[r11]
-        vmovdqu8        xmm1,XMMWORD[rdi]
+        vmovdqu8        xmm0{k1}{z},[r11]
+        vmovdqu8        xmm1{k1}{z},[rdi]
         vpxor   xmm2,xmm1,xmm0
         vmovdqu8        XMMWORD[rsi]{k1},xmm2
         vmovdqu8        XMMWORD[r11]{k1},xmm2
@@ -339,8 +339,8 @@ DB      243,15,30,250
         and     al,0x0F
 
         lea     r11,[r8*1+r11]
-        vmovdqu8        xmm0,XMMWORD[r11]
-        vmovdqu8        xmm1,XMMWORD[rdi]
+        vmovdqu8        xmm0{k1}{z},[r11]
+        vmovdqu8        xmm1{k1}{z},[rdi]
         vpxor   xmm2,xmm1,xmm0
         vmovdqu8        XMMWORD[rsi]{k1},xmm2
         vmovdqu8        XMMWORD[r11]{k1},xmm1

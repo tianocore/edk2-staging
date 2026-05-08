@@ -494,3 +494,6 @@ L$029done:
         ret
 segment .bss
 common  _OPENSSL_ia32cap_P 40
+segment .CRT$XCU data align=4
+extern  _OPENSSL_cpuid_setup
+dd      _OPENSSL_cpuid_setup
