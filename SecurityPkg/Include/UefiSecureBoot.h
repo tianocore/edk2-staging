@@ -13,7 +13,7 @@
 
 /*
   Data structure to provide certificates to setup authenticated secure
-  boot variables ('db', 'dbx', 'dbt', 'pk', etc.).
+  boot variables ('db', 'dbx', 'pk', etc.).
 
 */
 typedef struct {
@@ -58,16 +58,6 @@ typedef struct {
   //       for authenticated variables.
   //
   CONST VOID      *DbxPtr;
-  //
-  // The size, in number of bytes, of supplied certificate in 'DbtPtr' field.
-  //
-  UINTN           DbtSize;
-  //
-  // The pointer to the DBT certificates in signature list format.
-  // Note: This DBT certificates should not contain the EFI_VARIABLE_AUTHENTICATION_2
-  //       for authenticated variables.
-  //
-  CONST VOID      *DbtPtr;
   //
   // The size, in number of bytes, of supplied certificate in 'KekPtr' field.
   //

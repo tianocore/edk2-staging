@@ -136,19 +136,6 @@ DeleteDbx (
   );
 
 /**
-  Clears the content of the 'dbt' variable.
-
-  @retval EFI_OUT_OF_RESOURCES      If memory allocation for EFI_VARIABLE_AUTHENTICATION_2 fails
-                                    while VendorGuid is NULL.
-  @retval other                     Errors from GetVariable2(), GetTime() and SetVariable()
---*/
-EFI_STATUS
-EFIAPI
-DeleteDbt (
-  VOID
-  );
-
-/**
   Clears the content of the 'KEK' variable.
 
   @retval EFI_OUT_OF_RESOURCES      If memory allocation for EFI_VARIABLE_AUTHENTICATION_2 fails
@@ -212,7 +199,7 @@ EnrollFromInput (
 
 /**
   Similar to DeleteSecureBootVariables, this function is used to unilaterally
-  force the state of related SB variables (db, dbx, dbt, KEK, PK, etc.) to be
+  force the state of related SB variables (db, dbx, KEK, PK, etc.) to be
   the built-in, hardcoded default vars.
 
   @param[in]  SecureBootPayload  Payload information for secure boot related keys.

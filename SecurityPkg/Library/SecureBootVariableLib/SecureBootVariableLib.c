@@ -532,29 +532,6 @@ DeleteDbx (
 }
 
 /**
-  Clears the content of the 'dbt' variable.
-
-  @retval EFI_OUT_OF_RESOURCES      If memory allocation for EFI_VARIABLE_AUTHENTICATION_2 fails
-                                    while VendorGuid is NULL.
-  @retval other                     Errors from GetVariable2 (), GetTime () and SetVariable ()
-**/
-EFI_STATUS
-EFIAPI
-DeleteDbt (
-  VOID
-  )
-{
-  EFI_STATUS  Status;
-
-  Status = DeleteVariable (
-             EFI_IMAGE_SECURITY_DATABASE2,
-             &gEfiImageSecurityDatabaseGuid
-             );
-
-  return Status;
-}
-
-/**
   Clears the content of the 'KEK' variable.
 
   @retval EFI_OUT_OF_RESOURCES      If memory allocation for EFI_VARIABLE_AUTHENTICATION_2 fails
@@ -677,12 +654,6 @@ DeleteSecureBootVariables (
     if (EFI_ERROR (TempStatus) && (TempStatus != EFI_NOT_FOUND)) {
       Status = EFI_ACCESS_DENIED;
     }
-
-    TempStatus = DeleteDbt ();
-    DEBUG ((DEBUG_INFO, "%a - dbt Delete = %r\n", __func__, TempStatus));
-    if (EFI_ERROR (TempStatus) && (TempStatus != EFI_NOT_FOUND)) {
-      Status = EFI_ACCESS_DENIED;
-    }
   }
 
   return Status;
@@ -788,7 +759,7 @@ Exit:
 
 /**
   Similar to DeleteSecureBootVariables, this function is used to unilaterally
-  force the state of related SB variables (db, dbx, dbt, KEK, PK, etc.) to be
+  force the state of related SB variables (db, dbx, KEK, PK, etc.) to be
   the built-in, hardcoded default vars.
 
   @param[in]  SecureBootPayload  Payload information for secure boot related keys.
@@ -868,21 +839,6 @@ SetSecureBootVariablesToDefault (
     }
   } else {
     DEBUG ((DEBUG_ERROR, "%a - Failed to enroll DBX %r!\n", __func__, Status));
-  }
-
-  // Keep it going. Keep it going. dbt if supplied...
-  if (!EFI_ERROR (Status) && (SecureBootPayload->DbtPtr != NULL)) {
-    Data     = (UINT8 *)SecureBootPayload->DbtPtr;
-    DataSize = SecureBootPayload->DbtSize;
-    Status   = EnrollFromInput (
-                 EFI_IMAGE_SECURITY_DATABASE2,
-                 &gEfiImageSecurityDatabaseGuid,
-                 DataSize,
-                 Data
-                 );
-    if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_ERROR, "%a - Failed to enroll DBT %r!\n", __func__, Status));
-    }
   }
 
   // Keep it going. Keep it going. KEK...
