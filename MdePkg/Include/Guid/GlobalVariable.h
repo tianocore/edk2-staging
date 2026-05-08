@@ -162,11 +162,6 @@ extern EFI_GUID  gEfiGlobalVariableGuid;
 ///
 #define EFI_DBX_DEFAULT_VARIABLE_NAME  L"dbxDefault"
 ///
-/// The OEM's default secure boot timestamp signature store. Should be treated as read-only.
-/// Its attribute is BS+RT.
-///
-#define EFI_DBT_DEFAULT_VARIABLE_NAME  L"dbtDefault"
-///
 /// Allows the firmware to indicate supported features and actions to the OS.
 /// Its attribute is BS+RT.
 ///

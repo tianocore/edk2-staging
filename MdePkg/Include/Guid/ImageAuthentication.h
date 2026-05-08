@@ -29,11 +29,6 @@
 /// for the forbidden signature database.
 ///
 #define EFI_IMAGE_SECURITY_DATABASE1  L"dbx"
-///
-/// Variable name with guid EFI_IMAGE_SECURITY_DATABASE_GUID
-/// for the timestamp signature database.
-///
-#define EFI_IMAGE_SECURITY_DATABASE2  L"dbt"
 
 #define SECURE_BOOT_MODE_ENABLE   1
 #define SECURE_BOOT_MODE_DISABLE  0
