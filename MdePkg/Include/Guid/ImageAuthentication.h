@@ -91,9 +91,9 @@ typedef struct {
   ///
   EFI_SHA256_HASH    ToBeSignedHash;
   ///
-  /// The time that the certificate shall be considered to be revoked.
+  /// Reserved.
   ///
-  EFI_TIME           TimeOfRevocation;
+  EFI_TIME           Reserved;
 } EFI_CERT_X509_SHA256;
 
 typedef struct {
@@ -102,9 +102,9 @@ typedef struct {
   ///
   EFI_SHA384_HASH    ToBeSignedHash;
   ///
-  /// The time that the certificate shall be considered to be revoked.
+  /// Reserved.
   ///
-  EFI_TIME           TimeOfRevocation;
+  EFI_TIME           Reserved;
 } EFI_CERT_X509_SHA384;
 
 typedef struct {
@@ -113,9 +113,9 @@ typedef struct {
   ///
   EFI_SHA512_HASH    ToBeSignedHash;
   ///
-  /// The time that the certificate shall be considered to be revoked.
+  /// Reserved.
   ///
-  EFI_TIME           TimeOfRevocation;
+  EFI_TIME           Reserved;
 } EFI_CERT_X509_SHA512;
 
 typedef UINT8 EFI_SM3_HASH[32];
@@ -126,9 +126,9 @@ typedef struct {
   ///
   EFI_SM3_HASH    ToBeSignedHash;
   ///
-  /// The time that the certificate shall be considered to be revoked.
+  /// Reserved.
   ///
-  EFI_TIME        TimeOfRevocation;
+  EFI_TIME        Reserved;
 } EFI_CERT_X509_SM3;
 
 #pragma pack()
@@ -209,11 +209,8 @@ typedef struct {
 
 ///
 /// This identifies a signature containing the SM3 hash of an X.509 certificate's To-Be-Signed
-/// contents, and a time of revocation. The SignatureHeader size shall always be 0. The
-/// SignatureSize shall always be 16 (size of the SignatureOwner component) + 32 bytes for
-/// an EFI_CERT_X509_SM3 structure. If the TimeOfRevocation is non-zero, the certificate should
-/// be considered to be revoked from that time and onwards, and otherwise the certificate shall
-/// be considered to always be revoked.
+/// contents. The SignatureHeader size shall always be 0. The SignatureSize shall always be
+/// 16 (size of the SignatureOwner component) + 32 bytes for an EFI_CERT_X509_SM3 structure.
 ///
 #define EFI_CERT_X509_SM3_GUID \
   { \
@@ -252,11 +249,9 @@ typedef struct {
 
 ///
 /// This identifies a signature containing the SHA256 hash of an X.509 certificate's
-/// To-Be-Signed contents, and a time of revocation. The SignatureHeader size shall
-/// always be 0. The SignatureSize shall always be 16 (size of the SignatureOwner component)
-/// + 48 bytes for an EFI_CERT_X509_SHA256 structure. If the TimeOfRevocation is non-zero,
-/// the certificate should be considered to be revoked from that time and onwards, and
-/// otherwise the certificate shall be considered to always be revoked.
+/// To-Be-Signed contents. The SignatureHeader size shall always be 0. The SignatureSize
+/// shall always be 16 (size of the SignatureOwner component) + 48 bytes for an
+/// EFI_CERT_X509_SHA256 structure.
 ///
 #define EFI_CERT_X509_SHA256_GUID \
   { \
@@ -265,11 +260,9 @@ typedef struct {
 
 ///
 /// This identifies a signature containing the SHA384 hash of an X.509 certificate's
-/// To-Be-Signed contents, and a time of revocation. The SignatureHeader size shall
-/// always be 0. The SignatureSize shall always be 16 (size of the SignatureOwner component)
-/// + 64 bytes for an EFI_CERT_X509_SHA384 structure. If the TimeOfRevocation is non-zero,
-/// the certificate should be considered to be revoked from that time and onwards, and
-/// otherwise the certificate shall be considered to always be revoked.
+/// To-Be-Signed contents. The SignatureHeader size shall always be 0. The SignatureSize
+/// shall always be 16 (size of the SignatureOwner component) + 64 bytes for an
+/// EFI_CERT_X509_SHA384 structure.
 ///
 #define EFI_CERT_X509_SHA384_GUID \
   { \
@@ -278,11 +271,9 @@ typedef struct {
 
 ///
 /// This identifies a signature containing the SHA512 hash of an X.509 certificate's
-/// To-Be-Signed contents, and a time of revocation. The SignatureHeader size shall
-/// always be 0. The SignatureSize shall always be 16 (size of the SignatureOwner component)
-/// + 80 bytes for an EFI_CERT_X509_SHA512 structure. If the TimeOfRevocation is non-zero,
-/// the certificate should be considered to be revoked from that time and onwards, and
-/// otherwise the certificate shall be considered to always be revoked.
+/// To-Be-Signed contents. The SignatureHeader size shall always be 0. The SignatureSize
+/// shall always be 16 (size of the SignatureOwner component) + 80 bytes for an
+/// EFI_CERT_X509_SHA512 structure.
 ///
 #define EFI_CERT_X509_SHA512_GUID \
   { \
