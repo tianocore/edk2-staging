@@ -233,7 +233,7 @@ ON_EXIT:
   @param[in] AuthData              AUTHENTICATION_2 data.
   @param[in] AuthDataSize          AUTHENTICATION_2 data size.
   @param[in] VariableName          Variable name of signature database, must be
-                                   EFI_DB_DEFAULT_VARIABLE_NAME or EFI_DBX_DEFAULT_VARIABLE_NAME or EFI_DBT_DEFAULT_VARIABLE_NAME.
+                                   EFI_DB_DEFAULT_VARIABLE_NAME or EFI_DBX_DEFAULT_VARIABLE_NAME.
 
   @retval   EFI_SUCCESS            New signature is set successfully.
   @retval   EFI_INVALID_PARAMETER  The parameter is invalid.
@@ -299,7 +299,7 @@ SetAuthentication2ToSigDb (
   @param[in] X509Data              X509 Certificate data.
   @param[in] X509DataSize          X509 Certificate data size.
   @param[in] VariableName          Variable name of signature database, must be
-                                   EFI_DB_DEFAULT_VARIABLE_NAME or EFI_DBX_DEFAULT_VARIABLE_NAME or EFI_DBT_DEFAULT_VARIABLE_NAME.
+                                   EFI_DB_DEFAULT_VARIABLE_NAME or EFI_DBX_DEFAULT_VARIABLE_NAME.
   @param[in] SignatureOwnerGuid    Guid of the signature owner.
 
   @retval   EFI_SUCCESS            New X509 is enrolled successfully.
@@ -397,7 +397,7 @@ ON_EXIT:
   @param[in] Data                  Data.
   @param[in] DataSize              Data size.
   @param[in] VariableName          Variable name of signature database, must be
-                                   EFI_DB_DEFAULT_VARIABLE_NAME or EFI_DBX_DEFAULT_VARIABLE_NAME or EFI_DBT_DEFAULT_VARIABLE_NAME.
+                                   EFI_DB_DEFAULT_VARIABLE_NAME or EFI_DBX_DEFAULT_VARIABLE_NAME.
   @param[in] SignatureOwnerGuid    Guid of the signature owner.
 
   @retval   EFI_SUCCESS            Signature is set successfully.
