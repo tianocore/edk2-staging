@@ -66,11 +66,6 @@ UefiMain (
 
   Status = EnrollDbxFromDefault ();
   if (EFI_ERROR (Status)) {
-    AsciiPrint ("EnrollFromDefaultKeysApp: Cannot enroll dbt: %r\n", Status);
-  }
-
-  Status = EnrollDbtFromDefault ();
-  if (EFI_ERROR (Status)) {
     AsciiPrint ("EnrollFromDefaultKeysApp: Cannot enroll dbx: %r\n", Status);
   }
 
@@ -100,7 +95,6 @@ clearKEK:
   DeleteKEK ();
 
 cleardbs:
-  DeleteDbt ();
   DeleteDbx ();
   DeleteDb ();
 
