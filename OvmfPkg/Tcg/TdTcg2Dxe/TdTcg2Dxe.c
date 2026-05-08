@@ -1971,24 +1971,6 @@ MeasureAllSecureVariables (
     }
   }
 
-  //
-  // Measure DBT if present and not empty
-  //
-  Status = GetVariable2 (EFI_IMAGE_SECURITY_DATABASE2, &gEfiImageSecurityDatabaseGuid, &Data, &DataSize);
-  if (!EFI_ERROR (Status)) {
-    Status = MeasureVariable (
-               TdxMeasurementMapPcrToMrIndex (7),
-               EV_EFI_VARIABLE_DRIVER_CONFIG,
-               EFI_IMAGE_SECURITY_DATABASE2,
-               &gEfiImageSecurityDatabaseGuid,
-               Data,
-               DataSize
-               );
-    FreePool (Data);
-  } else {
-    DEBUG ((DEBUG_INFO, "Skip measuring variable %s since it's deleted\n", EFI_IMAGE_SECURITY_DATABASE2));
-  }
-
   return EFI_SUCCESS;
 }
 
