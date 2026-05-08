@@ -341,8 +341,7 @@ AuthVariableLibProcessVariable (
     }
   } else if (CompareGuid (VendorGuid, &gEfiImageSecurityDatabaseGuid) &&
              ((StrCmp (VariableName, EFI_IMAGE_SECURITY_DATABASE)  == 0) ||
-              (StrCmp (VariableName, EFI_IMAGE_SECURITY_DATABASE1) == 0) ||
-              (StrCmp (VariableName, EFI_IMAGE_SECURITY_DATABASE2) == 0)
+              (StrCmp (VariableName, EFI_IMAGE_SECURITY_DATABASE1) == 0)
              ))
   {
     DEBUG ((DEBUG_INFO, "AuthVariableLibProcessVariable - DB Update\n"));

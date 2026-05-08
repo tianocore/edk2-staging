@@ -291,8 +291,7 @@ AuthServiceInternalUpdateVariableWithTimeStamp (
   //
   if (!EFI_ERROR (FindStatus) && ((Attributes & EFI_VARIABLE_APPEND_WRITE) != 0)) {
     if ((CompareGuid (VendorGuid, &gEfiImageSecurityDatabaseGuid) &&
-         ((StrCmp (VariableName, EFI_IMAGE_SECURITY_DATABASE) == 0) || (StrCmp (VariableName, EFI_IMAGE_SECURITY_DATABASE1) == 0) ||
-          (StrCmp (VariableName, EFI_IMAGE_SECURITY_DATABASE2) == 0))) ||
+         ((StrCmp (VariableName, EFI_IMAGE_SECURITY_DATABASE) == 0) || (StrCmp (VariableName, EFI_IMAGE_SECURITY_DATABASE1) == 0))) ||
         (CompareGuid (VendorGuid, &gEfiGlobalVariableGuid) && (StrCmp (VariableName, EFI_KEY_EXCHANGE_KEY_NAME) == 0)))
     {
       //
@@ -621,7 +620,7 @@ IsX509SigningAlgSupported (
 }
 
 /**
-  Check input data form to make sure it is a valid EFI_SIGNATURE_LIST for PK/KEK/db/dbx/dbt variable.
+  Check input data form to make sure it is a valid EFI_SIGNATURE_LIST for PK/KEK/db/dbx variable.
 
   @param[in]  VariableName                Name of Variable to be check.
   @param[in]  VendorGuid                  Variable vendor GUID.
@@ -660,8 +659,7 @@ CheckSignatureListFormat (
     IsPk = TRUE;
   } else if ((CompareGuid (VendorGuid, &gEfiGlobalVariableGuid) && (StrCmp (VariableName, EFI_KEY_EXCHANGE_KEY_NAME) == 0)) ||
              (CompareGuid (VendorGuid, &gEfiImageSecurityDatabaseGuid) &&
-              ((StrCmp (VariableName, EFI_IMAGE_SECURITY_DATABASE) == 0) || (StrCmp (VariableName, EFI_IMAGE_SECURITY_DATABASE1) == 0) ||
-               (StrCmp (VariableName, EFI_IMAGE_SECURITY_DATABASE2) == 0))))
+              ((StrCmp (VariableName, EFI_IMAGE_SECURITY_DATABASE) == 0) || (StrCmp (VariableName, EFI_IMAGE_SECURITY_DATABASE1) == 0))))
   {
     IsPk = FALSE;
   } else {
@@ -868,7 +866,7 @@ ProcessVarWithPk (
       ((Attributes & EFI_VARIABLE_TIME_BASED_AUTHENTICATED_WRITE_ACCESS) == 0))
   {
     //
-    // PK, KEK and db/dbx/dbt should set EFI_VARIABLE_NON_VOLATILE attribute and should be a time-based
+    // PK, KEK and db/dbx should set EFI_VARIABLE_NON_VOLATILE attribute and should be a time-based
     // authenticated variable.
     //
     return EFI_INVALID_PARAMETER;
@@ -995,7 +993,7 @@ ProcessVarWithKek (
       ((Attributes & EFI_VARIABLE_TIME_BASED_AUTHENTICATED_WRITE_ACCESS) == 0))
   {
     //
-    // KEK, DB, DBX and DBT should set EFI_VARIABLE_NON_VOLATILE attribute and should be a time-based
+    // KEK, DB and DBX should set EFI_VARIABLE_NON_VOLATILE attribute and should be a time-based
     // authenticated variable.
     //
     return EFI_INVALID_PARAMETER;
