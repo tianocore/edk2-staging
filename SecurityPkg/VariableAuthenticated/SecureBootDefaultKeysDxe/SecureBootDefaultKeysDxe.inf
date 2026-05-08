@@ -37,7 +37,6 @@
   ## SOMETIMES_PRODUCES      ## Variable:L"PKDefault"
   ## SOMETIMES_PRODUCES      ## Variable:L"KEKDefault"
   ## SOMETIMES_PRODUCES      ## Variable:L"dbDefault"
-  ## SOMETIMES_PRODUCES      ## Variable:L"dbtDefault"
   ## SOMETIMES_PRODUCES      ## Variable:L"dbxDefault"
   gEfiGlobalVariableGuid
 

@@ -58,14 +58,6 @@ SecureBootDefaultKeysEntryPoint (
     return Status;
   }
 
-  Status = SecureBootInitDbtDefault ();
-  if (Status == EFI_NOT_FOUND) {
-    DEBUG ((DEBUG_INFO, "%a: dbtDefault not initialized\n", __func__));
-  } else if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_ERROR, "%a: Cannot initialize dbtDefault: %r\n", __func__, Status));
-    return Status;
-  }
-
   Status = SecureBootInitDbxDefault ();
   if (Status == EFI_NOT_FOUND) {
     DEBUG ((DEBUG_INFO, "%a: dbxDefault not initialized\n", __func__));
