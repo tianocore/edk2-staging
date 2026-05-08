@@ -256,20 +256,3 @@ UpdateDBXFromFile (
 {
   return UpdatePage (FilePath, SECUREBOOT_ENROLL_SIGNATURE_TO_DBX);
 }
-
-/**
-  Update the DBT form base on the input file path info.
-
-  @param FilePath    Point to the file path.
-
-  @retval TRUE   Exit caller function.
-  @retval FALSE  Not exit caller function.
-**/
-BOOLEAN
-EFIAPI
-UpdateDBTFromFile (
-  IN EFI_DEVICE_PATH_PROTOCOL  *FilePath
-  )
-{
-  return UpdatePage (FilePath, SECUREBOOT_ENROLL_SIGNATURE_TO_DBT);
-}

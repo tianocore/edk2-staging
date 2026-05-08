@@ -87,8 +87,6 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #string STR_SECURE_BOOT_DB_OPTION_HELP     #language en-US "Enroll/Delete Signature"
 #string STR_SECURE_BOOT_DBX_OPTION         #language en-US "DBX Options"
 #string STR_SECURE_BOOT_DBX_OPTION_HELP    #language en-US "Enroll/Delete DBX"
-#string STR_SECURE_BOOT_DBT_OPTION         #language en-US "DBT Options"
-#string STR_SECURE_BOOT_DBT_OPTION_HELP    #language en-US "Enroll/Delete DBT"
 
 #string STR_ENROLL_PK                      #language en-US "Enroll PK"
 #string STR_ENROLL_PK_HELP                 #language en-US "Enter into Enroll PK Form"

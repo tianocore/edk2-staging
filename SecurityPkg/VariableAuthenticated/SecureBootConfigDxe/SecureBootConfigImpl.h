@@ -176,7 +176,6 @@ typedef struct {
 typedef enum {
   Variable_DB,
   Variable_DBX,
-  Variable_DBT,
   Variable_MAX
 } CURRENT_VARIABLE_NAME;
 
@@ -592,20 +591,6 @@ UpdateDBFromFile (
 BOOLEAN
 EFIAPI
 UpdateDBXFromFile (
-  IN EFI_DEVICE_PATH_PROTOCOL  *FilePath
-  );
-
-/**
-  Update the DBT form base on the input file path info.
-
-  @param FilePath    Point to the file path.
-
-  @retval TRUE   Exit caller function.
-  @retval FALSE  Not exit caller function.
-**/
-BOOLEAN
-EFIAPI
-UpdateDBTFromFile (
   IN EFI_DEVICE_PATH_PROTOCOL  *FilePath
   );
 

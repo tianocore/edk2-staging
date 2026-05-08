@@ -917,7 +917,7 @@ EnrollKeyExchangeKey (
 }
 
 /**
-  Enroll a new X509 certificate into Signature Database (DB or DBX or DBT) without
+  Enroll a new X509 certificate into Signature Database (DB or DBX) without
   KEK's authentication.
 
   @param[in] PrivateData     The module's private data.
@@ -2163,8 +2163,7 @@ HashPeImageByType (
 
   @param[in] PrivateData     The module's private data.
   @param[in] VariableName    Variable name of signature database, must be
-                             EFI_IMAGE_SECURITY_DATABASE, EFI_IMAGE_SECURITY_DATABASE1
-                             or EFI_IMAGE_SECURITY_DATABASE2.
+                             EFI_IMAGE_SECURITY_DATABASE or EFI_IMAGE_SECURITY_DATABASE1.
 
   @retval   EFI_SUCCESS            New signature is enrolled successfully.
   @retval   EFI_INVALID_PARAMETER  The parameter is invalid.
@@ -2184,13 +2183,6 @@ EnrollAuthentication2Descriptor (
   UINT32      Attr;
 
   Data = NULL;
-
-  //
-  // DBT only support DER-X509 Cert Enrollment
-  //
-  if (StrCmp (VariableName, EFI_IMAGE_SECURITY_DATABASE2) == 0) {
-    return EFI_UNSUPPORTED;
-  }
 
   //
   // Read the whole file content
@@ -2263,8 +2255,7 @@ ON_EXIT:
 
   @param[in] PrivateData     The module's private data.
   @param[in] VariableName    Variable name of signature database, must be
-                             EFI_IMAGE_SECURITY_DATABASE, EFI_IMAGE_SECURITY_DATABASE1
-                             or EFI_IMAGE_SECURITY_DATABASE2.
+                             EFI_IMAGE_SECURITY_DATABASE or EFI_IMAGE_SECURITY_DATABASE1.
 
   @retval   EFI_SUCCESS            New signature is enrolled successfully.
   @retval   EFI_INVALID_PARAMETER  The parameter is invalid.
@@ -2291,10 +2282,6 @@ EnrollImageSignatureToSigDB (
 
   Data         = NULL;
   GuidCertData = NULL;
-
-  if (StrCmp (VariableName, EFI_IMAGE_SECURITY_DATABASE2) == 0) {
-    return EFI_UNSUPPORTED;
-  }
 
   //
   // Form the SigDB certificate list.
@@ -2467,7 +2454,7 @@ ON_EXIT:
 }
 
 /**
-  Enroll signature into DB/DBX/DBT without KEK's authentication.
+  Enroll signature into DB/DBX without KEK's authentication.
   The SignatureOwner GUID will be Private->SignatureGUID.
 
   @param[in] PrivateData     The module's private data.
@@ -2520,7 +2507,7 @@ EnrollSignatureDatabase (
 }
 
 /**
-  List all signatures in specified signature database (e.g. KEK/DB/DBX/DBT)
+  List all signatures in specified signature database (e.g. KEK/DB/DBX)
   by GUID in the page for user to select and delete as needed.
 
   @param[in]    PrivateData         Module's private data.
@@ -3158,8 +3145,6 @@ DeleteSignatureEx (
     UnicodeSPrint (VariableName, sizeof (VariableName), EFI_IMAGE_SECURITY_DATABASE);
   } else if (PrivateData->VariableName == Variable_DBX) {
     UnicodeSPrint (VariableName, sizeof (VariableName), EFI_IMAGE_SECURITY_DATABASE1);
-  } else if (PrivateData->VariableName == Variable_DBT) {
-    UnicodeSPrint (VariableName, sizeof (VariableName), EFI_IMAGE_SECURITY_DATABASE2);
   } else {
     goto ON_EXIT;
   }
@@ -3755,9 +3740,6 @@ LoadSignatureList (
   } else if (PrivateData->VariableName == Variable_DBX) {
     UnicodeSPrint (VariableName, sizeof (VariableName), EFI_IMAGE_SECURITY_DATABASE1);
     DstFormId = FORMID_SECURE_BOOT_DBX_OPTION_FORM;
-  } else if (PrivateData->VariableName == Variable_DBT) {
-    UnicodeSPrint (VariableName, sizeof (VariableName), EFI_IMAGE_SECURITY_DATABASE2);
-    DstFormId = FORMID_SECURE_BOOT_DBT_OPTION_FORM;
   } else {
     goto ON_EXIT;
   }
@@ -4267,8 +4249,6 @@ LoadSignatureData (
     UnicodeSPrint (VariableName, sizeof (VariableName), EFI_IMAGE_SECURITY_DATABASE);
   } else if (PrivateData->VariableName == Variable_DBX) {
     UnicodeSPrint (VariableName, sizeof (VariableName), EFI_IMAGE_SECURITY_DATABASE1);
-  } else if (PrivateData->VariableName == Variable_DBT) {
-    UnicodeSPrint (VariableName, sizeof (VariableName), EFI_IMAGE_SECURITY_DATABASE2);
   } else {
     goto ON_EXIT;
   }
@@ -4399,12 +4379,6 @@ KeyEnrollReset (
     return Status;
   }
 
-  Status = DeleteDbt ();
-  if (EFI_ERROR (Status) && (Status != EFI_NOT_FOUND)) {
-    DEBUG ((DEBUG_ERROR, "Fail to clear DBT: %r\n", Status));
-    return Status;
-  }
-
   Status = DeleteKEK ();
   if (EFI_ERROR (Status) && (Status != EFI_NOT_FOUND)) {
     DEBUG ((DEBUG_ERROR, "Fail to clear KEK: %r\n", Status));
@@ -4455,11 +4429,6 @@ KeyEnrollReset (
     DEBUG ((DEBUG_ERROR, "Cannot enroll dbx: %r\n", Status));
   }
 
-  Status = EnrollDbtFromDefault ();
-  if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_ERROR, "Cannot enroll dbt: %r\n", Status));
-  }
-
   Status = EnrollKEKFromDefault ();
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "Cannot enroll KEK: %r\n", Status));
@@ -4487,7 +4456,6 @@ clearKEK:
   DeleteKEK ();
 
 cleardbs:
-  DeleteDbt ();
   DeleteDbx ();
   DeleteDb ();
 
@@ -4593,8 +4561,7 @@ SecureBootCallback (
       if ((QuestionId == KEY_SECURE_BOOT_PK_OPTION) ||
           (QuestionId == KEY_SECURE_BOOT_KEK_OPTION) ||
           (QuestionId == KEY_SECURE_BOOT_DB_OPTION) ||
-          (QuestionId == KEY_SECURE_BOOT_DBX_OPTION) ||
-          (QuestionId == KEY_SECURE_BOOT_DBT_OPTION))
+          (QuestionId == KEY_SECURE_BOOT_DBX_OPTION))
       {
         CloseEnrolledFile (Private->FileContext);
       }
@@ -4659,7 +4626,6 @@ SecureBootCallback (
       case KEY_SECURE_BOOT_KEK_OPTION:
       case KEY_SECURE_BOOT_DB_OPTION:
       case KEY_SECURE_BOOT_DBX_OPTION:
-      case KEY_SECURE_BOOT_DBT_OPTION:
         PrivateData = SECUREBOOT_CONFIG_PRIVATE_FROM_THIS (This);
         //
         // Clear Signature GUID.
@@ -4673,7 +4639,7 @@ SecureBootCallback (
         }
 
         //
-        // Cleanup VFRData once leaving PK/KEK/DB/DBX/DBT enroll/delete page
+        // Cleanup VFRData once leaving PK/KEK/DB/DBX enroll/delete page
         //
         SecureBootExtractConfigFromVariable (PrivateData, IfrNvData);
 
@@ -4681,8 +4647,6 @@ SecureBootCallback (
           LabelId = SECUREBOOT_ENROLL_SIGNATURE_TO_DB;
         } else if (QuestionId == KEY_SECURE_BOOT_DBX_OPTION) {
           LabelId = SECUREBOOT_ENROLL_SIGNATURE_TO_DBX;
-        } else if (QuestionId == KEY_SECURE_BOOT_DBT_OPTION) {
-          LabelId = SECUREBOOT_ENROLL_SIGNATURE_TO_DBT;
         } else {
           LabelId = FORMID_ENROLL_KEK_FORM;
         }
@@ -4749,10 +4713,6 @@ SecureBootCallback (
           DEBUG ((DEBUG_ERROR, "IfrNvData->FileEnrollType %d\n", Private->FileContext->FileType));
         }
 
-        break;
-
-      case SECUREBOOT_ENROLL_SIGNATURE_TO_DBT:
-        ChooseFile (NULL, NULL, UpdateDBTFromFile, &File);
         break;
 
       case KEY_SECURE_BOOT_DELETE_PK:
@@ -4891,18 +4851,6 @@ SecureBootCallback (
         IfrNvData->ListCount = Private->ListCount;
         break;
 
-      case SECUREBOOT_DELETE_SIGNATURE_FROM_DBT:
-        UpdateDeletePage (
-          Private,
-          EFI_IMAGE_SECURITY_DATABASE2,
-          &gEfiImageSecurityDatabaseGuid,
-          LABEL_DBT_DELETE,
-          SECUREBOOT_DELETE_SIGNATURE_FROM_DBT,
-          OPTION_DEL_DBT_QUESTION_ID
-          );
-
-        break;
-
       case KEY_VALUE_SAVE_AND_EXIT_KEK:
         Status = EnrollKeyExchangeKey (Private);
         if (EFI_ERROR (Status)) {
@@ -4974,19 +4922,6 @@ SecureBootCallback (
 
         break;
 
-      case KEY_VALUE_SAVE_AND_EXIT_DBT:
-        Status = EnrollSignatureDatabase (Private, EFI_IMAGE_SECURITY_DATABASE2);
-        if (EFI_ERROR (Status)) {
-          CreatePopUp (
-            EFI_LIGHTGRAY | EFI_BACKGROUND_BLUE,
-            &Key,
-            L"ERROR: Unsupported file type!",
-            L"Only supports DER-encoded X509 certificate.",
-            NULL
-            );
-        }
-
-        break;
       case KEY_VALUE_SAVE_AND_EXIT_PK:
         //
         // Check the suffix, encode type and the key strength of PK certificate.
@@ -5064,18 +4999,6 @@ SecureBootCallback (
             IfrNvData->CheckedDataCount++;
             Private->CheckArray[QuestionId - OPTION_SIGNATURE_DATA_QUESTION_ID] = TRUE;
           }
-        } else if ((QuestionId >= OPTION_DEL_DBT_QUESTION_ID) &&
-                   (QuestionId < (OPTION_DEL_DBT_QUESTION_ID + OPTION_CONFIG_RANGE)))
-        {
-          DeleteSignature (
-            Private,
-            EFI_IMAGE_SECURITY_DATABASE2,
-            &gEfiImageSecurityDatabaseGuid,
-            LABEL_DBT_DELETE,
-            SECUREBOOT_DELETE_SIGNATURE_FROM_DBT,
-            OPTION_DEL_DBT_QUESTION_ID,
-            QuestionId - OPTION_DEL_DBT_QUESTION_ID
-            );
         }
 
         break;
@@ -5084,7 +5007,6 @@ SecureBootCallback (
       case KEY_VALUE_NO_SAVE_AND_EXIT_KEK:
       case KEY_VALUE_NO_SAVE_AND_EXIT_DB:
       case KEY_VALUE_NO_SAVE_AND_EXIT_DBX:
-      case KEY_VALUE_NO_SAVE_AND_EXIT_DBT:
         CloseEnrolledFile (Private->FileContext);
 
         if (Private->SignatureGUID != NULL) {
@@ -5105,7 +5027,6 @@ SecureBootCallback (
       case KEY_SECURE_BOOT_KEK_GUID:
       case KEY_SECURE_BOOT_SIGNATURE_GUID_DB:
       case KEY_SECURE_BOOT_SIGNATURE_GUID_DBX:
-      case KEY_SECURE_BOOT_SIGNATURE_GUID_DBT:
         ASSERT (Private->SignatureGUID != NULL);
         RStatus = StrToGuid (IfrNvData->SignatureGuid, Private->SignatureGUID);
         if (RETURN_ERROR (RStatus) || (IfrNvData->SignatureGuid[GUID_STRING_LENGTH] != L'\0')) {
