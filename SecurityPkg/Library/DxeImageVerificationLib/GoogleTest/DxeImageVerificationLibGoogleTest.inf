@@ -41,7 +41,6 @@
 
   ## SOMETIMES_CONSUMES   ## Variable:L"DB"
   ## SOMETIMES_CONSUMES   ## Variable:L"DBX"
-  ## SOMETIMES_CONSUMES   ## Variable:L"DBT"
   ## PRODUCES             ## SystemTable
   ## CONSUMES             ## SystemTable
   gEfiImageSecurityDatabaseGuid

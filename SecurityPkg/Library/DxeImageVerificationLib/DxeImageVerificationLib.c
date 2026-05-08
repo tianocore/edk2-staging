@@ -1119,173 +1119,10 @@ Done:
   return Status;
 }
 
-/**
-  Check whether the timestamp is valid by comparing the signing time and the revocation time.
 
-  @param SigningTime         A pointer to the signing time.
-  @param RevocationTime      A pointer to the revocation time.
-
-  @retval  TRUE              The SigningTime is not later than the RevocationTime.
-  @retval  FALSE             The SigningTime is later than the RevocationTime.
-
-**/
-BOOLEAN
-IsValidSignatureByTimestamp (
-  IN EFI_TIME  *SigningTime,
-  IN EFI_TIME  *RevocationTime
-  )
-{
-  if (SigningTime->Year != RevocationTime->Year) {
-    return (BOOLEAN)(SigningTime->Year < RevocationTime->Year);
-  } else if (SigningTime->Month != RevocationTime->Month) {
-    return (BOOLEAN)(SigningTime->Month < RevocationTime->Month);
-  } else if (SigningTime->Day != RevocationTime->Day) {
-    return (BOOLEAN)(SigningTime->Day < RevocationTime->Day);
-  } else if (SigningTime->Hour != RevocationTime->Hour) {
-    return (BOOLEAN)(SigningTime->Hour < RevocationTime->Hour);
-  } else if (SigningTime->Minute != RevocationTime->Minute) {
-    return (BOOLEAN)(SigningTime->Minute < RevocationTime->Minute);
-  }
-
-  return (BOOLEAN)(SigningTime->Second <= RevocationTime->Second);
-}
-
-/**
-  Check if the given time value is zero.
-
-  @param[in]  Time      Pointer of a time value.
-
-  @retval     TRUE      The Time is Zero.
-  @retval     FALSE     The Time is not Zero.
-
-**/
-BOOLEAN
-IsTimeZero (
-  IN EFI_TIME  *Time
-  )
-{
-  if ((Time->Year == 0) && (Time->Month == 0) &&  (Time->Day == 0) &&
-      (Time->Hour == 0) && (Time->Minute == 0) && (Time->Second == 0))
-  {
-    return TRUE;
-  }
-
-  return FALSE;
-}
-
-/**
-  Check whether the timestamp signature is valid and the signing time is also earlier than
-  the revocation time.
-
-  @param[in]  AuthData        Pointer to the Authenticode signature retrieved from signed image.
-  @param[in]  AuthDataSize    Size of the Authenticode signature in bytes.
-  @param[in]  RevocationTime  The time that the certificate was revoked.
-
-  @retval TRUE      Timestamp signature is valid and signing time is no later than the
-                    revocation time.
-  @retval FALSE     Timestamp signature is not valid or the signing time is later than the
-                    revocation time.
-
-**/
-BOOLEAN
-PassTimestampCheck (
-  IN UINT8     *AuthData,
-  IN UINTN     AuthDataSize,
-  IN EFI_TIME  *RevocationTime
-  )
-{
-  EFI_STATUS          Status;
-  BOOLEAN             VerifyStatus;
-  EFI_SIGNATURE_LIST  *CertList;
-  EFI_SIGNATURE_DATA  *Cert;
-  UINT8               *DbtData;
-  UINTN               DbtDataSize;
-  UINT8               *RootCert;
-  UINTN               RootCertSize;
-  UINTN               Index;
-  UINTN               CertCount;
-  EFI_TIME            SigningTime;
-
-  //
-  // Variable Initialization
-  //
-  VerifyStatus = FALSE;
-  DbtData      = NULL;
-  CertList     = NULL;
-  Cert         = NULL;
-  RootCert     = NULL;
-  RootCertSize = 0;
-
-  //
-  // If RevocationTime is zero, the certificate shall be considered to always be revoked.
-  //
-  if (IsTimeZero (RevocationTime)) {
-    return FALSE;
-  }
-
-  //
-  // RevocationTime is non-zero, the certificate should be considered to be revoked from that time and onwards.
-  // Using the dbt to get the trusted TSA certificates.
-  //
-  DbtDataSize = 0;
-  Status      = gRT->GetVariable (EFI_IMAGE_SECURITY_DATABASE2, &gEfiImageSecurityDatabaseGuid, NULL, &DbtDataSize, NULL);
-  if (Status != EFI_BUFFER_TOO_SMALL) {
-    goto Done;
-  }
-
-  DbtData = (UINT8 *)AllocateZeroPool (DbtDataSize);
-  if (DbtData == NULL) {
-    goto Done;
-  }
-
-  Status = gRT->GetVariable (EFI_IMAGE_SECURITY_DATABASE2, &gEfiImageSecurityDatabaseGuid, NULL, &DbtDataSize, (VOID *)DbtData);
-  if (EFI_ERROR (Status)) {
-    goto Done;
-  }
-
-  CertList = (EFI_SIGNATURE_LIST *)DbtData;
-  while ((DbtDataSize > 0) && (DbtDataSize >= CertList->SignatureListSize)) {
-    if (CompareGuid (&CertList->SignatureType, &gEfiCertX509Guid)) {
-      Cert      = (EFI_SIGNATURE_DATA *)((UINT8 *)CertList + sizeof (EFI_SIGNATURE_LIST) + CertList->SignatureHeaderSize);
-      CertCount = (CertList->SignatureListSize - sizeof (EFI_SIGNATURE_LIST) - CertList->SignatureHeaderSize) / CertList->SignatureSize;
-      for (Index = 0; Index < CertCount; Index++) {
-        //
-        // Iterate each Signature Data Node within this CertList for verify.
-        //
-        RootCert     = Cert->SignatureData;
-        RootCertSize = CertList->SignatureSize - sizeof (EFI_GUID);
-        //
-        // Get the signing time if the timestamp signature is valid.
-        //
-        if (ImageTimestampVerify (AuthData, AuthDataSize, RootCert, RootCertSize, &SigningTime)) {
-          //
-          // The signer signature is valid only when the signing time is earlier than revocation time.
-          //
-          if (IsValidSignatureByTimestamp (&SigningTime, RevocationTime)) {
-            VerifyStatus = TRUE;
-            goto Done;
-          }
-        }
-
-        Cert = (EFI_SIGNATURE_DATA *)((UINT8 *)Cert + CertList->SignatureSize);
-      }
-    }
-
-    DbtDataSize -= CertList->SignatureListSize;
-    CertList     = (EFI_SIGNATURE_LIST *)((UINT8 *)CertList + CertList->SignatureListSize);
-  }
-
-Done:
-  if (DbtData != NULL) {
-    FreePool (DbtData);
-  }
-
-  return VerifyStatus;
-}
 
 /**
   Check whether the image signature is forbidden by the forbidden database (dbx).
-  The image is forbidden to load if any certificates for signing are revoked before signing time.
 
   @param[in]  AuthData      Pointer to the Authenticode signature retrieved from the signed image.
   @param[in]  AuthDataSize  Size of the Authenticode signature in bytes.
@@ -1355,7 +1192,7 @@ IsForbiddenByDbx (
   }
 
   //
-  // Check X.509 Certificate Hash & Possible Timestamp.
+  // Check X.509 Certificate Hash.
   //
 
   //
@@ -1396,22 +1233,14 @@ IsForbiddenByDbx (
       // not be valid in such situation.
       //
       IsForbidden = TRUE;
+      goto Done;
     } else if (IsFound) {
       //
-      // Found Cert in dbx successfully. Check the timestamp signature and
-      // signing time to determine if the image can be trusted.
+      // Found Cert in dbx successfully. Image is forbidden.
       //
-      if (PassTimestampCheck (AuthData, AuthDataSize, &RevocationTime)) {
-        IsForbidden = FALSE;
-        //
-        // Pass DBT check. Continue to check other certs in image signer's cert list against DBX, DBT
-        //
-        continue;
-      } else {
-        IsForbidden = TRUE;
-        DEBUG ((DEBUG_INFO, "DxeImageVerificationLib: Image is signed but signature failed the timestamp check.\n"));
-        goto Done;
-      }
+      IsForbidden = TRUE;
+      DEBUG ((DEBUG_INFO, "DxeImageVerificationLib: Image is signed but certificate is revoked in DBX.\n"));
+      goto Done;
     }
   }
 
@@ -1429,17 +1258,15 @@ Done:
 }
 
 /**
-  Check whether the certificate is not revoked by dbx, or passes timestamp check.
+  Check whether the certificate is not revoked by dbx.
 
   @param[in]  Certificate   Pointer to X.509 Certificate.
   @param[in]  CertSize      Size of X.509 Certificate.
   @param[in]  DbxData       Pointer to dbx variable contents, or NULL if dbx is absent.
   @param[in]  DbxDataSize   Size of DbxData in bytes.
-  @param[in]  AuthData      Pointer to the Authenticode signature from the signed image.
-  @param[in]  AuthDataSize  Size of the Authenticode signature in bytes.
 
-  @retval TRUE   Certificate is not revoked, or revoked but passes timestamp check.
-  @retval FALSE  Certificate is revoked and timestamp check failed, or dbx search failed.
+  @retval TRUE   Certificate is not revoked.
+  @retval FALSE  Certificate is revoked, or dbx search failed.
 
 **/
 BOOLEAN
@@ -1447,9 +1274,7 @@ IsCertAllowedByDbx (
   IN UINT8  *Certificate,
   IN UINTN  CertSize,
   IN UINT8  *DbxData,
-  IN UINTN  DbxDataSize,
-  IN UINT8  *AuthData,
-  IN UINTN  AuthDataSize
+  IN UINTN  DbxDataSize
   )
 {
   EFI_STATUS  Status;
@@ -1473,8 +1298,8 @@ IsCertAllowedByDbx (
     return FALSE;
   }
 
-  if (IsFound && !PassTimestampCheck (AuthData, AuthDataSize, &RevocationTime)) {
-    DEBUG ((DEBUG_INFO, "DxeImageVerificationLib: Certificate is revoked in DBX and failed the timestamp check.\n"));
+  if (IsFound) {
+    DEBUG ((DEBUG_INFO, "DxeImageVerificationLib: Certificate is revoked in DBX.\n"));
     return FALSE;
   }
 
@@ -1635,13 +1460,10 @@ IsAllowedByDb (
           //
           // The image is signed and its signature is found in 'db'.
           //
-          VerifyStatus = IsCertAllowedByDbx (RootCert, RootCertSize, DbxData, DbxDataSize, AuthData, AuthDataSize);
+          VerifyStatus = IsCertAllowedByDbx (RootCert, RootCertSize, DbxData, DbxDataSize);
 
           //
-          // There's no 'dbx' to check revocation time against (must-be pass),
-          // or, there's revocation time found in 'dbx' and checked againt 'dbt'
-          // (maybe pass or fail, depending on timestamp compare result). Either
-          // way the verification job has been completed at this point.
+          // Check if this certificate is revoked in dbx.
           //
           goto Done;
         }
@@ -1706,10 +1528,8 @@ IsAllowedByDb (
 
         //
         // Signature verified. Check if this certificate is revoked in dbx.
-        // Certificate is revoked in dbx. Check timestamp to determine
-        // if the image was signed before the revocation time.
         //
-        if (!IsCertAllowedByDbx (Cert, CertSize, DbxData, DbxDataSize, AuthData, AuthDataSize)) {
+        if (!IsCertAllowedByDbx (Cert, CertSize, DbxData, DbxDataSize)) {
           goto Done;
         }
 
