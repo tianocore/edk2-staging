@@ -407,14 +407,6 @@
   $(OPENSSL_PATH)/crypto/pkcs12/p12_sbag.c
   $(OPENSSL_PATH)/crypto/pkcs12/p12_utl.c
   $(OPENSSL_PATH)/crypto/pkcs12/pk12err.c
-  $(OPENSSL_PATH)/crypto/pkcs7/bio_pk7.c
-  $(OPENSSL_PATH)/crypto/pkcs7/pk7_asn1.c
-  $(OPENSSL_PATH)/crypto/pkcs7/pk7_attr.c
-  $(OPENSSL_PATH)/crypto/pkcs7/pk7_doit.c
-  $(OPENSSL_PATH)/crypto/pkcs7/pk7_lib.c
-  $(OPENSSL_PATH)/crypto/pkcs7/pk7_mime.c
-  $(OPENSSL_PATH)/crypto/pkcs7/pk7_smime.c
-  $(OPENSSL_PATH)/crypto/pkcs7/pkcs7err.c
   $(OPENSSL_PATH)/crypto/cms/cms_asn1.c
   $(OPENSSL_PATH)/crypto/cms/cms_att.c
   $(OPENSSL_PATH)/crypto/cms/cms_cd.c
@@ -739,6 +731,7 @@
   OpensslStub/EncoderNull.c
   OpensslStub/SslStatServNull.c
   OpensslStub/SslExtServNull.c
+  OpensslStub/Pkcs7Null.c
 
 [Packages]
   MdePkg/MdePkg.dec
