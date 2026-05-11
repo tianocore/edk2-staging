@@ -179,6 +179,59 @@ CreateSignatureList (
 }
 
 /**
+  Combine two EFI_SIGNATURE_LIST payloads into a single buffer.
+
+  @param[in]  FirstSigList          First EFI_SIGNATURE_LIST payload.
+  @param[in]  FirstSigListSize      Size of FirstSigList in bytes.
+  @param[in]  SecondSigList         Second EFI_SIGNATURE_LIST payload.
+  @param[in]  SecondSigListSize     Size of SecondSigList in bytes.
+  @param[out] CombinedSigListSize   Size of combined payload.
+  @param[out] CombinedSigList       Allocated combined payload.
+
+  @retval EFI_SUCCESS               Signature list payloads combined successfully.
+  @retval EFI_INVALID_PARAMETER     Input parameter is invalid.
+  @retval EFI_OUT_OF_RESOURCES      Memory allocation failed.
+
+**/
+EFI_STATUS
+CombineSignatureLists (
+  IN  VOID   *FirstSigList,
+  IN  UINTN  FirstSigListSize,
+  IN  VOID   *SecondSigList,
+  IN  UINTN  SecondSigListSize,
+  OUT UINTN  *CombinedSigListSize,
+  OUT VOID   **CombinedSigList
+  )
+{
+  UINT8  *Buffer;
+  UINTN  TotalSize;
+
+  if ((FirstSigList == NULL) || (FirstSigListSize == 0) ||
+      (SecondSigList == NULL) || (SecondSigListSize == 0) ||
+      (CombinedSigListSize == NULL) || (CombinedSigList == NULL))
+  {
+    DEBUG ((DEBUG_ERROR, "CombineSignatureLists: Invalid parameter\n"));
+    return EFI_INVALID_PARAMETER;
+  }
+
+  TotalSize = FirstSigListSize + SecondSigListSize;
+  Buffer    = AllocateZeroPool (TotalSize);
+  if (Buffer == NULL) {
+    DEBUG ((DEBUG_ERROR, "CombineSignatureLists: Cannot allocate %u bytes\n", TotalSize));
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  CopyMem (Buffer, FirstSigList, FirstSigListSize);
+  CopyMem (Buffer + FirstSigListSize, SecondSigList, SecondSigListSize);
+
+  *CombinedSigListSize = TotalSize;
+  *CombinedSigList     = Buffer;
+
+  DEBUG ((DEBUG_INFO, "CombineSignatureLists: Combined size = %u bytes\n", TotalSize));
+  return EFI_SUCCESS;
+}
+
+/**
   Create an EFI_CERT_X509_SHA384 EFI_SIGNATURE_LIST by extracting the
   TBSCertificate from a DER-encoded X.509 certificate and computing its
   SHA-384 hash.
@@ -784,6 +837,7 @@ PrintUsage (
   Print (L"  update-pk <cert_file>      - Update PK from certificate file\n");
   Print (L"  update-kek <cert_file>     - Update KEK from certificate file\n");
   Print (L"  update-db <cert_file>      - Update DB from certificate file\n");
+  Print (L"  update-db-dualsiglist <cert_file1> <cert_file2> - Update DB with two X509 signature lists\n");
   Print (L"  update-db-hash <cert_file> - Update DB with SHA-384 hash of certificate's TBSCertificate\n");
   Print (L"  update-dbx <cert_file>     - Update DBX from certificate file\n");
   Print (L"  setcommonvar-with-timebasedauth <0|1>  - Set TestVar with time-based auth (0 or 1)\n");
@@ -794,6 +848,7 @@ PrintUsage (
   Print (L"  SecureBootUpdate.efi update-pk fs0:\\PK.cer\n");
   Print (L"  SecureBootUpdate.efi update-kek fs0:\\KEK.cer\n");
   Print (L"  SecureBootUpdate.efi update-db fs0:\\db.cer\n");
+  Print (L"  SecureBootUpdate.efi update-db-dualsiglist fs0:\\db1.cer fs0:\\db2.cer\n");
   Print (L"  SecureBootUpdate.efi update-db-hash fs0:\\db.cer\n");
   Print (L"  SecureBootUpdate.efi setcommonvar-with-timebasedauth 1\n");
   Print (L"\n");
@@ -1019,6 +1074,162 @@ UefiMain (
     }
     
     Status = TestSetCommonVarWithTimeBasedAuth (NewValue);
+    goto Done;
+  }
+
+  //
+  // Handle 'update-db-dualsiglist' command
+  //
+  if (StrCmp (Command, L"update-db-dualsiglist") == 0) {
+    CHAR16  *FileName1;
+    CHAR16  *FileName2;
+    VOID    *CertData1;
+    VOID    *CertData2;
+    UINTN   CertSize1;
+    UINTN   CertSize2;
+    VOID    *SigList1;
+    VOID    *SigList2;
+    UINTN   SigListSize1;
+    UINTN   SigListSize2;
+    VOID    *CombinedSigList;
+    UINTN   CombinedSigListSize;
+    VOID    *AuthData;
+    UINTN   AuthDataSize;
+    BOOLEAN IsAuthFile1;
+    BOOLEAN IsAuthFile2;
+    UINTN   FileNameLen;
+    CHAR16  *Ext;
+
+    DEBUG ((DEBUG_INFO, "SecureBootUpdate: Executing update-db-dualsiglist command\n"));
+
+    if (Argc < 3) {
+      DEBUG ((DEBUG_ERROR, "SecureBootUpdate: Missing second certificate file name\n"));
+      Print (L"Error: Usage: update-db-dualsiglist <cert_file1> <cert_file2>\n");
+      Status = EFI_INVALID_PARAMETER;
+      goto Done;
+    }
+
+    FileName1 = Argv[1];
+    FileName2 = Argv[2];
+
+    CertData1         = NULL;
+    CertData2         = NULL;
+    CertSize1         = 0;
+    CertSize2         = 0;
+    SigList1          = NULL;
+    SigList2          = NULL;
+    SigListSize1      = 0;
+    SigListSize2      = 0;
+    CombinedSigList   = NULL;
+    CombinedSigListSize = 0;
+    AuthData          = NULL;
+    AuthDataSize      = 0;
+
+    IsAuthFile1 = FALSE;
+    IsAuthFile2 = FALSE;
+
+    FileNameLen = StrLen (FileName1);
+    if (FileNameLen > 5) {
+      Ext = FileName1 + FileNameLen - 5;
+      if (StrCmp (Ext, L".auth") == 0) {
+        IsAuthFile1 = TRUE;
+      }
+    }
+
+    FileNameLen = StrLen (FileName2);
+    if (FileNameLen > 5) {
+      Ext = FileName2 + FileNameLen - 5;
+      if (StrCmp (Ext, L".auth") == 0) {
+        IsAuthFile2 = TRUE;
+      }
+    }
+
+    if (IsAuthFile1 || IsAuthFile2) {
+      Print (L"Error: update-db-dualsiglist does not support .auth files. Please provide DER certificates.\n");
+      Status = EFI_INVALID_PARAMETER;
+      goto DualSigListDone;
+    }
+
+    Status = ReadFileToBuffer (FileName1, &CertSize1, &CertData1);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_ERROR, "SecureBootUpdate: Failed to read first certificate file: %r\n", Status));
+      goto DualSigListDone;
+    }
+
+    Status = ReadFileToBuffer (FileName2, &CertSize2, &CertData2);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_ERROR, "SecureBootUpdate: Failed to read second certificate file: %r\n", Status));
+      goto DualSigListDone;
+    }
+
+    Status = CreateSignatureList (CertData1, CertSize1, &gEfiCertX509Guid, &SigListSize1, &SigList1);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_ERROR, "SecureBootUpdate: Failed to create first signature list: %r\n", Status));
+      Print (L"Error: Failed to create first signature list\n");
+      goto DualSigListDone;
+    }
+
+    Status = CreateSignatureList (CertData2, CertSize2, &gEfiCertX509Guid, &SigListSize2, &SigList2);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_ERROR, "SecureBootUpdate: Failed to create second signature list: %r\n", Status));
+      Print (L"Error: Failed to create second signature list\n");
+      goto DualSigListDone;
+    }
+
+    Status = CombineSignatureLists (
+               SigList1,
+               SigListSize1,
+               SigList2,
+               SigListSize2,
+               &CombinedSigListSize,
+               &CombinedSigList
+               );
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_ERROR, "SecureBootUpdate: Failed to combine signature lists: %r\n", Status));
+      Print (L"Error: Failed to combine signature lists\n");
+      goto DualSigListDone;
+    }
+
+    Status = WrapWithAuthHeader (CombinedSigList, CombinedSigListSize, &AuthDataSize, &AuthData);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_ERROR, "SecureBootUpdate: Failed to wrap combined list with auth header: %r\n", Status));
+      Print (L"Error: Failed to wrap combined signature list with authentication header\n");
+      goto DualSigListDone;
+    }
+
+    Status = UpdateSecureBootVariable (
+               EFI_IMAGE_SECURITY_DATABASE,
+               &gEfiImageSecurityDatabaseGuid,
+               AuthData,
+               AuthDataSize,
+               TRUE
+               );
+
+DualSigListDone:
+    if (AuthData != NULL) {
+      FreePool (AuthData);
+    }
+
+    if (CombinedSigList != NULL) {
+      FreePool (CombinedSigList);
+    }
+
+    if (SigList2 != NULL) {
+      FreePool (SigList2);
+    }
+
+    if (SigList1 != NULL) {
+      FreePool (SigList1);
+    }
+
+    if (CertData2 != NULL) {
+      FreePool (CertData2);
+    }
+
+    if (CertData1 != NULL) {
+      FreePool (CertData1);
+    }
+
     goto Done;
   }
 

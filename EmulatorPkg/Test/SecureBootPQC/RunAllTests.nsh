@@ -104,6 +104,13 @@ else
     echo "[PASS] Test 15: Enroll MLDSA cert hash to db and run RSA-signed image (correctly failed)"
 endif
 
+Test13-UpdateDb-DualSigList.nsh
+if %lasterror% eq 0 then
+    echo "[FAIL] Test 16: Enroll dual X509 signature lists to db should fail but succ"
+else
+    echo "[PASS] Test 16: Enroll dual X509 signature lists to db (correctly failed)"
+endif
+
 echo " "
 echo "========================================="
 echo "  All Tests Completed"
