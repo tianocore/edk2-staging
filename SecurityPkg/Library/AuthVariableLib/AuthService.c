@@ -642,8 +642,6 @@ CheckSignatureListFormat (
   EFI_SIGNATURE_LIST  *SigList;
   UINTN               SigDataSize;
   UINT32              Index;
-  UINT32              SigCount;
-  BOOLEAN             IsPk;
   VOID                *RsaContext;
   EFI_SIGNATURE_DATA  *CertData;
   UINTN               CertLen;
@@ -655,130 +653,122 @@ CheckSignatureListFormat (
 
   ASSERT (VariableName != NULL && VendorGuid != NULL && Data != NULL);
 
-  if (CompareGuid (VendorGuid, &gEfiGlobalVariableGuid) && (StrCmp (VariableName, EFI_PLATFORM_KEY_NAME) == 0)) {
-    IsPk = TRUE;
-  } else if ((CompareGuid (VendorGuid, &gEfiGlobalVariableGuid) && (StrCmp (VariableName, EFI_KEY_EXCHANGE_KEY_NAME) == 0)) ||
-             (CompareGuid (VendorGuid, &gEfiImageSecurityDatabaseGuid) &&
-              ((StrCmp (VariableName, EFI_IMAGE_SECURITY_DATABASE) == 0) || (StrCmp (VariableName, EFI_IMAGE_SECURITY_DATABASE1) == 0))))
+  if (!(CompareGuid (VendorGuid, &gEfiGlobalVariableGuid) &&
+        ((StrCmp (VariableName, EFI_PLATFORM_KEY_NAME) == 0) || (StrCmp (VariableName, EFI_KEY_EXCHANGE_KEY_NAME) == 0))) &&
+      !(CompareGuid (VendorGuid, &gEfiImageSecurityDatabaseGuid) &&
+        ((StrCmp (VariableName, EFI_IMAGE_SECURITY_DATABASE) == 0) || (StrCmp (VariableName, EFI_IMAGE_SECURITY_DATABASE1) == 0))))
   {
-    IsPk = FALSE;
-  } else {
     return EFI_SUCCESS;
   }
 
-  SigCount    = 0;
   SigList     = (EFI_SIGNATURE_LIST *)Data;
   SigDataSize = DataSize;
   RsaContext  = NULL;
 
   //
+  // Mandate one EFI_SIGNATURE_LIST only for SetVariable() call.
+  //
+  if (SigDataSize != SigList->SignatureListSize) {
+    DEBUG ((DEBUG_ERROR, "CheckSignatureListFormat - Mandate one EFI_SIGNATURE_LIST only for SetVariable() call\n"));
+    return EFI_INVALID_PARAMETER;
+  }
+
+  //
   // Walk through the input signature list and check the data format.
   // If any signature is incorrectly formed, the whole check will fail.
   //
-  while ((SigDataSize > 0) && (SigDataSize >= SigList->SignatureListSize)) {
-    for (Index = 0; Index < (sizeof (mSupportSigItem) / sizeof (EFI_SIGNATURE_ITEM)); Index++ ) {
-      if (CompareGuid (&SigList->SignatureType, &mSupportSigItem[Index].SigType)) {
-        //
-        // The value of SignatureSize should always be 16 (size of SignatureOwner
-        // component) add the data length according to signature type.
-        //
-        if ((mSupportSigItem[Index].SigDataSize != ((UINT32) ~0)) &&
-            ((SigList->SignatureSize - sizeof (EFI_GUID)) != mSupportSigItem[Index].SigDataSize))
-        {
-          return EFI_INVALID_PARAMETER;
-        }
-
-        if ((mSupportSigItem[Index].SigHeaderSize != ((UINT32) ~0)) &&
-            (SigList->SignatureHeaderSize != mSupportSigItem[Index].SigHeaderSize))
-        {
-          return EFI_INVALID_PARAMETER;
-        }
-
-        break;
-      }
-    }
-
-    if (Index == (sizeof (mSupportSigItem) / sizeof (EFI_SIGNATURE_ITEM))) {
+  for (Index = 0; Index < (sizeof (mSupportSigItem) / sizeof (EFI_SIGNATURE_ITEM)); Index++ ) {
+    if (CompareGuid (&SigList->SignatureType, &mSupportSigItem[Index].SigType)) {
       //
-      // Undefined signature type.
+      // The value of SignatureSize should always be 16 (size of SignatureOwner
+      // component) add the data length according to signature type.
       //
-      return EFI_INVALID_PARAMETER;
-    }
-
-    //
-    // PK and KEK only accept EFI_CERT_X509_GUID signature lists.
-    //
-    if (CompareGuid (VendorGuid, &gEfiGlobalVariableGuid) &&
-        ((StrCmp (VariableName, EFI_PLATFORM_KEY_NAME) == 0) ||
-         (StrCmp (VariableName, EFI_KEY_EXCHANGE_KEY_NAME) == 0)))
-    {
-      if (!CompareGuid (&SigList->SignatureType, &gEfiCertX509Guid)) {
-        DEBUG ((DEBUG_ERROR, "CheckSignatureListFormat - Only EFI_CERT_X509_GUID is allowed in PK/KEK\n"));
-        return EFI_INVALID_PARAMETER;
-      }
-    }
-
-    if (CompareGuid (&SigList->SignatureType, &gEfiCertX509Guid)) {
-      //
-      // Reject EFI_CERT_X509_GUID in dbx. Raw X.509 certificates are not
-      // supported for image revocation.
-      //
-      if (CompareGuid (VendorGuid, &gEfiImageSecurityDatabaseGuid) &&
-          (StrCmp (VariableName, EFI_IMAGE_SECURITY_DATABASE1) == 0))
+      if ((mSupportSigItem[Index].SigDataSize != ((UINT32) ~0)) &&
+          ((SigList->SignatureSize - sizeof (EFI_GUID)) != mSupportSigItem[Index].SigDataSize))
       {
-        DEBUG ((DEBUG_ERROR, "CheckSignatureListFormat - EFI_CERT_X509_GUID is not allowed in dbx\n"));
         return EFI_INVALID_PARAMETER;
       }
 
-      //
-      // Try to retrieve the RSA public key from the X.509 certificate.
-      // If this operation fails, it's not a valid certificate.
-      //
-      CertData   = (EFI_SIGNATURE_DATA *)((UINT8 *)SigList + sizeof (EFI_SIGNATURE_LIST) + SigList->SignatureHeaderSize);
-      CertLen    = SigList->SignatureSize - sizeof (EFI_GUID);
-      RsaContext = NULL;
-      IsValidAlg = FALSE;
-
-      if (RsaGetPublicKeyFromX509 (CertData->SignatureData, CertLen, &RsaContext)) {
-        IsValidAlg = TRUE;
-        DEBUG ((DEBUG_INFO, "CheckSignatureListFormat - X509 RSA check succ\n"));
-      } else if (MlDsaGetPublicKeyFromX509 (CertData->SignatureData, CertLen)) {
-        IsValidAlg = TRUE;
-        DEBUG ((DEBUG_INFO, "CheckSignatureListFormat - X509 ML-DSA check succ\n"));
-      }
-
-      RsaFree (RsaContext);
-      if (!IsValidAlg) {
-        DEBUG ((DEBUG_ERROR, "CheckSignatureListFormat - X509 Cert invalid\n"));
+      if ((mSupportSigItem[Index].SigHeaderSize != ((UINT32) ~0)) &&
+          (SigList->SignatureHeaderSize != mSupportSigItem[Index].SigHeaderSize))
+      {
         return EFI_INVALID_PARAMETER;
       }
 
-      //
-      // Check if the certificate's signing algorithm is in the supported OID list.
-      //
-      if (!IsX509SigningAlgSupported (CertData->SignatureData, CertLen)) {
-        DEBUG ((DEBUG_ERROR, "CheckSignatureListFormat - X509 signing alg not in supported list\n"));
-        return EFI_UNSUPPORTED;
-      }
+      break;
     }
+  }
 
-    if ((SigList->SignatureListSize - sizeof (EFI_SIGNATURE_LIST) - SigList->SignatureHeaderSize) % SigList->SignatureSize != 0) {
+  if (Index == (sizeof (mSupportSigItem) / sizeof (EFI_SIGNATURE_ITEM))) {
+    //
+    // Undefined signature type.
+    //
+    return EFI_INVALID_PARAMETER;
+  }
+
+  //
+  // PK and KEK only accept EFI_CERT_X509_GUID signature lists.
+  //
+  if (CompareGuid (VendorGuid, &gEfiGlobalVariableGuid) &&
+      ((StrCmp (VariableName, EFI_PLATFORM_KEY_NAME) == 0) ||
+        (StrCmp (VariableName, EFI_KEY_EXCHANGE_KEY_NAME) == 0)))
+  {
+    if (!CompareGuid (&SigList->SignatureType, &gEfiCertX509Guid)) {
+      DEBUG ((DEBUG_ERROR, "CheckSignatureListFormat - Only EFI_CERT_X509_GUID is allowed in PK/KEK\n"));
+      return EFI_INVALID_PARAMETER;
+    }
+  }
+
+  if (CompareGuid (&SigList->SignatureType, &gEfiCertX509Guid)) {
+    //
+    // Reject EFI_CERT_X509_GUID in dbx. Raw X.509 certificates are not
+    // supported for image revocation.
+    //
+    if (CompareGuid (VendorGuid, &gEfiImageSecurityDatabaseGuid) &&
+        (StrCmp (VariableName, EFI_IMAGE_SECURITY_DATABASE1) == 0))
+    {
+      DEBUG ((DEBUG_ERROR, "CheckSignatureListFormat - EFI_CERT_X509_GUID is not allowed in dbx\n"));
       return EFI_INVALID_PARAMETER;
     }
 
-    SigCount += (SigList->SignatureListSize - sizeof (EFI_SIGNATURE_LIST) - SigList->SignatureHeaderSize) / SigList->SignatureSize;
+    //
+    // Try to retrieve the RSA public key from the X.509 certificate.
+    // If this operation fails, it's not a valid certificate.
+    //
+    CertData   = (EFI_SIGNATURE_DATA *)((UINT8 *)SigList + sizeof (EFI_SIGNATURE_LIST) + SigList->SignatureHeaderSize);
+    CertLen    = SigList->SignatureSize - sizeof (EFI_GUID);
+    RsaContext = NULL;
+    IsValidAlg = FALSE;
 
-    SigDataSize -= SigList->SignatureListSize;
-    SigList      = (EFI_SIGNATURE_LIST *)((UINT8 *)SigList + SigList->SignatureListSize);
+    if (RsaGetPublicKeyFromX509 (CertData->SignatureData, CertLen, &RsaContext)) {
+      IsValidAlg = TRUE;
+      DEBUG ((DEBUG_INFO, "CheckSignatureListFormat - X509 RSA check succ\n"));
+    } else if (MlDsaGetPublicKeyFromX509 (CertData->SignatureData, CertLen)) {
+      IsValidAlg = TRUE;
+      DEBUG ((DEBUG_INFO, "CheckSignatureListFormat - X509 ML-DSA check succ\n"));
+    }
+
+    RsaFree (RsaContext);
+    if (!IsValidAlg) {
+      DEBUG ((DEBUG_ERROR, "CheckSignatureListFormat - X509 Cert invalid\n"));
+      return EFI_INVALID_PARAMETER;
+    }
+
+    //
+    // Check if the certificate's signing algorithm is in the supported OID list.
+    //
+    if (!IsX509SigningAlgSupported (CertData->SignatureData, CertLen)) {
+      DEBUG ((DEBUG_ERROR, "CheckSignatureListFormat - X509 signing alg not in supported list\n"));
+      return EFI_UNSUPPORTED;
+    }
   }
 
-  if (((UINTN)SigList - (UINTN)Data) != DataSize) {
+  if ((SigList->SignatureListSize - sizeof (EFI_SIGNATURE_LIST) - SigList->SignatureHeaderSize) % SigList->SignatureSize != 0) {
     return EFI_INVALID_PARAMETER;
   }
 
-  if (IsPk && (SigCount > 1)) {
-    return EFI_INVALID_PARAMETER;
-  }
+  SigDataSize -= SigList->SignatureListSize;
+  SigList      = (EFI_SIGNATURE_LIST *)((UINT8 *)SigList + SigList->SignatureListSize);
 
   return EFI_SUCCESS;
 }
