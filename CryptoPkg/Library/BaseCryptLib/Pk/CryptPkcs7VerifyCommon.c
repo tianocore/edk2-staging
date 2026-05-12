@@ -882,6 +882,18 @@ Pkcs7Verify (
   // Assume only 1 signer info in stack
   //
   Si = sk_PKCS7_SIGNER_INFO_value(SiStack, 0);
+
+  //
+  // Only allow SHA-256, SHA-384, and SHA-512 digest algorithms
+  //
+  if ((OBJ_obj2nid (Si->digest_alg->algorithm) != NID_sha256) &&
+      (OBJ_obj2nid (Si->digest_alg->algorithm) != NID_sha384) &&
+      (OBJ_obj2nid (Si->digest_alg->algorithm) != NID_sha512))
+  {
+    DEBUG ((DEBUG_INFO, "Pkcs7Verify - Unsupported digest algorithm (NID=%d)!\n", OBJ_obj2nid (Si->digest_alg->algorithm)));
+    goto _Exit;
+  }
+
   SignerCert = PKCS7_cert_from_signer_info (Pkcs7, Si);
   if (SignerCert == NULL) {
     goto _Exit;
