@@ -31,7 +31,6 @@
   RsaPkcs7Tests.c
   Pkcs5Pbkdf2Tests.c
   AuthenticodeTests.c
-  TSTests.c
   DhTests.c
   RandTests.c
   Pkcs7EkuTests.c

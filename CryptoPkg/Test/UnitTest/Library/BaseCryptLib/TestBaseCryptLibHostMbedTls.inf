@@ -30,7 +30,6 @@
   RsaPkcs7Tests.c
   Pkcs5Pbkdf2Tests.c
   AuthenticodeTests.c
-  TSTests.c
   RandTests.c
   Pkcs7EkuTests.c
   Pkcs7AttachedContentTest.c

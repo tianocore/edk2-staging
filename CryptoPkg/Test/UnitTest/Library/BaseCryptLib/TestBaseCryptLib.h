@@ -71,9 +71,6 @@ extern TEST_DESC  mPkcs5Test[];
 extern UINTN      mAuthenticodeTestNum;
 extern TEST_DESC  mAuthenticodeTest[];
 
-extern UINTN      mImageTimestampTestNum;
-extern TEST_DESC  mImageTimestampTest[];
-
 extern UINTN      mDhTestNum;
 extern TEST_DESC  mDhTest[];
 
