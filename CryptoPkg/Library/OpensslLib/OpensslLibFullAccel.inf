@@ -485,6 +485,23 @@
   $(OPENSSL_PATH)/crypto/pkcs7/pk7_mime.c
   $(OPENSSL_PATH)/crypto/pkcs7/pk7_smime.c
   $(OPENSSL_PATH)/crypto/pkcs7/pkcs7err.c
+  $(OPENSSL_PATH)/crypto/cms/cms_asn1.c
+  $(OPENSSL_PATH)/crypto/cms/cms_att.c
+  $(OPENSSL_PATH)/crypto/cms/cms_cd.c
+  $(OPENSSL_PATH)/crypto/cms/cms_dd.c
+  $(OPENSSL_PATH)/crypto/cms/cms_dh.c
+  $(OPENSSL_PATH)/crypto/cms/cms_ec.c
+  $(OPENSSL_PATH)/crypto/cms/cms_enc.c
+  $(OPENSSL_PATH)/crypto/cms/cms_env.c
+  $(OPENSSL_PATH)/crypto/cms/cms_err.c
+  $(OPENSSL_PATH)/crypto/cms/cms_ess.c
+  $(OPENSSL_PATH)/crypto/cms/cms_io.c
+  $(OPENSSL_PATH)/crypto/cms/cms_kari.c
+  $(OPENSSL_PATH)/crypto/cms/cms_lib.c
+  $(OPENSSL_PATH)/crypto/cms/cms_pwri.c
+  $(OPENSSL_PATH)/crypto/cms/cms_rsa.c
+  $(OPENSSL_PATH)/crypto/cms/cms_sd.c
+  $(OPENSSL_PATH)/crypto/cms/cms_smime.c
   $(OPENSSL_PATH)/crypto/property/defn_cache.c
   $(OPENSSL_PATH)/crypto/property/property.c
   $(OPENSSL_PATH)/crypto/property/property_err.c
@@ -1270,6 +1287,23 @@
   $(OPENSSL_PATH)/crypto/pkcs7/pk7_mime.c
   $(OPENSSL_PATH)/crypto/pkcs7/pk7_smime.c
   $(OPENSSL_PATH)/crypto/pkcs7/pkcs7err.c
+  $(OPENSSL_PATH)/crypto/cms/cms_asn1.c
+  $(OPENSSL_PATH)/crypto/cms/cms_att.c
+  $(OPENSSL_PATH)/crypto/cms/cms_cd.c
+  $(OPENSSL_PATH)/crypto/cms/cms_dd.c
+  $(OPENSSL_PATH)/crypto/cms/cms_dh.c
+  $(OPENSSL_PATH)/crypto/cms/cms_ec.c
+  $(OPENSSL_PATH)/crypto/cms/cms_enc.c
+  $(OPENSSL_PATH)/crypto/cms/cms_env.c
+  $(OPENSSL_PATH)/crypto/cms/cms_err.c
+  $(OPENSSL_PATH)/crypto/cms/cms_ess.c
+  $(OPENSSL_PATH)/crypto/cms/cms_io.c
+  $(OPENSSL_PATH)/crypto/cms/cms_kari.c
+  $(OPENSSL_PATH)/crypto/cms/cms_lib.c
+  $(OPENSSL_PATH)/crypto/cms/cms_pwri.c
+  $(OPENSSL_PATH)/crypto/cms/cms_rsa.c
+  $(OPENSSL_PATH)/crypto/cms/cms_sd.c
+  $(OPENSSL_PATH)/crypto/cms/cms_smime.c
   $(OPENSSL_PATH)/crypto/property/defn_cache.c
   $(OPENSSL_PATH)/crypto/property/property.c
   $(OPENSSL_PATH)/crypto/property/property_err.c
@@ -2075,6 +2109,23 @@
   $(OPENSSL_PATH)/crypto/pkcs7/pk7_mime.c
   $(OPENSSL_PATH)/crypto/pkcs7/pk7_smime.c
   $(OPENSSL_PATH)/crypto/pkcs7/pkcs7err.c
+  $(OPENSSL_PATH)/crypto/cms/cms_asn1.c
+  $(OPENSSL_PATH)/crypto/cms/cms_att.c
+  $(OPENSSL_PATH)/crypto/cms/cms_cd.c
+  $(OPENSSL_PATH)/crypto/cms/cms_dd.c
+  $(OPENSSL_PATH)/crypto/cms/cms_dh.c
+  $(OPENSSL_PATH)/crypto/cms/cms_ec.c
+  $(OPENSSL_PATH)/crypto/cms/cms_enc.c
+  $(OPENSSL_PATH)/crypto/cms/cms_env.c
+  $(OPENSSL_PATH)/crypto/cms/cms_err.c
+  $(OPENSSL_PATH)/crypto/cms/cms_ess.c
+  $(OPENSSL_PATH)/crypto/cms/cms_io.c
+  $(OPENSSL_PATH)/crypto/cms/cms_kari.c
+  $(OPENSSL_PATH)/crypto/cms/cms_lib.c
+  $(OPENSSL_PATH)/crypto/cms/cms_pwri.c
+  $(OPENSSL_PATH)/crypto/cms/cms_rsa.c
+  $(OPENSSL_PATH)/crypto/cms/cms_sd.c
+  $(OPENSSL_PATH)/crypto/cms/cms_smime.c
   $(OPENSSL_PATH)/crypto/property/defn_cache.c
   $(OPENSSL_PATH)/crypto/property/property.c
   $(OPENSSL_PATH)/crypto/property/property_err.c

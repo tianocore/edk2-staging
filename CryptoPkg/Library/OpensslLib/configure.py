@@ -30,7 +30,6 @@ def openssl_configure(openssldir, target, ec = True):
         'no-chacha',
         'no-cmac',
         'no-cmp',
-        'no-cms',
         'no-ct',
         'no-deprecated',
         'no-des',
