@@ -272,7 +272,6 @@ _Exit:
   @param[in]  RevokedDb       Pointer to a list of pointers to EFI_SIGNATURE_LIST
                               structures which contains list of X.509 certificate
                               of revoked signers and revoked content hashes.
-  @param[out] RevocationTime  Return the time that the certificate was revoked.
 
   @return TRUE   The certificate hash is found in the revocation database.
   @return FALSE  The certificate hash is not found in the revocation database.
@@ -282,8 +281,7 @@ BOOLEAN
 IsCertHashRevoked (
   IN  UINT8               *Certificate,
   IN  UINTN               CertSize,
-  IN  EFI_SIGNATURE_LIST  **RevokedDb,
-  OUT EFI_TIME            *RevocationTime
+  IN  EFI_SIGNATURE_LIST  **RevokedDb
   )
 {
   BOOLEAN             Status;
@@ -296,7 +294,7 @@ IsCertHashRevoked (
   UINTN               EntryCount;
   UINT8               CertHashVal[MAX_DIGEST_SIZE];
 
-  if ((RevocationTime == NULL) || (RevokedDb == NULL)) {
+  if (RevokedDb == NULL) {
     return FALSE;
   }
 
@@ -353,14 +351,6 @@ IsCertHashRevoked (
             ) == 0)
       {
         Status = TRUE;
-        //
-        // Return the revocation time of this revoked certificate.
-        //
-        CopyMem (
-          RevocationTime,
-          (EFI_TIME *)((UINT8 *)SigData + SigList->SignatureSize - sizeof (EFI_TIME)),
-          sizeof (EFI_TIME)
-          );
         goto _Exit;
       }
 
@@ -373,149 +363,8 @@ _Exit:
 }
 
 /**
-  Check if the given time value is zero.
-
-  @param[in]  Time      Pointer of a time value.
-
-  @retval     TRUE      The Time is Zero.
-  @retval     FALSE     The Time is not Zero.
-
-**/
-BOOLEAN
-IsTimeZero (
-  IN EFI_TIME  *Time
-  )
-{
-  if ((Time->Year == 0) && (Time->Month == 0) &&  (Time->Day == 0) &&
-      (Time->Hour == 0) && (Time->Minute == 0) && (Time->Second == 0))
-  {
-    return TRUE;
-  }
-
-  return FALSE;
-}
-
-/**
-  Check whether the timestamp is valid by comparing the signing time and the revocation time.
-
-  @param SigningTime     Pointer to the signing time.
-  @param RevocationTime  Pointer to the revocation time.
-
-  @retval  TRUE          The SigningTime is not later than the RevocationTime.
-  @retval  FALSE         The SigningTime is later than the RevocationTime.
-
-**/
-BOOLEAN
-CompareTimestamp (
-  IN EFI_TIME  *SigningTime,
-  IN EFI_TIME  *RevocationTime
-  )
-{
-  if (SigningTime->Year != RevocationTime->Year) {
-    return (BOOLEAN)(SigningTime->Year < RevocationTime->Year);
-  } else if (SigningTime->Month != RevocationTime->Month) {
-    return (BOOLEAN)(SigningTime->Month < RevocationTime->Month);
-  } else if (SigningTime->Day != RevocationTime->Day) {
-    return (BOOLEAN)(SigningTime->Day < RevocationTime->Day);
-  } else if (SigningTime->Hour != RevocationTime->Hour) {
-    return (BOOLEAN)(SigningTime->Hour < RevocationTime->Hour);
-  } else if (SigningTime->Minute != RevocationTime->Minute) {
-    return (BOOLEAN)(SigningTime->Minute < RevocationTime->Minute);
-  }
-
-  return (BOOLEAN)(SigningTime->Second <= RevocationTime->Second);
-}
-
-/**
-  Check whether the timestamp signature embedded in PKCS7 signedData is valid and
-  the signing time is also earlier than the revocation time.
-
-  @param[in]  SignedData        Pointer to the PKCS#7 signedData.
-  @param[in]  SignedDataSize    Size of SignedData in bytes.
-  @param[in]  TimeStampDb       Pointer to a list of pointers to EFI_SIGNATURE_LIST
-                                structures which is used to pass a list of X.509
-                                certificates of trusted timestamp signers.
-  @param[in]  RevocationTime    The time that the certificate was revoked.
-
-  @retval TRUE      Timestamp signature is valid and the signing time is no later
-                    than the revocation time.
-  @retval FALSE     Timestamp signature is not valid or the signing time is later
-                    than the revocation time.
-
-**/
-BOOLEAN
-IsValidTimestamp (
-  IN UINT8               *SignedData,
-  IN UINTN               SignedDataSize,
-  IN EFI_SIGNATURE_LIST  **TimeStampDb,
-  IN EFI_TIME            *RevocationTime
-  )
-{
-  BOOLEAN             Status;
-  EFI_SIGNATURE_LIST  *SigList;
-  EFI_SIGNATURE_DATA  *SigData;
-  UINT8               *TsaCert;
-  UINTN               TsaCertSize;
-  UINTN               Index;
-  EFI_TIME            SigningTime;
-
-  //
-  // If no supplied database for verification or RevocationTime is zero,
-  // the certificate shall be considered to always be revoked.
-  //
-  if ((TimeStampDb == NULL) || (IsTimeZero (RevocationTime))) {
-    return FALSE;
-  }
-
-  Status = FALSE;
-  //
-  // RevocationTime is non-zero, the certificate should be considered to be revoked
-  // from that time and onwards.
-  //
-  for (Index = 0; ; Index++) {
-    SigList = (EFI_SIGNATURE_LIST *)(TimeStampDb[Index]);
-
-    //
-    // The list is terminated by a NULL pointer.
-    //
-    if (SigList == NULL) {
-      break;
-    }
-
-    //
-    // Ignore any non-X509-format entry in the list
-    //
-    if (!CompareGuid (&SigList->SignatureType, &gEfiCertX509Guid)) {
-      continue;
-    }
-
-    SigData = (EFI_SIGNATURE_DATA *)((UINT8 *)SigList + sizeof (EFI_SIGNATURE_LIST) +
-                                     SigList->SignatureHeaderSize);
-    TsaCert     = SigData->SignatureData;
-    TsaCertSize = SigList->SignatureSize - sizeof (EFI_GUID);
-
-    //
-    // Each TSA Certificate will normally be in a separate EFI_SIGNATURE_LIST
-    // Leverage ImageTimestampVerify interface for Timestamp counterSignature Verification
-    //
-    if (ImageTimestampVerify (SignedData, SignedDataSize, TsaCert, TsaCertSize, &SigningTime)) {
-      //
-      // The signer signature is valid only when the signing time is earlier than revocation time.
-      //
-      if (CompareTimestamp (&SigningTime, RevocationTime)) {
-        Status = TRUE;
-        break;
-      }
-    }
-  }
-
-  return Status;
-}
-
-/**
   Check whether the PKCS7 signedData is revoked by verifying with the revoked
-  certificates database, and if the signedData is timestamped, the embedded timestamp
-  counterSignature will be checked with the supplied timestamp database.
+  certificates database.
 
   @param[in]  SignedData      Pointer to buffer containing ASN.1 DER-encoded PKCS7
                               signature.
@@ -526,9 +375,6 @@ IsValidTimestamp (
   @param[in]  RevokedDb       Pointer to a list of pointers to EFI_SIGNATURE_LIST
                               structure which contains list of X.509 certificates
                               of revoked signers and revoked content hashes.
-  @param[in]  TimeStampDb     Pointer to a list of pointers to EFI_SIGNATURE_LIST
-                              structures which is used to pass a list of X.509
-                              certificates of trusted timestamp signers.
 
   @retval  EFI_SUCCESS             The PKCS7 signedData is revoked.
   @retval  EFI_SECURITY_VIOLATION  Fail to verify the signature in PKCS7 signedData.
@@ -546,8 +392,7 @@ P7CheckRevocationByHash (
   IN UINTN               SignedDataSize,
   IN UINT8               *InHash,
   IN UINTN               InHashSize,
-  IN EFI_SIGNATURE_LIST  **RevokedDb,
-  IN EFI_SIGNATURE_LIST  **TimeStampDb
+  IN EFI_SIGNATURE_LIST  **RevokedDb
   )
 {
   EFI_STATUS          Status;
@@ -564,7 +409,6 @@ P7CheckRevocationByHash (
   UINT8               *CertPtr;
   UINT8               *Cert;
   UINTN               CertSize;
-  EFI_TIME            RevocationTime;
 
   Status          = EFI_SECURITY_VIOLATION;
   SigData         = NULL;
@@ -627,12 +471,8 @@ P7CheckRevocationByHash (
   }
 
   //
-  // Now we will continue to check the X.509 Certificate Hash & Possible Timestamp
+  // Check the X.509 Certificate Hash in the revoked database.
   //
-  if ((TimeStampDb == NULL) || (*TimeStampDb == NULL)) {
-    goto _Exit;
-  }
-
   Pkcs7GetSigners (SignedData, SignedDataSize, &CertBuffer, &BufferLength, &TrustedCert, &TrustedCertLength);
   if ((BufferLength == 0) || (CertBuffer == NULL)) {
     Status = EFI_SUCCESS;
@@ -651,19 +491,11 @@ P7CheckRevocationByHash (
     CertSize = (UINTN)ReadUnaligned32 ((UINT32 *)CertPtr);
     Cert     = (UINT8 *)CertPtr + sizeof (UINT32);
 
-    if (IsCertHashRevoked (Cert, CertSize, RevokedDb, &RevocationTime)) {
+    if (IsCertHashRevoked (Cert, CertSize, RevokedDb)) {
       //
-      // Check the timestamp signature and signing time to determine if p7 data can be trusted.
+      // The certificate hash is found in the revocation database.
       //
       Status = EFI_SUCCESS;
-      if (IsValidTimestamp (SignedData, SignedDataSize, TimeStampDb, &RevocationTime)) {
-        //
-        // Use EFI_NOT_READY to identify the P7Data is not revoked, because the timestamping
-        // occurred prior to the time of certificate revocation.
-        //
-        Status = EFI_NOT_READY;
-      }
-
       goto _Exit;
     }
 
@@ -679,8 +511,7 @@ _Exit:
 
 /**
   Check whether the PKCS7 signedData is revoked by verifying with the revoked
-  certificates database, and if the signedData is timestamped, the embedded timestamp
-  counterSignature will be checked with the supplied timestamp database.
+  certificates database.
 
   @param[in]  SignedData      Pointer to buffer containing ASN.1 DER-encoded PKCS7
                               signature.
@@ -691,9 +522,6 @@ _Exit:
   @param[in]  RevokedDb       Pointer to a list of pointers to EFI_SIGNATURE_LIST
                               structure which contains list of X.509 certificates
                               of revoked signers and revoked content hashes.
-  @param[in]  TimeStampDb     Pointer to a list of pointers to EFI_SIGNATURE_LIST
-                              structures which is used to pass a list of X.509
-                              certificates of trusted timestamp signers.
 
   @retval  EFI_SUCCESS             The PKCS7 signedData is revoked.
   @retval  EFI_SECURITY_VIOLATION  Fail to verify the signature in PKCS7 signedData.
@@ -711,8 +539,7 @@ P7CheckRevocation (
   IN UINTN               SignedDataSize,
   IN UINT8               *InData,
   IN UINTN               InDataSize,
-  IN EFI_SIGNATURE_LIST  **RevokedDb,
-  IN EFI_SIGNATURE_LIST  **TimeStampDb
+  IN EFI_SIGNATURE_LIST  **RevokedDb
   )
 {
   EFI_STATUS          Status;
@@ -729,7 +556,6 @@ P7CheckRevocation (
   UINT8               *CertPtr;
   UINT8               *Cert;
   UINTN               CertSize;
-  EFI_TIME            RevocationTime;
 
   Status          = EFI_UNSUPPORTED;
   SigData         = NULL;
@@ -792,12 +618,8 @@ P7CheckRevocation (
   }
 
   //
-  // Now we will continue to check the X.509 Certificate Hash & Possible Timestamp
+  // Check the X.509 Certificate Hash in the revoked database.
   //
-  if ((TimeStampDb == NULL) || (*TimeStampDb == NULL)) {
-    goto _Exit;
-  }
-
   Pkcs7GetSigners (SignedData, SignedDataSize, &CertBuffer, &BufferLength, &TrustedCert, &TrustedCertLength);
   if ((BufferLength == 0) || (CertBuffer == NULL)) {
     Status = EFI_SUCCESS;
@@ -816,19 +638,11 @@ P7CheckRevocation (
     CertSize = (UINTN)ReadUnaligned32 ((UINT32 *)CertPtr);
     Cert     = (UINT8 *)CertPtr + sizeof (UINT32);
 
-    if (IsCertHashRevoked (Cert, CertSize, RevokedDb, &RevocationTime)) {
+    if (IsCertHashRevoked (Cert, CertSize, RevokedDb)) {
       //
-      // Check the timestamp signature and signing time to determine if p7 data can be trusted.
+      // The certificate hash is found in the revocation database.
       //
       Status = EFI_SUCCESS;
-      if (IsValidTimestamp (SignedData, SignedDataSize, TimeStampDb, &RevocationTime)) {
-        //
-        // Use EFI_NOT_READY to identify the P7Data is not revoked, because the timestamping
-        // occurred prior to the time of certificate revocation.
-        //
-        Status = EFI_NOT_READY;
-      }
-
       goto _Exit;
     }
 
@@ -1061,19 +875,13 @@ P7CheckTrust (
   @param[in]     RevokedDb            Optional pointer to a list of pointers to
                                       EFI_SIGNATURE_LIST structures. The list is terminated
                                       by a null pointer. List of X.509 certificates of
-                                      revoked signers and revoked file hashes. Except as
-                                      noted in description of TimeStampDb signature
+                                      revoked signers and revoked file hashes. Signature
                                       verification will always fail if the signer of the
                                       file or the hash of the data component of the buffer
                                       is in RevokedDb list. This list is optional and
                                       caller may pass Null or pointer to NULL if not
                                       required.
-  @param[in]     TimeStampDb          Optional pointer to a list of pointers to
-                                      EFI_SIGNATURE_LIST structures. The list is terminated
-                                      by a null pointer. This parameter can be used to pass
-                                      a list of X.509 certificates of trusted time stamp
-                                      signers. This list is optional and caller must pass
-                                      Null or pointer to NULL if not required.
+  @param[in]     TimeStampDb          [DEPRECATED] This parameter is ignored.
   @param[out]    Content              On input, points to an optional caller-allocated
                                       buffer into which the function will copy the content
                                       portion of the file after verification succeeds.
@@ -1091,11 +899,8 @@ P7CheckTrust (
 
   @retval EFI_SUCCESS                 Content signature was verified against hash of
                                       content, the signer's certificate was not found in
-                                      RevokedDb, and was found in AllowedDb or if in signer
-                                      is found in both AllowedDb and RevokedDb, the
-                                      signing was allowed by reference to TimeStampDb as
-                                      described above, and no hash matching content hash
-                                      was found in RevokedDb.
+                                      RevokedDb, and was found in AllowedDb, and no hash
+                                      matching content hash was found in RevokedDb.
   @retval EFI_SECURITY_VIOLATION      The SignedData buffer was correctly formatted but
                                       signer was in RevokedDb or not in AllowedDb. Also
                                       returned if matching content hash found in RevokedDb.
@@ -1103,7 +908,7 @@ P7CheckTrust (
   @retval EFI_INVALID_PARAMETER       SignedData is NULL or SignedDataSize is zero.
                                       AllowedDb is NULL.
   @retval EFI_INVALID_PARAMETER       Content is not NULL and ContentSize is NULL.
-  @retval EFI_ABORTED                 Unsupported or invalid format in TimeStampDb,
+  @retval EFI_ABORTED                 Unsupported or invalid format in
                                       RevokedDb or AllowedDb list contents was detected.
   @retval EFI_NOT_FOUND               Content not found because InData is NULL and no
                                       content embedded in SignedData.
@@ -1189,26 +994,6 @@ VerifyBuffer (
   }
 
   //
-  // Check if any invalid entry format in TimeStampDb list contents
-  //
-  if (TimeStampDb != NULL) {
-    for (Index = 0; ; Index++) {
-      SigList = (EFI_SIGNATURE_LIST *)(TimeStampDb[Index]);
-
-      if (SigList == NULL) {
-        break;
-      }
-
-      if (SigList->SignatureListSize < sizeof (EFI_SIGNATURE_LIST) +
-          SigList->SignatureHeaderSize +
-          SigList->SignatureSize)
-      {
-        return EFI_ABORTED;
-      }
-    }
-  }
-
-  //
   // Try to retrieve the attached content from PKCS7 signedData
   //
   AttachedData     = NULL;
@@ -1267,8 +1052,7 @@ VerifyBuffer (
                SignedDataSize,
                DataPtr,
                DataSize,
-               RevokedDb,
-               TimeStampDb
+               RevokedDb
                );
     if (!EFI_ERROR (Status)) {
       //
@@ -1360,19 +1144,12 @@ _Exit:
                                       file or the hash of the data component of the buffer
                                       is in RevokedDb list. This parameter is optional
                                       and caller may pass Null if not required.
-  @param[in]     TimeStampDb          Optional pointer to a list of pointers to
-                                      EFI_SIGNATURE_LIST structures. The list is terminated
-                                      by a null pointer. This parameter can be used to pass
-                                      a list of X.509 certificates of trusted time stamp
-                                      counter-signers.
+  @param[in]     TimeStampDb          [DEPRECATED] This parameter is ignored.
 
   @retval EFI_SUCCESS                 Signed hash was verified against caller-provided
                                       hash of content, the signer's certificate was not
-                                      found in RevokedDb, and was found in AllowedDb or
-                                      if in signer is found in both AllowedDb and
-                                      RevokedDb, the signing was allowed by reference to
-                                      TimeStampDb as described above, and no hash matching
-                                      content hash was found in RevokedDb.
+                                      found in RevokedDb, and was found in AllowedDb, and
+                                      no hash matching content hash was found in RevokedDb.
   @retval EFI_SECURITY_VIOLATION      The SignedData buffer was correctly formatted but
                                       signer was in RevokedDb or not in AllowedDb. Also
                                       returned if matching content hash found in RevokedDb.
@@ -1380,7 +1157,7 @@ _Exit:
                                       caller and encrypted hash are different sizes.
   @retval EFI_INVALID_PARAMETER       Signature is NULL or SignatureSize is zero. InHash
                                       is NULL or InHashSize is zero. AllowedDb is NULL.
-  @retval EFI_ABORTED                 Unsupported or invalid format in TimeStampDb,
+  @retval EFI_ABORTED                 Unsupported or invalid format in
                                       RevokedDb or AllowedDb list contents was detected.
   @retval EFI_UNSUPPORTED             The Signature buffer was not correctly formatted
                                       for processing by the function.
@@ -1419,8 +1196,7 @@ VerifySignature (
                SignatureSize,
                InHash,
                InHashSize,
-               RevokedDb,
-               TimeStampDb
+               RevokedDb
                );
 
     if (!EFI_ERROR (Status)) {
