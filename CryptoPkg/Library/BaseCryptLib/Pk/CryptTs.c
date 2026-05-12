@@ -16,7 +16,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <openssl/asn1t.h>
 #include <openssl/x509.h>
 #include <openssl/x509v3.h>
-#include <openssl/pkcs7.h>
+#include <openssl/cms.h>
 
 //
 // OID ASN.1 Value for SPC_RFC3161_OBJID ("1.3.6.1.4.1.311.3.3.1")
@@ -385,17 +385,17 @@ TimestampTokenVerify (
   OUT EFI_TIME     *SigningTime
   )
 {
-  BOOLEAN      Status;
-  CONST UINT8  *TokenTemp;
-  PKCS7        *Pkcs7;
-  X509         *Cert;
-  CONST UINT8  *CertTemp;
-  X509_STORE   *CertStore;
-  BIO          *OutBio;
-  UINT8        *TstData;
-  UINTN        TstSize;
-  CONST UINT8  *TstTemp;
-  TS_TST_INFO  *TstInfo;
+  BOOLEAN          Status;
+  CONST UINT8      *TokenTemp;
+  CMS_ContentInfo  *Cms;
+  X509             *Cert;
+  CONST UINT8      *CertTemp;
+  X509_STORE       *CertStore;
+  BIO              *OutBio;
+  UINT8            *TstData;
+  UINTN            TstSize;
+  CONST UINT8      *TstTemp;
+  TS_TST_INFO      *TstInfo;
 
   Status = FALSE;
 
@@ -415,7 +415,7 @@ TimestampTokenVerify (
     SetMem (SigningTime, sizeof (EFI_TIME), 0);
   }
 
-  Pkcs7     = NULL;
+  Cms       = NULL;
   Cert      = NULL;
   CertStore = NULL;
   OutBio    = NULL;
@@ -426,15 +426,15 @@ TimestampTokenVerify (
   // TimeStamp Token should contain one valid DER-encoded ASN.1 PKCS#7 structure.
   //
   TokenTemp = TSToken;
-  Pkcs7     = d2i_PKCS7 (NULL, (const unsigned char **)&TokenTemp, (int)TokenSize);
-  if (Pkcs7 == NULL) {
+  Cms       = d2i_CMS_ContentInfo (NULL, (const unsigned char **)&TokenTemp, (int)TokenSize);
+  if (Cms == NULL) {
     goto _Exit;
   }
 
   //
   // The timestamp signature (TSA's response) will be one PKCS#7 signed data.
   //
-  if (!PKCS7_type_is_signed (Pkcs7)) {
+  if (OBJ_obj2nid (CMS_get0_type (Cms)) != NID_pkcs7_signed) {
     goto _Exit;
   }
 
@@ -474,7 +474,7 @@ TimestampTokenVerify (
     goto _Exit;
   }
 
-  if (!PKCS7_verify (Pkcs7, NULL, CertStore, NULL, OutBio, PKCS7_BINARY)) {
+  if (!CMS_verify (Cms, NULL, CertStore, NULL, OutBio, CMS_BINARY)) {
     goto _Exit;
   }
 
@@ -521,7 +521,7 @@ _Exit:
   //
   // Release Resources
   //
-  PKCS7_free (Pkcs7);
+  CMS_ContentInfo_free (Cms);
   X509_free (Cert);
   X509_STORE_free (CertStore);
   BIO_free (OutBio);
@@ -532,6 +532,142 @@ _Exit:
   }
 
   return Status;
+}
+
+/**
+  Patch the eContent tag in Authenticode DER data from SEQUENCE (0x30) to
+  OCTET STRING (0x04) to enable CMS parsing.
+
+  Authenticode signatures use SPC_INDIRECT_DATA content type which encodes
+  eContent as a SEQUENCE. CMS EncapsulatedContentInfo strictly requires
+  eContent to be OCTET STRING per RFC 5652. This function navigates the
+  DER structure of ContentInfo -> SignedData -> EncapsulatedContentInfo
+  to find and patch the eContent tag byte.
+
+  @param[in,out]  Der      Mutable copy of the DER-encoded Authenticode data.
+  @param[in]      DerSize  Size of the DER data in bytes.
+
+  @retval  TRUE   The tag was successfully patched (or no eContent present).
+  @retval  FALSE  Failed to navigate the DER structure.
+
+**/
+STATIC
+BOOLEAN
+PatchSpcContentTag (
+  IN OUT UINT8  *Der,
+  IN     UINTN  DerSize
+  )
+{
+  CONST UINT8  *p;
+  CONST UINT8  *pStart;
+  long         Length;
+  int          Tag;
+  int          Cls;
+  int          Ret;
+  UINTN        Offset;
+
+  p      = (CONST UINT8 *)Der;
+  pStart = p;
+
+  //
+  // ContentInfo SEQUENCE
+  //
+  Ret = ASN1_get_object (&p, &Length, &Tag, &Cls, (long)(DerSize - (UINTN)(p - pStart)));
+  if ((Ret & 0x80) || (Tag != V_ASN1_SEQUENCE)) {
+    return FALSE;
+  }
+
+  //
+  // contentType OID (skip over)
+  //
+  Ret = ASN1_get_object (&p, &Length, &Tag, &Cls, (long)(DerSize - (UINTN)(p - pStart)));
+  if ((Ret & 0x80) || (Tag != V_ASN1_OBJECT)) {
+    return FALSE;
+  }
+
+  p += Length;
+
+  //
+  // [0] EXPLICIT content wrapper
+  //
+  Ret = ASN1_get_object (&p, &Length, &Tag, &Cls, (long)(DerSize - (UINTN)(p - pStart)));
+  if ((Ret & 0x80) || (Tag != 0) || (Cls != V_ASN1_CONTEXT_SPECIFIC)) {
+    return FALSE;
+  }
+
+  //
+  // SignedData SEQUENCE
+  //
+  Ret = ASN1_get_object (&p, &Length, &Tag, &Cls, (long)(DerSize - (UINTN)(p - pStart)));
+  if ((Ret & 0x80) || (Tag != V_ASN1_SEQUENCE)) {
+    return FALSE;
+  }
+
+  //
+  // version INTEGER (skip over)
+  //
+  Ret = ASN1_get_object (&p, &Length, &Tag, &Cls, (long)(DerSize - (UINTN)(p - pStart)));
+  if ((Ret & 0x80) || (Tag != V_ASN1_INTEGER)) {
+    return FALSE;
+  }
+
+  p += Length;
+
+  //
+  // digestAlgorithms SET (skip over)
+  //
+  Ret = ASN1_get_object (&p, &Length, &Tag, &Cls, (long)(DerSize - (UINTN)(p - pStart)));
+  if ((Ret & 0x80) || (Tag != V_ASN1_SET)) {
+    return FALSE;
+  }
+
+  p += Length;
+
+  //
+  // EncapsulatedContentInfo SEQUENCE (enter)
+  //
+  Ret = ASN1_get_object (&p, &Length, &Tag, &Cls, (long)(DerSize - (UINTN)(p - pStart)));
+  if ((Ret & 0x80) || (Tag != V_ASN1_SEQUENCE)) {
+    return FALSE;
+  }
+
+  //
+  // eContentType OID (skip over)
+  //
+  Ret = ASN1_get_object (&p, &Length, &Tag, &Cls, (long)(DerSize - (UINTN)(p - pStart)));
+  if ((Ret & 0x80) || (Tag != V_ASN1_OBJECT)) {
+    return FALSE;
+  }
+
+  p += Length;
+
+  //
+  // [0] EXPLICIT eContent (optional, may not be present for detached content)
+  //
+  if ((UINTN)(p - pStart) >= DerSize) {
+    return TRUE;
+  }
+
+  Ret = ASN1_get_object (&p, &Length, &Tag, &Cls, (long)(DerSize - (UINTN)(p - pStart)));
+  if ((Ret & 0x80) || (Tag != 0) || (Cls != V_ASN1_CONTEXT_SPECIFIC)) {
+    //
+    // No [0] eContent tag found - detached content, nothing to patch.
+    //
+    return TRUE;
+  }
+
+  //
+  // p now points to the eContent value. If the tag is SEQUENCE (0x30),
+  // patch it to OCTET STRING (0x04) so the CMS decoder can parse it.
+  //
+  Offset = (UINTN)(p - pStart);
+  if ((Offset >= DerSize) || (Der[Offset] != 0x30)) {
+    return FALSE;
+  }
+
+  Der[Offset] = 0x04;
+
+  return TRUE;
 }
 
 /**
@@ -563,15 +699,16 @@ ImageTimestampVerify (
   OUT EFI_TIME     *SigningTime
   )
 {
-  BOOLEAN      Status;
-  PKCS7        *Pkcs7;
-  CONST UINT8  *Temp;
+  BOOLEAN          Status;
+  CMS_ContentInfo  *Cms;
+  CONST UINT8      *Temp;
+  UINT8            *AuthDataCopy;
 
-  STACK_OF (PKCS7_SIGNER_INFO)  *SignerInfos;
-  PKCS7_SIGNER_INFO  *SignInfo;
+  STACK_OF (CMS_SignerInfo)  *SignerInfos;
+  CMS_SignerInfo     *SignInfo;
   UINTN              Index;
+  INT32              UnsignedAttrCount;
 
-  STACK_OF (X509_ATTRIBUTE)     *Sk;
   X509_ATTRIBUTE     *Xa;
   ASN1_OBJECT        *XaObj;
   ASN1_TYPE          *Asn1Type;
@@ -603,31 +740,49 @@ ImageTimestampVerify (
   //
   // Initialization.
   //
-  Status   = FALSE;
-  Pkcs7    = NULL;
-  SignInfo = NULL;
+  Status       = FALSE;
+  Cms          = NULL;
+  SignInfo     = NULL;
+  AuthDataCopy = NULL;
 
   //
-  // Decode ASN.1-encoded Authenticode data into PKCS7 structure.
+  // Authenticode uses SPC_INDIRECT_DATA content type which encodes eContent
+  // as a SEQUENCE. CMS requires eContent to be OCTET STRING per RFC 5652.
+  // Make a copy and patch the eContent tag to enable CMS parsing.
+  // This is safe because we only access SignerInfo fields, not eContent.
   //
-  Temp  = AuthData;
-  Pkcs7 = d2i_PKCS7 (NULL, (const unsigned char **)&Temp, (int)DataSize);
-  if (Pkcs7 == NULL) {
+  AuthDataCopy = AllocatePool (DataSize);
+  if (AuthDataCopy == NULL) {
+    goto _Exit;
+  }
+
+  CopyMem (AuthDataCopy, AuthData, DataSize);
+
+  if (!PatchSpcContentTag (AuthDataCopy, DataSize)) {
+    goto _Exit;
+  }
+
+  //
+  // Decode ASN.1-encoded Authenticode data into CMS structure.
+  //
+  Temp = (CONST UINT8 *)AuthDataCopy;
+  Cms  = d2i_CMS_ContentInfo (NULL, (const unsigned char **)&Temp, (int)DataSize);
+  if (Cms == NULL) {
     goto _Exit;
   }
 
   //
   // Check if there is one and only one signer.
   //
-  SignerInfos = PKCS7_get_signer_info (Pkcs7);
-  if (!SignerInfos || (sk_PKCS7_SIGNER_INFO_num (SignerInfos) != 1)) {
+  SignerInfos = CMS_get0_SignerInfos (Cms);
+  if (!SignerInfos || (sk_CMS_SignerInfo_num (SignerInfos) != 1)) {
     goto _Exit;
   }
 
   //
   // Locate the TimeStamp CounterSignature.
   //
-  SignInfo = sk_PKCS7_SIGNER_INFO_value (SignerInfos, 0);
+  SignInfo = sk_CMS_SignerInfo_value (SignerInfos, 0);
   if (SignInfo == NULL) {
     goto _Exit;
   }
@@ -635,7 +790,7 @@ ImageTimestampVerify (
   //
   // Locate Message Digest which will be the data to be time-stamped.
   //
-  EncDigest = SignInfo->enc_digest;
+  EncDigest = (ASN1_OCTET_STRING *)CMS_SignerInfo_get0_signature (SignInfo);
   if (EncDigest == NULL) {
     goto _Exit;
   }
@@ -644,18 +799,18 @@ ImageTimestampVerify (
   // The RFC3161 timestamp counterSignature is contained in unauthenticatedAttributes field
   // of SignerInfo.
   //
-  Sk = SignInfo->unauth_attr;
-  if (Sk == NULL) {
+  UnsignedAttrCount = CMS_unsigned_get_attr_count (SignInfo);
+  if (UnsignedAttrCount <= 0) {
     // No timestamp counterSignature.
     goto _Exit;
   }
 
   Asn1Type = NULL;
-  for (Index = 0; Index < (UINTN)sk_X509_ATTRIBUTE_num (Sk); Index++) {
+  for (Index = 0; Index < (UINTN)UnsignedAttrCount; Index++) {
     //
     // Search valid RFC3161 timestamp counterSignature based on OBJID.
     //
-    Xa = sk_X509_ATTRIBUTE_value (Sk, (int)Index);
+    Xa = CMS_unsigned_get_attr (SignInfo, (int)Index);
     if (Xa == NULL) {
       continue;
     }
@@ -699,7 +854,11 @@ _Exit:
   //
   // Release Resources
   //
-  PKCS7_free (Pkcs7);
+  CMS_ContentInfo_free (Cms);
+
+  if (AuthDataCopy != NULL) {
+    FreePool (AuthDataCopy);
+  }
 
   return Status;
 }

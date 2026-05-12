@@ -11,69 +11,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <openssl/objects.h>
 #include <openssl/x509.h>
 #include <openssl/x509v3.h>
-#include <openssl/pkcs7.h>
-
-/**
-  Check the contents of PKCS7 is not data.
-
-  It is copied from PKCS7_type_is_other() in pk7_doit.c.
-
-  @param[in] P7 Pointer to the location at which the PKCS7 is located.
-
-  @retval TRUE  If the type is others.
-  @retval FALSE If the type is expected.
-**/
-STATIC
-BOOLEAN
-Pkcs7TypeIsOther (
-  IN PKCS7  *P7
-  )
-{
-  BOOLEAN  Others;
-  INTN     Nid = OBJ_obj2nid (P7->type);
-
-  switch (Nid) {
-    case NID_pkcs7_data:
-    case NID_pkcs7_signed:
-    case NID_pkcs7_enveloped:
-    case NID_pkcs7_signedAndEnveloped:
-    case NID_pkcs7_encrypted:
-      Others = FALSE;
-      break;
-    default:
-      Others = TRUE;
-  }
-
-  return Others;
-}
-
-/**
-  Get the ASN.1 string for the PKCS7.
-
-  It is copied from PKCS7_get_octet_string() in pk7_doit.c.
-
-  @param[in] P7 Pointer to the location at which the PKCS7 is located.
-
-  @return ASN1_OCTET_STRING ASN.1 string.
-**/
-STATIC
-ASN1_OCTET_STRING *
-Pkcs7GetOctetString (
-  IN PKCS7  *P7
-  )
-{
-  if (PKCS7_type_is_data (P7)) {
-    return P7->d.data;
-  }
-
-  if (Pkcs7TypeIsOther (P7) && (P7->d.other != NULL) &&
-      (P7->d.other->type == V_ASN1_OCTET_STRING))
-  {
-    return P7->d.other->value.octet_string;
-  }
-
-  return NULL;
-}
+#include <openssl/cms.h>
 
 /**
   Extracts the attached content from a PKCS#7 signed data if existed. The input signed
@@ -104,13 +42,13 @@ Pkcs7GetAttachedContent (
   OUT UINTN        *ContentSize
   )
 {
-  BOOLEAN            Status;
-  PKCS7              *Pkcs7;
-  UINT8              *SignedData;
-  UINTN              SignedDataSize;
-  BOOLEAN            Wrapped;
-  CONST UINT8        *Temp;
-  ASN1_OCTET_STRING  *OctStr;
+  BOOLEAN          Status;
+  CMS_ContentInfo  *Cms;
+  UINT8            *SignedData;
+  UINTN            SignedDataSize;
+  BOOLEAN          Wrapped;
+  CONST UINT8      *Temp;
+  ASN1_OCTET_STRING  **InnerContent;
 
   //
   // Check input parameter.
@@ -120,9 +58,8 @@ Pkcs7GetAttachedContent (
   }
 
   *Content   = NULL;
-  Pkcs7      = NULL;
+  Cms        = NULL;
   SignedData = NULL;
-  OctStr     = NULL;
 
   Status = WrapPkcs7Data (P7Data, P7Length, &Wrapped, &SignedData, &SignedDataSize);
   if (!Status || (SignedDataSize > INT_MAX)) {
@@ -134,23 +71,23 @@ Pkcs7GetAttachedContent (
   //
   // Decoding PKCS#7 SignedData
   //
-  Temp  = SignedData;
-  Pkcs7 = d2i_PKCS7 (NULL, (const unsigned char **)&Temp, (int)SignedDataSize);
-  if (Pkcs7 == NULL) {
+  Temp = SignedData;
+  Cms  = d2i_CMS_ContentInfo (NULL, (const unsigned char **)&Temp, (int)SignedDataSize);
+  if (Cms == NULL) {
     goto _Exit;
   }
 
   //
-  // The type of Pkcs7 must be signedData
+  // The type of Cms must be signedData
   //
-  if (!PKCS7_type_is_signed (Pkcs7)) {
+  if (OBJ_obj2nid (CMS_get0_type (Cms)) != NID_pkcs7_signed) {
     goto _Exit;
   }
 
   //
   // Check for detached or attached content
   //
-  if (PKCS7_get_detached (Pkcs7)) {
+  if (CMS_is_detached (Cms)) {
     //
     // No Content supplied for PKCS7 detached signedData
     //
@@ -160,20 +97,20 @@ Pkcs7GetAttachedContent (
     //
     // Retrieve the attached content in PKCS7 signedData
     //
-    OctStr = Pkcs7GetOctetString (Pkcs7->d.sign->contents);
-    if (OctStr == NULL) {
+    InnerContent = CMS_get0_content (Cms);
+    if ((InnerContent == NULL) || (*InnerContent == NULL)) {
       goto _Exit;
     }
 
-    if ((OctStr->length > 0) && (OctStr->data != NULL)) {
-      *ContentSize = OctStr->length;
+    if ((ASN1_STRING_length (*InnerContent) > 0) && (ASN1_STRING_get0_data (*InnerContent) != NULL)) {
+      *ContentSize = ASN1_STRING_length (*InnerContent);
       *Content     = AllocatePool (*ContentSize);
       if (*Content == NULL) {
         *ContentSize = 0;
         goto _Exit;
       }
 
-      CopyMem (*Content, OctStr->data, *ContentSize);
+      CopyMem (*Content, ASN1_STRING_get0_data (*InnerContent), *ContentSize);
     }
   }
 
@@ -183,7 +120,7 @@ _Exit:
   //
   // Release Resources
   //
-  PKCS7_free (Pkcs7);
+  CMS_ContentInfo_free (Cms);
 
   if (!Wrapped) {
     OPENSSL_free (SignedData);

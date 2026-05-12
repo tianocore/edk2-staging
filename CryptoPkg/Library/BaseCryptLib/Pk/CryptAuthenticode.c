@@ -18,8 +18,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 #include <openssl/objects.h>
 #include <openssl/x509.h>
-#include <openssl/pkcs7.h>
-#include <crypto/asn1.h>
+#include <openssl/cms.h>
 
 //
 // OID ASN.1 Value for SPC_INDIRECT_DATA_OBJID
@@ -39,6 +38,142 @@ GLOBAL_REMOVE_IF_UNREFERENCED const UINT8  mSpcIndirectOidValue[] = {
 GLOBAL_REMOVE_IF_UNREFERENCED const UINT8  mMicrosoftNestedSignatureOidValue[] = {
   0x2B, 0x06, 0x01, 0x04, 0x01, 0x82, 0x37, 0x02, 0x04, 0x01
 };
+
+/**
+  Patch the eContent tag in Authenticode DER data from SEQUENCE (0x30) to
+  OCTET STRING (0x04) to enable CMS parsing.
+
+  Authenticode signatures use SPC_INDIRECT_DATA content type which encodes
+  eContent as a SEQUENCE. CMS EncapsulatedContentInfo strictly requires
+  eContent to be OCTET STRING per RFC 5652. This function navigates the
+  DER structure of ContentInfo -> SignedData -> EncapsulatedContentInfo
+  to find and patch the eContent tag byte.
+
+  @param[in,out]  Der      Mutable copy of the DER-encoded Authenticode data.
+  @param[in]      DerSize  Size of the DER data in bytes.
+
+  @retval  TRUE   The tag was successfully patched (or no eContent present).
+  @retval  FALSE  Failed to navigate the DER structure.
+
+**/
+STATIC
+BOOLEAN
+PatchSpcContentTag (
+  IN OUT UINT8  *Der,
+  IN     UINTN  DerSize
+  )
+{
+  CONST UINT8  *p;
+  CONST UINT8  *pStart;
+  long         Length;
+  int          Tag;
+  int          Cls;
+  int          Ret;
+  UINTN        Offset;
+
+  p      = (CONST UINT8 *)Der;
+  pStart = p;
+
+  //
+  // ContentInfo SEQUENCE
+  //
+  Ret = ASN1_get_object (&p, &Length, &Tag, &Cls, (long)(DerSize - (UINTN)(p - pStart)));
+  if ((Ret & 0x80) || (Tag != V_ASN1_SEQUENCE)) {
+    return FALSE;
+  }
+
+  //
+  // contentType OID (skip over)
+  //
+  Ret = ASN1_get_object (&p, &Length, &Tag, &Cls, (long)(DerSize - (UINTN)(p - pStart)));
+  if ((Ret & 0x80) || (Tag != V_ASN1_OBJECT)) {
+    return FALSE;
+  }
+
+  p += Length;
+
+  //
+  // [0] EXPLICIT content wrapper
+  //
+  Ret = ASN1_get_object (&p, &Length, &Tag, &Cls, (long)(DerSize - (UINTN)(p - pStart)));
+  if ((Ret & 0x80) || (Tag != 0) || (Cls != V_ASN1_CONTEXT_SPECIFIC)) {
+    return FALSE;
+  }
+
+  //
+  // SignedData SEQUENCE
+  //
+  Ret = ASN1_get_object (&p, &Length, &Tag, &Cls, (long)(DerSize - (UINTN)(p - pStart)));
+  if ((Ret & 0x80) || (Tag != V_ASN1_SEQUENCE)) {
+    return FALSE;
+  }
+
+  //
+  // version INTEGER (skip over)
+  //
+  Ret = ASN1_get_object (&p, &Length, &Tag, &Cls, (long)(DerSize - (UINTN)(p - pStart)));
+  if ((Ret & 0x80) || (Tag != V_ASN1_INTEGER)) {
+    return FALSE;
+  }
+
+  p += Length;
+
+  //
+  // digestAlgorithms SET (skip over)
+  //
+  Ret = ASN1_get_object (&p, &Length, &Tag, &Cls, (long)(DerSize - (UINTN)(p - pStart)));
+  if ((Ret & 0x80) || (Tag != V_ASN1_SET)) {
+    return FALSE;
+  }
+
+  p += Length;
+
+  //
+  // EncapsulatedContentInfo SEQUENCE (enter)
+  //
+  Ret = ASN1_get_object (&p, &Length, &Tag, &Cls, (long)(DerSize - (UINTN)(p - pStart)));
+  if ((Ret & 0x80) || (Tag != V_ASN1_SEQUENCE)) {
+    return FALSE;
+  }
+
+  //
+  // eContentType OID (skip over)
+  //
+  Ret = ASN1_get_object (&p, &Length, &Tag, &Cls, (long)(DerSize - (UINTN)(p - pStart)));
+  if ((Ret & 0x80) || (Tag != V_ASN1_OBJECT)) {
+    return FALSE;
+  }
+
+  p += Length;
+
+  //
+  // [0] EXPLICIT eContent (optional, may not be present for detached content)
+  //
+  if ((UINTN)(p - pStart) >= DerSize) {
+    return TRUE;
+  }
+
+  Ret = ASN1_get_object (&p, &Length, &Tag, &Cls, (long)(DerSize - (UINTN)(p - pStart)));
+  if ((Ret & 0x80) || (Tag != 0) || (Cls != V_ASN1_CONTEXT_SPECIFIC)) {
+    //
+    // No [0] eContent tag found - detached content, nothing to patch.
+    //
+    return TRUE;
+  }
+
+  //
+  // p now points to the eContent value. If the tag is SEQUENCE (0x30),
+  // patch it to OCTET STRING (0x04) so the CMS decoder can parse it.
+  //
+  Offset = (UINTN)(p - pStart);
+  if ((Offset >= DerSize) || (Der[Offset] != 0x30)) {
+    return FALSE;
+  }
+
+  Der[Offset] = 0x04;
+
+  return TRUE;
+}
 
 /**
   Verifies the validity of a PE/COFF Authenticode Signature as described in "Windows
@@ -77,23 +212,24 @@ AuthenticodeVerify (
   IN  UINTN        HashSize
   )
 {
-  BOOLEAN                     Status;
-  PKCS7                       *Pkcs7;
-  CONST UINT8                 *Temp;
-  CONST UINT8                 *OrigAuthData;
-  UINT8                       *SpcIndirectDataContent;
-  UINT8                       Asn1Byte;
-  UINTN                       ContentSize;
-  CONST UINT8                 *SpcIndirectDataOid;
-  STACK_OF(PKCS7_SIGNER_INFO) *SiStack;
-  PKCS7_SIGNER_INFO           *Si;
-  UINT8                       *NextSig;
-  UINTN                       NextSigLen;
-  STACK_OF(X509_ATTRIBUTE)    *AttrStack;
-  INT32                       Index;
-  X509_ATTRIBUTE              *Attr;
-  ASN1_OBJECT                 *Asn1Obj;
-  ASN1_TYPE                   *Asn1Type;
+  BOOLEAN              Status;
+  CMS_ContentInfo      *Cms;
+  CONST UINT8          *Temp;
+  UINT8                *AuthDataCopy;
+  UINT8                *SpcIndirectDataContent;
+  UINTN                ContentSize;
+  CONST UINT8          *SpcIndirectDataOid;
+  CONST ASN1_OBJECT    *ContentType;
+  ASN1_OCTET_STRING    **InnerContent;
+  STACK_OF(CMS_SignerInfo) *SiStack;
+  CMS_SignerInfo       *Si;
+  UINT8                *NextSig;
+  UINTN                NextSigLen;
+  INT32                AttrCount;
+  INT32                Index;
+  X509_ATTRIBUTE       *Attr;
+  ASN1_OBJECT          *Asn1Obj;
+  ASN1_TYPE            *Asn1Type;
 
   //
   // Check input parameters.
@@ -107,36 +243,52 @@ AuthenticodeVerify (
   }
 
   Status       = FALSE;
-  Pkcs7        = NULL;
-  OrigAuthData = AuthData;
+  Cms          = NULL;
+  AuthDataCopy = NULL;
+
+  //
+  // Authenticode uses SPC_INDIRECT_DATA content type which encodes eContent
+  // as a SEQUENCE. CMS requires eContent to be OCTET STRING per RFC 5652.
+  // Make a copy and patch the eContent tag to enable CMS parsing.
+  //
+  AuthDataCopy = AllocatePool (DataSize);
+  if (AuthDataCopy == NULL) {
+    goto _Exit;
+  }
+
+  CopyMem (AuthDataCopy, AuthData, DataSize);
+
+  if (!PatchSpcContentTag (AuthDataCopy, DataSize)) {
+    goto _Exit;
+  }
 
   //
   // Retrieve & Parse PKCS#7 Data (DER encoding) from Authenticode Signature
   //
-  Temp  = AuthData;
-  Pkcs7 = d2i_PKCS7 (NULL, &Temp, (int)DataSize);
-  if (Pkcs7 == NULL) {
+  Temp = (CONST UINT8 *)AuthDataCopy;
+  Cms  = d2i_CMS_ContentInfo (NULL, (const unsigned char **)&Temp, (int)DataSize);
+  if (Cms == NULL) {
     goto _Exit;
   }
 
   //
   // Check if it's PKCS#7 Signed Data (for Authenticode Scenario)
   //
-  if (!PKCS7_type_is_signed (Pkcs7) || PKCS7_get_detached (Pkcs7)) {
+  if ((OBJ_obj2nid (CMS_get0_type (Cms)) != NID_pkcs7_signed) || CMS_is_detached (Cms)) {
     goto _Exit;
   }
 
   //
-  // NOTE: OpenSSL PKCS7 Decoder didn't work for Authenticode-format signed data due to
-  //       some authenticode-specific structure. Use opaque ASN.1 string to retrieve
-  //       PKCS#7 ContentInfo here.
+  // NOTE: OpenSSL CMS Decoder works for Authenticode after eContent tag patching.
+  //       Retrieve the eContentType and eContent from CMS EncapsulatedContentInfo.
   //
-  SpcIndirectDataOid = OBJ_get0_data (Pkcs7->d.sign->contents->type);
+  ContentType = CMS_get0_eContentType (Cms);
+  SpcIndirectDataOid = OBJ_get0_data (ContentType);
   if (SpcIndirectDataOid == NULL) {
     goto _Exit;
   }
 
-  if ((OBJ_length (Pkcs7->d.sign->contents->type) != sizeof (mSpcIndirectOidValue)) ||
+  if ((OBJ_length (ContentType) != sizeof (mSpcIndirectOidValue)) ||
       (CompareMem (
          SpcIndirectDataOid,
          mSpcIndirectOidValue,
@@ -149,42 +301,20 @@ AuthenticodeVerify (
     goto _Exit;
   }
 
-  SpcIndirectDataContent = (UINT8 *)(Pkcs7->d.sign->contents->d.other->value.asn1_string->data);
+  InnerContent = CMS_get0_content (Cms);
+  if ((InnerContent == NULL) || (*InnerContent == NULL)) {
+    goto _Exit;
+  }
 
   //
-  // Retrieve the SEQUENCE data size from ASN.1-encoded SpcIndirectDataContent.
+  // CMS decodes the patched OCTET STRING eContent and returns the value
+  // directly (without the SEQUENCE tag/length header). Use ASN1_STRING_length
+  // to get the content size and ASN1_STRING_get0_data for the raw content.
   //
-  Asn1Byte = *(SpcIndirectDataContent + 1);
+  SpcIndirectDataContent = (UINT8 *)ASN1_STRING_get0_data (*InnerContent);
+  ContentSize            = (UINTN)ASN1_STRING_length (*InnerContent);
 
-  if ((Asn1Byte & 0x80) == 0) {
-    //
-    // Short Form of Length Encoding (Length < 128)
-    //
-    ContentSize = (UINTN)(Asn1Byte & 0x7F);
-    //
-    // Skip the SEQUENCE Tag;
-    //
-    SpcIndirectDataContent += 2;
-  } else if ((Asn1Byte & 0x81) == 0x81) {
-    //
-    // Long Form of Length Encoding (128 <= Length < 255, Single Octet)
-    //
-    ContentSize = (UINTN)(*(UINT8 *)(SpcIndirectDataContent + 2));
-    //
-    // Skip the SEQUENCE Tag;
-    //
-    SpcIndirectDataContent += 3;
-  } else if ((Asn1Byte & 0x82) == 0x82) {
-    //
-    // Long Form of Length Encoding (Length > 255, Two Octet)
-    //
-    ContentSize = (UINTN)(*(UINT8 *)(SpcIndirectDataContent + 2));
-    ContentSize = (ContentSize << 8) + (UINTN)(*(UINT8 *)(SpcIndirectDataContent + 3));
-    //
-    // Skip the SEQUENCE Tag;
-    //
-    SpcIndirectDataContent += 4;
-  } else {
+  if ((ContentSize == 0) || (ContentSize <= HashSize)) {
     goto _Exit;
   }
 
@@ -201,37 +331,36 @@ AuthenticodeVerify (
   }
 
   //
-  // Try to extract Nested Signature for multiple signature case 
+  // Try to extract Nested Signature for multiple signature case
   //
   SiStack    = NULL;
   Si         = NULL;
   NextSig    = NULL;
   NextSigLen = 0;
-  AttrStack  = NULL;
   Attr       = NULL;
   Asn1Obj    = NULL;
   Asn1Type   = NULL;
 
-  SiStack = PKCS7_get_signer_info(Pkcs7);
-  if (SiStack == NULL || sk_PKCS7_SIGNER_INFO_num(SiStack) != 1) {
+  SiStack = CMS_get0_SignerInfos (Cms);
+  if (SiStack == NULL || sk_CMS_SignerInfo_num(SiStack) != 1) {
     //
     // Only single Singer Info is supported in Authenticode Verification
     //
-    DEBUG ((DEBUG_INFO, "AuthenticodeVerify - Fail due to None or Mutiple signer info found! Number = 0x%x\n", sk_PKCS7_SIGNER_INFO_num(SiStack)));
+    DEBUG ((DEBUG_INFO, "AuthenticodeVerify - Fail due to None or Mutiple signer info found! Number = 0x%x\n", sk_CMS_SignerInfo_num(SiStack)));
     goto _Exit;
   }
 
-  Si = sk_PKCS7_SIGNER_INFO_value(SiStack, 0);
-  if (Si->unauth_attr == NULL) {
+  Si = sk_CMS_SignerInfo_value(SiStack, 0);
+  AttrCount = CMS_unsigned_get_attr_count (Si);
+  if (AttrCount <= 0) {
     DEBUG ((DEBUG_INFO, "AuthenticodeVerify - Not found unauth_attr, go to single sig path!\n"));
   } else {
-    AttrStack = Si->unauth_attr;
-    for (Index = 0; Index < sk_X509_ATTRIBUTE_num(AttrStack); Index++) {
-        Attr    = sk_X509_ATTRIBUTE_value(AttrStack, Index);
+    for (Index = 0; Index < AttrCount; Index++) {
+        Attr    = CMS_unsigned_get_attr (Si, Index);
         Asn1Obj = X509_ATTRIBUTE_get0_object(Attr);
 
-        if (Asn1Obj->length == sizeof(mMicrosoftNestedSignatureOidValue) &&
-            CompareMem(Asn1Obj->data, mMicrosoftNestedSignatureOidValue, Asn1Obj->length) == 0) {
+        if (OBJ_length(Asn1Obj) == sizeof(mMicrosoftNestedSignatureOidValue) &&
+            CompareMem(OBJ_get0_data(Asn1Obj), mMicrosoftNestedSignatureOidValue, OBJ_length(Asn1Obj)) == 0) {
 
             Asn1Type = X509_ATTRIBUTE_get0_type(Attr, 0);
             if (Asn1Type != NULL && ((Asn1Type->type == V_ASN1_SET) || (Asn1Type->type == V_ASN1_SEQUENCE))) {
@@ -267,15 +396,21 @@ AuthenticodeVerify (
   }
 
   //
-  // Verifies the PKCS#7 Signed Data in PE/COFF Authenticode Signature
+  // Verifies the PKCS#7 Signed Data in PE/COFF Authenticode Signature.
+  // Use the patched copy (AuthDataCopy) so that Pkcs7Verify can parse it
+  // as CMS with OCTET STRING eContent tag.
   //
-  Status = (BOOLEAN)Pkcs7Verify (OrigAuthData, DataSize, TrustedCert, CertSize, SpcIndirectDataContent, ContentSize);
+  Status = (BOOLEAN)Pkcs7Verify (AuthDataCopy, DataSize, TrustedCert, CertSize, SpcIndirectDataContent, ContentSize);
 
 _Exit:
   //
   // Release Resources
   //
-  PKCS7_free (Pkcs7);
+  CMS_ContentInfo_free (Cms);
+
+  if (AuthDataCopy != NULL) {
+    FreePool (AuthDataCopy);
+  }
 
   return Status;
 }

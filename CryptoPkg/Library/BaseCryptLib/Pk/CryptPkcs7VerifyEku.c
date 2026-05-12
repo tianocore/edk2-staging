@@ -16,7 +16,7 @@
 #include <openssl/x509.h>
 #include <openssl/bio.h>
 #include <crypto/x509.h>
-#include <openssl/pkcs7.h>
+#include <openssl/cms.h>
 #include <openssl/bn.h>
 #include <openssl/x509_vfy.h>
 #include <openssl/pem.h>
@@ -65,8 +65,8 @@
 STATIC
 EFI_STATUS
 GetSignerCertificate (
-  IN CONST PKCS7  *CertChain,
-  OUT X509        **SignerCert
+  IN CONST CMS_ContentInfo  *Cms,
+  OUT X509                  **SignerCert
   )
 {
   EFI_STATUS  Status;
@@ -78,15 +78,21 @@ GetSignerCertificate (
   Signers       = NULL;
   NumberSigners = 0;
 
-  if ((CertChain == NULL) || (SignerCert == NULL)) {
+  if ((Cms == NULL) || (SignerCert == NULL)) {
     Status = EFI_INVALID_PARAMETER;
     goto Exit;
   }
 
   //
+  // Resolve signer certificates from the internal certificate list.
+  // CMS_get0_signers only returns signers whose certificates have been matched.
+  //
+  CMS_set1_signers_certs ((CMS_ContentInfo *)Cms, NULL, 0);
+
+  //
   // Get the signers from the chain.
   //
-  Signers = PKCS7_get0_signers ((PKCS7 *)CertChain, NULL, PKCS7_BINARY);
+  Signers = CMS_get0_signers ((CMS_ContentInfo *)Cms);
   if (Signers == NULL) {
     //
     // Fail to get signers form PKCS7
@@ -372,11 +378,10 @@ VerifyEKUsInPkcs7Signature (
   IN BOOLEAN       RequireAllPresent
   )
 {
-  EFI_STATUS  Status;
-  PKCS7       *Pkcs7;
+  EFI_STATUS       Status;
+  CMS_ContentInfo  *Cms;
 
   STACK_OF (X509)    *CertChain;
-  INT32    SignatureType;
   INT32    NumberCertsInSignature;
   X509     *SignerCert;
   UINT8    *SignedData;
@@ -386,9 +391,8 @@ VerifyEKUsInPkcs7Signature (
   BOOLEAN  Ok;
 
   Status                 = EFI_SUCCESS;
-  Pkcs7                  = NULL;
+  Cms                    = NULL;
   CertChain              = NULL;
-  SignatureType          = 0;
   NumberCertsInSignature = 0;
   SignerCert             = NULL;
   SignedData             = NULL;
@@ -433,10 +437,10 @@ VerifyEKUsInPkcs7Signature (
   Temp = SignedData;
 
   //
-  // Create the PKCS7 object.
+  // Create the CMS ContentInfo object.
   //
-  Pkcs7 = d2i_PKCS7 (NULL, (const unsigned char **)&Temp, (INT32)SignedDataSize);
-  if (Pkcs7 == NULL) {
+  Cms = d2i_CMS_ContentInfo (NULL, (const unsigned char **)&Temp, (INT32)SignedDataSize);
+  if (Cms == NULL) {
     //
     // Fail to read PKCS7 data.
     //
@@ -447,23 +451,12 @@ VerifyEKUsInPkcs7Signature (
   //
   // Get the certificate chain.
   //
-  SignatureType = OBJ_obj2nid (Pkcs7->type);
-  switch (SignatureType) {
-    case NID_pkcs7_signed:
-      if (Pkcs7->d.sign != NULL) {
-        CertChain = Pkcs7->d.sign->cert;
-      }
-
-      break;
-    case NID_pkcs7_signedAndEnveloped:
-      if (Pkcs7->d.signed_and_enveloped != NULL) {
-        CertChain = Pkcs7->d.signed_and_enveloped->cert;
-      }
-
-      break;
-    default:
-      break;
+  if (OBJ_obj2nid (CMS_get0_type (Cms)) != NID_pkcs7_signed) {
+    Status = EFI_INVALID_PARAMETER;
+    goto Exit;
   }
+
+  CertChain = CMS_get1_certs (Cms);
 
   //
   // Ensure we have a certificate stack
@@ -492,7 +485,7 @@ VerifyEKUsInPkcs7Signature (
   //
   // Get the leaf signer.
   //
-  Status = GetSignerCertificate (Pkcs7, &SignerCert);
+  Status = GetSignerCertificate (Cms, &SignerCert);
   if ((Status != EFI_SUCCESS) || (SignerCert == NULL)) {
     //
     // Fail to get the end-entity leaf signer certificate.
@@ -518,8 +511,12 @@ Exit:
     free (SignedData);
   }
 
-  if (Pkcs7 != NULL) {
-    PKCS7_free (Pkcs7);
+  if (CertChain != NULL) {
+    sk_X509_pop_free (CertChain, X509_free);
+  }
+
+  if (Cms != NULL) {
+    CMS_ContentInfo_free (Cms);
   }
 
   return Status;

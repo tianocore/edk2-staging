@@ -1,5 +1,7 @@
 /** @file
   PKCS#7 SignedData Sign Wrapper Implementation over OpenSSL.
+  Uses CMS (Cryptographic Message Syntax) API internally for
+  backward-compatible PKCS#7 SignedData generation.
 
 Copyright (c) 2009 - 2018, Intel Corporation. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
@@ -10,7 +12,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 #include <openssl/objects.h>
 #include <openssl/x509.h>
-#include <openssl/pkcs7.h>
+#include <openssl/cms.h>
 
 /**
   Creates a PKCS#7 signedData as described in "PKCS #7: Cryptographic Message
@@ -50,14 +52,14 @@ Pkcs7Sign (
   OUT  UINTN        *SignedDataSize
   )
 {
-  BOOLEAN   Status;
-  EVP_PKEY  *Key;
-  BIO       *DataBio;
-  PKCS7     *Pkcs7;
-  UINT8     *RsaContext;
-  UINT8     *P7Data;
-  UINTN     P7DataSize;
-  UINT8     *Tmp;
+  BOOLEAN          Status;
+  EVP_PKEY         *Key;
+  BIO              *DataBio;
+  CMS_ContentInfo  *Cms;
+  UINT8            *RsaContext;
+  UINT8            *P7Data;
+  UINTN            P7DataSize;
+  UINT8            *Tmp;
 
   //
   // Check input parameters.
@@ -70,7 +72,7 @@ Pkcs7Sign (
 
   RsaContext = NULL;
   Key        = NULL;
-  Pkcs7      = NULL;
+  Cms        = NULL;
   DataBio    = NULL;
   Status     = FALSE;
 
@@ -131,23 +133,23 @@ Pkcs7Sign (
   }
 
   //
-  // Create the PKCS#7 signedData structure.
+  // Create the PKCS#7 signedData structure using CMS API.
   //
-  Pkcs7 = PKCS7_sign (
-            (X509 *)SignCert,
-            Key,
-            (STACK_OF (X509) *) OtherCerts,
-            DataBio,
-            PKCS7_BINARY | PKCS7_NOATTR | PKCS7_DETACHED
-            );
-  if (Pkcs7 == NULL) {
+  Cms = CMS_sign (
+          (X509 *)SignCert,
+          Key,
+          (STACK_OF (X509) *) OtherCerts,
+          DataBio,
+          CMS_BINARY | CMS_NOATTR | CMS_DETACHED
+          );
+  if (Cms == NULL) {
     goto _Exit;
   }
 
   //
-  // Convert PKCS#7 signedData structure into DER-encoded buffer.
+  // Convert CMS signedData structure into DER-encoded buffer.
   //
-  P7DataSize = i2d_PKCS7 (Pkcs7, NULL);
+  P7DataSize = i2d_CMS_ContentInfo (Cms, NULL);
   if (P7DataSize <= 19) {
     goto _Exit;
   }
@@ -158,7 +160,7 @@ Pkcs7Sign (
   }
 
   Tmp        = P7Data;
-  P7DataSize = i2d_PKCS7 (Pkcs7, (unsigned char **)&Tmp);
+  P7DataSize = i2d_CMS_ContentInfo (Cms, (unsigned char **)&Tmp);
   ASSERT (P7DataSize > 19);
 
   //
@@ -190,8 +192,8 @@ _Exit:
     BIO_free (DataBio);
   }
 
-  if (Pkcs7 != NULL) {
-    PKCS7_free (Pkcs7);
+  if (Cms != NULL) {
+    CMS_ContentInfo_free (Cms);
   }
 
   return Status;
