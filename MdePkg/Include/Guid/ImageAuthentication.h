@@ -58,6 +58,17 @@ typedef struct {
   UINT8       SignatureData[1];
 } EFI_SIGNATURE_DATA;
 
+///
+/// The format of a V2 signature data element without SignatureOwner.
+/// Used with EFI_CERT_V2_* signature types.
+///
+typedef struct {
+  ///
+  /// The format of the signature is defined by the SignatureType.
+  ///
+  UINT8    SignatureData[1];
+} EFI_SIGNATURE_V2_DATA;
+
 typedef struct {
   ///
   /// Type of the signature. GUID signature types are defined in below.
@@ -131,6 +142,38 @@ typedef struct {
   EFI_TIME        Reserved;
 } EFI_CERT_X509_SM3;
 
+///
+/// V2 certificate hash structures.
+/// These do not include a TimeOfRevocation field.
+///
+typedef struct {
+  ///
+  /// The SHA256 hash of an X.509 certificate's To-Be-Signed contents.
+  ///
+  EFI_SHA256_HASH    ToBeSignedHash;
+} EFI_CERT_V2_X509_SHA256;
+
+typedef struct {
+  ///
+  /// The SHA384 hash of an X.509 certificate's To-Be-Signed contents.
+  ///
+  EFI_SHA384_HASH    ToBeSignedHash;
+} EFI_CERT_V2_X509_SHA384;
+
+typedef struct {
+  ///
+  /// The SHA512 hash of an X.509 certificate's To-Be-Signed contents.
+  ///
+  EFI_SHA512_HASH    ToBeSignedHash;
+} EFI_CERT_V2_X509_SHA512;
+
+typedef struct {
+  ///
+  /// The SM3 hash of an X.509 certificate's To-Be-Signed contents.
+  ///
+  EFI_SM3_HASH    ToBeSignedHash;
+} EFI_CERT_V2_X509_SM3;
+
 #pragma pack()
 
 ///
@@ -141,6 +184,16 @@ typedef struct {
 #define EFI_CERT_SHA256_GUID \
   { \
     0xc1c41626, 0x504c, 0x4092, {0xac, 0xa9, 0x41, 0xf9, 0x36, 0x93, 0x43, 0x28} \
+  }
+
+///
+/// This identifies a V2 signature containing a SHA-256 hash. The SignatureHeader size
+/// shall always be 0. The SignatureSize shall always be 32 bytes. The Signature data
+/// shall use the EFI_SIGNATURE_V2_DATA structure.
+///
+#define EFI_CERT_V2_SHA256_GUID \
+  { \
+    0x65325437, 0xca92, 0x441e, {0x94, 0x3d, 0x4e, 0x00, 0x3f, 0xae, 0xda, 0x97} \
   }
 
 ///
@@ -184,6 +237,16 @@ typedef struct {
   }
 
 ///
+/// This identifies a V2 signature containing a SM3 hash. The SignatureHeader size
+/// shall always be 0. The SignatureSize shall always be 32 bytes. The Signature data
+/// shall use the EFI_SIGNATURE_V2_DATA structure.
+///
+#define EFI_CERT_V2_SM3_GUID \
+  { \
+    0xee4df27a, 0xdeca, 0x4312, {0xa3, 0xae, 0x65, 0xf8, 0xa1, 0xd8, 0xf9, 0x92} \
+  }
+
+///
 /// TThis identifies a signature containing a RSA-2048 signature of a SHA-1 hash.  The
 /// SignatureHeader size shall always be 0. The SignatureSize shall always be 16 (size of
 /// SignatureOwner component) + 256 bytes.
@@ -208,6 +271,18 @@ typedef struct {
   }
 
 ///
+/// This identifies a V2 signature based on a DER-encoded X.509 certificate.
+/// The SignatureHeader size shall always be 0. The SignatureSize may vary but
+/// shall always be the size of the certificate itself. The Signature data
+/// shall use the EFI_SIGNATURE_V2_DATA structure.
+/// Note: Each certificate must always be in a separate EFI_SIGNATURE_LIST.
+///
+#define EFI_CERT_V2_X509_GUID \
+  { \
+    0x79518039, 0x4715, 0x4393, {0xbd, 0xf8, 0xd8, 0xe3, 0xc6, 0x7f, 0xba, 0xc7} \
+  }
+
+///
 /// This identifies a signature containing the SM3 hash of an X.509 certificate's To-Be-Signed
 /// contents. The SignatureHeader size shall always be 0. The SignatureSize shall always be
 /// 16 (size of the SignatureOwner component) + 32 bytes for an EFI_CERT_X509_SM3 structure.
@@ -215,6 +290,17 @@ typedef struct {
 #define EFI_CERT_X509_SM3_GUID \
   { \
     0x60d807e5, 0x10b4, 0x49a9, {0x93, 0x31, 0xe4, 0x4, 0x37, 0x88, 0x8d, 0x37 } \
+  }
+
+///
+/// This identifies a V2 signature containing the SM3 hash of an X.509 certificate's
+/// To-Be-Signed contents. The SignatureHeader size shall always be 0. The SignatureSize
+/// shall always be 32 bytes for an EFI_CERT_V2_X509_SM3 structure. The Signature data
+/// shall use the EFI_SIGNATURE_V2_DATA structure.
+///
+#define EFI_CERT_V2_X509_SM3_GUID \
+  { \
+    0xa3a48dce, 0x8de4, 0x4634, {0x91, 0x94, 0x95, 0xbf, 0x8d, 0x74, 0x42, 0xbc} \
   }
 
 ///
@@ -238,6 +324,16 @@ typedef struct {
   }
 
 ///
+/// This identifies a V2 signature containing a SHA-384 hash. The SignatureHeader size
+/// shall always be 0. The SignatureSize shall always be 48 bytes. The Signature data
+/// shall use the EFI_SIGNATURE_V2_DATA structure.
+///
+#define EFI_CERT_V2_SHA384_GUID \
+  { \
+    0x45db3553, 0xf9a6, 0x4026, {0x8e, 0x48, 0xeb, 0x1e, 0x4b, 0x07, 0x18, 0x5c} \
+  }
+
+///
 /// This identifies a signature containing a SHA-512 hash. The SignatureHeader size shall
 /// always be 0. The SignatureSize shall always be 16 (size of SignatureOwner component) +
 /// 64 bytes.
@@ -245,6 +341,16 @@ typedef struct {
 #define EFI_CERT_SHA512_GUID \
   { \
     0x93e0fae, 0xa6c4, 0x4f50, {0x9f, 0x1b, 0xd4, 0x1e, 0x2b, 0x89, 0xc1, 0x9a} \
+  }
+
+///
+/// This identifies a V2 signature containing a SHA-512 hash. The SignatureHeader size
+/// shall always be 0. The SignatureSize shall always be 64 bytes. The Signature data
+/// shall use the EFI_SIGNATURE_V2_DATA structure.
+///
+#define EFI_CERT_V2_SHA512_GUID \
+  { \
+    0xd2291d97, 0xf066, 0x4abf, {0x9c, 0x57, 0x63, 0x63, 0xe5, 0xfd, 0x69, 0x03} \
   }
 
 ///
@@ -259,6 +365,17 @@ typedef struct {
   }
 
 ///
+/// This identifies a V2 signature containing the SHA256 hash of an X.509 certificate's
+/// To-Be-Signed contents. The SignatureHeader size shall always be 0. The SignatureSize
+/// shall always be 32 bytes for an EFI_CERT_V2_X509_SHA256 structure. The Signature data
+/// shall use the EFI_SIGNATURE_V2_DATA structure.
+///
+#define EFI_CERT_V2_X509_SHA256_GUID \
+  { \
+    0xaf4d21cd, 0x7627, 0x4b81, {0x9e, 0x96, 0xd4, 0xf3, 0xbb, 0xc3, 0xfa, 0xe9} \
+  }
+
+///
 /// This identifies a signature containing the SHA384 hash of an X.509 certificate's
 /// To-Be-Signed contents. The SignatureHeader size shall always be 0. The SignatureSize
 /// shall always be 16 (size of the SignatureOwner component) + 64 bytes for an
@@ -270,6 +387,17 @@ typedef struct {
   }
 
 ///
+/// This identifies a V2 signature containing the SHA384 hash of an X.509 certificate's
+/// To-Be-Signed contents. The SignatureHeader size shall always be 0. The SignatureSize
+/// shall always be 48 bytes for an EFI_CERT_V2_X509_SHA384 structure. The Signature data
+/// shall use the EFI_SIGNATURE_V2_DATA structure.
+///
+#define EFI_CERT_V2_X509_SHA384_GUID \
+  { \
+    0x78860e15, 0xf2eb, 0x4d16, {0x81, 0x56, 0x23, 0x15, 0x18, 0xfb, 0x76, 0x88} \
+  }
+
+///
 /// This identifies a signature containing the SHA512 hash of an X.509 certificate's
 /// To-Be-Signed contents. The SignatureHeader size shall always be 0. The SignatureSize
 /// shall always be 16 (size of the SignatureOwner component) + 80 bytes for an
@@ -278,6 +406,17 @@ typedef struct {
 #define EFI_CERT_X509_SHA512_GUID \
   { \
     0x446dbf63, 0x2502, 0x4cda, {0xbc, 0xfa, 0x24, 0x65, 0xd2, 0xb0, 0xfe, 0x9d } \
+  }
+
+///
+/// This identifies a V2 signature containing the SHA512 hash of an X.509 certificate's
+/// To-Be-Signed contents. The SignatureHeader size shall always be 0. The SignatureSize
+/// shall always be 64 bytes for an EFI_CERT_V2_X509_SHA512 structure. The Signature data
+/// shall use the EFI_SIGNATURE_V2_DATA structure.
+///
+#define EFI_CERT_V2_X509_SHA512_GUID \
+  { \
+    0x4d46147a, 0xfa79, 0x43a9, {0x88, 0x36, 0x00, 0x34, 0x1c, 0x70, 0x8a, 0x70} \
   }
 
 ///
