@@ -61,6 +61,21 @@
       PeCoffExtraActionLib|MdePkg/Library/BasePeCoffExtraActionLibNull/BasePeCoffExtraActionLibNull.inf
       TpmMeasurementLib|MdeModulePkg/Library/TpmMeasurementLibNull/TpmMeasurementLibNull.inf
   }
+  SecurityPkg/Library/DxeImageVerificationLib/GoogleTest/DxeImageVerificationLibCertHashGoogleTest.inf {
+    <LibraryClasses>
+      UefiRuntimeServicesTableLib|MdePkg/Test/Mock/Library/GoogleTest/MockUefiRuntimeServicesTableLib/MockUefiRuntimeServicesTableLib.inf
+      UefiBootServicesTableLib|MdePkg/Test/Mock/Library/GoogleTest/MockUefiBootServicesTableLib/MockUefiBootServicesTableLib.inf
+      DxeImageVerificationLib|SecurityPkg/Library/DxeImageVerificationLib/DxeImageVerificationLib.inf
+      BaseCryptLib|CryptoPkg/Library/BaseCryptLib/UnitTestHostBaseCryptLib.inf
+      OpensslLib|CryptoPkg/Library/OpensslLib/OpensslLibFull.inf
+      RngLib|MdePkg/Library/BaseRngLib/BaseRngLib.inf
+      UefiLib|MdePkg/Test/Mock/Library/GoogleTest/MockUefiLib/MockUefiLib.inf
+      DevicePathLib|MdePkg/Test/Mock/Library/GoogleTest/MockDevicePathLib/MockDevicePathLib.inf
+      SecurityManagementLib|MdeModulePkg/Test/Mock/Library/GoogleTest/MockSecurityManagementLib/MockSecurityManagementLib.inf
+      PeCoffLib|MdePkg/Library/BasePeCoffLib/BasePeCoffLib.inf
+      PeCoffExtraActionLib|MdePkg/Library/BasePeCoffExtraActionLibNull/BasePeCoffExtraActionLibNull.inf
+      TpmMeasurementLib|MdeModulePkg/Library/TpmMeasurementLibNull/TpmMeasurementLibNull.inf
+  }
 
 [PcdsPatchableInModule]
   gEfiSecurityPkgTokenSpaceGuid.PcdOptionRomImageVerificationPolicy|0x04

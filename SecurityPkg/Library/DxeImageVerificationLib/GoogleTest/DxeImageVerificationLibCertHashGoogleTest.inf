@@ -1,0 +1,57 @@
+## @file
+# GoogleTest unit test for V1 and V2 certificate hash lookup in DxeImageVerificationLib
+#
+# Tests IsCertHashFoundInSigList() with V1 (EFI_CERT_X509_SHA256_GUID) and
+# V2 (EFI_CERT_V2_X509_SHA256_GUID) signature list entries.
+#
+# Copyright (c) 2025, Intel Corporation. All rights reserved.<BR>
+# SPDX-License-Identifier: BSD-2-Clause-Patent
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = DxeImageVerificationLibCertHashGoogleTest
+  FILE_GUID                      = 7A3B2C1D-4E5F-6A7B-8C9D-0E1F2A3B4C5D
+  MODULE_TYPE                    = HOST_APPLICATION
+  VERSION_STRING                 = 1.0
+
+[Sources]
+  DxeImageVerificationLibCertHashGoogleTest.cpp
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  SecurityPkg/SecurityPkg.dec
+  UnitTestFrameworkPkg/UnitTestFrameworkPkg.dec
+  CryptoPkg/CryptoPkg.dec
+
+[LibraryClasses]
+  DxeImageVerificationLib
+  GoogleTestLib
+  BaseCryptLib
+  DebugLib
+
+[Guids]
+  gEfiGlobalVariableGuid
+  gEfiImageSecurityDatabaseGuid
+  gEfiCertSha256Guid
+  gEfiCertSha384Guid
+  gEfiCertSha512Guid
+  gEfiCertX509Guid
+  gEfiCertX509Sha256Guid
+  gEfiCertX509Sha384Guid
+  gEfiCertX509Sha512Guid
+  gEfiCertPkcs7Guid
+  gEfiCertV2X509Sha256Guid
+  gEfiCertV2X509Sha384Guid
+  gEfiCertV2X509Sha512Guid
+
+[Protocols]
+  gEfiFirmwareVolume2ProtocolGuid
+  gEfiBlockIoProtocolGuid
+  gEfiSimpleFileSystemProtocolGuid
+
+[Pcd]
+  gEfiSecurityPkgTokenSpaceGuid.PcdOptionRomImageVerificationPolicy
+  gEfiSecurityPkgTokenSpaceGuid.PcdRemovableMediaImageVerificationPolicy
+  gEfiSecurityPkgTokenSpaceGuid.PcdFixedMediaImageVerificationPolicy
