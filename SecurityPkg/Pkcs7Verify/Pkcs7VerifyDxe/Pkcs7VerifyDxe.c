@@ -59,7 +59,8 @@ CalculateDataHash (
     Status = Sha1Init (HashCtx);
     Status = Sha1Update (HashCtx, Data, DataSize);
     Status = Sha1Final (HashCtx, HashValue);
-  } else if (CompareGuid (CertGuid, &gEfiCertSha256Guid)) {
+  } else if (CompareGuid (CertGuid, &gEfiCertSha256Guid) ||
+             CompareGuid (CertGuid, &gEfiCertV2Sha256Guid)) {
     //
     // SHA256 Hash
     //
@@ -72,7 +73,8 @@ CalculateDataHash (
     Status = Sha256Init (HashCtx);
     Status = Sha256Update (HashCtx, Data, DataSize);
     Status = Sha256Final (HashCtx, HashValue);
-  } else if (CompareGuid (CertGuid, &gEfiCertSha384Guid)) {
+  } else if (CompareGuid (CertGuid, &gEfiCertSha384Guid) ||
+             CompareGuid (CertGuid, &gEfiCertV2Sha384Guid)) {
     //
     // SHA384 Hash
     //
@@ -85,7 +87,8 @@ CalculateDataHash (
     Status = Sha384Init (HashCtx);
     Status = Sha384Update (HashCtx, Data, DataSize);
     Status = Sha384Final (HashCtx, HashValue);
-  } else if (CompareGuid (CertGuid, &gEfiCertSha512Guid)) {
+  } else if (CompareGuid (CertGuid, &gEfiCertSha512Guid) ||
+             CompareGuid (CertGuid, &gEfiCertV2Sha512Guid)) {
     //
     // SHA512 Hash
     //
@@ -166,13 +169,27 @@ IsContentHashRevokedByHash (
       // don't match, meaning it's a different hash algorithm and we
       // can't tell if it's revoking our binary or not.  Assume not.
       //
-      if (SigList->SignatureSize - sizeof (EFI_GUID) == HashSize) {
+      // V2 signature types have no SignatureOwner, so SignatureSize equals hash size.
+      // V1 signature types have SignatureOwner, so hash size = SignatureSize - sizeof(EFI_GUID).
+      //
+      if ((SigList->SignatureSize - sizeof (EFI_GUID) == HashSize) ||
+          (SigList->SignatureSize == HashSize)) {
         //
         // Compare Data Hash with Signature Data
         //
-        if (CompareMem (SigData->SignatureData, Hash, HashSize) == 0) {
-          Status = TRUE;
-          goto _Exit;
+        if (SigList->SignatureSize == HashSize) {
+          //
+          // V2 type: data starts at offset 0
+          //
+          if (CompareMem ((UINT8 *)SigData, Hash, HashSize) == 0) {
+            Status = TRUE;
+            goto _Exit;
+          }
+        } else {
+          if (CompareMem (SigData->SignatureData, Hash, HashSize) == 0) {
+            Status = TRUE;
+            goto _Exit;
+          }
         }
       }
 
@@ -250,8 +267,16 @@ IsContentHashRevoked (
     for (EntryIndex = 0; EntryIndex < EntryCount; EntryIndex++) {
       //
       // Compare Data Hash with Signature Data
+      // V2 types have no SignatureOwner.
       //
-      if (CompareMem (SigData->SignatureData, HashVal, (SigList->SignatureSize - sizeof (EFI_GUID))) == 0) {
+      if (CompareGuid (&SigList->SignatureType, &gEfiCertV2Sha256Guid) ||
+          CompareGuid (&SigList->SignatureType, &gEfiCertV2Sha384Guid) ||
+          CompareGuid (&SigList->SignatureType, &gEfiCertV2Sha512Guid)) {
+        if (CompareMem ((UINT8 *)SigData, HashVal, SigList->SignatureSize) == 0) {
+          Status = TRUE;
+          goto _Exit;
+        }
+      } else if (CompareMem (SigData->SignatureData, HashVal, (SigList->SignatureSize - sizeof (EFI_GUID))) == 0) {
         Status = TRUE;
         goto _Exit;
       }
@@ -325,6 +350,12 @@ IsCertHashRevoked (
       Status = CalculateDataHash (TBSCert, TBSCertSize, &gEfiCertSha384Guid, CertHashVal);
     } else if (CompareGuid (&SigList->SignatureType, &gEfiCertX509Sha512Guid)) {
       Status = CalculateDataHash (TBSCert, TBSCertSize, &gEfiCertSha512Guid, CertHashVal);
+    } else if (CompareGuid (&SigList->SignatureType, &gEfiCertV2X509Sha256Guid)) {
+      Status = CalculateDataHash (TBSCert, TBSCertSize, &gEfiCertSha256Guid, CertHashVal);
+    } else if (CompareGuid (&SigList->SignatureType, &gEfiCertV2X509Sha384Guid)) {
+      Status = CalculateDataHash (TBSCert, TBSCertSize, &gEfiCertSha384Guid, CertHashVal);
+    } else if (CompareGuid (&SigList->SignatureType, &gEfiCertV2X509Sha512Guid)) {
+      Status = CalculateDataHash (TBSCert, TBSCertSize, &gEfiCertSha512Guid, CertHashVal);
     } else {
       //
       // Un-matched Cert Hash GUID
@@ -343,8 +374,21 @@ IsCertHashRevoked (
     for (EntryIndex = 0; EntryIndex < EntryCount; Index++) {
       //
       // Check if the Certificate Hash is revoked.
+      // V2 types have no SignatureOwner and no TimeOfRevocation.
       //
-      if (CompareMem (
+      if (CompareGuid (&SigList->SignatureType, &gEfiCertV2X509Sha256Guid) ||
+          CompareGuid (&SigList->SignatureType, &gEfiCertV2X509Sha384Guid) ||
+          CompareGuid (&SigList->SignatureType, &gEfiCertV2X509Sha512Guid)) {
+        if (CompareMem (
+              (UINT8 *)SigData,
+              CertHashVal,
+              SigList->SignatureSize
+              ) == 0)
+        {
+          Status = TRUE;
+          goto _Exit;
+        }
+      } else if (CompareMem (
             SigData->SignatureData,
             CertHashVal,
             SigList->SignatureSize - sizeof (EFI_GUID) - sizeof (EFI_TIME)
@@ -441,15 +485,21 @@ P7CheckRevocationByHash (
     //
     // Ignore any non-X509-format entry in the list.
     //
-    if (!CompareGuid (&SigList->SignatureType, &gEfiCertX509Guid)) {
+    if (!CompareGuid (&SigList->SignatureType, &gEfiCertX509Guid) &&
+        !CompareGuid (&SigList->SignatureType, &gEfiCertV2X509Guid)) {
       continue;
     }
 
     SigData = (EFI_SIGNATURE_DATA *)((UINT8 *)SigList + sizeof (EFI_SIGNATURE_LIST) +
                                      SigList->SignatureHeaderSize);
 
-    RevokedCert     = SigData->SignatureData;
-    RevokedCertSize = SigList->SignatureSize - sizeof (EFI_GUID);
+    if (CompareGuid (&SigList->SignatureType, &gEfiCertV2X509Guid)) {
+      RevokedCert     = (UINT8 *)SigData;
+      RevokedCertSize = SigList->SignatureSize;
+    } else {
+      RevokedCert     = SigData->SignatureData;
+      RevokedCertSize = SigList->SignatureSize - sizeof (EFI_GUID);
+    }
 
     //
     // Verifying the PKCS#7 SignedData with the revoked certificate in RevokedDb
@@ -588,15 +638,21 @@ P7CheckRevocation (
     //
     // Ignore any non-X509-format entry in the list.
     //
-    if (!CompareGuid (&SigList->SignatureType, &gEfiCertX509Guid)) {
+    if (!CompareGuid (&SigList->SignatureType, &gEfiCertX509Guid) &&
+        !CompareGuid (&SigList->SignatureType, &gEfiCertV2X509Guid)) {
       continue;
     }
 
     SigData = (EFI_SIGNATURE_DATA *)((UINT8 *)SigList + sizeof (EFI_SIGNATURE_LIST) +
                                      SigList->SignatureHeaderSize);
 
-    RevokedCert     = SigData->SignatureData;
-    RevokedCertSize = SigList->SignatureSize - sizeof (EFI_GUID);
+    if (CompareGuid (&SigList->SignatureType, &gEfiCertV2X509Guid)) {
+      RevokedCert     = (UINT8 *)SigData;
+      RevokedCertSize = SigList->SignatureSize;
+    } else {
+      RevokedCert     = SigData->SignatureData;
+      RevokedCertSize = SigList->SignatureSize - sizeof (EFI_GUID);
+    }
 
     //
     // Verifying the PKCS#7 SignedData with the revoked certificate in RevokedDb
@@ -725,15 +781,21 @@ P7CheckTrustByHash (
     //
     // Ignore any non-X509-format entry in the list.
     //
-    if (!CompareGuid (&SigList->SignatureType, &gEfiCertX509Guid)) {
+    if (!CompareGuid (&SigList->SignatureType, &gEfiCertX509Guid) &&
+        !CompareGuid (&SigList->SignatureType, &gEfiCertV2X509Guid)) {
       continue;
     }
 
     SigData = (EFI_SIGNATURE_DATA *)((UINT8 *)SigList + sizeof (EFI_SIGNATURE_LIST) +
                                      SigList->SignatureHeaderSize);
 
-    TrustCert     = SigData->SignatureData;
-    TrustCertSize = SigList->SignatureSize - sizeof (EFI_GUID);
+    if (CompareGuid (&SigList->SignatureType, &gEfiCertV2X509Guid)) {
+      TrustCert     = (UINT8 *)SigData;
+      TrustCertSize = SigList->SignatureSize;
+    } else {
+      TrustCert     = SigData->SignatureData;
+      TrustCertSize = SigList->SignatureSize - sizeof (EFI_GUID);
+    }
 
     //
     // Verifying the PKCS#7 SignedData with the trusted certificate from AllowedDb
@@ -819,15 +881,21 @@ P7CheckTrust (
     //
     // Ignore any non-X509-format entry in the list.
     //
-    if (!CompareGuid (&SigList->SignatureType, &gEfiCertX509Guid)) {
+    if (!CompareGuid (&SigList->SignatureType, &gEfiCertX509Guid) &&
+        !CompareGuid (&SigList->SignatureType, &gEfiCertV2X509Guid)) {
       continue;
     }
 
     SigData = (EFI_SIGNATURE_DATA *)((UINT8 *)SigList + sizeof (EFI_SIGNATURE_LIST) +
                                      SigList->SignatureHeaderSize);
 
-    TrustCert     = SigData->SignatureData;
-    TrustCertSize = SigList->SignatureSize - sizeof (EFI_GUID);
+    if (CompareGuid (&SigList->SignatureType, &gEfiCertV2X509Guid)) {
+      TrustCert     = (UINT8 *)SigData;
+      TrustCertSize = SigList->SignatureSize;
+    } else {
+      TrustCert     = SigData->SignatureData;
+      TrustCertSize = SigList->SignatureSize - sizeof (EFI_GUID);
+    }
 
     //
     // Verifying the PKCS#7 SignedData with the trusted certificate from AllowedDb

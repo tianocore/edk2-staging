@@ -49,13 +49,20 @@
 
 [Guids]
   gEfiCertX509Guid              ## SOMETIMES_CONSUMES    ## GUID     # Unique ID for the type of the signature.
+  gEfiCertV2X509Guid            ## SOMETIMES_CONSUMES    ## GUID     # Unique ID for the type of the signature.
   gEfiCertSha1Guid              ## SOMETIMES_CONSUMES    ## GUID     # Unique ID for the type of the signature.
   gEfiCertSha256Guid            ## SOMETIMES_CONSUMES    ## GUID     # Unique ID for the type of the signature.
+  gEfiCertV2Sha256Guid          ## SOMETIMES_CONSUMES    ## GUID     # Unique ID for the type of the signature.
   gEfiCertSha384Guid            ## SOMETIMES_CONSUMES    ## GUID     # Unique ID for the type of the signature.
+  gEfiCertV2Sha384Guid          ## SOMETIMES_CONSUMES    ## GUID     # Unique ID for the type of the signature.
   gEfiCertSha512Guid            ## SOMETIMES_CONSUMES    ## GUID     # Unique ID for the type of the signature.
+  gEfiCertV2Sha512Guid          ## SOMETIMES_CONSUMES    ## GUID     # Unique ID for the type of the signature.
   gEfiCertX509Sha256Guid        ## SOMETIMES_CONSUMES    ## GUID     # Unique ID for the type of the signature.
+  gEfiCertV2X509Sha256Guid      ## SOMETIMES_CONSUMES    ## GUID     # Unique ID for the type of the signature.
   gEfiCertX509Sha384Guid        ## SOMETIMES_CONSUMES    ## GUID     # Unique ID for the type of the signature.
+  gEfiCertV2X509Sha384Guid      ## SOMETIMES_CONSUMES    ## GUID     # Unique ID for the type of the signature.
   gEfiCertX509Sha512Guid        ## SOMETIMES_CONSUMES    ## GUID     # Unique ID for the type of the signature.
+  gEfiCertV2X509Sha512Guid      ## SOMETIMES_CONSUMES    ## GUID     # Unique ID for the type of the signature.
 
 [Depex]
   TRUE
