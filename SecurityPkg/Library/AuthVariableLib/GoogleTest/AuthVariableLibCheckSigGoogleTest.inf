@@ -1,0 +1,63 @@
+## @file
+#  GoogleTest for CheckSignatureListFormat() in AuthVariableLib.
+#  Tests V1 and V2 signature type format validation.
+#
+#  Copyright (c) 2025, Intel Corporation. All rights reserved.<BR>
+#  SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = AuthVariableLibCheckSigGoogleTest
+  FILE_GUID                      = 8B3C2D1E-5F6A-7B8C-9D0E-1F2A3B4C5D6E
+  MODULE_TYPE                    = HOST_APPLICATION
+  VERSION_STRING                 = 1.0
+
+[Sources]
+  AuthVariableLibCheckSigGoogleTest.cpp
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  SecurityPkg/SecurityPkg.dec
+  CryptoPkg/CryptoPkg.dec
+  UnitTestFrameworkPkg/UnitTestFrameworkPkg.dec
+
+[LibraryClasses]
+  GoogleTestLib
+  BaseLib
+  BaseMemoryLib
+  DebugLib
+  MemoryAllocationLib
+  AuthVariableLib
+  BaseCryptLib
+
+[Guids]
+  gEfiGlobalVariableGuid
+  gEfiImageSecurityDatabaseGuid
+  gEfiCertSha256Guid
+  gEfiCertSha384Guid
+  gEfiCertSha512Guid
+  gEfiCertX509Guid
+  gEfiCertX509Sha256Guid
+  gEfiCertX509Sha384Guid
+  gEfiCertX509Sha512Guid
+  gEfiCertV2Sha256Guid
+  gEfiCertV2Sha384Guid
+  gEfiCertV2Sha512Guid
+  gEfiCertV2X509Guid
+  gEfiCertV2X509Sha256Guid
+  gEfiCertV2X509Sha384Guid
+  gEfiCertV2X509Sha512Guid
+  gEfiCertPkcs7Guid
+  gEfiCertTypeRsa2048Sha256Guid
+  gEfiSecureBootEnableDisableGuid
+  gEfiCustomModeEnableGuid
+  gEfiVendorKeysNvGuid
+  gEfiAuthenticatedVariableGuid
+  gEfiCertRsa2048Guid
+  gEfiCertRsa2048Sha256Guid
+  gEfiCertSha1Guid
+  gEfiCertRsa2048Sha1Guid
+  gEfiCertSha224Guid
