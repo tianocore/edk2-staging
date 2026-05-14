@@ -45,13 +45,20 @@ typedef struct {
 } GUID_NAME_ENTRY;
 
 STATIC GUID_NAME_ENTRY  mKnownSigTypes[] = {
-  { &gEfiCertX509Guid,       L"EFI_CERT_X509"        },
-  { &gEfiCertSha256Guid,     L"EFI_CERT_SHA256"       },
-  { &gEfiCertSha384Guid,     L"EFI_CERT_SHA384"       },
-  { &gEfiCertSha512Guid,     L"EFI_CERT_SHA512"       },
-  { &gEfiCertX509Sha256Guid, L"EFI_CERT_X509_SHA256"  },
-  { &gEfiCertX509Sha384Guid, L"EFI_CERT_X509_SHA384"  },
-  { &gEfiCertX509Sha512Guid, L"EFI_CERT_X509_SHA512"  },
+  { &gEfiCertX509Guid,         L"EFI_CERT_X509"          },
+  { &gEfiCertSha256Guid,       L"EFI_CERT_SHA256"         },
+  { &gEfiCertSha384Guid,       L"EFI_CERT_SHA384"         },
+  { &gEfiCertSha512Guid,       L"EFI_CERT_SHA512"         },
+  { &gEfiCertX509Sha256Guid,   L"EFI_CERT_X509_SHA256"    },
+  { &gEfiCertX509Sha384Guid,   L"EFI_CERT_X509_SHA384"    },
+  { &gEfiCertX509Sha512Guid,   L"EFI_CERT_X509_SHA512"    },
+  { &gEfiCertV2X509Guid,       L"EFI_CERT_V2_X509"        },
+  { &gEfiCertV2Sha256Guid,     L"EFI_CERT_V2_SHA256"      },
+  { &gEfiCertV2Sha384Guid,     L"EFI_CERT_V2_SHA384"      },
+  { &gEfiCertV2Sha512Guid,     L"EFI_CERT_V2_SHA512"      },
+  { &gEfiCertV2X509Sha256Guid, L"EFI_CERT_V2_X509_SHA256" },
+  { &gEfiCertV2X509Sha384Guid, L"EFI_CERT_V2_X509_SHA384" },
+  { &gEfiCertV2X509Sha512Guid, L"EFI_CERT_V2_X509_SHA512" },
 };
 
 /**

@@ -53,3 +53,10 @@
   gEfiCertX509Sha256Guid                     ## CONSUMES  ## GUID  # Signature type
   gEfiCertX509Sha384Guid                     ## CONSUMES  ## GUID  # Signature type
   gEfiCertX509Sha512Guid                     ## CONSUMES  ## GUID  # Signature type
+  gEfiCertV2X509Guid                         ## CONSUMES  ## GUID  # Signature type
+  gEfiCertV2Sha256Guid                       ## CONSUMES  ## GUID  # Signature type
+  gEfiCertV2Sha384Guid                       ## CONSUMES  ## GUID  # Signature type
+  gEfiCertV2Sha512Guid                       ## CONSUMES  ## GUID  # Signature type
+  gEfiCertV2X509Sha256Guid                   ## CONSUMES  ## GUID  # Signature type
+  gEfiCertV2X509Sha384Guid                   ## CONSUMES  ## GUID  # Signature type
+  gEfiCertV2X509Sha512Guid                   ## CONSUMES  ## GUID  # Signature type
