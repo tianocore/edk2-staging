@@ -822,7 +822,6 @@ AddImageExeInfo (
   @param[in]  CertSize          Size of X.509 Certificate.
   @param[in]  SignatureList     Pointer to the Signature List to search.
   @param[in]  SignatureListSize Size of Signature List.
-  @param[out] RevocationTime    Return the revocation time if available. Optional.
   @param[out] IsFound           Search result. Only valid if EFI_SUCCESS returned.
   @param[out] MatchedSigData    Return the matched signature data node. Optional.
 
@@ -836,7 +835,6 @@ IsCertHashFoundInSigList (
   IN  UINTN               CertSize,
   IN  EFI_SIGNATURE_LIST  *SignatureList,
   IN  UINTN               SignatureListSize,
-  OUT EFI_TIME            *RevocationTime OPTIONAL,
   OUT BOOLEAN             *IsFound,
   OUT EFI_SIGNATURE_DATA  **MatchedSigData OPTIONAL
   )
@@ -937,14 +935,6 @@ IsCertHashFoundInSigList (
         *IsFound = TRUE;
 
         //
-        // Return the revocation time.
-        //
-        if (RevocationTime != NULL)
-        {
-          CopyMem (RevocationTime, (EFI_TIME *)(SigCertHash + mHash[HashAlg].DigestLength), sizeof (EFI_TIME));
-        }
-
-        //
         // Return the matched signature data node.
         //
         if (MatchedSigData != NULL) {
@@ -978,7 +968,6 @@ Done:
   @param[in]  CertSize          Size of X.509 Certificate.
   @param[in]  SignatureList     Pointer to the Signature List in forbidden database.
   @param[in]  SignatureListSize Size of Signature List.
-  @param[out] RevocationTime    Return the time that the certificate was revoked.
   @param[out] IsFound           Search result. Only valid if EFI_SUCCESS returned.
 
   @retval EFI_SUCCESS           Finished the search without any error.
@@ -991,13 +980,12 @@ IsCertHashFoundInDbx (
   IN  UINTN               CertSize,
   IN  EFI_SIGNATURE_LIST  *SignatureList,
   IN  UINTN               SignatureListSize,
-  OUT EFI_TIME            *RevocationTime,
   OUT BOOLEAN             *IsFound
   )
 {
   EFI_STATUS Status;
 
-  if ((RevocationTime == NULL) || (SignatureList == NULL)) {
+  if (SignatureList == NULL) {
     return EFI_INVALID_PARAMETER;
   }
 
@@ -1006,7 +994,6 @@ IsCertHashFoundInDbx (
             CertSize,
             SignatureList,
             SignatureListSize,
-            RevocationTime,
             IsFound,
             NULL
             );
@@ -1151,7 +1138,6 @@ IsForbiddenByDbx (
   UINT8               *CertPtr;
   UINT8               *Cert;
   UINTN               CertSize;
-  EFI_TIME            RevocationTime;
 
   //
   // Variable Initialization
@@ -1226,11 +1212,10 @@ IsForbiddenByDbx (
     //
     CertPtr = CertPtr + sizeof (UINT32) + CertSize;
 
-    Status = IsCertHashFoundInDbx (Cert, CertSize, (EFI_SIGNATURE_LIST *)Data, DataSize, &RevocationTime, &IsFound);
+    Status = IsCertHashFoundInDbx (Cert, CertSize, (EFI_SIGNATURE_LIST *)Data, DataSize, &IsFound);
     if (EFI_ERROR (Status)) {
       //
-      // Error in searching dbx. Consider it as 'found'. RevocationTime might
-      // not be valid in such situation.
+      // Error in searching dbx. Consider it as 'found'.
       //
       IsForbidden = TRUE;
       goto Done;
@@ -1279,7 +1264,6 @@ IsCertAllowedByDbx (
 {
   EFI_STATUS  Status;
   BOOLEAN     IsFound;
-  EFI_TIME    RevocationTime;
 
   if (DbxData == NULL) {
     return TRUE;
@@ -1290,7 +1274,6 @@ IsCertAllowedByDbx (
              CertSize,
              (EFI_SIGNATURE_LIST *)DbxData,
              DbxDataSize,
-             &RevocationTime,
              &IsFound
              );
   if (EFI_ERROR (Status)) {
@@ -1495,7 +1478,6 @@ IsAllowedByDb (
                     CertSize,
                     CertList,
                     CertList->SignatureListSize,
-                    NULL,
                     &IsFound,
                     &CertData
                   );
