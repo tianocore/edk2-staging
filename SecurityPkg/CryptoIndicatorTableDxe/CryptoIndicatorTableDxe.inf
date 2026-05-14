@@ -54,6 +54,13 @@
   gEfiCertX509Sha256Guid                     ## CONSUMES  ## GUID  # Signature list type
   gEfiCertX509Sha384Guid                     ## CONSUMES  ## GUID  # Signature list type
   gEfiCertX509Sha512Guid                     ## CONSUMES  ## GUID  # Signature list type
+  gEfiCertV2X509Guid                          ## CONSUMES  ## GUID  # Signature list type
+  gEfiCertV2Sha256Guid                        ## CONSUMES  ## GUID  # Signature list type
+  gEfiCertV2Sha384Guid                        ## CONSUMES  ## GUID  # Signature list type
+  gEfiCertV2Sha512Guid                        ## CONSUMES  ## GUID  # Signature list type
+  gEfiCertV2X509Sha256Guid                    ## CONSUMES  ## GUID  # Signature list type
+  gEfiCertV2X509Sha384Guid                    ## CONSUMES  ## GUID  # Signature list type
+  gEfiCertV2X509Sha512Guid                    ## CONSUMES  ## GUID  # Signature list type
 
 [Depex]
   TRUE
