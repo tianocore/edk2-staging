@@ -852,6 +852,7 @@ IsCertHashFoundInSigList (
   UINTN               SiglistHeaderSize;
   UINT8               *TBSCert;
   UINTN               TBSCertSize;
+  BOOLEAN             IsV2;
 
   Status   = EFI_ABORTED;
   *IsFound = FALSE;
@@ -879,12 +880,22 @@ IsCertHashFoundInSigList (
     //
     // Determine Hash Algorithm of Certificate in the signature list.
     //
+    IsV2 = FALSE;
     if (CompareGuid (&SigList->SignatureType, &gEfiCertX509Sha256Guid)) {
       HashAlg = HASHALG_SHA256;
+    } else if (CompareGuid (&SigList->SignatureType, &gEfiCertV2X509Sha256Guid)) {
+      HashAlg = HASHALG_SHA256;
+      IsV2    = TRUE;
     } else if (CompareGuid (&SigList->SignatureType, &gEfiCertX509Sha384Guid)) {
       HashAlg = HASHALG_SHA384;
+    } else if (CompareGuid (&SigList->SignatureType, &gEfiCertV2X509Sha384Guid)) {
+      HashAlg = HASHALG_SHA384;
+      IsV2    = TRUE;
     } else if (CompareGuid (&SigList->SignatureType, &gEfiCertX509Sha512Guid)) {
       HashAlg = HASHALG_SHA512;
+    } else if (CompareGuid (&SigList->SignatureType, &gEfiCertV2X509Sha512Guid)) {
+      HashAlg = HASHALG_SHA512;
+      IsV2    = TRUE;
     } else {
       SigSize -= SigList->SignatureListSize;
       SigList  = (EFI_SIGNATURE_LIST *)((UINT8 *)SigList + SigList->SignatureListSize);
@@ -925,8 +936,14 @@ IsCertHashFoundInSigList (
     for (Index = 0; Index < CertHashCount; Index++) {
       //
       // Iterate each Signature Data Node within this CertList for verify.
+      // V2 types use EFI_SIGNATURE_V2_DATA (no SignatureOwner prefix).
       //
-      SigCertHash = CertHash->SignatureData;
+      if (IsV2) {
+        SigCertHash = (UINT8 *)CertHash;
+      } else {
+        SigCertHash = CertHash->SignatureData;
+      }
+
       if (CompareMem (SigCertHash, CertDigest, mHash[HashAlg].DigestLength) == 0) {
         //
         // Hash of Certificate is found in signature list.
@@ -1005,6 +1022,34 @@ IsCertHashFoundInDbx (
 }
 
 /**
+  Check whether a signature list type is the V2 counterpart of a given V1 cert hash type.
+
+  @param[in]  SigType   Pointer to the SignatureType from the signature list.
+  @param[in]  CertType  Pointer to the V1 certificate hash type being searched.
+
+  @retval TRUE   SigType is the V2 variant of CertType.
+  @retval FALSE  SigType is not the V2 variant of CertType.
+
+**/
+STATIC
+BOOLEAN
+IsV2CertHashType (
+  IN  EFI_GUID  *SigType,
+  IN  EFI_GUID  *CertType
+  )
+{
+  if (CompareGuid (CertType, &gEfiCertSha256Guid)) {
+    return CompareGuid (SigType, &gEfiCertV2Sha256Guid);
+  } else if (CompareGuid (CertType, &gEfiCertSha384Guid)) {
+    return CompareGuid (SigType, &gEfiCertV2Sha384Guid);
+  } else if (CompareGuid (CertType, &gEfiCertSha512Guid)) {
+    return CompareGuid (SigType, &gEfiCertV2Sha512Guid);
+  }
+
+  return FALSE;
+}
+
+/**
   Check whether signature is in specified database.
 
   @param[in]  VariableName        Name of database variable that is searched in.
@@ -1079,6 +1124,27 @@ IsSignatureFoundInDatabase (
           //
           // Entries in UEFI_IMAGE_SECURITY_DATABASE that are used to validate image should be measured
           //
+          if (StrCmp (VariableName, EFI_IMAGE_SECURITY_DATABASE) == 0) {
+            SecureBootHook (VariableName, &gEfiImageSecurityDatabaseGuid, CertList->SignatureSize, Cert);
+          }
+
+          break;
+        }
+
+        Cert = (EFI_SIGNATURE_DATA *)((UINT8 *)Cert + CertList->SignatureSize);
+      }
+
+      if (*IsFound) {
+        break;
+      }
+    } else if ((CertList->SignatureSize == SignatureSize) && IsV2CertHashType (&CertList->SignatureType, CertType)) {
+      //
+      // V2 signature type: EFI_SIGNATURE_V2_DATA has no SignatureOwner,
+      // so SignatureSize equals the hash size directly.
+      //
+      for (Index = 0; Index < CertCount; Index++) {
+        if (CompareMem ((UINT8 *)Cert, Signature, SignatureSize) == 0) {
+          *IsFound = TRUE;
           if (StrCmp (VariableName, EFI_IMAGE_SECURITY_DATABASE) == 0) {
             SecureBootHook (VariableName, &gEfiImageSecurityDatabaseGuid, CertList->SignatureSize, Cert);
           }
@@ -1453,9 +1519,31 @@ IsAllowedByDb (
 
         CertData = (EFI_SIGNATURE_DATA *)((UINT8 *)CertData + CertList->SignatureSize);
       }
+    } else if (CompareGuid (&CertList->SignatureType, &gEfiCertV2X509Guid)) {
+      //
+      // V2 X509: EFI_SIGNATURE_V2_DATA has no SignatureOwner.
+      //
+      RootCert     = (UINT8 *)CertList + sizeof (EFI_SIGNATURE_LIST) + CertList->SignatureHeaderSize;
+      RootCertSize = CertList->SignatureSize;
+
+      VerifyStatus = AuthenticodeVerify (
+                       AuthData,
+                       AuthDataSize,
+                       RootCert,
+                       RootCertSize,
+                       mImageDigest,
+                       mImageDigestSize
+                       );
+      if (VerifyStatus) {
+        VerifyStatus = IsCertAllowedByDbx (RootCert, RootCertSize, DbxData, DbxDataSize);
+        goto Done;
+      }
     } else if ((CompareGuid (&CertList->SignatureType, &gEfiCertX509Sha256Guid))
             || (CompareGuid (&CertList->SignatureType, &gEfiCertX509Sha384Guid))
-            || (CompareGuid (&CertList->SignatureType, &gEfiCertX509Sha512Guid))) {
+            || (CompareGuid (&CertList->SignatureType, &gEfiCertX509Sha512Guid))
+            || (CompareGuid (&CertList->SignatureType, &gEfiCertV2X509Sha256Guid))
+            || (CompareGuid (&CertList->SignatureType, &gEfiCertV2X509Sha384Guid))
+            || (CompareGuid (&CertList->SignatureType, &gEfiCertV2X509Sha512Guid))) {
       //
       // Check whether any certificate hash in the image signing chain is allowed
       // by this db entry and is not revoked in dbx.
