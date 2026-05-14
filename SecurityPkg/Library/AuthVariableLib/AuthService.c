@@ -167,8 +167,42 @@ EFI_SIGNATURE_ITEM  mSupportSigItem[] = {
   { EFI_CERT_SHA512_GUID,         0, 64            },
   { EFI_CERT_X509_SHA256_GUID,    0, 48            },
   { EFI_CERT_X509_SHA384_GUID,    0, 64            },
-  { EFI_CERT_X509_SHA512_GUID,    0, 80            }
+  { EFI_CERT_X509_SHA512_GUID,    0, 80            },
+  //
+  // V2 signature types (EFI_SIGNATURE_V2_DATA - no SignatureOwner)
+  //
+  { EFI_CERT_V2_SHA256_GUID,         0, 32            },
+  { EFI_CERT_V2_SHA384_GUID,         0, 48            },
+  { EFI_CERT_V2_SHA512_GUID,         0, 64            },
+  { EFI_CERT_V2_X509_GUID,           0, ((UINT32) ~0) },
+  { EFI_CERT_V2_X509_SHA256_GUID,    0, 32            },
+  { EFI_CERT_V2_X509_SHA384_GUID,    0, 48            },
+  { EFI_CERT_V2_X509_SHA512_GUID,    0, 64            }
 };
+
+/**
+  Check if a signature type GUID is a V2 type (uses EFI_SIGNATURE_V2_DATA with no SignatureOwner).
+
+  @param[in]  SigType  Pointer to signature type GUID.
+
+  @retval TRUE   The signature type is a V2 type.
+  @retval FALSE  The signature type is not a V2 type.
+
+**/
+STATIC
+BOOLEAN
+IsV2SignatureType (
+  IN  EFI_GUID  *SigType
+  )
+{
+  return CompareGuid (SigType, &gEfiCertV2Sha256Guid) ||
+         CompareGuid (SigType, &gEfiCertV2Sha384Guid) ||
+         CompareGuid (SigType, &gEfiCertV2Sha512Guid) ||
+         CompareGuid (SigType, &gEfiCertV2X509Guid) ||
+         CompareGuid (SigType, &gEfiCertV2X509Sha256Guid) ||
+         CompareGuid (SigType, &gEfiCertV2X509Sha384Guid) ||
+         CompareGuid (SigType, &gEfiCertV2X509Sha512Guid);
+}
 
 /**
   Finds variable in storage blocks of volatile and non-volatile storage areas.
@@ -646,6 +680,7 @@ CheckSignatureListFormat (
   EFI_SIGNATURE_DATA  *CertData;
   UINTN               CertLen;
   BOOLEAN             IsValidAlg;
+  UINT8               *CertBuffer;
 
   if (DataSize == 0) {
     return EFI_SUCCESS;
@@ -682,8 +717,15 @@ CheckSignatureListFormat (
       //
       // The value of SignatureSize should always be 16 (size of SignatureOwner
       // component) add the data length according to signature type.
+      // For V2 types, there is no SignatureOwner, so SignatureSize equals SigDataSize directly.
       //
-      if ((mSupportSigItem[Index].SigDataSize != ((UINT32) ~0)) &&
+      if (IsV2SignatureType (&mSupportSigItem[Index].SigType)) {
+        if ((mSupportSigItem[Index].SigDataSize != ((UINT32) ~0)) &&
+            (SigList->SignatureSize != mSupportSigItem[Index].SigDataSize))
+        {
+          return EFI_INVALID_PARAMETER;
+        }
+      } else if ((mSupportSigItem[Index].SigDataSize != ((UINT32) ~0)) &&
           ((SigList->SignatureSize - sizeof (EFI_GUID)) != mSupportSigItem[Index].SigDataSize))
       {
         return EFI_INVALID_PARAMETER;
@@ -713,21 +755,23 @@ CheckSignatureListFormat (
       ((StrCmp (VariableName, EFI_PLATFORM_KEY_NAME) == 0) ||
         (StrCmp (VariableName, EFI_KEY_EXCHANGE_KEY_NAME) == 0)))
   {
-    if (!CompareGuid (&SigList->SignatureType, &gEfiCertX509Guid)) {
-      DEBUG ((DEBUG_ERROR, "CheckSignatureListFormat - Only EFI_CERT_X509_GUID is allowed in PK/KEK\n"));
+    if (!CompareGuid (&SigList->SignatureType, &gEfiCertX509Guid) &&
+        !CompareGuid (&SigList->SignatureType, &gEfiCertV2X509Guid)) {
+      DEBUG ((DEBUG_ERROR, "CheckSignatureListFormat - Only EFI_CERT_X509_GUID or EFI_CERT_V2_X509_GUID is allowed in PK/KEK\n"));
       return EFI_INVALID_PARAMETER;
     }
   }
 
-  if (CompareGuid (&SigList->SignatureType, &gEfiCertX509Guid)) {
+  if (CompareGuid (&SigList->SignatureType, &gEfiCertX509Guid) ||
+      CompareGuid (&SigList->SignatureType, &gEfiCertV2X509Guid)) {
     //
-    // Reject EFI_CERT_X509_GUID in dbx. Raw X.509 certificates are not
-    // supported for image revocation.
+    // Reject EFI_CERT_X509_GUID / EFI_CERT_V2_X509_GUID in dbx. Raw X.509
+    // certificates are not supported for image revocation.
     //
     if (CompareGuid (VendorGuid, &gEfiImageSecurityDatabaseGuid) &&
         (StrCmp (VariableName, EFI_IMAGE_SECURITY_DATABASE1) == 0))
     {
-      DEBUG ((DEBUG_ERROR, "CheckSignatureListFormat - EFI_CERT_X509_GUID is not allowed in dbx\n"));
+      DEBUG ((DEBUG_ERROR, "CheckSignatureListFormat - EFI_CERT_X509_GUID/V2 is not allowed in dbx\n"));
       return EFI_INVALID_PARAMETER;
     }
 
@@ -736,14 +780,28 @@ CheckSignatureListFormat (
     // If this operation fails, it's not a valid certificate.
     //
     CertData   = (EFI_SIGNATURE_DATA *)((UINT8 *)SigList + sizeof (EFI_SIGNATURE_LIST) + SigList->SignatureHeaderSize);
-    CertLen    = SigList->SignatureSize - sizeof (EFI_GUID);
+    if (CompareGuid (&SigList->SignatureType, &gEfiCertV2X509Guid)) {
+      CertLen  = SigList->SignatureSize;
+    } else {
+      CertLen  = SigList->SignatureSize - sizeof (EFI_GUID);
+    }
     RsaContext = NULL;
     IsValidAlg = FALSE;
 
-    if (RsaGetPublicKeyFromX509 (CertData->SignatureData, CertLen, &RsaContext)) {
+    //
+    // For V2, cert data starts at offset 0 (no SignatureOwner).
+    // For V1, cert data starts at CertData->SignatureData (after SignatureOwner).
+    //
+    if (CompareGuid (&SigList->SignatureType, &gEfiCertV2X509Guid)) {
+      CertBuffer = (UINT8 *)CertData;
+    } else {
+      CertBuffer = CertData->SignatureData;
+    }
+
+    if (RsaGetPublicKeyFromX509 (CertBuffer, CertLen, &RsaContext)) {
       IsValidAlg = TRUE;
       DEBUG ((DEBUG_INFO, "CheckSignatureListFormat - X509 RSA check succ\n"));
-    } else if (MlDsaGetPublicKeyFromX509 (CertData->SignatureData, CertLen)) {
+    } else if (MlDsaGetPublicKeyFromX509 (CertBuffer, CertLen)) {
       IsValidAlg = TRUE;
       DEBUG ((DEBUG_INFO, "CheckSignatureListFormat - X509 ML-DSA check succ\n"));
     }
@@ -757,7 +815,7 @@ CheckSignatureListFormat (
     //
     // Check if the certificate's signing algorithm is in the supported OID list.
     //
-    if (!IsX509SigningAlgSupported (CertData->SignatureData, CertLen)) {
+    if (!IsX509SigningAlgSupported (CertBuffer, CertLen)) {
       DEBUG ((DEBUG_ERROR, "CheckSignatureListFormat - X509 signing alg not in supported list\n"));
       return EFI_UNSUPPORTED;
     }
