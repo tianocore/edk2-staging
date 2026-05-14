@@ -1120,6 +1120,19 @@ IsSignatureFoundInDatabase (
       if (IsFound) {
         break;
       }
+    } else if ((CertList->SignatureSize == SignatureSize) && (CompareGuid (&CertList->SignatureType, &gEfiCertV2X509Guid))) {
+      for (Index = 0; Index < CertCount; Index++) {
+        if (CompareMem ((UINT8 *)Cert, Signature, SignatureSize) == 0) {
+          IsFound = TRUE;
+          break;
+        }
+
+        Cert = (EFI_SIGNATURE_DATA *)((UINT8 *)Cert + CertList->SignatureSize);
+      }
+
+      if (IsFound) {
+        break;
+      }
     }
 
     DataSize -= CertList->SignatureListSize;
@@ -2631,7 +2644,14 @@ UpdateDeletePage (
         CompareGuid (&CertList->SignatureType, &gEfiCertSha256Guid) ||
         CompareGuid (&CertList->SignatureType, &gEfiCertX509Sha256Guid) ||
         CompareGuid (&CertList->SignatureType, &gEfiCertX509Sha384Guid) ||
-        CompareGuid (&CertList->SignatureType, &gEfiCertX509Sha512Guid)
+        CompareGuid (&CertList->SignatureType, &gEfiCertX509Sha512Guid) ||
+        CompareGuid (&CertList->SignatureType, &gEfiCertV2X509Guid) ||
+        CompareGuid (&CertList->SignatureType, &gEfiCertV2Sha256Guid) ||
+        CompareGuid (&CertList->SignatureType, &gEfiCertV2Sha384Guid) ||
+        CompareGuid (&CertList->SignatureType, &gEfiCertV2Sha512Guid) ||
+        CompareGuid (&CertList->SignatureType, &gEfiCertV2X509Sha256Guid) ||
+        CompareGuid (&CertList->SignatureType, &gEfiCertV2X509Sha384Guid) ||
+        CompareGuid (&CertList->SignatureType, &gEfiCertV2X509Sha512Guid)
         )
     {
       CertCount = (CertList->SignatureListSize - sizeof (EFI_SIGNATURE_LIST) - CertList->SignatureHeaderSize) / CertList->SignatureSize;
@@ -2779,7 +2799,8 @@ DeleteKeyExchangeKey (
   GuidIndex      = 0;
   while ((KekDataSize > 0) && (KekDataSize >= CertList->SignatureListSize)) {
     if (CompareGuid (&CertList->SignatureType, &gEfiCertRsa2048Guid) ||
-        CompareGuid (&CertList->SignatureType, &gEfiCertX509Guid))
+        CompareGuid (&CertList->SignatureType, &gEfiCertX509Guid) ||
+        CompareGuid (&CertList->SignatureType, &gEfiCertV2X509Guid))
     {
       CopyMem (Data + Offset, CertList, (sizeof (EFI_SIGNATURE_LIST) + CertList->SignatureHeaderSize));
       NewCertList = (EFI_SIGNATURE_LIST *)(Data + Offset);
@@ -2986,7 +3007,14 @@ DeleteSignature (
         CompareGuid (&CertList->SignatureType, &gEfiCertSha256Guid) ||
         CompareGuid (&CertList->SignatureType, &gEfiCertX509Sha256Guid) ||
         CompareGuid (&CertList->SignatureType, &gEfiCertX509Sha384Guid) ||
-        CompareGuid (&CertList->SignatureType, &gEfiCertX509Sha512Guid)
+        CompareGuid (&CertList->SignatureType, &gEfiCertX509Sha512Guid) ||
+        CompareGuid (&CertList->SignatureType, &gEfiCertV2X509Guid) ||
+        CompareGuid (&CertList->SignatureType, &gEfiCertV2Sha256Guid) ||
+        CompareGuid (&CertList->SignatureType, &gEfiCertV2Sha384Guid) ||
+        CompareGuid (&CertList->SignatureType, &gEfiCertV2Sha512Guid) ||
+        CompareGuid (&CertList->SignatureType, &gEfiCertV2X509Sha256Guid) ||
+        CompareGuid (&CertList->SignatureType, &gEfiCertV2X509Sha384Guid) ||
+        CompareGuid (&CertList->SignatureType, &gEfiCertV2X509Sha512Guid)
         )
     {
       //
@@ -3800,6 +3828,20 @@ LoadSignatureList (
       ListType = STRING_TOKEN (STR_LIST_TYPE_X509_SHA384);
     } else if (CompareGuid (&ListWalker->SignatureType, &gEfiCertX509Sha512Guid)) {
       ListType = STRING_TOKEN (STR_LIST_TYPE_X509_SHA512);
+    } else if (CompareGuid (&ListWalker->SignatureType, &gEfiCertV2X509Guid)) {
+      ListType = STRING_TOKEN (STR_LIST_TYPE_X509);
+    } else if (CompareGuid (&ListWalker->SignatureType, &gEfiCertV2Sha256Guid)) {
+      ListType = STRING_TOKEN (STR_LIST_TYPE_SHA256);
+    } else if (CompareGuid (&ListWalker->SignatureType, &gEfiCertV2Sha384Guid)) {
+      ListType = STRING_TOKEN (STR_LIST_TYPE_SHA384);
+    } else if (CompareGuid (&ListWalker->SignatureType, &gEfiCertV2Sha512Guid)) {
+      ListType = STRING_TOKEN (STR_LIST_TYPE_SHA512);
+    } else if (CompareGuid (&ListWalker->SignatureType, &gEfiCertV2X509Sha256Guid)) {
+      ListType = STRING_TOKEN (STR_LIST_TYPE_X509_SHA256);
+    } else if (CompareGuid (&ListWalker->SignatureType, &gEfiCertV2X509Sha384Guid)) {
+      ListType = STRING_TOKEN (STR_LIST_TYPE_X509_SHA384);
+    } else if (CompareGuid (&ListWalker->SignatureType, &gEfiCertV2X509Sha512Guid)) {
+      ListType = STRING_TOKEN (STR_LIST_TYPE_X509_SHA512);
     } else {
       ListType = STRING_TOKEN (STR_LIST_TYPE_UNKNOWN);
     }
@@ -4059,6 +4101,28 @@ FormatHelpInfo (
     ListTypeId = STRING_TOKEN (STR_LIST_TYPE_X509_SHA512);
     DataSize   = 64;
     Time       = (EFI_TIME *)(DataEntry->SignatureData + DataSize);
+  } else if (CompareGuid (&ListEntry->SignatureType, &gEfiCertV2X509Guid)) {
+    ListTypeId = STRING_TOKEN (STR_LIST_TYPE_X509);
+    DataSize   = ListEntry->SignatureSize;
+    IsCert     = TRUE;
+  } else if (CompareGuid (&ListEntry->SignatureType, &gEfiCertV2Sha256Guid)) {
+    ListTypeId = STRING_TOKEN (STR_LIST_TYPE_SHA256);
+    DataSize   = 32;
+  } else if (CompareGuid (&ListEntry->SignatureType, &gEfiCertV2Sha384Guid)) {
+    ListTypeId = STRING_TOKEN (STR_LIST_TYPE_SHA384);
+    DataSize   = 48;
+  } else if (CompareGuid (&ListEntry->SignatureType, &gEfiCertV2Sha512Guid)) {
+    ListTypeId = STRING_TOKEN (STR_LIST_TYPE_SHA512);
+    DataSize   = 64;
+  } else if (CompareGuid (&ListEntry->SignatureType, &gEfiCertV2X509Sha256Guid)) {
+    ListTypeId = STRING_TOKEN (STR_LIST_TYPE_X509_SHA256);
+    DataSize   = 32;
+  } else if (CompareGuid (&ListEntry->SignatureType, &gEfiCertV2X509Sha384Guid)) {
+    ListTypeId = STRING_TOKEN (STR_LIST_TYPE_X509_SHA384);
+    DataSize   = 48;
+  } else if (CompareGuid (&ListEntry->SignatureType, &gEfiCertV2X509Sha512Guid)) {
+    ListTypeId = STRING_TOKEN (STR_LIST_TYPE_X509_SHA512);
+    DataSize   = 64;
   } else {
     Status = EFI_UNSUPPORTED;
     goto ON_EXIT;
