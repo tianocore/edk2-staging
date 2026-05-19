@@ -41,6 +41,11 @@
   DEFINE SECURE_BOOT_ENABLE       = TRUE
 
   #
+  # Crypto provider: OPENSSL or MBEDTLS
+  #
+  DEFINE CRYPTO_PROVIDER          = OPENSSL
+
+  #
   # Redfish definition
   #
   DEFINE REDFISH_ENABLE = FALSE
@@ -139,8 +144,13 @@
   RngLib|MdeModulePkg/Library/BaseRngLibTimerLib/BaseRngLibTimerLib.inf
   IntrinsicLib|CryptoPkg/Library/IntrinsicLib/IntrinsicLib.inf
   OpensslLib|CryptoPkg/Library/OpensslLib/OpensslLibFullAccel.inf
-  BaseCryptLib|CryptoPkg/Library/BaseCryptLib/BaseCryptLib.inf
   TlsLib|CryptoPkg/Library/TlsLib/TlsLib.inf
+!if $(CRYPTO_PROVIDER) == MBEDTLS
+  MbedTlsLib|CryptoPkg/Library/MbedTlsLib/MbedTlsLibFull.inf
+  BaseCryptLib|CryptoPkg/Library/BaseCryptLibMbedTls/BaseCryptLib.inf
+!else
+  BaseCryptLib|CryptoPkg/Library/BaseCryptLib/BaseCryptLib.inf
+!endif
 
 !if $(SECURE_BOOT_ENABLE) == TRUE
   PlatformSecureLib|SecurityPkg/Library/PlatformSecureLibNull/PlatformSecureLibNull.inf
@@ -204,12 +214,20 @@
 
 [LibraryClasses.common.DXE_DRIVER, LibraryClasses.common.UEFI_DRIVER, LibraryClasses.common.UEFI_APPLICATION]
 !if $(SECURE_BOOT_ENABLE) == TRUE
+!if $(CRYPTO_PROVIDER) == MBEDTLS
+  BaseCryptLib|CryptoPkg/Library/BaseCryptLibMbedTls/BaseCryptLib.inf
+!else
   BaseCryptLib|CryptoPkg/Library/BaseCryptLib/BaseCryptLib.inf
+!endif
 !endif
 
 [LibraryClasses.common.DXE_RUNTIME_DRIVER]
 !if $(SECURE_BOOT_ENABLE) == TRUE
+!if $(CRYPTO_PROVIDER) == MBEDTLS
+  BaseCryptLib|CryptoPkg/Library/BaseCryptLibMbedTls/RuntimeCryptLib.inf
+!else
   BaseCryptLib|CryptoPkg/Library/BaseCryptLib/RuntimeCryptLib.inf
+!endif
 !endif
 
 [LibraryClasses.common.DXE_RUNTIME_DRIVER, LibraryClasses.common.UEFI_DRIVER, LibraryClasses.common.DXE_DRIVER, LibraryClasses.common.UEFI_APPLICATION]
