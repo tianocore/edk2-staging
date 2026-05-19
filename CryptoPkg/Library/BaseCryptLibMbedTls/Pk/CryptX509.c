@@ -1979,3 +1979,24 @@ X509FormatDateTime (
 
   return TRUE;
 }
+
+/**
+  Retrieve the ML-DSA Public Key from one DER-encoded X509 certificate.
+
+  MbedTLS does not support ML-DSA. This function always returns FALSE.
+
+  @param[in]  Cert         Pointer to the DER-encoded X509 certificate.
+  @param[in]  CertSize     Size of the X509 certificate in bytes.
+
+  @retval  FALSE  ML-DSA is not supported by MbedTLS.
+
+**/
+BOOLEAN
+EFIAPI
+MlDsaGetPublicKeyFromX509 (
+  IN   CONST UINT8  *Cert,
+  IN   UINTN        CertSize
+  )
+{
+  return FALSE;
+}
