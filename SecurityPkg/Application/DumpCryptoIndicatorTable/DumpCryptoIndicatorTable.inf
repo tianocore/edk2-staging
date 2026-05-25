@@ -30,6 +30,7 @@
   SecurityPkg/SecurityPkg.dec
 
 [LibraryClasses]
+  BaseLib
   BaseMemoryLib
   DebugLib
   PrintLib

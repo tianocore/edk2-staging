@@ -7,8 +7,15 @@
   firmware, supporting crypto agility where algorithms may be updated over time
   or vary across platforms.
 
-  The table is published via the EFI Configuration Table in memory of type
-  EfiBootServicesData.
+  The ECIT is both an EFI_CONFIGURATION_TABLE and an ACPI table. It uses the
+  common ACPI SDT header (signature "ECIT") to support both environments.
+
+  If ACPI is supported:
+    - The EFI_CONFIGURATION_TABLE pointer references the exact ACPI table memory.
+    - The ECIT is stored in EfiAcpiReclaimMemory.
+
+  If ACPI is not supported:
+    - The ECIT can be stored in EfiBootServicesData.
 
   Copyright (c) 2026, Intel Corporation. All rights reserved.<BR>
   SPDX-License-Identifier: BSD-2-Clause-Patent
@@ -18,6 +25,8 @@
 **/
 
 #pragma once
+
+#include <IndustryStandard/Acpi10.h>
 
 ///
 /// EFI Crypto Indicator Table GUID
@@ -156,25 +165,37 @@ typedef struct {
 } EFI_CRYPTO_INDICATOR_ENTRY;
 
 ///
+/// ECIT ACPI table signature "ECIT"
+///
+#define EFI_CRYPTO_INDICATOR_TABLE_SIGNATURE  SIGNATURE_32('E','C','I','T')
+
+///
 /// EFI Crypto Indicator Table
 ///
-/// Installed as an EFI Configuration Table entry identified by
-/// EFI_CRYPTO_INDICATOR_TABLE_GUID. The table resides in EfiBootServicesData
-/// memory.
+/// The ECIT uses the standard ACPI SDT header followed by ECIT-specific fields.
+/// It is installed both as an EFI Configuration Table entry (identified by
+/// EFI_CRYPTO_INDICATOR_TABLE_GUID) and as an ACPI table.
+///
+/// If ACPI is supported, the table resides in EfiAcpiReclaimMemory.
+/// If ACPI is not supported, the table can reside in EfiBootServicesData.
 ///
 typedef struct {
   ///
-  /// Version of this table structure. Must be set to 1.
+  /// Standard ACPI description table header.
+  /// Signature must be "ECIT" (0x54494345).
+  /// Length is the total table size including header and all entries.
+  /// Revision must be set to EFI_CRYPTO_INDICATOR_TABLE_VERSION.
+  /// Checksum must be set such that the entire table sums to zero.
   ///
-  UINT16    Version;
+  EFI_ACPI_DESCRIPTION_HEADER    Header;
   ///
   /// Number of EFI_CRYPTO_INDICATOR_ENTRY entries. Must be greater than 0.
   ///
-  UINT16    NumberOfEntries;
+  UINT8     NumberOfEntries;
   ///
-  /// Reserved, must be zero.
+  /// Reserved for future use, must be zero.
   ///
-  UINT32    Reserved;
+  UINT8     Reserved[3];
   ///
   /// Variable-length array of EFI_CRYPTO_INDICATOR_ENTRY structures.
   /// Each entry is located at an offset determined by summing the

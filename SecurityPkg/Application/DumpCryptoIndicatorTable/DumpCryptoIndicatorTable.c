@@ -9,6 +9,7 @@
 **/
 
 #include <Uefi.h>
+#include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
 #include <Library/PrintLib.h>
@@ -228,12 +229,40 @@ DumpCryptoIndicatorTableMain (
   }
 
   //
-  // Print table header.
+  // Print ACPI SDT header.
   //
   Print (L"=== EFI Crypto Indicator Table (ECIT) ===\n");
-  Print (L"  Version:          %u\n", Table->Version);
+  Print (L"  Signature:        '%c%c%c%c'\n",
+    (CHAR16)(Table->Header.Signature & 0xFF),
+    (CHAR16)((Table->Header.Signature >> 8) & 0xFF),
+    (CHAR16)((Table->Header.Signature >> 16) & 0xFF),
+    (CHAR16)((Table->Header.Signature >> 24) & 0xFF)
+    );
+  Print (L"  Length:           %u\n", Table->Header.Length);
+  Print (L"  Revision:         %u\n", Table->Header.Revision);
+  Print (L"  Checksum:         0x%02x\n", Table->Header.Checksum);
+  Print (L"  OemId:            '%c%c%c%c%c%c'\n",
+    (CHAR16)Table->Header.OemId[0], (CHAR16)Table->Header.OemId[1],
+    (CHAR16)Table->Header.OemId[2], (CHAR16)Table->Header.OemId[3],
+    (CHAR16)Table->Header.OemId[4], (CHAR16)Table->Header.OemId[5]
+    );
+  Print (L"  OemTableId:       0x%lx\n", Table->Header.OemTableId);
+  Print (L"  OemRevision:      %u\n", Table->Header.OemRevision);
+  Print (L"  CreatorId:        0x%08x\n", Table->Header.CreatorId);
+  Print (L"  CreatorRevision:  %u\n", Table->Header.CreatorRevision);
   Print (L"  NumberOfEntries:  %u\n", Table->NumberOfEntries);
   Print (L"\n");
+
+  //
+  // Validate checksum.
+  //
+  {
+    UINT8  Sum;
+    Sum = CalculateSum8 ((UINT8 *)Table, Table->Header.Length);
+    if (Sum != 0) {
+      Print (L"  WARNING: ACPI checksum invalid (sum=0x%02x, expected 0)\n\n", Sum);
+    }
+  }
 
   //
   // Walk entries.
