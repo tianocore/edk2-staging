@@ -21,8 +21,25 @@
 #include <Library/UefiLib.h>
 #include <Library/TlsLib.h>
 #include <Protocol/AcpiTable.h>
+#include <Protocol/Tcg2Protocol.h>
+#include <IndustryStandard/UefiTcgPlatform.h>
 #include <Guid/CryptoIndicatorTable.h>
 #include <Guid/ImageAuthentication.h>
+
+#define ECIT_HANDOFF_TABLE_DESC  "EfiCryptoIndicatorTable"
+
+typedef struct {
+  UINT8                    TableDescriptionSize;
+  UINT8                    TableDescription[sizeof (ECIT_HANDOFF_TABLE_DESC)];
+  UINT64                   NumberOfTables;
+  EFI_CONFIGURATION_TABLE  TableEntry[1];
+} ECIT_HANDOFF_TABLE_POINTERS2;
+
+typedef struct {
+  EFI_TCG2_EVENT               Tcg2Event;
+  UINT8                        EventData[sizeof (ECIT_HANDOFF_TABLE_POINTERS2)];
+} ECIT_TCG2_EVENT_BUFFER;
+
 
 //
 // OID strings for supported signing algorithms.
@@ -443,6 +460,53 @@ CryptoIndicatorTableDxeEntryPoint (
         FreePool (Table);
       }
       return Status;
+    }
+
+    //
+    // Measure the ECIT table to TPM PCR[1] with EV_EFI_HANDOFF_TABLES2
+    // so remote attestation can verify the declared cryptographic capabilities.
+    // Event data is UEFI_HANDOFF_TABLE_POINTERS2 per TCG PC Client PFP spec.
+    //
+    {
+      EFI_TCG2_PROTOCOL  *Tcg2;
+
+      Status = gBS->LocateProtocol (
+                      &gEfiTcg2ProtocolGuid,
+                      NULL,
+                      (VOID **)&Tcg2
+                      );
+      if (!EFI_ERROR (Status)) {
+        ECIT_TCG2_EVENT_BUFFER  EventBuffer;
+
+        ECIT_HANDOFF_TABLE_POINTERS2  *Hp2;
+
+        ZeroMem (&EventBuffer, sizeof (EventBuffer));
+        EventBuffer.Tcg2Event.Size                   = (UINT32)(sizeof (EventBuffer.Tcg2Event) + sizeof (ECIT_HANDOFF_TABLE_POINTERS2));
+        EventBuffer.Tcg2Event.Header.HeaderSize      = sizeof (EFI_TCG2_EVENT_HEADER);
+        EventBuffer.Tcg2Event.Header.HeaderVersion   = EFI_TCG2_EVENT_HEADER_VERSION;
+        EventBuffer.Tcg2Event.Header.PCRIndex        = 1;
+        EventBuffer.Tcg2Event.Header.EventType       = EV_EFI_HANDOFF_TABLES2;
+
+        Hp2 = (ECIT_HANDOFF_TABLE_POINTERS2 *)EventBuffer.Tcg2Event.Event;
+        Hp2->TableDescriptionSize = sizeof (Hp2->TableDescription);
+        CopyMem (Hp2->TableDescription, ECIT_HANDOFF_TABLE_DESC, sizeof (ECIT_HANDOFF_TABLE_DESC));
+        Hp2->NumberOfTables = 1;
+        CopyGuid (&Hp2->TableEntry[0].VendorGuid, &gEfiCryptoIndicatorTableGuid);
+        Hp2->TableEntry[0].VendorTable = ConfigTablePtr;
+
+        Status = Tcg2->HashLogExtendEvent (
+                         Tcg2,
+                         0,
+                         (EFI_PHYSICAL_ADDRESS)(UINTN)ConfigTablePtr,
+                         (UINT64)TableSize,
+                         &EventBuffer.Tcg2Event
+                         );
+        if (EFI_ERROR (Status)) {
+          DEBUG ((DEBUG_WARN, "CryptoIndicatorTableDxe: TCG2 measurement failed - %r\n", Status));
+        } else {
+          DEBUG ((DEBUG_INFO, "CryptoIndicatorTableDxe: ECIT measured to PCR[1]\n"));
+        }
+      }
     }
   }
 

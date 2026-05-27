@@ -65,6 +65,7 @@
 
 [Protocols]
   gEfiAcpiTableProtocolGuid                  ## SOMETIMES_CONSUMES
+  gEfiTcg2ProtocolGuid                       ## SOMETIMES_CONSUMES
 
 [Depex]
   TRUE
