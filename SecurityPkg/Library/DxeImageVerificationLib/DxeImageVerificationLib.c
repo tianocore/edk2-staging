@@ -33,8 +33,10 @@ EFI_GUID                             mCertType;
 //
 UINTN  mImageSize;
 UINT8  *mImageBase = NULL;
-UINT8  mImageDigest[MAX_DIGEST_SIZE];
-UINTN  mImageDigestSize;
+UINT8    mImageDigest[MAX_DIGEST_SIZE];
+UINTN    mImageDigestSize;
+UINT8    mImageDigestCache[HASHALG_MAX][MAX_DIGEST_SIZE];
+BOOLEAN  mImageDigestCached[HASHALG_MAX];
 
 //
 // Notify string for authorization UI.
@@ -601,6 +603,9 @@ Done:
   PE/COFF image is external input, so this function will validate its data structure
   within this image buffer before use.
 
+  If mImageDigestCache[] has a cached result for the determined hash algorithm,
+  restore it instead of re-hashing the image.
+
   @param[in]  AuthData            Pointer to the Authenticode Signature retrieved from signed image.
   @param[in]  AuthDataSize        Size of the Authenticode Signature in bytes.
 
@@ -648,6 +653,30 @@ HashPeImageByType (
 
   if (Index == HASHALG_MAX) {
     return EFI_UNSUPPORTED;
+  }
+
+  //
+  // If a cached digest is available for this algorithm, restore it.
+  //
+  if (mImageDigestCached[Index]) {
+    mImageDigestSize = mHash[Index].DigestLength;
+    mHashTypeStr     = mHash[Index].Name;
+    CopyMem (mImageDigest, mImageDigestCache[Index], mImageDigestSize);
+    switch (Index) {
+      case HASHALG_SHA256:
+        mCertType = gEfiCertSha256Guid;
+        break;
+      case HASHALG_SHA384:
+        mCertType = gEfiCertSha384Guid;
+        break;
+      case HASHALG_SHA512:
+        mCertType = gEfiCertSha512Guid;
+        break;
+      default:
+        return EFI_UNSUPPORTED;
+    }
+
+    return EFI_SUCCESS;
   }
 
   //
@@ -1690,7 +1719,6 @@ DxeImageVerificationHandler (
   )
 {
   EFI_IMAGE_DOS_HEADER          *DosHdr;
-  BOOLEAN                       IsVerified;
   EFI_SIGNATURE_LIST            *SignatureList;
   UINTN                         SignatureListSize;
   EFI_SIGNATURE_DATA            *Signature;
@@ -1717,7 +1745,6 @@ DxeImageVerificationHandler (
   UINT32                        VarAttr;
   BOOLEAN                       IsFound;
   UINT8                         HashAlg;
-  BOOLEAN                       IsFoundInDatabase;
 
   SignatureList     = NULL;
   SignatureListSize = 0;
@@ -1725,9 +1752,8 @@ DxeImageVerificationHandler (
   SecDataDir        = NULL;
   PkcsCertData      = NULL;
   Action            = EFI_IMAGE_EXECUTION_AUTH_UNTESTED;
-  IsVerified        = FALSE;
   IsFound           = FALSE;
-  IsFoundInDatabase = FALSE;
+  ZeroMem (mImageDigestCached, sizeof (mImageDigestCached));
 
   //
   // Sanity check
@@ -1871,65 +1897,75 @@ DxeImageVerificationHandler (
   //
   // Start Image Validation.
   //
-  if ((SecDataDir == NULL) || (SecDataDir->Size == 0)) {
-    //
-    // This image is not signed. The hash value of the image must match a record in the security database "db",
-    // and not be reflected in the security data base "dbx".
-    //
-    HashAlg = sizeof (mHash) / sizeof (HASH_TABLE);
-    while (HashAlg > 0) {
-      HashAlg--;
-      if ((mHash[HashAlg].GetContextSize == NULL) || (mHash[HashAlg].HashInit == NULL) || (mHash[HashAlg].HashUpdate == NULL) || (mHash[HashAlg].HashFinal == NULL)) {
-        continue;
-      }
+  // Per UEFI Spec Section 32.5.3.3, the validation order is:
+  //   A. If the hash of the binary is in dbx, the image shall fail validation.
+  //   B. Else if the hash of the binary is in db, the image shall pass validation.
+  //   C. Else if one of signatures is in db and is not in dbx, the image shall pass validation.
+  //   D. Else the image shall fail validation.
+  //
+  // Step A and B apply to both signed and unsigned images.
+  // Step C only applies to signed images.
+  //
 
-      if (!HashPeImage (HashAlg)) {
-        continue;
-      }
-
-      DbStatus = IsSignatureFoundInDatabase (
-                   EFI_IMAGE_SECURITY_DATABASE1,
-                   mImageDigest,
-                   &mCertType,
-                   mImageDigestSize,
-                   &IsFound
-                   );
-      if (EFI_ERROR (DbStatus) || IsFound) {
-        //
-        // Image Hash is in forbidden database (DBX).
-        //
-        DEBUG ((DEBUG_INFO, "DxeImageVerificationLib: Image is not signed and %s hash of image is forbidden by DBX.\n", mHashTypeStr));
-        goto Failed;
-      }
-
-      DbStatus = IsSignatureFoundInDatabase (
-                   EFI_IMAGE_SECURITY_DATABASE,
-                   mImageDigest,
-                   &mCertType,
-                   mImageDigestSize,
-                   &IsFound
-                   );
-      if (!EFI_ERROR (DbStatus) && IsFound) {
-        //
-        // Image Hash is in allowed database (DB).
-        //
-        IsFoundInDatabase = TRUE;
-      }
+  //
+  // Step A and B: Check the image hash against dbx and db using all supported hash algorithms.
+  //
+  HashAlg = sizeof (mHash) / sizeof (HASH_TABLE);
+  while (HashAlg > 0) {
+    HashAlg--;
+    if ((mHash[HashAlg].GetContextSize == NULL) || (mHash[HashAlg].HashInit == NULL) || (mHash[HashAlg].HashUpdate == NULL) || (mHash[HashAlg].HashFinal == NULL)) {
+      continue;
     }
 
-    if (IsFoundInDatabase) {
+    if (!HashPeImage (HashAlg)) {
+      continue;
+    }
+
+    CopyMem (mImageDigestCache[HashAlg], mImageDigest, mImageDigestSize);
+    mImageDigestCached[HashAlg] = TRUE;
+
+    //
+    // Step A: If the hash of the binary is in dbx, the image shall fail validation.
+    //
+    DbStatus = IsSignatureFoundInDatabase (
+                 EFI_IMAGE_SECURITY_DATABASE1,
+                 mImageDigest,
+                 &mCertType,
+                 mImageDigestSize,
+                 &IsFound
+                 );
+    if (EFI_ERROR (DbStatus) || IsFound) {
+      Action = EFI_IMAGE_EXECUTION_AUTH_SIG_FOUND;
+      DEBUG ((DEBUG_INFO, "DxeImageVerificationLib: %s hash of image is found in DBX.\n", mHashTypeStr));
+      goto Done;
+    }
+
+    //
+    // Step B: If the hash of the binary is in db, the image shall pass validation.
+    //
+    DbStatus = IsSignatureFoundInDatabase (
+                 EFI_IMAGE_SECURITY_DATABASE,
+                 mImageDigest,
+                 &mCertType,
+                 mImageDigestSize,
+                 &IsFound
+                 );
+    if (!EFI_ERROR (DbStatus) && IsFound) {
       return EFI_SUCCESS;
     }
+  }
 
-    //
-    // Image Hash is not found in both forbidden and allowed database.
-    //
+  //
+  // Step C: For unsigned images, there are no signatures to check, so fail.
+  //
+  if ((SecDataDir == NULL) || (SecDataDir->Size == 0)) {
     DEBUG ((DEBUG_INFO, "DxeImageVerificationLib: Image is not signed and %s hash of image is not found in DB/DBX.\n", mHashTypeStr));
     goto Failed;
   }
 
   //
-  // Verify the signature of the image, multiple signatures are allowed as per PE/COFF Section 4.7
+  // Step C: Check each signature in the certificate table against db and dbx.
+  // Multiple signatures are allowed as per PE/COFF Section 4.7
   // "Attribute Certificate Table".
   // The first certificate starts at offset (SecDataDir->VirtualAddress) from the start of the file.
   //
@@ -1998,65 +2034,30 @@ DxeImageVerificationHandler (
     // Check the digital signature against the revoked certificate in forbidden database (dbx).
     //
     if (IsForbiddenByDbx (AuthData, AuthDataSize)) {
-      Action     = EFI_IMAGE_EXECUTION_AUTH_SIG_FAILED;
-      IsVerified = FALSE;
+      Action = EFI_IMAGE_EXECUTION_AUTH_SIG_FAILED;
       break;
     }
 
     //
     // Check the digital signature against the valid certificate in allowed database (db).
+    // If the signature is accepted, the image is accepted and the remaining
+    // signatures are not evaluated.
     //
-    if (!IsVerified) {
-      if (IsAllowedByDb (AuthData, AuthDataSize)) {
-        IsVerified = TRUE;
-      }
-    }
-
-    //
-    // Check the image's hash value.
-    //
-    DbStatus = IsSignatureFoundInDatabase (
-                 EFI_IMAGE_SECURITY_DATABASE1,
-                 mImageDigest,
-                 &mCertType,
-                 mImageDigestSize,
-                 &IsFound
-                 );
-    if (EFI_ERROR (DbStatus) || IsFound) {
-      Action = EFI_IMAGE_EXECUTION_AUTH_SIG_FOUND;
-      DEBUG ((DEBUG_INFO, "DxeImageVerificationLib: Image is signed but %s hash of image is found in DBX.\n", mHashTypeStr));
-      IsVerified = FALSE;
-      break;
-    }
-
-    if (!IsVerified) {
-      DbStatus = IsSignatureFoundInDatabase (
-                   EFI_IMAGE_SECURITY_DATABASE,
-                   mImageDigest,
-                   &mCertType,
-                   mImageDigestSize,
-                   &IsFound
-                   );
-      if (!EFI_ERROR (DbStatus) && IsFound) {
-        IsVerified = TRUE;
-      } else {
-        Action = EFI_IMAGE_EXECUTION_AUTH_SIG_NOT_FOUND;
-        DEBUG ((DEBUG_INFO, "DxeImageVerificationLib: Image is signed but signature is not allowed by DB and %s hash of image is not found in DB/DBX.\n", mHashTypeStr));
-      }
+    if (IsAllowedByDb (AuthData, AuthDataSize)) {
+      return EFI_SUCCESS;
     }
   }
 
-  if (OffSet != SecDataDirEnd) {
-    //
-    // The Size in Certificate Table or the attribute certificate table is corrupted.
-    //
-    IsVerified = FALSE;
+  //
+  // Step D: No signature was accepted. The image fails validation.
+  //
+  if (Action == EFI_IMAGE_EXECUTION_AUTH_UNTESTED) {
+    Action = EFI_IMAGE_EXECUTION_AUTH_SIG_NOT_FOUND;
   }
 
-  if (IsVerified) {
-    return EFI_SUCCESS;
-  }
+  DEBUG ((DEBUG_INFO, "DxeImageVerificationLib: Image is signed but signature is not allowed by DB and is not found in DB/DBX.\n"));
 
+Done:
   if ((Action == EFI_IMAGE_EXECUTION_AUTH_SIG_FAILED) || (Action == EFI_IMAGE_EXECUTION_AUTH_SIG_FOUND)) {
     //
     // Get image hash value as signature of executable.
