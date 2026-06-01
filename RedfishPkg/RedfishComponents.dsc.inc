@@ -29,4 +29,5 @@
   RedfishPkg/RedfishPlatformConfigDxe/RedfishPlatformConfigDxe.inf
   MdeModulePkg/Universal/RegularExpressionDxe/RegularExpressionDxe.inf
   RedfishPkg/RedfishHttpDxe/RedfishHttpDxe.inf
+  RedfishPkg/RedfishResourceDxe/RedfishResourceDxe.inf
 !endif
