@@ -22,5 +22,6 @@
   HiiUtilityLib|RedfishPkg/Library/HiiUtilityLib/HiiUtilityLib.inf
   RedfishPlatformConfigLib|RedfishPkg/Library/RedfishPlatformConfigLib/RedfishPlatformConfigLib.inf
   RedfishHttpLib|RedfishPkg/Library/RedfishHttpLib/RedfishHttpLib.inf
+  RedfishResourceLib|RedfishPkg/Library/RedfishResourceLib/RedfishResourceLib.inf
 !endif
 

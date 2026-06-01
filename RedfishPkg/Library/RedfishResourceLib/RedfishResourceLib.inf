@@ -1,0 +1,35 @@
+## @file
+#  RedfishResourceLib - type-agnostic consumer side library.
+#
+#  Provides resource query APIs for Redfish feature drivers.
+#  Retrieves data from EFI_REDFISH_RESOURCE_PROTOCOL.
+#
+#  Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.<BR>
+#  SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x0001000b
+  BASE_NAME                      = RedfishResourceLib
+  FILE_GUID                      = 8EC5A919-320C-424D-8FAF-0F7F4223ACD7
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = RedfishResourceLib
+
+[Sources]
+  RedfishResourceLib.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  RedfishPkg/RedfishPkg.dec
+
+[LibraryClasses]
+  BaseLib
+  DebugLib
+  MemoryAllocationLib
+  UefiBootServicesTableLib
+
+[Protocols]
+  gEfiRedfishResourceProtocolGuid    ## CONSUMES

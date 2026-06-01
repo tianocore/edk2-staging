@@ -1,0 +1,41 @@
+## @file
+#  RedfishResourceDxe installs EFI_REDFISH_RESOURCE_PROTOCOL.
+#
+#  This driver provides a data repository for platform Redfish resource.
+#  Platform porting code calls SetResource() to publish data; Redfish feature
+#  drivers call GetResource() to retrieve it.
+#
+#  Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.<BR>
+#  SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x0001001B
+  BASE_NAME                      = RedfishResourceDxe
+  FILE_GUID                      = 7A3C2E01-0816-4B8E-A1C9-3F7D5E8B6C02
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = RedfishResourceDxeEntryPoint
+
+[Sources]
+  RedfishResourceDxe.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  RedfishPkg/RedfishPkg.dec
+
+[LibraryClasses]
+  BaseLib
+  BaseMemoryLib
+  DebugLib
+  MemoryAllocationLib
+  UefiBootServicesTableLib
+  UefiDriverEntryPoint
+
+[Protocols]
+  gEfiRedfishResourceProtocolGuid    ## PRODUCES
+
+[Depex]
+  TRUE

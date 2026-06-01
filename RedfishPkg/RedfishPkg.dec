@@ -80,6 +80,11 @@
   #
   RedfishPlatformWantedDeviceLib|Include/Library/RedfishPlatformWantedDeviceLib.h
 
+  ##  @libraryclass  Type-agnostic consumer library for retrieving resource
+  #   data from EFI_REDFISH_RESOURCE_PROTOCOL.
+  #
+  RedfishResourceLib|Include/Library/RedfishResourceLib.h
+
 [LibraryClasses.Common.Private]
   ##  @libraryclass  Provides the private C runtime library functions.
   #   CRT library is currently used by edk2 JsonLib (open source
@@ -109,6 +114,9 @@
 
   ## Include/Protocol/EdkIIRedfishHttpProtocol.h
   gEdkIIRedfishHttpProtocolGuid = { 0x58a0f47e, 0xf45f, 0x4d44, { 0x89, 0x5b, 0x2a, 0xfe, 0xb0, 0x80, 0x15, 0xe2 } }
+
+  ## Include/Protocol/RedfishResourceProtocol.h
+  gEfiRedfishResourceProtocolGuid = { 0x574527BC, 0xB976, 0x0816, { 0xA1, 0x3B, 0x91, 0xBD, 0x9C, 0x9B, 0xA8, 0x99 } }
 
 [Guids]
   gEfiRedfishPkgTokenSpaceGuid      = { 0x4fdbccb7, 0xe829, 0x4b4c, { 0x88, 0x87, 0xb2, 0x3f, 0xd7, 0x25, 0x4b, 0x85 }}

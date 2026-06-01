@@ -69,5 +69,6 @@
   RedfishPkg/Library/RedfishPlatformConfigLib/RedfishPlatformConfigLib.inf
   RedfishPkg/Library/RedfishHttpLib/RedfishHttpLib.inf
   RedfishPkg/Library/RedfishPlatformWantedDeviceLibNull/RedfishPlatformWantedDeviceLibNull.inf
+  RedfishPkg/Library/RedfishResourceLib/RedfishResourceLib.inf
 
   !include RedfishPkg/Redfish.dsc.inc
