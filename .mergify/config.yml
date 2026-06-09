@@ -36,7 +36,6 @@ pull_request_rules:
       - status-success=Windows VS2019 PR
     actions:
       merge:
-        strict: true
         method: rebase
 
   - name: Automatically close a PR when all required checks pass and 'push' label is not present
