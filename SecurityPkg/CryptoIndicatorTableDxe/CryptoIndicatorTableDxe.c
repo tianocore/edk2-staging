@@ -434,7 +434,7 @@ CryptoIndicatorTableDxeEntryPoint (
         //
         // Locate the ACPI copy so ConfigurationTable points to the same memory.
         //
-        AcpiCopy = EfiLocateFirstAcpiTable (EFI_CRYPTO_INDICATOR_TABLE_SIGNATURE);
+        AcpiCopy = (EFI_ACPI_DESCRIPTION_HEADER *)EfiLocateFirstAcpiTable (EFI_CRYPTO_INDICATOR_TABLE_SIGNATURE);
         if (AcpiCopy != NULL) {
           ConfigTablePtr = (VOID *)AcpiCopy;
           FreePool (Table);
