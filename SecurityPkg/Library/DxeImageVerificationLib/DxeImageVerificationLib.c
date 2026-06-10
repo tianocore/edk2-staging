@@ -2032,10 +2032,14 @@ DxeImageVerificationHandler (
 
     //
     // Check the digital signature against the revoked certificate in forbidden database (dbx).
+    // Per UEFI Spec Section, a signature found in dbx only disqualifies that
+    // signature; the image may still pass if another signature is in db and not in dbx.
+    // Therefore skip this signature and continue evaluating the remaining ones rather than
+    // failing the whole image here.
     //
     if (IsForbiddenByDbx (AuthData, AuthDataSize)) {
       Action = EFI_IMAGE_EXECUTION_AUTH_SIG_FAILED;
-      break;
+      continue;
     }
 
     //
