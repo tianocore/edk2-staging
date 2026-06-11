@@ -2061,11 +2061,64 @@ TestVerifyAuthenticodeVerify (
   return UNIT_TEST_PASSED;
 }
 
+/**
+  Regression test for Pkcs7GetSigners() on Authenticode-signed data.
+
+  Authenticode encodes eContent as an SPC_INDIRECT_DATA SEQUENCE (0x30), while
+  CMS requires eContent to be an OCTET STRING (0x04). Pkcs7GetSigners must be
+  able to parse such data and return the signer's certificate; otherwise the
+  image verification 'db' check path (IsAllowedByDb) silently fails before any
+  signature verification is attempted.
+**/
+UNIT_TEST_STATUS
+EFIAPI
+TestVerifyPkcs7GetSignersAuthenticode (
+  IN UNIT_TEST_CONTEXT  Context
+  )
+{
+  BOOLEAN  Status;
+  UINT8    *CertStack;
+  UINTN    StackLength;
+  UINT8    *TrustedCert;
+  UINTN    CertLength;
+
+  CertStack   = NULL;
+  StackLength = 0;
+  TrustedCert = NULL;
+  CertLength  = 0;
+
+  Status = Pkcs7GetSigners (
+             AuthenticodeWithSha256,
+             sizeof (AuthenticodeWithSha256),
+             &CertStack,
+             &StackLength,
+             &TrustedCert,
+             &CertLength
+             );
+  UT_ASSERT_TRUE (Status);
+
+  //
+  // A valid signer certificate must be returned. The first byte of CertStack
+  // encodes the certificate count and must be non-zero.
+  //
+  UT_ASSERT_NOT_NULL (CertStack);
+  UT_ASSERT_TRUE (StackLength > 0);
+  UT_ASSERT_TRUE (CertStack[0] != 0);
+  UT_ASSERT_NOT_NULL (TrustedCert);
+  UT_ASSERT_TRUE (CertLength > 0);
+
+  Pkcs7FreeSigners (CertStack);
+  Pkcs7FreeSigners (TrustedCert);
+
+  return UNIT_TEST_PASSED;
+}
+
 TEST_DESC  mAuthenticodeTest[] = {
   //
   // -----Description--------------------------------------Class----------------------Function-----------------Pre---Post--Context
   //
   { "TestVerifyAuthenticodeVerify()", "CryptoPkg.BaseCryptLib.Authenticode", TestVerifyAuthenticodeVerify, NULL, NULL, NULL },
+  { "TestVerifyPkcs7GetSignersAuthenticode()", "CryptoPkg.BaseCryptLib.Authenticode", TestVerifyPkcs7GetSignersAuthenticode, NULL, NULL, NULL },
 };
 
 UINTN  mAuthenticodeTestNum = ARRAY_SIZE (mAuthenticodeTest);

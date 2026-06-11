@@ -61,4 +61,27 @@ WrapPkcs7Data (
   OUT UINTN        *WrapDataSize
   );
 
+/**
+  Patch the eContent tag in Authenticode DER data from SEQUENCE (0x30) to
+  OCTET STRING (0x04) to enable CMS parsing.
+
+  Authenticode signatures use SPC_INDIRECT_DATA content type which encodes
+  eContent as a SEQUENCE. CMS EncapsulatedContentInfo strictly requires
+  eContent to be OCTET STRING per RFC 5652. This function navigates the
+  DER structure of ContentInfo -> SignedData -> EncapsulatedContentInfo
+  to find and patch the eContent tag byte.
+
+  @param[in,out]  Der      Mutable copy of the DER-encoded Authenticode data.
+  @param[in]      DerSize  Size of the DER data in bytes.
+
+  @retval  TRUE   The tag was successfully patched (or no eContent present).
+  @retval  FALSE  Failed to navigate the DER structure.
+
+**/
+BOOLEAN
+PatchSpcContentTag (
+  IN OUT UINT8  *Der,
+  IN     UINTN  DerSize
+  );
+
 #endif
