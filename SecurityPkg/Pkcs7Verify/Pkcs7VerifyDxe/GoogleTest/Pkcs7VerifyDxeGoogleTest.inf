@@ -1,0 +1,58 @@
+## @file
+# GoogleTest unit test for the revocation-database helpers in Pkcs7VerifyDxe.
+#
+# Compiles the driver source directly into the host application so the
+# internal IsContentHashRevokedByHash(), IsContentHashRevoked() and
+# IsCertHashRevoked() helpers can be exercised against crafted V1 and V2
+# signature lists.
+#
+# Copyright (c) 2026, Intel Corporation. All rights reserved.<BR>
+# SPDX-License-Identifier: BSD-2-Clause-Patent
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = Pkcs7VerifyDxeGoogleTest
+  FILE_GUID                      = 1E2D3C4B-5A69-7887-96A5-B4C3D2E1F009
+  MODULE_TYPE                    = HOST_APPLICATION
+  VERSION_STRING                 = 1.0
+
+[Sources]
+  Pkcs7VerifyDxeGoogleTest.cpp
+  Pkcs7VerifyDxeHostWrap.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  CryptoPkg/CryptoPkg.dec
+  SecurityPkg/SecurityPkg.dec
+  UnitTestFrameworkPkg/UnitTestFrameworkPkg.dec
+
+[LibraryClasses]
+  GoogleTestLib
+  BaseLib
+  BaseMemoryLib
+  MemoryAllocationLib
+  DebugLib
+  BaseCryptLib
+  UefiLib
+  UefiBootServicesTableLib
+
+[Guids]
+  gEfiCertX509Guid
+  gEfiCertV2X509Guid
+  gEfiCertSha1Guid
+  gEfiCertSha256Guid
+  gEfiCertV2Sha256Guid
+  gEfiCertSha384Guid
+  gEfiCertV2Sha384Guid
+  gEfiCertSha512Guid
+  gEfiCertV2Sha512Guid
+  gEfiCertX509Sha256Guid
+  gEfiCertV2X509Sha256Guid
+  gEfiCertX509Sha384Guid
+  gEfiCertV2X509Sha384Guid
+  gEfiCertX509Sha512Guid
+  gEfiCertV2X509Sha512Guid
+
+[Protocols]
+  gEfiPkcs7VerifyProtocolGuid

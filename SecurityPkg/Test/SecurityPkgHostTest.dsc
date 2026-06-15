@@ -76,6 +76,15 @@
       PeCoffExtraActionLib|MdePkg/Library/BasePeCoffExtraActionLibNull/BasePeCoffExtraActionLibNull.inf
       TpmMeasurementLib|MdeModulePkg/Library/TpmMeasurementLibNull/TpmMeasurementLibNull.inf
   }
+  SecurityPkg/Pkcs7Verify/Pkcs7VerifyDxe/GoogleTest/Pkcs7VerifyDxeGoogleTest.inf {
+    <LibraryClasses>
+      UefiBootServicesTableLib|MdePkg/Test/Mock/Library/GoogleTest/MockUefiBootServicesTableLib/MockUefiBootServicesTableLib.inf
+      BaseCryptLib|CryptoPkg/Library/BaseCryptLib/UnitTestHostBaseCryptLib.inf
+      OpensslLib|CryptoPkg/Library/OpensslLib/OpensslLibFull.inf
+      RngLib|MdePkg/Library/BaseRngLib/BaseRngLib.inf
+      UefiLib|MdePkg/Test/Mock/Library/GoogleTest/MockUefiLib/MockUefiLib.inf
+      UefiRuntimeServicesTableLib|MdePkg/Test/Mock/Library/GoogleTest/MockUefiRuntimeServicesTableLib/MockUefiRuntimeServicesTableLib.inf
+  }
   SecurityPkg/Library/AuthVariableLib/GoogleTest/AuthVariableLibCheckSigGoogleTest.inf {
     <LibraryClasses>
       AuthVariableLib|SecurityPkg/Library/AuthVariableLib/AuthVariableLib.inf
