@@ -318,6 +318,8 @@ IsCertHashRevoked (
   UINTN               EntryIndex;
   UINTN               EntryCount;
   UINT8               CertHashVal[MAX_DIGEST_SIZE];
+  UINTN               HashSize;
+  BOOLEAN             IsV2;
 
   if (RevokedDb == NULL) {
     return FALSE;
@@ -342,20 +344,32 @@ IsCertHashRevoked (
 
     //
     // Determine Hash Algorithm based on the entry type in revocation database, and
-    // calculate the certificate hash.
+    // calculate the certificate hash. HashSize tracks the digest length of the
+    // selected algorithm and IsV2 records whether the entry uses the V2 layout
+    // (EFI_SIGNATURE_V2_DATA, no SignatureOwner and no TimeOfRevocation).
     //
+    IsV2 = FALSE;
     if (CompareGuid (&SigList->SignatureType, &gEfiCertX509Sha256Guid)) {
-      Status = CalculateDataHash (TBSCert, TBSCertSize, &gEfiCertSha256Guid, CertHashVal);
+      Status   = CalculateDataHash (TBSCert, TBSCertSize, &gEfiCertSha256Guid, CertHashVal);
+      HashSize = SHA256_DIGEST_SIZE;
     } else if (CompareGuid (&SigList->SignatureType, &gEfiCertX509Sha384Guid)) {
-      Status = CalculateDataHash (TBSCert, TBSCertSize, &gEfiCertSha384Guid, CertHashVal);
+      Status   = CalculateDataHash (TBSCert, TBSCertSize, &gEfiCertSha384Guid, CertHashVal);
+      HashSize = SHA384_DIGEST_SIZE;
     } else if (CompareGuid (&SigList->SignatureType, &gEfiCertX509Sha512Guid)) {
-      Status = CalculateDataHash (TBSCert, TBSCertSize, &gEfiCertSha512Guid, CertHashVal);
+      Status   = CalculateDataHash (TBSCert, TBSCertSize, &gEfiCertSha512Guid, CertHashVal);
+      HashSize = SHA512_DIGEST_SIZE;
     } else if (CompareGuid (&SigList->SignatureType, &gEfiCertV2X509Sha256Guid)) {
-      Status = CalculateDataHash (TBSCert, TBSCertSize, &gEfiCertSha256Guid, CertHashVal);
+      Status   = CalculateDataHash (TBSCert, TBSCertSize, &gEfiCertSha256Guid, CertHashVal);
+      HashSize = SHA256_DIGEST_SIZE;
+      IsV2     = TRUE;
     } else if (CompareGuid (&SigList->SignatureType, &gEfiCertV2X509Sha384Guid)) {
-      Status = CalculateDataHash (TBSCert, TBSCertSize, &gEfiCertSha384Guid, CertHashVal);
+      Status   = CalculateDataHash (TBSCert, TBSCertSize, &gEfiCertSha384Guid, CertHashVal);
+      HashSize = SHA384_DIGEST_SIZE;
+      IsV2     = TRUE;
     } else if (CompareGuid (&SigList->SignatureType, &gEfiCertV2X509Sha512Guid)) {
-      Status = CalculateDataHash (TBSCert, TBSCertSize, &gEfiCertSha512Guid, CertHashVal);
+      Status   = CalculateDataHash (TBSCert, TBSCertSize, &gEfiCertSha512Guid, CertHashVal);
+      HashSize = SHA512_DIGEST_SIZE;
+      IsV2     = TRUE;
     } else {
       //
       // Un-matched Cert Hash GUID
@@ -374,16 +388,18 @@ IsCertHashRevoked (
     for (EntryIndex = 0; EntryIndex < EntryCount; EntryIndex++) {
       //
       // Check if the Certificate Hash is revoked.
-      // V2 types have no SignatureOwner and no TimeOfRevocation.
+      // V2 types have no SignatureOwner and no TimeOfRevocation, so the hash
+      // data starts at offset 0. Compare exactly the digest length of the
+      // declared algorithm rather than trusting SignatureSize, and confirm the
+      // entry is large enough to hold the digest.
       //
-      if (CompareGuid (&SigList->SignatureType, &gEfiCertV2X509Sha256Guid) ||
-          CompareGuid (&SigList->SignatureType, &gEfiCertV2X509Sha384Guid) ||
-          CompareGuid (&SigList->SignatureType, &gEfiCertV2X509Sha512Guid)) {
-        if (CompareMem (
-              (UINT8 *)SigData,
-              CertHashVal,
-              SigList->SignatureSize
-              ) == 0)
+      if (IsV2) {
+        if ((SigList->SignatureSize == HashSize) &&
+            (CompareMem (
+               (UINT8 *)SigData,
+               CertHashVal,
+               HashSize
+               ) == 0))
         {
           Status = TRUE;
           goto _Exit;
