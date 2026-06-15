@@ -371,7 +371,7 @@ IsCertHashRevoked (
                                      SigList->SignatureHeaderSize);
     EntryCount = (SigList->SignatureListSize - SigList->SignatureHeaderSize -
                   sizeof (EFI_SIGNATURE_LIST)) / SigList->SignatureSize;
-    for (EntryIndex = 0; EntryIndex < EntryCount; Index++) {
+    for (EntryIndex = 0; EntryIndex < EntryCount; EntryIndex++) {
       //
       // Check if the Certificate Hash is revoked.
       // V2 types have no SignatureOwner and no TimeOfRevocation.
