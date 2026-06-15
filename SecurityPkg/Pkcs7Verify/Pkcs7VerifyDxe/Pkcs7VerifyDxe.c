@@ -137,6 +137,7 @@ IsContentHashRevokedByHash (
   UINTN               EntryIndex;
   UINTN               EntryCount;
   BOOLEAN             Status;
+  BOOLEAN             IsV2;
 
   if (RevokedDb == NULL) {
     return FALSE;
@@ -157,6 +158,21 @@ IsContentHashRevokedByHash (
     }
 
     //
+    // Determine the layout from the SignatureType GUID rather than by size.
+    // V2 content hash types use EFI_SIGNATURE_V2_DATA (no SignatureOwner), so
+    // the hash data starts at offset 0 and SignatureSize equals the hash size.
+    // V1 types carry a SignatureOwner GUID, so the hash size is
+    // SignatureSize - sizeof(EFI_GUID).
+    //
+    if (CompareGuid (&SigList->SignatureType, &gEfiCertV2Sha256Guid) ||
+        CompareGuid (&SigList->SignatureType, &gEfiCertV2Sha384Guid) ||
+        CompareGuid (&SigList->SignatureType, &gEfiCertV2Sha512Guid)) {
+      IsV2 = TRUE;
+    } else {
+      IsV2 = FALSE;
+    }
+
+    //
     // Search the signature database to search the revoked content hash
     //
     SigData = (EFI_SIGNATURE_DATA *)((UINT8 *)SigList + sizeof (EFI_SIGNATURE_LIST) +
@@ -169,27 +185,23 @@ IsContentHashRevokedByHash (
       // don't match, meaning it's a different hash algorithm and we
       // can't tell if it's revoking our binary or not.  Assume not.
       //
-      // V2 signature types have no SignatureOwner, so SignatureSize equals hash size.
-      // V1 signature types have SignatureOwner, so hash size = SignatureSize - sizeof(EFI_GUID).
-      //
-      if ((SigList->SignatureSize - sizeof (EFI_GUID) == HashSize) ||
-          (SigList->SignatureSize == HashSize)) {
+      if (IsV2) {
         //
-        // Compare Data Hash with Signature Data
+        // V2 type: data starts at offset 0, SignatureSize equals hash size.
         //
-        if (SigList->SignatureSize == HashSize) {
-          //
-          // V2 type: data starts at offset 0
-          //
-          if (CompareMem ((UINT8 *)SigData, Hash, HashSize) == 0) {
-            Status = TRUE;
-            goto _Exit;
-          }
-        } else {
-          if (CompareMem (SigData->SignatureData, Hash, HashSize) == 0) {
-            Status = TRUE;
-            goto _Exit;
-          }
+        if ((SigList->SignatureSize == HashSize) &&
+            (CompareMem ((UINT8 *)SigData, Hash, HashSize) == 0)) {
+          Status = TRUE;
+          goto _Exit;
+        }
+      } else {
+        //
+        // V1 type: data follows the SignatureOwner GUID.
+        //
+        if ((SigList->SignatureSize - sizeof (EFI_GUID) == HashSize) &&
+            (CompareMem (SigData->SignatureData, Hash, HashSize) == 0)) {
+          Status = TRUE;
+          goto _Exit;
         }
       }
 
