@@ -70,6 +70,15 @@ extern "C" {
     IN UINTN               InDataSize,
     IN EFI_SIGNATURE_LIST  **AllowedDb
     );
+
+  EFI_STATUS
+  P7CheckRevocation (
+    IN UINT8               *SignedData,
+    IN UINTN               SignedDataSize,
+    IN UINT8               *InData,
+    IN UINTN               InDataSize,
+    IN EFI_SIGNATURE_LIST  **RevokedDb
+    );
 }
 
 #define SHA256_DIGEST_SIZE  32
@@ -870,6 +879,121 @@ TEST_F (Pkcs7VerifyRevokeTest, CertHashMatchesButSignatureOverWrongData) {
                          OtherData,
                          sizeof (OtherData),
                          Db
+                         );
+
+  EXPECT_NE (Status, EFI_SUCCESS);
+
+  FreePool (List);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// P7CheckRevocation - EFI_CERT_X509_SHAxxx in dbx revokes the signer
+//
+// This is the path the protocol runs (before P7CheckTrust) to enforce that a
+// signer whose certificate TBS hash is present in the revocation database is
+// rejected. It extracts the signer chain via Pkcs7GetSigners and matches each
+// certificate's TBS hash against RevokedDb. P7CheckRevocation returns
+// EFI_SUCCESS to mean "revoked".
+///////////////////////////////////////////////////////////////////////////////
+
+TEST_F (Pkcs7VerifyRevokeTest, RevokedByCertHash_V1_Sha256) {
+  ASSERT_TRUE (mSetUpDone);
+
+  UINT8               *Hashes[] = { mTbsHash256 };
+  EFI_SIGNATURE_LIST  *List     = BuildCertHashList (
+                                    &gEfiCertX509Sha256Guid, FALSE,
+                                    Hashes, SHA256_DIGEST_SIZE, 1
+                                    );
+  ASSERT_NE (List, (EFI_SIGNATURE_LIST *)NULL);
+  EFI_SIGNATURE_LIST  *Dbx[] = { List, NULL };
+
+  EFI_STATUS  Status = P7CheckRevocation (
+                         (UINT8 *)mP7SignedAttached,
+                         sizeof (mP7SignedAttached),
+                         (UINT8 *)mTestContent,
+                         sizeof (mTestContent),
+                         Dbx
+                         );
+
+  //
+  // EFI_SUCCESS from P7CheckRevocation means the signer is revoked.
+  //
+  EXPECT_EQ (Status, EFI_SUCCESS);
+
+  FreePool (List);
+}
+
+TEST_F (Pkcs7VerifyRevokeTest, RevokedByCertHash_V2_Sha256) {
+  ASSERT_TRUE (mSetUpDone);
+
+  UINT8               *Hashes[] = { mTbsHash256 };
+  EFI_SIGNATURE_LIST  *List     = BuildCertHashList (
+                                    &gEfiCertV2X509Sha256Guid, TRUE,
+                                    Hashes, SHA256_DIGEST_SIZE, 1
+                                    );
+  ASSERT_NE (List, (EFI_SIGNATURE_LIST *)NULL);
+  EFI_SIGNATURE_LIST  *Dbx[] = { List, NULL };
+
+  EFI_STATUS  Status = P7CheckRevocation (
+                         (UINT8 *)mP7SignedAttached,
+                         sizeof (mP7SignedAttached),
+                         (UINT8 *)mTestContent,
+                         sizeof (mTestContent),
+                         Dbx
+                         );
+
+  EXPECT_EQ (Status, EFI_SUCCESS);
+
+  FreePool (List);
+}
+
+TEST_F (Pkcs7VerifyRevokeTest, RevokedByCertHash_Sha384) {
+  ASSERT_TRUE (mSetUpDone);
+
+  UINT8               *Hashes[] = { mTbsHash384 };
+  EFI_SIGNATURE_LIST  *List     = BuildCertHashList (
+                                    &gEfiCertX509Sha384Guid, FALSE,
+                                    Hashes, SHA384_DIGEST_SIZE, 1
+                                    );
+  ASSERT_NE (List, (EFI_SIGNATURE_LIST *)NULL);
+  EFI_SIGNATURE_LIST  *Dbx[] = { List, NULL };
+
+  EFI_STATUS  Status = P7CheckRevocation (
+                         (UINT8 *)mP7SignedAttached,
+                         sizeof (mP7SignedAttached),
+                         (UINT8 *)mTestContent,
+                         sizeof (mTestContent),
+                         Dbx
+                         );
+
+  EXPECT_EQ (Status, EFI_SUCCESS);
+
+  FreePool (List);
+}
+
+TEST_F (Pkcs7VerifyRevokeTest, NotRevokedByUnrelatedCertHash) {
+  ASSERT_TRUE (mSetUpDone);
+
+  //
+  // dbx holds an unrelated cert hash, so the signer is not revoked.
+  // P7CheckRevocation must NOT return EFI_SUCCESS.
+  //
+  UINT8  UnrelatedHash[SHA256_DIGEST_SIZE];
+  SetMem (UnrelatedHash, sizeof (UnrelatedHash), 0x5A);
+  UINT8               *Hashes[] = { UnrelatedHash };
+  EFI_SIGNATURE_LIST  *List     = BuildCertHashList (
+                                    &gEfiCertX509Sha256Guid, FALSE,
+                                    Hashes, SHA256_DIGEST_SIZE, 1
+                                    );
+  ASSERT_NE (List, (EFI_SIGNATURE_LIST *)NULL);
+  EFI_SIGNATURE_LIST  *Dbx[] = { List, NULL };
+
+  EFI_STATUS  Status = P7CheckRevocation (
+                         (UINT8 *)mP7SignedAttached,
+                         sizeof (mP7SignedAttached),
+                         (UINT8 *)mTestContent,
+                         sizeof (mTestContent),
+                         Dbx
                          );
 
   EXPECT_NE (Status, EFI_SUCCESS);
