@@ -49,6 +49,14 @@ extern "C" {
     IN  UINTN               SignatureListSize,
     OUT BOOLEAN             *IsFound
     );
+
+  BOOLEAN
+  IsCertAllowedByDbx (
+    IN UINT8  *Certificate,
+    IN UINTN  CertSize,
+    IN UINT8  *DbxData,
+    IN UINTN  DbxDataSize
+    );
 }
 
 //
@@ -742,6 +750,93 @@ TEST_F (CertHashSearchTest, CertHashNotFoundInDbx) {
   EXPECT_FALSE (IsFound);
 
   FreePool (SigList);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// IsCertAllowedByDbx - dbx certificate-hash revocation decision
+//
+// This is the dbx re-check IsAllowedByDb() performs once a db entry grants
+// trust: a certificate is allowed only if its TBS hash is not in dbx.
+///////////////////////////////////////////////////////////////////////////////
+
+TEST_F (CertHashSearchTest, CertRevokedByDbx_V1_Sha256) {
+  ASSERT_TRUE (mSetUpDone);
+
+  UINTN   SigListSize = 0;
+  UINT8   *SigList    = BuildSigListWithHash (
+                           &gEfiCertX509Sha256Guid,
+                           mTbsHash256,
+                           SHA256_DIGEST_SIZE,
+                           FALSE,
+                           &SigListSize
+                           );
+  ASSERT_NE (SigList, (UINT8 *)NULL);
+
+  //
+  // The certificate TBS hash is in dbx, so it is revoked (not allowed).
+  //
+  EXPECT_FALSE (
+    IsCertAllowedByDbx ((UINT8 *)mTestCert, sizeof (mTestCert), SigList, SigListSize)
+    );
+
+  FreePool (SigList);
+}
+
+TEST_F (CertHashSearchTest, CertRevokedByDbx_V2_Sha384) {
+  ASSERT_TRUE (mSetUpDone);
+
+  UINTN   SigListSize = 0;
+  UINT8   *SigList    = BuildSigListWithHash (
+                           &gEfiCertV2X509Sha384Guid,
+                           mTbsHash384,
+                           SHA384_DIGEST_SIZE,
+                           TRUE,
+                           &SigListSize
+                           );
+  ASSERT_NE (SigList, (UINT8 *)NULL);
+
+  EXPECT_FALSE (
+    IsCertAllowedByDbx ((UINT8 *)mTestCert, sizeof (mTestCert), SigList, SigListSize)
+    );
+
+  FreePool (SigList);
+}
+
+TEST_F (CertHashSearchTest, CertAllowedWhenDbxDoesNotMatch) {
+  ASSERT_TRUE (mSetUpDone);
+
+  //
+  // dbx holds an unrelated cert hash, so the certificate is not revoked.
+  //
+  UINT8  WrongHash[SHA256_DIGEST_SIZE];
+  ZeroMem (WrongHash, sizeof (WrongHash));
+
+  UINTN   SigListSize = 0;
+  UINT8   *SigList    = BuildSigListWithHash (
+                           &gEfiCertX509Sha256Guid,
+                           WrongHash,
+                           SHA256_DIGEST_SIZE,
+                           FALSE,
+                           &SigListSize
+                           );
+  ASSERT_NE (SigList, (UINT8 *)NULL);
+
+  EXPECT_TRUE (
+    IsCertAllowedByDbx ((UINT8 *)mTestCert, sizeof (mTestCert), SigList, SigListSize)
+    );
+
+  FreePool (SigList);
+}
+
+TEST_F (CertHashSearchTest, CertAllowedWhenDbxAbsent) {
+  ASSERT_TRUE (mSetUpDone);
+
+  //
+  // No dbx present (NULL) means nothing is revoked.
+  //
+  EXPECT_TRUE (
+    IsCertAllowedByDbx ((UINT8 *)mTestCert, sizeof (mTestCert), NULL, 0)
+    );
 }
 
 int
