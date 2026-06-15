@@ -322,6 +322,7 @@ IsCertHashRevoked (
   )
 {
   BOOLEAN             Status;
+  BOOLEAN             HashStatus;
   EFI_SIGNATURE_LIST  *SigList;
   EFI_SIGNATURE_DATA  *SigData;
   UINT8               *TBSCert;
@@ -362,26 +363,26 @@ IsCertHashRevoked (
     //
     IsV2 = FALSE;
     if (CompareGuid (&SigList->SignatureType, &gEfiCertX509Sha256Guid)) {
-      Status   = CalculateDataHash (TBSCert, TBSCertSize, &gEfiCertSha256Guid, CertHashVal);
-      HashSize = SHA256_DIGEST_SIZE;
+      HashStatus = CalculateDataHash (TBSCert, TBSCertSize, &gEfiCertSha256Guid, CertHashVal);
+      HashSize   = SHA256_DIGEST_SIZE;
     } else if (CompareGuid (&SigList->SignatureType, &gEfiCertX509Sha384Guid)) {
-      Status   = CalculateDataHash (TBSCert, TBSCertSize, &gEfiCertSha384Guid, CertHashVal);
-      HashSize = SHA384_DIGEST_SIZE;
+      HashStatus = CalculateDataHash (TBSCert, TBSCertSize, &gEfiCertSha384Guid, CertHashVal);
+      HashSize   = SHA384_DIGEST_SIZE;
     } else if (CompareGuid (&SigList->SignatureType, &gEfiCertX509Sha512Guid)) {
-      Status   = CalculateDataHash (TBSCert, TBSCertSize, &gEfiCertSha512Guid, CertHashVal);
-      HashSize = SHA512_DIGEST_SIZE;
+      HashStatus = CalculateDataHash (TBSCert, TBSCertSize, &gEfiCertSha512Guid, CertHashVal);
+      HashSize   = SHA512_DIGEST_SIZE;
     } else if (CompareGuid (&SigList->SignatureType, &gEfiCertV2X509Sha256Guid)) {
-      Status   = CalculateDataHash (TBSCert, TBSCertSize, &gEfiCertSha256Guid, CertHashVal);
-      HashSize = SHA256_DIGEST_SIZE;
-      IsV2     = TRUE;
+      HashStatus = CalculateDataHash (TBSCert, TBSCertSize, &gEfiCertSha256Guid, CertHashVal);
+      HashSize   = SHA256_DIGEST_SIZE;
+      IsV2       = TRUE;
     } else if (CompareGuid (&SigList->SignatureType, &gEfiCertV2X509Sha384Guid)) {
-      Status   = CalculateDataHash (TBSCert, TBSCertSize, &gEfiCertSha384Guid, CertHashVal);
-      HashSize = SHA384_DIGEST_SIZE;
-      IsV2     = TRUE;
+      HashStatus = CalculateDataHash (TBSCert, TBSCertSize, &gEfiCertSha384Guid, CertHashVal);
+      HashSize   = SHA384_DIGEST_SIZE;
+      IsV2       = TRUE;
     } else if (CompareGuid (&SigList->SignatureType, &gEfiCertV2X509Sha512Guid)) {
-      Status   = CalculateDataHash (TBSCert, TBSCertSize, &gEfiCertSha512Guid, CertHashVal);
-      HashSize = SHA512_DIGEST_SIZE;
-      IsV2     = TRUE;
+      HashStatus = CalculateDataHash (TBSCert, TBSCertSize, &gEfiCertSha512Guid, CertHashVal);
+      HashSize   = SHA512_DIGEST_SIZE;
+      IsV2       = TRUE;
     } else {
       //
       // Un-matched Cert Hash GUID
@@ -389,7 +390,7 @@ IsCertHashRevoked (
       continue;
     }
 
-    if (!Status) {
+    if (!HashStatus) {
       continue;
     }
 
