@@ -302,6 +302,130 @@ _Exit:
 }
 
 /**
+  Check whether the To-Be-Signed hash of a given X.509 certificate is present
+  in a single EFI_CERT_X509_SHAxxx / EFI_CERT_V2_X509_SHAxxx signature list.
+
+  The SignatureList must be one of the certificate-hash types; any other type
+  returns FALSE. The hash algorithm is selected by the list's SignatureType,
+  the TBSCertificate is hashed with that algorithm, and the result is compared
+  against each entry.
+
+  V1 layout: EFI_SIGNATURE_DATA = SignatureOwner (EFI_GUID) + hash + EFI_TIME
+             (TimeOfRevocation). The hash is the first digest-length bytes of
+             SignatureData.
+  V2 layout: EFI_SIGNATURE_V2_DATA = hash only (no SignatureOwner, no EFI_TIME).
+             SignatureSize equals the digest length.
+
+  @param[in]  Certificate     Pointer to the X.509 certificate that is searched for.
+  @param[in]  CertSize        Size of certificate in bytes.
+  @param[in]  SigList         Pointer to a single EFI_SIGNATURE_LIST to search.
+
+  @return TRUE   The certificate's TBS hash is found in SigList.
+  @return FALSE  The certificate's TBS hash is not found, SigList is not a
+                 certificate-hash type, or an error occurred.
+
+**/
+BOOLEAN
+IsCertTbsHashInSigList (
+  IN  UINT8               *Certificate,
+  IN  UINTN               CertSize,
+  IN  EFI_SIGNATURE_LIST  *SigList
+  )
+{
+  BOOLEAN             HashStatus;
+  EFI_SIGNATURE_DATA  *SigData;
+  UINT8               *TBSCert;
+  UINTN               TBSCertSize;
+  UINTN               EntryIndex;
+  UINTN               EntryCount;
+  UINT8               CertHashVal[MAX_DIGEST_SIZE];
+  UINTN               HashSize;
+  BOOLEAN             IsV2;
+
+  if ((Certificate == NULL) || (SigList == NULL)) {
+    return FALSE;
+  }
+
+  //
+  // Determine Hash Algorithm based on the entry type. HashSize tracks the
+  // digest length of the selected algorithm and IsV2 records whether the entry
+  // uses the V2 layout (EFI_SIGNATURE_V2_DATA, no SignatureOwner and no
+  // TimeOfRevocation).
+  //
+  IsV2 = FALSE;
+  if (CompareGuid (&SigList->SignatureType, &gEfiCertX509Sha256Guid)) {
+    HashSize = SHA256_DIGEST_SIZE;
+  } else if (CompareGuid (&SigList->SignatureType, &gEfiCertX509Sha384Guid)) {
+    HashSize = SHA384_DIGEST_SIZE;
+  } else if (CompareGuid (&SigList->SignatureType, &gEfiCertX509Sha512Guid)) {
+    HashSize = SHA512_DIGEST_SIZE;
+  } else if (CompareGuid (&SigList->SignatureType, &gEfiCertV2X509Sha256Guid)) {
+    HashSize = SHA256_DIGEST_SIZE;
+    IsV2     = TRUE;
+  } else if (CompareGuid (&SigList->SignatureType, &gEfiCertV2X509Sha384Guid)) {
+    HashSize = SHA384_DIGEST_SIZE;
+    IsV2     = TRUE;
+  } else if (CompareGuid (&SigList->SignatureType, &gEfiCertV2X509Sha512Guid)) {
+    HashSize = SHA512_DIGEST_SIZE;
+    IsV2     = TRUE;
+  } else {
+    //
+    // Un-matched Cert Hash GUID
+    //
+    return FALSE;
+  }
+
+  //
+  // Retrieve the TBSCertificate from the X.509 Certificate for hash calculation.
+  //
+  if (!X509GetTBSCert (Certificate, CertSize, &TBSCert, &TBSCertSize)) {
+    return FALSE;
+  }
+
+  //
+  // SignatureType always maps to a supported algorithm; pass the V1 cert-hash
+  // GUID (CalculateDataHash treats the V1 and V2 variants identically).
+  //
+  if (HashSize == SHA256_DIGEST_SIZE) {
+    HashStatus = CalculateDataHash (TBSCert, TBSCertSize, &gEfiCertSha256Guid, CertHashVal);
+  } else if (HashSize == SHA384_DIGEST_SIZE) {
+    HashStatus = CalculateDataHash (TBSCert, TBSCertSize, &gEfiCertSha384Guid, CertHashVal);
+  } else {
+    HashStatus = CalculateDataHash (TBSCert, TBSCertSize, &gEfiCertSha512Guid, CertHashVal);
+  }
+
+  if (!HashStatus) {
+    return FALSE;
+  }
+
+  SigData = (EFI_SIGNATURE_DATA *)((UINT8 *)SigList + sizeof (EFI_SIGNATURE_LIST) +
+                                   SigList->SignatureHeaderSize);
+  EntryCount = (SigList->SignatureListSize - SigList->SignatureHeaderSize -
+                sizeof (EFI_SIGNATURE_LIST)) / SigList->SignatureSize;
+  for (EntryIndex = 0; EntryIndex < EntryCount; EntryIndex++) {
+    //
+    // Compare exactly the digest length of the declared algorithm rather than
+    // trusting SignatureSize. For V2 also confirm the entry is large enough to
+    // hold the digest. For V1 the hash is the leading bytes of SignatureData
+    // (a trailing EFI_TIME, if any, is not compared).
+    //
+    if (IsV2) {
+      if ((SigList->SignatureSize == HashSize) &&
+          (CompareMem ((UINT8 *)SigData, CertHashVal, HashSize) == 0))
+      {
+        return TRUE;
+      }
+    } else if (CompareMem (SigData->SignatureData, CertHashVal, HashSize) == 0) {
+      return TRUE;
+    }
+
+    SigData = (EFI_SIGNATURE_DATA *)((UINT8 *)SigData + SigList->SignatureSize);
+  }
+
+  return FALSE;
+}
+
+/**
   Check whether the hash of an given certificate is revoked by the revocation database.
 
   @param[in]  Certificate     Pointer to the certificate that is searched for.
@@ -321,118 +445,19 @@ IsCertHashRevoked (
   IN  EFI_SIGNATURE_LIST  **RevokedDb
   )
 {
-  BOOLEAN             Status;
-  BOOLEAN             HashStatus;
-  EFI_SIGNATURE_LIST  *SigList;
-  EFI_SIGNATURE_DATA  *SigData;
-  UINT8               *TBSCert;
-  UINTN               TBSCertSize;
-  UINTN               Index;
-  UINTN               EntryIndex;
-  UINTN               EntryCount;
-  UINT8               CertHashVal[MAX_DIGEST_SIZE];
-  UINTN               HashSize;
-  BOOLEAN             IsV2;
+  UINTN  Index;
 
   if (RevokedDb == NULL) {
     return FALSE;
   }
 
-  //
-  // Retrieve the TBSCertificate from the X.509 Certificate for hash calculation
-  //
-  if (!X509GetTBSCert (Certificate, CertSize, &TBSCert, &TBSCertSize)) {
-    return FALSE;
-  }
-
-  Status = FALSE;
-  for (Index = 0; ; Index++) {
-    SigList = (EFI_SIGNATURE_LIST *)(RevokedDb[Index]);
-    //
-    // The list is terminated by a NULL pointer.
-    //
-    if (SigList == NULL) {
-      break;
-    }
-
-    //
-    // Determine Hash Algorithm based on the entry type in revocation database, and
-    // calculate the certificate hash. HashSize tracks the digest length of the
-    // selected algorithm and IsV2 records whether the entry uses the V2 layout
-    // (EFI_SIGNATURE_V2_DATA, no SignatureOwner and no TimeOfRevocation).
-    //
-    IsV2 = FALSE;
-    if (CompareGuid (&SigList->SignatureType, &gEfiCertX509Sha256Guid)) {
-      HashStatus = CalculateDataHash (TBSCert, TBSCertSize, &gEfiCertSha256Guid, CertHashVal);
-      HashSize   = SHA256_DIGEST_SIZE;
-    } else if (CompareGuid (&SigList->SignatureType, &gEfiCertX509Sha384Guid)) {
-      HashStatus = CalculateDataHash (TBSCert, TBSCertSize, &gEfiCertSha384Guid, CertHashVal);
-      HashSize   = SHA384_DIGEST_SIZE;
-    } else if (CompareGuid (&SigList->SignatureType, &gEfiCertX509Sha512Guid)) {
-      HashStatus = CalculateDataHash (TBSCert, TBSCertSize, &gEfiCertSha512Guid, CertHashVal);
-      HashSize   = SHA512_DIGEST_SIZE;
-    } else if (CompareGuid (&SigList->SignatureType, &gEfiCertV2X509Sha256Guid)) {
-      HashStatus = CalculateDataHash (TBSCert, TBSCertSize, &gEfiCertSha256Guid, CertHashVal);
-      HashSize   = SHA256_DIGEST_SIZE;
-      IsV2       = TRUE;
-    } else if (CompareGuid (&SigList->SignatureType, &gEfiCertV2X509Sha384Guid)) {
-      HashStatus = CalculateDataHash (TBSCert, TBSCertSize, &gEfiCertSha384Guid, CertHashVal);
-      HashSize   = SHA384_DIGEST_SIZE;
-      IsV2       = TRUE;
-    } else if (CompareGuid (&SigList->SignatureType, &gEfiCertV2X509Sha512Guid)) {
-      HashStatus = CalculateDataHash (TBSCert, TBSCertSize, &gEfiCertSha512Guid, CertHashVal);
-      HashSize   = SHA512_DIGEST_SIZE;
-      IsV2       = TRUE;
-    } else {
-      //
-      // Un-matched Cert Hash GUID
-      //
-      continue;
-    }
-
-    if (!HashStatus) {
-      continue;
-    }
-
-    SigData = (EFI_SIGNATURE_DATA *)((UINT8 *)SigList + sizeof (EFI_SIGNATURE_LIST) +
-                                     SigList->SignatureHeaderSize);
-    EntryCount = (SigList->SignatureListSize - SigList->SignatureHeaderSize -
-                  sizeof (EFI_SIGNATURE_LIST)) / SigList->SignatureSize;
-    for (EntryIndex = 0; EntryIndex < EntryCount; EntryIndex++) {
-      //
-      // Check if the Certificate Hash is revoked.
-      // V2 types have no SignatureOwner and no TimeOfRevocation, so the hash
-      // data starts at offset 0. Compare exactly the digest length of the
-      // declared algorithm rather than trusting SignatureSize, and confirm the
-      // entry is large enough to hold the digest.
-      //
-      if (IsV2) {
-        if ((SigList->SignatureSize == HashSize) &&
-            (CompareMem (
-               (UINT8 *)SigData,
-               CertHashVal,
-               HashSize
-               ) == 0))
-        {
-          Status = TRUE;
-          goto _Exit;
-        }
-      } else if (CompareMem (
-            SigData->SignatureData,
-            CertHashVal,
-            SigList->SignatureSize - sizeof (EFI_GUID) - sizeof (EFI_TIME)
-            ) == 0)
-      {
-        Status = TRUE;
-        goto _Exit;
-      }
-
-      SigData = (EFI_SIGNATURE_DATA *)((UINT8 *)SigData + SigList->SignatureSize);
+  for (Index = 0; RevokedDb[Index] != NULL; Index++) {
+    if (IsCertTbsHashInSigList (Certificate, CertSize, RevokedDb[Index])) {
+      return TRUE;
     }
   }
 
-_Exit:
-  return Status;
+  return FALSE;
 }
 
 /**
@@ -783,11 +808,22 @@ P7CheckTrustByHash (
   UINT8               *TrustCert;
   UINTN               TrustCertSize;
   UINTN               Index;
+  UINT8               *CertBuffer;
+  UINTN               BufferLength;
+  UINT8               *TrustedCert;
+  UINTN               TrustedCertLength;
+  UINT8               CertNumber;
+  UINT8               *CertPtr;
+  UINT8               *Cert;
+  UINTN               CertSize;
+  UINTN               CertIndex;
 
   Status        = EFI_SECURITY_VIOLATION;
   SigData       = NULL;
   TrustCert     = NULL;
   TrustCertSize = 0;
+  CertBuffer    = NULL;
+  TrustedCert   = NULL;
 
   if (AllowedDb == NULL) {
     return EFI_INVALID_PARAMETER;
@@ -807,36 +843,83 @@ P7CheckTrustByHash (
       break;
     }
 
-    //
-    // Ignore any non-X509-format entry in the list.
-    //
-    if (!CompareGuid (&SigList->SignatureType, &gEfiCertX509Guid) &&
-        !CompareGuid (&SigList->SignatureType, &gEfiCertV2X509Guid)) {
-      continue;
-    }
+    if (CompareGuid (&SigList->SignatureType, &gEfiCertX509Guid) ||
+        CompareGuid (&SigList->SignatureType, &gEfiCertV2X509Guid)) {
+      SigData = (EFI_SIGNATURE_DATA *)((UINT8 *)SigList + sizeof (EFI_SIGNATURE_LIST) +
+                                       SigList->SignatureHeaderSize);
 
-    SigData = (EFI_SIGNATURE_DATA *)((UINT8 *)SigList + sizeof (EFI_SIGNATURE_LIST) +
-                                     SigList->SignatureHeaderSize);
+      if (CompareGuid (&SigList->SignatureType, &gEfiCertV2X509Guid)) {
+        TrustCert     = (UINT8 *)SigData;
+        TrustCertSize = SigList->SignatureSize;
+      } else {
+        TrustCert     = SigData->SignatureData;
+        TrustCertSize = SigList->SignatureSize - sizeof (EFI_GUID);
+      }
 
-    if (CompareGuid (&SigList->SignatureType, &gEfiCertV2X509Guid)) {
-      TrustCert     = (UINT8 *)SigData;
-      TrustCertSize = SigList->SignatureSize;
-    } else {
-      TrustCert     = SigData->SignatureData;
-      TrustCertSize = SigList->SignatureSize - sizeof (EFI_GUID);
-    }
-
-    //
-    // Verifying the PKCS#7 SignedData with the trusted certificate from AllowedDb
-    //
-    if (AuthenticodeVerify (SignedData, SignedDataSize, TrustCert, TrustCertSize, InHash, InHashSize)) {
       //
-      // The SignedData was verified successfully by one entry in Trusted Database
+      // Verifying the PKCS#7 SignedData with the trusted certificate from AllowedDb
       //
-      Status = EFI_SUCCESS;
-      break;
+      if (AuthenticodeVerify (SignedData, SignedDataSize, TrustCert, TrustCertSize, InHash, InHashSize)) {
+        //
+        // The SignedData was verified successfully by one entry in Trusted Database
+        //
+        Status = EFI_SUCCESS;
+        goto _Exit;
+      }
+    } else if (CompareGuid (&SigList->SignatureType, &gEfiCertX509Sha256Guid) ||
+               CompareGuid (&SigList->SignatureType, &gEfiCertX509Sha384Guid) ||
+               CompareGuid (&SigList->SignatureType, &gEfiCertX509Sha512Guid) ||
+               CompareGuid (&SigList->SignatureType, &gEfiCertV2X509Sha256Guid) ||
+               CompareGuid (&SigList->SignatureType, &gEfiCertV2X509Sha384Guid) ||
+               CompareGuid (&SigList->SignatureType, &gEfiCertV2X509Sha512Guid))
+    {
+      //
+      // Certificate-hash entry in AllowedDb (UEFI Spec 32.5.3.3 step B): a db
+      // entry with EFI_CERT_X509_SHAxxx whose hash reflects the To-Be-Signed
+      // hash of any certificate in the signing chain allows that signer.
+      //
+      // Extract the signer's certificate chain (once) and check whether any of
+      // its certificates' TBS hashes is present in this list. If so, confirm
+      // that the PKCS#7 signature actually verifies against that certificate
+      // before trusting it.
+      //
+      if (CertBuffer == NULL) {
+        Pkcs7GetSigners (SignedData, SignedDataSize, &CertBuffer, &BufferLength, &TrustedCert, &TrustedCertLength);
+        if ((BufferLength == 0) || (CertBuffer == NULL) || (*CertBuffer == 0)) {
+          continue;
+        }
+      }
+
+      CertNumber = (UINT8)(*CertBuffer);
+      CertPtr    = CertBuffer + 1;
+      for (CertIndex = 0; CertIndex < CertNumber; CertIndex++) {
+        CertSize = (UINTN)ReadUnaligned32 ((UINT32 *)CertPtr);
+        Cert     = (UINT8 *)CertPtr + sizeof (UINT32);
+        CertPtr  = CertPtr + sizeof (UINT32) + CertSize;
+
+        if (!IsCertTbsHashInSigList (Cert, CertSize, SigList)) {
+          continue;
+        }
+
+        //
+        // The certificate hash is in AllowedDb. Verify the signature against
+        // this certificate of the signing chain.
+        //
+        if (AuthenticodeVerify (SignedData, SignedDataSize, Cert, CertSize, InHash, InHashSize)) {
+          Status = EFI_SUCCESS;
+          goto _Exit;
+        }
+      }
     }
+
+    //
+    // Ignore any other entry type in the list.
+    //
   }
+
+_Exit:
+  Pkcs7FreeSigners (CertBuffer);
+  Pkcs7FreeSigners (TrustedCert);
 
   return Status;
 }
@@ -883,11 +966,22 @@ P7CheckTrust (
   UINT8               *TrustCert;
   UINTN               TrustCertSize;
   UINTN               Index;
+  UINT8               *CertBuffer;
+  UINTN               BufferLength;
+  UINT8               *TrustedCert;
+  UINTN               TrustedCertLength;
+  UINT8               CertNumber;
+  UINT8               *CertPtr;
+  UINT8               *Cert;
+  UINTN               CertSize;
+  UINTN               CertIndex;
 
   Status        = EFI_SECURITY_VIOLATION;
   SigData       = NULL;
   TrustCert     = NULL;
   TrustCertSize = 0;
+  CertBuffer    = NULL;
+  TrustedCert   = NULL;
 
   if (AllowedDb == NULL) {
     return EFI_INVALID_PARAMETER;
@@ -907,36 +1001,83 @@ P7CheckTrust (
       break;
     }
 
-    //
-    // Ignore any non-X509-format entry in the list.
-    //
-    if (!CompareGuid (&SigList->SignatureType, &gEfiCertX509Guid) &&
-        !CompareGuid (&SigList->SignatureType, &gEfiCertV2X509Guid)) {
-      continue;
-    }
+    if (CompareGuid (&SigList->SignatureType, &gEfiCertX509Guid) ||
+        CompareGuid (&SigList->SignatureType, &gEfiCertV2X509Guid)) {
+      SigData = (EFI_SIGNATURE_DATA *)((UINT8 *)SigList + sizeof (EFI_SIGNATURE_LIST) +
+                                       SigList->SignatureHeaderSize);
 
-    SigData = (EFI_SIGNATURE_DATA *)((UINT8 *)SigList + sizeof (EFI_SIGNATURE_LIST) +
-                                     SigList->SignatureHeaderSize);
+      if (CompareGuid (&SigList->SignatureType, &gEfiCertV2X509Guid)) {
+        TrustCert     = (UINT8 *)SigData;
+        TrustCertSize = SigList->SignatureSize;
+      } else {
+        TrustCert     = SigData->SignatureData;
+        TrustCertSize = SigList->SignatureSize - sizeof (EFI_GUID);
+      }
 
-    if (CompareGuid (&SigList->SignatureType, &gEfiCertV2X509Guid)) {
-      TrustCert     = (UINT8 *)SigData;
-      TrustCertSize = SigList->SignatureSize;
-    } else {
-      TrustCert     = SigData->SignatureData;
-      TrustCertSize = SigList->SignatureSize - sizeof (EFI_GUID);
-    }
-
-    //
-    // Verifying the PKCS#7 SignedData with the trusted certificate from AllowedDb
-    //
-    if (Pkcs7Verify (SignedData, SignedDataSize, TrustCert, TrustCertSize, InData, InDataSize)) {
       //
-      // The SignedData was verified successfully by one entry in Trusted Database
+      // Verifying the PKCS#7 SignedData with the trusted certificate from AllowedDb
       //
-      Status = EFI_SUCCESS;
-      break;
+      if (Pkcs7Verify (SignedData, SignedDataSize, TrustCert, TrustCertSize, InData, InDataSize)) {
+        //
+        // The SignedData was verified successfully by one entry in Trusted Database
+        //
+        Status = EFI_SUCCESS;
+        goto _Exit;
+      }
+    } else if (CompareGuid (&SigList->SignatureType, &gEfiCertX509Sha256Guid) ||
+               CompareGuid (&SigList->SignatureType, &gEfiCertX509Sha384Guid) ||
+               CompareGuid (&SigList->SignatureType, &gEfiCertX509Sha512Guid) ||
+               CompareGuid (&SigList->SignatureType, &gEfiCertV2X509Sha256Guid) ||
+               CompareGuid (&SigList->SignatureType, &gEfiCertV2X509Sha384Guid) ||
+               CompareGuid (&SigList->SignatureType, &gEfiCertV2X509Sha512Guid))
+    {
+      //
+      // Certificate-hash entry in AllowedDb (UEFI Spec 32.5.3.3 step B): a db
+      // entry with EFI_CERT_X509_SHAxxx whose hash reflects the To-Be-Signed
+      // hash of any certificate in the signing chain allows that signer.
+      //
+      // Extract the signer's certificate chain (once) and check whether any of
+      // its certificates' TBS hashes is present in this list. If so, confirm
+      // that the PKCS#7 signature actually verifies against that certificate
+      // before trusting it.
+      //
+      if (CertBuffer == NULL) {
+        Pkcs7GetSigners (SignedData, SignedDataSize, &CertBuffer, &BufferLength, &TrustedCert, &TrustedCertLength);
+        if ((BufferLength == 0) || (CertBuffer == NULL) || (*CertBuffer == 0)) {
+          continue;
+        }
+      }
+
+      CertNumber = (UINT8)(*CertBuffer);
+      CertPtr    = CertBuffer + 1;
+      for (CertIndex = 0; CertIndex < CertNumber; CertIndex++) {
+        CertSize = (UINTN)ReadUnaligned32 ((UINT32 *)CertPtr);
+        Cert     = (UINT8 *)CertPtr + sizeof (UINT32);
+        CertPtr  = CertPtr + sizeof (UINT32) + CertSize;
+
+        if (!IsCertTbsHashInSigList (Cert, CertSize, SigList)) {
+          continue;
+        }
+
+        //
+        // The certificate hash is in AllowedDb. Verify the signature against
+        // this certificate of the signing chain.
+        //
+        if (Pkcs7Verify (SignedData, SignedDataSize, Cert, CertSize, InData, InDataSize)) {
+          Status = EFI_SUCCESS;
+          goto _Exit;
+        }
+      }
     }
+
+    //
+    // Ignore any other entry type in the list.
+    //
   }
+
+_Exit:
+  Pkcs7FreeSigners (CertBuffer);
+  Pkcs7FreeSigners (TrustedCert);
 
   return Status;
 }
