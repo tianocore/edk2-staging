@@ -28,8 +28,8 @@ extern "C" {
   #include <Guid/ImageAuthentication.h>
 
   //
-  // IsCertHashFoundInSigList is a non-static function in DxeImageVerificationLib.c
-  // It is not declared in any header, so we forward-declare it here.
+  // The following are non-static functions in DxeImageVerificationLib.c.
+  // They are not declared in any header, so we forward-declare them here.
   //
   EFI_STATUS
   IsCertHashFoundInSigList (
@@ -39,6 +39,15 @@ extern "C" {
     IN  UINTN               SignatureListSize,
     OUT BOOLEAN             *IsFound,
     OUT EFI_SIGNATURE_DATA  **MatchedSigData OPTIONAL
+    );
+
+  EFI_STATUS
+  IsCertHashFoundInDbx (
+    IN  UINT8               *Certificate,
+    IN  UINTN               CertSize,
+    IN  EFI_SIGNATURE_LIST  *SignatureList,
+    IN  UINTN               SignatureListSize,
+    OUT BOOLEAN             *IsFound
     );
 }
 
@@ -630,6 +639,107 @@ TEST_F (CertHashSearchTest, V1SigListMatchesWithCorrectLayout) {
 
   EXPECT_EQ (Status, EFI_SUCCESS);
   EXPECT_TRUE (IsFound);
+
+  FreePool (SigList);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// IsCertHashFoundInDbx - certificate TBS hash lookup in a dbx signature list
+///////////////////////////////////////////////////////////////////////////////
+
+TEST_F (CertHashSearchTest, CertHashFoundInDbx_V1_Sha256) {
+  ASSERT_TRUE (mSetUpDone);
+
+  UINTN   SigListSize = 0;
+  UINT8   *SigList    = BuildSigListWithHash (
+                           &gEfiCertX509Sha256Guid,
+                           mTbsHash256,
+                           SHA256_DIGEST_SIZE,
+                           FALSE,
+                           &SigListSize
+                           );
+  ASSERT_NE (SigList, (UINT8 *)NULL);
+
+  BOOLEAN     IsFound = FALSE;
+  EFI_STATUS  Status;
+
+  Status = IsCertHashFoundInDbx (
+             (UINT8 *)mTestCert,
+             sizeof (mTestCert),
+             (EFI_SIGNATURE_LIST *)SigList,
+             SigListSize,
+             &IsFound
+             );
+
+  EXPECT_EQ (Status, EFI_SUCCESS);
+  EXPECT_TRUE (IsFound);
+
+  FreePool (SigList);
+}
+
+TEST_F (CertHashSearchTest, CertHashFoundInDbx_V2_Sha256) {
+  ASSERT_TRUE (mSetUpDone);
+
+  UINTN   SigListSize = 0;
+  UINT8   *SigList    = BuildSigListWithHash (
+                           &gEfiCertV2X509Sha256Guid,
+                           mTbsHash256,
+                           SHA256_DIGEST_SIZE,
+                           TRUE,
+                           &SigListSize
+                           );
+  ASSERT_NE (SigList, (UINT8 *)NULL);
+
+  BOOLEAN     IsFound = FALSE;
+  EFI_STATUS  Status;
+
+  Status = IsCertHashFoundInDbx (
+             (UINT8 *)mTestCert,
+             sizeof (mTestCert),
+             (EFI_SIGNATURE_LIST *)SigList,
+             SigListSize,
+             &IsFound
+             );
+
+  EXPECT_EQ (Status, EFI_SUCCESS);
+  EXPECT_TRUE (IsFound);
+
+  FreePool (SigList);
+}
+
+TEST_F (CertHashSearchTest, CertHashNotFoundInDbx) {
+  ASSERT_TRUE (mSetUpDone);
+
+  //
+  // dbx contains an unrelated (all-zero) hash, so the certificate is not found.
+  // IsCertHashFoundInDbx maps the not-found case to EFI_SUCCESS / IsFound=FALSE.
+  //
+  UINT8  WrongHash[SHA256_DIGEST_SIZE];
+  ZeroMem (WrongHash, sizeof (WrongHash));
+
+  UINTN   SigListSize = 0;
+  UINT8   *SigList    = BuildSigListWithHash (
+                           &gEfiCertX509Sha256Guid,
+                           WrongHash,
+                           SHA256_DIGEST_SIZE,
+                           FALSE,
+                           &SigListSize
+                           );
+  ASSERT_NE (SigList, (UINT8 *)NULL);
+
+  BOOLEAN     IsFound = FALSE;
+  EFI_STATUS  Status;
+
+  Status = IsCertHashFoundInDbx (
+             (UINT8 *)mTestCert,
+             sizeof (mTestCert),
+             (EFI_SIGNATURE_LIST *)SigList,
+             SigListSize,
+             &IsFound
+             );
+
+  EXPECT_EQ (Status, EFI_SUCCESS);
+  EXPECT_FALSE (IsFound);
 
   FreePool (SigList);
 }
