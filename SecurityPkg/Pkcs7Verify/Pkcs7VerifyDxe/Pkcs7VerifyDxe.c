@@ -461,6 +461,93 @@ IsCertHashRevoked (
 }
 
 /**
+  Check whether the To-Be-Signed hash of any certificate in the PKCS#7 signing
+  chain is found in the revocation database (by EFI_CERT_X509_SHAxxx entry).
+
+  Per UEFI Spec 32.5.3.3, a dbx EFI_CERT_X509_SHAxxx entry forbids the image if
+  its hash reflects the TBS hash of ANY certificate in the signing chain (the
+  leaf signer and every issuer up to the root), not just the leaf. The full
+  chain is retrieved with Pkcs7GetCertificatesList(). If the chain cannot be
+  retrieved, this function fails safe and reports the signedData as revoked.
+
+  @param[in]  SignedData      Pointer to the PKCS#7 signedData.
+  @param[in]  SignedDataSize  Size of SignedData in bytes.
+  @param[in]  RevokedDb       Pointer to a NULL-terminated list of pointers to
+                              EFI_SIGNATURE_LIST structures.
+
+  @retval TRUE   A certificate in the signing chain is revoked by hash, or the
+                 signing chain could not be retrieved (fail-safe).
+  @retval FALSE  No certificate in the signing chain is revoked by hash.
+
+**/
+BOOLEAN
+IsSignerCertChainRevokedByHash (
+  IN UINT8               *SignedData,
+  IN UINTN               SignedDataSize,
+  IN EFI_SIGNATURE_LIST  **RevokedDb
+  )
+{
+  BOOLEAN  Revoked;
+  UINT8    *ChainCerts;
+  UINTN    ChainLength;
+  UINT8    *UnchainCerts;
+  UINTN    UnchainLength;
+  UINT8    CertNumber;
+  UINT8    *CertPtr;
+  UINT8    *Cert;
+  UINTN    CertSize;
+  UINTN    Index;
+
+  Revoked       = FALSE;
+  ChainCerts    = NULL;
+  ChainLength   = 0;
+  UnchainCerts  = NULL;
+  UnchainLength = 0;
+
+  //
+  // Retrieve the full signing chain (leaf + intermediates + root). If it cannot
+  // be retrieved, fail safe and treat the signedData as revoked rather than
+  // checking only a subset of the chain.
+  //
+  if (!Pkcs7GetCertificatesList (
+         SignedData,
+         SignedDataSize,
+         &ChainCerts,
+         &ChainLength,
+         &UnchainCerts,
+         &UnchainLength
+         ) || (ChainCerts == NULL) || (*ChainCerts == 0))
+  {
+    Revoked = TRUE;
+    goto _Exit;
+  }
+
+  //
+  // The buffer format is:
+  //   UINT8  CertNumber;
+  //   UINT32 Cert1Length; UINT8 Cert1[]; ... UINT32 CertnLength; UINT8 Certn[];
+  //
+  CertNumber = (UINT8)(*ChainCerts);
+  CertPtr    = ChainCerts + 1;
+  for (Index = 0; Index < CertNumber; Index++) {
+    CertSize = (UINTN)ReadUnaligned32 ((UINT32 *)CertPtr);
+    Cert     = (UINT8 *)CertPtr + sizeof (UINT32);
+    CertPtr  = CertPtr + sizeof (UINT32) + CertSize;
+
+    if (IsCertHashRevoked (Cert, CertSize, RevokedDb)) {
+      Revoked = TRUE;
+      goto _Exit;
+    }
+  }
+
+_Exit:
+  Pkcs7FreeSigners (ChainCerts);
+  Pkcs7FreeSigners (UnchainCerts);
+
+  return Revoked;
+}
+
+/**
   Check whether the PKCS7 signedData is revoked by verifying with the revoked
   certificates database.
 
@@ -499,21 +586,11 @@ P7CheckRevocationByHash (
   UINT8               *RevokedCert;
   UINTN               RevokedCertSize;
   UINTN               Index;
-  UINT8               *CertBuffer;
-  UINTN               BufferLength;
-  UINT8               *TrustedCert;
-  UINTN               TrustedCertLength;
-  UINT8               CertNumber;
-  UINT8               *CertPtr;
-  UINT8               *Cert;
-  UINTN               CertSize;
 
   Status          = EFI_SECURITY_VIOLATION;
   SigData         = NULL;
   RevokedCert     = NULL;
   RevokedCertSize = 0;
-  CertBuffer      = NULL;
-  TrustedCert     = NULL;
 
   //
   // The signedData is revoked if the hash of content existed in RevokedDb
@@ -575,40 +652,20 @@ P7CheckRevocationByHash (
   }
 
   //
-  // Check the X.509 Certificate Hash in the revoked database.
+  // Check the X.509 Certificate Hash in the revoked database against every
+  // certificate in the signing chain. Per UEFI Spec 32.5.3.3, a dbx
+  // EFI_CERT_X509_SHAxxx entry forbids the image if its hash reflects the
+  // To-Be-Signed hash of ANY certificate in the signing chain - not only the
+  // leaf signer. IsSignerCertChainRevokedByHash() walks the full chain.
   //
-  Pkcs7GetSigners (SignedData, SignedDataSize, &CertBuffer, &BufferLength, &TrustedCert, &TrustedCertLength);
-  if ((BufferLength == 0) || (CertBuffer == NULL)) {
+  if (IsSignerCertChainRevokedByHash (SignedData, SignedDataSize, RevokedDb)) {
     Status = EFI_SUCCESS;
     goto _Exit;
   }
 
-  //
-  // Check if any hash of certificates embedded in P7 data is in the revoked database.
-  //
-  CertNumber = (UINT8)(*CertBuffer);
-  CertPtr    = CertBuffer + 1;
-  for (Index = 0; Index < CertNumber; Index++) {
-    //
-    // Retrieve the Certificate data
-    //
-    CertSize = (UINTN)ReadUnaligned32 ((UINT32 *)CertPtr);
-    Cert     = (UINT8 *)CertPtr + sizeof (UINT32);
-
-    if (IsCertHashRevoked (Cert, CertSize, RevokedDb)) {
-      //
-      // The certificate hash is found in the revocation database.
-      //
-      Status = EFI_SUCCESS;
-      goto _Exit;
-    }
-
-    CertPtr = CertPtr + sizeof (UINT32) + CertSize;
-  }
+  Status = EFI_SECURITY_VIOLATION;
 
 _Exit:
-  Pkcs7FreeSigners (CertBuffer);
-  Pkcs7FreeSigners (TrustedCert);
 
   return Status;
 }
@@ -652,21 +709,11 @@ P7CheckRevocation (
   UINT8               *RevokedCert;
   UINTN               RevokedCertSize;
   UINTN               Index;
-  UINT8               *CertBuffer;
-  UINTN               BufferLength;
-  UINT8               *TrustedCert;
-  UINTN               TrustedCertLength;
-  UINT8               CertNumber;
-  UINT8               *CertPtr;
-  UINT8               *Cert;
-  UINTN               CertSize;
 
   Status          = EFI_UNSUPPORTED;
   SigData         = NULL;
   RevokedCert     = NULL;
   RevokedCertSize = 0;
-  CertBuffer      = NULL;
-  TrustedCert     = NULL;
 
   //
   // The signedData is revoked if the hash of content existed in RevokedDb
@@ -728,40 +775,20 @@ P7CheckRevocation (
   }
 
   //
-  // Check the X.509 Certificate Hash in the revoked database.
+  // Check the X.509 Certificate Hash in the revoked database against every
+  // certificate in the signing chain. Per UEFI Spec 32.5.3.3, a dbx
+  // EFI_CERT_X509_SHAxxx entry forbids the image if its hash reflects the
+  // To-Be-Signed hash of ANY certificate in the signing chain - not only the
+  // leaf signer. IsSignerCertChainRevokedByHash() walks the full chain.
   //
-  Pkcs7GetSigners (SignedData, SignedDataSize, &CertBuffer, &BufferLength, &TrustedCert, &TrustedCertLength);
-  if ((BufferLength == 0) || (CertBuffer == NULL)) {
+  if (IsSignerCertChainRevokedByHash (SignedData, SignedDataSize, RevokedDb)) {
     Status = EFI_SUCCESS;
     goto _Exit;
   }
 
-  //
-  // Check if any hash of certificates embedded in P7 data is in the revoked database.
-  //
-  CertNumber = (UINT8)(*CertBuffer);
-  CertPtr    = CertBuffer + 1;
-  for (Index = 0; Index < CertNumber; Index++) {
-    //
-    // Retrieve the Certificate data
-    //
-    CertSize = (UINTN)ReadUnaligned32 ((UINT32 *)CertPtr);
-    Cert     = (UINT8 *)CertPtr + sizeof (UINT32);
-
-    if (IsCertHashRevoked (Cert, CertSize, RevokedDb)) {
-      //
-      // The certificate hash is found in the revocation database.
-      //
-      Status = EFI_SUCCESS;
-      goto _Exit;
-    }
-
-    CertPtr = CertPtr + sizeof (UINT32) + CertSize;
-  }
+  Status = EFI_UNSUPPORTED;
 
 _Exit:
-  Pkcs7FreeSigners (CertBuffer);
-  Pkcs7FreeSigners (TrustedCert);
 
   return Status;
 }
