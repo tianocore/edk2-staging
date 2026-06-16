@@ -1225,10 +1225,11 @@ IsForbiddenByDbx (
   UINT8               *Data;
   UINTN               DataSize;
   UINTN               Index;
-  UINT8               *CertBuffer;
-  UINTN               BufferLength;
-  UINT8               *TrustedCert;
-  UINTN               TrustedCertLength;
+  UINT8               *ChainCerts;
+  UINTN               ChainLength;
+  UINT8               *UnchainCerts;
+  UINTN               UnchainLength;
+  UINT8               *CertList;
   UINT8               CertNumber;
   UINT8               *CertPtr;
   UINT8               *Cert;
@@ -1240,10 +1241,11 @@ IsForbiddenByDbx (
   IsForbidden       = TRUE;
   Data              = NULL;
   Cert              = NULL;
-  CertBuffer        = NULL;
-  BufferLength      = 0;
-  TrustedCert       = NULL;
-  TrustedCertLength = 0;
+  ChainCerts        = NULL;
+  ChainLength       = 0;
+  UnchainCerts      = NULL;
+  UnchainLength     = 0;
+  CertList          = NULL;
 
   //
   // The image will not be forbidden if dbx can't be got.
@@ -1277,7 +1279,13 @@ IsForbiddenByDbx (
   //
 
   //
-  // Retrieve the certificate stack from AuthData
+  // Retrieve the certificate stack from AuthData. Per UEFI Spec 32.5.3.3, a dbx
+  // EFI_CERT_X509_SHAxxx entry forbids the image if its hash reflects the
+  // To-Be-Signed hash of ANY certificate in the signing chain (the leaf signer
+  // and every issuer up to the root), not just the leaf. Retrieve the full
+  // chain with Pkcs7GetCertificatesList(); if it cannot be retrieved, fail safe
+  // and treat the image as forbidden rather than checking only a subset.
+  //
   // The output CertStack format will be:
   //       UINT8  CertNumber;
   //       UINT32 Cert1Length;
@@ -1288,17 +1296,26 @@ IsForbiddenByDbx (
   //       UINT32 CertnLength;
   //       UINT8  Certn[];
   //
-  Pkcs7GetSigners (AuthData, AuthDataSize, &CertBuffer, &BufferLength, &TrustedCert, &TrustedCertLength);
-  if ((BufferLength == 0) || (CertBuffer == NULL) || ((*CertBuffer) == 0)) {
+  if (!Pkcs7GetCertificatesList (
+         AuthData,
+         AuthDataSize,
+         &ChainCerts,
+         &ChainLength,
+         &UnchainCerts,
+         &UnchainLength
+         ) || (ChainCerts == NULL) || (*ChainCerts == 0))
+  {
     IsForbidden = TRUE;
     goto Done;
   }
 
+  CertList = ChainCerts;
+
   //
   // Check if any hash of certificates embedded in AuthData is in the forbidden database.
   //
-  CertNumber = (UINT8)(*CertBuffer);
-  CertPtr    = CertBuffer + 1;
+  CertNumber = (UINT8)(*CertList);
+  CertPtr    = CertList + 1;
   for (Index = 0; Index < CertNumber; Index++) {
     CertSize = (UINTN)ReadUnaligned32 ((UINT32 *)CertPtr);
     Cert     = (UINT8 *)CertPtr + sizeof (UINT32);
@@ -1331,8 +1348,8 @@ Done:
     FreePool (Data);
   }
 
-  Pkcs7FreeSigners (CertBuffer);
-  Pkcs7FreeSigners (TrustedCert);
+  Pkcs7FreeSigners (ChainCerts);
+  Pkcs7FreeSigners (UnchainCerts);
 
   return IsForbidden;
 }
