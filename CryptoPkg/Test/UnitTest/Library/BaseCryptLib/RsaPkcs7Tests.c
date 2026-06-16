@@ -1691,6 +1691,136 @@ TestVerifyPkcs7GetSignerInfoNum (
   return UNIT_TEST_PASSED;
 }
 
+//
+// TestCase4: Verify Pkcs7GetCertificatesList returns the signer's full chain.
+// The data is signed by TestCert2 (leaf, issued by TestCACert) with TestCACert
+// embedded as an extra certificate, so the chained list must contain both the
+// leaf and its issuing root.
+//
+UNIT_TEST_STATUS
+EFIAPI
+TestVerifyPkcs7GetCertificatesList (
+  IN UNIT_TEST_CONTEXT  Context
+  )
+{
+  BOOLEAN  Status;
+  UINT8    *P7SignedData;
+  UINTN    P7SignedDataSize;
+  UINT8    *SignCert;
+  UINT8    *OtherCerts;
+  UINT8    *ChainCerts;
+  UINTN    ChainLength;
+  UINT8    *UnchainCerts;
+  UINTN    UnchainLength;
+  UINT8    *CertPtr;
+  UINT8    CertNumber;
+  UINTN    CertSize;
+  UINTN    Index;
+  BOOLEAN  FoundLeaf;
+  BOOLEAN  FoundRoot;
+
+  P7SignedData  = NULL;
+  SignCert      = NULL;
+  OtherCerts    = NULL;
+  ChainCerts    = NULL;
+  UnchainCerts  = NULL;
+  ChainLength   = 0;
+  UnchainLength = 0;
+  FoundLeaf     = FALSE;
+  FoundRoot     = FALSE;
+
+  //
+  // Construct signer certificate (leaf) and embed the issuing root (TestCACert)
+  // via the OtherCerts argument so the full chain is present in the signedData.
+  // OtherCerts must be a constructed X509 stack object (not raw DER).
+  //
+  Status = X509ConstructCertificate (TestCert2, sizeof (TestCert2), (UINT8 **)&SignCert);
+  UT_ASSERT_TRUE (Status);
+  UT_ASSERT_NOT_NULL (SignCert);
+
+  Status = X509ConstructCertificateStack (
+             (UINT8 **)&OtherCerts,
+             TestCACert,
+             sizeof (TestCACert),
+             NULL
+             );
+  UT_ASSERT_TRUE (Status);
+  UT_ASSERT_NOT_NULL (OtherCerts);
+
+  Status = Pkcs7Sign (
+             TestKeyCert2Pem,
+             sizeof (TestKeyCert2Pem),
+             (CONST UINT8 *)TestKeyCert2PemPass,
+             (UINT8 *)Payload,
+             AsciiStrLen (Payload),
+             SignCert,
+             OtherCerts,
+             &P7SignedData,
+             &P7SignedDataSize
+             );
+  UT_ASSERT_TRUE (Status);
+  UT_ASSERT_NOT_EQUAL (P7SignedDataSize, 0);
+
+  //
+  // Retrieve the signer's certificate chain.
+  //
+  Status = Pkcs7GetCertificatesList (
+             P7SignedData,
+             P7SignedDataSize,
+             &ChainCerts,
+             &ChainLength,
+             &UnchainCerts,
+             &UnchainLength
+             );
+  UT_ASSERT_TRUE (Status);
+  UT_ASSERT_NOT_NULL (ChainCerts);
+  UT_ASSERT_NOT_EQUAL (ChainLength, 0);
+
+  //
+  // The chain must include both the leaf (TestCert2) and the root (TestCACert).
+  //
+  CertNumber = (UINT8)(*ChainCerts);
+  UT_ASSERT_TRUE (CertNumber >= 2);
+
+  CertPtr = ChainCerts + 1;
+  for (Index = 0; Index < CertNumber; Index++) {
+    CertSize = (UINTN)ReadUnaligned32 ((UINT32 *)CertPtr);
+    if ((CertSize == sizeof (TestCert2)) &&
+        (CompareMem (CertPtr + sizeof (UINT32), TestCert2, CertSize) == 0))
+    {
+      FoundLeaf = TRUE;
+    }
+
+    if ((CertSize == sizeof (TestCACert)) &&
+        (CompareMem (CertPtr + sizeof (UINT32), TestCACert, CertSize) == 0))
+    {
+      FoundRoot = TRUE;
+    }
+
+    CertPtr = CertPtr + sizeof (UINT32) + CertSize;
+  }
+
+  UT_ASSERT_TRUE (FoundLeaf);
+  UT_ASSERT_TRUE (FoundRoot);
+
+  if (P7SignedData != NULL) {
+    FreePool (P7SignedData);
+  }
+
+  if (SignCert != NULL) {
+    X509Free (SignCert);
+  }
+
+  if (OtherCerts != NULL) {
+    X509StackFree (OtherCerts);
+  }
+
+  Pkcs7FreeSigners (ChainCerts);
+  Pkcs7FreeSigners (UnchainCerts);
+
+  return UNIT_TEST_PASSED;
+}
+
 TEST_DESC  mRsaCertTest[] = {
   //
   // -----Description--------------------------------------Class----------------------Function-----------------Pre---Post--Context
@@ -1707,6 +1837,7 @@ TEST_DESC  mPkcs7Test[] = {
   { "TestVerifyPkcs7SignVerify()",              "CryptoPkg.BaseCryptLib.Pkcs7", TestVerifyPkcs7SignVerify,              NULL, NULL, NULL },
   { "TestVerifyPkcs7SignVerifyNonSelfIssued()", "CryptoPkg.BaseCryptLib.Pkcs7", TestVerifyPkcs7SignVerifyNonSelfIssued, NULL, NULL, NULL },
   { "TestVerifyPkcs7GetSignerInfoNum()",        "CryptoPkg.BaseCryptLib.Pkcs7", TestVerifyPkcs7GetSignerInfoNum,        NULL, NULL, NULL },
+  { "TestVerifyPkcs7GetCertificatesList()",     "CryptoPkg.BaseCryptLib.Pkcs7", TestVerifyPkcs7GetCertificatesList,     NULL, NULL, NULL },
 };
 
 UINTN  mPkcs7TestNum = ARRAY_SIZE (mPkcs7Test);
@@ -1715,7 +1846,8 @@ TEST_DESC  mPkcs7TestMbedTls[] = {
   //
   // -----Description--------------------------------------Class----------------------Function-----------------Pre---Post--Context
   //
-  { "TestVerifyPkcs7SignVerify()", "CryptoPkg.BaseCryptLib.Pkcs7", TestVerifyPkcs7SignVerify, NULL, NULL, NULL },
+  { "TestVerifyPkcs7SignVerify()",              "CryptoPkg.BaseCryptLib.Pkcs7", TestVerifyPkcs7SignVerify,              NULL, NULL, NULL },
+  { "TestVerifyPkcs7GetCertificatesList()",     "CryptoPkg.BaseCryptLib.Pkcs7", TestVerifyPkcs7GetCertificatesList,     NULL, NULL, NULL },
 };
 
 UINTN  mPkcs7TestMbedTlsNum = ARRAY_SIZE (mPkcs7TestMbedTls);
