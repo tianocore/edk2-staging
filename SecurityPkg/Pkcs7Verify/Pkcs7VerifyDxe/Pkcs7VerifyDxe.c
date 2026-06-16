@@ -580,17 +580,9 @@ P7CheckRevocationByHash (
   IN EFI_SIGNATURE_LIST  **RevokedDb
   )
 {
-  EFI_STATUS          Status;
-  EFI_SIGNATURE_LIST  *SigList;
-  EFI_SIGNATURE_DATA  *SigData;
-  UINT8               *RevokedCert;
-  UINTN               RevokedCertSize;
-  UINTN               Index;
+  EFI_STATUS  Status;
 
-  Status          = EFI_SECURITY_VIOLATION;
-  SigData         = NULL;
-  RevokedCert     = NULL;
-  RevokedCertSize = 0;
+  Status = EFI_SECURITY_VIOLATION;
 
   //
   // The signedData is revoked if the hash of content existed in RevokedDb
@@ -601,55 +593,13 @@ P7CheckRevocationByHash (
   }
 
   //
-  // Check if the signer's certificate can be found in Revoked database
+  // Raw X.509 certificate (EFI_CERT_X509_GUID / EFI_CERT_V2_X509_GUID) entries
+  // are deprecated in the forbidden database (dbx) - see TianoCore BZ #12527.
+  // Supporting full certificates in dbx is a burden (e.g. unsupported
+  // algorithms within a multi-cert entry) and the certificates themselves can
+  // be very large (e.g. PQC). Revocation now relies solely on the To-Be-Signed
+  // certificate hash. Any raw X.509 entry in dbx is ignored.
   //
-  for (Index = 0; ; Index++) {
-    SigList = (EFI_SIGNATURE_LIST *)(RevokedDb[Index]);
-
-    //
-    // The list is terminated by a NULL pointer.
-    //
-    if (SigList == NULL) {
-      break;
-    }
-
-    //
-    // Ignore any non-X509-format entry in the list.
-    //
-    if (!CompareGuid (&SigList->SignatureType, &gEfiCertX509Guid) &&
-        !CompareGuid (&SigList->SignatureType, &gEfiCertV2X509Guid)) {
-      continue;
-    }
-
-    SigData = (EFI_SIGNATURE_DATA *)((UINT8 *)SigList + sizeof (EFI_SIGNATURE_LIST) +
-                                     SigList->SignatureHeaderSize);
-
-    if (CompareGuid (&SigList->SignatureType, &gEfiCertV2X509Guid)) {
-      RevokedCert     = (UINT8 *)SigData;
-      RevokedCertSize = SigList->SignatureSize;
-    } else {
-      RevokedCert     = SigData->SignatureData;
-      RevokedCertSize = SigList->SignatureSize - sizeof (EFI_GUID);
-    }
-
-    //
-    // Verifying the PKCS#7 SignedData with the revoked certificate in RevokedDb
-    //
-    if (AuthenticodeVerify (SignedData, SignedDataSize, RevokedCert, RevokedCertSize, InHash, InHashSize)) {
-      //
-      // The signedData was verified by one entry in Revoked Database
-      //
-      Status = EFI_SUCCESS;
-      break;
-    }
-  }
-
-  if (!EFI_ERROR (Status)) {
-    //
-    // The signedData was revoked, since it was hit by RevokedDb
-    //
-    goto _Exit;
-  }
 
   //
   // Check the X.509 Certificate Hash in the revoked database against every
@@ -703,17 +653,9 @@ P7CheckRevocation (
   IN EFI_SIGNATURE_LIST  **RevokedDb
   )
 {
-  EFI_STATUS          Status;
-  EFI_SIGNATURE_LIST  *SigList;
-  EFI_SIGNATURE_DATA  *SigData;
-  UINT8               *RevokedCert;
-  UINTN               RevokedCertSize;
-  UINTN               Index;
+  EFI_STATUS  Status;
 
-  Status          = EFI_UNSUPPORTED;
-  SigData         = NULL;
-  RevokedCert     = NULL;
-  RevokedCertSize = 0;
+  Status = EFI_UNSUPPORTED;
 
   //
   // The signedData is revoked if the hash of content existed in RevokedDb
@@ -724,55 +666,13 @@ P7CheckRevocation (
   }
 
   //
-  // Check if the signer's certificate can be found in Revoked database
+  // Raw X.509 certificate (EFI_CERT_X509_GUID / EFI_CERT_V2_X509_GUID) entries
+  // are deprecated in the forbidden database (dbx) - see TianoCore BZ #12527.
+  // Supporting full certificates in dbx is a burden (e.g. unsupported
+  // algorithms within a multi-cert entry) and the certificates themselves can
+  // be very large (e.g. PQC). Revocation now relies solely on the To-Be-Signed
+  // certificate hash. Any raw X.509 entry in dbx is ignored.
   //
-  for (Index = 0; ; Index++) {
-    SigList = (EFI_SIGNATURE_LIST *)(RevokedDb[Index]);
-
-    //
-    // The list is terminated by a NULL pointer.
-    //
-    if (SigList == NULL) {
-      break;
-    }
-
-    //
-    // Ignore any non-X509-format entry in the list.
-    //
-    if (!CompareGuid (&SigList->SignatureType, &gEfiCertX509Guid) &&
-        !CompareGuid (&SigList->SignatureType, &gEfiCertV2X509Guid)) {
-      continue;
-    }
-
-    SigData = (EFI_SIGNATURE_DATA *)((UINT8 *)SigList + sizeof (EFI_SIGNATURE_LIST) +
-                                     SigList->SignatureHeaderSize);
-
-    if (CompareGuid (&SigList->SignatureType, &gEfiCertV2X509Guid)) {
-      RevokedCert     = (UINT8 *)SigData;
-      RevokedCertSize = SigList->SignatureSize;
-    } else {
-      RevokedCert     = SigData->SignatureData;
-      RevokedCertSize = SigList->SignatureSize - sizeof (EFI_GUID);
-    }
-
-    //
-    // Verifying the PKCS#7 SignedData with the revoked certificate in RevokedDb
-    //
-    if (Pkcs7Verify (SignedData, SignedDataSize, RevokedCert, RevokedCertSize, InData, InDataSize)) {
-      //
-      // The signedData was verified by one entry in Revoked Database
-      //
-      Status = EFI_SUCCESS;
-      break;
-    }
-  }
-
-  if (!EFI_ERROR (Status)) {
-    //
-    // The signedData was revoked, since it was hit by RevokedDb
-    //
-    goto _Exit;
-  }
 
   //
   // Check the X.509 Certificate Hash in the revoked database against every

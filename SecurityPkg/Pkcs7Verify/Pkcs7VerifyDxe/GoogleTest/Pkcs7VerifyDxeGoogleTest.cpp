@@ -929,41 +929,6 @@ BuildCertHashList (
   return SigList;
 }
 
-//
-// Build a full-certificate signature list (EFI_CERT_X509_GUID), holding one
-// DER X.509 certificate. Layout: [SignatureOwner (EFI_GUID)] [certificate].
-//
-static EFI_SIGNATURE_LIST *
-BuildX509CertList (
-  IN  CONST UINT8  *Cert,
-  IN  UINTN        CertLen
-  )
-{
-  UINT32              SigSize;
-  UINTN               TotalSize;
-  EFI_SIGNATURE_LIST  *SigList;
-  UINT8               *Entry;
-
-  SigSize   = (UINT32)(sizeof (EFI_GUID) + CertLen);
-  TotalSize = sizeof (EFI_SIGNATURE_LIST) + SigSize;
-
-  SigList = (EFI_SIGNATURE_LIST *)AllocateZeroPool (TotalSize);
-  if (SigList == NULL) {
-    return NULL;
-  }
-
-  CopyGuid (&SigList->SignatureType, &gEfiCertX509Guid);
-  SigList->SignatureListSize   = (UINT32)TotalSize;
-  SigList->SignatureHeaderSize = 0;
-  SigList->SignatureSize       = SigSize;
-
-  Entry = (UINT8 *)SigList + sizeof (EFI_SIGNATURE_LIST);
-  CopyGuid ((EFI_GUID *)Entry, &mTestOwner);
-  CopyMem (Entry + sizeof (EFI_GUID), Cert, CertLen);
-
-  return SigList;
-}
-
 //////////////////////////////////////////////////////////////////////////////
 // Test fixture - computes the TBSCertificate hashes and content hashes once.
 //////////////////////////////////////////////////////////////////////////////
@@ -1634,14 +1599,13 @@ TEST_F (Pkcs7VerifyRevokeTest, NotRevokedByUnrelatedCertHash) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// Certificate chain (root in db, intermediate/root in dbx => image rejected)
+// Certificate chain (root in db, chain certificate in dbx => image rejected)
 //
 // mP7SignedChain embeds a 2-cert chain: a leaf (signer) issued by the root CA
-// (mTestCert). Note Pkcs7GetSigners() returns only the signer (leaf), so the
-// certificate-HASH revocation path inspects the leaf. A non-signer chain
-// certificate (the root/intermediate) is matched instead by the
-// full-certificate revocation path, where P7CheckRevocation verifies the
-// signature against the revoked certificate (the signature chains to it).
+// (mTestCert). A non-signer chain certificate (the root) is revoked by its TBS
+// hash via IsSignerCertChainRevokedByHash(), which walks the full chain
+// returned by Pkcs7GetCertificatesList(). Raw full-certificate dbx entries are
+// deprecated (TianoCore BZ #12527) and are ignored.
 ///////////////////////////////////////////////////////////////////////////////
 
 //
@@ -1704,35 +1668,11 @@ TEST_F (Pkcs7VerifyRevokeTest, Chain_LeafCertHashRevokedByDbx) {
 }
 
 //
-// Root/intermediate certificate present in dbx as a full EFI_CERT_X509 entry
-// revokes the signature: P7CheckRevocation verifies the chain against the
-// revoked root. This is the "intermediate/root in dbx => rejected" case.
-//
-TEST_F (Pkcs7VerifyRevokeTest, Chain_RootCertRevokedByDbx) {
-  ASSERT_TRUE (mSetUpDone);
-
-  EFI_SIGNATURE_LIST  *List = BuildX509CertList (mTestCert, sizeof (mTestCert));
-  ASSERT_NE (List, (EFI_SIGNATURE_LIST *)NULL);
-  EFI_SIGNATURE_LIST  *Dbx[] = { List, NULL };
-
-  EFI_STATUS  Status = P7CheckRevocation (
-                         (UINT8 *)mP7SignedChain,
-                         sizeof (mP7SignedChain),
-                         (UINT8 *)mTestContent,
-                         sizeof (mTestContent),
-                         Dbx
-                         );
-
-  EXPECT_EQ (Status, EFI_SUCCESS);
-
-  FreePool (List);
-}
-
-//
 // The scenario of interest: the leaf signer would be allowed by db, but the
-// root certificate is revoked in dbx. Because the EFI_PKCS7_VERIFY_PROTOCOL
-// runs the revocation check (P7CheckRevocation) before the trust check
-// (P7CheckTrust), the revocation wins and the image is rejected.
+// root certificate is revoked in dbx by its TBS hash. Because the
+// EFI_PKCS7_VERIFY_PROTOCOL runs the revocation check (P7CheckRevocation)
+// before the trust check (P7CheckTrust), the revocation wins and the image is
+// rejected.
 //
 TEST_F (Pkcs7VerifyRevokeTest, Chain_RootInDbxOverridesDbAllow) {
   ASSERT_TRUE (mSetUpDone);
@@ -1749,9 +1689,13 @@ TEST_F (Pkcs7VerifyRevokeTest, Chain_RootInDbxOverridesDbAllow) {
   EFI_SIGNATURE_LIST  *Db[] = { DbList, NULL };
 
   //
-  // dbx: revoke the root certificate (full EFI_CERT_X509 entry).
+  // dbx: revoke the root certificate by its TBS hash (EFI_CERT_X509_SHA256).
   //
-  EFI_SIGNATURE_LIST  *DbxList = BuildX509CertList (mTestCert, sizeof (mTestCert));
+  UINT8               *DbxHashes[] = { mTbsHash256 };
+  EFI_SIGNATURE_LIST  *DbxList     = BuildCertHashList (
+                                       &gEfiCertX509Sha256Guid, FALSE,
+                                       DbxHashes, SHA256_DIGEST_SIZE, 1
+                                       );
   ASSERT_NE (DbxList, (EFI_SIGNATURE_LIST *)NULL);
   EFI_SIGNATURE_LIST  *Dbx[] = { DbxList, NULL };
 
