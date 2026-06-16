@@ -633,6 +633,7 @@ Pkcs7GetCertificatesList (
 {
   BOOLEAN          Status;
   UINT8            *NewP7Data;
+  CONST UINT8      *Temp;
   UINTN            NewP7Length;
   BOOLEAN          Wrapped;
   UINT8            Index;
@@ -696,9 +697,12 @@ Pkcs7GetCertificatesList (
   }
 
   //
-  // Decodes PKCS#7 SignedData
+  // Decodes PKCS#7 SignedData. Use a temporary pointer because
+  // d2i_CMS_ContentInfo advances it past the consumed DER; NewP7Data must keep
+  // pointing at the start of the (possibly malloc'd) buffer so it can be freed.
   //
-  Cms = d2i_CMS_ContentInfo (NULL, (const unsigned char **)&NewP7Data, (int)NewP7Length);
+  Temp = NewP7Data;
+  Cms  = d2i_CMS_ContentInfo (NULL, (const unsigned char **)&Temp, (int)NewP7Length);
   if ((Cms == NULL) || (OBJ_obj2nid (CMS_get0_type (Cms)) != NID_pkcs7_signed)) {
     goto _Error;
   }
