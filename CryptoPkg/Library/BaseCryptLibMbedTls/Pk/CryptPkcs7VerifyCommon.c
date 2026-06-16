@@ -1317,26 +1317,124 @@ _Exit:
 }
 
 /**
-  Retrieves all embedded certificates from PKCS#7 signed data as described in "PKCS #7:
-  Cryptographic Message Syntax Standard", and outputs two certificate lists chained and
-  unchained to the signer's certificates.
-  The input signed data could be wrapped in a ContentInfo structure.
+  Check whether a DER certificate is already present in an EFI_CERT_STACK buffer.
+
+  @param[in]  Buffer    EFI_CERT_STACK buffer, or NULL.
+  @param[in]  Cert      Pointer to the DER certificate.
+  @param[in]  CertSize  Size of the certificate in bytes.
+
+  @retval TRUE   The certificate is present in Buffer.
+  @retval FALSE  The certificate is not present (or Buffer is NULL).
+**/
+STATIC
+BOOLEAN
+IsCertInCertStack (
+  IN UINT8  *Buffer,
+  IN UINT8  *Cert,
+  IN UINTN  CertSize
+  )
+{
+  UINT8   Count;
+  UINT8   *Ptr;
+  UINTN   ThisSize;
+  UINTN   Index;
+
+  if (Buffer == NULL) {
+    return FALSE;
+  }
+
+  Count = (UINT8)(*Buffer);
+  Ptr   = Buffer + 1;
+  for (Index = 0; Index < Count; Index++) {
+    ThisSize = (UINTN)ReadUnaligned32 ((UINT32 *)Ptr);
+    if ((ThisSize == CertSize) &&
+        (CompareMem (Ptr + sizeof (UINT32), Cert, CertSize) == 0))
+    {
+      return TRUE;
+    }
+
+    Ptr = Ptr + sizeof (UINT32) + ThisSize;
+  }
+
+  return FALSE;
+}
+
+/**
+  Append a single certificate (DER) to an EFI_CERT_STACK-format buffer.
+
+  The buffer format is:
+      UINT8  CertNumber;
+      UINT32 Cert1Length; UINT8 Cert1[]; ... UINT32 CertnLength; UINT8 Certn[];
+
+  On the first call *Buffer must be NULL and *BufferSize 0. The buffer is grown
+  with a fresh allocation each call and the old one freed. CertNumber (the first
+  byte) is updated to *Count.
+
+  @param[in,out]  Buffer      Pointer to the EFI_CERT_STACK buffer pointer.
+  @param[in,out]  BufferSize  Pointer to the current buffer size in bytes.
+  @param[in,out]  Count       Pointer to the running certificate count.
+  @param[in]      Cert        Pointer to the DER certificate to append.
+  @param[in]      CertSize    Size of the certificate in bytes.
+
+  @retval TRUE   The certificate was appended.
+  @retval FALSE  Allocation failed.
+**/
+STATIC
+BOOLEAN
+MbedTlsAppendCertToStack (
+  IN OUT UINT8  **Buffer,
+  IN OUT UINTN  *BufferSize,
+  IN OUT UINT8  *Count,
+  IN     UINT8  *Cert,
+  IN     UINTN  CertSize
+  )
+{
+  UINT8  *OldBuf;
+  UINTN  OldSize;
+  UINT8  *NewBuf;
+
+  OldBuf  = *Buffer;
+  OldSize = (OldBuf == NULL) ? sizeof (UINT8) : *BufferSize;
+
+  NewBuf = AllocateZeroPool (OldSize + sizeof (UINT32) + CertSize);
+  if (NewBuf == NULL) {
+    return FALSE;
+  }
+
+  if (OldBuf != NULL) {
+    CopyMem (NewBuf, OldBuf, OldSize);
+    FreePool (OldBuf);
+  }
+
+  WriteUnaligned32 ((UINT32 *)(NewBuf + OldSize), (UINT32)CertSize);
+  CopyMem (NewBuf + OldSize + sizeof (UINT32), Cert, CertSize);
+
+  *Count       = (UINT8)(*Count + 1);
+  NewBuf[0]    = *Count;
+  *Buffer      = NewBuf;
+  *BufferSize  = OldSize + sizeof (UINT32) + CertSize;
+
+  return TRUE;
+}
+
+/**
+  Retrieves all embedded certificates from PKCS#7 signed data and outputs two
+  certificate lists chained and unchained to the signer's certificate.
+
+  See the declaration in BaseCryptLib.h for the full contract. The signer
+  certificate is located, then its issuer chain is walked (matching each
+  certificate's issuer_raw to a candidate's subject_raw) to build
+  SignerChainCerts; the remaining embedded certificates form UnchainCerts.
 
   @param[in]  P7Data            Pointer to the PKCS#7 message.
   @param[in]  P7Length          Length of the PKCS#7 message in bytes.
-  @param[out] SignerChainCerts  Pointer to the certificates list chained to signer's
-                                certificate. It's caller's responsibility to free the buffer
-                                with Pkcs7FreeSigners().
-                                This data structure is EFI_CERT_STACK type.
-  @param[out] ChainLength       Length of the chained certificates list buffer in bytes.
-  @param[out] UnchainCerts      Pointer to the unchained certificates lists. It's caller's
-                                responsibility to free the buffer with Pkcs7FreeSigners().
-                                This data structure is EFI_CERT_STACK type.
-  @param[out] UnchainLength     Length of the unchained certificates list buffer in bytes.
+  @param[out] SignerChainCerts  Certificates chained to the signer's certificate.
+  @param[out] ChainLength       Length of SignerChainCerts in bytes.
+  @param[out] UnchainCerts      Certificates not chained to the signer.
+  @param[out] UnchainLength     Length of UnchainCerts in bytes.
 
   @retval  TRUE         The operation is finished successfully.
   @retval  FALSE        Error occurs during the operation.
-
 **/
 BOOLEAN
 EFIAPI
@@ -1349,8 +1447,159 @@ Pkcs7GetCertificatesList (
   OUT UINTN       *UnchainLength
   )
 {
-  ASSERT (FALSE);
-  return FALSE;
+  BOOLEAN                 Status;
+  BOOLEAN                 Wrapped;
+  UINT8                   *WrapData;
+  UINTN                   WrapDataSize;
+  MbedtlsPkcs7            Pkcs7;
+  BOOLEAN                 Pkcs7Parsed;
+  MbedtlsPkcs7SignerInfo  *SignerInfo;
+  mbedtls_x509_crt        *AllCerts;
+  mbedtls_x509_crt        *Cert;
+  mbedtls_x509_crt        *Issuer;
+  mbedtls_x509_crt        *TempCrt;
+  UINT8                   *ChainBuf;
+  UINTN                   ChainBufSize;
+  UINT8                   ChainCount;
+  UINT8                   *UnchainBuf;
+  UINTN                   UnchainBufSize;
+  UINT8                   UnchainCount;
+  BOOLEAN                 Chained;
+
+  if ((P7Data == NULL) || (SignerChainCerts == NULL) || (ChainLength == NULL) ||
+      (UnchainCerts == NULL) || (UnchainLength == NULL) || (P7Length > INT_MAX))
+  {
+    return FALSE;
+  }
+
+  Status         = FALSE;
+  Wrapped        = FALSE;
+  WrapData       = NULL;
+  WrapDataSize   = 0;
+  Pkcs7Parsed    = FALSE;
+  ChainBuf       = NULL;
+  ChainBufSize   = 0;
+  ChainCount     = 0;
+  UnchainBuf     = NULL;
+  UnchainBufSize = 0;
+  UnchainCount   = 0;
+
+  *SignerChainCerts = NULL;
+  *ChainLength      = 0;
+  *UnchainCerts     = NULL;
+  *UnchainLength    = 0;
+
+  if (!WrapPkcs7Data (P7Data, P7Length, &Wrapped, &WrapData, &WrapDataSize)) {
+    return FALSE;
+  }
+
+  MbedTlsPkcs7Init (&Pkcs7);
+  if (MbedtlsPkcs7ParseDer (WrapData, (INT32)WrapDataSize, &Pkcs7) != 0) {
+    goto _Exit;
+  }
+
+  Pkcs7Parsed = TRUE;
+
+  //
+  // Locate the signer certificate. Only the single-signer case is handled,
+  // matching the rest of this wrapper.
+  //
+  SignerInfo = &(Pkcs7.SignedData.SignerInfos);
+  AllCerts   = &(Pkcs7.SignedData.Certificates);
+  Cert       = MbedTlsPkcs7FindSignerCert (SignerInfo, AllCerts);
+  if (Cert == NULL) {
+    goto _Exit;
+  }
+
+  //
+  // Build the chain from the signer up through its issuers. A certificate is
+  // its own issuer (self-signed root) terminates the walk.
+  //
+  for ( ; ;) {
+    if (!MbedTlsAppendCertToStack (&ChainBuf, &ChainBufSize, &ChainCount, Cert->raw.p, Cert->raw.len)) {
+      goto _Exit;
+    }
+
+    //
+    // Self-issued (root) - stop.
+    //
+    if ((Cert->subject_raw.len == Cert->issuer_raw.len) &&
+        (CompareMem (Cert->subject_raw.p, Cert->issuer_raw.p, Cert->subject_raw.len) == 0))
+    {
+      break;
+    }
+
+    //
+    // Find the issuer among the embedded certificates (subject == our issuer).
+    //
+    Issuer = AllCerts;
+    while (Issuer != NULL) {
+      if ((Issuer != Cert) &&
+          (Issuer->subject_raw.len == Cert->issuer_raw.len) &&
+          (Issuer->subject_raw.p != NULL) &&
+          (CompareMem (Issuer->subject_raw.p, Cert->issuer_raw.p, Cert->issuer_raw.len) == 0))
+      {
+        break;
+      }
+
+      Issuer = Issuer->next;
+    }
+
+    if (Issuer == NULL) {
+      //
+      // Issuer not embedded; chain ends here.
+      //
+      break;
+    }
+
+    Cert = Issuer;
+  }
+
+  //
+  // Collect the certificates that are not part of the signer chain.
+  //
+  for (Cert = AllCerts; Cert != NULL; Cert = Cert->next) {
+    if ((Cert->raw.p == NULL) || (Cert->raw.len == 0)) {
+      continue;
+    }
+
+    Chained = IsCertInCertStack (ChainBuf, Cert->raw.p, Cert->raw.len);
+    if (Chained) {
+      continue;
+    }
+
+    if (!MbedTlsAppendCertToStack (&UnchainBuf, &UnchainBufSize, &UnchainCount, Cert->raw.p, Cert->raw.len)) {
+      goto _Exit;
+    }
+  }
+
+  *SignerChainCerts = ChainBuf;
+  *ChainLength      = ChainBufSize;
+  *UnchainCerts     = UnchainBuf;
+  *UnchainLength    = UnchainBufSize;
+  ChainBuf          = NULL;
+  UnchainBuf        = NULL;
+  Status            = TRUE;
+
+_Exit:
+  if (Pkcs7Parsed && (Pkcs7.SignedData.Certificates.next != NULL)) {
+    TempCrt = Pkcs7.SignedData.Certificates.next;
+    mbedtls_x509_crt_free (TempCrt);
+  }
+
+  if (Wrapped && (WrapData != NULL)) {
+    FreePool (WrapData);
+  }
+
+  if (ChainBuf != NULL) {
+    FreePool (ChainBuf);
+  }
+
+  if (UnchainBuf != NULL) {
+    FreePool (UnchainBuf);
+  }
+
+  return Status;
 }
 
 /**
