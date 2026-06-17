@@ -476,6 +476,7 @@ Pkcs7Sign (
   INTN                    BufferSize;
   UINT8                   *Ptr;
   INT32                   Len;
+  mbedtls_x509_crt        *SavedNext;
 
   //
   // Check input parameters.
@@ -491,6 +492,7 @@ Pkcs7Sign (
 
   SignatureLen = MAX_SIGNATURE_SIZE;
   Crt          = (mbedtls_x509_crt *)SignCert;
+  SavedNext    = Crt->next;
 
   NewPrivateKey = NULL;
   if (PrivateKey[PrivateKeySize - 1] != 0) {
@@ -554,6 +556,15 @@ Pkcs7Sign (
   ZeroMem (&Pkcs7, sizeof (MbedtlsPkcs7));
   Pkcs7.SignedData.Version = 1;
 
+  //
+  // Temporarily chain the caller's OtherCerts after the signer certificate so
+  // the full set is serialized into the signedData. SignCert and OtherCerts are
+  // independent objects owned (and freed) separately by the caller, so the
+  // signer's original 'next' link (captured in SavedNext above) is restored at
+  // Cleanup. Leaving them cross-linked would make the caller's
+  // X509Free(SignCert) walk into and free the OtherCerts memory, and the
+  // subsequent X509StackFree(OtherCerts) would then double-free it.
+  //
   Crt->next                     = (mbedtls_x509_crt *)OtherCerts;
   Pkcs7.SignedData.Certificates = *Crt;
 
@@ -618,6 +629,14 @@ Pkcs7Sign (
   Status = TRUE;
 
 Cleanup:
+  //
+  // Restore the signer certificate's original 'next' link so the caller's
+  // SignCert and OtherCerts remain independent objects (see the cross-link
+  // note above). Crt aliases SignCert, which is non-NULL on every path that
+  // reaches here.
+  //
+  Crt->next = SavedNext;
+
   if (&Pkey != NULL) {
     mbedtls_pk_free (&Pkey);
   }

@@ -7,7 +7,7 @@
 
 [Defines]
   INF_VERSION    = 0x00010005
-  BASE_NAME      = BaseCryptLibUnitTestHost
+  BASE_NAME      = BaseCryptLibMbedTlsUnitTestHost
   FILE_GUID      = ab0bc736-2552-4a3c-a2c5-eb106b8a75d1
   MODULE_TYPE    = HOST_APPLICATION
   VERSION_STRING = 1.0
