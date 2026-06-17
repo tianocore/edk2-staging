@@ -1633,13 +1633,15 @@ IsAllowedByDb (
                ))
         {
           //
-          // The hash of TBSCertificate matched a db entry but AuthenticodeVerify failed.
-          // Since this cert is part of the image own signing chain (from
-          // Pkcs7GetSigners), a verification failure means the chain is broken
-          // or the signature is invalid. No further checking is needed.
+          // The hash of this TBSCertificate matched a db entry, but the image
+          // signature does not verify against this particular certificate. The
+          // signing chain (from Pkcs7GetSigners) may contain more than one
+          // signer, and per UEFI Spec 32.5.3.3 the image is accepted if ANY of
+          // its signatures is in db and not in dbx. Continue checking the
+          // remaining certificates rather than rejecting the whole image here.
           //
-          DEBUG ((DEBUG_INFO, "DxeImageVerificationLib: Image cert hash is in DB but AuthenticodeVerify failed. Broken chain.\n"));
-          goto Done;
+          DEBUG ((DEBUG_INFO, "DxeImageVerificationLib: Image cert hash is in DB but AuthenticodeVerify failed. Try next signer.\n"));
+          continue;
         }
 
         //
