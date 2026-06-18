@@ -1201,159 +1201,6 @@ Done:
   return Status;
 }
 
-
-
-/**
-  Check whether the image signature is forbidden by the forbidden database (dbx).
-
-  @param[in]  AuthData      Pointer to the Authenticode signature retrieved from the signed image.
-  @param[in]  AuthDataSize  Size of the Authenticode signature in bytes.
-
-  @retval TRUE              Image is forbidden by dbx.
-  @retval FALSE             Image is not forbidden by dbx.
-
-**/
-BOOLEAN
-IsForbiddenByDbx (
-  IN UINT8  *AuthData,
-  IN UINTN  AuthDataSize
-  )
-{
-  EFI_STATUS          Status;
-  BOOLEAN             IsForbidden;
-  BOOLEAN             IsFound;
-  UINT8               *Data;
-  UINTN               DataSize;
-  UINTN               Index;
-  UINT8               *ChainCerts;
-  UINTN               ChainLength;
-  UINT8               *UnchainCerts;
-  UINTN               UnchainLength;
-  UINT8               *CertList;
-  UINT8               CertNumber;
-  UINT8               *CertPtr;
-  UINT8               *Cert;
-  UINTN               CertSize;
-
-  //
-  // Variable Initialization
-  //
-  IsForbidden       = TRUE;
-  Data              = NULL;
-  Cert              = NULL;
-  ChainCerts        = NULL;
-  ChainLength       = 0;
-  UnchainCerts      = NULL;
-  UnchainLength     = 0;
-  CertList          = NULL;
-
-  //
-  // The image will not be forbidden if dbx can't be got.
-  //
-  DataSize = 0;
-  Status   = gRT->GetVariable (EFI_IMAGE_SECURITY_DATABASE1, &gEfiImageSecurityDatabaseGuid, NULL, &DataSize, NULL);
-  ASSERT (EFI_ERROR (Status));
-  if (Status != EFI_BUFFER_TOO_SMALL) {
-    if (Status == EFI_NOT_FOUND) {
-      //
-      // Evidently not in dbx if the database doesn't exist.
-      //
-      IsForbidden = FALSE;
-    }
-
-    return IsForbidden;
-  }
-
-  Data = (UINT8 *)AllocateZeroPool (DataSize);
-  if (Data == NULL) {
-    return IsForbidden;
-  }
-
-  Status = gRT->GetVariable (EFI_IMAGE_SECURITY_DATABASE1, &gEfiImageSecurityDatabaseGuid, NULL, &DataSize, (VOID *)Data);
-  if (EFI_ERROR (Status)) {
-    goto Done;
-  }
-
-  //
-  // Check X.509 Certificate Hash.
-  //
-
-  //
-  // Retrieve the certificate stack from AuthData. Per UEFI Spec 32.5.3.3, a dbx
-  // EFI_CERT_X509_SHAxxx entry forbids the image if its hash reflects the
-  // To-Be-Signed hash of ANY certificate in the signing chain (the leaf signer
-  // and every issuer up to the root), not just the leaf. Retrieve the full
-  // chain with Pkcs7GetCertificatesList(); if it cannot be retrieved, fail safe
-  // and treat the image as forbidden rather than checking only a subset.
-  //
-  // The output CertStack format will be:
-  //       UINT8  CertNumber;
-  //       UINT32 Cert1Length;
-  //       UINT8  Cert1[];
-  //       UINT32 Cert2Length;
-  //       UINT8  Cert2[];
-  //       ...
-  //       UINT32 CertnLength;
-  //       UINT8  Certn[];
-  //
-  if (!Pkcs7GetCertificatesList (
-         AuthData,
-         AuthDataSize,
-         &ChainCerts,
-         &ChainLength,
-         &UnchainCerts,
-         &UnchainLength
-         ) || (ChainCerts == NULL) || (*ChainCerts == 0))
-  {
-    IsForbidden = TRUE;
-    goto Done;
-  }
-
-  CertList = ChainCerts;
-
-  //
-  // Check if any hash of certificates embedded in AuthData is in the forbidden database.
-  //
-  CertNumber = (UINT8)(*CertList);
-  CertPtr    = CertList + 1;
-  for (Index = 0; Index < CertNumber; Index++) {
-    CertSize = (UINTN)ReadUnaligned32 ((UINT32 *)CertPtr);
-    Cert     = (UINT8 *)CertPtr + sizeof (UINT32);
-    //
-    // Advance CertPtr to the next cert in image signer's cert list
-    //
-    CertPtr = CertPtr + sizeof (UINT32) + CertSize;
-
-    Status = IsCertHashFoundInDbx (Cert, CertSize, (EFI_SIGNATURE_LIST *)Data, DataSize, &IsFound);
-    if (EFI_ERROR (Status)) {
-      //
-      // Error in searching dbx. Consider it as 'found'.
-      //
-      IsForbidden = TRUE;
-      goto Done;
-    } else if (IsFound) {
-      //
-      // Found Cert in dbx successfully. Image is forbidden.
-      //
-      IsForbidden = TRUE;
-      DEBUG ((DEBUG_INFO, "DxeImageVerificationLib: Image is signed but certificate is revoked in DBX.\n"));
-      goto Done;
-    }
-  }
-
-  IsForbidden = FALSE;
-
-Done:
-  if (Data != NULL) {
-    FreePool (Data);
-  }
-
-  Pkcs7FreeSigners (ChainCerts);
-  Pkcs7FreeSigners (UnchainCerts);
-
-  return IsForbidden;
-}
-
 /**
   Check whether the certificate is not revoked by dbx.
 
@@ -1402,6 +1249,127 @@ IsCertAllowedByDbx (
 }
 
 /**
+  Find the index of a certificate within a signing-chain certificate buffer.
+
+  The CertBuffer is the signing chain returned by Pkcs7GetSigners(), formatted
+  as:
+        UINT8  CertNumber;
+        UINT32 Cert1Length; UINT8 Cert1[]; ... UINT32 CertnLength; UINT8 Certn[];
+  with index 0 being the leaf (signer) certificate and ascending toward the root.
+
+  @param[in]  CertBuffer    Signing-chain certificate buffer.
+  @param[in]  TargetCert    Pointer to the DER certificate to locate.
+  @param[in]  TargetSize    Size of TargetCert in bytes.
+
+  @retval >= 0  The index of the matching certificate in the chain.
+  @retval -1    The certificate is not present in the chain.
+
+**/
+STATIC
+INTN
+FindCertIndexInChain (
+  IN UINT8  *CertBuffer,
+  IN UINT8  *TargetCert,
+  IN UINTN  TargetSize
+  )
+{
+  UINT8  CertNumber;
+  UINT8  *CertPtr;
+  UINT8  *Cert;
+  UINTN  CertSize;
+  UINTN  Index;
+
+  if ((CertBuffer == NULL) || (TargetCert == NULL)) {
+    return -1;
+  }
+
+  CertNumber = (UINT8)(*CertBuffer);
+  CertPtr    = CertBuffer + 1;
+  for (Index = 0; Index < CertNumber; Index++) {
+    CertSize = (UINTN)ReadUnaligned32 ((UINT32 *)CertPtr);
+    Cert     = (UINT8 *)CertPtr + sizeof (UINT32);
+    CertPtr  = CertPtr + sizeof (UINT32) + CertSize;
+
+    if ((CertSize == TargetSize) && (CompareMem (Cert, TargetCert, CertSize) == 0)) {
+      return (INTN)Index;
+    }
+  }
+
+  return -1;
+}
+
+/**
+  Check the trust-anchor and the certificates below it (toward the leaf) against dbx.
+
+  Per UEFI Spec 32.5.3.3, when a trust anchor is found in db, only that anchor
+  and the certificates below it in the signing chain (that is, between the anchor
+  and the leaf signer, inclusive) are evaluated against dbx. Any certificate
+  above the anchor (closer to the root) is ignored even if it is present in dbx.
+
+  The signing chain returned by Pkcs7GetSigners() is ordered root-first (index 0
+  is the top of the chain, closest to the root) and descends toward the leaf
+  signer at the highest index, so "the anchor and everything below it (toward
+  the leaf)" is the inclusive index range [AnchorIndex, CertNumber - 1].
+
+  @param[in]  CertBuffer    Signing-chain certificate buffer from Pkcs7GetSigners().
+  @param[in]  AnchorIndex   Index of the trust anchor in CertBuffer. A negative
+                            value means the trust anchor is not one of the
+                            embedded certificates (for example a root supplied by
+                            db that is above the entire embedded chain), in which
+                            case every embedded certificate is below the anchor
+                            and is evaluated against dbx.
+  @param[in]  DbxData       Pointer to dbx contents, or NULL if dbx is absent.
+  @param[in]  DbxDataSize   Size of DbxData in bytes.
+
+  @retval TRUE   Neither the anchor nor any certificate below it is revoked.
+  @retval FALSE  The anchor or a certificate below it is revoked, or a dbx
+                 search failed.
+
+**/
+STATIC
+BOOLEAN
+IsSignerChainAllowedByDbx (
+  IN UINT8  *CertBuffer,
+  IN INTN   AnchorIndex,
+  IN UINT8  *DbxData,
+  IN UINTN  DbxDataSize
+  )
+{
+  UINT8  CertNumber;
+  UINT8  *CertPtr;
+  UINT8  *Cert;
+  UINTN  CertSize;
+  UINTN  Index;
+
+  if (DbxData == NULL) {
+    return TRUE;
+  }
+
+  CertNumber = (UINT8)(*CertBuffer);
+  CertPtr    = CertBuffer + 1;
+  for (Index = 0; Index < CertNumber; Index++) {
+    CertSize = (UINTN)ReadUnaligned32 ((UINT32 *)CertPtr);
+    Cert     = (UINT8 *)CertPtr + sizeof (UINT32);
+    CertPtr  = CertPtr + sizeof (UINT32) + CertSize;
+
+    //
+    // Certificates above the trust anchor (lower index, closer to the root) are
+    // not evaluated against dbx. When AnchorIndex is negative the anchor is
+    // above the whole embedded chain, so every embedded certificate is checked.
+    //
+    if ((AnchorIndex >= 0) && (Index < (UINTN)AnchorIndex)) {
+      continue;
+    }
+
+    if (!IsCertAllowedByDbx (Cert, CertSize, DbxData, DbxDataSize)) {
+      return FALSE;
+    }
+  }
+
+  return TRUE;
+}
+
+/**
   Check whether the image signature can be verified by the trusted certificates in DB database.
 
   @param[in]  AuthData      Pointer to the Authenticode signature retrieved from signed image.
@@ -1438,6 +1406,7 @@ IsAllowedByDb (
   UINTN               BufferLength;
   UINT8               *TrustedCert;
   UINTN               TrustedCertLength;
+  INTN                AnchorIndex;
 
   Data              = NULL;
   CertList          = NULL;
@@ -1508,7 +1477,12 @@ IsAllowedByDb (
   }
 
   //
-  // Retrieve the certificate stack from AuthData
+  // Retrieve the candidate-anchor certificate set from AuthData. Prefer the full
+  // signing chain from Pkcs7GetCertificatesList() so that an intermediate or
+  // root certificate listed in db (by EFI_CERT_X509_SHAxxx hash) can serve as
+  // the trust anchor, per UEFI Spec 32.5.3.3. That function supports only a
+  // single signer; for a multi-signer SignedData it fails, so fall back to
+  // Pkcs7GetSigners(), which returns every signer's certificate.
   // The output CertStack format will be:
   //       UINT8  CertNumber;
   //       UINT32 Cert1Length;
@@ -1519,7 +1493,14 @@ IsAllowedByDb (
   //       UINT32 CertnLength;
   //       UINT8  Certn[];
   //
-  Pkcs7GetSigners (AuthData, AuthDataSize, &CertBuffer, &BufferLength, &TrustedCert, &TrustedCertLength);
+  if (!Pkcs7GetCertificatesList (AuthData, AuthDataSize, &CertBuffer, &BufferLength, &TrustedCert, &TrustedCertLength) ||
+      (BufferLength == 0) || (CertBuffer == NULL) || ((*CertBuffer) == 0))
+  {
+    CertBuffer  = NULL;
+    TrustedCert = NULL;
+    Pkcs7GetSigners (AuthData, AuthDataSize, &CertBuffer, &BufferLength, &TrustedCert, &TrustedCertLength);
+  }
+
   if ((BufferLength == 0) || (CertBuffer == NULL) || ((*CertBuffer) == 0)) {
     goto Done;
   }
@@ -1553,13 +1534,13 @@ IsAllowedByDb (
                          );
         if (VerifyStatus) {
           //
-          // The image is signed and its signature is found in 'db'.
+          // The image is signed and verifies up to this db certificate (the
+          // trust anchor). Per UEFI Spec 32.5.3.3, check the trust anchor and
+          // the certificates below it (toward the leaf) against dbx; any
+          // certificate above the anchor is ignored.
           //
-          VerifyStatus = IsCertAllowedByDbx (RootCert, RootCertSize, DbxData, DbxDataSize);
-
-          //
-          // Check if this certificate is revoked in dbx.
-          //
+          AnchorIndex  = FindCertIndexInChain (CertBuffer, RootCert, RootCertSize);
+          VerifyStatus = IsSignerChainAllowedByDbx (CertBuffer, (UINTN)AnchorIndex, DbxData, DbxDataSize);
           goto Done;
         }
 
@@ -1581,7 +1562,8 @@ IsAllowedByDb (
                        mImageDigestSize
                        );
       if (VerifyStatus) {
-        VerifyStatus = IsCertAllowedByDbx (RootCert, RootCertSize, DbxData, DbxDataSize);
+        AnchorIndex  = FindCertIndexInChain (CertBuffer, RootCert, RootCertSize);
+        VerifyStatus = IsSignerChainAllowedByDbx (CertBuffer, (UINTN)AnchorIndex, DbxData, DbxDataSize);
         goto Done;
       }
     } else if ((CompareGuid (&CertList->SignatureType, &gEfiCertX509Sha256Guid))
@@ -1634,20 +1616,25 @@ IsAllowedByDb (
         {
           //
           // The hash of this TBSCertificate matched a db entry, but the image
-          // signature does not verify against this particular certificate. The
-          // signing chain (from Pkcs7GetSigners) may contain more than one
-          // signer, and per UEFI Spec 32.5.3.3 the image is accepted if ANY of
-          // its signatures is in db and not in dbx. Continue checking the
+          // signature does not verify up to this particular certificate. The
+          // candidate set may contain more than one certificate (the full
+          // signing chain, or multiple signers), and per UEFI Spec 32.5.3.3 the
+          // image is accepted if ANY of its signatures verifies up to a db
+          // certificate and is not revoked in dbx. Continue checking the
           // remaining certificates rather than rejecting the whole image here.
           //
-          DEBUG ((DEBUG_INFO, "DxeImageVerificationLib: Image cert hash is in DB but AuthenticodeVerify failed. Try next signer.\n"));
+          DEBUG ((DEBUG_INFO, "DxeImageVerificationLib: Image cert hash is in DB but AuthenticodeVerify failed. Try next candidate.\n"));
           continue;
         }
 
         //
-        // Signature verified. Check if this certificate is revoked in dbx.
+        // Signature verified. This db-matched certificate (at chain index
+        // Index) is the trust anchor. Per UEFI Spec 32.5.3.3, check the trust
+        // anchor and the certificates below it (toward the leaf) against dbx;
+        // any certificate above the anchor is ignored. The chain is root-first,
+        // so "the anchor and below" is the index range [Index, CertNumber - 1].
         //
-        if (!IsCertAllowedByDbx (Cert, CertSize, DbxData, DbxDataSize)) {
+        if (!IsSignerChainAllowedByDbx (CertBuffer, (INTN)Index, DbxData, DbxDataSize)) {
           goto Done;
         }
 
@@ -2050,21 +2037,15 @@ DxeImageVerificationHandler (
     }
 
     //
-    // Check the digital signature against the revoked certificate in forbidden database (dbx).
-    // Per UEFI Spec Section, a signature found in dbx only disqualifies that
-    // signature; the image may still pass if another signature is in db and not in dbx.
-    // Therefore skip this signature and continue evaluating the remaining ones rather than
-    // failing the whole image here.
-    //
-    if (IsForbiddenByDbx (AuthData, AuthDataSize)) {
-      Action = EFI_IMAGE_EXECUTION_AUTH_SIG_FAILED;
-      continue;
-    }
-
-    //
-    // Check the digital signature against the valid certificate in allowed database (db).
-    // If the signature is accepted, the image is accepted and the remaining
-    // signatures are not evaluated.
+    // Step C: A signature is accepted if it verifies up to a trust anchor in db
+    // and neither that anchor nor any certificate below it (toward the leaf) is
+    // revoked in dbx. Per UEFI Spec 32.5.3.3, dbx is evaluated relative to the
+    // trust anchor: a certificate above the anchor (closer to the root) is
+    // ignored even if present in dbx. IsAllowedByDb() performs this anchor-
+    // relative db/dbx evaluation, so the dbx revocation check is no longer a
+    // separate whole-chain pre-pass here. A signature that is not accepted only
+    // disqualifies itself; the image may still pass via another signature, so
+    // continue evaluating the remaining ones.
     //
     if (IsAllowedByDb (AuthData, AuthDataSize)) {
       return EFI_SUCCESS;
