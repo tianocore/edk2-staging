@@ -638,6 +638,7 @@ Pkcs7GetCertificatesList (
   BOOLEAN          Wrapped;
   UINT8            Index;
   CMS_ContentInfo  *Cms;
+  UINT8            *PatchedData;
   X509_STORE_CTX   *CertCtx;
 
   STACK_OF (X509)   *CtxChain;
@@ -663,6 +664,7 @@ Pkcs7GetCertificatesList (
   Status       = FALSE;
   NewP7Data    = NULL;
   Cms          = NULL;
+  PatchedData  = NULL;
   CertCtx      = NULL;
   CtxChain     = NULL;
   CtxCert      = NULL;
@@ -703,6 +705,27 @@ Pkcs7GetCertificatesList (
   //
   Temp = NewP7Data;
   Cms  = d2i_CMS_ContentInfo (NULL, (const unsigned char **)&Temp, (int)NewP7Length);
+  if (Cms == NULL) {
+    //
+    // Authenticode signatures encapsulate eContent as an SPC_INDIRECT_DATA
+    // SEQUENCE (0x30), while CMS strictly requires eContent to be an OCTET
+    // STRING (0x04) per RFC 5652. d2i_CMS_ContentInfo therefore fails on raw
+    // Authenticode data. Patch a mutable copy (NewP7Data may alias the caller's
+    // input when it is already a ContentInfo) and retry so that the certificate
+    // chain can still be extracted from Authenticode-signed images.
+    //
+    PatchedData = malloc (NewP7Length);
+    if (PatchedData == NULL) {
+      goto _Error;
+    }
+
+    CopyMem (PatchedData, NewP7Data, NewP7Length);
+    if (PatchSpcContentTag (PatchedData, NewP7Length)) {
+      Temp = PatchedData;
+      Cms  = d2i_CMS_ContentInfo (NULL, (const unsigned char **)&Temp, (int)NewP7Length);
+    }
+  }
+
   if ((Cms == NULL) || (OBJ_obj2nid (CMS_get0_type (Cms)) != NID_pkcs7_signed)) {
     goto _Error;
   }
@@ -898,6 +921,10 @@ _Error:
   //
   if (!Wrapped && (NewP7Data != NULL)) {
     free (NewP7Data);
+  }
+
+  if (PatchedData != NULL) {
+    free (PatchedData);
   }
 
   if (Cms != NULL) {
