@@ -68,16 +68,8 @@ extern "C" {
     IN UINTN               SignedDataSize,
     IN UINT8               *InData,
     IN UINTN               InDataSize,
-    IN EFI_SIGNATURE_LIST  **AllowedDb
-    );
-
-  EFI_STATUS
-  P7CheckRevocation (
-    IN UINT8               *SignedData,
-    IN UINTN               SignedDataSize,
-    IN UINT8               *InData,
-    IN UINTN               InDataSize,
-    IN EFI_SIGNATURE_LIST  **RevokedDb
+    IN EFI_SIGNATURE_LIST  **AllowedDb,
+    IN EFI_SIGNATURE_LIST  **RevokedDb      OPTIONAL
     );
 
   // Multi-signer test material (RSA-2048).
@@ -1894,7 +1886,8 @@ TEST_F (Pkcs7VerifyRevokeTest, AllowedByCertHash_V1_Sha256) {
                          sizeof (mP7SignedAttached),
                          (UINT8 *)mTestContent,
                          sizeof (mTestContent),
-                         Db
+                         Db,
+                         NULL
                          );
 
   EXPECT_EQ (Status, EFI_SUCCESS);
@@ -1918,7 +1911,8 @@ TEST_F (Pkcs7VerifyRevokeTest, AllowedByCertHash_V2_Sha256) {
                          sizeof (mP7SignedAttached),
                          (UINT8 *)mTestContent,
                          sizeof (mTestContent),
-                         Db
+                         Db,
+                         NULL
                          );
 
   EXPECT_EQ (Status, EFI_SUCCESS);
@@ -1942,7 +1936,8 @@ TEST_F (Pkcs7VerifyRevokeTest, AllowedByCertHash_Sha384) {
                          sizeof (mP7SignedAttached),
                          (UINT8 *)mTestContent,
                          sizeof (mTestContent),
-                         Db
+                         Db,
+                         NULL
                          );
 
   EXPECT_EQ (Status, EFI_SUCCESS);
@@ -1971,7 +1966,8 @@ TEST_F (Pkcs7VerifyRevokeTest, NotAllowedByWrongCertHash) {
                          sizeof (mP7SignedAttached),
                          (UINT8 *)mTestContent,
                          sizeof (mTestContent),
-                         Db
+                         Db,
+                         NULL
                          );
 
   EXPECT_NE (Status, EFI_SUCCESS);
@@ -2002,7 +1998,8 @@ TEST_F (Pkcs7VerifyRevokeTest, CertHashMatchesButSignatureOverWrongData) {
                          sizeof (mP7SignedAttached),
                          OtherData,
                          sizeof (OtherData),
-                         Db
+                         Db,
+                         NULL
                          );
 
   EXPECT_NE (Status, EFI_SUCCESS);
@@ -2011,202 +2008,64 @@ TEST_F (Pkcs7VerifyRevokeTest, CertHashMatchesButSignatureOverWrongData) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// P7CheckRevocation - EFI_CERT_X509_SHAxxx in dbx revokes the signer
+// P7CheckTrust - trust-anchor-relative dbx evaluation (UEFI Spec 32.5.3.3)
 //
-// This is the path the protocol runs (before P7CheckTrust) to enforce that a
-// signer whose certificate TBS hash is present in the revocation database is
-// rejected. It extracts the signer chain via Pkcs7GetSigners and matches each
-// certificate's TBS hash against RevokedDb. P7CheckRevocation returns
-// EFI_SUCCESS to mean "revoked".
-///////////////////////////////////////////////////////////////////////////////
-
-TEST_F (Pkcs7VerifyRevokeTest, RevokedByCertHash_V1_Sha256) {
-  ASSERT_TRUE (mSetUpDone);
-
-  UINT8               *Hashes[] = { mTbsHash256 };
-  EFI_SIGNATURE_LIST  *List     = BuildCertHashList (
-                                    &gEfiCertX509Sha256Guid, FALSE,
-                                    Hashes, SHA256_DIGEST_SIZE, 1
-                                    );
-  ASSERT_NE (List, (EFI_SIGNATURE_LIST *)NULL);
-  EFI_SIGNATURE_LIST  *Dbx[] = { List, NULL };
-
-  EFI_STATUS  Status = P7CheckRevocation (
-                         (UINT8 *)mP7SignedAttached,
-                         sizeof (mP7SignedAttached),
-                         (UINT8 *)mTestContent,
-                         sizeof (mTestContent),
-                         Dbx
-                         );
-
-  //
-  // EFI_SUCCESS from P7CheckRevocation means the signer is revoked.
-  //
-  EXPECT_EQ (Status, EFI_SUCCESS);
-
-  FreePool (List);
-}
-
-TEST_F (Pkcs7VerifyRevokeTest, RevokedByCertHash_V2_Sha256) {
-  ASSERT_TRUE (mSetUpDone);
-
-  UINT8               *Hashes[] = { mTbsHash256 };
-  EFI_SIGNATURE_LIST  *List     = BuildCertHashList (
-                                    &gEfiCertV2X509Sha256Guid, TRUE,
-                                    Hashes, SHA256_DIGEST_SIZE, 1
-                                    );
-  ASSERT_NE (List, (EFI_SIGNATURE_LIST *)NULL);
-  EFI_SIGNATURE_LIST  *Dbx[] = { List, NULL };
-
-  EFI_STATUS  Status = P7CheckRevocation (
-                         (UINT8 *)mP7SignedAttached,
-                         sizeof (mP7SignedAttached),
-                         (UINT8 *)mTestContent,
-                         sizeof (mTestContent),
-                         Dbx
-                         );
-
-  EXPECT_EQ (Status, EFI_SUCCESS);
-
-  FreePool (List);
-}
-
-TEST_F (Pkcs7VerifyRevokeTest, RevokedByCertHash_Sha384) {
-  ASSERT_TRUE (mSetUpDone);
-
-  UINT8               *Hashes[] = { mTbsHash384 };
-  EFI_SIGNATURE_LIST  *List     = BuildCertHashList (
-                                    &gEfiCertX509Sha384Guid, FALSE,
-                                    Hashes, SHA384_DIGEST_SIZE, 1
-                                    );
-  ASSERT_NE (List, (EFI_SIGNATURE_LIST *)NULL);
-  EFI_SIGNATURE_LIST  *Dbx[] = { List, NULL };
-
-  EFI_STATUS  Status = P7CheckRevocation (
-                         (UINT8 *)mP7SignedAttached,
-                         sizeof (mP7SignedAttached),
-                         (UINT8 *)mTestContent,
-                         sizeof (mTestContent),
-                         Dbx
-                         );
-
-  EXPECT_EQ (Status, EFI_SUCCESS);
-
-  FreePool (List);
-}
-
-TEST_F (Pkcs7VerifyRevokeTest, NotRevokedByUnrelatedCertHash) {
-  ASSERT_TRUE (mSetUpDone);
-
-  //
-  // dbx holds an unrelated cert hash, so the signer is not revoked.
-  // P7CheckRevocation must NOT return EFI_SUCCESS.
-  //
-  UINT8  UnrelatedHash[SHA256_DIGEST_SIZE];
-  SetMem (UnrelatedHash, sizeof (UnrelatedHash), 0x5A);
-  UINT8               *Hashes[] = { UnrelatedHash };
-  EFI_SIGNATURE_LIST  *List     = BuildCertHashList (
-                                    &gEfiCertX509Sha256Guid, FALSE,
-                                    Hashes, SHA256_DIGEST_SIZE, 1
-                                    );
-  ASSERT_NE (List, (EFI_SIGNATURE_LIST *)NULL);
-  EFI_SIGNATURE_LIST  *Dbx[] = { List, NULL };
-
-  EFI_STATUS  Status = P7CheckRevocation (
-                         (UINT8 *)mP7SignedAttached,
-                         sizeof (mP7SignedAttached),
-                         (UINT8 *)mTestContent,
-                         sizeof (mTestContent),
-                         Dbx
-                         );
-
-  EXPECT_NE (Status, EFI_SUCCESS);
-
-  FreePool (List);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// Certificate chain (root in db, chain certificate in dbx => image rejected)
+// Once a signature verifies up to a certificate present in db (the trust
+// anchor), dbx is evaluated ONLY against that anchor and the certificates below
+// it (toward the leaf signer, inclusive). A certificate above the anchor
+// (closer to the root) is ignored even if its hash is present in dbx.
 //
-// mP7SignedChain embeds a 2-cert chain: a leaf (signer) issued by the root CA
-// (mTestCert). A non-signer chain certificate (the root) is revoked by its TBS
-// hash via IsSignerCertChainRevokedByHash(), which walks the full chain
-// returned by Pkcs7GetCertificatesList(). Raw full-certificate dbx entries are
-// deprecated (TianoCore BZ #12527) and are ignored.
+// P7CheckTrust now takes RevokedDb and performs this anchor-relative check; it
+// returns EFI_SUCCESS only when the image is both allowed by db and not revoked
+// (relative to the anchor) by dbx.
 ///////////////////////////////////////////////////////////////////////////////
 
 //
-// Baseline: the chain-signed image is trusted when the leaf signer's cert hash
-// is in db (and no dbx). Confirms later rejections are caused by dbx, not by a
-// malformed vector.
+// Anchor = leaf signer (db lists the leaf hash). Its own hash in dbx revokes
+// the only trust anchor, so the image is rejected.
 //
-TEST_F (Pkcs7VerifyRevokeTest, Chain_LeafInDbAllowsSigner) {
+TEST_F (Pkcs7VerifyRevokeTest, AnchorLeaf_LeafInDbx_Rejected) {
   ASSERT_TRUE (mSetUpDone);
 
-  UINT8               *Hashes[] = { mLeafTbsHash256 };
-  EFI_SIGNATURE_LIST  *List     = BuildCertHashList (
-                                    &gEfiCertX509Sha256Guid, FALSE,
-                                    Hashes, SHA256_DIGEST_SIZE, 1
-                                    );
-  ASSERT_NE (List, (EFI_SIGNATURE_LIST *)NULL);
-  EFI_SIGNATURE_LIST  *Db[] = { List, NULL };
+  UINT8               *DbHashes[] = { mLeafTbsHash256 };
+  EFI_SIGNATURE_LIST  *DbList     = BuildCertHashList (
+                                      &gEfiCertX509Sha256Guid, FALSE,
+                                      DbHashes, SHA256_DIGEST_SIZE, 1
+                                      );
+  ASSERT_NE (DbList, (EFI_SIGNATURE_LIST *)NULL);
+  EFI_SIGNATURE_LIST  *Db[] = { DbList, NULL };
+
+  UINT8               *DbxHashes[] = { mLeafTbsHash256 };
+  EFI_SIGNATURE_LIST  *DbxList     = BuildCertHashList (
+                                       &gEfiCertX509Sha256Guid, FALSE,
+                                       DbxHashes, SHA256_DIGEST_SIZE, 1
+                                       );
+  ASSERT_NE (DbxList, (EFI_SIGNATURE_LIST *)NULL);
+  EFI_SIGNATURE_LIST  *Dbx[] = { DbxList, NULL };
 
   EFI_STATUS  Status = P7CheckTrust (
                          (UINT8 *)mP7SignedChain,
                          sizeof (mP7SignedChain),
                          (UINT8 *)mTestContent,
                          sizeof (mTestContent),
-                         Db
-                         );
-
-  EXPECT_EQ (Status, EFI_SUCCESS);
-
-  FreePool (List);
-}
-
-//
-// Leaf (signer) certificate hash in dbx revokes the signature.
-//
-TEST_F (Pkcs7VerifyRevokeTest, Chain_LeafCertHashRevokedByDbx) {
-  ASSERT_TRUE (mSetUpDone);
-
-  UINT8               *Hashes[] = { mLeafTbsHash256 };
-  EFI_SIGNATURE_LIST  *List     = BuildCertHashList (
-                                    &gEfiCertX509Sha256Guid, FALSE,
-                                    Hashes, SHA256_DIGEST_SIZE, 1
-                                    );
-  ASSERT_NE (List, (EFI_SIGNATURE_LIST *)NULL);
-  EFI_SIGNATURE_LIST  *Dbx[] = { List, NULL };
-
-  EFI_STATUS  Status = P7CheckRevocation (
-                         (UINT8 *)mP7SignedChain,
-                         sizeof (mP7SignedChain),
-                         (UINT8 *)mTestContent,
-                         sizeof (mTestContent),
+                         Db,
                          Dbx
                          );
 
-  //
-  // EFI_SUCCESS means "revoked".
-  //
-  EXPECT_EQ (Status, EFI_SUCCESS);
+  EXPECT_NE (Status, EFI_SUCCESS);
 
-  FreePool (List);
+  FreePool (DbList);
+  FreePool (DbxList);
 }
 
 //
-// The scenario of interest: the leaf signer would be allowed by db, but the
-// root certificate is revoked in dbx by its TBS hash. Because the
-// EFI_PKCS7_VERIFY_PROTOCOL runs the revocation check (P7CheckRevocation)
-// before the trust check (P7CheckTrust), the revocation wins and the image is
-// rejected.
+// 2-level chain (leaf -> root). Spec NOTE example, PASS direction:
+// db trusts the LEAF (anchor), dbx lists the ROOT. The root is ABOVE the trust
+// anchor and is therefore ignored: the image passes.
 //
-TEST_F (Pkcs7VerifyRevokeTest, Chain_RootInDbxOverridesDbAllow) {
+TEST_F (Pkcs7VerifyRevokeTest, AnchorLeaf_RootInDbxAboveAnchor_Allowed) {
   ASSERT_TRUE (mSetUpDone);
 
-  //
-  // db: allow by the leaf signer's certificate hash.
-  //
   UINT8               *DbHashes[] = { mLeafTbsHash256 };
   EFI_SIGNATURE_LIST  *DbList     = BuildCertHashList (
                                       &gEfiCertX509Sha256Guid, FALSE,
@@ -2216,7 +2075,7 @@ TEST_F (Pkcs7VerifyRevokeTest, Chain_RootInDbxOverridesDbAllow) {
   EFI_SIGNATURE_LIST  *Db[] = { DbList, NULL };
 
   //
-  // dbx: revoke the root certificate by its TBS hash (EFI_CERT_X509_SHA256).
+  // dbx: the root certificate hash (above the leaf anchor -> ignored).
   //
   UINT8               *DbxHashes[] = { mTbsHash256 };
   EFI_SIGNATURE_LIST  *DbxList     = BuildCertHashList (
@@ -2226,49 +2085,30 @@ TEST_F (Pkcs7VerifyRevokeTest, Chain_RootInDbxOverridesDbAllow) {
   ASSERT_NE (DbxList, (EFI_SIGNATURE_LIST *)NULL);
   EFI_SIGNATURE_LIST  *Dbx[] = { DbxList, NULL };
 
-  //
-  // Sanity: db alone would trust this signer.
-  //
-  EXPECT_EQ (
-    P7CheckTrust (
-      (UINT8 *)mP7SignedChain,
-      sizeof (mP7SignedChain),
-      (UINT8 *)mTestContent,
-      sizeof (mTestContent),
-      Db
-      ),
-    EFI_SUCCESS
-    );
+  EFI_STATUS  Status = P7CheckTrust (
+                         (UINT8 *)mP7SignedChain,
+                         sizeof (mP7SignedChain),
+                         (UINT8 *)mTestContent,
+                         sizeof (mTestContent),
+                         Db,
+                         Dbx
+                         );
 
-  //
-  // But the revocation check (run first by the protocol) reports revoked.
-  //
-  EXPECT_EQ (
-    P7CheckRevocation (
-      (UINT8 *)mP7SignedChain,
-      sizeof (mP7SignedChain),
-      (UINT8 *)mTestContent,
-      sizeof (mTestContent),
-      Dbx
-      ),
-    EFI_SUCCESS
-    );
+  EXPECT_EQ (Status, EFI_SUCCESS);
 
   FreePool (DbList);
   FreePool (DbxList);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// 3-level chain (root -> intermediate -> leaf): a non-signer chain certificate
-// (root or intermediate) revoked in dbx by EFI_CERT_X509_SHAxxx HASH must
-// reject the image. Per UEFI Spec 32.5.3.3 rule B, a dbx cert-hash entry
-// forbids the image if it reflects the TBS hash of ANY certificate in the
-// signing chain, not just the leaf signer. P7CheckRevocation walks the full
-// chain (via Pkcs7GetCertificatesList) to enforce this.
+// 3-level chain (leaf -> intermediate -> root): trust-anchor-relative dbx.
+// The signing chain index order is leaf(0) -> intermediate(1) -> root(2), so a
+// certificate is "below" the anchor when its index is <= the anchor's index.
 ///////////////////////////////////////////////////////////////////////////////
 
 //
-// Baseline: the 3-chain image is trusted when the leaf signer hash is in db.
+// Baseline: the 3-chain image is trusted when the leaf signer hash is in db and
+// dbx is absent.
 //
 TEST_F (Pkcs7VerifyRevokeTest, Chain3_LeafInDbAllowsSigner) {
   ASSERT_TRUE (mSetUpDone);
@@ -2286,7 +2126,8 @@ TEST_F (Pkcs7VerifyRevokeTest, Chain3_LeafInDbAllowsSigner) {
                          sizeof (mP7Signed3Chain),
                          (UINT8 *)mTestContent,
                          sizeof (mTestContent),
-                         Db
+                         Db,
+                         NULL
                          );
 
   EXPECT_EQ (Status, EFI_SUCCESS);
@@ -2295,9 +2136,10 @@ TEST_F (Pkcs7VerifyRevokeTest, Chain3_LeafInDbAllowsSigner) {
 }
 
 //
-// Intermediate certificate HASH in dbx revokes the chain-signed image.
+// Baseline: the 3-chain image is trusted when the INTERMEDIATE hash is in db
+// (the intermediate serves as the trust anchor) and dbx is absent.
 //
-TEST_F (Pkcs7VerifyRevokeTest, Chain3_IntermediateCertHashRevokedByDbx) {
+TEST_F (Pkcs7VerifyRevokeTest, Chain3_IntermediateInDbAllowsSigner) {
   ASSERT_TRUE (mSetUpDone);
 
   UINT8               *Hashes[] = { mInterTbsHash256 };
@@ -2306,28 +2148,27 @@ TEST_F (Pkcs7VerifyRevokeTest, Chain3_IntermediateCertHashRevokedByDbx) {
                                     Hashes, SHA256_DIGEST_SIZE, 1
                                     );
   ASSERT_NE (List, (EFI_SIGNATURE_LIST *)NULL);
-  EFI_SIGNATURE_LIST  *Dbx[] = { List, NULL };
+  EFI_SIGNATURE_LIST  *Db[] = { List, NULL };
 
-  EFI_STATUS  Status = P7CheckRevocation (
+  EFI_STATUS  Status = P7CheckTrust (
                          (UINT8 *)mP7Signed3Chain,
                          sizeof (mP7Signed3Chain),
                          (UINT8 *)mTestContent,
                          sizeof (mTestContent),
-                         Dbx
+                         Db,
+                         NULL
                          );
 
-  //
-  // EFI_SUCCESS means "revoked".
-  //
   EXPECT_EQ (Status, EFI_SUCCESS);
 
   FreePool (List);
 }
 
 //
-// Root certificate HASH in dbx revokes the chain-signed image.
+// Baseline: the 3-chain image is trusted when the ROOT hash is in db (the root
+// serves as the trust anchor) and dbx is absent.
 //
-TEST_F (Pkcs7VerifyRevokeTest, Chain3_RootCertHashRevokedByDbx) {
+TEST_F (Pkcs7VerifyRevokeTest, Chain3_RootInDbAllowsSigner) {
   ASSERT_TRUE (mSetUpDone);
 
   UINT8               *Hashes[] = { mTbsHash256 };
@@ -2336,14 +2177,15 @@ TEST_F (Pkcs7VerifyRevokeTest, Chain3_RootCertHashRevokedByDbx) {
                                     Hashes, SHA256_DIGEST_SIZE, 1
                                     );
   ASSERT_NE (List, (EFI_SIGNATURE_LIST *)NULL);
-  EFI_SIGNATURE_LIST  *Dbx[] = { List, NULL };
+  EFI_SIGNATURE_LIST  *Db[] = { List, NULL };
 
-  EFI_STATUS  Status = P7CheckRevocation (
+  EFI_STATUS  Status = P7CheckTrust (
                          (UINT8 *)mP7Signed3Chain,
                          sizeof (mP7Signed3Chain),
                          (UINT8 *)mTestContent,
                          sizeof (mTestContent),
-                         Dbx
+                         Db,
+                         NULL
                          );
 
   EXPECT_EQ (Status, EFI_SUCCESS);
@@ -2352,30 +2194,192 @@ TEST_F (Pkcs7VerifyRevokeTest, Chain3_RootCertHashRevokedByDbx) {
 }
 
 //
-// V2 cert-hash variant: intermediate hash in dbx as EFI_CERT_V2_X509_SHA256.
+// Spec NOTE example, PASS direction (3-level): db trusts the INTERMEDIATE
+// (anchor), dbx lists the ROOT. The root is ABOVE the trust anchor and is
+// therefore ignored -> the image passes validation.
 //
-TEST_F (Pkcs7VerifyRevokeTest, Chain3_IntermediateCertHashRevokedByDbx_V2) {
+TEST_F (Pkcs7VerifyRevokeTest, Chain3_IntermediateInDb_RootInDbx_Allowed) {
   ASSERT_TRUE (mSetUpDone);
 
-  UINT8               *Hashes[] = { mInterTbsHash256 };
-  EFI_SIGNATURE_LIST  *List     = BuildCertHashList (
-                                    &gEfiCertV2X509Sha256Guid, TRUE,
-                                    Hashes, SHA256_DIGEST_SIZE, 1
-                                    );
-  ASSERT_NE (List, (EFI_SIGNATURE_LIST *)NULL);
-  EFI_SIGNATURE_LIST  *Dbx[] = { List, NULL };
+  UINT8               *DbHashes[] = { mInterTbsHash256 };
+  EFI_SIGNATURE_LIST  *DbList     = BuildCertHashList (
+                                      &gEfiCertX509Sha256Guid, FALSE,
+                                      DbHashes, SHA256_DIGEST_SIZE, 1
+                                      );
+  ASSERT_NE (DbList, (EFI_SIGNATURE_LIST *)NULL);
+  EFI_SIGNATURE_LIST  *Db[] = { DbList, NULL };
 
-  EFI_STATUS  Status = P7CheckRevocation (
+  UINT8               *DbxHashes[] = { mTbsHash256 };
+  EFI_SIGNATURE_LIST  *DbxList     = BuildCertHashList (
+                                       &gEfiCertX509Sha256Guid, FALSE,
+                                       DbxHashes, SHA256_DIGEST_SIZE, 1
+                                       );
+  ASSERT_NE (DbxList, (EFI_SIGNATURE_LIST *)NULL);
+  EFI_SIGNATURE_LIST  *Dbx[] = { DbxList, NULL };
+
+  EFI_STATUS  Status = P7CheckTrust (
                          (UINT8 *)mP7Signed3Chain,
                          sizeof (mP7Signed3Chain),
                          (UINT8 *)mTestContent,
                          sizeof (mTestContent),
+                         Db,
                          Dbx
                          );
 
   EXPECT_EQ (Status, EFI_SUCCESS);
 
-  FreePool (List);
+  FreePool (DbList);
+  FreePool (DbxList);
+}
+
+//
+// Spec NOTE example, FAIL direction (3-level): db trusts the ROOT (anchor),
+// dbx lists the INTERMEDIATE. The intermediate is BELOW the trust anchor and is
+// therefore evaluated -> the image fails validation.
+//
+TEST_F (Pkcs7VerifyRevokeTest, Chain3_RootInDb_IntermediateInDbx_Rejected) {
+  ASSERT_TRUE (mSetUpDone);
+
+  UINT8               *DbHashes[] = { mTbsHash256 };
+  EFI_SIGNATURE_LIST  *DbList     = BuildCertHashList (
+                                      &gEfiCertX509Sha256Guid, FALSE,
+                                      DbHashes, SHA256_DIGEST_SIZE, 1
+                                      );
+  ASSERT_NE (DbList, (EFI_SIGNATURE_LIST *)NULL);
+  EFI_SIGNATURE_LIST  *Db[] = { DbList, NULL };
+
+  UINT8               *DbxHashes[] = { mInterTbsHash256 };
+  EFI_SIGNATURE_LIST  *DbxList     = BuildCertHashList (
+                                       &gEfiCertX509Sha256Guid, FALSE,
+                                       DbxHashes, SHA256_DIGEST_SIZE, 1
+                                       );
+  ASSERT_NE (DbxList, (EFI_SIGNATURE_LIST *)NULL);
+  EFI_SIGNATURE_LIST  *Dbx[] = { DbxList, NULL };
+
+  EFI_STATUS  Status = P7CheckTrust (
+                         (UINT8 *)mP7Signed3Chain,
+                         sizeof (mP7Signed3Chain),
+                         (UINT8 *)mTestContent,
+                         sizeof (mTestContent),
+                         Db,
+                         Dbx
+                         );
+
+  EXPECT_NE (Status, EFI_SUCCESS);
+
+  FreePool (DbList);
+  FreePool (DbxList);
+}
+
+//
+// Anchor = root; the anchor's own hash (root) in dbx revokes it -> rejected.
+//
+TEST_F (Pkcs7VerifyRevokeTest, Chain3_RootInDb_RootInDbx_Rejected) {
+  ASSERT_TRUE (mSetUpDone);
+
+  UINT8               *DbHashes[] = { mTbsHash256 };
+  EFI_SIGNATURE_LIST  *DbList     = BuildCertHashList (
+                                      &gEfiCertX509Sha256Guid, FALSE,
+                                      DbHashes, SHA256_DIGEST_SIZE, 1
+                                      );
+  ASSERT_NE (DbList, (EFI_SIGNATURE_LIST *)NULL);
+  EFI_SIGNATURE_LIST  *Db[] = { DbList, NULL };
+
+  UINT8               *DbxHashes[] = { mTbsHash256 };
+  EFI_SIGNATURE_LIST  *DbxList     = BuildCertHashList (
+                                       &gEfiCertX509Sha256Guid, FALSE,
+                                       DbxHashes, SHA256_DIGEST_SIZE, 1
+                                       );
+  ASSERT_NE (DbxList, (EFI_SIGNATURE_LIST *)NULL);
+  EFI_SIGNATURE_LIST  *Dbx[] = { DbxList, NULL };
+
+  EFI_STATUS  Status = P7CheckTrust (
+                         (UINT8 *)mP7Signed3Chain,
+                         sizeof (mP7Signed3Chain),
+                         (UINT8 *)mTestContent,
+                         sizeof (mTestContent),
+                         Db,
+                         Dbx
+                         );
+
+  EXPECT_NE (Status, EFI_SUCCESS);
+
+  FreePool (DbList);
+  FreePool (DbxList);
+}
+
+//
+// Anchor = root; the LEAF (below the anchor) in dbx revokes the image.
+//
+TEST_F (Pkcs7VerifyRevokeTest, Chain3_RootInDb_LeafInDbx_Rejected) {
+  ASSERT_TRUE (mSetUpDone);
+
+  UINT8               *DbHashes[] = { mTbsHash256 };
+  EFI_SIGNATURE_LIST  *DbList     = BuildCertHashList (
+                                      &gEfiCertX509Sha256Guid, FALSE,
+                                      DbHashes, SHA256_DIGEST_SIZE, 1
+                                      );
+  ASSERT_NE (DbList, (EFI_SIGNATURE_LIST *)NULL);
+  EFI_SIGNATURE_LIST  *Db[] = { DbList, NULL };
+
+  UINT8               *DbxHashes[] = { mLeaf3TbsHash256 };
+  EFI_SIGNATURE_LIST  *DbxList     = BuildCertHashList (
+                                       &gEfiCertX509Sha256Guid, FALSE,
+                                       DbxHashes, SHA256_DIGEST_SIZE, 1
+                                       );
+  ASSERT_NE (DbxList, (EFI_SIGNATURE_LIST *)NULL);
+  EFI_SIGNATURE_LIST  *Dbx[] = { DbxList, NULL };
+
+  EFI_STATUS  Status = P7CheckTrust (
+                         (UINT8 *)mP7Signed3Chain,
+                         sizeof (mP7Signed3Chain),
+                         (UINT8 *)mTestContent,
+                         sizeof (mTestContent),
+                         Db,
+                         Dbx
+                         );
+
+  EXPECT_NE (Status, EFI_SUCCESS);
+
+  FreePool (DbList);
+  FreePool (DbxList);
+}
+
+//
+// Anchor = intermediate; the LEAF (below the anchor) in dbx revokes the image.
+//
+TEST_F (Pkcs7VerifyRevokeTest, Chain3_IntermediateInDb_LeafInDbx_Rejected) {
+  ASSERT_TRUE (mSetUpDone);
+
+  UINT8               *DbHashes[] = { mInterTbsHash256 };
+  EFI_SIGNATURE_LIST  *DbList     = BuildCertHashList (
+                                      &gEfiCertX509Sha256Guid, FALSE,
+                                      DbHashes, SHA256_DIGEST_SIZE, 1
+                                      );
+  ASSERT_NE (DbList, (EFI_SIGNATURE_LIST *)NULL);
+  EFI_SIGNATURE_LIST  *Db[] = { DbList, NULL };
+
+  UINT8               *DbxHashes[] = { mLeaf3TbsHash256 };
+  EFI_SIGNATURE_LIST  *DbxList     = BuildCertHashList (
+                                       &gEfiCertX509Sha256Guid, FALSE,
+                                       DbxHashes, SHA256_DIGEST_SIZE, 1
+                                       );
+  ASSERT_NE (DbxList, (EFI_SIGNATURE_LIST *)NULL);
+  EFI_SIGNATURE_LIST  *Dbx[] = { DbxList, NULL };
+
+  EFI_STATUS  Status = P7CheckTrust (
+                         (UINT8 *)mP7Signed3Chain,
+                         sizeof (mP7Signed3Chain),
+                         (UINT8 *)mTestContent,
+                         sizeof (mTestContent),
+                         Db,
+                         Dbx
+                         );
+
+  EXPECT_NE (Status, EFI_SUCCESS);
+
+  FreePool (DbList);
+  FreePool (DbxList);
 }
 
 //
@@ -2384,27 +2388,37 @@ TEST_F (Pkcs7VerifyRevokeTest, Chain3_IntermediateCertHashRevokedByDbx_V2) {
 TEST_F (Pkcs7VerifyRevokeTest, Chain3_UnrelatedCertHashNotRevoked) {
   ASSERT_TRUE (mSetUpDone);
 
+  UINT8               *DbHashes[] = { mLeaf3TbsHash256 };
+  EFI_SIGNATURE_LIST  *DbList     = BuildCertHashList (
+                                      &gEfiCertX509Sha256Guid, FALSE,
+                                      DbHashes, SHA256_DIGEST_SIZE, 1
+                                      );
+  ASSERT_NE (DbList, (EFI_SIGNATURE_LIST *)NULL);
+  EFI_SIGNATURE_LIST  *Db[] = { DbList, NULL };
+
   UINT8  UnrelatedHash[SHA256_DIGEST_SIZE];
   SetMem (UnrelatedHash, sizeof (UnrelatedHash), 0x5A);
-  UINT8               *Hashes[] = { UnrelatedHash };
-  EFI_SIGNATURE_LIST  *List     = BuildCertHashList (
-                                    &gEfiCertX509Sha256Guid, FALSE,
-                                    Hashes, SHA256_DIGEST_SIZE, 1
-                                    );
-  ASSERT_NE (List, (EFI_SIGNATURE_LIST *)NULL);
-  EFI_SIGNATURE_LIST  *Dbx[] = { List, NULL };
+  UINT8               *DbxHashes[] = { UnrelatedHash };
+  EFI_SIGNATURE_LIST  *DbxList     = BuildCertHashList (
+                                       &gEfiCertX509Sha256Guid, FALSE,
+                                       DbxHashes, SHA256_DIGEST_SIZE, 1
+                                       );
+  ASSERT_NE (DbxList, (EFI_SIGNATURE_LIST *)NULL);
+  EFI_SIGNATURE_LIST  *Dbx[] = { DbxList, NULL };
 
-  EFI_STATUS  Status = P7CheckRevocation (
+  EFI_STATUS  Status = P7CheckTrust (
                          (UINT8 *)mP7Signed3Chain,
                          sizeof (mP7Signed3Chain),
                          (UINT8 *)mTestContent,
                          sizeof (mTestContent),
+                         Db,
                          Dbx
                          );
 
-  EXPECT_NE (Status, EFI_SUCCESS);
+  EXPECT_EQ (Status, EFI_SUCCESS);
 
-  FreePool (List);
+  FreePool (DbList);
+  FreePool (DbxList);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2469,7 +2483,8 @@ TEST_F (MultiSignerTest, BothSignersInDb_AcceptsViaVerifiableSigner) {
                          sizeof (mMultiSignerPlainDualSigned),
                          (UINT8 *)mMultiSignerContent,
                          MULTI_SIGNER_CONTENT_SIZE,
-                         Db
+                         Db,
+                         NULL
                          );
 
   EXPECT_EQ (Status, EFI_SUCCESS);
@@ -2496,7 +2511,8 @@ TEST_F (MultiSignerTest, VerifiableSignerOnlyInDb_Accepts) {
                          sizeof (mMultiSignerPlainDualSigned),
                          (UINT8 *)mMultiSignerContent,
                          MULTI_SIGNER_CONTENT_SIZE,
-                         Db
+                         Db,
+                         NULL
                          );
 
   EXPECT_EQ (Status, EFI_SUCCESS);
@@ -5119,7 +5135,8 @@ TEST (MlDsaMultiSignerTest, ForgedCoSignerSignature_Rejected) {
                          sizeof (mMlDsaMultiSignerForged),
                          (UINT8 *)mMlDsaMultiSignerPayload,
                          MLDSA_MULTI_SIGNER_PAYLOAD_SIZE,
-                         Db
+                         Db,
+                         NULL
                          );
 
   EXPECT_NE (Status, EFI_SUCCESS);
@@ -5157,7 +5174,8 @@ TEST (MlDsaMultiSignerTest, ValidCoSignerSignature_Accepted) {
                          sizeof (mMlDsaMultiSignerValid),
                          (UINT8 *)mMlDsaMultiSignerPayload,
                          MLDSA_MULTI_SIGNER_PAYLOAD_SIZE,
-                         Db
+                         Db,
+                         NULL
                          );
 
   EXPECT_EQ (Status, EFI_SUCCESS);

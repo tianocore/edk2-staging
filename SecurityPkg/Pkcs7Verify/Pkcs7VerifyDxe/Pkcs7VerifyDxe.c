@@ -461,30 +461,43 @@ IsCertHashRevoked (
 }
 
 /**
-  Check whether the To-Be-Signed hash of any certificate in the PKCS#7 signing
-  chain is found in the revocation database (by EFI_CERT_X509_SHAxxx entry).
+  Check whether the trust anchor or any certificate below it in the PKCS#7
+  signing chain is revoked by hash in the revocation database.
 
-  Per UEFI Spec 32.5.3.3, a dbx EFI_CERT_X509_SHAxxx entry forbids the image if
-  its hash reflects the TBS hash of ANY certificate in the signing chain (the
-  leaf signer and every issuer up to the root), not just the leaf. The full
-  chain is retrieved with Pkcs7GetCertificatesList(). If the chain cannot be
-  retrieved, this function fails safe and reports the signedData as revoked.
+  Per UEFI Spec 32.5.3.3, once a trust anchor is found in db, dbx is evaluated
+  only against that anchor and the certificates below it in the signing chain
+  (that is, between the anchor and the leaf signer, inclusive). Any certificate
+  above the anchor (closer to the root) is ignored even if it is present in dbx.
+
+  The signing chain returned by Pkcs7GetCertificatesList() is ordered root-first
+  (index 0 is closest to the root) and descends toward the leaf signer at the
+  highest index, so the anchor and everything below it is the inclusive index
+  range [AnchorIndex, CertNumber - 1], where AnchorIndex is the position of
+  AnchorCert in the chain. When AnchorCert is not one of the embedded
+  certificates (for example a root supplied by db that is above the whole
+  embedded chain), every embedded certificate is below the anchor and is
+  evaluated.
 
   @param[in]  SignedData      Pointer to the PKCS#7 signedData.
   @param[in]  SignedDataSize  Size of SignedData in bytes.
   @param[in]  RevokedDb       Pointer to a NULL-terminated list of pointers to
                               EFI_SIGNATURE_LIST structures.
+  @param[in]  AnchorCert      Pointer to the DER trust-anchor certificate found
+                              in db.
+  @param[in]  AnchorCertSize  Size of AnchorCert in bytes.
 
-  @retval TRUE   A certificate in the signing chain is revoked by hash, or the
+  @retval TRUE   The anchor or a certificate below it is revoked by hash, or the
                  signing chain could not be retrieved (fail-safe).
-  @retval FALSE  No certificate in the signing chain is revoked by hash.
+  @retval FALSE  Neither the anchor nor any certificate below it is revoked.
 
 **/
 BOOLEAN
 IsSignerCertChainRevokedByHash (
   IN UINT8               *SignedData,
   IN UINTN               SignedDataSize,
-  IN EFI_SIGNATURE_LIST  **RevokedDb
+  IN EFI_SIGNATURE_LIST  **RevokedDb,
+  IN UINT8               *AnchorCert,
+  IN UINTN               AnchorCertSize
   )
 {
   BOOLEAN  Revoked;
@@ -497,12 +510,20 @@ IsSignerCertChainRevokedByHash (
   UINT8    *Cert;
   UINTN    CertSize;
   UINTN    Index;
+  BOOLEAN  AnchorReached;
 
   Revoked       = FALSE;
   ChainCerts    = NULL;
   ChainLength   = 0;
   UnchainCerts  = NULL;
   UnchainLength = 0;
+
+  //
+  // No revocation database: nothing can be revoked.
+  //
+  if (RevokedDb == NULL) {
+    return FALSE;
+  }
 
   //
   // Retrieve the full signing chain (leaf + intermediates + root). If it cannot
@@ -527,12 +548,39 @@ IsSignerCertChainRevokedByHash (
   //   UINT8  CertNumber;
   //   UINT32 Cert1Length; UINT8 Cert1[]; ... UINT32 CertnLength; UINT8 Certn[];
   //
-  CertNumber = (UINT8)(*ChainCerts);
-  CertPtr    = ChainCerts + 1;
+  // The chain is ordered root-first (index 0 is closest to the root) and
+  // descends toward the leaf signer at the highest index. Per UEFI Spec
+  // 32.5.3.3, evaluate dbx only against the trust anchor and the certificates
+  // below it (toward the leaf), so start checking once the anchor is reached and
+  // skip the certificates above it (lower indices, closer to the root). If the
+  // anchor is not one of the embedded certificates (for example a root supplied
+  // by db that is above the whole embedded chain), every embedded certificate is
+  // below the anchor and is evaluated.
+  //
+  AnchorReached = (AnchorCert == NULL) ? TRUE : FALSE;
+  CertNumber    = (UINT8)(*ChainCerts);
+  CertPtr       = ChainCerts + 1;
   for (Index = 0; Index < CertNumber; Index++) {
     CertSize = (UINTN)ReadUnaligned32 ((UINT32 *)CertPtr);
     Cert     = (UINT8 *)CertPtr + sizeof (UINT32);
     CertPtr  = CertPtr + sizeof (UINT32) + CertSize;
+
+    //
+    // The trust anchor is matched by exact DER bytes.
+    //
+    if (!AnchorReached && (CertSize == AnchorCertSize) &&
+        (CompareMem (Cert, AnchorCert, CertSize) == 0))
+    {
+      AnchorReached = TRUE;
+    }
+
+    //
+    // Certificates above the anchor (encountered before it in this root-first
+    // chain) are ignored.
+    //
+    if (!AnchorReached) {
+      continue;
+    }
 
     if (IsCertHashRevoked (Cert, CertSize, RevokedDb)) {
       Revoked = TRUE;
@@ -586,29 +634,16 @@ P7CheckRevocationByHash (
 
   //
   // The signedData is revoked if the hash of content existed in RevokedDb
+  // (UEFI Spec 32.5.3.3 rule A, content-hash form).
+  //
+  // Certificate revocation (a dbx EFI_CERT_X509_SHAxxx entry whose hash matches
+  // a certificate in the signing chain) is NOT a standalone whole-chain check:
+  // per the spec, dbx is evaluated relative to the db trust anchor (the anchor
+  // and certificates below it toward the leaf are checked; certificates above
+  // are ignored). That anchor-relative evaluation is performed in the trust
+  // step (P7CheckTrustByHash), which receives RevokedDb.
   //
   if (IsContentHashRevokedByHash (InHash, InHashSize, RevokedDb)) {
-    Status = EFI_SUCCESS;
-    goto _Exit;
-  }
-
-  //
-  // Raw X.509 certificate (EFI_CERT_X509_GUID / EFI_CERT_V2_X509_GUID) entries
-  // are deprecated in the forbidden database (dbx) - see TianoCore BZ #12527.
-  // Supporting full certificates in dbx is a burden (e.g. unsupported
-  // algorithms within a multi-cert entry) and the certificates themselves can
-  // be very large (e.g. PQC). Revocation now relies solely on the To-Be-Signed
-  // certificate hash. Any raw X.509 entry in dbx is ignored.
-  //
-
-  //
-  // Check the X.509 Certificate Hash in the revoked database against every
-  // certificate in the signing chain. Per UEFI Spec 32.5.3.3, a dbx
-  // EFI_CERT_X509_SHAxxx entry forbids the image if its hash reflects the
-  // To-Be-Signed hash of ANY certificate in the signing chain - not only the
-  // leaf signer. IsSignerCertChainRevokedByHash() walks the full chain.
-  //
-  if (IsSignerCertChainRevokedByHash (SignedData, SignedDataSize, RevokedDb)) {
     Status = EFI_SUCCESS;
     goto _Exit;
   }
@@ -659,29 +694,16 @@ P7CheckRevocation (
 
   //
   // The signedData is revoked if the hash of content existed in RevokedDb
+  // (UEFI Spec 32.5.3.3 rule A, content-hash form).
+  //
+  // Certificate revocation (a dbx EFI_CERT_X509_SHAxxx entry whose hash matches
+  // a certificate in the signing chain) is NOT a standalone whole-chain check:
+  // per the spec, dbx is evaluated relative to the db trust anchor (the anchor
+  // and certificates below it toward the leaf are checked; certificates above
+  // are ignored). That anchor-relative evaluation is performed in the trust
+  // step (P7CheckTrust), which receives RevokedDb.
   //
   if (IsContentHashRevoked (InData, InDataSize, RevokedDb)) {
-    Status = EFI_SUCCESS;
-    goto _Exit;
-  }
-
-  //
-  // Raw X.509 certificate (EFI_CERT_X509_GUID / EFI_CERT_V2_X509_GUID) entries
-  // are deprecated in the forbidden database (dbx) - see TianoCore BZ #12527.
-  // Supporting full certificates in dbx is a burden (e.g. unsupported
-  // algorithms within a multi-cert entry) and the certificates themselves can
-  // be very large (e.g. PQC). Revocation now relies solely on the To-Be-Signed
-  // certificate hash. Any raw X.509 entry in dbx is ignored.
-  //
-
-  //
-  // Check the X.509 Certificate Hash in the revoked database against every
-  // certificate in the signing chain. Per UEFI Spec 32.5.3.3, a dbx
-  // EFI_CERT_X509_SHAxxx entry forbids the image if its hash reflects the
-  // To-Be-Signed hash of ANY certificate in the signing chain - not only the
-  // leaf signer. IsSignerCertChainRevokedByHash() walks the full chain.
-  //
-  if (IsSignerCertChainRevokedByHash (SignedData, SignedDataSize, RevokedDb)) {
     Status = EFI_SUCCESS;
     goto _Exit;
   }
@@ -726,7 +748,8 @@ P7CheckTrustByHash (
   IN UINTN               SignedDataSize,
   IN UINT8               *InHash,
   IN UINTN               InHashSize,
-  IN EFI_SIGNATURE_LIST  **AllowedDb
+  IN EFI_SIGNATURE_LIST  **AllowedDb,
+  IN EFI_SIGNATURE_LIST  **RevokedDb      OPTIONAL
   )
 {
   EFI_STATUS          Status;
@@ -788,8 +811,16 @@ P7CheckTrustByHash (
       //
       if (AuthenticodeVerify (SignedData, SignedDataSize, TrustCert, TrustCertSize, InHash, InHashSize)) {
         //
-        // The SignedData was verified successfully by one entry in Trusted Database
+        // The SignedData verified up to this db certificate (the trust anchor).
+        // Per UEFI Spec 32.5.3.3, the image is trusted only if neither the
+        // trust anchor nor any certificate below it (toward the leaf) is revoked
+        // in dbx; certificates above the anchor are ignored.
         //
+        if (IsSignerCertChainRevokedByHash (SignedData, SignedDataSize, RevokedDb, TrustCert, TrustCertSize)) {
+          Status = EFI_SECURITY_VIOLATION;
+          goto _Exit;
+        }
+
         Status = EFI_SUCCESS;
         goto _Exit;
       }
@@ -803,15 +834,27 @@ P7CheckTrustByHash (
       //
       // Certificate-hash entry in AllowedDb (UEFI Spec 32.5.3.3 step B): a db
       // entry with EFI_CERT_X509_SHAxxx whose hash reflects the To-Be-Signed
-      // hash of any certificate in the signing chain allows that signer.
+      // hash of ANY certificate in the signing chain (leaf, intermediate, or
+      // root) makes that certificate a candidate trust anchor.
       //
-      // Extract the signer's certificate chain (once) and check whether any of
-      // its certificates' TBS hashes is present in this list. If so, confirm
-      // that the PKCS#7 signature actually verifies against that certificate
-      // before trusting it.
+      // Extract the candidate-anchor certificate set (once). Prefer the full
+      // signing chain from Pkcs7GetCertificatesList() so an intermediate or root
+      // listed in db can serve as the trust anchor. That function supports only
+      // a single signer; for a multi-signer SignedData it fails, so fall back to
+      // Pkcs7GetSigners(), which returns every signer's certificate. For each
+      // candidate certificate whose TBS hash is in this list, confirm that the
+      // PKCS#7 signature actually verifies up to that certificate before
+      // trusting it.
       //
       if (CertBuffer == NULL) {
-        Pkcs7GetSigners (SignedData, SignedDataSize, &CertBuffer, &BufferLength, &TrustedCert, &TrustedCertLength);
+        if (!Pkcs7GetCertificatesList (SignedData, SignedDataSize, &CertBuffer, &BufferLength, &TrustedCert, &TrustedCertLength) ||
+            (BufferLength == 0) || (CertBuffer == NULL) || (*CertBuffer == 0))
+        {
+          CertBuffer  = NULL;
+          TrustedCert = NULL;
+          Pkcs7GetSigners (SignedData, SignedDataSize, &CertBuffer, &BufferLength, &TrustedCert, &TrustedCertLength);
+        }
+
         if ((BufferLength == 0) || (CertBuffer == NULL) || (*CertBuffer == 0)) {
           continue;
         }
@@ -833,6 +876,17 @@ P7CheckTrustByHash (
         // this certificate of the signing chain.
         //
         if (AuthenticodeVerify (SignedData, SignedDataSize, Cert, CertSize, InHash, InHashSize)) {
+          //
+          // This db-matched certificate is the trust anchor. Per UEFI Spec
+          // 32.5.3.3, the image is trusted only if neither the anchor nor any
+          // certificate below it (toward the leaf) is revoked in dbx;
+          // certificates above the anchor are ignored.
+          //
+          if (IsSignerCertChainRevokedByHash (SignedData, SignedDataSize, RevokedDb, Cert, CertSize)) {
+            Status = EFI_SECURITY_VIOLATION;
+            goto _Exit;
+          }
+
           Status = EFI_SUCCESS;
           goto _Exit;
         }
@@ -884,7 +938,8 @@ P7CheckTrust (
   IN UINTN               SignedDataSize,
   IN UINT8               *InData,
   IN UINTN               InDataSize,
-  IN EFI_SIGNATURE_LIST  **AllowedDb
+  IN EFI_SIGNATURE_LIST  **AllowedDb,
+  IN EFI_SIGNATURE_LIST  **RevokedDb      OPTIONAL
   )
 {
   EFI_STATUS          Status;
@@ -946,8 +1001,16 @@ P7CheckTrust (
       //
       if (Pkcs7Verify (SignedData, SignedDataSize, TrustCert, TrustCertSize, InData, InDataSize)) {
         //
-        // The SignedData was verified successfully by one entry in Trusted Database
+        // The SignedData verified up to this db certificate (the trust anchor).
+        // Per UEFI Spec 32.5.3.3, the image is trusted only if neither the
+        // trust anchor nor any certificate below it (toward the leaf) is revoked
+        // in dbx; certificates above the anchor are ignored.
         //
+        if (IsSignerCertChainRevokedByHash (SignedData, SignedDataSize, RevokedDb, TrustCert, TrustCertSize)) {
+          Status = EFI_SECURITY_VIOLATION;
+          goto _Exit;
+        }
+
         Status = EFI_SUCCESS;
         goto _Exit;
       }
@@ -961,15 +1024,27 @@ P7CheckTrust (
       //
       // Certificate-hash entry in AllowedDb (UEFI Spec 32.5.3.3 step B): a db
       // entry with EFI_CERT_X509_SHAxxx whose hash reflects the To-Be-Signed
-      // hash of any certificate in the signing chain allows that signer.
+      // hash of ANY certificate in the signing chain (leaf, intermediate, or
+      // root) makes that certificate a candidate trust anchor.
       //
-      // Extract the signer's certificate chain (once) and check whether any of
-      // its certificates' TBS hashes is present in this list. If so, confirm
-      // that the PKCS#7 signature actually verifies against that certificate
-      // before trusting it.
+      // Extract the candidate-anchor certificate set (once). Prefer the full
+      // signing chain from Pkcs7GetCertificatesList() so an intermediate or root
+      // listed in db can serve as the trust anchor. That function supports only
+      // a single signer; for a multi-signer SignedData it fails, so fall back to
+      // Pkcs7GetSigners(), which returns every signer's certificate. For each
+      // candidate certificate whose TBS hash is in this list, confirm that the
+      // PKCS#7 signature actually verifies up to that certificate before
+      // trusting it.
       //
       if (CertBuffer == NULL) {
-        Pkcs7GetSigners (SignedData, SignedDataSize, &CertBuffer, &BufferLength, &TrustedCert, &TrustedCertLength);
+        if (!Pkcs7GetCertificatesList (SignedData, SignedDataSize, &CertBuffer, &BufferLength, &TrustedCert, &TrustedCertLength) ||
+            (BufferLength == 0) || (CertBuffer == NULL) || (*CertBuffer == 0))
+        {
+          CertBuffer  = NULL;
+          TrustedCert = NULL;
+          Pkcs7GetSigners (SignedData, SignedDataSize, &CertBuffer, &BufferLength, &TrustedCert, &TrustedCertLength);
+        }
+
         if ((BufferLength == 0) || (CertBuffer == NULL) || (*CertBuffer == 0)) {
           continue;
         }
@@ -991,6 +1066,17 @@ P7CheckTrust (
         // this certificate of the signing chain.
         //
         if (Pkcs7Verify (SignedData, SignedDataSize, Cert, CertSize, InData, InDataSize)) {
+          //
+          // This db-matched certificate is the trust anchor. Per UEFI Spec
+          // 32.5.3.3, the image is trusted only if neither the anchor nor any
+          // certificate below it (toward the leaf) is revoked in dbx;
+          // certificates above the anchor are ignored.
+          //
+          if (IsSignerCertChainRevokedByHash (SignedData, SignedDataSize, RevokedDb, Cert, CertSize)) {
+            Status = EFI_SECURITY_VIOLATION;
+            goto _Exit;
+          }
+
           Status = EFI_SUCCESS;
           goto _Exit;
         }
@@ -1236,7 +1322,8 @@ VerifyBuffer (
              SignedDataSize,
              DataPtr,
              DataSize,
-             AllowedDb
+             AllowedDb,
+             RevokedDb
              );
   if (EFI_ERROR (Status)) {
     //
@@ -1380,7 +1467,8 @@ VerifySignature (
              SignatureSize,
              InHash,
              InHashSize,
-             AllowedDb
+             AllowedDb,
+             RevokedDb
              );
 
   return Status;
