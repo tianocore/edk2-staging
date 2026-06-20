@@ -1251,7 +1251,7 @@ IsCertAllowedByDbx (
 /**
   Find the index of a certificate within a signing-chain certificate buffer.
 
-  The CertBuffer is the signing chain returned by Pkcs7GetSigners(), formatted
+  The CertBuffer is the signing chain returned by Pkcs7GetCertificatesList(), formatted
   as:
         UINT8  CertNumber;
         UINT32 Cert1Length; UINT8 Cert1[]; ... UINT32 CertnLength; UINT8 Certn[];
@@ -1306,12 +1306,12 @@ FindCertIndexInChain (
   and the leaf signer, inclusive) are evaluated against dbx. Any certificate
   above the anchor (closer to the root) is ignored even if it is present in dbx.
 
-  The signing chain returned by Pkcs7GetSigners() is ordered root-first (index 0
+  The signing chain returned by Pkcs7GetCertificatesList() is ordered root-first (index 0
   is the top of the chain, closest to the root) and descends toward the leaf
   signer at the highest index, so "the anchor and everything below it (toward
   the leaf)" is the inclusive index range [AnchorIndex, CertNumber - 1].
 
-  @param[in]  CertBuffer    Signing-chain certificate buffer from Pkcs7GetSigners().
+  @param[in]  CertBuffer    Signing-chain certificate buffer from Pkcs7GetCertificatesList().
   @param[in]  AnchorIndex   Index of the trust anchor in CertBuffer. A negative
                             value means the trust anchor is not one of the
                             embedded certificates (for example a root supplied by
@@ -1477,12 +1477,12 @@ IsAllowedByDb (
   }
 
   //
-  // Retrieve the candidate-anchor certificate set from AuthData. Prefer the full
-  // signing chain from Pkcs7GetCertificatesList() so that an intermediate or
-  // root certificate listed in db (by EFI_CERT_X509_SHAxxx hash) can serve as
-  // the trust anchor, per UEFI Spec 32.5.3.3. That function supports only a
-  // single signer; for a multi-signer SignedData it fails, so fall back to
-  // Pkcs7GetSigners(), which returns every signer's certificate.
+  // Retrieve the signer's full certificate chain from AuthData so that an
+  // intermediate or root certificate listed in db (by EFI_CERT_X509_SHAxxx
+  // hash) can serve as the trust anchor, per UEFI Spec 32.5.3.3. A UEFI image
+  // signature is single-signer; Pkcs7GetCertificatesList() returns that one
+  // signer's chain and yields no chain for a (non-conformant) multi-signer
+  // SignedData, which is therefore not allowed by db.
   // The output CertStack format will be:
   //       UINT8  CertNumber;
   //       UINT32 Cert1Length;
@@ -1496,12 +1496,6 @@ IsAllowedByDb (
   if (!Pkcs7GetCertificatesList (AuthData, AuthDataSize, &CertBuffer, &BufferLength, &TrustedCert, &TrustedCertLength) ||
       (BufferLength == 0) || (CertBuffer == NULL) || ((*CertBuffer) == 0))
   {
-    CertBuffer  = NULL;
-    TrustedCert = NULL;
-    Pkcs7GetSigners (AuthData, AuthDataSize, &CertBuffer, &BufferLength, &TrustedCert, &TrustedCertLength);
-  }
-
-  if ((BufferLength == 0) || (CertBuffer == NULL) || ((*CertBuffer) == 0)) {
     goto Done;
   }
 

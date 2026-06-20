@@ -836,25 +836,18 @@ P7CheckTrustByHash (
       // hash of ANY certificate in the signing chain (leaf, intermediate, or
       // root) makes that certificate a candidate trust anchor.
       //
-      // Extract the candidate-anchor certificate set (once). Prefer the full
-      // signing chain from Pkcs7GetCertificatesList() so an intermediate or root
-      // listed in db can serve as the trust anchor. That function supports only
-      // a single signer; for a multi-signer SignedData it fails, so fall back to
-      // Pkcs7GetSigners(), which returns every signer's certificate. For each
-      // candidate certificate whose TBS hash is in this list, confirm that the
-      // PKCS#7 signature actually verifies up to that certificate before
-      // trusting it.
+      // Extract the signer's full certificate chain (once) so an intermediate
+      // or root listed in db can serve as the trust anchor. A UEFI image
+      // signature is single-signer; Pkcs7GetCertificatesList() returns that one
+      // signer's chain and yields no chain for a (non-conformant) multi-signer
+      // SignedData. For each chain certificate whose TBS hash is in this list,
+      // confirm that the PKCS#7 signature actually verifies up to that
+      // certificate before trusting it.
       //
       if (CertBuffer == NULL) {
         if (!Pkcs7GetCertificatesList (SignedData, SignedDataSize, &CertBuffer, &BufferLength, &TrustedCert, &TrustedCertLength) ||
             (BufferLength == 0) || (CertBuffer == NULL) || (*CertBuffer == 0))
         {
-          CertBuffer  = NULL;
-          TrustedCert = NULL;
-          Pkcs7GetSigners (SignedData, SignedDataSize, &CertBuffer, &BufferLength, &TrustedCert, &TrustedCertLength);
-        }
-
-        if ((BufferLength == 0) || (CertBuffer == NULL) || (*CertBuffer == 0)) {
           continue;
         }
       }
@@ -1038,25 +1031,18 @@ P7CheckTrust (
       // hash of ANY certificate in the signing chain (leaf, intermediate, or
       // root) makes that certificate a candidate trust anchor.
       //
-      // Extract the candidate-anchor certificate set (once). Prefer the full
-      // signing chain from Pkcs7GetCertificatesList() so an intermediate or root
-      // listed in db can serve as the trust anchor. That function supports only
-      // a single signer; for a multi-signer SignedData it fails, so fall back to
-      // Pkcs7GetSigners(), which returns every signer's certificate. For each
-      // candidate certificate whose TBS hash is in this list, confirm that the
-      // PKCS#7 signature actually verifies up to that certificate before
-      // trusting it.
+      // Extract the signer's full certificate chain (once) so an intermediate
+      // or root listed in db can serve as the trust anchor. A UEFI image
+      // signature is single-signer; Pkcs7GetCertificatesList() returns that one
+      // signer's chain and yields no chain for a (non-conformant) multi-signer
+      // SignedData. For each chain certificate whose TBS hash is in this list,
+      // confirm that the PKCS#7 signature actually verifies up to that
+      // certificate before trusting it.
       //
       if (CertBuffer == NULL) {
         if (!Pkcs7GetCertificatesList (SignedData, SignedDataSize, &CertBuffer, &BufferLength, &TrustedCert, &TrustedCertLength) ||
             (BufferLength == 0) || (CertBuffer == NULL) || (*CertBuffer == 0))
         {
-          CertBuffer  = NULL;
-          TrustedCert = NULL;
-          Pkcs7GetSigners (SignedData, SignedDataSize, &CertBuffer, &BufferLength, &TrustedCert, &TrustedCertLength);
-        }
-
-        if ((BufferLength == 0) || (CertBuffer == NULL) || (*CertBuffer == 0)) {
           continue;
         }
       }
