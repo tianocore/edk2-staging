@@ -767,6 +767,7 @@ P7CheckTrustByHash (
   UINT8               *Cert;
   UINTN               CertSize;
   UINTN               CertIndex;
+  UINTN               CertCount;
 
   Status        = EFI_SECURITY_VIOLATION;
   SigData       = NULL;
@@ -795,34 +796,45 @@ P7CheckTrustByHash (
 
     if (CompareGuid (&SigList->SignatureType, &gEfiCertX509Guid) ||
         CompareGuid (&SigList->SignatureType, &gEfiCertV2X509Guid)) {
-      SigData = (EFI_SIGNATURE_DATA *)((UINT8 *)SigList + sizeof (EFI_SIGNATURE_LIST) +
-                                       SigList->SignatureHeaderSize);
-
-      if (CompareGuid (&SigList->SignatureType, &gEfiCertV2X509Guid)) {
-        TrustCert     = (UINT8 *)SigData;
-        TrustCertSize = SigList->SignatureSize;
-      } else {
-        TrustCert     = SigData->SignatureData;
-        TrustCertSize = SigList->SignatureSize - sizeof (EFI_GUID);
-      }
-
       //
-      // Verifying the PKCS#7 SignedData with the trusted certificate from AllowedDb
+      // A single EFI_CERT_X509 / EFI_CERT_V2_X509 list may hold more than one
+      // certificate entry, each a candidate trust anchor. Evaluate every entry,
+      // not just the first.
       //
-      if (AuthenticodeVerify (SignedData, SignedDataSize, TrustCert, TrustCertSize, InHash, InHashSize)) {
+      SigData    = (EFI_SIGNATURE_DATA *)((UINT8 *)SigList + sizeof (EFI_SIGNATURE_LIST) +
+                                          SigList->SignatureHeaderSize);
+      CertCount  = (SigList->SignatureListSize - sizeof (EFI_SIGNATURE_LIST) -
+                    SigList->SignatureHeaderSize) / SigList->SignatureSize;
+
+      for (CertIndex = 0; CertIndex < CertCount; CertIndex++) {
+        if (CompareGuid (&SigList->SignatureType, &gEfiCertV2X509Guid)) {
+          TrustCert     = (UINT8 *)SigData;
+          TrustCertSize = SigList->SignatureSize;
+        } else {
+          TrustCert     = SigData->SignatureData;
+          TrustCertSize = SigList->SignatureSize - sizeof (EFI_GUID);
+        }
+
         //
-        // The SignedData verified up to this db certificate (the trust anchor).
-        // Per UEFI Spec 32.5.3.3, the image is trusted only if neither the
-        // trust anchor nor any certificate below it (toward the leaf) is revoked
-        // in dbx; certificates above the anchor are ignored.
+        // Verifying the PKCS#7 SignedData with the trusted certificate from AllowedDb
         //
-        if (IsSignerCertChainRevokedByHash (SignedData, SignedDataSize, RevokedDb, TrustCert, TrustCertSize)) {
-          Status = EFI_SECURITY_VIOLATION;
+        if (AuthenticodeVerify (SignedData, SignedDataSize, TrustCert, TrustCertSize, InHash, InHashSize)) {
+          //
+          // The SignedData verified up to this db certificate (the trust anchor).
+          // Per UEFI Spec 32.5.3.3, the image is trusted only if neither the
+          // trust anchor nor any certificate below it (toward the leaf) is revoked
+          // in dbx; certificates above the anchor are ignored.
+          //
+          if (IsSignerCertChainRevokedByHash (SignedData, SignedDataSize, RevokedDb, TrustCert, TrustCertSize)) {
+            Status = EFI_SECURITY_VIOLATION;
+            goto _Exit;
+          }
+
+          Status = EFI_SUCCESS;
           goto _Exit;
         }
 
-        Status = EFI_SUCCESS;
-        goto _Exit;
+        SigData = (EFI_SIGNATURE_DATA *)((UINT8 *)SigData + SigList->SignatureSize);
       }
     } else if (CompareGuid (&SigList->SignatureType, &gEfiCertX509Sha256Guid) ||
                CompareGuid (&SigList->SignatureType, &gEfiCertX509Sha384Guid) ||
@@ -957,6 +969,7 @@ P7CheckTrust (
   UINT8               *Cert;
   UINTN               CertSize;
   UINTN               CertIndex;
+  UINTN               CertCount;
 
   Status        = EFI_SECURITY_VIOLATION;
   SigData       = NULL;
@@ -985,34 +998,45 @@ P7CheckTrust (
 
     if (CompareGuid (&SigList->SignatureType, &gEfiCertX509Guid) ||
         CompareGuid (&SigList->SignatureType, &gEfiCertV2X509Guid)) {
-      SigData = (EFI_SIGNATURE_DATA *)((UINT8 *)SigList + sizeof (EFI_SIGNATURE_LIST) +
-                                       SigList->SignatureHeaderSize);
-
-      if (CompareGuid (&SigList->SignatureType, &gEfiCertV2X509Guid)) {
-        TrustCert     = (UINT8 *)SigData;
-        TrustCertSize = SigList->SignatureSize;
-      } else {
-        TrustCert     = SigData->SignatureData;
-        TrustCertSize = SigList->SignatureSize - sizeof (EFI_GUID);
-      }
-
       //
-      // Verifying the PKCS#7 SignedData with the trusted certificate from AllowedDb
+      // A single EFI_CERT_X509 / EFI_CERT_V2_X509 list may hold more than one
+      // certificate entry, each a candidate trust anchor. Evaluate every entry,
+      // not just the first.
       //
-      if (Pkcs7Verify (SignedData, SignedDataSize, TrustCert, TrustCertSize, InData, InDataSize)) {
+      SigData    = (EFI_SIGNATURE_DATA *)((UINT8 *)SigList + sizeof (EFI_SIGNATURE_LIST) +
+                                          SigList->SignatureHeaderSize);
+      CertCount  = (SigList->SignatureListSize - sizeof (EFI_SIGNATURE_LIST) -
+                    SigList->SignatureHeaderSize) / SigList->SignatureSize;
+
+      for (CertIndex = 0; CertIndex < CertCount; CertIndex++) {
+        if (CompareGuid (&SigList->SignatureType, &gEfiCertV2X509Guid)) {
+          TrustCert     = (UINT8 *)SigData;
+          TrustCertSize = SigList->SignatureSize;
+        } else {
+          TrustCert     = SigData->SignatureData;
+          TrustCertSize = SigList->SignatureSize - sizeof (EFI_GUID);
+        }
+
         //
-        // The SignedData verified up to this db certificate (the trust anchor).
-        // Per UEFI Spec 32.5.3.3, the image is trusted only if neither the
-        // trust anchor nor any certificate below it (toward the leaf) is revoked
-        // in dbx; certificates above the anchor are ignored.
+        // Verifying the PKCS#7 SignedData with the trusted certificate from AllowedDb
         //
-        if (IsSignerCertChainRevokedByHash (SignedData, SignedDataSize, RevokedDb, TrustCert, TrustCertSize)) {
-          Status = EFI_SECURITY_VIOLATION;
+        if (Pkcs7Verify (SignedData, SignedDataSize, TrustCert, TrustCertSize, InData, InDataSize)) {
+          //
+          // The SignedData verified up to this db certificate (the trust anchor).
+          // Per UEFI Spec 32.5.3.3, the image is trusted only if neither the
+          // trust anchor nor any certificate below it (toward the leaf) is revoked
+          // in dbx; certificates above the anchor are ignored.
+          //
+          if (IsSignerCertChainRevokedByHash (SignedData, SignedDataSize, RevokedDb, TrustCert, TrustCertSize)) {
+            Status = EFI_SECURITY_VIOLATION;
+            goto _Exit;
+          }
+
+          Status = EFI_SUCCESS;
           goto _Exit;
         }
 
-        Status = EFI_SUCCESS;
-        goto _Exit;
+        SigData = (EFI_SIGNATURE_DATA *)((UINT8 *)SigData + SigList->SignatureSize);
       }
     } else if (CompareGuid (&SigList->SignatureType, &gEfiCertX509Sha256Guid) ||
                CompareGuid (&SigList->SignatureType, &gEfiCertX509Sha384Guid) ||

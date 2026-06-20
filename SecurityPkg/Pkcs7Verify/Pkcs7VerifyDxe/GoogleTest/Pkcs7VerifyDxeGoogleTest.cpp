@@ -5184,6 +5184,56 @@ TEST (MlDsaMultiSignerTest, ValidCoSignerSignature_Accepted) {
   FreePool (SigData);
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// P7CheckTrust - a single EFI_CERT_X509 AllowedDb list may carry more than one
+// certificate entry; every entry must be evaluated, not just the first.
+//
+// Build a 2-entry EFI_CERT_X509 list whose first entry is a byte-corrupted copy
+// of the signing root (does not verify) and whose second entry is the real root
+// mTestCert (verifies mP7SignedChain). If only the first entry were checked the
+// image would be wrongly rejected; evaluating all entries accepts it.
+///////////////////////////////////////////////////////////////////////////////
+TEST (P7CheckTrustMultiEntryX509Test, SecondEntryVerifies_Accepted) {
+  UINTN  EntrySize = sizeof (EFI_GUID) + sizeof (mTestCert);
+  UINTN  ListSize  = sizeof (EFI_SIGNATURE_LIST) + EntrySize * 2;
+
+  EFI_SIGNATURE_LIST  *List = (EFI_SIGNATURE_LIST *)AllocateZeroPool (ListSize);
+  ASSERT_NE (List, (EFI_SIGNATURE_LIST *)NULL);
+  CopyGuid (&List->SignatureType, &gEfiCertX509Guid);
+  List->SignatureListSize   = (UINT32)ListSize;
+  List->SignatureHeaderSize = 0;
+  List->SignatureSize       = (UINT32)EntrySize;
+
+  UINT8  *Entry0 = (UINT8 *)List + sizeof (EFI_SIGNATURE_LIST);
+  UINT8  *Entry1 = Entry0 + EntrySize;
+
+  //
+  // Entry 0: corrupted copy of mTestCert (SignatureData starts after the owner
+  // GUID). Flipping a byte makes Pkcs7Verify() fail to anchor on it.
+  //
+  CopyMem (Entry0 + sizeof (EFI_GUID), mTestCert, sizeof (mTestCert));
+  (Entry0 + sizeof (EFI_GUID))[sizeof (mTestCert) / 2] ^= 0xFF;
+
+  //
+  // Entry 1: the real signing root.
+  //
+  CopyMem (Entry1 + sizeof (EFI_GUID), mTestCert, sizeof (mTestCert));
+
+  EFI_SIGNATURE_LIST  *Db[] = { List, NULL };
+
+  EFI_STATUS  Status = P7CheckTrust (
+                         (UINT8 *)mP7SignedChain,
+                         sizeof (mP7SignedChain),
+                         (UINT8 *)mTestContent,
+                         sizeof (mTestContent),
+                         Db,
+                         NULL
+                         );
+
+  EXPECT_EQ (Status, EFI_SUCCESS);
+
+  FreePool (List);
+}
 
 int
 main (
