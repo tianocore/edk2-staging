@@ -206,67 +206,56 @@ AuthenticodeVerify (
   Asn1Type   = NULL;
 
   SiStack = CMS_get0_SignerInfos (Cms);
-  if ((SiStack == NULL) || (sk_CMS_SignerInfo_num (SiStack) == 0)) {
+  if (SiStack == NULL || sk_CMS_SignerInfo_num(SiStack) != 1) {
     //
-    // At least one signer info is required for Authenticode verification.
+    // Only single Singer Info is supported in Authenticode Verification
     //
-    DEBUG ((DEBUG_INFO, "AuthenticodeVerify - Fail due to no signer info found!\n"));
+    DEBUG ((DEBUG_INFO, "AuthenticodeVerify - Fail due to None or Mutiple signer info found! Number = 0x%x\n", sk_CMS_SignerInfo_num(SiStack)));
     goto _Exit;
   }
 
-  //
-  // The Microsoft nested-signature attribute (1.3.6.1.4.1.311.2.4.1) is a
-  // single-signer Authenticode construct: a secondary Authenticode signature is
-  // carried in the unsigned attributes of the one primary SignerInfo. Only look
-  // for it when there is exactly one SignerInfo. A SignedData carrying multiple
-  // SignerInfos is handled by the Pkcs7Verify() path below, which is the same
-  // primitive the UEFI PKCS7 verification protocol uses, so AuthenticodeVerify
-  // and Pkcs7Verify treat the multi-signer case identically.
-  //
-  if (sk_CMS_SignerInfo_num (SiStack) == 1) {
-    Si = sk_CMS_SignerInfo_value(SiStack, 0);
-    AttrCount = CMS_unsigned_get_attr_count (Si);
-    if (AttrCount <= 0) {
-      DEBUG ((DEBUG_INFO, "AuthenticodeVerify - Not found unauth_attr, go to single sig path!\n"));
-    } else {
-      for (Index = 0; Index < AttrCount; Index++) {
-          Attr    = CMS_unsigned_get_attr (Si, Index);
-          Asn1Obj = X509_ATTRIBUTE_get0_object(Attr);
+  Si = sk_CMS_SignerInfo_value(SiStack, 0);
+  AttrCount = CMS_unsigned_get_attr_count (Si);
+  if (AttrCount <= 0) {
+    DEBUG ((DEBUG_INFO, "AuthenticodeVerify - Not found unauth_attr, go to single sig path!\n"));
+  } else {
+    for (Index = 0; Index < AttrCount; Index++) {
+        Attr    = CMS_unsigned_get_attr (Si, Index);
+        Asn1Obj = X509_ATTRIBUTE_get0_object(Attr);
 
-          if (OBJ_length(Asn1Obj) == sizeof(mMicrosoftNestedSignatureOidValue) &&
-              CompareMem(OBJ_get0_data(Asn1Obj), mMicrosoftNestedSignatureOidValue, OBJ_length(Asn1Obj)) == 0) {
+        if (OBJ_length(Asn1Obj) == sizeof(mMicrosoftNestedSignatureOidValue) &&
+            CompareMem(OBJ_get0_data(Asn1Obj), mMicrosoftNestedSignatureOidValue, OBJ_length(Asn1Obj)) == 0) {
 
-              Asn1Type = X509_ATTRIBUTE_get0_type(Attr, 0);
-              if (Asn1Type != NULL && ((Asn1Type->type == V_ASN1_SET) || (Asn1Type->type == V_ASN1_SEQUENCE))) {
-                DEBUG ((DEBUG_INFO, "AuthenticodeVerify - Nested sig found!\n"));
-                NextSig    = Asn1Type->value.set->data;
-                NextSigLen = Asn1Type->value.set->length;
-                break;
-              }
-          }
-      }
-      //
-      // Process the Nested Signature recursively
-      //
-      if (NextSig != NULL && NextSigLen != 0) {
-        Status = AuthenticodeVerify (
-                  NextSig,
-                  NextSigLen,
-                  TrustedCert,
-                  CertSize,
-                  ImageHash,
-                  HashSize
-                  );
-        if (Status) {
-          DEBUG ((DEBUG_INFO, "AuthenticodeVerify - Nested signature verification Succ!\n"));
-          DEBUG ((DEBUG_INFO, "Then interrupt the process because any valid signature represents successful Authenticode verification.\n"));
-          goto _Exit;
-        } else {
-          DEBUG ((DEBUG_INFO, "AuthenticodeVerify - Nested signature verification Fail!\n"));
+            Asn1Type = X509_ATTRIBUTE_get0_type(Attr, 0);
+            if (Asn1Type != NULL && ((Asn1Type->type == V_ASN1_SET) || (Asn1Type->type == V_ASN1_SEQUENCE))) {
+              DEBUG ((DEBUG_INFO, "AuthenticodeVerify - Nested sig found!\n"));
+              NextSig    = Asn1Type->value.set->data;
+              NextSigLen = Asn1Type->value.set->length;
+              break;
+            }
         }
+    }
+    //
+    // Process the Nested Signature recursively
+    //
+    if (NextSig != NULL && NextSigLen != 0) {
+      Status = AuthenticodeVerify (
+                NextSig,
+                NextSigLen,
+                TrustedCert,
+                CertSize,
+                ImageHash,
+                HashSize
+                );
+      if (Status) {
+        DEBUG ((DEBUG_INFO, "AuthenticodeVerify - Nested signature verification Succ!\n"));
+        DEBUG ((DEBUG_INFO, "Then interrupt the process because any valid signature represents successful Authenticode verification.\n"));
+        goto _Exit;
       } else {
-        DEBUG ((DEBUG_INFO, "AuthenticodeVerify - Not found nested sig, go to single sig path!\n"));
+        DEBUG ((DEBUG_INFO, "AuthenticodeVerify - Nested signature verification Fail!\n"));
       }
+    } else {
+      DEBUG ((DEBUG_INFO, "AuthenticodeVerify - Not found nested sig, go to single sig path!\n"));
     }
   }
 
