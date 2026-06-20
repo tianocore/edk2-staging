@@ -40,7 +40,6 @@
 [Guids]
   gEfiCertX509Guid
   gEfiCertV2X509Guid
-  gEfiCertSha1Guid
   gEfiCertSha256Guid
   gEfiCertV2Sha256Guid
   gEfiCertSha384Guid

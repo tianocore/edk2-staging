@@ -46,21 +46,8 @@ CalculateDataHash (
   Status  = FALSE;
   HashCtx = NULL;
 
-  if (CompareGuid (CertGuid, &gEfiCertSha1Guid)) {
-    //
-    // SHA-1 Hash
-    //
-    CtxSize = Sha1GetContextSize ();
-    HashCtx = AllocatePool (CtxSize);
-    if (HashCtx == NULL) {
-      goto _Exit;
-    }
-
-    Status = Sha1Init (HashCtx);
-    Status = Sha1Update (HashCtx, Data, DataSize);
-    Status = Sha1Final (HashCtx, HashValue);
-  } else if (CompareGuid (CertGuid, &gEfiCertSha256Guid) ||
-             CompareGuid (CertGuid, &gEfiCertV2Sha256Guid)) {
+  if (CompareGuid (CertGuid, &gEfiCertSha256Guid) ||
+      CompareGuid (CertGuid, &gEfiCertV2Sha256Guid)) {
     //
     // SHA256 Hash
     //
