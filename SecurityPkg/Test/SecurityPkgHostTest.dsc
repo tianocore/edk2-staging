@@ -96,6 +96,17 @@
       SafeIntLib|MdePkg/Library/BaseSafeIntLib/BaseSafeIntLib.inf
       PcdLib|MdePkg/Library/BasePcdLibNull/BasePcdLibNull.inf
   }
+  SecurityPkg/Library/AuthVariableLib/GoogleTest/AuthVariableLibPkKekVerifyGoogleTest.inf {
+    <LibraryClasses>
+      AuthVariableLib|SecurityPkg/Library/AuthVariableLib/AuthVariableLib.inf
+      BaseCryptLib|CryptoPkg/Library/BaseCryptLib/UnitTestHostBaseCryptLib.inf
+      OpensslLib|CryptoPkg/Library/OpensslLib/OpensslLibFull.inf
+      RngLib|MdePkg/Library/BaseRngLib/BaseRngLib.inf
+      PlatformSecureLib|SecurityPkg/Library/PlatformSecureLibNull/PlatformSecureLibNull.inf
+      VariablePolicyLib|MdeModulePkg/Library/VariablePolicyLib/VariablePolicyLib.inf
+      SafeIntLib|MdePkg/Library/BaseSafeIntLib/BaseSafeIntLib.inf
+      PcdLib|MdePkg/Library/BasePcdLibNull/BasePcdLibNull.inf
+  }
 
 [PcdsPatchableInModule]
   gEfiSecurityPkgTokenSpaceGuid.PcdOptionRomImageVerificationPolicy|0x04

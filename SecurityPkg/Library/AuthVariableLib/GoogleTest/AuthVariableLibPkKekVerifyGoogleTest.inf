@@ -1,0 +1,42 @@
+## @file
+#  GoogleTest for PK/KEK signature verification in AuthVariableLib.
+#  Signs a time-based authenticated variable update at test time and checks that
+#  VerifyTimeBasedPayload() accepts the enrolled PK/KEK signer and rejects others.
+#
+#  Copyright (c) 2026, Intel Corporation. All rights reserved.<BR>
+#  SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = AuthVariableLibPkKekVerifyGoogleTest
+  FILE_GUID                      = 6E3D9A0C-2B1F-4C7A-8E5D-0A9B3C4D5E6F
+  MODULE_TYPE                    = HOST_APPLICATION
+  VERSION_STRING                 = 1.0
+
+[Sources]
+  AuthVariableLibPkKekVerifyGoogleTest.cpp
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  SecurityPkg/SecurityPkg.dec
+  CryptoPkg/CryptoPkg.dec
+  UnitTestFrameworkPkg/UnitTestFrameworkPkg.dec
+
+[LibraryClasses]
+  GoogleTestLib
+  BaseLib
+  BaseMemoryLib
+  DebugLib
+  MemoryAllocationLib
+  AuthVariableLib
+  BaseCryptLib
+
+[Guids]
+  gEfiGlobalVariableGuid
+  gEfiImageSecurityDatabaseGuid
+  gEfiCertX509Guid
+  gEfiCertV2X509Guid
+  gEfiCertPkcs7Guid
