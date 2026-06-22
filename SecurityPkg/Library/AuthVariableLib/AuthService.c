@@ -1471,6 +1471,7 @@ VerifyTimeBasedPayload (
   EFI_STATUS                     Status;
   EFI_SIGNATURE_LIST             *CertList;
   EFI_SIGNATURE_DATA             *Cert;
+  BOOLEAN                        IsV2Cert;
   UINTN                          Index;
   UINTN                          CertCount;
   UINT32                         KekDataSize;
@@ -1696,8 +1697,22 @@ VerifyTimeBasedPayload (
 
     CertList = (EFI_SIGNATURE_LIST *)Data;
     Cert     = (EFI_SIGNATURE_DATA *)((UINT8 *)CertList + sizeof (EFI_SIGNATURE_LIST) + CertList->SignatureHeaderSize);
-    if ((TopLevelCertSize != (CertList->SignatureSize - (sizeof (EFI_SIGNATURE_DATA) - 1))) ||
-        (CompareMem (Cert->SignatureData, TopLevelCert, TopLevelCertSize) != 0))
+    //
+    // The Platform Key may be enrolled as EFI_CERT_X509_GUID (V1, with a leading
+    // SignatureOwner GUID) or EFI_CERT_V2_X509_GUID (V2, no SignatureOwner), both
+    // of which CheckSignatureListFormat() accepts. Locate the certificate and its
+    // length according to the list type before the identity comparison.
+    //
+    if (CompareGuid (&CertList->SignatureType, &gEfiCertV2X509Guid)) {
+      TrustedCert     = (UINT8 *)Cert;
+      TrustedCertSize = CertList->SignatureSize;
+    } else {
+      TrustedCert     = Cert->SignatureData;
+      TrustedCertSize = CertList->SignatureSize - sizeof (EFI_GUID);
+    }
+
+    if ((TopLevelCertSize != TrustedCertSize) ||
+        (CompareMem (TrustedCert, TopLevelCert, TopLevelCertSize) != 0))
     {
       VerifyStatus = FALSE;
       goto Exit;
@@ -1734,15 +1749,26 @@ VerifyTimeBasedPayload (
     KekDataSize = (UINT32)DataSize;
     CertList    = (EFI_SIGNATURE_LIST *)Data;
     while ((KekDataSize > 0) && (KekDataSize >= CertList->SignatureListSize)) {
-      if (CompareGuid (&CertList->SignatureType, &gEfiCertX509Guid)) {
+      //
+      // A KEK may be enrolled as EFI_CERT_X509_GUID (V1, with a leading
+      // SignatureOwner GUID) or EFI_CERT_V2_X509_GUID (V2, no SignatureOwner),
+      // both of which CheckSignatureListFormat() accepts. Handle either layout.
+      //
+      IsV2Cert = CompareGuid (&CertList->SignatureType, &gEfiCertV2X509Guid);
+      if (CompareGuid (&CertList->SignatureType, &gEfiCertX509Guid) || IsV2Cert) {
         Cert      = (EFI_SIGNATURE_DATA *)((UINT8 *)CertList + sizeof (EFI_SIGNATURE_LIST) + CertList->SignatureHeaderSize);
         CertCount = (CertList->SignatureListSize - sizeof (EFI_SIGNATURE_LIST) - CertList->SignatureHeaderSize) / CertList->SignatureSize;
         for (Index = 0; Index < CertCount; Index++) {
           //
           // Iterate each Signature Data Node within this CertList for a verify
           //
-          TrustedCert     = Cert->SignatureData;
-          TrustedCertSize = CertList->SignatureSize - (sizeof (EFI_SIGNATURE_DATA) - 1);
+          if (IsV2Cert) {
+            TrustedCert     = (UINT8 *)Cert;
+            TrustedCertSize = CertList->SignatureSize;
+          } else {
+            TrustedCert     = Cert->SignatureData;
+            TrustedCertSize = CertList->SignatureSize - sizeof (EFI_GUID);
+          }
 
           //
           // Verify Pkcs7 SignedData via Pkcs7Verify library.
@@ -1767,10 +1793,22 @@ VerifyTimeBasedPayload (
       CertList     = (EFI_SIGNATURE_LIST *)((UINT8 *)CertList + CertList->SignatureListSize);
     }
   } else if (AuthVarType == AuthVarTypePayload) {
-    CertList        = (EFI_SIGNATURE_LIST *)PayloadPtr;
-    Cert            = (EFI_SIGNATURE_DATA *)((UINT8 *)CertList + sizeof (EFI_SIGNATURE_LIST) + CertList->SignatureHeaderSize);
-    TrustedCert     = Cert->SignatureData;
-    TrustedCertSize = CertList->SignatureSize - (sizeof (EFI_SIGNATURE_DATA) - 1);
+    CertList = (EFI_SIGNATURE_LIST *)PayloadPtr;
+    Cert     = (EFI_SIGNATURE_DATA *)((UINT8 *)CertList + sizeof (EFI_SIGNATURE_LIST) + CertList->SignatureHeaderSize);
+    //
+    // The certificate is carried in the payload (self-signed PK enrollment) and
+    // may be EFI_CERT_X509_GUID (V1, with a leading SignatureOwner GUID) or
+    // EFI_CERT_V2_X509_GUID (V2, no SignatureOwner), both of which
+    // CheckSignatureListFormat() accepts. Locate it according to the list type.
+    //
+    if (CompareGuid (&CertList->SignatureType, &gEfiCertV2X509Guid)) {
+      TrustedCert     = (UINT8 *)Cert;
+      TrustedCertSize = CertList->SignatureSize;
+    } else {
+      TrustedCert     = Cert->SignatureData;
+      TrustedCertSize = CertList->SignatureSize - sizeof (EFI_GUID);
+    }
+
     //
     // Verify Pkcs7 SignedData via Pkcs7Verify library.
     //
