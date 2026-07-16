@@ -690,160 +690,6 @@ HashPeImageByType (
 }
 
 /**
-  Returns the size of a given image execution info table in bytes.
-
-  This function returns the size, in bytes, of the image execution info table specified by
-  ImageExeInfoTable. If ImageExeInfoTable is NULL, then 0 is returned.
-
-  @param  ImageExeInfoTable          A pointer to a image execution info table structure.
-
-  @retval 0       If ImageExeInfoTable is NULL.
-  @retval Others  The size of a image execution info table in bytes.
-
-**/
-UINTN
-GetImageExeInfoTableSize (
-  EFI_IMAGE_EXECUTION_INFO_TABLE  *ImageExeInfoTable
-  )
-{
-  UINTN                     Index;
-  EFI_IMAGE_EXECUTION_INFO  *ImageExeInfoItem;
-  UINTN                     TotalSize;
-
-  if (ImageExeInfoTable == NULL) {
-    return 0;
-  }
-
-  ImageExeInfoItem = (EFI_IMAGE_EXECUTION_INFO *)((UINT8 *)ImageExeInfoTable + sizeof (EFI_IMAGE_EXECUTION_INFO_TABLE));
-  TotalSize        = sizeof (EFI_IMAGE_EXECUTION_INFO_TABLE);
-  for (Index = 0; Index < ImageExeInfoTable->NumberOfImages; Index++) {
-    TotalSize       += ReadUnaligned32 ((UINT32 *)&ImageExeInfoItem->InfoSize);
-    ImageExeInfoItem = (EFI_IMAGE_EXECUTION_INFO *)((UINT8 *)ImageExeInfoItem + ReadUnaligned32 ((UINT32 *)&ImageExeInfoItem->InfoSize));
-  }
-
-  return TotalSize;
-}
-
-/**
-  Create an Image Execution Information Table entry and add it to system configuration table.
-
-  @param[in]  Action          Describes the action taken by the firmware regarding this image.
-  @param[in]  Name            Input a null-terminated, user-friendly name.
-  @param[in]  DevicePath      Input device path pointer.
-  @param[in]  Signature       Input signature info in EFI_SIGNATURE_LIST data structure.
-  @param[in]  SignatureSize   Size of signature. Must be zero if Signature is NULL.
-
-**/
-VOID
-AddImageExeInfo (
-  IN       EFI_IMAGE_EXECUTION_ACTION  Action,
-  IN       CHAR16                      *Name OPTIONAL,
-  IN CONST EFI_DEVICE_PATH_PROTOCOL    *DevicePath,
-  IN       EFI_SIGNATURE_LIST          *Signature OPTIONAL,
-  IN       UINTN                       SignatureSize
-  )
-{
-  EFI_IMAGE_EXECUTION_INFO_TABLE  *ImageExeInfoTable;
-  EFI_IMAGE_EXECUTION_INFO_TABLE  *NewImageExeInfoTable;
-  EFI_IMAGE_EXECUTION_INFO        *ImageExeInfoEntry;
-  UINTN                           ImageExeInfoTableSize;
-  UINTN                           NewImageExeInfoEntrySize;
-  UINTN                           NameStringLen;
-  UINTN                           DevicePathSize;
-  CHAR16                          *NameStr;
-
-  ImageExeInfoTable    = NULL;
-  NewImageExeInfoTable = NULL;
-  ImageExeInfoEntry    = NULL;
-  NameStringLen        = 0;
-  NameStr              = NULL;
-
-  if (DevicePath == NULL) {
-    return;
-  }
-
-  if (Name != NULL) {
-    NameStringLen = StrSize (Name);
-  } else {
-    NameStringLen = sizeof (CHAR16);
-  }
-
-  EfiGetSystemConfigurationTable (&gEfiImageSecurityDatabaseGuid, (VOID **)&ImageExeInfoTable);
-  if (ImageExeInfoTable != NULL) {
-    //
-    // The table has been found!
-    // We must enlarge the table to accommodate the new exe info entry.
-    //
-    ImageExeInfoTableSize = GetImageExeInfoTableSize (ImageExeInfoTable);
-  } else {
-    //
-    // Not Found!
-    // We should create a new table to append to the configuration table.
-    //
-    ImageExeInfoTableSize = sizeof (EFI_IMAGE_EXECUTION_INFO_TABLE);
-  }
-
-  DevicePathSize = GetDevicePathSize (DevicePath);
-
-  //
-  // Signature size can be odd. Pad after signature to ensure next EXECUTION_INFO entry align
-  //
-  ASSERT (Signature != NULL || SignatureSize == 0);
-  NewImageExeInfoEntrySize = sizeof (EFI_IMAGE_EXECUTION_INFO) + NameStringLen + DevicePathSize + SignatureSize;
-
-  NewImageExeInfoTable = (EFI_IMAGE_EXECUTION_INFO_TABLE *)AllocateRuntimePool (ImageExeInfoTableSize + NewImageExeInfoEntrySize);
-  if (NewImageExeInfoTable == NULL) {
-    return;
-  }
-
-  if (ImageExeInfoTable != NULL) {
-    CopyMem (NewImageExeInfoTable, ImageExeInfoTable, ImageExeInfoTableSize);
-  } else {
-    NewImageExeInfoTable->NumberOfImages = 0;
-  }
-
-  NewImageExeInfoTable->NumberOfImages++;
-  ImageExeInfoEntry = (EFI_IMAGE_EXECUTION_INFO *)((UINT8 *)NewImageExeInfoTable + ImageExeInfoTableSize);
-  //
-  // Update new item's information.
-  //
-  WriteUnaligned32 ((UINT32 *)ImageExeInfoEntry, Action);
-  WriteUnaligned32 ((UINT32 *)((UINT8 *)ImageExeInfoEntry + sizeof (EFI_IMAGE_EXECUTION_ACTION)), (UINT32)NewImageExeInfoEntrySize);
-
-  NameStr = (CHAR16 *)(ImageExeInfoEntry + 1);
-  if (Name != NULL) {
-    CopyMem ((UINT8 *)NameStr, Name, NameStringLen);
-  } else {
-    ZeroMem ((UINT8 *)NameStr, sizeof (CHAR16));
-  }
-
-  CopyMem (
-    (UINT8 *)NameStr + NameStringLen,
-    DevicePath,
-    DevicePathSize
-    );
-  if (Signature != NULL) {
-    CopyMem (
-      (UINT8 *)NameStr + NameStringLen + DevicePathSize,
-      Signature,
-      SignatureSize
-      );
-  }
-
-  //
-  // Update/replace the image execution table.
-  //
-  gBS->InstallConfigurationTable (&gEfiImageSecurityDatabaseGuid, (VOID *)NewImageExeInfoTable);
-
-  //
-  // Free Old table data!
-  //
-  if (ImageExeInfoTable != NULL) {
-    FreePool (ImageExeInfoTable);
-  }
-}
-
-/**
   Check whether the hash of an given X.509 certificate is in the specified
   signature list.
 
@@ -1700,12 +1546,10 @@ Done:
                                  FileBuffer.
   @retval EFI_SECURITY_VIOLATION The file specified by File did not authenticate, and
                                  the platform policy dictates that File should be placed
-                                 in the untrusted state. The image has been added to the file
-                                 execution table.
+                                 in the untrusted state.
   @retval EFI_ACCESS_DENIED      The file specified by File and FileBuffer did not
                                  authenticate, and the platform policy dictates that the DXE
-                                 Foundation may not use File. The image has
-                                 been added to the file execution table.
+                                 Foundation may not use File.
 
 **/
 EFI_STATUS
@@ -1719,10 +1563,6 @@ DxeImageVerificationHandler (
   )
 {
   EFI_IMAGE_DOS_HEADER          *DosHdr;
-  EFI_SIGNATURE_LIST            *SignatureList;
-  UINTN                         SignatureListSize;
-  EFI_SIGNATURE_DATA            *Signature;
-  EFI_IMAGE_EXECUTION_ACTION    Action;
   WIN_CERTIFICATE               *WinCertificate;
   UINT32                        Policy;
   UINT8                         SecureBoot;
@@ -1737,7 +1577,6 @@ DxeImageVerificationHandler (
   UINT32                        SecDataDirEnd;
   UINT32                        SecDataDirLeft;
   UINT32                        OffSet;
-  CHAR16                        *NameStr;
   RETURN_STATUS                 PeCoffStatus;
   EFI_STATUS                    HashStatus;
   EFI_STATUS                    DbStatus;
@@ -1746,13 +1585,10 @@ DxeImageVerificationHandler (
   BOOLEAN                       IsFound;
   UINT8                         HashAlg;
 
-  SignatureList     = NULL;
-  SignatureListSize = 0;
-  WinCertificate    = NULL;
-  SecDataDir        = NULL;
-  PkcsCertData      = NULL;
-  Action            = EFI_IMAGE_EXECUTION_AUTH_UNTESTED;
-  IsFound           = FALSE;
+  WinCertificate = NULL;
+  SecDataDir     = NULL;
+  PkcsCertData   = NULL;
+  IsFound        = FALSE;
   ZeroMem (mImageDigestCached, sizeof (mImageDigestCached));
 
   //
@@ -1935,9 +1771,8 @@ DxeImageVerificationHandler (
                  &IsFound
                  );
     if (EFI_ERROR (DbStatus) || IsFound) {
-      Action = EFI_IMAGE_EXECUTION_AUTH_SIG_FOUND;
       DEBUG ((DEBUG_INFO, "DxeImageVerificationLib: %s hash of image is found in DBX.\n", mHashTypeStr));
-      goto Done;
+      goto Failed;
     }
 
     //
@@ -2049,87 +1884,14 @@ DxeImageVerificationHandler (
   //
   // Step D: No signature was accepted. The image fails validation.
   //
-  if (Action == EFI_IMAGE_EXECUTION_AUTH_UNTESTED) {
-    Action = EFI_IMAGE_EXECUTION_AUTH_SIG_NOT_FOUND;
-  }
-
   DEBUG ((DEBUG_INFO, "DxeImageVerificationLib: Image is signed but signature is not allowed by DB and is not found in DB/DBX.\n"));
 
-Done:
-  if ((Action == EFI_IMAGE_EXECUTION_AUTH_SIG_FAILED) || (Action == EFI_IMAGE_EXECUTION_AUTH_SIG_FOUND)) {
-    //
-    // Get image hash value as signature of executable.
-    //
-    SignatureListSize = sizeof (EFI_SIGNATURE_LIST) + sizeof (EFI_SIGNATURE_DATA) - 1 + mImageDigestSize;
-    SignatureList     = (EFI_SIGNATURE_LIST *)AllocateZeroPool (SignatureListSize);
-    if (SignatureList == NULL) {
-      SignatureListSize = 0;
-      goto Failed;
-    }
-
-    SignatureList->SignatureHeaderSize = 0;
-    SignatureList->SignatureListSize   = (UINT32)SignatureListSize;
-    SignatureList->SignatureSize       = (UINT32)(sizeof (EFI_SIGNATURE_DATA) - 1 + mImageDigestSize);
-    CopyMem (&SignatureList->SignatureType, &mCertType, sizeof (EFI_GUID));
-    Signature = (EFI_SIGNATURE_DATA *)((UINT8 *)SignatureList + sizeof (EFI_SIGNATURE_LIST));
-    CopyMem (Signature->SignatureData, mImageDigest, mImageDigestSize);
-  }
-
 Failed:
-  //
-  // Policy decides to defer or reject the image; add its information in image
-  // executable information table in either case.
-  //
-  NameStr = ConvertDevicePathToText (File, FALSE, TRUE);
-  AddImageExeInfo (Action, NameStr, File, SignatureList, SignatureListSize);
-  if (NameStr != NULL) {
-    DEBUG ((DEBUG_INFO, "The image doesn't pass verification: %s\n", NameStr));
-    FreePool (NameStr);
-  }
-
-  if (SignatureList != NULL) {
-    FreePool (SignatureList);
-  }
-
   if (Policy == DEFER_EXECUTE_ON_SECURITY_VIOLATION) {
     return EFI_SECURITY_VIOLATION;
   }
 
   return EFI_ACCESS_DENIED;
-}
-
-/**
-  On Ready To Boot Services Event notification handler.
-
-  Add the image execution information table if it is not in system configuration table.
-
-  @param[in]  Event     Event whose notification function is being invoked
-  @param[in]  Context   Pointer to the notification function's context
-
-**/
-VOID
-EFIAPI
-OnReadyToBoot (
-  IN      EFI_EVENT  Event,
-  IN      VOID       *Context
-  )
-{
-  EFI_IMAGE_EXECUTION_INFO_TABLE  *ImageExeInfoTable;
-  UINTN                           ImageExeInfoTableSize;
-
-  EfiGetSystemConfigurationTable (&gEfiImageSecurityDatabaseGuid, (VOID **)&ImageExeInfoTable);
-  if (ImageExeInfoTable != NULL) {
-    return;
-  }
-
-  ImageExeInfoTableSize = sizeof (EFI_IMAGE_EXECUTION_INFO_TABLE);
-  ImageExeInfoTable     = (EFI_IMAGE_EXECUTION_INFO_TABLE *)AllocateRuntimePool (ImageExeInfoTableSize);
-  if (ImageExeInfoTable == NULL) {
-    return;
-  }
-
-  ImageExeInfoTable->NumberOfImages = 0;
-  gBS->InstallConfigurationTable (&gEfiImageSecurityDatabaseGuid, (VOID *)ImageExeInfoTable);
 }
 
 /**
@@ -2147,18 +1909,6 @@ DxeImageVerificationLibConstructor (
   IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
-  EFI_EVENT  Event;
-
-  //
-  // Register the event to publish the image execution table.
-  //
-  EfiCreateEventReadyToBootEx (
-    TPL_CALLBACK,
-    OnReadyToBoot,
-    NULL,
-    &Event
-    );
-
   return RegisterSecurity2Handler (
            DxeImageVerificationHandler,
            EFI_AUTH_OPERATION_VERIFY_IMAGE | EFI_AUTH_OPERATION_IMAGE_REQUIRED
