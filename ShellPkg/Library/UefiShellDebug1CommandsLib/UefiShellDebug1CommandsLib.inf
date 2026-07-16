@@ -136,7 +136,6 @@
   gEfiRtPropertiesTableGuid       ## SOMETIMES_CONSUMES ## SystemTable
   gEfiSystemResourceTableGuid     ## SOMETIMES_CONSUMES ## SystemTable
   gEfiDebugImageInfoTableGuid     ## SOMETIMES_CONSUMES ## SystemTable
-  gEfiImageSecurityDatabaseGuid   ## SOMETIMES_CONSUMES ## SystemTable
   gEfiJsonConfigDataTableGuid     ## SOMETIMES_CONSUMES ## SystemTable
   gEfiJsonCapsuleDataTableGuid    ## SOMETIMES_CONSUMES ## SystemTable
   gEfiJsonCapsuleResultTableGuid  ## SOMETIMES_CONSUMES ## SystemTable

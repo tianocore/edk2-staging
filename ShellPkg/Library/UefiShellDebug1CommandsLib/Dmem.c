@@ -18,7 +18,6 @@
 #include <Guid/RtPropertiesTable.h>
 #include <Guid/SystemResourceTable.h>
 #include <Guid/DebugImageInfoTable.h>
-#include <Guid/ImageAuthentication.h>
 #include <Guid/ConformanceProfiles.h>
 
 /**
@@ -131,131 +130,6 @@ DisplayRtProperties (
 }
 
 /**
-  Retrieve the ImageExecutionTable Entry ImageName from ImagePath
-
-  @param[in]  FileName    The full path of the image.
-  @param[out] BaseName    The name of the image.
-**/
-EFI_STATUS
-GetBaseName (
-  IN  CHAR16  *FileName,
-  OUT CHAR16  **BaseName
-  )
-{
-  UINTN   StrLen;
-  CHAR16  *StrTail;
-
-  StrLen = StrSize (FileName);
-
-  for (StrTail = FileName + StrLen - 1; StrTail != FileName && *StrTail != L'\\'; StrTail--) {
-  }
-
-  if (StrTail == FileName) {
-    return EFI_NOT_FOUND;
-  }
-
-  *BaseName = StrTail+1;
-
-  return EFI_SUCCESS;
-}
-
-/**
-  Retrieve the ImageExecutionTable entries.
-
-  @param[in] ExecInfoTablePtr    The pointer to the ImageExecutionTable.
-**/
-EFI_STATUS
-GetImageExecutionInfo (
-  IN EFI_IMAGE_EXECUTION_INFO_TABLE  *ExecInfoTablePtr
-  )
-{
-  EFI_STATUS                Status;
-  EFI_IMAGE_EXECUTION_INFO  *InfoPtr;
-  CHAR8                     *ptr;
-  CHAR16                    *ImagePath;
-  CHAR16                    *ImageName;
-  UINTN                     Image;
-  UINTN                     *NumberOfImages;
-  CHAR16                    *ActionType;
-
-  NumberOfImages = &ExecInfoTablePtr->NumberOfImages;
-
-  ptr = (CHAR8 *)ExecInfoTablePtr + 1;
-
-  Status = EFI_NOT_FOUND;
-
-  for (Image = 0; Image < *NumberOfImages; Image++, ptr += InfoPtr->InfoSize) {
-    InfoPtr   = (EFI_IMAGE_EXECUTION_INFO *)ptr;
-    ImagePath = (CHAR16 *)(InfoPtr + 1);
-
-    GetBaseName (ImagePath, &ImageName);
-
-    switch (InfoPtr->Action) {
-      case EFI_IMAGE_EXECUTION_AUTHENTICATION:
-        ActionType = L"AUTHENTICATION";
-        break;
-      case EFI_IMAGE_EXECUTION_AUTH_UNTESTED:
-        ActionType = L"AUTH_UNTESTED";
-        break;
-      case EFI_IMAGE_EXECUTION_AUTH_SIG_FAILED:
-        ActionType = L"AUTH_SIG_FAILED";
-        break;
-      case EFI_IMAGE_EXECUTION_AUTH_SIG_PASSED:
-        ActionType = L"AUTH_SIG_PASSED";
-        break;
-      case EFI_IMAGE_EXECUTION_AUTH_SIG_NOT_FOUND:
-        ActionType = L"AUTH_SIG_NOT_FOUND";
-        break;
-      case EFI_IMAGE_EXECUTION_AUTH_SIG_FOUND:
-        ActionType = L"AUTH_SIG_FOUND";
-        break;
-      case EFI_IMAGE_EXECUTION_POLICY_FAILED:
-        ActionType = L"POLICY_FAILED";
-        break;
-      case EFI_IMAGE_EXECUTION_INITIALIZED:
-        ActionType = L"INITIALIZED";
-        break;
-      default:
-        ActionType = L"invalid action";
-    }
-
-    Status = ShellPrintHiiDefaultEx (
-               STRING_TOKEN (STR_DMEM_IMG_EXE_ENTRY),
-               gShellDebug1HiiHandle,
-               ImageName,
-               ActionType
-               );
-  }
-
-  return Status;
-}
-
-/**
-  Display the ImageExecutionTable entries
-
-  @param[in] ExecInfoTablePtr    The pointer to the ImageExecutionTable.
-**/
-STATIC
-VOID
-DisplayImageExecutionEntries (
-  IN EFI_IMAGE_EXECUTION_INFO_TABLE  *ExecInfoTablePtr
-  )
-{
-  EFI_STATUS  Status;
-
-  if (ExecInfoTablePtr == NULL) {
-    ShellPrintHiiDefaultEx (STRING_TOKEN (STR_DMEM_ERR_NOT_FOUND), gShellDebug1HiiHandle, L"ImageExecutionTable");
-    return;
-  }
-
-  ShellPrintHiiDefaultEx (STRING_TOKEN (STR_DMEM_IMG_EXE_TABLE), gShellDebug1HiiHandle);
-  Status = GetImageExecutionInfo (ExecInfoTablePtr);
-  if (EFI_ERROR (Status)) {
-    ShellPrintHiiDefaultEx (STRING_TOKEN (STR_DMEM_ERR_GET_FAIL), gShellDebug1HiiHandle, L"ImageExecutionTable");
-  }
-}
-
-/**
   Display the ConformanceProfileTable entries
 
   @param[in] ConfProfTable    The pointer to the ConformanceProfileTable.
@@ -328,7 +202,6 @@ typedef enum {
   EDstRtPropertiesTable,
   EDstSystemResourceTable,
   EDstDebugImageInfoTable,
-  EDstImageSecurityDatabase,
   EDstJsonConfigDataTable,
   EDstJsonCapsuleDataTable,
   EDstJsonCapsuleResultTable,
@@ -348,7 +221,6 @@ STATIC CONST EFI_GUID  *GuidArray[] = {
   [EDstRtPropertiesTable]      = &gEfiRtPropertiesTableGuid,
   [EDstSystemResourceTable]    = &gEfiSystemResourceTableGuid,
   [EDstDebugImageInfoTable]    = &gEfiDebugImageInfoTableGuid,
-  [EDstImageSecurityDatabase]  = &gEfiImageSecurityDatabaseGuid,
   [EDstJsonConfigDataTable]    = &gEfiJsonConfigDataTableGuid,
   [EDstJsonCapsuleDataTable]   = &gEfiJsonCapsuleDataTableGuid,
   [EDstJsonCapsuleResultTable] = &gEfiJsonCapsuleResultTableGuid,
@@ -413,7 +285,6 @@ DisplaySystemTable (
     AddressArray[EDstRtPropertiesTable],
     AddressArray[EDstSystemResourceTable],
     AddressArray[EDstDebugImageInfoTable],
-    AddressArray[EDstImageSecurityDatabase],
     AddressArray[EDstJsonConfigDataTable],
     AddressArray[EDstJsonCapsuleDataTable],
     AddressArray[EDstJsonCapsuleResultTable],
@@ -423,7 +294,6 @@ DisplaySystemTable (
 
   if (ShellCommandLineGetFlag (Package, L"-verbose")) {
     DisplayRtProperties ((EFI_RT_PROPERTIES_TABLE *)AddressArray[EDstRtPropertiesTable]);
-    DisplayImageExecutionEntries ((EFI_IMAGE_EXECUTION_INFO_TABLE *)AddressArray[EDstImageSecurityDatabase]);
     DisplayConformanceProfiles ((EFI_CONFORMANCE_PROFILES_TABLE *)AddressArray[EDstConfProfilesTable]);
   }
 
