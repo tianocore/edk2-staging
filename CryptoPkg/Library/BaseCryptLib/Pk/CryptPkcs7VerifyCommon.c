@@ -10,7 +10,7 @@
   WrapPkcs7Data(), Pkcs7GetSigners(), Pkcs7Verify() will get UEFI Authenticated
   Variable and will do basic check for data structure.
 
-Copyright (c) 2009 - 2019, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2009 - 2026, Intel Corporation. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
@@ -644,9 +644,11 @@ Pkcs7GetCertificatesList (
   STACK_OF (X509)   *CtxChain;
   STACK_OF (X509)   *CtxUntrusted;
   X509  *CtxCert;
+  BOOLEAN  CtxChainOwned;
 
   STACK_OF (X509)   *Signers;
   STACK_OF (X509)   *AllCerts;
+  STACK_OF (X509)   *OwnedCerts;
   X509       *Signer;
   X509       *Cert;
   X509       *Issuer;
@@ -665,16 +667,18 @@ Pkcs7GetCertificatesList (
   NewP7Data    = NULL;
   Cms          = NULL;
   PatchedData  = NULL;
-  CertCtx      = NULL;
-  CtxChain     = NULL;
-  CtxCert      = NULL;
-  CtxUntrusted = NULL;
-  Cert         = NULL;
-  SingleCert   = NULL;
-  CertBuf      = NULL;
-  OldBuf       = NULL;
-  Signers      = NULL;
-  AllCerts     = NULL;
+  CertCtx       = NULL;
+  CtxChain      = NULL;
+  CtxCert       = NULL;
+  CtxChainOwned = FALSE;
+  CtxUntrusted  = NULL;
+  Cert          = NULL;
+  SingleCert    = NULL;
+  CertBuf       = NULL;
+  OldBuf        = NULL;
+  Signers       = NULL;
+  AllCerts      = NULL;
+  OwnedCerts    = NULL;
 
   //
   // Parameter Checking
@@ -750,9 +754,20 @@ Pkcs7GetCertificatesList (
   }
 
   //
-  // Get all embedded certificates via CMS API
+  // Get all embedded certificates via CMS API. CMS_get1_certs() returns a stack
+  // whose members are each up-referenced (owned by this function). The chain
+  // build below moves and drains these entries across CtxChain/CtxUntrusted, so
+  // take a shallow snapshot of the pointers now (sk_X509_dup() does not change
+  // refcounts) and release exactly one reference per member via OwnedCerts on
+  // exit, independent of how the working stacks are later mutated.
   //
   AllCerts = CMS_get1_certs (Cms);
+  if (AllCerts != NULL) {
+    OwnedCerts = sk_X509_dup (AllCerts);
+    if (OwnedCerts == NULL) {
+      goto _Error;
+    }
+  }
 
   if (!X509_STORE_CTX_init (CertCtx, NULL, Signer, AllCerts)) {
     goto _Error;
@@ -764,11 +779,18 @@ Pkcs7GetCertificatesList (
   CtxChain = X509_STORE_CTX_get0_chain (CertCtx);
   CtxCert  = X509_STORE_CTX_get0_cert (CertCtx);
   if (CtxChain == NULL) {
-    if (((CtxChain = sk_X509_new_null ()) == NULL) ||
-        (!sk_X509_push (CtxChain, CtxCert)))
-    {
+    //
+    // The store context has not built a chain yet, so allocate one. This stack
+    // is owned here and only holds pointers to certificates owned elsewhere
+    // (Signer/OwnedCerts), so it is released container-only (sk_X509_free()) on
+    // exit.
+    //
+    CtxChain = sk_X509_new_null ();
+    if ((CtxChain == NULL) || (!sk_X509_push (CtxChain, CtxCert))) {
       goto _Error;
     }
+
+    CtxChainOwned = TRUE;
   }
 
   CtxUntrusted = X509_STORE_CTX_get0_untrusted (CertCtx);
@@ -782,13 +804,20 @@ Pkcs7GetCertificatesList (
   Cert = Signer;
   for ( ; ;) {
     //
-    // Self-Issue checking
+    // Self-Issue checking. X509_STORE_CTX_get1_issuer() returns an owned
+    // reference (the "1" convention), so release it once the self-issue
+    // comparison is done; it is not used beyond this check.
     //
     Issuer = NULL;
     if (X509_STORE_CTX_get1_issuer (&Issuer, CertCtx, Cert) == 1) {
       if (X509_cmp (Issuer, Cert) == 0) {
+        X509_free (Issuer);
+        Issuer = NULL;
         break;
       }
+
+      X509_free (Issuer);
+      Issuer = NULL;
     }
 
     //
@@ -933,8 +962,27 @@ _Error:
 
   sk_X509_free (Signers);
 
+  //
+  // Free the chain stack only if it was allocated here; when it is the store
+  // context's own chain it belongs to CertCtx. Container-only: the entries are
+  // owned via OwnedCerts (or are the borrowed Signer).
+  //
+  if (CtxChainOwned && (CtxChain != NULL)) {
+    sk_X509_free (CtxChain);
+  }
+
+  //
+  // AllCerts and CtxUntrusted (an alias of AllCerts) are drained container-only
+  // by the chain build and serialization above; free the (possibly emptied)
+  // container here. The one reference each CMS_get1_certs() member holds is
+  // released via the OwnedCerts snapshot, which is unaffected by that draining.
+  //
   if (AllCerts != NULL) {
-    sk_X509_pop_free (AllCerts, X509_free);
+    sk_X509_free (AllCerts);
+  }
+
+  if (OwnedCerts != NULL) {
+    OSSL_STACK_OF_X509_free (OwnedCerts);
   }
 
   if (CertCtx != NULL) {
