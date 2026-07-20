@@ -1132,6 +1132,83 @@ _Exit:
 }
 
 /**
+  Check the integrity of a PKCS7 signedData against the signer's own certificate
+  embedded in the signedData, independent of any AllowedDb/RevokedDb policy.
+
+  Per the UEFI Spec VerifyBuffer() Description, the first step verifies "the
+  PKCS7 signature of that hash ... by decrypting the hash calculated at time of
+  signing" using the certificate "included within the signed data". A failure of
+  this step means the calculated content hash differs from the signed hash, which
+  the spec maps to EFI_COMPROMISED_DATA (as distinct from the policy failures that
+  map to EFI_SECURITY_VIOLATION).
+
+  The signer's own certificate is retrieved from the signedData and used as the
+  trust certificate, so this check reflects content integrity only and does not
+  consult AllowedDb or RevokedDb.
+
+  @param[in]  SignedData      Pointer to the ASN.1 DER-encoded PKCS7 signedData.
+  @param[in]  SignedDataSize  Size of SignedData in bytes.
+  @param[in]  InData          Pointer to the content to be verified.
+  @param[in]  InDataSize      Size of InData in bytes.
+
+  @retval TRUE   The content hash matches the signed hash (integrity intact).
+  @retval FALSE  The content hash differs from the signed hash, or the signer's
+                 certificate could not be retrieved.
+**/
+STATIC
+BOOLEAN
+P7CheckContentIntegrity (
+  IN UINT8  *SignedData,
+  IN UINTN  SignedDataSize,
+  IN UINT8  *InData,
+  IN UINTN  InDataSize
+  )
+{
+  BOOLEAN  Status;
+  UINT8    *CertStack;
+  UINTN    StackLength;
+  UINT8    *SignerCert;
+  UINTN    SignerCertSize;
+
+  CertStack  = NULL;
+  SignerCert = NULL;
+
+  //
+  // Retrieve the signer's own certificate embedded in the signedData.
+  //
+  if (!Pkcs7GetSigners (
+         SignedData,
+         SignedDataSize,
+         &CertStack,
+         &StackLength,
+         &SignerCert,
+         &SignerCertSize
+         ))
+  {
+    return FALSE;
+  }
+
+  //
+  // Verify the signature against the signer's own certificate. This confirms
+  // the content has not been modified since signing, without applying any
+  // AllowedDb/RevokedDb policy.
+  //
+  Status = Pkcs7Verify (
+             SignedData,
+             SignedDataSize,
+             SignerCert,
+             SignerCertSize,
+             InData,
+             InDataSize
+             );
+
+  Pkcs7FreeSigners (CertStack);
+  Pkcs7FreeSigners (SignerCert);
+
+  return Status;
+}
+
+/**
   Processes a buffer containing binary DER-encoded PKCS7 signature.
   The signed data content may be embedded within the buffer or separated. Function
   verifies the signature of the content is valid and signing certificate was not
@@ -1329,6 +1406,17 @@ VerifyBuffer (
   }
 
   Status = EFI_UNSUPPORTED;
+
+  //
+  // Per the UEFI Spec VerifyBuffer() Description, first verify the content hash
+  // against the signed hash using the signer's own certificate. This is a
+  // content-integrity check independent of AllowedDb/RevokedDb policy; a
+  // mismatch means the calculated hash differs from the signed hash.
+  //
+  if (!P7CheckContentIntegrity (SignedData, SignedDataSize, DataPtr, DataSize)) {
+    Status = EFI_COMPROMISED_DATA;
+    goto _Exit;
+  }
 
   //
   // Verify PKCS7 SignedData with Revoked database

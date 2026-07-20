@@ -29,6 +29,7 @@ extern "C" {
   #include <Library/DebugLib.h>
   #include <Library/BaseCryptLib.h>
   #include <Guid/ImageAuthentication.h>
+  #include <Protocol/Pkcs7Verify.h>
 
   //
   // The following helpers are non-static functions in Pkcs7VerifyDxe.c.
@@ -80,6 +81,21 @@ extern "C" {
     IN UINTN               InHashSize,
     IN EFI_SIGNATURE_LIST  **AllowedDb,
     IN EFI_SIGNATURE_LIST  **RevokedDb      OPTIONAL
+    );
+
+  EFI_STATUS
+  EFIAPI
+  VerifyBuffer (
+    IN EFI_PKCS7_VERIFY_PROTOCOL  *This,
+    IN VOID                       *SignedData,
+    IN UINTN                      SignedDataSize,
+    IN VOID                       *InData          OPTIONAL,
+    IN UINTN                      InDataSize,
+    IN EFI_SIGNATURE_LIST         **AllowedDb,
+    IN EFI_SIGNATURE_LIST         **RevokedDb      OPTIONAL,
+    IN EFI_SIGNATURE_LIST         **TimeStampDb    OPTIONAL,
+    OUT VOID                      *Content         OPTIONAL,
+    IN OUT UINTN                  *ContentSize
     );
 
 }
@@ -2244,6 +2260,137 @@ TEST (P7CheckTrustByHashGenericTest, GenericDetachedByHash_WrongHash_Rejected) {
 
   EXPECT_EQ (Status, EFI_SECURITY_VIOLATION);
 
+  FreePool (List);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// VerifyBuffer - EFI_COMPROMISED_DATA vs EFI_SECURITY_VIOLATION (issue #2)
+//
+// Per the UEFI Spec VerifyBuffer() Description and status codes:
+//   - EFI_COMPROMISED_DATA    : "Calculated hash differs from signed hash."
+//                               (content integrity, independent of policy)
+//   - EFI_SECURITY_VIOLATION  : signer not in AllowedDb / in RevokedDb
+//                               (policy), when the content is intact.
+///////////////////////////////////////////////////////////////////////////////
+
+//
+// Fixture that exposes the MockUefiBootServicesTableLib the driver links against.
+//
+class VerifyBufferReturnCodeTest : public ::testing::Test {
+protected:
+  MockUefiBootServicesTableLib BsMock;
+};
+
+//
+// Intact content + signer trusted in AllowedDb: EFI_SUCCESS.
+//
+TEST_F (VerifyBufferReturnCodeTest, IntactAndTrusted_Success) {
+  EFI_SIGNATURE_LIST  *List = BuildX509List (mTestCert, sizeof (mTestCert));
+
+  ASSERT_NE (List, (EFI_SIGNATURE_LIST *)NULL);
+  EFI_SIGNATURE_LIST  *Db[] = { List, NULL };
+
+  EFI_STATUS  Status = VerifyBuffer (
+                         NULL,
+                         (UINT8 *)mP7SignedAttached,
+                         sizeof (mP7SignedAttached),
+                         NULL,
+                         0,
+                         Db,
+                         NULL,
+                         NULL,
+                         NULL,
+                         NULL
+                         );
+
+  EXPECT_EQ (Status, EFI_SUCCESS);
+
+  FreePool (List);
+}
+
+//
+// Intact content but signer NOT in AllowedDb: EFI_SECURITY_VIOLATION. The
+// content integrity check passes (the embedded content matches the signature),
+// so the failure is a policy failure, not EFI_COMPROMISED_DATA.
+//
+TEST_F (VerifyBufferReturnCodeTest, IntactButUntrusted_SecurityViolation) {
+  //
+  // Use an unrelated certificate (mBhCaCert) as the only AllowedDb anchor; it
+  // did not sign mP7SignedAttached.
+  //
+  EFI_SIGNATURE_LIST  *List = BuildX509List (mBhCaCert, sizeof (mBhCaCert));
+
+  ASSERT_NE (List, (EFI_SIGNATURE_LIST *)NULL);
+  EFI_SIGNATURE_LIST  *Db[] = { List, NULL };
+
+  EFI_STATUS  Status = VerifyBuffer (
+                         NULL,
+                         (UINT8 *)mP7SignedAttached,
+                         sizeof (mP7SignedAttached),
+                         NULL,
+                         0,
+                         Db,
+                         NULL,
+                         NULL,
+                         NULL,
+                         NULL
+                         );
+
+  EXPECT_EQ (Status, EFI_SECURITY_VIOLATION);
+
+  FreePool (List);
+}
+
+//
+// Tampered embedded content: the calculated content hash differs from the
+// signed hash, so the integrity check fails BEFORE any policy check and
+// EFI_COMPROMISED_DATA is returned - even though the signer is in AllowedDb.
+//
+TEST_F (VerifyBufferReturnCodeTest, TamperedContent_CompromisedData) {
+  EFI_SIGNATURE_LIST  *List = BuildX509List (mTestCert, sizeof (mTestCert));
+
+  ASSERT_NE (List, (EFI_SIGNATURE_LIST *)NULL);
+  EFI_SIGNATURE_LIST  *Db[] = { List, NULL };
+
+  //
+  // Work on a mutable copy and flip one byte of the embedded content octet
+  // string ("Pkcs7VerifyDxe host test content payload"). The 'P' (0x50) at the
+  // start of the content is unique enough to locate deterministically.
+  //
+  UINT8  *Tampered = (UINT8 *)AllocateCopyPool (sizeof (mP7SignedAttached), mP7SignedAttached);
+
+  ASSERT_NE (Tampered, (UINT8 *)NULL);
+
+  UINTN  Index;
+  BOOLEAN  Patched = FALSE;
+  for (Index = 0; Index + 4 < sizeof (mP7SignedAttached); Index++) {
+    if ((Tampered[Index] == 'P') && (Tampered[Index + 1] == 'k') &&
+        (Tampered[Index + 2] == 'c') && (Tampered[Index + 3] == 's'))
+    {
+      Tampered[Index] = 'X';
+      Patched         = TRUE;
+      break;
+    }
+  }
+
+  ASSERT_TRUE (Patched);
+
+  EFI_STATUS  Status = VerifyBuffer (
+                         NULL,
+                         Tampered,
+                         sizeof (mP7SignedAttached),
+                         NULL,
+                         0,
+                         Db,
+                         NULL,
+                         NULL,
+                         NULL,
+                         NULL
+                         );
+
+  EXPECT_EQ (Status, EFI_COMPROMISED_DATA);
+
+  FreePool (Tampered);
   FreePool (List);
 }
 
