@@ -1008,76 +1008,41 @@ _Error:
 }
 
 /**
-  Manually verify the signature of a single ML-DSA CMS SignerInfo.
+  Verify the ML-DSA public key and signedAttrs signature of a single CMS
+  SignerInfo, without checking the messageDigest signed attribute.
 
   ML-DSA key types are not supported by OpenSSL CMS_verify(), so the signature of
-  each ML-DSA signer has to be checked by hand: confirm the signer uses an
-  accepted digest algorithm, that the messageDigest signed attribute matches the
-  hash of InData, and that the raw ML-DSA signature over the signedAttrs DER
-  verifies against the signer's public key.
+  each ML-DSA signer has to be checked by hand: confirm the signer certificate
+  carries an ML-DSA public key and that the raw ML-DSA signature over the
+  signedAttrs DER verifies against it. The caller is responsible for binding the
+  signature to the content by matching the messageDigest signed attribute.
 
-  @param[in]  Si            CMS SignerInfo to verify. Its signer certificate must
-                            already be resolved (CMS_set1_signers_certs()).
-  @param[in]  InData        Pointer to the content that was signed.
-  @param[in]  DataLength    Length of InData in bytes.
+  @param[in]  Si  CMS SignerInfo to verify. Its signer certificate must already
+                  be resolved (CMS_set1_signers_certs()).
 
-  @retval  TRUE   The ML-DSA signer verifies.
+  @retval  TRUE   The ML-DSA signer's signedAttrs signature verifies.
   @retval  FALSE  The signer does not verify, is not ML-DSA, or an error occurred.
 
 **/
 STATIC
 BOOLEAN
-Pkcs7VerifyMlDsaSignerInfo (
-  IN  CMS_SignerInfo  *Si,
-  IN  CONST UINT8     *InData,
-  IN  UINTN           DataLength
+Pkcs7VerifyMlDsaSignerInfoNoDigest (
+  IN  CMS_SignerInfo  *Si
   )
 {
   BOOLEAN                  Status;
   EVP_PKEY                 *PKey;
   EVP_PKEY_CTX             *PCtx;
   X509                     *SignerCert;
-  X509_ALGOR               *DigestAlg;
-  ASN1_OCTET_STRING        *DigestAttribute;
   CONST ASN1_OCTET_STRING  *CmsSig;
   CONST UINT8              *Sig;
   UINTN                    SigLen;
   UINT8                    *AttrDer;
   UINTN                    AttrDerLen;
-  UINT8                    InDataHash[64];
-  UINTN                    InDataHashLen;
 
   Status  = FALSE;
   PCtx    = NULL;
   AttrDer = NULL;
-
-  //
-  // Only SHA-256, SHA-384, and SHA-512 digest algorithms are accepted. Hash
-  // InData with this signer's own digest algorithm.
-  //
-  DigestAlg = NULL;
-  CMS_SignerInfo_get0_algs (Si, NULL, NULL, &DigestAlg, NULL);
-  if (DigestAlg == NULL) {
-    return FALSE;
-  }
-
-  switch (OBJ_obj2nid (DigestAlg->algorithm)) {
-    case NID_sha256:
-      Sha256HashAll (InData, DataLength, InDataHash);
-      InDataHashLen = 32;
-      break;
-    case NID_sha384:
-      Sha384HashAll (InData, DataLength, InDataHash);
-      InDataHashLen = 48;
-      break;
-    case NID_sha512:
-      Sha512HashAll (InData, DataLength, InDataHash);
-      InDataHashLen = 64;
-      break;
-    default:
-      DEBUG ((DEBUG_INFO, "Pkcs7Verify - Unsupported digest algorithm (NID=%d)!\n", OBJ_obj2nid (DigestAlg->algorithm)));
-      return FALSE;
-  }
 
   //
   // The signer certificate must carry an ML-DSA public key.
@@ -1090,18 +1055,6 @@ Pkcs7VerifyMlDsaSignerInfo (
        (AsciiStrCmp (EVP_PKEY_get0_type_name (PKey), "ML-DSA-65") != 0) &&
        (AsciiStrCmp (EVP_PKEY_get0_type_name (PKey), "ML-DSA-87") != 0)))
   {
-    return FALSE;
-  }
-
-  //
-  // messageDigest signed attribute must match the hash of InData.
-  //
-  DigestAttribute = CMS_signed_get0_data_by_OBJ (Si, OBJ_nid2obj (NID_pkcs9_messageDigest), -1, V_ASN1_OCTET_STRING);
-  if ((DigestAttribute == NULL) ||
-      ((UINTN)ASN1_STRING_length (DigestAttribute) != InDataHashLen) ||
-      (CompareMem (ASN1_STRING_get0_data (DigestAttribute), InDataHash, InDataHashLen) != 0))
-  {
-    DEBUG ((DEBUG_ERROR, "Pkcs7Verify - ML-DSA messageDigest mismatch\n"));
     return FALSE;
   }
 
@@ -1142,6 +1095,84 @@ Done:
   OPENSSL_free (AttrDer);
 
   return Status;
+}
+
+/**
+  Manually verify the signature of a single ML-DSA CMS SignerInfo.
+
+  ML-DSA key types are not supported by OpenSSL CMS_verify(), so the signature of
+  each ML-DSA signer has to be checked by hand: confirm the signer uses an
+  accepted digest algorithm, that the messageDigest signed attribute matches the
+  hash of InData, and that the raw ML-DSA signature over the signedAttrs DER
+  verifies against the signer's public key.
+
+  @param[in]  Si            CMS SignerInfo to verify. Its signer certificate must
+                            already be resolved (CMS_set1_signers_certs()).
+  @param[in]  InData        Pointer to the content that was signed.
+  @param[in]  DataLength    Length of InData in bytes.
+
+  @retval  TRUE   The ML-DSA signer verifies.
+  @retval  FALSE  The signer does not verify, is not ML-DSA, or an error occurred.
+
+**/
+STATIC
+BOOLEAN
+Pkcs7VerifyMlDsaSignerInfo (
+  IN  CMS_SignerInfo  *Si,
+  IN  CONST UINT8     *InData,
+  IN  UINTN           DataLength
+  )
+{
+  X509_ALGOR         *DigestAlg;
+  ASN1_OCTET_STRING  *DigestAttribute;
+  UINT8              InDataHash[64];
+  UINTN              InDataHashLen;
+
+  //
+  // Only SHA-256, SHA-384, and SHA-512 digest algorithms are accepted. Hash
+  // InData with this signer's own digest algorithm.
+  //
+  DigestAlg = NULL;
+  CMS_SignerInfo_get0_algs (Si, NULL, NULL, &DigestAlg, NULL);
+  if (DigestAlg == NULL) {
+    return FALSE;
+  }
+
+  switch (OBJ_obj2nid (DigestAlg->algorithm)) {
+    case NID_sha256:
+      Sha256HashAll (InData, DataLength, InDataHash);
+      InDataHashLen = 32;
+      break;
+    case NID_sha384:
+      Sha384HashAll (InData, DataLength, InDataHash);
+      InDataHashLen = 48;
+      break;
+    case NID_sha512:
+      Sha512HashAll (InData, DataLength, InDataHash);
+      InDataHashLen = 64;
+      break;
+    default:
+      DEBUG ((DEBUG_ERROR, "Pkcs7Verify - Unsupported digest algorithm (NID=%d)!\n", OBJ_obj2nid (DigestAlg->algorithm)));
+      return FALSE;
+  }
+
+  //
+  // messageDigest signed attribute must match the hash of InData.
+  //
+  DigestAttribute = CMS_signed_get0_data_by_OBJ (Si, OBJ_nid2obj (NID_pkcs9_messageDigest), -1, V_ASN1_OCTET_STRING);
+  if ((DigestAttribute == NULL) ||
+      ((UINTN)ASN1_STRING_length (DigestAttribute) != InDataHashLen) ||
+      (CompareMem (ASN1_STRING_get0_data (DigestAttribute), InDataHash, InDataHashLen) != 0))
+  {
+    DEBUG ((DEBUG_ERROR, "Pkcs7Verify - ML-DSA messageDigest mismatch\n"));
+    return FALSE;
+  }
+
+  //
+  // The public key and the raw signature over signedAttrs are verified by the
+  // shared no-digest helper.
+  //
+  return Pkcs7VerifyMlDsaSignerInfoNoDigest (Si);
 }
 
 /**
@@ -1360,12 +1391,264 @@ Pkcs7Verify (
 
 _Exit:
   if (!Status) {
-    DEBUG ((DEBUG_INFO, "Pkcs7Verify - PKCS7 verify failed!\n"));
+    DEBUG ((DEBUG_ERROR, "Pkcs7Verify - PKCS7 verify failed!\n"));
   }
   //
   // Release Resources
   //
   BIO_free (DataBio);
+  X509_free (Cert);
+  X509_STORE_free (CertStore);
+  CMS_ContentInfo_free (Cms);
+
+  if (!Wrapped) {
+    OPENSSL_free (SignedData);
+  }
+
+  return Status;
+}
+
+/**
+  Confirm the signer's messageDigest signed attribute equals the caller-supplied
+  hash.
+
+  For a detached PKCS#7 verified by hash, the content is not available, so the
+  binding between the signature and the content is enforced by checking that the
+  signed messageDigest attribute matches the caller's hash (the signedAttrs
+  signature is verified separately).
+
+  @param[in]  Si          CMS SignerInfo to inspect.
+  @param[in]  InHash      Caller-computed content hash.
+  @param[in]  InHashSize  Size of InHash in bytes.
+
+  @retval  TRUE   The messageDigest attribute matches InHash.
+  @retval  FALSE  No messageDigest attribute, or it does not match.
+
+**/
+STATIC
+BOOLEAN
+Pkcs7SignerMessageDigestMatches (
+  IN  CMS_SignerInfo  *Si,
+  IN  CONST UINT8     *InHash,
+  IN  UINTN           InHashSize
+  )
+{
+  ASN1_OCTET_STRING  *DigestAttribute;
+
+  DigestAttribute = CMS_signed_get0_data_by_OBJ (
+                      Si,
+                      OBJ_nid2obj (NID_pkcs9_messageDigest),
+                      -1,
+                      V_ASN1_OCTET_STRING
+                      );
+  if ((DigestAttribute == NULL) ||
+      ((UINTN)ASN1_STRING_length (DigestAttribute) != InHashSize) ||
+      (CompareMem (ASN1_STRING_get0_data (DigestAttribute), InHash, InHashSize) != 0))
+  {
+    return FALSE;
+  }
+
+  return TRUE;
+}
+
+/**
+  Verifies the validity of a PKCS#7 detached signature using a caller-supplied
+  hash of the signed content, without requiring the content itself.
+
+  Unlike AuthenticodeVerify(), the signed content is NOT assumed to be an
+  Authenticode SPC_INDIRECT_DATA structure; this function supports a generic
+  PKCS#7 detached signature over arbitrary content. For every signer the
+  messageDigest signed attribute must equal InHash, the signature over the
+  signed attributes must verify, and the signer certificate must chain to
+  TrustedCert.
+
+  If P7Data, TrustedCert or InHash is NULL, then return FALSE.
+  If P7Length, CertLength or InHashSize overflow, then return FALSE.
+
+  @param[in]  P7Data       Pointer to the PKCS#7 message to verify.
+  @param[in]  P7Length     Length of the PKCS#7 message in bytes.
+  @param[in]  TrustedCert  Pointer to a trusted/root certificate encoded in DER,
+                           which is used for certificate chain verification.
+  @param[in]  CertLength   Length of the trusted certificate in bytes.
+  @param[in]  InHash       Pointer to the caller-computed hash of the signed
+                           content.
+  @param[in]  InHashSize   Size of InHash in bytes.
+
+  @retval  TRUE   The specified PKCS#7 signed data is valid and InHash matches.
+  @retval  FALSE  Invalid PKCS#7 signed data, or InHash does not match.
+
+**/
+BOOLEAN
+EFIAPI
+Pkcs7VerifyByHash (
+  IN  CONST UINT8  *P7Data,
+  IN  UINTN        P7Length,
+  IN  CONST UINT8  *TrustedCert,
+  IN  UINTN        CertLength,
+  IN  CONST UINT8  *InHash,
+  IN  UINTN        InHashSize
+  )
+{
+  CMS_ContentInfo           *Cms;
+  BIO                       *EmptyContent;
+  BOOLEAN                   Status;
+  X509                      *Cert;
+  X509_STORE                *CertStore;
+  UINT8                     *SignedData;
+  CONST UINT8               *Temp;
+  UINTN                     SignedDataSize;
+  BOOLEAN                   Wrapped;
+  EVP_PKEY                  *PKey;
+  BOOLEAN                   IsMlDsa;
+  STACK_OF (CMS_SignerInfo) *SiStack;
+  CMS_SignerInfo            *Si;
+  X509                      *SignerCert;
+  INT32                     SignerIndex;
+  INT32                     SignerNum;
+
+  //
+  // Check input parameters.
+  //
+  if ((P7Data == NULL) || (TrustedCert == NULL) || (InHash == NULL) ||
+      (P7Length > INT_MAX) || (CertLength > INT_MAX) || (InHashSize == 0) ||
+      (InHashSize > INT_MAX))
+  {
+    return FALSE;
+  }
+
+  Cms          = NULL;
+  EmptyContent = NULL;
+  Cert         = NULL;
+  CertStore    = NULL;
+  PKey         = NULL;
+  IsMlDsa      = FALSE;
+
+  //
+  // Register & Initialize necessary digest algorithms for PKCS#7 Handling
+  //
+  if ((EVP_add_digest (EVP_sha256 ()) == 0) ||
+      (EVP_add_digest (EVP_sha384 ()) == 0) ||
+      (EVP_add_digest (EVP_sha512 ()) == 0))
+  {
+    return FALSE;
+  }
+
+  Status = WrapPkcs7Data (P7Data, P7Length, &Wrapped, &SignedData, &SignedDataSize);
+  if (!Status || (SignedDataSize > INT_MAX)) {
+    return FALSE;
+  }
+
+  Status = FALSE;
+
+  Temp = SignedData;
+  Cms  = d2i_CMS_ContentInfo (NULL, (const unsigned char **)&Temp, (int)SignedDataSize);
+  if ((Cms == NULL) || (OBJ_obj2nid (CMS_get0_type (Cms)) != NID_pkcs7_signed)) {
+    goto _Exit;
+  }
+
+  Temp = TrustedCert;
+  Cert = d2i_X509 (NULL, &Temp, (long)CertLength);
+  if (Cert == NULL) {
+    goto _Exit;
+  }
+
+  SiStack   = CMS_get0_SignerInfos (Cms);
+  SignerNum = (SiStack == NULL) ? 0 : sk_CMS_SignerInfo_num (SiStack);
+  if (SignerNum == 0) {
+    goto _Exit;
+  }
+
+  CertStore = X509_STORE_new ();
+  if (CertStore == NULL) {
+    goto _Exit;
+  }
+
+  if (!X509_STORE_add_cert (CertStore, Cert)) {
+    goto _Exit;
+  }
+
+  X509_STORE_set_flags (CertStore, X509_V_FLAG_PARTIAL_CHAIN | X509_V_FLAG_NO_CHECK_TIME);
+  X509_STORE_set_purpose (CertStore, X509_PURPOSE_ANY);
+
+  //
+  // Resolve signer certificates from the CMS structure.
+  //
+  CMS_set1_signers_certs (Cms, NULL, CMS_USE_KEYID);
+
+  //
+  // The content is not supplied (detached, verified by hash). CMS_verify()
+  // fails its internal content presence check unless a content BIO is passed,
+  // so pass an empty memory BIO and set CMS_NO_CONTENT_VERIFY so the content
+  // hash is not recomputed by CMS. The content binding is enforced separately
+  // by comparing each signer's messageDigest attribute to InHash below.
+  //
+  EmptyContent = BIO_new_mem_buf ("", 0);
+  if (EmptyContent == NULL) {
+    goto _Exit;
+  }
+
+  //
+  // Every signer's messageDigest signed attribute must equal InHash. This is
+  // the content binding that replaces CMS content-hash verification.
+  //
+  for (SignerIndex = 0; SignerIndex < SignerNum; SignerIndex++) {
+    Si = sk_CMS_SignerInfo_value (SiStack, SignerIndex);
+    if (!Pkcs7SignerMessageDigestMatches (Si, InHash, InHashSize)) {
+      DEBUG ((DEBUG_ERROR, "Pkcs7VerifyByHash - messageDigest mismatch\n"));
+      goto _Exit;
+    }
+  }
+
+  //
+  // Determine whether this is an ML-DSA SignedData by inspecting the first
+  // signer's certificate. ML-DSA key types are not supported by CMS_verify().
+  //
+  Si         = sk_CMS_SignerInfo_value (SiStack, 0);
+  SignerCert = NULL;
+  CMS_SignerInfo_get0_algs (Si, NULL, &SignerCert, NULL, NULL);
+
+  if ((SignerCert != NULL) &&
+      ((PKey = X509_get0_pubkey (SignerCert)) != NULL) &&
+      ((AsciiStrCmp (EVP_PKEY_get0_type_name (PKey), "ML-DSA-44") == 0) ||
+       (AsciiStrCmp (EVP_PKEY_get0_type_name (PKey), "ML-DSA-65") == 0) ||
+       (AsciiStrCmp (EVP_PKEY_get0_type_name (PKey), "ML-DSA-87") == 0)))
+  {
+    DEBUG ((DEBUG_INFO, "Pkcs7VerifyByHash - %a Signature\n", EVP_PKEY_get0_type_name (PKey)));
+    IsMlDsa = TRUE;
+  }
+
+  if (IsMlDsa) {
+    //
+    // ML-DSA is not supported by CMS_verify(): CMS_NOSIGS checks only the CMS
+    // and X509 chain formatting; each signer's raw signature over signedAttrs
+    // is then verified by hand. messageDigest was already matched above.
+    //
+    Status = (BOOLEAN)CMS_verify (Cms, NULL, CertStore, EmptyContent, NULL, CMS_BINARY | CMS_NOSIGS | CMS_NO_CONTENT_VERIFY);
+    if (Status) {
+      for (SignerIndex = 0; SignerIndex < SignerNum; SignerIndex++) {
+        Si = sk_CMS_SignerInfo_value (SiStack, SignerIndex);
+        if (!Pkcs7VerifyMlDsaSignerInfoNoDigest (Si)) {
+          Status = FALSE;
+          goto _Exit;
+        }
+      }
+    }
+  } else {
+    //
+    // CMS_verify() checks the signer certificate chain to CertStore and each
+    // signer's signature over the signed attributes. CMS_NO_CONTENT_VERIFY
+    // suppresses recomputation of the content hash (content is not available);
+    // the messageDigest match above binds the signature to InHash.
+    //
+    Status = (BOOLEAN)CMS_verify (Cms, NULL, CertStore, EmptyContent, NULL, CMS_BINARY | CMS_NO_CONTENT_VERIFY);
+  }
+
+_Exit:
+  if (!Status) {
+    DEBUG ((DEBUG_ERROR, "Pkcs7VerifyByHash - PKCS7 verify failed!\n"));
+  }
+
+  BIO_free (EmptyContent);
   X509_free (Cert);
   X509_STORE_free (CertStore);
   CMS_ContentInfo_free (Cms);

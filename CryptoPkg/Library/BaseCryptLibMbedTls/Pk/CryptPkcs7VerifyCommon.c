@@ -5,13 +5,18 @@
   RFC 8422 - Elliptic Curve Cryptography (ECC) Cipher Suites
   FIPS 186-4 - Digital Signature Standard (DSS)
 
-Copyright (c) 2024, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2024 - 2026, Intel Corporation. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
 #include "CryptPkcs7Internal.h"
 #include <mbedtls/pkcs7.h>
+
+//
+// messageDigest signed attribute: 1.2.840.113549.1.9.4
+//
+#define MBEDTLS_OID_PKCS9_MESSAGE_DIGEST  MBEDTLS_OID_PKCS9 "\x04"
 
 /* Profile for backward compatibility. Allows RSA 1024, unlike the default
    profile. */
@@ -1124,6 +1129,282 @@ Cleanup:
     TempCrt = Pkcs7.SignedData.Certificates.next;
     mbedtls_x509_crt_free (TempCrt);
   }
+
+  return Status;
+}
+
+/**
+  Check the signer's messageDigest signed attribute against a caller-supplied
+  content hash.
+
+  For a detached PKCS#7 verified by hash the content is not available, so the
+  binding between the signature and the content is enforced by decoding the
+  messageDigest attribute (OID 1.2.840.113549.1.9.4) from the signer's signed
+  attributes and comparing its value to InHash.
+
+  @param[in]  SignerInfo   MbedtlsPkcs7 SignerInfo carrying the signed attributes.
+  @param[in]  InHash       Caller-computed content hash.
+  @param[in]  InHashSize   Size of InHash in bytes.
+
+  @retval TRUE   The messageDigest attribute is present and matches InHash.
+  @retval FALSE  No signed attributes, no messageDigest attribute, or mismatch.
+**/
+STATIC
+BOOLEAN
+MbedTlsPkcs7AuthAttrMatchesHash (
+  MbedtlsPkcs7SignerInfo  *SignerInfo,
+  CONST UINT8             *InHash,
+  UINTN                   InHashSize
+  )
+{
+  UINT8  *Ptr;
+  UINT8  *End;
+  UINT8  *SeqEnd;
+  UINTN  Len;
+  INT32  Ret;
+
+  if (SignerInfo->AuthAttr.p == NULL) {
+    return FALSE;
+  }
+
+  Ptr = SignerInfo->AuthAttr.p;
+  End = Ptr + SignerInfo->AuthAttr.len;
+
+  //
+  // Outer [0] IMPLICIT SET OF Attribute.
+  //
+  Ret = mbedtls_asn1_get_tag (&Ptr, End, &Len, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_CONTEXT_SPECIFIC);
+  if (Ret != 0) {
+    return FALSE;
+  }
+
+  End = Ptr + Len;
+
+  //
+  // Walk each Attribute ::= SEQUENCE { type OID, values SET OF ANY }.
+  //
+  while (Ptr < End) {
+    Ret = mbedtls_asn1_get_tag (&Ptr, End, &Len, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE);
+    if (Ret != 0) {
+      return FALSE;
+    }
+
+    SeqEnd = Ptr + Len;
+
+    Ret = mbedtls_asn1_get_tag (&Ptr, SeqEnd, &Len, MBEDTLS_ASN1_OID);
+    if (Ret != 0) {
+      return FALSE;
+    }
+
+    if ((Len == sizeof (MBEDTLS_OID_PKCS9_MESSAGE_DIGEST) - 1) &&
+        (CompareMem (Ptr, MBEDTLS_OID_PKCS9_MESSAGE_DIGEST, Len) == 0))
+    {
+      Ptr += Len;
+
+      //
+      // values SET OF, then the messageDigest OCTET STRING.
+      //
+      Ret = mbedtls_asn1_get_tag (&Ptr, SeqEnd, &Len, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SET);
+      if (Ret != 0) {
+        return FALSE;
+      }
+
+      Ret = mbedtls_asn1_get_tag (&Ptr, SeqEnd, &Len, MBEDTLS_ASN1_OCTET_STRING);
+      if (Ret != 0) {
+        return FALSE;
+      }
+
+      return (BOOLEAN)((Len == InHashSize) && (CompareMem (Ptr, InHash, InHashSize) == 0));
+    }
+
+    //
+    // Not messageDigest; skip to the next attribute.
+    //
+    Ptr = SeqEnd;
+  }
+
+  return FALSE;
+}
+
+/**
+  MbedTlsPkcs7 Verify SignedData using a caller-supplied content hash.
+
+  Each signer must carry signed attributes whose messageDigest equals InHash,
+  its signer certificate must chain to TrustCert, and the signature over the
+  signed attributes must verify against the signer certificate's public key.
+
+  @param[in]  Pkcs7       MbedtlsPkcs7.
+  @param[in]  TrustCert   CA cert.
+  @param[in]  InHash      Caller-computed content hash.
+  @param[in]  InHashSize  Size of InHash in bytes.
+
+  @retval TRUE      Verify successfully.
+  @retval FALSE     Verify failed.
+**/
+STATIC
+BOOLEAN
+MbedTlsPkcs7SignedDataVerifyByHash (
+  MbedtlsPkcs7      *Pkcs7,
+  mbedtls_x509_crt  *TrustCert,
+  CONST UINT8       *InHash,
+  UINTN             InHashSize
+  )
+{
+  MbedtlsPkcs7SignerInfo  *SignerInfo;
+  mbedtls_x509_crt        *Cert;
+
+  SignerInfo = &(Pkcs7->SignedData.SignerInfos);
+
+  //
+  // Traverse and verify every signer.
+  //
+  while (SignerInfo != NULL) {
+    //
+    // A detached-by-hash signature must have signed attributes carrying the
+    // messageDigest that binds the signature to InHash.
+    //
+    if (!MbedTlsPkcs7AuthAttrMatchesHash (SignerInfo, InHash, InHashSize)) {
+      return FALSE;
+    }
+
+    //
+    // Find the signer's certificate among the embedded certificates.
+    //
+    Cert = MbedTlsPkcs7FindSignerCert (SignerInfo, &(Pkcs7->SignedData.Certificates));
+    if (Cert == NULL) {
+      return FALSE;
+    }
+
+    //
+    // The signer certificate must be trusted by (chain to) TrustCert.
+    //
+    if (!MbedTlsPkcs7VerifyCert (TrustCert, &(Pkcs7->SignedData.Crls), Cert) &&
+        !MbedTlsPkcs7VerifyCertChain (Pkcs7, TrustCert, Cert))
+    {
+      return FALSE;
+    }
+
+    //
+    // Verify the signature over the signed attributes against the signer
+    // certificate. MbedtlsPkcs7SignedDataVerifySigners() hashes the signed
+    // attributes (present here) rather than the content, so InHash/InHashSize
+    // are unused by the hash step.
+    //
+    if (MbedtlsPkcs7SignedDataVerifySigners (SignerInfo, Cert, InHash, (INTN)InHashSize) != 0) {
+      return FALSE;
+    }
+
+    SignerInfo = SignerInfo->Next;
+  }
+
+  return TRUE;
+}
+
+/**
+  Verifies the validity of a PKCS#7 detached signature using a caller-supplied
+  hash of the signed content, without requiring the content itself.
+
+  Unlike AuthenticodeVerify(), the signed content is NOT assumed to be an
+  Authenticode SPC_INDIRECT_DATA structure; this function supports a generic
+  PKCS#7 detached signature over arbitrary content. For every signer the
+  messageDigest signed attribute must equal InHash, the signature over the
+  signed attributes must verify, and the signer certificate must chain to
+  TrustedCert.
+
+  ML-DSA is not supported by the Mbed TLS backend; only RSA signers verify.
+
+  @param[in]  P7Data       Pointer to the PKCS#7 message to verify.
+  @param[in]  P7Length     Length of the PKCS#7 message in bytes.
+  @param[in]  TrustedCert  Pointer to a trusted/root certificate encoded in DER, which
+                           is used for certificate chain verification.
+  @param[in]  CertLength   Length of the trusted certificate in bytes.
+  @param[in]  InHash       Pointer to the caller-computed hash of the signed content.
+  @param[in]  InHashSize   Size of InHash in bytes.
+
+  @retval  TRUE   The specified PKCS#7 signed data is valid and InHash matches.
+  @retval  FALSE  Invalid PKCS#7 signed data, or InHash does not match.
+
+**/
+BOOLEAN
+EFIAPI
+Pkcs7VerifyByHash (
+  IN  CONST UINT8  *P7Data,
+  IN  UINTN        P7Length,
+  IN  CONST UINT8  *TrustedCert,
+  IN  UINTN        CertLength,
+  IN  CONST UINT8  *InHash,
+  IN  UINTN        InHashSize
+  )
+{
+  BOOLEAN           Status;
+  UINT8             *WritableP7;
+  UINT8             *WrapData;
+  UINTN             WrapDataSize;
+  BOOLEAN           Wrapped;
+  MbedtlsPkcs7      Pkcs7;
+  INT32             Ret;
+  mbedtls_x509_crt  Crt;
+  mbedtls_x509_crt  *TempCrt;
+
+  //
+  // Check input parameters.
+  //
+  if ((P7Data == NULL) || (TrustedCert == NULL) || (InHash == NULL) ||
+      (P7Length == 0) || (P7Length > INT_MAX) || (CertLength > INT_MAX) ||
+      (InHashSize == 0) || (InHashSize > INT_MAX))
+  {
+    return FALSE;
+  }
+
+  //
+  // The signer verification hashes the signed attributes by temporarily
+  // patching the AuthAttr tag byte in place, so the parse buffer must be
+  // writable. Work on a private copy of P7Data.
+  //
+  WritableP7 = AllocateCopyPool (P7Length, P7Data);
+  if (WritableP7 == NULL) {
+    return FALSE;
+  }
+
+  Status = WrapPkcs7Data (WritableP7, P7Length, &Wrapped, &WrapData, &WrapDataSize);
+  if (!Status || (WrapDataSize > INT_MAX)) {
+    if (!Wrapped && (WrapData != NULL)) {
+      FreePool (WrapData);
+    }
+
+    FreePool (WritableP7);
+    return FALSE;
+  }
+
+  Status = FALSE;
+  MbedTlsPkcs7Init (&Pkcs7);
+  mbedtls_x509_crt_init (&Crt);
+
+  Ret = MbedtlsPkcs7ParseDer (WrapData, (INT32)WrapDataSize, &Pkcs7);
+  if (Ret != 0) {
+    goto Cleanup;
+  }
+
+  Ret = mbedtls_x509_crt_parse_der (&Crt, TrustedCert, CertLength);
+  if (Ret != 0) {
+    goto Cleanup;
+  }
+
+  Status = MbedTlsPkcs7SignedDataVerifyByHash (&Pkcs7, &Crt, InHash, InHashSize);
+
+Cleanup:
+  mbedtls_x509_crt_free (&Crt);
+
+  if (Pkcs7.SignedData.Certificates.next != NULL) {
+    TempCrt = Pkcs7.SignedData.Certificates.next;
+    mbedtls_x509_crt_free (TempCrt);
+  }
+
+  if (!Wrapped && (WrapData != NULL)) {
+    FreePool (WrapData);
+  }
+
+  FreePool (WritableP7);
 
   return Status;
 }

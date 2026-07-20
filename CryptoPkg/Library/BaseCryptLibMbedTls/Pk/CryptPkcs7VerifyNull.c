@@ -2,7 +2,7 @@
   PKCS#7 SignedData Verification Wrapper Implementation which does not provide
   real capabilities.
 
-Copyright (c) 2023, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2023 - 2026, Intel Corporation. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
@@ -127,6 +127,38 @@ Pkcs7Verify (
   IN  UINTN        CertLength,
   IN  CONST UINT8  *InData,
   IN  UINTN        DataLength
+  )
+{
+  ASSERT (FALSE);
+  return FALSE;
+}
+
+/**
+  Verifies the validity of a PKCS#7 detached signature using a caller-supplied
+  hash of the signed content, without requiring the content itself.
+
+  Return FALSE to indicate this interface is not supported.
+
+  @param[in]  P7Data       Pointer to the PKCS#7 message to verify.
+  @param[in]  P7Length     Length of the PKCS#7 message in bytes.
+  @param[in]  TrustedCert  Pointer to a trusted/root certificate encoded in DER, which
+                           is used for certificate chain verification.
+  @param[in]  CertLength   Length of the trusted certificate in bytes.
+  @param[in]  InHash       Pointer to the caller-computed hash of the signed content.
+  @param[in]  InHashSize   Size of InHash in bytes.
+
+  @retval FALSE  This interface is not supported.
+
+**/
+BOOLEAN
+EFIAPI
+Pkcs7VerifyByHash (
+  IN  CONST UINT8  *P7Data,
+  IN  UINTN        P7Length,
+  IN  CONST UINT8  *TrustedCert,
+  IN  UINTN        CertLength,
+  IN  CONST UINT8  *InHash,
+  IN  UINTN        InHashSize
   )
 {
   ASSERT (FALSE);

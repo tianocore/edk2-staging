@@ -3,7 +3,7 @@
   Protocol/PPI.
 
   Copyright (C) Microsoft Corporation. All rights reserved.
-  Copyright (c) 2019 - 2022, Intel Corporation. All rights reserved.<BR>
+  Copyright (c) 2019 - 2026, Intel Corporation. All rights reserved.<BR>
   SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
@@ -3307,6 +3307,42 @@ AuthenticodeVerify (
   )
 {
   CALL_CRYPTO_SERVICE (AuthenticodeVerify, (AuthData, DataSize, TrustedCert, CertSize, ImageHash, HashSize), FALSE);
+}
+
+/**
+  Verifies the validity of a PKCS#7 detached signature using a caller-supplied
+  hash of the signed content, without requiring the content itself.
+
+  If P7Data, TrustedCert or InHash is NULL, then return FALSE.
+  If P7Length, CertLength or InHashSize overflow, then return FALSE.
+  If this interface is not supported, then return FALSE.
+
+  @param[in]  P7Data       Pointer to the PKCS#7 message to verify.
+  @param[in]  P7Length     Length of the PKCS#7 message in bytes.
+  @param[in]  TrustedCert  Pointer to a trusted/root certificate encoded in DER,
+                           which is used for certificate chain verification.
+  @param[in]  CertLength   Length of the trusted certificate in bytes.
+  @param[in]  InHash       Pointer to the caller-computed hash of the signed
+                           content.
+  @param[in]  InHashSize   Size of InHash in bytes.
+
+  @retval  TRUE   The specified PKCS#7 signed data is valid and InHash matches.
+  @retval  FALSE  Invalid PKCS#7 signed data, or InHash does not match, or this
+                  interface is not supported.
+
+**/
+BOOLEAN
+EFIAPI
+Pkcs7VerifyByHash (
+  IN  CONST UINT8  *P7Data,
+  IN  UINTN        P7Length,
+  IN  CONST UINT8  *TrustedCert,
+  IN  UINTN        CertLength,
+  IN  CONST UINT8  *InHash,
+  IN  UINTN        InHashSize
+  )
+{
+  CALL_CRYPTO_SERVICE (Pkcs7VerifyByHash, (P7Data, P7Length, TrustedCert, CertLength, InHash, InHashSize), FALSE);
 }
 
 /**

@@ -22,7 +22,7 @@
   be deprecated in the future.
   * Sha1 family
 
-  Copyright (c) 2019 - 2022, Intel Corporation. All rights reserved.<BR>
+  Copyright (c) 2019 - 2026, Intel Corporation. All rights reserved.<BR>
   Copyright (c) Microsoft Corporation. All rights reserved.
   SPDX-License-Identifier: BSD-2-Clause-Patent
 
@@ -128,6 +128,7 @@ typedef struct {
       UINT8    Pkcs1v2Decrypt             : 1;
       UINT8    Pkcs7GetSignerInfoNum      : 1;
       UINT8    Pkcs7GetVerifyOidList      : 1;
+      UINT8    Pkcs7VerifyByHash          : 1;
     } Services;
     UINT32    Family;
   } Pkcs;

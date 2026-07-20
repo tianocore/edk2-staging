@@ -2,7 +2,7 @@
   This Protocol provides Crypto services to DXE modules
 
   Copyright (C) Microsoft Corporation. All rights reserved.
-  Copyright (c) 2020 - 2022, Intel Corporation. All rights reserved.<BR>
+  Copyright (c) 2020 - 2026, Intel Corporation. All rights reserved.<BR>
   SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
@@ -21,7 +21,7 @@
 /// the EDK II Crypto Protocol is extended, this version define must be
 /// increased.
 ///
-#define EDKII_CRYPTO_VERSION  21
+#define EDKII_CRYPTO_VERSION  22
 
 ///
 /// EDK II Crypto Protocol forward declaration
@@ -1127,6 +1127,43 @@ BOOLEAN
   IN  UINTN        CertSize,
   IN  CONST UINT8  *ImageHash,
   IN  UINTN        HashSize
+  );
+
+/**
+  Verifies the validity of a PKCS#7 detached signature using a caller-supplied
+  hash of the signed content, without requiring the content itself.
+
+  Unlike AuthenticodeVerify(), the signed content is NOT assumed to be an
+  Authenticode SPC_INDIRECT_DATA structure; this function supports a generic
+  PKCS#7 detached signature over arbitrary content.
+
+  If P7Data, TrustedCert or InHash is NULL, then return FALSE.
+  If P7Length, CertLength or InHashSize overflow, then return FALSE.
+  If this interface is not supported, then return FALSE.
+
+  @param[in]  P7Data       Pointer to the PKCS#7 message to verify.
+  @param[in]  P7Length     Length of the PKCS#7 message in bytes.
+  @param[in]  TrustedCert  Pointer to a trusted/root certificate encoded in DER,
+                           which is used for certificate chain verification.
+  @param[in]  CertLength   Length of the trusted certificate in bytes.
+  @param[in]  InHash       Pointer to the caller-computed hash of the signed
+                           content.
+  @param[in]  InHashSize   Size of InHash in bytes.
+
+  @retval  TRUE   The specified PKCS#7 signed data is valid and InHash matches.
+  @retval  FALSE  Invalid PKCS#7 signed data, or InHash does not match, or this
+                  interface is not supported.
+
+**/
+typedef
+BOOLEAN
+(EFIAPI *EDKII_CRYPTO_PKCS7_VERIFY_BY_HASH)(
+  IN  CONST UINT8  *P7Data,
+  IN  UINTN        P7Length,
+  IN  CONST UINT8  *TrustedCert,
+  IN  UINTN        CertLength,
+  IN  CONST UINT8  *InHash,
+  IN  UINTN        InHashSize
   );
 
 /**
@@ -5829,6 +5866,8 @@ struct _EDKII_CRYPTO_PROTOCOL {
   EDKII_CRYPTO_PKCS7_GET_VERIFY_OID_LIST              Pkcs7GetVerifyOidList;
   /// X509 (Continued)
   EDKII_CRYPTO_X509_GET_SIGNATURE_ALGORITHM_ASCII     X509GetSignatureAlgorithmAscii;
+  /// Pkcs (Continued)
+  EDKII_CRYPTO_PKCS7_VERIFY_BY_HASH                   Pkcs7VerifyByHash;
 };
 
 extern GUID  gEdkiiCryptoProtocolGuid;
