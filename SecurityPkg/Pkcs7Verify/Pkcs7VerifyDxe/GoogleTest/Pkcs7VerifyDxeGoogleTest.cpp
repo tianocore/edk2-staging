@@ -98,6 +98,19 @@ extern "C" {
     IN OUT UINTN                  *ContentSize
     );
 
+  EFI_STATUS
+  EFIAPI
+  VerifySignature (
+    IN EFI_PKCS7_VERIFY_PROTOCOL  *This,
+    IN VOID                       *Signature,
+    IN UINTN                      SignatureSize,
+    IN VOID                       *InHash,
+    IN UINTN                      InHashSize,
+    IN EFI_SIGNATURE_LIST         **AllowedDb,
+    IN EFI_SIGNATURE_LIST         **RevokedDb       OPTIONAL,
+    IN EFI_SIGNATURE_LIST         **TimeStampDb     OPTIONAL
+    );
+
 }
 
 #define SHA256_DIGEST_SIZE  32
@@ -2391,6 +2404,138 @@ TEST_F (VerifyBufferReturnCodeTest, TamperedContent_CompromisedData) {
   EXPECT_EQ (Status, EFI_COMPROMISED_DATA);
 
   FreePool (Tampered);
+  FreePool (List);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// VerifySignature - EFI_COMPROMISED_DATA vs EFI_SECURITY_VIOLATION (issue #3)
+//
+// Per the UEFI Spec EFI_PKCS7_VERIFY_PROTOCOL.VerifySignature() status codes:
+//   - EFI_COMPROMISED_DATA    : "Caller provided hash differs from signed hash.
+//                               Or, caller and encrypted hash are different
+//                               sizes." (integrity, independent of policy)
+//   - EFI_SECURITY_VIOLATION  : signer not in AllowedDb / in RevokedDb (policy),
+//                               when the caller-provided hash is intact.
+///////////////////////////////////////////////////////////////////////////////
+
+//
+// Correct hash + signer trusted in AllowedDb: EFI_SUCCESS.
+//
+TEST (VerifySignatureReturnCodeTest, IntactAndTrusted_Success) {
+  EFI_SIGNATURE_LIST  *List = BuildX509List (mBhCaCert, sizeof (mBhCaCert));
+
+  ASSERT_NE (List, (EFI_SIGNATURE_LIST *)NULL);
+  EFI_SIGNATURE_LIST  *Db[] = { List, NULL };
+
+  EFI_STATUS  Status = VerifySignature (
+                         NULL,
+                         (UINT8 *)mBhSignedData,
+                         sizeof (mBhSignedData),
+                         (UINT8 *)mBhContentSha256,
+                         sizeof (mBhContentSha256),
+                         Db,
+                         NULL,
+                         NULL
+                         );
+
+  EXPECT_EQ (Status, EFI_SUCCESS);
+
+  FreePool (List);
+}
+
+//
+// Correct hash but signer NOT in AllowedDb: EFI_SECURITY_VIOLATION. The hash
+// matches the signed hash (integrity intact), so the failure is policy.
+//
+TEST (VerifySignatureReturnCodeTest, IntactButUntrusted_SecurityViolation) {
+  //
+  // Use the unrelated mTestCert as the only AllowedDb anchor; it did not sign
+  // mBhSignedData.
+  //
+  EFI_SIGNATURE_LIST  *List = BuildX509List (mTestCert, sizeof (mTestCert));
+
+  ASSERT_NE (List, (EFI_SIGNATURE_LIST *)NULL);
+  EFI_SIGNATURE_LIST  *Db[] = { List, NULL };
+
+  EFI_STATUS  Status = VerifySignature (
+                         NULL,
+                         (UINT8 *)mBhSignedData,
+                         sizeof (mBhSignedData),
+                         (UINT8 *)mBhContentSha256,
+                         sizeof (mBhContentSha256),
+                         Db,
+                         NULL,
+                         NULL
+                         );
+
+  EXPECT_EQ (Status, EFI_SECURITY_VIOLATION);
+
+  FreePool (List);
+}
+
+//
+// Wrong caller-provided hash (same size): the caller hash differs from the
+// signed hash, so EFI_COMPROMISED_DATA is returned before any policy check,
+// even though the signer is in AllowedDb.
+//
+TEST (VerifySignatureReturnCodeTest, WrongHash_CompromisedData) {
+  EFI_SIGNATURE_LIST  *List = BuildX509List (mBhCaCert, sizeof (mBhCaCert));
+
+  ASSERT_NE (List, (EFI_SIGNATURE_LIST *)NULL);
+  EFI_SIGNATURE_LIST  *Db[] = { List, NULL };
+
+  UINT8  WrongHash[SHA256_DIGEST_SIZE];
+  CopyMem (WrongHash, mBhContentSha256, sizeof (WrongHash));
+  WrongHash[0] ^= 0xFF;
+
+  EFI_STATUS  Status = VerifySignature (
+                         NULL,
+                         (UINT8 *)mBhSignedData,
+                         sizeof (mBhSignedData),
+                         WrongHash,
+                         sizeof (WrongHash),
+                         Db,
+                         NULL,
+                         NULL
+                         );
+
+  EXPECT_EQ (Status, EFI_COMPROMISED_DATA);
+
+  FreePool (List);
+}
+
+//
+// Wrong hash SIZE: the caller-provided hash length differs from the signed hash
+// length. The spec maps "caller and encrypted hash are different sizes" to
+// EFI_COMPROMISED_DATA.
+//
+TEST (VerifySignatureReturnCodeTest, WrongHashSize_CompromisedData) {
+  EFI_SIGNATURE_LIST  *List = BuildX509List (mBhCaCert, sizeof (mBhCaCert));
+
+  ASSERT_NE (List, (EFI_SIGNATURE_LIST *)NULL);
+  EFI_SIGNATURE_LIST  *Db[] = { List, NULL };
+
+  //
+  // The signature was made with SHA-256 (32-byte messageDigest). Present a
+  // 48-byte (SHA-384-length) hash: the size cannot match the signed digest.
+  //
+  UINT8  BigHash[SHA384_DIGEST_SIZE];
+  ZeroMem (BigHash, sizeof (BigHash));
+  CopyMem (BigHash, mBhContentSha256, SHA256_DIGEST_SIZE);
+
+  EFI_STATUS  Status = VerifySignature (
+                         NULL,
+                         (UINT8 *)mBhSignedData,
+                         sizeof (mBhSignedData),
+                         BigHash,
+                         sizeof (BigHash),
+                         Db,
+                         NULL,
+                         NULL
+                         );
+
+  EXPECT_EQ (Status, EFI_COMPROMISED_DATA);
+
   FreePool (List);
 }
 

@@ -1209,6 +1209,85 @@ P7CheckContentIntegrity (
 }
 
 /**
+  Check the integrity of a detached PKCS7 signature against the signer's own
+  certificate embedded in the signature, using a caller-supplied content hash,
+  independent of any AllowedDb/RevokedDb policy.
+
+  Per the UEFI Spec VerifySignature() Description, the signature of the hash is
+  verified by decrypting the hash computed at time of signing, using the signer
+  certificate included within the signature. A failure of this step means the
+  caller-provided hash differs from the signed hash (or the caller hash and the
+  signed hash are different sizes), which the spec maps to EFI_COMPROMISED_DATA
+  - distinct from the policy failures that map to EFI_SECURITY_VIOLATION.
+
+  The signer's own certificate is retrieved from the signature and used as the
+  trust certificate, so this check reflects integrity only and does not consult
+  AllowedDb or RevokedDb.
+
+  @param[in]  Signature      Pointer to the ASN.1 DER-encoded detached PKCS7 signature.
+  @param[in]  SignatureSize  Size of Signature in bytes.
+  @param[in]  InHash         Pointer to the caller-computed content hash.
+  @param[in]  InHashSize     Size of InHash in bytes.
+
+  @retval TRUE   The caller-provided hash matches the signed hash (integrity intact).
+  @retval FALSE  The caller-provided hash differs from the signed hash (including a
+                 size difference), or the signer's certificate could not be retrieved.
+**/
+STATIC
+BOOLEAN
+P7CheckContentIntegrityByHash (
+  IN UINT8  *Signature,
+  IN UINTN  SignatureSize,
+  IN UINT8  *InHash,
+  IN UINTN  InHashSize
+  )
+{
+  BOOLEAN  Status;
+  UINT8    *CertStack;
+  UINTN    StackLength;
+  UINT8    *SignerCert;
+  UINTN    SignerCertSize;
+
+  CertStack  = NULL;
+  SignerCert = NULL;
+
+  //
+  // Retrieve the signer's own certificate embedded in the signature.
+  //
+  if (!Pkcs7GetSigners (
+         Signature,
+         SignatureSize,
+         &CertStack,
+         &StackLength,
+         &SignerCert,
+         &SignerCertSize
+         ))
+  {
+    return FALSE;
+  }
+
+  //
+  // Verify the signature against the signer's own certificate using the
+  // caller-supplied hash. This confirms the caller's hash matches the signed
+  // hash without applying any AllowedDb/RevokedDb policy. A size mismatch fails
+  // the same way (the signed messageDigest cannot equal a different-length hash).
+  //
+  Status = VerifyHashUpToCert (
+             Signature,
+             SignatureSize,
+             SignerCert,
+             SignerCertSize,
+             InHash,
+             InHashSize
+             );
+
+  Pkcs7FreeSigners (CertStack);
+  Pkcs7FreeSigners (SignerCert);
+
+  return Status;
+}
+
+/**
   Processes a buffer containing binary DER-encoded PKCS7 signature.
   The signed data content may be embedded within the buffer or separated. Function
   verifies the signature of the content is valid and signing certificate was not
@@ -1561,6 +1640,17 @@ VerifySignature (
      || (InHash == NULL) || (InHashSize == 0))
   {
     return EFI_INVALID_PARAMETER;
+  }
+
+  //
+  // Per the UEFI Spec VerifySignature() Description, first verify the caller-
+  // provided hash against the signed hash using the signer's own certificate.
+  // This is an integrity check independent of AllowedDb/RevokedDb policy; a
+  // failure means the caller-provided hash differs from the signed hash (or the
+  // caller and signed hash are different sizes).
+  //
+  if (!P7CheckContentIntegrityByHash (Signature, SignatureSize, InHash, InHashSize)) {
+    return EFI_COMPROMISED_DATA;
   }
 
   //
