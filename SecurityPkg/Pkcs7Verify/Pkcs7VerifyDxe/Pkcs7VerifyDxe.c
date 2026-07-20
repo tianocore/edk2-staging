@@ -5,7 +5,7 @@
   verify data signed using PKCS7 structure. The PKCS7 data to be verified must
   be ASN.1 (DER) encoded.
 
-Copyright (c) 2015 - 2017, Intel Corporation. All rights reserved.<BR>
+Copyright (c) 2015 - 2026, Intel Corporation. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
@@ -703,6 +703,45 @@ _Exit:
 }
 
 /**
+  Verify a detached PKCS7 SignedData up to a candidate trust-anchor certificate
+  using a caller-supplied content hash.
+
+  Tries AuthenticodeVerify() first, which handles signatures whose signed
+  content is an Authenticode SPC_INDIRECT_DATA structure (PE/COFF images). If
+  that does not verify, falls back to Pkcs7VerifyByHash() for a generic detached
+  PKCS7 signature whose signed content is arbitrary data bound by the
+  messageDigest signed attribute.
+
+  @param[in]  SignedData      Pointer to ASN.1 DER-encoded PKCS7 SignedData.
+  @param[in]  SignedDataSize  Size of SignedData in bytes.
+  @param[in]  TrustCert       Pointer to the DER trust-anchor certificate.
+  @param[in]  TrustCertSize   Size of TrustCert in bytes.
+  @param[in]  InHash          Pointer to the caller-computed content hash.
+  @param[in]  InHashSize      Size of InHash in bytes.
+
+  @retval  TRUE   The signature verifies up to TrustCert.
+  @retval  FALSE  It does not.
+
+**/
+STATIC
+BOOLEAN
+VerifyHashUpToCert (
+  IN  UINT8  *SignedData,
+  IN  UINTN  SignedDataSize,
+  IN  UINT8  *TrustCert,
+  IN  UINTN  TrustCertSize,
+  IN  UINT8  *InHash,
+  IN  UINTN  InHashSize
+  )
+{
+  if (AuthenticodeVerify (SignedData, SignedDataSize, TrustCert, TrustCertSize, InHash, InHashSize)) {
+    return TRUE;
+  }
+
+  return Pkcs7VerifyByHash (SignedData, SignedDataSize, TrustCert, TrustCertSize, InHash, InHashSize);
+}
+
+/**
   Check whether the PKCS7 signedData can be verified by the trusted certificates
   database, and return the content of the signedData if requested.
 
@@ -805,7 +844,7 @@ P7CheckTrustByHash (
         //
         // Verifying the PKCS#7 SignedData with the trusted certificate from AllowedDb
         //
-        if (AuthenticodeVerify (SignedData, SignedDataSize, TrustCert, TrustCertSize, InHash, InHashSize)) {
+        if (VerifyHashUpToCert (SignedData, SignedDataSize, TrustCert, TrustCertSize, InHash, InHashSize)) {
           //
           // The SignedData verified up to this db certificate (the trust anchor).
           // Per UEFI Spec 32.5.3.3, the image is trusted only if neither the
@@ -867,7 +906,7 @@ P7CheckTrustByHash (
         // The certificate hash is in AllowedDb. Verify the signature against
         // this certificate of the signing chain.
         //
-        if (AuthenticodeVerify (SignedData, SignedDataSize, Cert, CertSize, InHash, InHashSize)) {
+        if (VerifyHashUpToCert (SignedData, SignedDataSize, Cert, CertSize, InHash, InHashSize)) {
           //
           // This db-matched certificate is the trust anchor. Per UEFI Spec
           // 32.5.3.3, the image is trusted only if neither the anchor nor any
