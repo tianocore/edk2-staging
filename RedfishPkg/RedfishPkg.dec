@@ -5,7 +5,7 @@
 # (C) Copyright 2021 Hewlett Packard Enterprise Development LP<BR>
 # Copyright (c) 2023, American Megatrends International LLC.
 # Copyright (c) 2023-2025, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
-# Copyright (C) 2024 Advanced Micro Devices, Inc. All rights reserved.<BR>
+# Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.<BR>
 #
 # SPDX-License-Identifier: BSD-2-Clause-Patent
 ##
@@ -80,6 +80,11 @@
   #
   RedfishPlatformWantedDeviceLib|Include/Library/RedfishPlatformWantedDeviceLib.h
 
+  ##  @libraryclass  Type-agnostic consumer library for retrieving resource
+  #   data from EFI_REDFISH_RESOURCE_PROTOCOL.
+  #
+  RedfishResourceLib|Include/Library/RedfishResourceLib.h
+
 [LibraryClasses.Common.Private]
   ##  @libraryclass  Provides the private C runtime library functions.
   #   CRT library is currently used by edk2 JsonLib (open source
@@ -110,11 +115,17 @@
   ## Include/Protocol/EdkIIRedfishHttpProtocol.h
   gEdkIIRedfishHttpProtocolGuid = { 0x58a0f47e, 0xf45f, 0x4d44, { 0x89, 0x5b, 0x2a, 0xfe, 0xb0, 0x80, 0x15, 0xe2 } }
 
+  ## Include/Protocol/RedfishResourceProtocol.h
+  gEfiRedfishResourceProtocolGuid = { 0x574527BC, 0xB976, 0x0816, { 0xA1, 0x3B, 0x91, 0xBD, 0x9C, 0x9B, 0xA8, 0x99 } }
+
 [Guids]
   gEfiRedfishPkgTokenSpaceGuid      = { 0x4fdbccb7, 0xe829, 0x4b4c, { 0x88, 0x87, 0xb2, 0x3f, 0xd7, 0x25, 0x4b, 0x85 }}
 
   # Redfish variable guid
   gEfiRedfishVariableGuid           = { 0x85ef8dd3, 0xe606, 0x4b89, { 0x8b, 0xbd, 0x93, 0xbf, 0x5c, 0xbe, 0x1c, 0x18 } }
+
+  # Redfish Configuration Handler Disconnection
+  gEdkIIRedfisEventRedfishInterfaceDisconnectionGuid = { 0x11B81837, 0x249B, 0x4843, { 0xA5, 0x2C, 0xC8, 0x23, 0x7B, 0x35, 0xBF, 0xC2 } }
 
 [PcdsFixedAtBuild, PcdsPatchableInModule]
   #
@@ -220,3 +231,5 @@
   gEfiRedfishPkgTokenSpaceGuid.PcdRedfishCredentialDeleteAccount|TRUE|BOOLEAN|0x00001015
   ## Default Redfish version string
   gEfiRedfishPkgTokenSpaceGuid.PcdDefaultRedfishVersion|L"v1"|VOID*|0x00001016
+  ## Maximum number of resource entries in EFI_REDFISH_RESOURCE_PROTOCOL repository.
+  gEfiRedfishPkgTokenSpaceGuid.PcdRedfishResourceMaxEntries|32|UINT32|0x00001017
