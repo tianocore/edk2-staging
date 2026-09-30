@@ -226,5 +226,9 @@
   gEfiRedfishPkgTokenSpaceGuid.PcdRedfishCredentialDeleteAccount|TRUE|BOOLEAN|0x00001015
   ## Default Redfish version string
   gEfiRedfishPkgTokenSpaceGuid.PcdDefaultRedfishVersion|L"v1"|VOID*|0x00001016
+
+[PcdsFixedAtBuild]
   ## Maximum number of resource entries in EDKII_REDFISH_RESOURCE_PROTOCOL repository.
+  #  This value dimensions a statically allocated array, so it must be resolved at
+  #  build time. It is declared FixedAtBuild only for that reason.
   gEfiRedfishPkgTokenSpaceGuid.PcdRedfishResourceMaxEntries|32|UINT32|0x00001017

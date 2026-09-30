@@ -24,7 +24,6 @@
 
 [Packages]
   MdePkg/MdePkg.dec
-  MdeModulePkg/MdeModulePkg.dec
   RedfishPkg/RedfishPkg.dec
 
 [LibraryClasses]
@@ -36,7 +35,7 @@
   UefiBootServicesTableLib
   UefiDriverEntryPoint
 
-[Pcd]
+[FixedPcd]
   gEfiRedfishPkgTokenSpaceGuid.PcdRedfishResourceMaxEntries    ## CONSUMES
 
 [Protocols]

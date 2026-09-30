@@ -27,7 +27,17 @@
 
 #include "RedfishResourceDxeInternal.h"
 
-STATIC REDFISH_RESOURCE_PRIVATE  *mPrivate = NULL;
+STATIC_ASSERT (
+  REDFISH_RESOURCE_MAX_ENTRIES > 0,
+  "PcdRedfishResourceMaxEntries must be greater than zero"
+  );
+
+STATIC_ASSERT (
+  REDFISH_RESOURCE_MAX_ENTRIES <= (MAX_UINTN / sizeof (RESOURCE_DATA_ENTRY)),
+  "PcdRedfishResourceMaxEntries would overflow the resource entry array size"
+  );
+
+STATIC REDFISH_RESOURCE_PRIVATE  mPrivate;
 
 /**
   Find an existing resource entry by its type name.
@@ -51,11 +61,11 @@ FindEntry (
     return NULL;
   }
 
-  for (Index = 0; Index < mPrivate->EntryCount; Index++) {
-    if ((mPrivate->Entries[Index].TypeName != NULL) &&
-        (AsciiStrCmp (mPrivate->Entries[Index].TypeName, TypeName) == 0))
+  for (Index = 0; Index < mPrivate.EntryCount; Index++) {
+    if ((mPrivate.Entries[Index].TypeName != NULL) &&
+        (AsciiStrCmp (mPrivate.Entries[Index].TypeName, TypeName) == 0))
     {
-      return &mPrivate->Entries[Index];
+      return &mPrivate.Entries[Index];
     }
   }
 
@@ -165,22 +175,26 @@ RedfishResourceGetSupportedResourceTypes (
     return EFI_INVALID_PARAMETER;
   }
 
-  *ResourceTypeCount  = mPrivate->EntryCount;
+  //
+  // Keep the two outputs consistent on every path: a non-zero count is only
+  // published together with the array it describes.
+  //
+  *ResourceTypeCount  = 0;
   *SupportedResources = NULL;
 
-  if (mPrivate->EntryCount == 0) {
+  if (mPrivate.EntryCount == 0) {
     return EFI_SUCCESS;
   }
 
-  TypeArray = AllocateZeroPool (sizeof (CHAR8 *) * mPrivate->EntryCount);
+  TypeArray = AllocateZeroPool (sizeof (CHAR8 *) * mPrivate.EntryCount);
   if (TypeArray == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
 
-  for (Index = 0; Index < mPrivate->EntryCount; Index++) {
+  for (Index = 0; Index < mPrivate.EntryCount; Index++) {
     TypeArray[Index] = AllocateCopyPool (
-                         AsciiStrSize (mPrivate->Entries[Index].TypeName),
-                         mPrivate->Entries[Index].TypeName
+                         AsciiStrSize (mPrivate.Entries[Index].TypeName),
+                         mPrivate.Entries[Index].TypeName
                          );
     //
     // If any allocation fails, free the strings already copied and the array
@@ -196,6 +210,7 @@ RedfishResourceGetSupportedResourceTypes (
     }
   }
 
+  *ResourceTypeCount  = mPrivate.EntryCount;
   *SupportedResources = TypeArray;
   return EFI_SUCCESS;
 }
@@ -210,7 +225,8 @@ RedfishResourceGetSupportedResourceTypes (
   parameters may be NULL. Only one instance of resource data is stored for each
   ResourceTypeName. The implementation of this function returns the data and data
   size set by the platform implementation through SetResource(). Caller shouldn't
-  modify the data or free the memory buffer of the data.
+  modify the data or free the memory buffer of the data because the buffer belongs
+  to the platform provider that published it.
 
   @param[in]   This              Pointer to the EDKII_REDFISH_RESOURCE_PROTOCOL instance.
   @param[in]   ResourceTypeName  NULL-terminated ASCII string identifying the Redfish
@@ -241,8 +257,8 @@ RedfishResourceGetSupportedResourceTypes (
 
   @retval EFI_SUCCESS            Resource data was returned successfully.
   @retval EFI_NOT_FOUND          No resource data is available for the specified Redfish
-                                 resource type and schema version combination.
-  @retval EFI_INVALID_PARAMETER  This or ResourceTypeName is NULL.
+                                 resource type.
+  @retval EFI_INVALID_PARAMETER  This, ResourceTypeName, DataSize, or Data is NULL.
 **/
 STATIC
 EFI_STATUS
@@ -250,9 +266,9 @@ EFIAPI
 RedfishResourceGetResource (
   IN  EDKII_REDFISH_RESOURCE_PROTOCOL  *This,
   IN  CHAR8                            *ResourceTypeName,
-  OUT CHAR8                            **MajorVersion,
-  OUT CHAR8                            **MinorVersion,
-  OUT CHAR8                            **ErrataVersion,
+  OUT CHAR8                            **MajorVersion   OPTIONAL,
+  OUT CHAR8                            **MinorVersion   OPTIONAL,
+  OUT CHAR8                            **ErrataVersion  OPTIONAL,
   OUT UINTN                            *DataSize,
   OUT VOID                             **Data
   )
@@ -261,6 +277,25 @@ RedfishResourceGetResource (
 
   if ((This == NULL) || (ResourceTypeName == NULL) || (DataSize == NULL) || (Data == NULL)) {
     return EFI_INVALID_PARAMETER;
+  }
+
+  //
+  // Establish a defined output state before any path that can fail, so a caller
+  // that mishandles the status reads NULL rather than an indeterminate value.
+  //
+  *DataSize = 0;
+  *Data     = NULL;
+
+  if (MajorVersion != NULL) {
+    *MajorVersion = NULL;
+  }
+
+  if (MinorVersion != NULL) {
+    *MinorVersion = NULL;
+  }
+
+  if (ErrataVersion != NULL) {
+    *ErrataVersion = NULL;
   }
 
   //
@@ -302,7 +337,7 @@ RedfishResourceGetResource (
 }
 
 /**
-  Sets the Redfish resource for a specified Redfish resource type and schema version
+  Sets the Redfish resource for a specified Redfish resource type.
 
   The SetResource() function maintains the Redfish resource which is identified by
   ResourceTypeName. If the resource already exists with the specified
@@ -328,8 +363,8 @@ RedfishResourceGetResource (
                                  schema errata version, or NULL if the schema is not
                                  version-controlled.
   @param[in]  DataSize           Size in bytes of the resource data pointed to by Data. If
-                                 DataSize is 0, the existing resource data shall be
-                                 removed.
+                                 DataSize is 0, the existing resource data for
+                                 ResourceTypeName shall be removed.
   @param[in]  Data               Pointer to the resource data provided by the platform. If
                                  DataSize is 0, Data must be NULL, to remove the existing
                                  Redfish resource.
@@ -339,8 +374,10 @@ RedfishResourceGetResource (
                                  stored for ResourceTypeName.
   @retval EFI_INVALID_PARAMETER  This or ResourceTypeName is NULL, DataSize > 0 and Data
                                  is NULL, or DataSize = 0 and Data is not NULL.
-  @retval EFI_OUT_OF_RESOURCES   Failed to allocate memory for internal metadata
-                                 management.
+  @retval EFI_OUT_OF_RESOURCES   The resource database has reached the maximum allowed
+                                 number of entries and no new resource type can be added,
+                                 or the memory required for the internal metadata could
+                                 not be allocated.
 **/
 STATIC
 EFI_STATUS
@@ -399,14 +436,17 @@ RedfishResourceSetResource (
       ZeroMem (Entry, sizeof (RESOURCE_DATA_ENTRY));
 
       //
-      // Compact: move the last entry into the vacated slot.
+      // Move the last entry into the position of the deleted entry
+      // (only one entry is moved).
+      // If the entry being deleted happens to be the last one, skip the copy;
+      // the ZeroMem above has already cleared it.
       //
-      if (mPrivate->EntryCount > 1) {
-        CopyMem (Entry, &mPrivate->Entries[mPrivate->EntryCount - 1], sizeof (RESOURCE_DATA_ENTRY));
-        ZeroMem (&mPrivate->Entries[mPrivate->EntryCount - 1], sizeof (RESOURCE_DATA_ENTRY));
+      if (Entry != &mPrivate.Entries[mPrivate.EntryCount - 1]) {
+        CopyMem (Entry, &mPrivate.Entries[mPrivate.EntryCount - 1], sizeof (RESOURCE_DATA_ENTRY));
+        ZeroMem (&mPrivate.Entries[mPrivate.EntryCount - 1], sizeof (RESOURCE_DATA_ENTRY));
       }
 
-      mPrivate->EntryCount--;
+      mPrivate.EntryCount--;
       return EFI_SUCCESS;
     }
 
@@ -424,8 +464,13 @@ RedfishResourceSetResource (
     IsNew = FALSE;
   }
 
-  if (IsNew && (mPrivate->EntryCount >= mPrivate->MaxEntries)) {
-    DEBUG ((DEBUG_ERROR, "%a: Resource repository full (%u entries)\n", __func__, mPrivate->MaxEntries));
+  if (IsNew && (mPrivate.EntryCount >= REDFISH_RESOURCE_MAX_ENTRIES)) {
+    DEBUG ((
+      DEBUG_ERROR,
+      "%a: Resource repository full (%u entries); increase PcdRedfishResourceMaxEntries\n",
+      __func__,
+      REDFISH_RESOURCE_MAX_ENTRIES
+      ));
     return EFI_OUT_OF_RESOURCES;
   }
 
@@ -487,9 +532,9 @@ RedfishResourceSetResource (
   // the copy allocated above.
   //
   if (IsNew) {
-    Entry           = &mPrivate->Entries[mPrivate->EntryCount];
+    Entry           = &mPrivate.Entries[mPrivate.EntryCount];
     Entry->TypeName = NewTypeName;
-    mPrivate->EntryCount++;
+    mPrivate.EntryCount++;
   } else {
     //
     // An existing entry already holds the same TypeName, so no copy was allocated for it.
@@ -508,27 +553,24 @@ RedfishResourceSetResource (
   Entry->MinorVersion  = NewMinor;
   Entry->ErrataVersion = NewErrata;
 
-  DEBUG ((DEBUG_INFO, "%a: %a resource for %a (%u bytes), total entries: %u\n", __func__, IsNew ? "Added" : "Updated", ResourceTypeName, DataSize, mPrivate->EntryCount));
+  DEBUG ((DEBUG_INFO, "%a: %a resource for %a (%u bytes), total entries: %u\n", __func__, IsNew ? "Added" : "Updated", ResourceTypeName, DataSize, mPrivate.EntryCount));
   return EFI_SUCCESS;
 }
 
 /**
   Entry point.
 
-  Allocates the repository, sizes it from PcdRedfishResourceMaxEntries, and
-  installs EDKII_REDFISH_RESOURCE_PROTOCOL. Every failure path releases what it
-  allocated, so the driver either ends up fully initialised with the protocol
-  published, or leaves no trace.
+  Publishes EDKII_REDFISH_RESOURCE_PROTOCOL. The repository itself is a
+  statically allocated structure sized by PcdRedfishResourceMaxEntries at build
+  time, so there is nothing to allocate or release here: the driver either ends
+  up with the protocol published, or leaves no trace.
 
   @param[in]  ImageHandle  Image handle.
   @param[in]  SystemTable  Pointer to EFI System Table.
 
-  @retval EFI_SUCCESS            Protocol installed successfully.
-  @retval EFI_INVALID_PARAMETER  PcdRedfishResourceMaxEntries is 0, or large
-                                 enough that sizing the repository would
-                                 overflow.
-  @retval EFI_OUT_OF_RESOURCES   The private context or the entry array could not
-                                 be allocated.
+  @retval EFI_SUCCESS      The protocol interface was installed.
+  @retval Other            No protocol installed, unload driver.
+
 **/
 EFI_STATUS
 EFIAPI
@@ -539,43 +581,19 @@ RedfishResourceDxeEntryPoint (
 {
   EFI_STATUS  Status;
 
-  mPrivate = AllocateZeroPool (sizeof (REDFISH_RESOURCE_PRIVATE));
-  if (mPrivate == NULL) {
-    return EFI_OUT_OF_RESOURCES;
-  }
-
-  mPrivate->MaxEntries = PcdGet32 (PcdRedfishResourceMaxEntries);
-  //
-  // Zero leaves no room for any resource
-  //
-  if (mPrivate->MaxEntries == 0) {
-    DEBUG ((DEBUG_ERROR, "%a: Invalid PcdRedfishResourceMaxEntries: %u\n", __func__, mPrivate->MaxEntries));
-    FreePool (mPrivate);
-    return EFI_INVALID_PARAMETER;
-  }
-
-  mPrivate->Entries = AllocateZeroPool (sizeof (RESOURCE_DATA_ENTRY) * mPrivate->MaxEntries);
-  if (mPrivate->Entries == NULL) {
-    FreePool (mPrivate);
-    return EFI_OUT_OF_RESOURCES;
-  }
-
-  mPrivate->EntryCount                         = 0;
-  mPrivate->Protocol.GetSupportedResourceTypes = RedfishResourceGetSupportedResourceTypes;
-  mPrivate->Protocol.GetResource               = RedfishResourceGetResource;
-  mPrivate->Protocol.SetResource               = RedfishResourceSetResource;
+  mPrivate.EntryCount                         = 0;
+  mPrivate.Protocol.GetSupportedResourceTypes = RedfishResourceGetSupportedResourceTypes;
+  mPrivate.Protocol.GetResource               = RedfishResourceGetResource;
+  mPrivate.Protocol.SetResource               = RedfishResourceSetResource;
 
   Status = gBS->InstallMultipleProtocolInterfaces (
                   &ImageHandle,
                   &gEdkIIRedfishResourceProtocolGuid,
-                  &mPrivate->Protocol,
+                  &mPrivate.Protocol,
                   NULL
                   );
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "%a: Failed to install protocol: %r\n", __func__, Status));
-    FreePool (mPrivate->Entries);
-    FreePool (mPrivate);
-    mPrivate = NULL;
     return Status;
   }
 

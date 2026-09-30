@@ -6,8 +6,7 @@
 
 **/
 
-#ifndef EDKII_REDFISH_RESOURCE_PROTOCOL_H_
-#define EDKII_REDFISH_RESOURCE_PROTOCOL_H_
+#pragma once
 
 #include <Uefi.h>
 
@@ -64,7 +63,8 @@ EFI_STATUS
   parameters may be NULL. Only one instance of resource data is stored for each
   ResourceTypeName. The implementation of this function returns the data and data
   size set by the platform implementation through SetResource(). Caller shouldn't
-  modify the data or free the memory buffer of the data.
+  modify the data or free the memory buffer of the data because the buffer belongs
+  to the platform provider that published it.
 
   @param[in]   This              Pointer to the EDKII_REDFISH_RESOURCE_PROTOCOL instance.
   @param[in]   ResourceTypeName  NULL-terminated ASCII string identifying the Redfish
@@ -95,23 +95,23 @@ EFI_STATUS
 
   @retval EFI_SUCCESS            Resource data was returned successfully.
   @retval EFI_NOT_FOUND          No resource data is available for the specified Redfish
-                                 resource type and schema version combination.
-  @retval EFI_INVALID_PARAMETER  This or ResourceTypeName is NULL.
+                                 resource type.
+  @retval EFI_INVALID_PARAMETER  This, ResourceTypeName, DataSize, or Data is NULL.
 **/
 typedef
 EFI_STATUS
 (EFIAPI *EDKII_REDFISH_RESOURCE_GET_RESOURCE)(
   IN  EDKII_REDFISH_RESOURCE_PROTOCOL  *This,
   IN  CHAR8                            *ResourceTypeName,
-  OUT CHAR8                            **MajorVersion,
-  OUT CHAR8                            **MinorVersion,
-  OUT CHAR8                            **ErrataVersion,
+  OUT CHAR8                            **MajorVersion   OPTIONAL,
+  OUT CHAR8                            **MinorVersion   OPTIONAL,
+  OUT CHAR8                            **ErrataVersion  OPTIONAL,
   OUT UINTN                            *DataSize,
   OUT VOID                             **Data
   );
 
 /**
-  Sets the Redfish resource for a specified Redfish resource type and schema version
+  Sets the Redfish resource for a specified Redfish resource type.
 
   The SetResource() function maintains the Redfish resource which is identified by
   ResourceTypeName. If the resource already exists with the specified
@@ -137,8 +137,8 @@ EFI_STATUS
                                  schema errata version, or NULL if the schema is not
                                  version-controlled.
   @param[in]  DataSize           Size in bytes of the resource data pointed to by Data. If
-                                 DataSize is 0, the existing resource data shall be
-                                 removed.
+                                 DataSize is 0, the existing resource data for
+                                 ResourceTypeName shall be removed.
   @param[in]  Data               Pointer to the resource data provided by the platform. If
                                  DataSize is 0, Data must be NULL, to remove the existing
                                  Redfish resource.
@@ -148,8 +148,10 @@ EFI_STATUS
                                  stored for ResourceTypeName.
   @retval EFI_INVALID_PARAMETER  This or ResourceTypeName is NULL, DataSize > 0 and Data
                                  is NULL, or DataSize = 0 and Data is not NULL.
-  @retval EFI_OUT_OF_RESOURCES   Failed to allocate memory for internal metadata
-                                 management.
+  @retval EFI_OUT_OF_RESOURCES   The resource database has reached the maximum allowed
+                                 number of entries and no new resource type can be added,
+                                 or the memory required for the internal metadata could
+                                 not be allocated.
 **/
 typedef
 EFI_STATUS
@@ -170,5 +172,3 @@ struct _EDKII_REDFISH_RESOURCE_PROTOCOL {
 };
 
 extern EFI_GUID  gEdkIIRedfishResourceProtocolGuid;
-
-#endif
